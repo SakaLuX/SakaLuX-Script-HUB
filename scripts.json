@@ -1,29 +1,5 @@
 {
-  "schemaVersion": 1,
-  "updated": "2026-08-24",
-  "suite": "SakaLuX Script Hub",
   "scripts": [
-    {
-      "id": "hub",
-      "type": "core",
-      "active": true,
-      "name": "SakaLuX Script Hub",
-      "icon": "☠️",
-      "category": "Core",
-      "version": "1.8.0",
-      "description": "Central manager, installer, updater and health monitor for SakaLuX Torn add-ons.",
-      "greasyForkId": "592699",
-      "metaUrl": "https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js",
-      "downloadUrl": "https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js",
-      "apiGlobal": "SakaLuXScriptHub",
-      "latestChanges": [
-        "Added central scripts.json auto-discovery for SakaLuX add-ons.",
-        "Added WHAT'S NEW release notes directly inside the Hub.",
-        "Added UPDATE ALL for installed add-ons with available updates.",
-        "Added SYSTEM CHECK for registry, Greasy Fork and add-on health diagnostics.",
-        "Added a global SakaLuXScriptHub API so complementary scripts can detect the Hub reliably."
-      ]
-    },
     {
       "id": "enhancer",
       "type": "addon",
