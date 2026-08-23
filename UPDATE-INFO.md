@@ -7,8 +7,16 @@ Last updated: 2026-08-24
 - SakaLuX Script Hub: **v1.8.1**
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
+- SakaLuX Mission Rewards: **v1.0.0**
 
 ## Latest changes
+
+### SakaLuX Mission Rewards v1.0.0
+- Imported the currently published Mission Rewards source into the GitHub repository.
+- Added Mission Rewards to `scripts.json` so SakaLuX Script Hub can discover and manage it.
+- Registered the existing `window.SakaLuXMissionRewards` API with Hub actions for settings, refresh and Missions navigation.
+- Added the versioned source backup in `backups/`.
+- Added `greasyfork/Mission-Rewards.md` for synchronized Greasy Fork Additional info.
 
 ### SakaLuX Script Hub v1.8.1
 - Fixed **WHAT'S NEW** so the button is visible and usable on mobile/PDA.
@@ -55,3 +63,4 @@ For every future script update:
 - `backups/SakaLuX-Script-Hub-v1.7.0.user.js`
 - `backups/SakaLuX-Enhancer-Guard-v1.3.1.user.js`
 - `backups/SakaLuX-Bazaar-Thanker-PDA-v5.3.0.user.js`
+- `backups/SakaLuX-Mission-Rewards-v1.0.0.user.js`
