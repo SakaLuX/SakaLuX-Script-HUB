@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.0
+// @version      5.3.1
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author SakaLuX
 // @match        https://www.torn.com/*
@@ -21,6 +21,11 @@
     const PENDING_HTML_KEY = 'sakalux_pending_bazaar_html';
     const PENDING_PLAIN_KEY = 'sakalux_pending_bazaar_plain';
     const PENDING_XID_KEY = 'sakalux_pending_bazaar_xid';
+
+    const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+    const HUB_PROMPT_STORAGE = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
+    const HUB_PROMPT_INTERVAL = 24 * 60 * 60 * 1000;
+    const HUB_PROMPT_ID = 'sakalux-hub-install-prompt';
 
     const DEFAULTS = {
         sellerId: '2380374',
@@ -152,6 +157,71 @@
     function formatDate(timestamp) {
         if (!timestamp) return 'Never';
         return new Date(timestamp).toLocaleString();
+    }
+
+    function isHubInstalled() {
+        return Boolean(
+            window.SakaLuXScriptHub ||
+            document.getElementById('sakalux-hub-button')
+        );
+    }
+
+    function rememberHubPrompt() {
+        try {
+            localStorage.setItem(HUB_PROMPT_STORAGE, String(Date.now()));
+        } catch {}
+    }
+
+    function shouldOfferHub() {
+        if (isHubInstalled()) return false;
+        try {
+            const last = Number(localStorage.getItem(HUB_PROMPT_STORAGE) || 0);
+            return !last || Date.now() - last >= HUB_PROMPT_INTERVAL;
+        } catch {
+            return true;
+        }
+    }
+
+    function closeHubPrompt(remember = true) {
+        if (remember) rememberHubPrompt();
+        document.getElementById(HUB_PROMPT_ID)?.remove();
+    }
+
+    function showHubInstallPrompt() {
+        if (!shouldOfferHub() || document.getElementById(HUB_PROMPT_ID)) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = HUB_PROMPT_ID;
+        overlay.style.cssText = 'position:fixed;z-index:2147483647;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;font-family:Arial,sans-serif;';
+        overlay.innerHTML = `
+            <div style="width:min(420px,94vw);background:#101318;color:#fff;border:1px solid #303640;border-radius:16px;padding:18px;box-sizing:border-box;box-shadow:0 15px 50px rgba(0,0,0,.65);">
+                <div style="font-size:19px;font-weight:900;margin-bottom:8px;">☠️ SakaLuX Script Hub</div>
+                <div style="font-size:12px;line-height:1.5;color:#c9d1d9;margin-bottom:14px;">This script is part of the SakaLuX suite. Install the main Script Hub for add-on management, quick access and update checking?</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <button id="sakalux-hub-install-now" style="border:0;border-radius:9px;padding:11px;background:#16a34a;color:#fff;font-weight:900;">⬇ INSTALL HUB</button>
+                    <button id="sakalux-hub-not-now" style="border:0;border-radius:9px;padding:11px;background:#374151;color:#fff;font-weight:900;">NOT NOW</button>
+                </div>
+                <div style="margin-top:10px;color:#8b949e;font-size:10px;text-align:center;">If you choose NOT NOW, this reminder can appear again after 24 hours.</div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('sakalux-hub-install-now').onclick = () => {
+            rememberHubPrompt();
+            window.location.href = HUB_INSTALL_URL;
+        };
+
+        document.getElementById('sakalux-hub-not-now').onclick = () => closeHubPrompt(true);
+        overlay.addEventListener('click', event => {
+            if (event.target === overlay) closeHubPrompt(true);
+        });
+    }
+
+    function scheduleHubInstallPrompt() {
+        setTimeout(() => {
+            if (!isHubInstalled()) showHubInstallPrompt();
+        }, 3500);
     }
 
     let detectedBazaarName = '';
@@ -663,7 +733,7 @@
 
         panel.innerHTML = `
             <div style="font-size:21px;font-weight:bold;margin-bottom:6px;">⚙️ SakaLuX Bazaar Thanker</div>
-            <div style="font-size:12px;color:#888;margin-bottom:15px;">Version 5.3.0</div>
+            <div style="font-size:12px;color:#888;margin-bottom:15px;">Version 5.3.1</div>
             <div id="sbtStats" style="background:#222;border:1px solid #333;border-radius:9px;padding:12px;margin-bottom:15px;"></div>
             <label>Your Torn ID</label><input id="sbtSellerId" value="${escapeHtml(settings.sellerId)}" style="${inputStyle()}">
             <label>Bazaar URL</label><input id="sbtBazaarUrl" value="${escapeHtml(settings.bazaarUrl)}" style="${inputStyle()}">
@@ -879,7 +949,7 @@
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION = '5.3.0';
+    const BAZAAR_VERSION = '5.3.1';
 
     function openSettingsPanel() {
         if (!location.href.includes('sid=events')) return false;
@@ -975,6 +1045,8 @@
         if (location.pathname.includes('messages.php')) {
             startMessageObserver();
         }
+
+        scheduleHubInstallPrompt();
     }
 
     if (document.readyState === 'loading') {
