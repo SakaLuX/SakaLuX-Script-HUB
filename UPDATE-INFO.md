@@ -4,21 +4,19 @@ Last updated: 2026-08-24
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.8.0**
+- SakaLuX Script Hub: **v1.8.1**
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 
 ## Latest changes
 
-### SakaLuX Script Hub v1.8.0
-- Added central `scripts.json` registry and automatic add-on discovery.
-- New scripts can now be registered centrally without hard-coding them into the Hub.
-- Added **WHAT'S NEW** inside the Hub using release notes from `scripts.json`.
-- Added **UPDATE ALL** for installed add-ons that have newer Greasy Fork versions available.
-- Added **SYSTEM CHECK** for `scripts.json`, Greasy Fork update sources, local installation state and add-on health.
-- Added a global `window.SakaLuXScriptHub` API so complementary scripts can reliably detect that the Hub is installed.
-- Added manual registry refresh from Hub Settings.
-- Added `@connect raw.githubusercontent.com` so the Hub can read the registry directly from GitHub.
+### SakaLuX Script Hub v1.8.1
+- Fixed **WHAT'S NEW** so the button is visible and usable on mobile/PDA.
+- Moved Hub release notes into the Hub code itself instead of storing them in `scripts.json`.
+- Cleaned `scripts.json` so it is used only as the add-on registry.
+- Removed the Script Hub entry and release-note data from `scripts.json`.
+- Kept automatic add-on discovery, **UPDATE ALL**, **SYSTEM CHECK**, registry refresh and the global `window.SakaLuXScriptHub` API.
+- Reworked the Hub toolbar so all five controls remain visible on mobile: update check, update all, system check, what's new and settings.
 
 ### SakaLuX Enhancer Guard v1.3.2
 - Added a SakaLuX Script Hub install prompt when the Hub is not detected.
@@ -32,9 +30,11 @@ Last updated: 2026-08-24
 
 ## Central registry policy
 
-Every new SakaLuX script must be added to `scripts.json` in the same release cycle.
+`scripts.json` is only the registry of complementary SakaLuX add-ons that the Hub should discover and manage.
 
-The registry stores the script ID, type, active status, name, version, category, description, Greasy Fork URLs, exposed API global, UI button selector and supported quick actions.
+Every new complementary SakaLuX script must be added to `scripts.json` in the same release cycle.
+
+The registry stores only information needed to identify, install, detect, update and launch add-ons. Hub metadata and Hub release notes do not belong in `scripts.json`.
 
 ## Update workflow
 
@@ -43,13 +43,15 @@ For every future script update:
 2. Include the old version number in the backup filename.
 3. Do not create date subfolders.
 4. Update the live source file on `main`.
-5. Update the script version in `scripts.json`.
-6. Update this `UPDATE-INFO.md` file with the new version and change summary.
-7. Update the corresponding `greasyfork/*.md` additional-info file.
-8. Keep Greasy Fork source synchronization pointed only at the live source files in the repository root.
+5. If the updated script is an add-on, update its entry/version in `scripts.json`.
+6. If a new add-on is created, add it to `scripts.json` immediately.
+7. Update this `UPDATE-INFO.md` file with the new version and change summary.
+8. Update the corresponding `greasyfork/*.md` additional-info file.
+9. Keep Greasy Fork source synchronization pointed only at the live source files in the repository root.
 
-## Backups available for this update
+## Backups available
 
+- `backups/SakaLuX-Script-Hub-v1.8.0.user.js`
 - `backups/SakaLuX-Script-Hub-v1.7.0.user.js`
 - `backups/SakaLuX-Enhancer-Guard-v1.3.1.user.js`
 - `backups/SakaLuX-Bazaar-Thanker-PDA-v5.3.0.user.js`
