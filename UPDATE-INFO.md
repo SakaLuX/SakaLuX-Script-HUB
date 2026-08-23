@@ -27,14 +27,15 @@ Last updated: 2026-08-24
 ## Backup policy
 
 Before every future script update:
-1. Save the currently published source in `backups/YYYY-MM-DD/`.
-2. Include the old version number in the backup filename.
-3. Update the live source file on `main`.
-4. Update this `UPDATE-INFO.md` file with the new current version and change summary.
-5. Keep Greasy Fork synchronization pointed only at the live source files in the repository root.
+1. Save the currently published source directly in `backups/`.
+2. Include the old version number in the backup filename, for example `SakaLuX-Script-Hub-v1.7.0.user.js`.
+3. Do not create date subfolders; all backups stay directly inside `backups/` and are identified by script name + version.
+4. Update the live source file on `main`.
+5. Update this `UPDATE-INFO.md` file with the new current version and change summary.
+6. Keep Greasy Fork synchronization pointed only at the live source files in the repository root.
 
-## Backup created for this update
+## Available backups
 
-- `backups/2026-08-24/SakaLuX-Script-Hub-v1.6.0.user.js`
-- `backups/2026-08-24/SakaLuX-Enhancer-Guard-v1.3.1.user.js`
-- `backups/2026-08-24/SakaLuX-Bazaar-Thanker-PDA-v5.2.1.user.js`
+- `backups/SakaLuX-Script-Hub-v1.6.0.user.js`
+- `backups/SakaLuX-Enhancer-Guard-v1.3.1.user.js`
+- `backups/SakaLuX-Bazaar-Thanker-PDA-v5.2.1.user.js`
