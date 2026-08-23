@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-08-24",
+  "suite": "SakaLuX Script Hub",
+  "scripts": [
+    {
+      "id": "hub",
+      "type": "core",
+      "active": true,
+      "name": "SakaLuX Script Hub",
+      "icon": "☠️",
+      "category": "Core",
+      "version": "1.8.0",
+      "description": "Central manager, installer, updater and health monitor for SakaLuX Torn add-ons.",
+      "greasyForkId": "592699",
+      "metaUrl": "https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js",
+      "apiGlobal": "SakaLuXScriptHub",
+      "latestChanges": [
+        "Added central scripts.json auto-discovery for SakaLuX add-ons.",
+        "Added WHAT'S NEW release notes directly inside the Hub.",
+        "Added UPDATE ALL for installed add-ons with available updates.",
+        "Added SYSTEM CHECK for registry, Greasy Fork and add-on health diagnostics.",
+        "Added a global SakaLuXScriptHub API so complementary scripts can detect the Hub reliably."
+      ]
+    },
+    {
+      "id": "enhancer",
+      "type": "addon",
+      "active": true,
+      "name": "Enhancer Guard",
+      "icon": "🛡️",
+      "category": "Inventory",
+      "version": "1.3.2",
+      "description": "Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.",
+      "greasyForkId": "592698",
+      "metaUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js",
+      "apiGlobal": "SakaLuXEnhancerGuard",
+      "buttonSelector": "#sl-eg-button",
+      "quickActions": [
+        { "id": "open", "label": "OPEN", "icon": "🛡️", "method": "open" },
+        { "id": "refresh", "label": "REFRESH", "icon": "🔄", "method": "refresh" },
+        { "id": "hardRefresh", "label": "HARD", "icon": "⚡", "method": "hardRefresh" }
+      ]
+    },
+    {
+      "id": "bazaar",
+      "type": "addon",
+      "active": true,
+      "name": "Bazaar Thanker",
+      "icon": "💬",
+      "category": "Trading",
+      "version": "5.3.1",
+      "description": "Bazaar buyer grouping, thank-you messages, statistics and history management.",
+      "greasyForkId": "592388",
+      "metaUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js",
+      "apiGlobal": "SakaLuXBazaarThanker",
+      "buttonSelector": "#sakalux-bt-settings-button",
+      "quickActions": [
+        { "id": "open", "label": "SETTINGS", "icon": "⚙️", "method": "open" },
+        { "id": "refresh", "label": "REFRESH", "icon": "🔄", "method": "refresh" },
+        { "id": "events", "label": "EVENTS", "icon": "📋", "method": "goToEvents", "fallbackUrl": "https://www.torn.com/page.php?sid=events" }
+      ]
+    }
+  ]
+}
