@@ -39,6 +39,26 @@
         { "id": "refresh", "label": "REFRESH", "icon": "🔄", "method": "refresh" },
         { "id": "events", "label": "EVENTS", "icon": "📋", "method": "goToEvents", "fallbackUrl": "https://www.torn.com/page.php?sid=events" }
       ]
+    },
+    {
+      "id": "mission-rewards",
+      "type": "addon",
+      "active": true,
+      "name": "Mission Rewards",
+      "icon": "🎯",
+      "category": "Missions",
+      "version": "1.0.0",
+      "description": "Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.",
+      "greasyForkId": "592711",
+      "metaUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js",
+      "apiGlobal": "SakaLuXMissionRewards",
+      "buttonSelector": "#sl-mri-button",
+      "quickActions": [
+        { "id": "open", "label": "SETTINGS", "icon": "⚙️", "method": "open", "fallbackUrl": "https://www.torn.com/page.php?sid=missions" },
+        { "id": "refresh", "label": "REFRESH", "icon": "🔄", "method": "refresh", "fallbackUrl": "https://www.torn.com/page.php?sid=missions" },
+        { "id": "missions", "label": "MISSIONS", "icon": "🎯", "method": "goToMissions", "fallbackUrl": "https://www.torn.com/page.php?sid=missions" }
+      ]
     }
   ]
 }
