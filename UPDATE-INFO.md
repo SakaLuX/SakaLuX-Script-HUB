@@ -8,9 +8,17 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.2** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.3** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.3
+- Fixed **Arrival Basket flicker/disappearing on Torn PDA** during periodic flight-page rerenders.
+- The existing Arrival Basket now stays visible while YATA/Torn market data refreshes asynchronously.
+- A refreshed panel replaces the previous one only after the new data is ready.
+- Force refreshes no longer remove the Arrival Basket before the replacement is built.
+- The panel is removed only when the player is no longer in flight or the flight state is invalid.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.2.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.2
 - Fixed **Arrival Basket / Arrival Stock not appearing on Torn PDA/mobile while flying**.

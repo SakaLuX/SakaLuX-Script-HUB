@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.2
+// @version      1.15.3
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.2';
+    const VERSION = '1.15.3';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -749,13 +749,13 @@
     }
 
     async function renderArrivalStock(){
-        document.getElementById('sl-mi-arrival')?.remove();
+        const previousArrival=document.getElementById('sl-mi-arrival');
         state.arrivalRows=0;state.flightDestination='';state.landingMins=null;
         state.arrivalBasketItems=0;state.arrivalBasketCost=0;state.arrivalBasketProfit=0;state.arrivalBasketSlots=0;state.arrivalBasketMode='';
-        if(!settings.arrivalStock||!detectInFlight()) return;
+        if(!settings.arrivalStock||!detectInFlight()){previousArrival?.remove();return;}
         const flight=await fetchFlightStatus();
         const destination=normalizeDestination(flight.destination),landingMins=Number(flight.seconds)/60;
-        if(!destination||!Number.isFinite(landingMins)||landingMins<0) return;
+        if(!destination||!Number.isFinite(landingMins)||landingMins<0){previousArrival?.remove();return;}
         state.flightDestination=destination;state.landingMins=landingMins;
         const yata=(await fetchYataAll()).filter(r=>r.destination===destination);if(!yata.length)return;
         for(const r of yata)if(r.stock!=null)recordStock(destination,r.itemId,r.stock);flushStockHistory();
@@ -818,7 +818,9 @@
             row.innerHTML='<span class="name">'+esc(r.name)+'</span><strong class="buy">'+buy+'</strong><span>now '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+'</span><span class="eta">arrival ~'+proj+' · '+esc(restockText)+'</span><span>+'+money(r.profitItem)+'/ea</span><span class="conf '+p.confidence.toLowerCase()+'">'+esc(p.confidence)+'</span><strong>'+money(total)+'</strong>';
             body.appendChild(row);
         }
-        bar.querySelector('.sl-mi-arrival-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
+        bar.querySelector('.sl-mi-arrival-head').onclick=()=>bar.classList.toggle('open');
+        previousArrival?.remove();
+        mountTop(bar);
         paintTravelSessionSummary();
     }
 
@@ -1216,7 +1218,7 @@
 
     async function scan(force=false){
         if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
-        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-museum-bar,#sl-mi-bazaar-board,#sl-mi-market-bar,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
+        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-museum-bar,#sl-mi-bazaar-board,#sl-mi-market-bar,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
         catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;}
     }
     function scheduleScan(force=false){if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},450);}
