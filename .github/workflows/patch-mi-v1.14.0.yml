@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/patches/mi-v1.14.0.py'
+      - '.github/workflows/patch-mi-v1.14.0.yml'
 
 permissions:
   contents: write
