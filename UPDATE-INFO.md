@@ -8,9 +8,20 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.9.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.10.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.10.0
+- Best Travel Run is now **budget-aware**.
+- When **Travel budget ($)** is greater than 0, each route is evaluated using only the quantity that can actually be purchased with that budget.
+- Routes where the configured budget cannot afford even one item are excluded from the ranking.
+- Best Travel Run rows now show planned **buy quantity**, total **trip purchase cost** and whether the recommendation is **budget capped**.
+- Profit per run and profit per hour are recalculated from the affordable quantity instead of assuming every route can always fill all travel slots.
+- The shortlist of Item Market prices refreshed for Best Travel Run is also prioritized using the affordable quantity, reducing wasted refreshes on routes that the configured budget cannot use.
+- Both the instant cache phase and the live-refreshed phase use the same budget-aware calculations.
+- Added `bestRunBudgetAware`, `bestRunAffordableRoutes` and `bestRunBlockedRoutes` to `health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.9.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.9.0
 - Added **Travel Profit Optimizer** on top of Travel Budget Planner.
@@ -193,6 +204,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.9.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.8.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.7.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.6.0.user.js`
