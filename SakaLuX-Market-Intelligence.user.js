@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.10.0
-// @description  Torn market and travel intelligence with budget-aware Best Travel Run, profit-optimized Travel Buy Planner, real flight times, Bazaar flips, Item Market signals, arrival prediction and Museum valuation.
+// @version      1.11.0
+// @description  Torn market and travel intelligence with Best Route Basket Optimizer, budget-aware Travel planning, real flight times, Bazaar flips, Item Market signals, arrival prediction and Museum valuation.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.10.0';
+    const VERSION = '1.11.0';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -135,7 +135,8 @@
         itemMarketSignal: '', itemMarketTrend: 0, itemMarketVolatility: 0, itemMarketHistorySamples: 0,
         actualFlightTimes: 0, travelTimeSource: 'fallback',
         travelPlanItems: 0, travelPlanCost: 0, travelPlanProfit: 0, travelPlanSlots: 0, travelPlanBudget: 0, travelPlanUnusedBudget: 0, travelPlanMode: '', travelPlanOptimizationGain: 0,
-        bestRunBudgetAware: false, bestRunAffordableRoutes: 0, bestRunBlockedRoutes: 0
+        bestRunBudgetAware: false, bestRunAffordableRoutes: 0, bestRunBlockedRoutes: 0,
+        bestRunBasketRoutes: 0, bestRunBasketItems: 0, bestRunBasketProfit: 0
     };
 
     function loadJson(key, fallback) {
@@ -488,42 +489,65 @@
         return Math.min(stockQty,Math.floor(budget/Math.max(1,Number(row.buyPrice)||1)));
     }
 
+    function routeBasketEntries(rows){
+        return rows.map(r=>({id:r.itemId,name:r.name,buy:r.buyPrice,stock:r.stock,row:null,destination:r.destination}));
+    }
+
     function buildBestRunRows(candidates,marketMap,actualTimes){
-        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),ranked=[];
-        let blocked=0;
-        for(const r of candidates){
-            const market=marketMap.get(r.itemId),flight=flightInfo(r.destination,actualTimes);if(!market||!flight)continue;
-            const m=metrics(r.buyPrice,market.price);if(m.profit<=0)continue;
-            const stockQty=r.stock==null?slots:Math.min(slots,Math.max(0,Number(r.stock)||0));
-            const qty=bestRunAffordableQty(r,slots);
-            if(qty<=0){blocked++;continue;}
-            const costRun=r.buyPrice*qty,profitRun=m.profit*qty,roundTrip=flight.mins*2,profitHour=profitRun/(roundTrip/60);
-            ranked.push(Object.assign({},r,{market:market.price,net:m.net,profitItem:m.profit,roi:m.roi,qty,costRun,profitRun,profitHour,flightMins:flight.mins,flightSource:flight.source,eta:estimateRestock(r.destination,r.itemId),budgetLimited:budget>0&&qty<stockQty}));
+        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),grouped=new Map(),ranked=[];
+        for(const r of candidates){if(!grouped.has(r.destination))grouped.set(r.destination,[]);grouped.get(r.destination).push(r);}
+        let blocked=0,totalBasketItems=0;
+        for(const [destination,rows] of grouped){
+            const flight=flightInfo(destination,actualTimes);if(!flight)continue;
+            const entries=routeBasketEntries(rows);
+            const plan=buildTravelBuyPlan(destination,entries,marketMap);
+            if(!plan?.rows?.length||!(plan.totalProfit>0)){blocked++;continue;}
+            const roundTrip=flight.mins*2,profitHour=plan.totalProfit/(roundTrip/60);
+            const summary=plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':'');
+            totalBasketItems+=plan.rows.length;
+            ranked.push({
+                destination,
+                basket:plan.rows,
+                basketSummary:summary,
+                qty:plan.used,
+                slots,
+                costRun:plan.totalCost,
+                profitRun:plan.totalProfit,
+                profitHour,
+                flightMins:flight.mins,
+                flightSource:flight.source,
+                budgetLimited:budget>0&&plan.unusedBudget!==null,
+                mode:plan.mode,
+                optimizationGain:plan.optimizationGain||0
+            });
         }
         state.bestRunBudgetAware=budget>0;
         state.bestRunAffordableRoutes=ranked.length;
         state.bestRunBlockedRoutes=blocked;
-        return ranked.sort((a,b)=>b.profitHour-a.profitHour || b.profitRun-a.profitRun).slice(0,11);
+        state.bestRunBasketRoutes=ranked.length;
+        state.bestRunBasketItems=totalBasketItems;
+        const sorted=ranked.sort((a,b)=>b.profitHour-a.profitHour || b.profitRun-a.profitRun).slice(0,11);
+        state.bestRunBasketProfit=sorted[0]?.profitRun||0;
+        return sorted;
     }
 
     function paintBestTravelRun(top,phase){
         document.getElementById('sl-mi-best-run')?.remove();state.bestRunRows=top.length;if(!top.length)return;
         const bar=document.createElement('div');bar.id='sl-mi-best-run';const best=top[0];
-        bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST TRAVEL RUN</span><strong>'+esc(best.name)+' → '+esc(best.destination)+'</strong><span>'+money(best.profitHour)+'/hr</span><button type="button">▾</button></div><div class="sl-mi-perf-note">'+esc(phase||'cached')+'</div><div class="sl-mi-br-body"></div>';
+        bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST ROUTE BASKET</span><strong>'+esc(best.destination)+' · '+best.basket.length+' item types</strong><span>'+money(best.profitHour)+'/hr</span><button type="button">▾</button></div><div class="sl-mi-perf-note">'+esc(phase||'cached')+'</div><div class="sl-mi-br-body"></div>';
         const body=bar.querySelector('.sl-mi-br-body');
         for(const r of top){
             const row=document.createElement('div');row.className='sl-mi-br-row sl-mi-route';row.dataset.destination=r.destination;row.setAttribute('role','button');row.tabIndex=0;row.title='Select '+r.destination+' in Torn Travel';
-            const eta=(r.eta.learned?('next '+fmtDuration(r.eta.mins)):('ETA learning · possible ≤'+Math.max(1,Math.ceil(r.eta.mins))+'m'))+' · flight '+fmtFlightMinutes(r.flightMins)+' '+(r.flightSource==='torn-page'?'actual':'fallback');
-            const costLine='cost '+money(r.costRun)+(r.budgetLimited?' · budget capped':'');
-            row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>'+esc(r.destination)+'</span><span>stock '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+' · buy ×'+r.qty+'</span><span class="eta">'+eta+' · '+costLine+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
+            const routeInfo=r.basket.length+' item types · '+r.qty+'/'+r.slots+' slots · flight '+fmtFlightMinutes(r.flightMins)+' '+(r.flightSource==='torn-page'?'actual':'fallback');
+            const costLine='cost '+money(r.costRun)+(settings.travelBudget>0?' · budget '+money(settings.travelBudget):'');
+            row.innerHTML='<span class="name">'+esc(r.destination)+'</span><span>'+esc(r.basketSummary)+'</span><span>'+routeInfo+'</span><span class="eta">'+costLine+' · '+esc(r.mode)+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
             const activate=()=>selectTravelDestination(r.destination);row.addEventListener('click',activate);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});body.appendChild(row);
         }
         bar.querySelector('.sl-mi-br-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
     }
 
     function travelRefreshIds(candidates,limit,actualTimes){
-        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0);
-        const scored=[];
+        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),byDestination=new Map();
         for(const r of candidates){
             const affordableQty=bestRunAffordableQty(r,slots);
             if(affordableQty<=0) continue;
@@ -531,11 +555,16 @@
             let score=0;
             if(c){const m=metrics(r.buyPrice,c.price);score=Math.max(0,m.profit)*affordableQty/(flight||1);}
             else score=Math.max(1,r.buyPrice)/Math.max(1,flight);
-            scored.push({id:r.itemId,score,cached:!!c,budgetAware:budget>0});
+            const scored={id:r.itemId,destination:r.destination,score,cached:!!c,budgetAware:budget>0};
+            if(!byDestination.has(r.destination))byDestination.set(r.destination,[]);
+            byDestination.get(r.destination).push(scored);
         }
-        scored.sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
-        const ids=[];const seen=new Set();
-        for(const x of scored){if(seen.has(x.id))continue;seen.add(x.id);ids.push(x.id);if(ids.length>=limit)break;}
+        for(const list of byDestination.values())list.sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+        const ids=[],seen=new Set();
+        const destinationHeads=[...byDestination.values()].map(list=>list[0]).filter(Boolean).sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+        for(const x of destinationHeads){if(seen.has(x.id))continue;seen.add(x.id);ids.push(x.id);if(ids.length>=limit)return ids;}
+        const rest=[...byDestination.values()].flatMap(list=>list.slice(1)).sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+        for(const x of rest){if(seen.has(x.id))continue;seen.add(x.id);ids.push(x.id);if(ids.length>=limit)break;}
         return ids;
     }
 
@@ -553,7 +582,7 @@
         for(const r of candidates){const c=cachePeek(r.itemId);if(c)cachedMap.set(r.itemId,c);}
         state.travelCacheHits=cachedMap.size;
         const cachedTop=buildBestRunRows(candidates,cachedMap,actualTimes);
-        if(cachedTop.length) paintBestTravelRun(cachedTop,'instant cache · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn times '+actualTimes.size+'/'+Object.keys(FLIGHT_MINS).length:'fallback flight times')+' · refreshing '+TRAVEL_REFRESH_LIMIT+' prices');
+        if(cachedTop.length) paintBestTravelRun(cachedTop,'route baskets · instant cache · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn times '+actualTimes.size+'/'+Object.keys(FLIGHT_MINS).length:'fallback flight times')+' · refreshing '+TRAVEL_REFRESH_LIMIT+' prices');
 
         const ids=travelRefreshIds(candidates,TRAVEL_REFRESH_LIMIT,actualTimes);
         state.travelRefreshes=ids.length;
@@ -562,7 +591,7 @@
         const finalMap=new Map();
         for(const r of candidates){const c=cachePeek(r.itemId);if(c)finalMap.set(r.itemId,c);}
         const finalTop=buildBestRunRows(candidates,finalMap,actualTimes);
-        if(finalTop.length) paintBestTravelRun(finalTop,'live-refreshed · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn flight times':'fallback flight times')+' · '+ids.length+' prices checked');
+        if(finalTop.length) paintBestTravelRun(finalTop,'route baskets · live-refreshed · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn flight times':'fallback flight times')+' · '+ids.length+' prices checked');
     }
 
     async function renderArrivalStock(){
@@ -965,7 +994,7 @@
 .sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival{box-sizing:border-box;margin:4px 0;padding:6px 8px;border-radius:6px;background:#15191f;border:1px solid #2c333d;color:#d7dce5;font:700 10px/1.4 Arial,sans-serif}
 .sl-mi-travel strong,.sl-mi-bazaar.good,.sl-mi-bazaar.good strong,#sl-mi-market-bar strong,#sl-mi-points-bar strong,#sl-mi-museum-bar strong,#sl-mi-best-run strong,#sl-mi-arrival strong{color:#78d98b}.sl-mi-travel.loss,.sl-mi-bazaar.bad,.sl-mi-bazaar.bad strong{color:#e06c6c}
 #sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-bazaar-board,#sl-mi-travel-plan{margin:8px auto 10px;max-width:1100px;border-left:3px solid #d7b94c;font-size:11px}#sl-mi-market-bar.hit{border-left-color:#78d98b;background:#152219}
-.sl-mi-br-head,.sl-mi-arrival-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button,.sl-mi-arrival-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body,.sl-mi-arrival-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body,.open .sl-mi-arrival-body{display:flex;flex-direction:column}.sl-mi-br-row,.sl-mi-arrival-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name,.sl-mi-arrival-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{color:#d7b94c}.sl-mi-route{cursor:pointer;transition:background .12s ease,border-color .12s ease}.sl-mi-route:hover,.sl-mi-route:focus{background:#1c2522;border-color:#4d6957;outline:none}.sl-mi-route:active{background:#203028}
+.sl-mi-br-head,.sl-mi-arrival-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button,.sl-mi-arrival-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body,.sl-mi-arrival-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body,.open .sl-mi-arrival-body{display:flex;flex-direction:column}.sl-mi-br-row,.sl-mi-arrival-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.8fr) auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name,.sl-mi-arrival-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{color:#d7b94c}.sl-mi-route{cursor:pointer;transition:background .12s ease,border-color .12s ease}.sl-mi-route:hover,.sl-mi-route:focus{background:#1c2522;border-color:#4d6957;outline:none}.sl-mi-route:active{background:#203028}
 .sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}
 .sl-mi-museum-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-museum-head>div{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-museum-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-museum-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-museum-body{display:none;margin-top:7px;gap:4px}#sl-mi-museum-bar.open .sl-mi-museum-body{display:flex;flex-direction:column}.sl-mi-museum-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-museum-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-museum-row.turn{border-left:3px solid #78d98b;background:#142019}.sl-mi-museum-row.sell{border-left:3px solid #d7b94c;background:#201d13}.sl-mi-museum-row.missing{border-left:3px solid #5c6570}.sl-mi-museum-row .edge{color:#9da6b3}.sl-mi-points-link{border:1px solid #66591d;background:#2a2512;color:#e4c95d;border-radius:6px;padding:7px 9px;font-weight:900;font-size:10px;align-self:flex-start}
 .sl-mi-plan-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-plan-head>div:first-child{display:flex;align-items:center;gap:8px}.sl-mi-plan-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-plan-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-plan-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;padding:6px;border:1px solid #29323a;border-radius:6px}.sl-mi-plan-body{display:none;margin-top:7px;gap:4px}#sl-mi-travel-plan.open .sl-mi-plan-body{display:flex;flex-direction:column}.sl-mi-plan-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px;cursor:pointer}.sl-mi-plan-row:hover,.sl-mi-plan-row:focus{background:#1b251f;border-color:#4d6957;outline:none}.sl-mi-plan-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-target{outline:2px solid #d7b94c!important;box-shadow:0 0 0 2px rgba(215,185,76,.22)!important}
@@ -974,7 +1003,7 @@
 .sl-mi-watch-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sl-mi-watch-row input{flex:1 1 140px;background:#0d0f14;color:#fff;border:1px solid #363e49;border-radius:6px;padding:8px}.sl-mi-watch-row button{border:0;border-radius:6px;padding:7px 9px;background:#303844;color:#fff;font-weight:900;font-size:10px}
 #sl-mi-button{position:fixed;right:10px;bottom:106px;z-index:2147483644;border:0;border-radius:999px;padding:9px 11px;background:#18181b;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font-weight:900;font-size:12px}
 #sl-mi-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-mi-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mi-title{font-size:16px;font-weight:900}.sl-mi-sub{margin-top:3px;color:#8e96a3;font-size:9px}#sl-mi-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}.sl-mi-toggle,.sl-mi-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mi-field input{width:45%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:7px}.sl-mi-info{margin:10px 0;color:#a6adb8;font-size:10px}.sl-mi-primary,.sl-mi-secondary{width:100%;min-height:40px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900}.sl-mi-primary{background:#2563eb}.sl-mi-secondary{background:#374151}.muted{color:#7e8793}
-@media(max-width:700px){.sl-mi-plan-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-plan-row .name{grid-column:1/-1}.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-museum-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 7px}.sl-mi-museum-row .name{grid-column:1/-1}.sl-mi-market-grid{grid-template-columns:repeat(2,1fr)}.sl-mi-spark{align-items:flex-start;flex-direction:column}.sl-mi-spark small{text-align:left}.sl-mi-baz-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-baz-row .name{grid-column:1/-1}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
+@media(max-width:700px){.sl-mi-plan-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-plan-row .name{grid-column:1/-1}.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-br-row>span:nth-child(2){grid-column:1/-1}.sl-mi-museum-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 7px}.sl-mi-museum-row .name{grid-column:1/-1}.sl-mi-market-grid{grid-template-columns:repeat(2,1fr)}.sl-mi-spark{align-items:flex-start;flex-direction:column}.sl-mi-spark small{text-align:left}.sl-mi-baz-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-baz-row .name{grid-column:1/-1}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
 `;document.head.appendChild(s);}
 
     function createButton(){if(!settings.showButton||document.getElementById('sl-mi-button'))return;const b=document.createElement('button');b.id='sl-mi-button';b.textContent='☠︎ Market';b.onclick=openSettings;document.body.appendChild(b);}
@@ -986,7 +1015,7 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
