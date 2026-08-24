@@ -8,9 +8,16 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.3** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.4** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.4
+- Fixed Torn PDA compact travel prices such as **$3M**, which were previously parsed as `$3` and caused absurd ROI/profit values.
+- Market calculations now prefer Torn API v2 `itemmarket.average_price` (the market value style number shown by Torn/Torn PDA) while retaining the lowest listing separately in cache.
+- Fixed corrupted Arrival stock learning: impossible stock/restock deltas above 100,000 are ignored, learned gaps below 10 minutes are rejected, and projected stock is clamped to a sane range.
+- Existing corrupted local restock samples are filtered automatically, so users do not need to clear storage manually.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.3.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.3
 - Fixed **Arrival Basket flicker/disappearing on Torn PDA** during periodic flight-page rerenders.
