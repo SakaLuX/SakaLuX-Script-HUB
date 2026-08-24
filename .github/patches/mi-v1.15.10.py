@@ -28,12 +28,9 @@ if helper.strip() not in s:
     if anchor not in s: raise SystemExit('anchor missing')
     s=s.replace(anchor,helper+anchor,1)
 s=s.replace("const m=metrics(e.buy,market.price),box=ensureBadge(e.row,'sl-mi-bazaar');","const m=metrics(e.buy,market.price),box=ensureBazaarBadge(e.row,'sl-mi-bazaar');",1)
-# keep board stable while refreshing
 s=s.replace("        document.getElementById('sl-mi-bazaar-board')?.remove();\n        state.bazaarDeals=0;state.bazaarBestProfit=0;state.bazaarBestRoi=0;","        const previousBoard=document.getElementById('sl-mi-bazaar-board');\n        state.bazaarDeals=0;state.bazaarBestProfit=0;state.bazaarBestRoi=0;",1)
 s=s.replace("        paintBazaarBoard(deals);\n    }","        previousBoard?.remove();\n        paintBazaarBoard(deals);\n    }",1)
-# don't blank bazaar board on force refresh
 s=s.replace("#sl-mi-museum-bar,#sl-mi-bazaar-board,#sl-mi-travel-plan", "#sl-mi-museum-bar,#sl-mi-travel-plan",1)
-# mobile bazaar layout polish
 css_anchor=".sl-mi-baz-row .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-focus{outline:2px solid #78d98b!important;outline-offset:2px!important}"
 css_new=css_anchor+"\n.sl-mi-bazaar-badge-wrap{display:block!important;width:100%!important;clear:both!important;box-sizing:border-box!important;margin:2px 0 7px!important}.sl-mi-bazaar-wide{display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35!important;padding:7px 10px!important;margin:0!important}.sl-mi-baz-head>div:first-child{flex:1;min-width:0}.sl-mi-baz-head>div:nth-child(2){white-space:nowrap}"
 if css_anchor not in s: raise SystemExit('css anchor missing')
@@ -54,3 +51,4 @@ info=info.replace('## Latest changes\n\n','## Latest changes\n\n### SakaLuX Mark
 gf=(R/'greasyfork/Market-Intelligence.md').read_text(encoding='utf-8').replace('**Current version: v1.15.9**','**Current version: v1.15.10**',1)
 gf=gf.replace('## v1.15.9','## v1.15.10 — Torn PDA Bazaar Layout\n\n- Bazaar badges now render as full-width rows below each item instead of overlapping the item card.\n- Bazaar Flip Intelligence has cleaner mobile wrapping and remains visible while market prices refresh.\n\n## v1.15.9',1)
 (R/'greasyfork/Market-Intelligence.md').write_text(gf,encoding='utf-8')
+# trigger 2026-08-25
