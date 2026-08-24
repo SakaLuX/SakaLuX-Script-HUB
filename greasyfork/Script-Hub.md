@@ -4,7 +4,7 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 
 ## Current version
 
-**v1.8.3**
+**v1.8.4**
 
 ## What it does
 
@@ -17,27 +17,26 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - Provides **SYSTEM CHECK** for registry access, Greasy Fork update sources and local add-on health.
 - Provides a dedicated **WHAT'S NEW** view for Hub release notes.
 - Provides quick actions, favorites, search, health status and backup/restore.
-- Adds a native Torn-style **☠︎ HUB** navigation item immediately before **Messages**.
-- Uses Torn's own navigation structure so the HUB launcher matches surrounding buttons in size, spacing and alignment.
-- The monochrome skull performs a subtle double-blink animation while the **HUB** label stays fixed.
-- The old floating circular Hub button automatically hides when the native navigation launcher is available and remains only as a fallback.
+- Adds a Torn-native **skull HUB** mobile navigation entry immediately before **Messages**.
+- Reuses Torn's own `mobileLink`, area row, swiper slide, SVG sizing and label classes so the HUB entry matches surrounding navigation buttons.
+- Only the skull artwork and subtle blink are custom; size, spacing, typography and theme colors come from Torn.
+- The floating circular Hub button automatically hides when the native navigation entry is available and remains only as a fallback.
 - Exposes `window.SakaLuXScriptHub` so complementary scripts can detect the Hub reliably.
 - Designed for Torn PDA and Tampermonkey.
 
 ## Current release notes
 
-### v1.8.3
-- Rebuilt the launcher as a native Torn navigation item directly before Messages.
-- Clones Torn's own menu structure rather than drawing a floating icon over the page.
-- Uses a monochrome text-presentation skull (`☠︎`) plus **HUB** label.
-- Blink animation affects only the skull icon.
-- Floating circular launcher hides automatically when the native item is available.
-- Existing Hub panel, updates, diagnostics, registry and add-on controls remain available.
+### v1.8.4
+- Fixed the mobile layout where HUB appeared above Messages and pushed Messages onto a second row.
+- HUB is now mounted as its own Torn swiper/navigation entry directly before Messages.
+- Reuses a native Torn SVG element and icon wrappers for exact sizing and alignment.
+- The **HUB** label inherits Torn's own typography and spacing.
+- Removed custom launcher dimensions that made the previous version look detached from Torn.
+- Blink animation now changes only skull opacity, keeping the whole navigation row stable.
 
-### v1.8.2
-- Added the first animated top-bar launcher experiment.
-- Added issue/update badge support and a launcher visibility setting.
-- Added Mission Rewards v1.0.1 to the offline fallback registry.
+### v1.8.3
+- Introduced the first Torn-style navigation version of the HUB launcher.
+- Added the monochrome skull plus HUB label and floating-button fallback behavior.
 
 ## SakaLuX suite
 
