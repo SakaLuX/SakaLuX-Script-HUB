@@ -8,9 +8,21 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.11.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.12.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.12.0
+- Added **In-Country Best Buys** for the Travel shop after landing.
+- The board is designed to provide the same kind of at-a-glance buying guidance users expect from travel-helper scripts, while using SakaLuX's own calculations and UI.
+- Shows the destination, optimized basket summary, planned spend, expected net profit, used slots and remaining budget.
+- Ranks up to 12 items with **BUY × quantity** for items selected by the optimizer and **ALT** for profitable alternatives.
+- Each row shows current stock, abroad buy price, Torn Item Market estimate, profit per item, ROI and planned/alternative profit.
+- Recommended rows are highlighted separately from alternatives.
+- Tapping a row scrolls to the matching Torn travel-shop item and highlights it; the script does not auto-buy.
+- Added an **In-country Best Buys board** toggle in Settings.
+- Added Best Buys destination/row/top-item fields to `health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.11.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.11.0
 - Replaced the old single-item **Best Travel Run** ranking with **Best Route Basket Optimizer**.
@@ -217,6 +229,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.11.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.10.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.9.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.8.0.user.js`
