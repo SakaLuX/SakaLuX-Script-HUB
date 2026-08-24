@@ -1,10 +1,20 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.13.0**
+**Current version: v1.14.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.14.0 — Smart Auto Refresh After Landing
+
+- Added smart post-landing refresh for foreign Travel shops.
+- Detects actual shop item/stock changes and refreshes **BEST BUYS** only when the visible shop signature changes.
+- Debounces Torn DOM mutations and ignores the script's own panels to avoid self-triggered loops.
+- Uses a 12-second minimum refresh interval for PDA-friendly behavior.
+- Item Market prices are force-refreshed at most once every 2 minutes; stock-only changes reuse the existing cache.
+- Added a Settings toggle for **Smart refresh after landing**.
+- Added landed refresh counters/timestamps to `health()` and `smartLandedRefresh()` to the public API.
 
 ## v1.13.0 — Arrival Basket Planner
 
@@ -196,7 +206,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist, price history and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.13.0.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist, price history and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.14.0.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.
