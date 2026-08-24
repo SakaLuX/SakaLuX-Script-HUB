@@ -8,9 +8,19 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.3.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.4.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.4.0
+- Added **Bazaar Flip Intelligence** with a dedicated ranked deal board.
+- Scans Bazaar listings, compares buy price with current/cached Torn Item Market price, applies the configured market fee and ranks profitable flips by estimated net profit.
+- Shows item, buy price, market price, profit and ROI for the top 10 deals.
+- Tapping a deal scrolls directly to the matching Bazaar listing and highlights it temporarily.
+- Keeps the existing per-item **DEAL / NO FLIP** overlays.
+- Uses cache-first market data and refreshes through the existing bounded request system.
+- Added Bazaar deal count, best profit and best ROI to `health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.3.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.3.0
 - Added **Museum Set Intelligence**.
@@ -130,6 +140,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.3.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.2.1.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.2.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.1.1.user.js`

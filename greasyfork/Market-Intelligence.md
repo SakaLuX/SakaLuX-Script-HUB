@@ -1,10 +1,20 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.3.0**
+**Current version: v1.4.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.4.0 — Bazaar Flip Intelligence
+
+- Added a dedicated **Bazaar Flip Intelligence** board.
+- Profitable Bazaar listings are ranked by estimated net profit after the configured market fee.
+- The board shows buy price, Item Market price, net profit and ROI for the top 10 opportunities.
+- Tapping a board row jumps to the matching Bazaar listing and highlights it.
+- Existing per-item DEAL / NO FLIP labels remain available.
+- Uses the existing cache-first market layer and bounded requests to avoid unnecessary API load.
+- `health()` now exposes Bazaar deal count, best profit and best ROI.
 
 ## v1.3.0 — Museum Set Intelligence
 
@@ -98,7 +108,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.3.0.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.4.0.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.
