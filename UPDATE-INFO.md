@@ -8,9 +8,20 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.13.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.14.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.14.0
+- Added **Smart Auto Refresh after landing** for the foreign Travel shop.
+- Detects meaningful changes in the currently displayed shop item/stock signature instead of blindly polling on a fixed interval.
+- Debounces Torn DOM mutations and ignores SakaLuX-owned UI updates, reducing duplicate rescans on PDA/mobile.
+- Rebuilds **BEST BUYS** when the foreign shop stock changes so the recommended quantities and basket stay current.
+- Enforces a minimum 12-second landed refresh interval to avoid repeated work while Torn hydrates or rerenders the page.
+- Live Item Market data is hard-refreshed at most once every 2 minutes during landed smart refreshes; intermediate stock changes reuse cached prices.
+- Added a **Smart refresh after landing** setting.
+- Added refresh/skip counters and timestamps to `health()` plus `smartLandedRefresh()` to the public API.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.13.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.13.0
 - Added **Arrival Basket Planner** while flying.
@@ -240,6 +251,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.13.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.12.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.11.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.10.0.user.js`
