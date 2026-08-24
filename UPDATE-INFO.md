@@ -8,9 +8,22 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.14.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.0
+- Added **Travel Session Summary**, the final planned development module before full testing.
+- Travel sessions are stored locally and keep up to 20 recent trips.
+- While flying, the session records the Arrival Basket estimate before landing.
+- After landing, the session records the current BEST BUYS basket so the pre-landing estimate can be compared with the landed opportunity.
+- Shows predicted profit, landed profit and the landing delta.
+- Added **MARK PLAN BOUGHT** in the in-country Best Buys panel; this records the user's confirmation of the displayed basket and its estimated cost/profit without claiming to verify later sale proceeds.
+- Session Summary displays the current trip plus the five most recent archived trips.
+- Added a Settings toggle plus **CLEAR TRAVEL HISTORY**.
+- Added session fields to `health()` and `travelSessionSummary()` to the public API.
+- All session data remains local to the device/browser.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.14.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.14.0
 - Added **Smart Auto Refresh after landing** for the foreign Travel shop.
@@ -251,6 +264,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.14.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.13.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.12.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.11.0.user.js`

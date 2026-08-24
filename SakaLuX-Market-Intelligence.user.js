@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.14.0
-// @description  Torn market and travel intelligence with Best Route Basket, Arrival Basket, in-country Best Buys and smart post-landing refresh that reacts to stock changes without hammering the APIs.
+// @version      1.15.0
+// @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.14.0';
+    const VERSION = '1.15.0';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -34,7 +34,8 @@
         pointsRate: 'SakaLuX_MI_POINTS_RATE_V1',
         stockHistory: 'SakaLuX_MI_STOCK_HISTORY_V1',
         itemCatalog: 'SakaLuX_MI_ITEM_CATALOG_V1',
-        priceHistory: 'SakaLuX_MI_PRICE_HISTORY_V1'
+        priceHistory: 'SakaLuX_MI_PRICE_HISTORY_V1',
+        travelSessions: 'SakaLuX_MI_TRAVEL_SESSIONS_V1'
     };
 
     const MARKET_CACHE_MS = 10 * 60 * 1000;
@@ -111,6 +112,7 @@
         arrivalStock: true,
         arrivalBasket: true,
         smartLandedRefresh: true,
+        sessionSummary: true,
         bazaar: true,
         itemMarket: true,
         items: true,
@@ -129,6 +131,9 @@
     let watchlist = loadJson(STORAGE.watchlist, {});
     let stockHistory = loadJson(STORAGE.stockHistory, {});
     let priceHistory = loadJson(STORAGE.priceHistory, {});
+    let travelSessions = loadJson(STORAGE.travelSessions, {current:null,history:[]});
+    if(!travelSessions||typeof travelSessions!=='object')travelSessions={current:null,history:[]};
+    if(!Array.isArray(travelSessions.history))travelSessions.history=[];
 
     const state = {
         page: '', apiMode: '', busy: false, lastScan: 0, lastError: '',
@@ -144,7 +149,8 @@
         bestRunBudgetAware: false, bestRunAffordableRoutes: 0, bestRunBlockedRoutes: 0,
         bestRunBasketRoutes: 0, bestRunBasketItems: 0, bestRunBasketProfit: 0,
         countryBestBuysRows: 0, countryBestBuyName: '', countryBestBuyProfit: 0, countryBestBuyQty: 0, countryBestBuysDestination: '',
-        landedRefreshes: 0, landedStockRefreshes: 0, landedMarketRefreshes: 0, landedRefreshSkips: 0, landedLastRefresh: 0, landedLastMarketRefresh: 0, landedSignature: '', landedRefreshTimer: null
+        landedRefreshes: 0, landedStockRefreshes: 0, landedMarketRefreshes: 0, landedRefreshSkips: 0, landedLastRefresh: 0, landedLastMarketRefresh: 0, landedSignature: '', landedRefreshTimer: null,
+        travelSessionCount: 0, currentSessionDestination: '', currentSessionStatus: '', currentSessionPredictedProfit: 0, currentSessionLandedProfit: 0, currentSessionRecordedProfit: 0, lastSessionProfit: 0
     };
 
     function loadJson(key, fallback) {
@@ -159,6 +165,101 @@
     function fmtDuration(mins) { if(mins==null||!Number.isFinite(mins)) return 'learning'; mins=Math.max(0,Math.round(mins)); if(mins<60) return '~'+mins+'m'; const h=Math.floor(mins/60),m=mins%60; return '~'+h+'h'+(m?' '+m+'m':''); }
     function normText(text) { return String(text||'').replace(/\s+/g,' ').trim(); }
     function median(values) { const a=values.filter(Number.isFinite).sort((x,y)=>x-y); return a.length ? a[Math.floor(a.length/2)] : null; }
+
+
+
+    function saveTravelSessions(){
+        travelSessions.history=(travelSessions.history||[]).slice(0,20);
+        saveJson(STORAGE.travelSessions,travelSessions);
+        state.travelSessionCount=(travelSessions.history||[]).length+(travelSessions.current?1:0);
+        state.currentSessionDestination=travelSessions.current?.destination||'';
+        state.currentSessionStatus=travelSessions.current?.status||'';
+        state.currentSessionPredictedProfit=Number(travelSessions.current?.predicted?.profit)||0;
+        state.currentSessionLandedProfit=Number(travelSessions.current?.landed?.profit)||0;
+        state.currentSessionRecordedProfit=Number(travelSessions.current?.recorded?.profit)||0;
+        state.lastSessionProfit=Number((travelSessions.history||[])[0]?.recorded?.profit||(travelSessions.history||[])[0]?.landed?.profit)||0;
+    }
+
+    function sessionPlanSnapshot(plan){
+        if(!plan)return null;
+        return {
+            at:Date.now(),
+            cost:Number(plan.totalCost)||0,
+            profit:Number(plan.totalProfit)||0,
+            slots:Number(plan.used)||0,
+            mode:plan.mode||'',
+            items:(plan.rows||[]).map(r=>({id:Number(r.id)||0,name:r.name||'',qty:Number(r.qty)||0,buy:Number(r.buy)||0,profit:Number(r.profit)||0})).filter(r=>r.qty>0)
+        };
+    }
+
+    function archiveCurrentSession(){
+        const cur=travelSessions.current;if(!cur)return;
+        cur.endedAt=cur.endedAt||Date.now();
+        const history=(travelSessions.history||[]).filter(x=>x?.id!==cur.id);
+        history.unshift(cur);travelSessions.history=history.slice(0,20);travelSessions.current=null;saveTravelSessions();
+    }
+
+    function ensureTravelSession(destination,phase='FLYING'){
+        if(!destination)return null;
+        let cur=travelSessions.current;
+        if(!cur||cur.destination!==destination){
+            if(cur)archiveCurrentSession();
+            cur={id:destination+'-'+Date.now(),destination,startedAt:Date.now(),status:phase,predicted:null,landed:null,recorded:null};
+            travelSessions.current=cur;
+        }
+        cur.status=phase||cur.status;saveTravelSessions();return cur;
+    }
+
+    function updatePredictedSession(destination,plan,landingMins){
+        if(!destination||!plan)return;
+        const cur=ensureTravelSession(destination,'FLYING');
+        cur.predicted=sessionPlanSnapshot(plan);cur.landingMins=Number(landingMins)||0;cur.lastSeenAt=Date.now();saveTravelSessions();
+    }
+
+    function updateLandedSession(destination,plan){
+        if(!destination||!plan)return;
+        const cur=ensureTravelSession(destination,'LANDED');
+        cur.status=cur.recorded?'PURCHASED':'LANDED';cur.landedAt=cur.landedAt||Date.now();cur.landed=sessionPlanSnapshot(plan);cur.lastSeenAt=Date.now();saveTravelSessions();
+    }
+
+    function markCurrentPlanBought(){
+        const cur=travelSessions.current;if(!cur?.landed)return false;
+        cur.recorded={...cur.landed,at:Date.now(),confirmed:true};cur.status='PURCHASED';saveTravelSessions();paintTravelSessionSummary();return true;
+    }
+
+    function fmtSessionTime(ts){
+        if(!ts)return '—';
+        try{return new Date(ts).toLocaleString([], {month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(_){return '—';}
+    }
+
+    function paintTravelSessionSummary(){
+        document.getElementById('sl-mi-session')?.remove();
+        if(!settings.sessionSummary)return;
+        const cur=travelSessions.current,history=(travelSessions.history||[]).slice(0,5);
+        if(!cur&&!history.length)return;
+        const bar=document.createElement('div');bar.id='sl-mi-session';bar.className='open';
+        const active=cur||history[0];
+        const predicted=Number(active?.predicted?.profit)||0,landed=Number(active?.landed?.profit)||0,recorded=Number(active?.recorded?.profit)||0;
+        const displayProfit=recorded||landed||predicted;
+        bar.innerHTML='<div class="sl-mi-session-head"><div><span class="sl-mi-br-title">📒 TRAVEL SESSION SUMMARY</span><strong>'+esc(active?.destination||'History')+'</strong></div><div>'+esc(active?.status||'ARCHIVED')+' · '+money(displayProfit)+' est. profit</div><button type="button">▾</button></div><div class="sl-mi-session-note">Trip values are estimates from the script\'s market/basket calculations. “MARK PLAN BOUGHT” records your confirmation; it does not verify later Item Market sale proceeds.</div><div class="sl-mi-session-body"></div>';
+        const body=bar.querySelector('.sl-mi-session-body');
+        if(cur){
+            const delta=cur.predicted&&cur.landed?(Number(cur.landed.profit||0)-Number(cur.predicted.profit||0)):null;
+            const card=document.createElement('div');card.className='sl-mi-session-current';
+            card.innerHTML='<div><b>'+esc(cur.destination)+'</b><span>'+esc(cur.status||'')+' · started '+fmtSessionTime(cur.startedAt)+'</span></div><div><small>BEFORE LANDING</small><strong>'+money(cur.predicted?.profit||0)+'</strong></div><div><small>AT LANDING</small><strong>'+money(cur.landed?.profit||0)+'</strong></div><div><small>RECORDED PLAN</small><strong>'+money(cur.recorded?.profit||0)+'</strong></div>'+(delta==null?'':'<div><small>LANDING Δ</small><strong class="'+(delta>=0?'pos':'neg')+'">'+(delta>=0?'+':'')+money(delta)+'</strong></div>');
+            body.appendChild(card);
+        }
+        if(history.length){
+            const title=document.createElement('div');title.className='sl-mi-session-history-title';title.textContent='RECENT TRIPS';body.appendChild(title);
+            history.forEach(h=>{
+                const p=Number(h.recorded?.profit||h.landed?.profit||h.predicted?.profit)||0;
+                const row=document.createElement('div');row.className='sl-mi-session-row';
+                row.innerHTML='<span class="name">'+esc(h.destination||'?')+'</span><span>'+esc(h.status||'ARCHIVED')+'</span><span>'+fmtSessionTime(h.startedAt)+'</span><strong>'+money(p)+'</strong>';
+                body.appendChild(row);
+            });
+        }
+        bar.querySelector('.sl-mi-session-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
+    }
 
     function museumNameKey(name) {
         return normText(name).toLowerCase().replace(/\s*:\s*/g, ':');
@@ -549,6 +650,7 @@
             const flight=flightInfo(destination,actualTimes);if(!flight)continue;
             const entries=routeBasketEntries(rows);
             const plan=buildTravelBuyPlan(destination,entries,marketMap);
+        updateLandedSession(destination,plan);
             if(!plan?.rows?.length||!(plan.totalProfit>0)){blocked++;continue;}
             const roundTrip=flight.mins*2,profitHour=plan.totalProfit/(roundTrip/60);
             const summary=plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':'');
@@ -683,6 +785,7 @@
             state.arrivalBasketProfit=plan?.totalProfit||0;
             state.arrivalBasketSlots=plan?.used||0;
             state.arrivalBasketMode=plan?.mode||'';
+            if(plan?.rows?.length)updatePredictedSession(destination,plan,landingMins);
         }
 
         rows.forEach(r=>{r.plannedQty=plannedQty.get(String(r.itemId))||0;r.plannedProfit=r.plannedQty*r.profitItem;});
@@ -712,6 +815,7 @@
             body.appendChild(row);
         }
         bar.querySelector('.sl-mi-arrival-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
+        paintTravelSessionSummary();
     }
 
     function travelPlannerCandidates(entries,marketMap,slots){
@@ -837,7 +941,7 @@
         const budgetText=plan?.budget>0?(' · budget '+money(plan.budget)):' · unlimited budget';
         bar.innerHTML='<div class="sl-mi-country-head"><div><span class="sl-mi-br-title">🌍 BEST BUYS · '+esc(destination.toUpperCase())+'</span><strong>'+plannedCount+' recommended item'+(plannedCount===1?'':'s')+'</strong></div><div>'+((plan?.used)||0)+'/'+slots+' slots · '+money(plan?.totalProfit||0)+' profit'+budgetText+'</div><button type="button">▾</button></div>'+
             '<div class="sl-mi-country-note">Shows what is best to buy here right now. Green rows are in the optimized basket; alternatives stay ranked below. Tap an item to jump to it in Torn.</div>'+
-            '<div class="sl-mi-country-summary"><span>Spend <strong>'+money(plan?.totalCost||0)+'</strong></span><span>Expected net profit <strong>'+money(plan?.totalProfit||0)+'</strong></span><span>Mode <strong>'+esc(plan?.mode||'GREEDY')+'</strong></span>'+(plan?.unusedBudget!=null?'<span>Budget left <strong>'+money(plan.unusedBudget)+'</strong></span>':'')+'</div><div class="sl-mi-country-body"></div>';
+            '<div class="sl-mi-country-summary"><span>Spend <strong>'+money(plan?.totalCost||0)+'</strong></span><span>Expected net profit <strong>'+money(plan?.totalProfit||0)+'</strong></span><span>Mode <strong>'+esc(plan?.mode||'GREEDY')+'</strong></span>'+(plan?.unusedBudget!=null?'<span>Budget left <strong>'+money(plan.unusedBudget)+'</strong></span>':'')+'<button type="button" id="sl-mi-mark-bought">'+(travelSessions.current?.recorded?'PLAN RECORDED ✓':'MARK PLAN BOUGHT')+'</button></div><div class="sl-mi-country-body"></div>';
         const body=bar.querySelector('.sl-mi-country-body');
         top.forEach((r,index)=>{
             const row=document.createElement('div');row.className='sl-mi-country-row '+(r.plannedQty>0?'recommended':'alternative');row.setAttribute('role','button');row.tabIndex=0;
@@ -848,7 +952,9 @@
             row.onclick=go;row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};body.appendChild(row);
         });
         bar.querySelector('.sl-mi-country-head').onclick=()=>bar.classList.toggle('open');
+        const mark=bar.querySelector('#sl-mi-mark-bought');if(mark)mark.onclick=e=>{e.stopPropagation();if(markCurrentPlanBought()){mark.textContent='PLAN RECORDED ✓';mark.disabled=true;}};
         mountTop(bar);
+        paintTravelSessionSummary();
     }
 
     function paintTravelBuyPlan(plan){
@@ -882,7 +988,7 @@
         if(!settings.travel)return;
         if(detectInFlight()){document.getElementById('sl-mi-best-run')?.remove();await renderArrivalStock();return;}
         document.getElementById('sl-mi-arrival')?.remove();
-        if(!detectDestination()){await renderBestTravelRun();return;}
+        if(!detectDestination()){await renderBestTravelRun();paintTravelSessionSummary();return;}
         const destination=detectDestination();if(!destination)return;
         document.getElementById('sl-mi-best-run')?.remove();
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
@@ -896,6 +1002,7 @@
         else paintTravelBuyPlan(buildTravelBuyPlan(destination,unique,marketMap));
         state.landedSignature=travelShopSignature();
         state.landedLastRefresh=Date.now();
+        paintTravelSessionSummary();
     }
 
     function paintBazaarBoard(rows){
@@ -1104,7 +1211,7 @@
 
     async function scan(force=false){
         if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
-        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-museum-bar,#sl-mi-bazaar-board,#sl-mi-market-bar,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
+        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-museum-bar,#sl-mi-bazaar-board,#sl-mi-market-bar,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
         catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;}
     }
     function scheduleScan(force=false){if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},450);}
@@ -1112,28 +1219,30 @@
     function toggle(key,label){return '<label class="sl-mi-toggle"><input id="sl-mi-'+key+'" type="checkbox" '+(settings[key]?'checked':'')+'><span>'+esc(label)+'</span></label>';}
     function openSettings(){
         document.getElementById('sl-mi-overlay')?.remove();const overlay=document.createElement('div');overlay.id='sl-mi-overlay';
-        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><button id="sl-mi-close">×</button></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('arrivalBasket','Arrival Basket Planner while flying')+toggle('smartLandedRefresh','Smart refresh after landing')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label>'+(!getApiKey()?'<label class="sl-mi-field">Manual Torn API key<input id="sl-mi-api" type="password" placeholder="Public/limited key"></label>':'')+'<div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Arrival rows: <b>'+state.arrivalRows+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
+        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><button id="sl-mi-close">×</button></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('arrivalBasket','Arrival Basket Planner while flying')+toggle('smartLandedRefresh','Smart refresh after landing')+toggle('sessionSummary','Travel Session Summary + local history')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label>'+(!getApiKey()?'<label class="sl-mi-field">Manual Torn API key<input id="sl-mi-api" type="password" placeholder="Public/limited key"></label>':'')+'<div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Travel sessions: <b>'+((travelSessions.history||[]).length+(travelSessions.current?1:0))+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE</button><button class="sl-mi-secondary" id="sl-mi-clear-sessions">CLEAR TRAVEL HISTORY</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
         document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};overlay.querySelector('#sl-mi-close').onclick=()=>overlay.remove();
-        overlay.querySelector('#sl-mi-save').onclick=()=>{for(const k of['enabled','travel','bestRun','countryBestBuys','stockEta','arrivalStock','arrivalBasket','smartLandedRefresh','bazaar','itemMarket','items','museum','points'])settings[k]=!!overlay.querySelector('#sl-mi-'+k)?.checked;settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;const api=overlay.querySelector('#sl-mi-api')?.value.trim();if(api)saveApiKey(api);saveJson(STORAGE.settings,settings);overlay.remove();scheduleScan(true);};
-        overlay.querySelector('#sl-mi-refresh').onclick=()=>{overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-hard').onclick=()=>{marketCache={};saveJson(STORAGE.marketCache,marketCache);overlay.remove();scheduleScan(true);};
+        overlay.querySelector('#sl-mi-save').onclick=()=>{for(const k of['enabled','travel','bestRun','countryBestBuys','stockEta','arrivalStock','arrivalBasket','smartLandedRefresh','sessionSummary','bazaar','itemMarket','items','museum','points'])settings[k]=!!overlay.querySelector('#sl-mi-'+k)?.checked;settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;const api=overlay.querySelector('#sl-mi-api')?.value.trim();if(api)saveApiKey(api);saveJson(STORAGE.settings,settings);overlay.remove();scheduleScan(true);};
+        overlay.querySelector('#sl-mi-clear-sessions').onclick=()=>{travelSessions={current:null,history:[]};saveTravelSessions();overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-refresh').onclick=()=>{overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-hard').onclick=()=>{marketCache={};saveJson(STORAGE.marketCache,marketCache);overlay.remove();scheduleScan(true);};
     }
 
     function injectCss(){if(document.getElementById('sl-mi-style'))return;const s=document.createElement('style');s.id='sl-mi-style';s.textContent=`
 .sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival{box-sizing:border-box;margin:4px 0;padding:6px 8px;border-radius:6px;background:#15191f;border:1px solid #2c333d;color:#d7dce5;font:700 10px/1.4 Arial,sans-serif}
 .sl-mi-travel strong,.sl-mi-bazaar.good,.sl-mi-bazaar.good strong,#sl-mi-market-bar strong,#sl-mi-points-bar strong,#sl-mi-museum-bar strong,#sl-mi-best-run strong,#sl-mi-arrival strong{color:#78d98b}.sl-mi-travel.loss,.sl-mi-bazaar.bad,.sl-mi-bazaar.bad strong{color:#e06c6c}
-#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-bazaar-board,#sl-mi-travel-plan,#sl-mi-country-best{margin:8px auto 10px;max-width:1100px;border-left:3px solid #d7b94c;font-size:11px}#sl-mi-market-bar.hit{border-left-color:#78d98b;background:#152219}
+#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-bazaar-board,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session{margin:8px auto 10px;max-width:1100px;border-left:3px solid #d7b94c;font-size:11px}#sl-mi-market-bar.hit{border-left-color:#78d98b;background:#152219}
 .sl-mi-br-head,.sl-mi-arrival-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button,.sl-mi-arrival-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body,.sl-mi-arrival-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body,.open .sl-mi-arrival-body{display:flex;flex-direction:column}.sl-mi-br-row,.sl-mi-arrival-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.8fr) auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name,.sl-mi-arrival-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{color:#d7b94c}.sl-mi-route{cursor:pointer;transition:background .12s ease,border-color .12s ease}.sl-mi-route:hover,.sl-mi-route:focus{background:#1c2522;border-color:#4d6957;outline:none}.sl-mi-route:active{background:#203028}
 .sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}.sl-mi-arrival-row.recommended{border-left:3px solid #78d98b;background:#142019}.sl-mi-arrival-row.alternative{border-left:3px solid #59616c}.sl-mi-arrival-row .buy{color:#78d98b}
 .sl-mi-museum-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-museum-head>div{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-museum-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-museum-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-museum-body{display:none;margin-top:7px;gap:4px}#sl-mi-museum-bar.open .sl-mi-museum-body{display:flex;flex-direction:column}.sl-mi-museum-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-museum-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-museum-row.turn{border-left:3px solid #78d98b;background:#142019}.sl-mi-museum-row.sell{border-left:3px solid #d7b94c;background:#201d13}.sl-mi-museum-row.missing{border-left:3px solid #5c6570}.sl-mi-museum-row .edge{color:#9da6b3}.sl-mi-points-link{border:1px solid #66591d;background:#2a2512;color:#e4c95d;border-radius:6px;padding:7px 9px;font-weight:900;font-size:10px;align-self:flex-start}
 
 .sl-mi-country-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-country-head>div:first-child{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-country-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-country-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-country-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;padding:6px;border:1px solid #29323a;border-radius:6px}.sl-mi-country-body{display:none;margin-top:7px;gap:4px}#sl-mi-country-best.open .sl-mi-country-body{display:flex;flex-direction:column}.sl-mi-country-row{display:grid;grid-template-columns:auto minmax(0,1.5fr) auto auto auto auto auto auto auto;gap:7px;align-items:center;padding:7px;border:1px solid #292f38;border-radius:6px;font-size:10px;cursor:pointer}.sl-mi-country-row.recommended{border-left:3px solid #78d98b;background:#142019}.sl-mi-country-row.alternative{border-left:3px solid #59616c;background:#15191f}.sl-mi-country-row:hover,.sl-mi-country-row:focus{background:#1b251f;border-color:#4d6957;outline:none}.sl-mi-country-row .rank{color:#d7b94c;font-weight:900}.sl-mi-country-row .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-country-row .buy,.sl-mi-country-row .profit,.sl-mi-country-row .total{color:#78d98b}.sl-mi-country-row.alternative .buy{color:#9da6b3}
+
+.sl-mi-session-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-session-head>div:first-child{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-session-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-session-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-session-body{display:none;margin-top:7px;gap:5px}#sl-mi-session.open .sl-mi-session-body{display:flex;flex-direction:column}.sl-mi-session-current{display:grid;grid-template-columns:minmax(0,1.5fr) repeat(4,auto);gap:8px;align-items:center;padding:7px;border:1px solid #29323a;border-radius:6px;background:#121820}.sl-mi-session-current>div:first-child{display:flex;flex-direction:column}.sl-mi-session-current small{display:block;color:#7f8996;font-size:8px}.sl-mi-session-current strong{color:#78d98b}.sl-mi-session-current .neg{color:#e06c6c}.sl-mi-session-history-title{color:#d7b94c;font-size:9px;font-weight:900;margin-top:3px}.sl-mi-session-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-session-row .name{font-weight:900}.sl-mi-country-summary button{border:1px solid #42664b;background:#16351f;color:#78d98b;border-radius:6px;padding:6px 8px;font-weight:900;font-size:9px}.sl-mi-country-summary button:disabled{opacity:.7}
 .sl-mi-plan-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-plan-head>div:first-child{display:flex;align-items:center;gap:8px}.sl-mi-plan-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-plan-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-plan-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;padding:6px;border:1px solid #29323a;border-radius:6px}.sl-mi-plan-body{display:none;margin-top:7px;gap:4px}#sl-mi-travel-plan.open .sl-mi-plan-body{display:flex;flex-direction:column}.sl-mi-plan-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px;cursor:pointer}.sl-mi-plan-row:hover,.sl-mi-plan-row:focus{background:#1b251f;border-color:#4d6957;outline:none}.sl-mi-plan-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-target{outline:2px solid #d7b94c!important;box-shadow:0 0 0 2px rgba(215,185,76,.22)!important}
 .sl-mi-baz-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-baz-head>div:first-child{display:flex;gap:8px;align-items:center;min-width:0}.sl-mi-baz-head strong{color:#78d98b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-baz-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-baz-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-baz-body{display:none;margin-top:7px;gap:4px}#sl-mi-bazaar-board.open .sl-mi-baz-body{display:flex;flex-direction:column}.sl-mi-baz-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px;cursor:pointer}.sl-mi-baz-row:hover,.sl-mi-baz-row:focus{background:#1a231c;border-color:#4d6957;outline:none}.sl-mi-baz-row .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-focus{outline:2px solid #78d98b!important;outline-offset:2px!important}
 .sl-mi-market-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.sl-mi-market-head>div{display:flex;flex-direction:column;gap:3px}.sl-mi-signal{padding:4px 7px;border-radius:6px;font-weight:900;white-space:nowrap}.sl-mi-signal.buy{background:#16351f;color:#78d98b}.sl-mi-signal.wait{background:#3a1d1d;color:#f08b8b}.sl-mi-signal.fair{background:#2f2b17;color:#e1c865}.sl-mi-signal.learning{background:#252a31;color:#aab2bd}.sl-mi-market-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:7px}.sl-mi-market-grid>div{background:#0f1318;border:1px solid #2b323b;border-radius:6px;padding:6px}.sl-mi-market-grid small{display:block;color:#7f8894;font-size:8px}.sl-mi-market-grid strong{display:block;margin-top:2px}.sl-mi-spark{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:6px;border-radius:6px;background:#0f1318;border:1px solid #2b323b}.sl-mi-spark>span{font-size:15px;letter-spacing:1px;color:#d7b94c}.sl-mi-spark small{color:#8f98a5;text-align:right}
 .sl-mi-watch-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sl-mi-watch-row input{flex:1 1 140px;background:#0d0f14;color:#fff;border:1px solid #363e49;border-radius:6px;padding:8px}.sl-mi-watch-row button{border:0;border-radius:6px;padding:7px 9px;background:#303844;color:#fff;font-weight:900;font-size:10px}
 #sl-mi-button{position:fixed;right:10px;bottom:106px;z-index:2147483644;border:0;border-radius:999px;padding:9px 11px;background:#18181b;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font-weight:900;font-size:12px}
 #sl-mi-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-mi-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mi-title{font-size:16px;font-weight:900}.sl-mi-sub{margin-top:3px;color:#8e96a3;font-size:9px}#sl-mi-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}.sl-mi-toggle,.sl-mi-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mi-field input{width:45%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:7px}.sl-mi-info{margin:10px 0;color:#a6adb8;font-size:10px}.sl-mi-primary,.sl-mi-secondary{width:100%;min-height:40px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900}.sl-mi-primary{background:#2563eb}.sl-mi-secondary{background:#374151}.muted{color:#7e8793}
-@media(max-width:700px){.sl-mi-country-row{grid-template-columns:auto minmax(0,1fr) auto;gap:3px 7px}.sl-mi-country-row .name{grid-column:2/-1}.sl-mi-country-row .profit,.sl-mi-country-row .total{font-weight:900}.sl-mi-plan-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-plan-row .name{grid-column:1/-1}.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-br-row>span:nth-child(2){grid-column:1/-1}.sl-mi-museum-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 7px}.sl-mi-museum-row .name{grid-column:1/-1}.sl-mi-market-grid{grid-template-columns:repeat(2,1fr)}.sl-mi-spark{align-items:flex-start;flex-direction:column}.sl-mi-spark small{text-align:left}.sl-mi-baz-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-baz-row .name{grid-column:1/-1}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
+@media(max-width:700px){.sl-mi-session-current{grid-template-columns:repeat(2,minmax(0,1fr))}.sl-mi-session-current>div:first-child{grid-column:1/-1}.sl-mi-session-row{grid-template-columns:minmax(0,1fr) auto}.sl-mi-session-row>span:nth-child(3){grid-column:1/-1}.sl-mi-country-row{grid-template-columns:auto minmax(0,1fr) auto;gap:3px 7px}.sl-mi-country-row .name{grid-column:2/-1}.sl-mi-country-row .profit,.sl-mi-country-row .total{font-weight:900}.sl-mi-plan-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-plan-row .name{grid-column:1/-1}.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-br-row>span:nth-child(2){grid-column:1/-1}.sl-mi-museum-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 7px}.sl-mi-museum-row .name{grid-column:1/-1}.sl-mi-market-grid{grid-template-columns:repeat(2,1fr)}.sl-mi-spark{align-items:flex-start;flex-direction:column}.sl-mi-spark small{text-align:left}.sl-mi-baz-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-baz-row .name{grid-column:1/-1}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
 `;document.head.appendChild(s);}
 
     function createButton(){if(!settings.showButton||document.getElementById('sl-mi-button'))return;const b=document.createElement('button');b.id='sl-mi-button';b.textContent='☠︎ Market';b.onclick=openSettings;document.body.appendChild(b);}
@@ -1145,12 +1254,13 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,landedRefreshes:state.landedRefreshes,landedStockRefreshes:state.landedStockRefreshes,landedMarketRefreshes:state.landedMarketRefreshes,landedRefreshSkips:state.landedRefreshSkips,landedLastRefresh:state.landedLastRefresh,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,arrivalBasketItems:state.arrivalBasketItems,arrivalBasketCost:state.arrivalBasketCost,arrivalBasketProfit:state.arrivalBasketProfit,arrivalBasketSlots:state.arrivalBasketSlots,arrivalBasketMode:state.arrivalBasketMode,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,travelSessionCount:state.travelSessionCount,currentSessionDestination:state.currentSessionDestination,currentSessionStatus:state.currentSessionStatus,currentSessionPredictedProfit:state.currentSessionPredictedProfit,currentSessionLandedProfit:state.currentSessionLandedProfit,currentSessionRecordedProfit:state.currentSessionRecordedProfit,lastSessionProfit:state.lastSessionProfit,landedRefreshes:state.landedRefreshes,landedStockRefreshes:state.landedStockRefreshes,landedMarketRefreshes:state.landedMarketRefreshes,landedRefreshSkips:state.landedRefreshSkips,landedLastRefresh:state.landedLastRefresh,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,arrivalBasketItems:state.arrivalBasketItems,arrivalBasketCost:state.arrivalBasketCost,arrivalBasketProfit:state.arrivalBasketProfit,arrivalBasketSlots:state.arrivalBasketSlots,arrivalBasketMode:state.arrivalBasketMode,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
         async arrivalPrediction(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
         smartLandedRefresh(){if(detectPage()!=='travel'||detectInFlight()||!detectDestination())return false;scheduleLandedSmartRefresh('api');return true;},
+        travelSessionSummary(){paintTravelSessionSummary();return {current:travelSessions.current,history:(travelSessions.history||[]).slice(0,20)};},
         async arrivalBasket(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
         goToMarket(){location.href='https://www.torn.com/page.php?sid=ItemMarket';return true;},
         itemMarketIntelligence(){if(detectPage()!=='itemmarket')return null;const id=selectedMarketItemId();if(!id)return null;const c=cachePeek(id);if(!c)return null;return analyzePriceHistory(id,Number(c.minPrice),c);},
@@ -1160,6 +1270,6 @@
     };
     window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceReady',{detail:{version:VERSION}}));
 
-    function init(){injectCss();createButton();startObserver();maybePromptHub();scheduleScan(true);console.log('['+NAME+' v'+VERSION+'] Loaded.');}
+    function init(){injectCss();createButton();startObserver();maybePromptHub();saveTravelSessions();scheduleScan(true);console.log('['+NAME+' v'+VERSION+'] Loaded.');}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
