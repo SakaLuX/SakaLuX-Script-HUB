@@ -8,7 +8,7 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.0.0**
+- SakaLuX Market Intelligence: **v1.0.0** — Greasy Fork **592781**
 
 ## Latest changes
 
@@ -23,8 +23,9 @@ Last updated: 2026-08-24
 - Added Torn PDA API-key support plus manual API-key fallback.
 - Added `window.SakaLuXMarketIntelligence` with OPEN, REFRESH, HARD REFRESH, TRAVEL and MARKET Hub actions.
 - Added the shared optional Script Hub install prompt with the common 24-hour NOT NOW cooldown.
-- Added the new add-on to `scripts.json` immediately. Until a Greasy Fork script ID is assigned, the registry install/update URLs point to the live GitHub userscript.
-- Added `greasyfork/Market-Intelligence.md` ready for future Additional Info synchronization.
+- Published on Greasy Fork as script **592781**.
+- Updated `scripts.json` to use the official Greasy Fork install and metadata URLs.
+- Added `greasyfork/Market-Intelligence.md` for Additional Info synchronization.
 
 ### SakaLuX Script Hub v1.8.4
 - Rebuilt the mobile **HUB** entry using Torn's real mobile navigation structure: `mobileLink`, area row and swiper slide classes.
