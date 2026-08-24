@@ -4,21 +4,28 @@ Last updated: 2026-08-24
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.8.2**
+- SakaLuX Script Hub: **v1.8.3**
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
 
 ## Latest changes
 
+### SakaLuX Script Hub v1.8.3
+- Rebuilt the Hub launcher as a native Torn navigation item inserted immediately before **Messages**.
+- The launcher clones Torn's own navigation structure so size, spacing and alignment match surrounding buttons.
+- Replaced the emoji-style top launcher with a monochrome text-presentation skull (`☠︎`) and **HUB** label.
+- The blink animation now affects only the skull icon, with a subtle native-style double blink.
+- The floating circular Hub button automatically hides whenever the native Torn launcher is available and remains only as a fallback if Torn's Messages navigation cannot be detected.
+- Update/error badge remains supported without disturbing Torn's navigation layout.
+- **SYSTEM CHECK** now reports the native Torn HUB launcher state.
+- Added exact source backup: `backups/SakaLuX-Script-Hub-v1.8.2.user.js`.
+
 ### SakaLuX Script Hub v1.8.2
-- Added a dedicated animated **☠️ SakaLuX launcher** directly in Torn's top navigation before **Messages**.
-- The top-bar skull opens the full SakaLuX Script Hub with one tap/click.
-- Added a repeated double-blink/pulse animation for the skull.
-- When updates, missing add-ons or add-on errors exist, the skull changes to a faster alert animation and shows a numeric badge.
-- The top-bar badge mirrors the issue/update count already shown by the floating Hub button.
-- Added a Hub setting to show/hide the blinking top-bar skull.
-- Added top-bar launcher status to **SYSTEM CHECK**.
+- Added the first animated **☠️ SakaLuX launcher** experiment before **Messages**.
+- The top-bar launcher opened the full SakaLuX Script Hub with one tap/click.
+- Added repeated blink/pulse animation and update/issue status badge.
+- Added a Hub setting to show/hide the top-bar launcher.
 - Added Mission Rewards v1.0.1 to the Hub's offline fallback registry.
 - Added the `SakaLuX:MissionRewardsReady` listener so Hub status refreshes immediately when Mission Rewards becomes available.
 
@@ -79,6 +86,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Script-Hub-v1.8.2.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.1.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.0.user.js`
 - `backups/SakaLuX-Script-Hub-v1.7.0.user.js`
