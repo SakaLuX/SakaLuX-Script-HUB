@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.3
+// @version      1.15.4
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.3';
+    const VERSION = '1.15.4';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -54,6 +54,8 @@
     const LANDED_REFRESH_MIN_MS = 12 * 1000;
     const LANDED_MARKET_REFRESH_MS = 2 * 60 * 1000;
     const LANDED_SIGNATURE_DEBOUNCE_MS = 1200;
+    const MAX_REASONABLE_TRAVEL_STOCK = 100000;
+    const MIN_LEARNED_RESTOCK_GAP_MIN = 10;
 
     const FLIGHT_MINS = {
         Mexico: 25, Caymans: 33, Canada: 39, Hawaii: 127, UK: 151,
@@ -161,7 +163,12 @@
     function esc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
     function money(v) { const n=Number(v); if(!Number.isFinite(n)) return '?'; return (n<0?'-':'')+'$'+Math.round(Math.abs(n)).toLocaleString('en-US'); }
     function pct(v) { const n=Number(v); if(!Number.isFinite(n)) return '?'; return (n>=0?'+':'')+n.toFixed(1)+'%'; }
-    function parseMoney(text) { const s=String(text||'').replace(/[^0-9]/g,''); return s?Number(s):NaN; }
+    function parseMoney(text) {
+        const raw=String(text||'').trim().replace(/[$,\s]/g,'');
+        const m=raw.match(/^([0-9]*\.?[0-9]+)([kmb])?$/i);
+        if(m){const mult=!m[2]?1:(m[2].toLowerCase()==='k'?1e3:m[2].toLowerCase()==='m'?1e6:1e9);return Number(m[1])*mult;}
+        const digits=raw.replace(/[^0-9]/g,''); return digits?Number(digits):NaN;
+    }
     function fmtDuration(mins) { if(mins==null||!Number.isFinite(mins)) return 'learning'; mins=Math.max(0,Math.round(mins)); if(mins<60) return '~'+mins+'m'; const h=Math.floor(mins/60),m=mins%60; return '~'+h+'h'+(m?' '+m+'m':''); }
     function normText(text) { return String(text||'').replace(/\s+/g,' ').trim(); }
     function median(values) { const a=values.filter(Number.isFinite).sort((x,y)=>x-y); return a.length ? a[Math.floor(a.length/2)] : null; }
@@ -539,7 +546,7 @@
 
     function rowContainer(img) { return img.closest('tr')||img.closest('li')||img.closest('[class*="row"]')||img.closest('[class*="Row"]')||img.closest('[class*="item"]')||img.parentElement?.parentElement||img.parentElement; }
     function itemIdFromImg(img) { const m=(img?.getAttribute('src')||'').match(/\/images\/items\/(\d+)\//); return m?Number(m[1]):null; }
-    function extractFirstPrice(node) { const txt=(node?.innerText||node?.textContent||'').replace(/\s+/g,' '); const m=txt.match(/\$\s*([\d,.]+)/); return m?parseMoney(m[1]):NaN; }
+    function extractFirstPrice(node) { const txt=(node?.innerText||node?.textContent||'').replace(/\s+/g,' '); const m=txt.match(/\$\s*([\d,.]+)\s*([KMB])?/i); return m?parseMoney(m[1]+(m[2]||'')):NaN; }
     function extractStock(node) { const txt=(node?.innerText||'').replace(/\$\s*[\d,.]+/g,' '); const nums=txt.match(/\b\d[\d,]*\b/g)||[]; if(!nums.length) return null; const vals=nums.map(x=>Number(x.replace(/,/g,''))).filter(Number.isFinite); return vals.length?Math.max(...vals):null; }
 
     function cacheGet(itemId) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>MARKET_CACHE_MS) return null; return row; }
@@ -553,9 +560,12 @@
         checkApiError(data);
         const listings=Array.isArray(data?.itemmarket?.listings)?data.itemmarket.listings:(Array.isArray(data?.itemmarket)?data.itemmarket:[]);
         const norm=listings.map(l=>({price:Number(l.price??l.cost??0),qty:Number(l.amount??l.quantity??1)})).filter(l=>l.price>0).sort((a,b)=>a.price-b.price);
-        if(!norm.length) return null;
-        const effective=norm.find(l=>l.qty>=2)||norm[0];
-        const row={price:effective.price,minPrice:norm[0].price,qty:effective.qty,count:norm.length}; cachePut(itemId,row); return row;
+        const average=Number(data?.itemmarket?.average_price??data?.itemmarket?.market_value??0);
+        if(!norm.length && !(average>0)) return null;
+        const effective=norm.length?(norm.find(l=>l.qty>=2)||norm[0]):null;
+        const floor=norm[0]?.price||average;
+        const marketValue=average>0?average:(effective?.price||floor);
+        const row={price:marketValue,averagePrice:average>0?average:null,minPrice:floor,listingPrice:effective?.price||floor,qty:effective?.qty||0,count:norm.length}; cachePut(itemId,row); return row;
     }
     async function mapWithLimit(items,fn) { const out=new Array(items.length); let i=0; async function worker(){while(i<items.length){const idx=i++; try{out[idx]=await fn(items[idx],idx);}catch(_){out[idx]=null;}}} const workers=[]; for(let w=0;w<Math.min(CONCURRENCY,items.length);w++) workers.push(worker()); await Promise.all(workers); return out; }
     function metrics(buyPrice,marketPrice) { const fee=Math.max(0,Number(settings.marketFeePct)||0)/100; const net=marketPrice*(1-fee); const profit=net-buyPrice; return {net,profit,roi:buyPrice>0?profit/buyPrice*100:0}; }
@@ -565,13 +575,17 @@
     function recordStock(destination,itemId,stock,now=Date.now()) {
         if(!destination||!Number.isFinite(Number(stock))) return;
         const key=stockKey(destination,itemId), qty=Number(stock);
+        if(qty<0||qty>MAX_REASONABLE_TRAVEL_STOCK)return;
         let h=stockHistory[key]||{last:null,restocks:[],restockQty:[]};
         if(!Array.isArray(h.restocks)) h.restocks=[];
         if(!Array.isArray(h.restockQty)) h.restockQty=[];
+        if(h.last&&(!Number.isFinite(Number(h.last.qty))||Number(h.last.qty)<0||Number(h.last.qty)>MAX_REASONABLE_TRAVEL_STOCK))h.last=null;
         if(h.last&&Number.isFinite(h.last.qty)&&qty>h.last.qty){
             const delta=qty-h.last.qty;
-            h.restocks=h.restocks.filter(t=>now-t<STOCK_HISTORY_MAX_AGE); h.restocks.push(now); h.restocks=h.restocks.slice(-MAX_HISTORY_EVENTS);
-            h.restockQty.push(delta); h.restockQty=h.restockQty.filter(v=>Number.isFinite(v)&&v>0).slice(-MAX_HISTORY_EVENTS);
+            if(delta>0&&delta<=MAX_REASONABLE_TRAVEL_STOCK){
+                h.restocks=h.restocks.filter(t=>now-t<STOCK_HISTORY_MAX_AGE); h.restocks.push(now); h.restocks=h.restocks.slice(-MAX_HISTORY_EVENTS);
+                h.restockQty.push(delta); h.restockQty=h.restockQty.filter(v=>Number.isFinite(v)&&v>0&&v<=MAX_REASONABLE_TRAVEL_STOCK).slice(-MAX_HISTORY_EVENTS);
+            }
         }
         h.last={qty,at:now}; stockHistory[key]=h;
     }
@@ -580,9 +594,9 @@
         const h=stockHistory[stockKey(destination,itemId)];
         const events=(h?.restocks||[]).filter(t=>Number.isFinite(t)&&now-t<STOCK_HISTORY_MAX_AGE).sort((a,b)=>a-b);
         const gaps=[];
-        for(let i=1;i<events.length;i++){const g=(events[i]-events[i-1])/60000;if(g>0&&g<24*60)gaps.push(g);}
+        for(let i=1;i<events.length;i++){const g=(events[i]-events[i-1])/60000;if(g>=MIN_LEARNED_RESTOCK_GAP_MIN&&g<24*60)gaps.push(g);}
         const medGap=median(gaps);
-        const medQty=median((h?.restockQty||[]).map(Number).filter(v=>v>0));
+        const medQty=median((h?.restockQty||[]).map(Number).filter(v=>v>0&&v<=MAX_REASONABLE_TRAVEL_STOCK));
         return {events,gaps,medGap,medQty,samples:events.length};
     }
 
@@ -607,11 +621,12 @@
         if(e.learned&&e.gap>0){
             if(e.mins<=horizon) expectedRestocks=1+Math.floor(Math.max(0,horizon-e.mins)/e.gap);
             confidence=e.samples>=5?'HIGH':e.samples>=3?'MEDIUM':'LOW';
-            if(projected!=null&&e.qty&&expectedRestocks>0) projected+=e.qty*expectedRestocks;
+            if(projected!=null&&e.qty&&expectedRestocks>0) projected=Math.min(MAX_REASONABLE_TRAVEL_STOCK,projected+e.qty*expectedRestocks);
         } else {
             expectedRestocks=Math.max(0,Math.floor((horizon-nextQuarterHourMins(now))/15)+1);
             confidence='LEARNING';
         }
+        if(projected!=null)projected=Math.max(0,Math.min(MAX_REASONABLE_TRAVEL_STOCK,projected));
         return {current:projected==null?null:stock,projected,expectedRestocks,confidence,eta:e};
     }
 

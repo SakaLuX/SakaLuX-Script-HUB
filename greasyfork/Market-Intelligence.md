@@ -1,10 +1,17 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.3**
+**Current version: v1.15.4**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.4 — Torn PDA Price + Restock Accuracy
+
+- Fixed compact travel prices such as `$3M` being interpreted as `$3`.
+- Profit calculations now use Torn item-market `average_price` when available, matching the market-value style figure shown by Torn/Torn PDA more closely; the live floor listing remains cached separately.
+- Added guards against corrupted restock history and impossible multi-million arrival-stock projections.
+- Very short false restock intervals are ignored and projected stock is clamped to a sane travel-stock range.
 
 ## v1.15.3 — Torn PDA Arrival Basket No-Flicker
 
