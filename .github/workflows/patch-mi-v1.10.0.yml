@@ -18,11 +18,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Save exact v1.9.0 backup
+        run: cp SakaLuX-Market-Intelligence.user.js backups/SakaLuX-Market-Intelligence-v1.9.0.user.js
       - name: Apply v1.10.0 patch
         run: python .github/patches/mi-v1.10.0.py
       - name: Verify
         run: |
           grep -q '@version      1.10.0' SakaLuX-Market-Intelligence.user.js
+          grep -q '@version      1.9.0' backups/SakaLuX-Market-Intelligence-v1.9.0.user.js
           grep -q 'bestRunBudgetAware' SakaLuX-Market-Intelligence.user.js
           grep -q 'budget capped' SakaLuX-Market-Intelligence.user.js
           grep -q '"version": "1.10.0"' scripts.json
@@ -32,6 +35,6 @@ jobs:
         run: |
           git config user.name "SakaLuX"
           git config user.email "sakalutzu92@yahoo.com"
-          git add SakaLuX-Market-Intelligence.user.js scripts.json UPDATE-INFO.md greasyfork/Market-Intelligence.md
+          git add SakaLuX-Market-Intelligence.user.js backups/SakaLuX-Market-Intelligence-v1.9.0.user.js scripts.json UPDATE-INFO.md greasyfork/Market-Intelligence.md
           git commit -m "SakaLuX Market Intelligence v1.10.0: budget-aware Best Travel Run"
           git push
