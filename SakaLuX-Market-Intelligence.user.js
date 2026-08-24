@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.9.0
-// @description  Torn market and travel intelligence with profit-optimized Travel Buy Planner, real flight times, Bazaar flips, Item Market signals, arrival prediction and Museum valuation.
+// @version      1.10.0
+// @description  Torn market and travel intelligence with budget-aware Best Travel Run, profit-optimized Travel Buy Planner, real flight times, Bazaar flips, Item Market signals, arrival prediction and Museum valuation.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.0';
+    const VERSION = '1.10.0';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -62,8 +62,6 @@
         uni: 'UK', arg: 'Argentina', swi: 'Switzerland', jap: 'Japan',
         chi: 'China', uae: 'UAE', sou: 'South Africa'
     };
-
-
 
     const MUSEUM_SETS = [
         { id:'arrowheads', name:'Arrowhead Set', points:25, members:[
@@ -136,7 +134,8 @@
         bazaarDeals: 0, bazaarBestProfit: 0, bazaarBestRoi: 0,
         itemMarketSignal: '', itemMarketTrend: 0, itemMarketVolatility: 0, itemMarketHistorySamples: 0,
         actualFlightTimes: 0, travelTimeSource: 'fallback',
-        travelPlanItems: 0, travelPlanCost: 0, travelPlanProfit: 0, travelPlanSlots: 0, travelPlanBudget: 0, travelPlanUnusedBudget: 0, travelPlanMode: '', travelPlanOptimizationGain: 0
+        travelPlanItems: 0, travelPlanCost: 0, travelPlanProfit: 0, travelPlanSlots: 0, travelPlanBudget: 0, travelPlanUnusedBudget: 0, travelPlanMode: '', travelPlanOptimizationGain: 0,
+        bestRunBudgetAware: false, bestRunAffordableRoutes: 0, bestRunBlockedRoutes: 0
     };
 
     function loadJson(key, fallback) {
@@ -151,8 +150,6 @@
     function fmtDuration(mins) { if(mins==null||!Number.isFinite(mins)) return 'learning'; mins=Math.max(0,Math.round(mins)); if(mins<60) return '~'+mins+'m'; const h=Math.floor(mins/60),m=mins%60; return '~'+h+'h'+(m?' '+m+'m':''); }
     function normText(text) { return String(text||'').replace(/\s+/g,' ').trim(); }
     function median(values) { const a=values.filter(Number.isFinite).sort((x,y)=>x-y); return a.length ? a[Math.floor(a.length/2)] : null; }
-
-
 
     function museumNameKey(name) {
         return normText(name).toLowerCase().replace(/\s*:\s*/g, ':');
@@ -302,8 +299,6 @@
         const s=getComputedStyle(el);
         return s.display!=='none' && s.visibility!=='hidden';
     }
-
-
 
     function parseTravelDurationMinutes(text) {
         const t=normText(text);
@@ -486,16 +481,29 @@
 
     function ensureBadge(row,cls){let box=row.querySelector(':scope > .'+cls);if(!box){box=document.createElement('div');box.className=cls;row.appendChild(box);}return box;}
 
+    function bestRunAffordableQty(row,slots){
+        const stockQty=row.stock==null?slots:Math.min(slots,Math.max(0,Number(row.stock)||0));
+        const budget=Math.max(0,Number(settings.travelBudget)||0);
+        if(!(budget>0)) return stockQty;
+        return Math.min(stockQty,Math.floor(budget/Math.max(1,Number(row.buyPrice)||1)));
+    }
+
     function buildBestRunRows(candidates,marketMap,actualTimes){
-        const slots=Math.max(1,Number(settings.travelSlots)||29),ranked=[];
+        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),ranked=[];
+        let blocked=0;
         for(const r of candidates){
             const market=marketMap.get(r.itemId),flight=flightInfo(r.destination,actualTimes);if(!market||!flight)continue;
             const m=metrics(r.buyPrice,market.price);if(m.profit<=0)continue;
-            const qty=r.stock==null?slots:Math.min(slots,r.stock);if(qty<=0)continue;
-            const profitRun=m.profit*qty,roundTrip=flight.mins*2,profitHour=profitRun/(roundTrip/60);
-            ranked.push(Object.assign({},r,{market:market.price,net:m.net,profitItem:m.profit,roi:m.roi,qty,profitRun,profitHour,flightMins:flight.mins,flightSource:flight.source,eta:estimateRestock(r.destination,r.itemId)}));
+            const stockQty=r.stock==null?slots:Math.min(slots,Math.max(0,Number(r.stock)||0));
+            const qty=bestRunAffordableQty(r,slots);
+            if(qty<=0){blocked++;continue;}
+            const costRun=r.buyPrice*qty,profitRun=m.profit*qty,roundTrip=flight.mins*2,profitHour=profitRun/(roundTrip/60);
+            ranked.push(Object.assign({},r,{market:market.price,net:m.net,profitItem:m.profit,roi:m.roi,qty,costRun,profitRun,profitHour,flightMins:flight.mins,flightSource:flight.source,eta:estimateRestock(r.destination,r.itemId),budgetLimited:budget>0&&qty<stockQty}));
         }
-        return ranked.sort((a,b)=>b.profitHour-a.profitHour).slice(0,11);
+        state.bestRunBudgetAware=budget>0;
+        state.bestRunAffordableRoutes=ranked.length;
+        state.bestRunBlockedRoutes=blocked;
+        return ranked.sort((a,b)=>b.profitHour-a.profitHour || b.profitRun-a.profitRun).slice(0,11);
     }
 
     function paintBestTravelRun(top,phase){
@@ -506,20 +514,26 @@
         for(const r of top){
             const row=document.createElement('div');row.className='sl-mi-br-row sl-mi-route';row.dataset.destination=r.destination;row.setAttribute('role','button');row.tabIndex=0;row.title='Select '+r.destination+' in Torn Travel';
             const eta=(r.eta.learned?('next '+fmtDuration(r.eta.mins)):('ETA learning · possible ≤'+Math.max(1,Math.ceil(r.eta.mins))+'m'))+' · flight '+fmtFlightMinutes(r.flightMins)+' '+(r.flightSource==='torn-page'?'actual':'fallback');
-            row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>'+esc(r.destination)+'</span><span>stock '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+'</span><span class="eta">'+eta+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
+            const costLine='cost '+money(r.costRun)+(r.budgetLimited?' · budget capped':'');
+            row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>'+esc(r.destination)+'</span><span>stock '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+' · buy ×'+r.qty+'</span><span class="eta">'+eta+' · '+costLine+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
             const activate=()=>selectTravelDestination(r.destination);row.addEventListener('click',activate);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});body.appendChild(row);
         }
         bar.querySelector('.sl-mi-br-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
     }
 
     function travelRefreshIds(candidates,limit,actualTimes){
-        const scored=candidates.map(r=>{
+        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0);
+        const scored=[];
+        for(const r of candidates){
+            const affordableQty=bestRunAffordableQty(r,slots);
+            if(affordableQty<=0) continue;
             const c=cachePeek(r.itemId),flight=flightInfo(r.destination,actualTimes)?.mins||9999;
             let score=0;
-            if(c){const m=metrics(r.buyPrice,c.price);score=Math.max(0,m.profit)*(Math.min(Math.max(1,Number(settings.travelSlots)||29),r.stock==null?999:r.stock))/(flight||1);}
+            if(c){const m=metrics(r.buyPrice,c.price);score=Math.max(0,m.profit)*affordableQty/(flight||1);}
             else score=Math.max(1,r.buyPrice)/Math.max(1,flight);
-            return {id:r.itemId,score,cached:!!c};
-        }).sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+            scored.push({id:r.itemId,score,cached:!!c,budgetAware:budget>0});
+        }
+        scored.sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
         const ids=[];const seen=new Set();
         for(const x of scored){if(seen.has(x.id))continue;seen.add(x.id);ids.push(x.id);if(ids.length>=limit)break;}
         return ids;
@@ -539,7 +553,7 @@
         for(const r of candidates){const c=cachePeek(r.itemId);if(c)cachedMap.set(r.itemId,c);}
         state.travelCacheHits=cachedMap.size;
         const cachedTop=buildBestRunRows(candidates,cachedMap,actualTimes);
-        if(cachedTop.length) paintBestTravelRun(cachedTop,'instant cache · '+(actualTimes.size?'actual Torn times '+actualTimes.size+'/'+Object.keys(FLIGHT_MINS).length:'fallback flight times')+' · refreshing '+TRAVEL_REFRESH_LIMIT+' prices');
+        if(cachedTop.length) paintBestTravelRun(cachedTop,'instant cache · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn times '+actualTimes.size+'/'+Object.keys(FLIGHT_MINS).length:'fallback flight times')+' · refreshing '+TRAVEL_REFRESH_LIMIT+' prices');
 
         const ids=travelRefreshIds(candidates,TRAVEL_REFRESH_LIMIT,actualTimes);
         state.travelRefreshes=ids.length;
@@ -548,7 +562,7 @@
         const finalMap=new Map();
         for(const r of candidates){const c=cachePeek(r.itemId);if(c)finalMap.set(r.itemId,c);}
         const finalTop=buildBestRunRows(candidates,finalMap,actualTimes);
-        if(finalTop.length) paintBestTravelRun(finalTop,'live-refreshed · '+(actualTimes.size?'actual Torn flight times':'fallback flight times')+' · '+ids.length+' prices checked');
+        if(finalTop.length) paintBestTravelRun(finalTop,'live-refreshed · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn flight times':'fallback flight times')+' · '+ids.length+' prices checked');
     }
 
     async function renderArrivalStock(){
@@ -589,8 +603,6 @@
         }
         bar.querySelector('.sl-mi-arrival-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
     }
-
-
 
     function travelPlannerCandidates(entries,marketMap,slots){
         const ranked=[];
@@ -774,8 +786,6 @@
         deals.sort((a,b)=>b.profit-a.profit || b.roi-a.roi);
         paintBazaarBoard(deals);
     }
-
-
 
     function percentile(values,p){
         const a=values.filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return null;
@@ -976,7 +986,7 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
