@@ -8,9 +8,20 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.2.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.2.1** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.2.1
+- Added **cache-first Travel rendering**: existing market prices are displayed immediately after YATA loads instead of waiting for every live Item Market request.
+- Reduced Best Travel Run live refreshes from up to 45 item lookups to a prioritized shortlist of **15**.
+- Reduced Arrival Stock live refreshes to a prioritized shortlist of **12**.
+- Increased market-request concurrency from 4 to 6 for the smaller shortlist.
+- Travel can reuse market cache up to 6 hours for the instant first paint, then replaces shortlist prices with live results.
+- Added a small performance status line showing whether the board is using instant cache or the refreshed shortlist.
+- Added Travel MutationObserver throttling and ignores SakaLuX-owned DOM changes, preventing the script from repeatedly rescanning itself while Torn hydrates the page.
+- Added performance counters to `health()`: cache hits, live Travel refresh count and observer skips.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.2.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.2.0
 - Added **Arrival Stock Intelligence** while the player is flying.
@@ -107,6 +118,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.2.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.1.1.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.4.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.1.0.user.js`
