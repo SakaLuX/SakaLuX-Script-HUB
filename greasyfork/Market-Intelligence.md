@@ -1,10 +1,16 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.5**
+**Current version: v1.15.6**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.6 — Torn PDA Displayed Value Accuracy
+
+- Landed travel calculations now use Torn PDA compact shop rows for buy/stock.
+- If Torn displays an expanded `Value: $...`, that value is used for the local landed market/profit calculation.
+- Fixes mismatches such as Minigun showing $1,499,999 instead of Torn's displayed $1,322,192.
 
 ## v1.15.5 — Torn PDA Travel Row Accuracy
 

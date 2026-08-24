@@ -8,9 +8,15 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.5** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.6** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.6
+- Fixed landed Torn PDA scan to use the compact shop row for buy price and stock.
+- When an expanded Torn item card exposes `Value: $...`, that displayed Torn value now overrides the API listing reference for the local landed profit calculation.
+- This fixes cases like Minigun showing Market $1,499,999 while Torn itself displays Value $1,322,192.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.5.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.5
 - Fixed Torn PDA stock parsing so expanded stats such as `Circ: 106,303` are not treated as shop stock.
