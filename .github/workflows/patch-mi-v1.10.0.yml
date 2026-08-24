@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/patches/mi-v1.10.0.py'
+      - '.github/patches/mi-v1.10.0-trigger.txt'
       - '.github/workflows/patch-mi-v1.10.0.yml'
 
 permissions:
