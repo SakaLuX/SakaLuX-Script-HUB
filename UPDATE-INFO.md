@@ -8,9 +8,20 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.6.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.7.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.7.0
+- Added **Travel Buy Planner** for the abroad shop page.
+- Builds an automatic shopping mix using the configured travel capacity and current destination stock.
+- Ranks available items by estimated net profit per item and fills the available slots greedily with the best-profit items first.
+- Shows recommended quantity for each item, unit buy price, total spend, expected net profit and ROI.
+- Shows total planned spend, total expected profit, used slots and any unused capacity.
+- Tapping a planner row scrolls directly to the matching abroad item and highlights it temporarily.
+- Uses the same market cache/API results already fetched for Travel overlays, so it does not add a second independent round of requests.
+- Added planner item/cost/profit/slot fields to `health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.6.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.6.0
 - Added **real Torn Travel Agency flight-time detection** for Best Travel Run.
@@ -162,6 +173,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.6.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.5.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.4.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.3.0.user.js`
