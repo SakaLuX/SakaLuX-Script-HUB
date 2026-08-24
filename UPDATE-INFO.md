@@ -8,9 +8,22 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.10.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.11.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.11.0
+- Replaced the old single-item **Best Travel Run** ranking with **Best Route Basket Optimizer**.
+- Each destination is now evaluated as a complete shopping basket rather than one item at a time.
+- For every country, the script builds the best mix of multiple profitable items using the configured travel slots, live/current stock and optional Travel budget.
+- With a cash budget, the same Pareto-frontier optimizer used by Travel Buy Planner searches the best item combination for that route.
+- With unlimited budget, the route basket uses the optimal slot-only highest-profit fill.
+- Routes are ranked by the basket's estimated **profit per hour**, using actual Torn flight times when detected.
+- Best Route Basket rows show destination, basket summary, item-type count, used slots, planned cost, profit/run and profit/hour.
+- Tapping a route still selects that destination in Torn Travel.
+- Live refresh selection now gives each destination a fair first candidate before filling the remaining 15-price refresh slots, reducing route bias while keeping Travel fast.
+- Added `bestRunBasketRoutes`, `bestRunBasketItems` and `bestRunBasketProfit` to `health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.10.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.10.0
 - Best Travel Run is now **budget-aware**.
@@ -204,6 +217,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.10.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.9.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.8.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.7.0.user.js`
