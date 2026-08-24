@@ -8,9 +8,15 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.4** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.5** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.5
+- Fixed Torn PDA stock parsing so expanded stats such as `Circ: 106,303` are not treated as shop stock.
+- Uses the smallest compact travel row for stock/buy detection.
+- Uses Torn PDA's visible `Value: $...` for the expanded item when available, so profit matches Torn's displayed value more closely.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.4.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.4
 - Fixed Torn PDA compact travel prices such as **$3M**, which were previously parsed as `$3` and caused absurd ROI/profit values.
