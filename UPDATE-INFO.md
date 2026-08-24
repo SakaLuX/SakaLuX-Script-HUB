@@ -4,12 +4,23 @@ Last updated: 2026-08-24
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.8.1**
+- SakaLuX Script Hub: **v1.8.2**
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
 
 ## Latest changes
+
+### SakaLuX Script Hub v1.8.2
+- Added a dedicated animated **☠️ SakaLuX launcher** directly in Torn's top navigation before **Messages**.
+- The top-bar skull opens the full SakaLuX Script Hub with one tap/click.
+- Added a repeated double-blink/pulse animation for the skull.
+- When updates, missing add-ons or add-on errors exist, the skull changes to a faster alert animation and shows a numeric badge.
+- The top-bar badge mirrors the issue/update count already shown by the floating Hub button.
+- Added a Hub setting to show/hide the blinking top-bar skull.
+- Added top-bar launcher status to **SYSTEM CHECK**.
+- Added Mission Rewards v1.0.1 to the Hub's offline fallback registry.
+- Added the `SakaLuX:MissionRewardsReady` listener so Hub status refreshes immediately when Mission Rewards becomes available.
 
 ### SakaLuX Mission Rewards v1.0.1
 - Changed `@match` to all Torn pages so `window.SakaLuXMissionRewards` is available everywhere and Script Hub no longer reports the add-on as missing outside Missions.
@@ -68,6 +79,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Script-Hub-v1.8.1.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.0.user.js`
 - `backups/SakaLuX-Script-Hub-v1.7.0.user.js`
 - `backups/SakaLuX-Enhancer-Guard-v1.3.1.user.js`
