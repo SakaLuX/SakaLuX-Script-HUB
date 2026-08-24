@@ -1,10 +1,24 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.2.1**
+**Current version: v1.3.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.3.0 — Museum Set Intelligence
+
+- Added full **Museum Set Intelligence**.
+- Calculates each supported set's current Item Market value and estimated net proceeds after the configured market fee.
+- Converts the Museum Points reward into a cash value using the Points Market rate captured by the script.
+- Shows a direct **TURN IN SET** or **SELL ITEMS** recommendation.
+- Shows the absolute dollar advantage and percentage edge of the better option.
+- Supports Arrowhead, Medieval Coin, Patagonian Fossil, Meteorite Fragment, Vairocana Buddha, Ganesha, Shabti, Senet, Companion Script and Egyptian Amulet rewards.
+- Missing market data is labelled instead of producing a false recommendation.
+- A missing/stale Points Market rate is clearly indicated with a button to open Points Market.
+- Added a 30-day local Torn item-catalog cache for Museum member resolution.
+- Added `museumIntelligence()` and `goToMuseum()` to `window.SakaLuXMarketIntelligence`.
+- Added Museum status fields to `health()` and a **MUSEUM** Hub quick action.
 
 ## v1.2.1 — Travel Performance Update
 
@@ -84,7 +98,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.2.1.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.3.0.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.
@@ -92,6 +106,5 @@ Current external data sources used by this version:
 
 ## Planned next modules
 
-- Museum set / Points value calculations.
 - Expanded Bazaar and Item Market deal surfaces.
 - Optional SakaLuX community price/restock network after the local version is stable.

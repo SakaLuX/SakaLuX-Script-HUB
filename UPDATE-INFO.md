@@ -8,9 +8,21 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.2.1** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.3.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.3.0
+- Added **Museum Set Intelligence**.
+- Values the known Museum sets using current Torn Item Market prices and the configured market fee.
+- Compares **net Item Market sale value** against the cash-equivalent value of the set's Museum Points reward.
+- Gives a direct **TURN IN SET** or **SELL ITEMS** recommendation with the dollar advantage and percentage edge.
+- Supports Arrowhead, Medieval Coin, Patagonian Fossil, Meteorite Fragment, Vairocana Buddha, Ganesha, Shabti, Senet, Companion Script and Egyptian Amulet rewards.
+- Uses the Points Market rate captured by Market Intelligence; a missing/stale rate is clearly shown and links to Points Market.
+- Added a 30-day local Torn item-catalog cache so set member IDs do not need to be rediscovered on every Museum visit.
+- Added Museum set/recommendation fields to `health()` and `museumIntelligence()` / `goToMuseum()` to the public API.
+- Added a **MUSEUM** quick action to Script Hub through `scripts.json`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.2.1.user.js`.
 
 ### SakaLuX Market Intelligence v1.2.1
 - Added **cache-first Travel rendering**: existing market prices are displayed immediately after YATA loads instead of waiting for every live Item Market request.
@@ -118,6 +130,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.2.1.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.2.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.1.1.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.4.user.js`

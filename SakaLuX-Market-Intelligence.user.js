@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.2.1
-// @description  Torn market and travel intelligence with fast cache-first Best Travel Run, arrival-stock prediction, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.
+// @version      1.3.0
+// @description  Torn market and travel intelligence with fast Travel tools, arrival-stock prediction, Bazaar/Item Market intelligence, and Museum set vs Points valuation.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.2.1';
+    const VERSION = '1.3.0';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -32,7 +32,8 @@
         marketCache: 'SakaLuX_MI_MARKET_CACHE_V1',
         watchlist: 'SakaLuX_MI_WATCHLIST_V1',
         pointsRate: 'SakaLuX_MI_POINTS_RATE_V1',
-        stockHistory: 'SakaLuX_MI_STOCK_HISTORY_V1'
+        stockHistory: 'SakaLuX_MI_STOCK_HISTORY_V1',
+        itemCatalog: 'SakaLuX_MI_ITEM_CATALOG_V1'
     };
 
     const MARKET_CACHE_MS = 10 * 60 * 1000;
@@ -43,6 +44,8 @@
     const CONCURRENCY = 6;
     const MAX_HISTORY_EVENTS = 8;
     const STOCK_HISTORY_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+    const ITEM_CATALOG_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+    const POINTS_RATE_MAX_AGE = 24 * 60 * 60 * 1000;
 
     const FLIGHT_MINS = {
         Mexico: 25, Caymans: 33, Canada: 39, Hawaii: 127, UK: 151,
@@ -55,6 +58,30 @@
         uni: 'UK', arg: 'Argentina', swi: 'Switzerland', jap: 'Japan',
         chi: 'China', uae: 'UAE', sou: 'South Africa'
     };
+
+
+
+    const MUSEUM_SETS = [
+        { id:'arrowheads', name:'Arrowhead Set', points:25, members:[
+            {name:'Chert Point',qty:1},{name:'Quartzite Point',qty:1},{name:'Basalt Point',qty:1},
+            {name:'Obsidian Point',qty:1},{name:'Quartz Point',qty:1},{name:'Chalcedony Point',qty:1}
+        ]},
+        { id:'medieval-coins', name:'Medieval Coin Set', points:100, members:[
+            {name:'Leopard Coin',qty:1},{name:'Florin Coin',qty:1},{name:'Gold Noble Coin',qty:1}
+        ]},
+        { id:'patagonian-fossil', name:'Patagonian Fossil', points:20, members:[{name:'Patagonian Fossil',qty:1}] },
+        { id:'meteorite-fragment', name:'Meteorite Fragment', points:15, members:[{name:'Meteorite Fragment',qty:1}] },
+        { id:'vairocana-buddha', name:'Vairocana Buddha', points:100, members:[{name:'Vairocana Buddha Sculpture',qty:1}] },
+        { id:'ganesha', name:'Ganesha Sculpture', points:250, members:[{name:'Ganesha Sculpture',qty:1}] },
+        { id:'shabti', name:'Shabti Sculpture', points:500, members:[{name:'Shabti Sculpture',qty:1}] },
+        { id:'senet', name:'Senet Game Set', points:2000, members:[
+            {name:'Senet Board',qty:1},{name:'White Senet Pawn',qty:5},{name:'Black Senet Pawn',qty:5}
+        ]},
+        { id:'companion-scripts', name:'Companion Script Set', points:1000, members:[
+            {name:'Companion Script : Abdullah',qty:1},{name:'Companion Script : Ali',qty:1},{name:'Companion Script : Ubay',qty:1}
+        ]},
+        { id:'egyptian-amulet', name:'Egyptian Amulet', points:10000, members:[{name:'Egyptian Amulet',qty:1}] }
+    ];
 
     const TORN_TRAVEL_LABELS = {
         Mexico: ['Mexico'],
@@ -98,7 +125,8 @@
         scanCount: 0, marketRequests: 0, decorated: 0, observer: null,
         scanTimer: null, bestRunRows: 0, stockEtaLearned: 0,
         arrivalRows: 0, flightDestination: '', landingMins: null,
-        travelCacheHits: 0, travelRefreshes: 0, observerSkips: 0, lastObserverScan: 0
+        travelCacheHits: 0, travelRefreshes: 0, observerSkips: 0, lastObserverScan: 0,
+        museumSets: 0, museumRecommendation: '', museumMissingSets: 0
     };
 
     function loadJson(key, fallback) {
@@ -113,6 +141,54 @@
     function fmtDuration(mins) { if(mins==null||!Number.isFinite(mins)) return 'learning'; mins=Math.max(0,Math.round(mins)); if(mins<60) return '~'+mins+'m'; const h=Math.floor(mins/60),m=mins%60; return '~'+h+'h'+(m?' '+m+'m':''); }
     function normText(text) { return String(text||'').replace(/\s+/g,' ').trim(); }
     function median(values) { const a=values.filter(Number.isFinite).sort((x,y)=>x-y); return a.length ? a[Math.floor(a.length/2)] : null; }
+
+
+
+    function museumNameKey(name) {
+        return normText(name).toLowerCase().replace(/\s*:\s*/g, ':');
+    }
+
+    function museumDomCatalog() {
+        const map=new Map();
+        document.querySelectorAll('img[src*="/images/items/"]').forEach(img=>{
+            const id=itemIdFromImg(img); if(!id)return;
+            const row=rowContainer(img);
+            const raw=normText(img.getAttribute('alt')||'') || normText((row?.innerText||'').split('\n')[0]);
+            if(!raw)return;
+            map.set(museumNameKey(raw),{id,name:raw,source:'museum-dom'});
+        });
+        return map;
+    }
+
+    async function loadMuseumCatalog() {
+        const merged=museumDomCatalog();
+        const cached=loadJson(STORAGE.itemCatalog,null);
+        if(cached?.items && cached?.at && Date.now()-cached.at<ITEM_CATALOG_MAX_AGE) {
+            for(const item of cached.items){if(item?.id&&item?.name)merged.set(museumNameKey(item.name),item);}
+            return merged;
+        }
+        const key=getApiKey();
+        if(!key)return merged;
+        try {
+            const data=await requestJson('https://api.torn.com/torn/?selections=items&key='+encodeURIComponent(key));
+            checkApiError(data);
+            const items=[];
+            for(const [id,meta] of Object.entries(data?.items||{})){
+                const n=Number(id); if(!n||!meta?.name)continue;
+                const item={id:n,name:meta.name,type:meta.type||'',source:'torn-catalog'};
+                items.push(item); merged.set(museumNameKey(item.name),item);
+            }
+            if(items.length)saveJson(STORAGE.itemCatalog,{at:Date.now(),items});
+        } catch (_) {}
+        return merged;
+    }
+
+    function freshPointsRate() {
+        const row=loadJson(STORAGE.pointsRate,null);
+        if(!row?.rate||!row?.at)return null;
+        if(Date.now()-Number(row.at)>POINTS_RATE_MAX_AGE)return null;
+        return Number(row.rate)||null;
+    }
 
     function normalizeDestination(value) {
         const text=normText(value).toLowerCase();
@@ -484,12 +560,97 @@
 
     function scrapePointsRate(){const vals=[];document.querySelectorAll('*').forEach(el=>{if(el.children.length)return;const m=(el.textContent||'').trim().match(/^\$\s*([\d,]+)$/);if(!m)return;const n=parseMoney(m[1]);if(n>=5000&&n<=200000)vals.push(n);});return vals.length?Math.min(...vals):null;}
     function scanPoints(){if(!settings.points)return;const rate=scrapePointsRate();if(!rate)return;saveJson(STORAGE.pointsRate,{rate,at:Date.now()});document.getElementById('sl-mi-points-bar')?.remove();const bar=document.createElement('div');bar.id='sl-mi-points-bar';bar.innerHTML='<b>☠︎ Points Intelligence</b> · captured <strong>'+money(rate)+'/point</strong>';mountTop(bar);}
-    function scanMuseum(){if(!settings.museum)return;document.getElementById('sl-mi-museum-bar')?.remove();const rate=loadJson(STORAGE.pointsRate,null),bar=document.createElement('div');bar.id='sl-mi-museum-bar';bar.innerHTML='<b>☠︎ Museum Intelligence</b> · Points rate: <strong>'+(rate?.rate?money(rate.rate)+'/pt':'not captured yet')+'</strong><span class="muted"> · Full set valuation is the next module.</span>';mountTop(bar);}
+    async function scanMuseum(){
+        if(!settings.museum)return;
+        document.getElementById('sl-mi-museum-bar')?.remove();
+        state.museumSets=0;state.museumRecommendation='';state.museumMissingSets=0;
+
+        const pointsRate=freshPointsRate();
+        const catalog=await loadMuseumCatalog();
+        const resolved=[];
+        const itemIds=new Set();
+
+        for(const set of MUSEUM_SETS){
+            const members=[];const missing=[];
+            for(const member of set.members){
+                const item=catalog.get(museumNameKey(member.name));
+                if(!item?.id){missing.push(member.name);continue;}
+                members.push({id:Number(item.id),name:item.name||member.name,qty:Number(member.qty)||1});
+                itemIds.add(Number(item.id));
+            }
+            resolved.push({set,members,missing});
+        }
+
+        const marketMap=new Map();
+        for(const id of itemIds){const c=cachePeek(id);if(c)marketMap.set(id,c);}
+        await mapWithLimit([...itemIds].slice(0,MAX_LIVE_FETCHES),async id=>{
+            const m=await fetchMarket(id);if(m)marketMap.set(id,m);return m;
+        });
+
+        const rows=[];
+        const fee=Math.max(0,Number(settings.marketFeePct)||0)/100;
+        for(const entry of resolved){
+            let gross=0;const unpriced=[];
+            for(const member of entry.members){
+                const market=marketMap.get(member.id);
+                if(!market?.price){unpriced.push(member.name);continue;}
+                gross+=Number(market.price)*member.qty;
+            }
+            const complete=entry.missing.length===0&&unpriced.length===0&&entry.members.length===entry.set.members.length;
+            const sellNet=complete?gross*(1-fee):null;
+            const pointsCash=complete&&pointsRate?entry.set.points*pointsRate:null;
+            let recommendation='WAITING FOR DATA',difference=null,edgePct=null;
+            if(complete&&!pointsRate)recommendation='CAPTURE POINTS RATE';
+            if(complete&&pointsRate){
+                difference=pointsCash-sellNet;
+                recommendation=difference>=0?'TURN IN SET':'SELL ITEMS';
+                const winner=Math.max(pointsCash,sellNet),loser=Math.max(1,Math.min(pointsCash,sellNet));
+                edgePct=(winner-loser)/loser*100;
+            }
+            rows.push({set:entry.set,complete,missing:[...entry.missing,...unpriced],gross,sellNet,pointsCash,recommendation,difference,edgePct});
+        }
+
+        const ready=rows.filter(r=>r.complete);
+        state.museumSets=ready.length;
+        state.museumMissingSets=rows.length-ready.length;
+        const actionable=ready.filter(r=>r.pointsCash!=null).sort((a,b)=>Math.abs(b.difference)-Math.abs(a.difference));
+        state.museumRecommendation=actionable[0]?.recommendation||'';
+
+        const bar=document.createElement('div');bar.id='sl-mi-museum-bar';bar.className='open';
+        const rateText=pointsRate?money(pointsRate)+'/pt':'not captured / stale';
+        bar.innerHTML='<div class="sl-mi-museum-head"><div><span class="sl-mi-br-title">🏛 MUSEUM INTELLIGENCE</span><strong>'+esc(rateText)+'</strong></div><button type="button">▾</button></div>'+
+            '<div class="sl-mi-museum-note">Compares net Item Market sale value after '+esc(settings.marketFeePct)+'% fee with the cash-equivalent value of the Museum points reward.</div><div class="sl-mi-museum-body"></div>';
+        const body=bar.querySelector('.sl-mi-museum-body');
+
+        rows.sort((a,b)=>{
+            if(a.complete!==b.complete)return a.complete?-1:1;
+            return Math.abs(b.difference||0)-Math.abs(a.difference||0);
+        });
+        for(const r of rows){
+            const row=document.createElement('div');row.className='sl-mi-museum-row';
+            if(!r.complete){
+                row.classList.add('missing');
+                row.innerHTML='<span class="name">'+esc(r.set.name)+'</span><span>'+r.set.points.toLocaleString('en-US')+' pts</span><span class="muted">missing price/data: '+esc(r.missing.slice(0,2).join(', '))+(r.missing.length>2?' +'+(r.missing.length-2):'')+'</span>';
+            } else if(!pointsRate){
+                row.classList.add('missing');
+                row.innerHTML='<span class="name">'+esc(r.set.name)+'</span><span>'+r.set.points.toLocaleString('en-US')+' pts</span><span>Sell net '+money(r.sellNet)+'</span><strong>CAPTURE POINTS RATE</strong>';
+            } else {
+                const turn=r.recommendation==='TURN IN SET';row.classList.add(turn?'turn':'sell');
+                row.innerHTML='<span class="name">'+esc(r.set.name)+'</span><span>'+r.set.points.toLocaleString('en-US')+' pts</span><span>Sell net '+money(r.sellNet)+'</span><span>Points '+money(r.pointsCash)+'</span><strong>'+esc(r.recommendation)+'</strong><span class="edge">+'+money(Math.abs(r.difference))+' · '+pct(r.edgePct)+'</span>';
+            }
+            body.appendChild(row);
+        }
+        if(!pointsRate){
+            const hint=document.createElement('button');hint.type='button';hint.className='sl-mi-points-link';hint.textContent='OPEN POINTS MARKET';hint.onclick=()=>{location.href='https://www.torn.com/pmarket.php';};body.prepend(hint);
+        }
+        bar.querySelector('.sl-mi-museum-head').onclick=()=>bar.classList.toggle('open');
+        mountTop(bar);
+    }
     function mountTop(el){const host=document.querySelector('#mainContainer .content-wrapper')||document.querySelector('.content-wrapper')||document.querySelector('#mainContainer')||document.body;host.insertBefore(el,host.firstChild);}
 
     async function scan(force=false){
         if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
-        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-arrival').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
+        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-museum-bar').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
         catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;}
     }
     function scheduleScan(force=false){if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},450);}
@@ -509,10 +670,11 @@
 #sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival{margin:8px auto 10px;max-width:1100px;border-left:3px solid #d7b94c;font-size:11px}#sl-mi-market-bar.hit{border-left-color:#78d98b;background:#152219}
 .sl-mi-br-head,.sl-mi-arrival-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button,.sl-mi-arrival-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body,.sl-mi-arrival-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body,.open .sl-mi-arrival-body{display:flex;flex-direction:column}.sl-mi-br-row,.sl-mi-arrival-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name,.sl-mi-arrival-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{color:#d7b94c}.sl-mi-route{cursor:pointer;transition:background .12s ease,border-color .12s ease}.sl-mi-route:hover,.sl-mi-route:focus{background:#1c2522;border-color:#4d6957;outline:none}.sl-mi-route:active{background:#203028}
 .sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}
+.sl-mi-museum-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-museum-head>div{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-museum-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-museum-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-museum-body{display:none;margin-top:7px;gap:4px}#sl-mi-museum-bar.open .sl-mi-museum-body{display:flex;flex-direction:column}.sl-mi-museum-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-museum-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-museum-row.turn{border-left:3px solid #78d98b;background:#142019}.sl-mi-museum-row.sell{border-left:3px solid #d7b94c;background:#201d13}.sl-mi-museum-row.missing{border-left:3px solid #5c6570}.sl-mi-museum-row .edge{color:#9da6b3}.sl-mi-points-link{border:1px solid #66591d;background:#2a2512;color:#e4c95d;border-radius:6px;padding:7px 9px;font-weight:900;font-size:10px;align-self:flex-start}
 .sl-mi-watch-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sl-mi-watch-row input{flex:1 1 140px;background:#0d0f14;color:#fff;border:1px solid #363e49;border-radius:6px;padding:8px}.sl-mi-watch-row button{border:0;border-radius:6px;padding:7px 9px;background:#303844;color:#fff;font-weight:900;font-size:10px}
 #sl-mi-button{position:fixed;right:10px;bottom:106px;z-index:2147483644;border:0;border-radius:999px;padding:9px 11px;background:#18181b;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font-weight:900;font-size:12px}
 #sl-mi-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-mi-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mi-title{font-size:16px;font-weight:900}.sl-mi-sub{margin-top:3px;color:#8e96a3;font-size:9px}#sl-mi-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}.sl-mi-toggle,.sl-mi-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mi-field input{width:45%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:7px}.sl-mi-info{margin:10px 0;color:#a6adb8;font-size:10px}.sl-mi-primary,.sl-mi-secondary{width:100%;min-height:40px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900}.sl-mi-primary{background:#2563eb}.sl-mi-secondary{background:#374151}.muted{color:#7e8793}
-@media(max-width:700px){.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
+@media(max-width:700px){.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-museum-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 7px}.sl-mi-museum-row .name{grid-column:1/-1}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
 `;document.head.appendChild(s);}
 
     function createButton(){if(!settings.showButton||document.getElementById('sl-mi-button'))return;const b=document.createElement('button');b.id='sl-mi-button';b.textContent='☠︎ Market';b.onclick=openSettings;document.body.appendChild(b);}
@@ -524,13 +686,15 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
         async arrivalPrediction(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
         goToMarket(){location.href='https://www.torn.com/page.php?sid=ItemMarket';return true;},
-        goToBazaar(){location.href='https://www.torn.com/bazaar.php';return true;}
+        goToBazaar(){location.href='https://www.torn.com/bazaar.php';return true;},
+        goToMuseum(){location.href='https://www.torn.com/museum.php';return true;},
+        async museumIntelligence(){if(detectPage()!=='museum')return false;await scanMuseum();return true;}
     };
     window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceReady',{detail:{version:VERSION}}));
 
