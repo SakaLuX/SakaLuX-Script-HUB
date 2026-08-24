@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.8.3
-// @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with a native Torn-style HUB launcher before Messages.
+// @version      1.8.4
+// @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with a Torn-native mobile HUB entry integrated before Messages.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -16,7 +16,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.8.3';
+    const VERSION = '1.8.4';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -24,14 +24,22 @@
 
     const HUB_CHANGELOG = [
         {
+            version: '1.8.4',
+            date: '2026-08-24',
+            changes: [
+                'Rebuilt the mobile HUB entry using Torn mobileLink, area-row and swiper classes like native navigation entries.',
+                'HUB is mounted as its own swiper slide immediately before Messages instead of inside the Messages slot.',
+                'The skull reuses Torn native SVG sizing and colors, replacing only the icon artwork.',
+                'Removed custom layout sizing that made HUB look detached from the Torn navigation row.',
+                'Kept the subtle skull blink and Hub click action without moving the label or surrounding menu.'
+            ]
+        },
+        {
             version: '1.8.3',
             date: '2026-08-24',
             changes: [
                 'Rebuilt the Hub launcher as a native Torn navigation item before Messages.',
-                'The HUB item now clones Torn navigation structure and styling instead of floating over the page.',
-                'Uses a monochrome text-presentation skull with a subtle double blink on the icon only.',
-                'The floating Hub button automatically hides when the native launcher is available and remains only as a fallback.',
-                'Issue and update badges remain available without disturbing Torn menu layout.'
+                'The floating Hub button automatically hides when the native launcher is available.'
             ]
         },
         {
@@ -39,17 +47,7 @@
             date: '2026-08-24',
             changes: [
                 'Added the first animated skull launcher experiment.',
-                'Added shared issue/update status to the launcher.',
                 'Added Mission Rewards v1.0.1 to the offline fallback registry.'
-            ]
-        },
-        {
-            version: '1.8.1',
-            date: '2026-08-24',
-            changes: [
-                "Fixed the WHAT'S NEW control on mobile/PDA.",
-                'Kept scripts.json dedicated only to add-on discovery.',
-                'Kept UPDATE ALL and SYSTEM CHECK.'
             ]
         }
     ];
@@ -381,14 +379,13 @@
         style.textContent = `
 #${IDS.button}{position:fixed!important;z-index:2147483646!important;border:2px solid #555!important;border-radius:50%!important;background:#171717!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font-size:24px!important;box-shadow:0 5px 18px rgba(0,0,0,.6)!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important}
 #${IDS.badge}{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#ef4444;color:#fff;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:2px solid #171717}
-#${IDS.topSkull}{position:relative!important;box-sizing:border-box!important;cursor:pointer!important;user-select:none!important;-webkit-tap-highlight-color:transparent!important}
-#${IDS.topSkull} .slh-native-link{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;box-sizing:border-box!important;color:inherit!important;text-decoration:none!important;background:transparent!important;border:0!important;padding:0!important;margin:0!important;cursor:pointer!important}
-#${IDS.topSkull} .slh-native-skull{display:block!important;color:inherit!important;font-family:Arial,Helvetica,sans-serif!important;font-size:25px!important;font-weight:700!important;line-height:27px!important;height:28px!important;min-height:28px!important;text-align:center!important;opacity:.72!important;transform-origin:center!important;animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;text-shadow:0 1px 0 rgba(255,255,255,.05)!important}
-#${IDS.topSkull} .slh-native-label{display:block!important;color:inherit!important;font-family:Arial,Helvetica,sans-serif!important;font-size:10px!important;font-weight:700!important;line-height:12px!important;text-transform:uppercase!important;text-align:center!important;white-space:nowrap!important;opacity:.82!important}
-#${IDS.topSkull}.slh-alert .slh-native-skull{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}
-#${IDS.topBadge}{position:absolute;top:0;right:calc(50% - 18px);min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#b53b3b;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}
-@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48;transform:scale(.96)}11%,19%,27%{opacity:.95;transform:scale(1.06)}40%,75%{opacity:.68;transform:scale(1)}}
-@keyframes slhNativeSkullAlert{0%,100%{opacity:.4;transform:scale(.94)}50%{opacity:1;transform:scale(1.10)}72%{opacity:.62;transform:scale(.98)}}
+#${IDS.topSkull}{position:relative!important;box-sizing:border-box!important}
+#${IDS.topSkull} .slh-native-link{position:relative!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}
+#${IDS.topSkull} .slh-native-skull-icon{animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;transform-origin:center center!important}
+#${IDS.topSkull}.slh-alert .slh-native-skull-icon{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}
+#${IDS.topBadge}{position:absolute;top:0;right:4px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#b53b3b;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}
+@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48}11%,19%,27%{opacity:1}40%,75%{opacity:.72}}
+@keyframes slhNativeSkullAlert{0%,100%{opacity:.38}50%{opacity:1}72%{opacity:.58}}
 #${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.76);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
 #${IDS.panel}{width:min(620px,100%);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;background:#101318;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.7)}
 .slh-header{padding:14px;border-bottom:1px solid #292f38;flex-shrink:0}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.slh-title{font-size:19px;font-weight:900}.slh-sub{margin-top:3px;color:#8b949e;font-size:10px}.slh-close{width:36px;height:36px;border:0;border-radius:9px;background:#252a32;color:#fff;font-size:20px}
@@ -467,50 +464,72 @@
         });
     }
 
-    function isVisibleElement(element) {
-        if (!element || !element.isConnected) return false;
-        const rect = element.getBoundingClientRect();
-        const style = getComputedStyle(element);
-        return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden';
+    function getMobileNavContext() {
+        const swiperWrap = document.querySelector('.swiper-wrapper')
+            || document.querySelector('[class*="swiper___"]');
+        const areasWrap = document.querySelector('[class*="areasMobile___"]');
+        const wrapper = swiperWrap || areasWrap;
+        if (!wrapper) return null;
+
+        const links = [...wrapper.querySelectorAll('a[class*="mobileLink___"]')];
+        const messagesLink = links.find(link => {
+            const label = link.querySelector('span[class*="linkName___"]');
+            const text = String(label?.textContent || link.textContent || '').trim().toUpperCase();
+            const href = String(link.getAttribute('href') || '').toLowerCase();
+            return text === 'MESSAGES' || href.includes('messages');
+        });
+        if (!messagesLink) return null;
+
+        const messagesArea = messagesLink.closest('[class*="area-mobile___"]');
+        if (!messagesArea) return null;
+        const messagesSlide = messagesArea.closest('[class*="slide___"]');
+        const isSwiper = Boolean(messagesSlide && messagesSlide.parentElement === wrapper);
+
+        return {
+            wrapper,
+            isSwiper,
+            messagesLink,
+            messagesArea,
+            messagesSlide,
+            nativeRow: messagesArea.querySelector('[class*="areaRow___"], [class*="area-row___"]'),
+            nativeIconWrap: messagesLink.querySelector('span[class*="svgIconWrap___"]'),
+            nativeDefaultIcon: messagesLink.querySelector('span[class*="defaultIcon___"]'),
+            nativeLabel: messagesLink.querySelector('span[class*="linkName___"]'),
+            nativeSvg: messagesLink.querySelector('svg')
+        };
     }
 
-    function findMessagesAnchor() {
-        const directSelectors = [
-            'a[href*="messages.php"]',
-            'a[href*="sid=messages"]',
-            'a[href*="messages"]',
-            '[aria-label*="message" i]',
-            '[title*="message" i]'
-        ];
-        for (const selector of directSelectors) {
-            const nodes = [...document.querySelectorAll(selector)];
-            const match = nodes.find(node => {
-                if (node.closest('#' + IDS.overlay)) return false;
-                if (node.id === IDS.topSkull || node.closest('#' + IDS.topSkull)) return false;
-                return isVisibleElement(node);
-            });
-            if (match) return match.closest('a,button,[role="button"]') || match;
-        }
-        return [...document.querySelectorAll('a,button,[role="button"]')].find(node => {
-            if (node.closest('#' + IDS.overlay)) return false;
-            if (!isVisibleElement(node)) return false;
-            const text = String(node.textContent || '').trim().toLowerCase();
-            const aria = String(node.getAttribute('aria-label') || '').toLowerCase();
-            const title = String(node.getAttribute('title') || '').toLowerCase();
-            return text === 'messages' || aria.includes('messages') || title.includes('messages');
-        }) || null;
-    }
+    function buildSkullSvg(nativeSvg) {
+        if (!nativeSvg) return null;
+        const svg = nativeSvg.cloneNode(false);
+        const vb = (nativeSvg.getAttribute('viewBox') || '0 0 24 24').split(/\s+/).map(Number);
+        const vbW = vb[2] || 24;
+        const vbH = vb[3] || 24;
+        const ART_INK = 20;
+        const scale = vbH / ART_INK;
+        const tx = (vb[0] || 0) + (vbW - 24 * scale) / 2;
+        const ty = (vb[1] || 0) + (vbH - 24 * scale) / 2;
+        svg.style.overflow = 'visible';
+        svg.style.setProperty('filter', 'none', 'important');
+        svg.style.setProperty('-webkit-filter', 'none', 'important');
+        svg.setAttribute('aria-hidden', 'true');
 
-    function getMessagesNavItem(messages) {
-        if (!messages) return null;
-        let node = messages;
-        for (let depth = 0; depth < 4 && node?.parentElement; depth++) {
-            const parent = node.parentElement;
-            const visibleChildren = [...parent.children].filter(isVisibleElement);
-            if (visibleChildren.length >= 4 && visibleChildren.length <= 20) return node;
-            node = parent;
-        }
-        return messages;
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('transform', `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${scale.toFixed(4)})`);
+        g.setAttribute('fill', 'none');
+        g.setAttribute('stroke', 'currentColor');
+        g.setAttribute('stroke-width', '1.75');
+        g.setAttribute('stroke-linecap', 'round');
+        g.setAttribute('stroke-linejoin', 'round');
+        g.innerHTML = `
+            <path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-6.4 0-4.4-3.3-7.6-8.1-7.6Z"/>
+            <circle cx="8.8" cy="10.5" r="1.65"/>
+            <circle cx="15.2" cy="10.5" r="1.65"/>
+            <path d="m12 12.7-1 1.8h2l-1-1.8Z"/>
+            <path d="M8.1 16.1h7.8M10.5 16.1v1.3M13.5 16.1v1.3"/>
+        `;
+        svg.appendChild(g);
+        return svg;
     }
 
     function syncFloatingButtonVisibility() {
@@ -533,46 +552,88 @@
             return true;
         }
 
-        const messages = findMessagesAnchor();
-        if (!messages) {
+        const ctx = getMobileNavContext();
+        if (!ctx) {
             syncFloatingButtonVisibility();
             return false;
         }
 
-        const messagesItem = getMessagesNavItem(messages);
-        if (!messagesItem?.parentElement) {
-            syncFloatingButtonVisibility();
-            return false;
-        }
+        const area = document.createElement('div');
+        area.className = ctx.messagesArea.className;
 
-        const hubItem = messagesItem.cloneNode(true);
-        hubItem.id = IDS.topSkull;
-        hubItem.querySelectorAll?.('[id]').forEach(node => node.removeAttribute('id'));
+        const row = document.createElement('div');
+        if (ctx.nativeRow) row.className = ctx.nativeRow.className;
 
-        const clickable = hubItem.matches?.('a,button,[role="button"]')
-            ? hubItem
-            : hubItem.querySelector?.('a,button,[role="button"]') || hubItem;
+        const link = document.createElement('a');
+        link.className = ctx.messagesLink.className;
+        link.href = '#';
+        link.tabIndex = 0;
+        link.classList.add('slh-native-link');
+        link.setAttribute('aria-label', 'Open SakaLuX Script Hub');
+        link.setAttribute('title', 'SakaLuX Script Hub');
 
-        clickable.removeAttribute?.('href');
-        clickable.removeAttribute?.('target');
-        clickable.setAttribute('role', 'button');
-        clickable.setAttribute('tabindex', '0');
-        clickable.setAttribute('aria-label', 'Open SakaLuX Script Hub');
-        clickable.setAttribute('title', 'SakaLuX Script Hub');
-        clickable.classList.add('slh-native-link');
-        clickable.innerHTML = `<span class="slh-native-skull" aria-hidden="true">☠︎</span><span class="slh-native-label">HUB</span><span id="${IDS.topBadge}"></span>`;
+        const iconWrap = document.createElement('span');
+        if (ctx.nativeIconWrap) iconWrap.className = ctx.nativeIconWrap.className;
+
+        const innerIcon = document.createElement('span');
+        if (ctx.nativeDefaultIcon) innerIcon.className = ctx.nativeDefaultIcon.className;
+        innerIcon.classList.add('slh-native-skull-icon');
+        innerIcon.style.setProperty('filter', 'none', 'important');
+        innerIcon.style.setProperty('-webkit-filter', 'none', 'important');
+
+        const skullSvg = buildSkullSvg(ctx.nativeSvg);
+        if (skullSvg) innerIcon.appendChild(skullSvg);
+        else innerIcon.textContent = '☠︎';
+
+        iconWrap.appendChild(innerIcon);
+        link.appendChild(iconWrap);
+
+        const label = document.createElement('span');
+        if (ctx.nativeLabel) label.className = ctx.nativeLabel.className;
+        label.textContent = 'HUB';
+        link.appendChild(label);
+
+        const badge = document.createElement('span');
+        badge.id = IDS.topBadge;
+        link.appendChild(badge);
 
         const open = event => {
             event.preventDefault();
             event.stopPropagation();
             openHub();
         };
-        clickable.addEventListener('click', open);
-        clickable.addEventListener('keydown', event => {
+        link.addEventListener('click', open);
+        link.addEventListener('keydown', event => {
             if (event.key === 'Enter' || event.key === ' ') open(event);
         });
 
-        messagesItem.parentElement.insertBefore(hubItem, messagesItem);
+        row.appendChild(link);
+        area.appendChild(row);
+
+        let mounted;
+        if (ctx.isSwiper && ctx.messagesSlide) {
+            const slide = document.createElement('div');
+            slide.className = ctx.messagesSlide.className
+                .replace(/swiper-slide-active|swiper-slide-next|swiper-slide-prev|contextMenuActive___\S+/g, '')
+                .trim();
+            if (ctx.messagesSlide.style.width) slide.style.width = ctx.messagesSlide.style.width;
+            slide.appendChild(area);
+            mounted = slide;
+        } else {
+            mounted = area;
+        }
+
+        mounted.id = IDS.topSkull;
+        const reference = ctx.isSwiper ? ctx.messagesSlide : ctx.messagesArea;
+        ctx.wrapper.insertBefore(mounted, reference);
+
+        if (ctx.isSwiper) {
+            try {
+                const swiper = ctx.wrapper.parentElement?.swiper;
+                swiper?.update?.();
+            } catch {}
+        }
+
         updateTopbarSkullState();
         syncFloatingButtonVisibility();
         return true;
@@ -892,8 +953,8 @@
         results.push({ level: 'ok', label: 'SakaLuX Script Hub', detail: 'Loaded v' + VERSION + ' • API exposed' });
         results.push({
             level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn',
-            label: 'Native Torn HUB launcher',
-            detail: document.getElementById(IDS.topSkull) ? 'Integrated before Messages' : 'Messages navigation item not detected yet'
+            label: 'Torn-native HUB launcher',
+            detail: document.getElementById(IDS.topSkull) ? 'Mounted as a native mobile navigation entry before Messages' : 'Torn mobile navigation not detected yet'
         });
         const box = document.getElementById('slhc-results');
         if (!box) return;
@@ -924,8 +985,8 @@
     function openSettings() {
         createOverlay(`<div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">⚙️ Hub Settings</div><div class="slh-sub">SakaLuX Script Hub v${VERSION}</div></div><button class="slh-close" id="slhs-close">×</button></div></div><div class="slh-settings">
             <div class="slh-setting"><label><input id="slhs-hide" type="checkbox" ${settings.hideIndividualButtons ? 'checked' : ''}> Hide individual script buttons</label></div>
-            <div class="slh-setting"><label><input id="slhs-topbar" type="checkbox" ${settings.showTopbarSkull ? 'checked' : ''}> Show native blinking ☠︎ HUB before Messages</label></div>
-            <div class="slh-setting"><label><input id="slhs-long" type="checkbox" ${settings.longPressQuickMenu ? 'checked' : ''}> Long press fallback floating ☠️ opens Quick Menu</label></div>
+            <div class="slh-setting"><label><input id="slhs-topbar" type="checkbox" ${settings.showTopbarSkull ? 'checked' : ''}> Show Torn-native blinking skull HUB before Messages</label></div>
+            <div class="slh-setting"><label><input id="slhs-long" type="checkbox" ${settings.longPressQuickMenu ? 'checked' : ''}> Long press fallback floating skull opens Quick Menu</label></div>
             <div class="slh-setting"><label><input id="slhs-auto" type="checkbox" ${settings.autoCheckUpdates ? 'checked' : ''}> Automatically check Greasy Fork updates</label></div>
             <div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
@@ -947,6 +1008,7 @@
             saveJson(STORAGE.settings, settings);
             updateHiddenButtons();
             positionButton();
+            document.getElementById(IDS.topSkull)?.remove();
             createTopbarSkull();
             syncFloatingButtonVisibility();
             openHub();
@@ -982,6 +1044,7 @@
             saveJson(STORAGE.usage, usage);
             updateHiddenButtons();
             positionButton();
+            document.getElementById(IDS.topSkull)?.remove();
             createTopbarSkull();
             syncFloatingButtonVisibility();
             alert('Backup restored.');
@@ -1002,6 +1065,7 @@
         SCRIPTS = normalizeRegistry(registry);
         updateHiddenButtons();
         positionButton();
+        document.getElementById(IDS.topSkull)?.remove();
         createTopbarSkull();
         syncFloatingButtonVisibility();
         updateBadge();
@@ -1031,6 +1095,7 @@
             if (mutations.some(mutation => mutation.addedNodes.length || mutation.removedNodes.length)) queueEnsure();
         });
         observer.observe(document.body, { childList: true, subtree: true });
+        window.addEventListener('hashchange', () => setTimeout(queueEnsure, 250));
     }
 
     window.SakaLuXScriptHub = {
