@@ -5,12 +5,16 @@ on:
     branches: [main]
     paths:
       - '.github/patches/mi-v1.7.0.py'
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
+  issues: read
 
 jobs:
   patch:
+    if: github.event_name == 'push' || github.event.issue.title == 'RUN MI v1.7.0 PATCH'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
