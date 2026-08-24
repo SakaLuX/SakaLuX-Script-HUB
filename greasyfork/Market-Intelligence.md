@@ -1,10 +1,19 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.1.0**
+**Current version: v1.1.1**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.1.1
+
+- Best Travel Run recommendations are now directly actionable.
+- Tap any recommended route and the script automatically selects that destination in Torn's Travel Agency list.
+- Supports Torn destination labels such as **Cayman Islands**, **United Kingdom** and **UAE** while keeping the internal SakaLuX/YATA destination names.
+- Route rows now have button-like hover/focus/active feedback.
+- Added keyboard activation for route rows.
+- Added `selectDestination(destination)` to the public Hub API.
 
 ## v1.1.0
 
@@ -20,7 +29,7 @@ SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and t
 - Before enough history exists, sold-out items show a clearly-labelled **possible restock** estimate based on the next quarter-hour tick, rather than claiming an exact refill time.
 - Landed Travel overlays now show current stock and refill information directly beside profit data.
 - Added **BEST RUN** quick action in SakaLuX Script Hub.
-- Official Greasy Fork update/download URLs are now embedded in the userscript metadata.
+- Official Greasy Fork update/download URLs are embedded in the userscript metadata.
 
 ## v1.0.0
 
@@ -41,7 +50,7 @@ The script does not invent an exact stock refill time. It learns from stock incr
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.1.0.
+SakaLuX Market Intelligence remains local-first. Stock history, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.1.1.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings.
