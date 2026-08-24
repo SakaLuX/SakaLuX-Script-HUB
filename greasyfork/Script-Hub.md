@@ -4,7 +4,7 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 
 ## Current version
 
-**v1.8.4**
+**v1.8.5**
 
 ## What it does
 
@@ -14,6 +14,7 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - Shows one-tap INSTALL actions for missing add-ons.
 - Checks Greasy Fork for available updates.
 - Provides **UPDATE ALL** for installed add-ons with newer versions available.
+- Revalidates cached update status against the version currently installed, preventing stale false update alerts after an add-on has already been updated.
 - Provides **SYSTEM CHECK** for registry access, Greasy Fork update sources and local add-on health.
 - Provides a dedicated **WHAT'S NEW** view for Hub release notes.
 - Provides quick actions, favorites, search, health status and backup/restore.
@@ -25,6 +26,13 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - Designed for Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.8.5
+- Fixed false **UPDATE AVAILABLE** indicators after an add-on has already been updated.
+- A cached update result is reused only when its stored installed version still equals the version currently loaded.
+- **Latest vs Installed** is recalculated before rendering cards, the UPDATES counter and the native HUB alert badge.
+- Added Market Intelligence v1.1.1 to the offline fallback registry.
+- Added the Market Intelligence ready-event integration.
 
 ### v1.8.4
 - Fixed the mobile layout where HUB appeared above Messages and pushed Messages onto a second row.
@@ -44,5 +52,6 @@ Complementary add-ons currently registered:
 - SakaLuX Enhancer Guard v1.3.2
 - SakaLuX Bazaar Thanker - PDA v5.3.1
 - SakaLuX Mission Rewards v1.0.1
+- SakaLuX Market Intelligence v1.1.1
 
 Every new complementary SakaLuX script is added to `scripts.json` so the Hub can discover it automatically.
