@@ -1,0 +1,237 @@
+name: Patch Hub native nav
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-hub-native.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch Script Hub
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path('SakaLuX-Script-Hub.user.js')
+          s = path.read_text(encoding='utf-8')
+          if "const VERSION = '1.8.3';" not in s:
+              raise SystemExit('Expected Hub v1.8.3 source')
+
+          s = s.replace('// @version      1.8.3', '// @version      1.8.4', 1)
+          s = s.replace('// @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with a native Torn-style HUB launcher before Messages.', '// @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with a Torn-native mobile HUB entry integrated before Messages.', 1)
+          s = s.replace("const VERSION = '1.8.3';", "const VERSION = '1.8.4';", 1)
+
+          marker = '    const HUB_CHANGELOG = [\n'
+          release = '''        {\n            version: '1.8.4',\n            date: '2026-08-24',\n            changes: [\n                'Rebuilt the mobile HUB entry using Torn mobileLink, area-row and swiper classes exactly like native navigation entries.',\n                'HUB is mounted as its own swiper slide immediately before Messages instead of inside the Messages slot.',\n                'The skull now reuses Torn native SVG sizing and colors, replacing only the icon artwork.',\n                'Removed custom layout sizing that made HUB look detached from the Torn navigation row.',\n                'Kept the subtle skull blink and Hub click action without moving the label or surrounding menu.'\n            ]\n        },\n'''
+          s = s.replace(marker, marker + release, 1)
+
+          css_pattern = re.compile(r"#\$\{IDS\.topSkull\}\{.*?@keyframes slhNativeSkullAlert\{.*?\}\n", re.S)
+          css_new = '''#${IDS.topSkull}{position:relative!important;box-sizing:border-box!important}\n#${IDS.topSkull} .slh-native-link{position:relative!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}\n#${IDS.topSkull} .slh-native-skull-icon{animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;transform-origin:center center!important}\n#${IDS.topSkull}.slh-alert .slh-native-skull-icon{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}\n#${IDS.topBadge}{position:absolute;top:0;right:4px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#b53b3b;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}\n@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48}11%,19%,27%{opacity:1}40%,75%{opacity:.72}}\n@keyframes slhNativeSkullAlert{0%,100%{opacity:.38}50%{opacity:1}72%{opacity:.58}}\n'''
+          s, n = css_pattern.subn(css_new, s, count=1)
+          if n != 1:
+              raise SystemExit('Could not replace old native HUB CSS')
+
+          fn_pattern = re.compile(r"    function findMessagesAnchor\(\) \{.*?\n    function updateTopbarSkullState\(\) \{", re.S)
+          fn_new = r'''    function getMobileNavContext() {
+        const swiperWrap = document.querySelector('.swiper-wrapper')
+            || document.querySelector('[class*="swiper___"]');
+        const areasWrap = document.querySelector('[class*="areasMobile___"]');
+        const wrapper = swiperWrap || areasWrap;
+        if (!wrapper) return null;
+
+        const links = [...wrapper.querySelectorAll('a[class*="mobileLink___"]')];
+        const messagesLink = links.find(link => {
+            const label = link.querySelector('span[class*="linkName___"]');
+            const text = String(label?.textContent || link.textContent || '').trim().toUpperCase();
+            const href = String(link.getAttribute('href') || '').toLowerCase();
+            return text === 'MESSAGES' || href.includes('messages');
+        });
+        if (!messagesLink) return null;
+
+        const messagesArea = messagesLink.closest('[class*="area-mobile___"]');
+        if (!messagesArea) return null;
+        const messagesSlide = messagesArea.closest('[class*="slide___"]');
+        const isSwiper = Boolean(messagesSlide && messagesSlide.parentElement === wrapper);
+
+        return {
+            wrapper,
+            isSwiper,
+            messagesLink,
+            messagesArea,
+            messagesSlide,
+            nativeRow: messagesArea.querySelector('[class*="areaRow___"], [class*="area-row___"]'),
+            nativeIconWrap: messagesLink.querySelector('span[class*="svgIconWrap___"]'),
+            nativeDefaultIcon: messagesLink.querySelector('span[class*="defaultIcon___"]'),
+            nativeLabel: messagesLink.querySelector('span[class*="linkName___"]'),
+            nativeSvg: messagesLink.querySelector('svg')
+        };
+    }
+
+    function buildSkullSvg(nativeSvg) {
+        if (!nativeSvg) return null;
+        const svg = nativeSvg.cloneNode(false);
+        const vb = (nativeSvg.getAttribute('viewBox') || '0 0 24 24').split(/\s+/).map(Number);
+        const vbW = vb[2] || 24;
+        const vbH = vb[3] || 24;
+        const ART_INK = 20;
+        const scale = vbH / ART_INK;
+        const tx = (vb[0] || 0) + (vbW - 24 * scale) / 2;
+        const ty = (vb[1] || 0) + (vbH - 24 * scale) / 2;
+        svg.style.overflow = 'visible';
+        svg.style.setProperty('filter', 'none', 'important');
+        svg.style.setProperty('-webkit-filter', 'none', 'important');
+        svg.setAttribute('aria-hidden', 'true');
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('transform', `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${scale.toFixed(4)})`);
+        g.setAttribute('fill', 'none');
+        g.setAttribute('stroke', 'currentColor');
+        g.setAttribute('stroke-width', '1.75');
+        g.setAttribute('stroke-linecap', 'round');
+        g.setAttribute('stroke-linejoin', 'round');
+        g.innerHTML = `
+            <path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-6.4 0-4.4-3.3-7.6-8.1-7.6Z"/>
+            <circle cx="8.8" cy="10.5" r="1.65"/>
+            <circle cx="15.2" cy="10.5" r="1.65"/>
+            <path d="m12 12.7-1 1.8h2l-1-1.8Z"/>
+            <path d="M8.1 16.1h7.8M10.5 16.1v1.3M13.5 16.1v1.3"/>
+        `;
+        svg.appendChild(g);
+        return svg;
+    }
+
+    function syncFloatingButtonVisibility() {
+        const button = document.getElementById(IDS.button);
+        if (!button) return;
+        const nativeReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.topSkull));
+        button.style.setProperty('display', nativeReady ? 'none' : 'flex', 'important');
+    }
+
+    function createTopbarSkull() {
+        const existing = document.getElementById(IDS.topSkull);
+        if (!settings.showTopbarSkull) {
+            existing?.remove();
+            syncFloatingButtonVisibility();
+            return false;
+        }
+        if (existing?.isConnected) {
+            updateTopbarSkullState();
+            syncFloatingButtonVisibility();
+            return true;
+        }
+
+        const ctx = getMobileNavContext();
+        if (!ctx) {
+            syncFloatingButtonVisibility();
+            return false;
+        }
+
+        const area = document.createElement('div');
+        area.className = ctx.messagesArea.className;
+        area.id = 'nav-sakalux-hub';
+
+        const row = document.createElement('div');
+        if (ctx.nativeRow) row.className = ctx.nativeRow.className;
+
+        const link = document.createElement('a');
+        link.className = ctx.messagesLink.className;
+        link.href = '#';
+        link.tabIndex = 0;
+        link.classList.add('slh-native-link');
+        link.setAttribute('aria-label', 'Open SakaLuX Script Hub');
+        link.setAttribute('title', 'SakaLuX Script Hub');
+
+        const iconWrap = document.createElement('span');
+        if (ctx.nativeIconWrap) iconWrap.className = ctx.nativeIconWrap.className;
+
+        const innerIcon = document.createElement('span');
+        if (ctx.nativeDefaultIcon) innerIcon.className = ctx.nativeDefaultIcon.className;
+        innerIcon.classList.add('slh-native-skull-icon');
+        innerIcon.style.setProperty('filter', 'none', 'important');
+        innerIcon.style.setProperty('-webkit-filter', 'none', 'important');
+
+        const skullSvg = buildSkullSvg(ctx.nativeSvg);
+        if (skullSvg) innerIcon.appendChild(skullSvg);
+        else innerIcon.textContent = '☠︎';
+
+        iconWrap.appendChild(innerIcon);
+        link.appendChild(iconWrap);
+
+        const label = document.createElement('span');
+        if (ctx.nativeLabel) label.className = ctx.nativeLabel.className;
+        label.textContent = 'HUB';
+        link.appendChild(label);
+
+        const badge = document.createElement('span');
+        badge.id = IDS.topBadge;
+        link.appendChild(badge);
+
+        const open = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            openHub();
+        };
+        link.addEventListener('click', open);
+        link.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') open(event);
+        });
+
+        row.appendChild(link);
+        area.appendChild(row);
+
+        let mounted;
+        if (ctx.isSwiper && ctx.messagesSlide) {
+            const slide = document.createElement('div');
+            slide.className = ctx.messagesSlide.className
+                .replace(/swiper-slide-active|swiper-slide-next|swiper-slide-prev|contextMenuActive___\S+/g, '')
+                .trim();
+            if (ctx.messagesSlide.style.width) slide.style.width = ctx.messagesSlide.style.width;
+            slide.appendChild(area);
+            mounted = slide;
+        } else {
+            mounted = area;
+        }
+
+        mounted.id = IDS.topSkull;
+        const reference = ctx.isSwiper ? ctx.messagesSlide : ctx.messagesArea;
+        ctx.wrapper.insertBefore(mounted, reference);
+
+        if (ctx.isSwiper) {
+            try {
+                const swiper = ctx.wrapper.parentElement?.swiper;
+                swiper?.update?.();
+            } catch {}
+        }
+
+        updateTopbarSkullState();
+        syncFloatingButtonVisibility();
+        return true;
+    }
+
+    function updateTopbarSkullState() {'''
+          s, n = fn_pattern.subn(fn_new, s, count=1)
+          if n != 1:
+              raise SystemExit('Could not replace old nav injection functions')
+
+          path.write_text(s, encoding='utf-8')
+
+          # Self-remove one-shot patch workflow.
+          Path('.github/workflows/patch-hub-native.yml').unlink(missing_ok=True)
+
+      - name: Commit patched Hub
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "sakalutzu92@yahoo.com"
+          git add -A
+          git commit -m "Release Script Hub v1.8.4 native mobile nav integration"
+          git push
