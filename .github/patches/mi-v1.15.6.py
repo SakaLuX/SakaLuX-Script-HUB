@@ -24,3 +24,4 @@ info=info.replace('## Latest changes\n\n','## Latest changes\n\n### SakaLuX Mark
 gf=(R/'greasyfork/Market-Intelligence.md').read_text(encoding='utf-8').replace('**Current version: v1.15.5**','**Current version: v1.15.6**',1)
 gf=gf.replace('## v1.15.5','## v1.15.6 — Torn PDA Displayed Value Accuracy\n\n- Landed travel calculations now use Torn PDA compact shop rows for buy/stock.\n- If Torn displays an expanded `Value: $...`, that value is used for the local landed market/profit calculation.\n- Fixes mismatches such as Minigun showing $1,499,999 instead of Torn\'s displayed $1,322,192.\n\n## v1.15.5',1)
 (R/'greasyfork/Market-Intelligence.md').write_text(gf,encoding='utf-8')
+# trigger
