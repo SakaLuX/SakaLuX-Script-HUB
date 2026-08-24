@@ -6,6 +6,7 @@ SRC=ROOT/'SakaLuX-Market-Intelligence.user.js'
 REG=ROOT/'scripts.json'
 INFO=ROOT/'UPDATE-INFO.md'
 GF=ROOT/'greasyfork/Market-Intelligence.md'
+BACKUP=ROOT/'backups/SakaLuX-Market-Intelligence-v1.8.0.user.js'
 
 
 def rep(text,old,new,label):
@@ -16,6 +17,7 @@ def rep(text,old,new,label):
 s=SRC.read_text(encoding='utf-8')
 if '// @version      1.8.0' not in s:
     raise SystemExit('Expected v1.8.0 source')
+BACKUP.write_text(s,encoding='utf-8')
 
 s=rep(s,'// @version      1.8.0','// @version      1.9.0','metadata version')
 s=rep(s,
@@ -24,8 +26,8 @@ s=rep(s,
 'description')
 s=rep(s,"const VERSION = '1.8.0';","const VERSION = '1.9.0';",'runtime version')
 s=rep(s,
-"        travelPlanItems: 0, travelPlanCost: 0, travelPlanProfit: 0, travelPlanSlots: 0,\n        travelPlanBudget: 0, travelPlanUnusedBudget: 0",
-"        travelPlanItems: 0, travelPlanCost: 0, travelPlanProfit: 0, travelPlanSlots: 0,\n        travelPlanBudget: 0, travelPlanUnusedBudget: 0, travelPlanMode: '', travelPlanOptimizationGain: 0",
+"        travelPlanItems: 0, travelPlanCost: 0, travelPlanProfit: 0, travelPlanSlots: 0, travelPlanBudget: 0, travelPlanUnusedBudget: 0",
+"        travelPlanItems: 0, travelPlanCost: 0, travelPlanProfit: 0, travelPlanSlots: 0, travelPlanBudget: 0, travelPlanUnusedBudget: 0, travelPlanMode: '', travelPlanOptimizationGain: 0",
 'state optimizer fields')
 
 old=r'''    function buildTravelBuyPlan(destination, entries, marketMap) {
@@ -164,7 +166,7 @@ s=rep(s,
 "<div>'+plan.used+'/'+plan.slots+' slots · '+money(plan.totalProfit)+' profit · '+modeText+gainText+budgetText+'</div>",
 'planner headline')
 s=rep(s,
-"Recommended quantities respect both travel capacity and your configured cash budget. 0 budget means unlimited.",
+"Plan respects both configured travel capacity and optional cash budget. Set budget to 0 for no money limit.",
 "Recommended quantities maximize estimated total net profit across your slot limit and cash budget. 0 budget uses the simpler slot-only greedy path because that is already optimal without a cash constraint.",
 'planner note')
 
