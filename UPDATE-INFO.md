@@ -8,9 +8,16 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.1** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.2** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.2
+- Fixed **Arrival Basket / Arrival Stock not appearing on Torn PDA/mobile while flying**.
+- `detectPage()` now recognizes the live **Remaining Flight Time** card even when Torn keeps the flight screen on a non-`sid=travel` URL.
+- Added Torn destination-city aliases used by the mobile flight UI, including **Ciudad Juarez → Mexico**, George Town, Toronto, Honolulu, London, Buenos Aires, Zurich, Tokyo, Beijing, Dubai and Johannesburg.
+- `detectFlightFromDom()` now understands the PDA/mobile format `Torn to Ciudad Juarez. Remaining Flight Time - HH:MM:SS` in addition to the desktop `Traveling ... to ...` format.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.1.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.1
 - Hotfix for **Travel Session Summary** session lifecycle.
@@ -271,6 +278,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.15.1.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.15.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.14.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.13.0.user.js`

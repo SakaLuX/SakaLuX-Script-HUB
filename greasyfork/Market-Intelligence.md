@@ -1,10 +1,17 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.1**
+**Current version: v1.15.2**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.2 — Torn PDA/Mobile Flight Detection Fix
+
+- Fixed Arrival Basket / Arrival Stock failing to appear on Torn PDA/mobile flight screens.
+- Recognizes `Remaining Flight Time` as a Travel page even if the URL is not `?sid=travel`.
+- Supports Torn's city-form flight destinations such as **Ciudad Juarez → Mexico** and the equivalent cities for all travel countries.
+- Supports the mobile text format `Torn to <city>. Remaining Flight Time - HH:MM:SS`.
 
 ## v1.15.1 — Travel Session Tracking Hotfix
 
