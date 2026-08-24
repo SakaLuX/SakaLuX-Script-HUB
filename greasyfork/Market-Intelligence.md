@@ -1,10 +1,20 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.12.0**
+**Current version: v1.13.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.13.0 — Arrival Basket Planner
+
+- While flying, Market Intelligence now prepares the **best basket to buy immediately after landing**.
+- Predicted stock combines current YATA stock with the script's locally learned restock timing and refill quantities.
+- Uses your configured travel slots and optional Travel budget to optimize the basket.
+- Recommended rows show **BUY × quantity**, current stock, estimated landing stock, profit per item, prediction confidence and planned total profit.
+- Profitable alternatives are still shown below the selected basket.
+- The panel shows planned slot usage, expected profit and optimization mode before landing.
+- Added a dedicated Settings toggle and `arrivalBasket()` public API action.
 
 ## v1.12.0 — In-Country Best Buys
 
@@ -186,7 +196,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist, price history and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.12.0.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist, price history and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.13.0.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.
