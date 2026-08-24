@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.8.4
+// @version      1.8.5
 // @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with a Torn-native mobile HUB entry integrated before Messages.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -16,13 +16,23 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.8.4';
+    const VERSION = '1.8.5';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.8.5',
+            date: '2026-08-24',
+            changes: [
+                'Fixed false UPDATE AVAILABLE states caused by cached checks from an older installed add-on version.',
+                'Cached update data is now fresh only when its recorded installed version still matches the version currently loaded.',
+                'Update cards, counters and HUB alert badge now recalculate availability from Latest versus Installed before rendering.',
+                'Added Market Intelligence v1.1.1 to the offline fallback registry and its ready-event integration.'
+            ]
+        },
         {
             version: '1.8.4',
             date: '2026-08-24',
@@ -111,6 +121,21 @@
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open', fallbackUrl: 'https://www.torn.com/page.php?sid=missions' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh', fallbackUrl: 'https://www.torn.com/page.php?sid=missions' },
                     { id: 'missions', label: 'MISSIONS', icon: '🎯', method: 'goToMissions', fallbackUrl: 'https://www.torn.com/page.php?sid=missions' }
+                ]
+            },
+            {
+                id: 'market-intelligence', type: 'addon', active: true,
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.1.1',
+                description: 'Market and travel intelligence with clickable Best Travel Run routes, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.',
+                greasyForkId: '592781',
+                metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
+                downloadUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js',
+                apiGlobal: 'SakaLuXMarketIntelligence', buttonSelector: '#sl-mi-button',
+                quickActions: [
+                    { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open' },
+                    { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' },
+                    { id: 'best-run', label: 'BEST RUN', icon: '✈️', method: 'goToBestRun', fallbackUrl: 'https://www.torn.com/page.php?sid=travel' },
+                    { id: 'market', label: 'MARKET', icon: '📈', method: 'goToMarket', fallbackUrl: 'https://www.torn.com/page.php?sid=ItemMarket' }
                 ]
             }
         ]
@@ -280,13 +305,31 @@
         saveJson(STORAGE.usage, usage);
     }
 
-    function isUpdateCacheFresh(id) {
-        const data = updateCache[id];
-        return Boolean(data?.checkedAt && Date.now() - Number(data.checkedAt) < UPDATE_CACHE_TIME);
+    function isUpdateCacheFresh(script) {
+        const data = updateCache[script.id];
+        const installed = getInstalledVersion(script);
+        return Boolean(
+            data?.checkedAt &&
+            Date.now() - Number(data.checkedAt) < UPDATE_CACHE_TIME &&
+            String(data.installed || '') === String(installed || '')
+        );
+    }
+
+    function normalizeCachedUpdate(script) {
+        const data = updateCache[script.id];
+        if (!data) return null;
+        const installed = getInstalledVersion(script);
+        const latest = data.latest ? String(data.latest) : null;
+        const available = Boolean(installed && latest && compareVersions(latest, installed) > 0);
+        if (String(data.installed || '') !== String(installed || '') || Boolean(data.available) !== available) {
+            updateCache[script.id] = { ...data, installed, latest, available };
+            saveJson(STORAGE.updates, updateCache);
+        }
+        return updateCache[script.id];
     }
 
     async function checkScriptUpdate(script, force = false) {
-        if (!force && isUpdateCacheFresh(script.id)) return updateCache[script.id];
+        if (!force && isUpdateCacheFresh(script)) return normalizeCachedUpdate(script);
         const installed = getInstalledVersion(script);
         try {
             const latest = parseMetaVersion(await httpGet(script.metaUrl));
@@ -332,7 +375,7 @@
 
     function getUpdateState(script) {
         const installed = getInstalledVersion(script);
-        const data = updateCache[script.id];
+        const data = normalizeCachedUpdate(script);
         if (!installed) return { state: 'missing', text: '⬇ ADD-ON NOT INSTALLED', data: data || null };
         if (!data) return { state: 'unknown', text: 'NOT CHECKED', data: null };
         if (data.error) return { state: 'failed', text: 'CHECK FAILED', data };
@@ -341,7 +384,7 @@
     }
 
     function getUpdateCount() {
-        return SCRIPTS.filter(s => getInstalledVersion(s) && updateCache[s.id]?.available).length;
+        return SCRIPTS.filter(script => Boolean(normalizeCachedUpdate(script)?.available)).length;
     }
 
     function getUpdateErrorCount() {
@@ -898,7 +941,7 @@
 
     async function updateAll() {
         await checkAllUpdates(true);
-        const updates = SCRIPTS.filter(script => getInstalledVersion(script) && updateCache[script.id]?.available && script.downloadUrl);
+        const updates = SCRIPTS.filter(script => getUpdateState(script).state === 'available' && script.downloadUrl);
         if (!updates.length) {
             alert('All installed SakaLuX add-ons are up to date.');
             return;
@@ -1120,6 +1163,7 @@
     window.addEventListener('SakaLuX:EnhancerGuardReady', () => { queueEnsure(); renderList(); renderMainStats(); });
     window.addEventListener('SakaLuX:BazaarThankerReady', () => { queueEnsure(); renderList(); renderMainStats(); });
     window.addEventListener('SakaLuX:MissionRewardsReady', () => { queueEnsure(); renderList(); renderMainStats(); });
+    window.addEventListener('SakaLuX:MarketIntelligenceReady', () => { queueEnsure(); renderList(); renderMainStats(); });
 
     async function init() {
         ensureEverything();
