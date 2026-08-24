@@ -13,7 +13,6 @@ def repl(t,a,b,label):
 s=SRC.read_text(encoding='utf-8')
 s=repl(s,'// @version      1.15.2','// @version      1.15.3','meta')
 s=repl(s,"const VERSION = '1.15.2';","const VERSION = '1.15.3';",'runtime')
-# Keep the current Arrival panel visible while async refreshes happen. Remove only when flight state is invalid.
 s=repl(s,"    async function renderArrivalStock(){\n        document.getElementById('sl-mi-arrival')?.remove();\n        state.arrivalRows=0;state.flightDestination='';state.landingMins=null;",
 "    async function renderArrivalStock(){\n        const previousArrival=document.getElementById('sl-mi-arrival');\n        state.arrivalRows=0;state.flightDestination='';state.landingMins=null;",
 'arrival start')
@@ -23,17 +22,9 @@ s=repl(s,"        if(!settings.arrivalStock||!detectInFlight()) return;",
 s=repl(s,"        if(!destination||!Number.isFinite(landingMins)||landingMins<0) return;",
 "        if(!destination||!Number.isFinite(landingMins)||landingMins<0){previousArrival?.remove();return;}",
 'arrival no destination')
-s=repl(s,"        const yata=(await fetchYataAll()).filter(r=>r.destination===destination);if(!yata.length)return;",
-"        const yata=(await fetchYataAll()).filter(r=>r.destination===destination);if(!yata.length)return;",
-'yata anchor')
-# Replace old panel only when a fully built new panel is ready.
-s=repl(s,"        const bar=document.createElement('div');bar.id='sl-mi-arrival';bar.className='open';",
-"        const bar=document.createElement('div');bar.id='sl-mi-arrival';bar.className='open';",
-'bar anchor')
 s=repl(s,"        bar.querySelector('.sl-mi-arrival-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);\n        paintTravelSessionSummary();",
 "        bar.querySelector('.sl-mi-arrival-head').onclick=()=>bar.classList.toggle('open');\n        previousArrival?.remove();\n        mountTop(bar);\n        paintTravelSessionSummary();",
 'swap panel')
-# Force scans should not wipe Arrival Basket before renderArrivalStock can refresh it.
 s=repl(s,".sl-mi-items,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-museum-bar",
 ".sl-mi-items,#sl-mi-best-run,#sl-mi-museum-bar",
 'force cleanup arrival')
@@ -56,3 +47,4 @@ gf=GF.read_text(encoding='utf-8')
 gf=gf.replace('**Current version: v1.15.2**','**Current version: v1.15.3**',1)
 gf=gf.replace('## v1.15.2', '## v1.15.3 — Torn PDA Arrival Basket No-Flicker\n\n- Fixed Arrival Basket disappearing briefly during Torn PDA flight-page rerenders.\n- The current panel remains visible while fresh data is fetched and is swapped only when the replacement is ready.\n- Force refresh no longer clears Arrival Basket before async work completes.\n\n## v1.15.2',1)
 GF.write_text(gf,encoding='utf-8')
+# trigger
