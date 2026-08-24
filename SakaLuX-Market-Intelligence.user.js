@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.1
+// @version      1.15.2
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.1';
+    const VERSION = '1.15.2';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -90,17 +90,17 @@
     ];
 
     const TORN_TRAVEL_LABELS = {
-        Mexico: ['Mexico'],
-        Caymans: ['Cayman Islands', 'Caymans'],
-        Canada: ['Canada'],
-        Hawaii: ['Hawaii'],
-        UK: ['United Kingdom', 'UK'],
-        Argentina: ['Argentina'],
-        Switzerland: ['Switzerland'],
-        Japan: ['Japan'],
-        China: ['China'],
-        UAE: ['UAE', 'United Arab Emirates'],
-        'South Africa': ['South Africa']
+        Mexico: ['Mexico', 'Ciudad Juarez'],
+        Caymans: ['Cayman Islands', 'Caymans', 'George Town'],
+        Canada: ['Canada', 'Toronto'],
+        Hawaii: ['Hawaii', 'Honolulu'],
+        UK: ['United Kingdom', 'UK', 'London'],
+        Argentina: ['Argentina', 'Buenos Aires'],
+        Switzerland: ['Switzerland', 'Zurich', 'Zürich'],
+        Japan: ['Japan', 'Tokyo'],
+        China: ['China', 'Beijing'],
+        UAE: ['UAE', 'United Arab Emirates', 'Dubai'],
+        'South Africa': ['South Africa', 'Johannesburg']
     };
 
     const DEFAULT_SETTINGS = {
@@ -348,8 +348,10 @@
     function checkApiError(data) { if(data?.error) throw new Error(data.error.error||data.error.message||'Torn API error'); }
 
     function detectPage() {
-        const u=location.href;
-        if(/sid=travel/i.test(u)) return 'travel';
+        const u=location.href, body=document.body?.innerText||'';
+        // Torn's mobile/PDA in-flight screen is not always kept on ?sid=travel.
+        // Detect the actual flight card too so Arrival Basket runs on /index.php-style travel views.
+        if(/sid=travel/i.test(u)||/Remaining Flight Time/i.test(body)||/(?:Traveling\s+(?:from\s+.+?\s+)?to|Torn\s+to)\s+[A-Za-zÀ-ÿ .'-]+/i.test(body)) return 'travel';
         if(/sid=ItemMarket/i.test(u)) return 'itemmarket';
         if(/bazaar\.php/i.test(u)) return 'bazaar';
         if(/item\.php/i.test(u)) return 'items';
@@ -370,7 +372,9 @@
     function detectFlightFromDom() {
         const body=document.body?.innerText||'';
         let destination=null, seconds=null;
-        const to=body.match(/Traveling\s+(?:from\s+.+?\s+)?to\s+([A-Za-z ]+?)(?:\n|Remaining|$)/i);
+        // Desktop commonly says "Traveling ... to X" while Torn PDA/mobile can say
+        // "Torn to Ciudad Juarez. Remaining Flight Time - 00:16:43".
+        const to=body.match(/(?:Traveling\s+(?:from\s+.+?\s+)?to|Torn\s+to)\s+([A-Za-zÀ-ÿ .'-]+?)(?=\s*(?:\.|\n|Remaining Flight Time|$))/i);
         if(to) destination=normalizeDestination(to[1]);
         if(!destination) {
             for(const key of Object.keys(FLIGHT_MINS)) {
