@@ -2,6 +2,8 @@
 
 **Current version: v1.0.0**
 
+**Greasy Fork:** script **592781**
+
 SakaLuX Market Intelligence is a local-first Torn PDA / Tampermonkey add-on for market and travel decisions. It is designed to work with **SakaLuX Script Hub** and does not depend on Valigia servers or copy its shared-data infrastructure.
 
 ## v1.0.0
@@ -17,6 +19,7 @@ SakaLuX Market Intelligence is a local-first Torn PDA / Tampermonkey add-on for 
 - Manual API-key fallback outside Torn PDA.
 - Full `window.SakaLuXMarketIntelligence` API for SakaLuX Script Hub detection and quick actions.
 - Shared optional SakaLuX Script Hub installation prompt with 24-hour **NOT NOW** cooldown.
+- Official Greasy Fork release registered in SakaLuX Script Hub for install/update checks.
 
 ## Privacy / data
 
