@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.6
+// @version      1.15.7
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.6';
+    const VERSION = '1.15.7';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -676,6 +676,38 @@
 
     function ensureBadge(row,cls){let box=row.querySelector(':scope > .'+cls);if(!box){box=document.createElement('div');box.className=cls;row.appendChild(box);}return box;}
 
+
+    function ensureTravelBadge(row,cls){
+        if(!row)return null;
+        const host=row.closest?.('tr')||row;
+        if(host?.tagName==='TR'){
+            const next=host.nextElementSibling;
+            if(next?.classList?.contains('sl-mi-pda-badge-row')&&next.dataset.miClass===cls){
+                const existing=next.querySelector('.'+cls);if(existing)return existing;
+            }
+            const tr=document.createElement('tr');
+            tr.className='sl-mi-pda-badge-row';
+            tr.dataset.miClass=cls;
+            const td=document.createElement('td');
+            td.colSpan=Math.max(1,host.children?.length||5);
+            td.style.cssText='padding:0 6px 6px!important;border:0!important;background:transparent!important;height:auto!important;';
+            const box=document.createElement('div');
+            box.className=cls+' sl-mi-pda-wide-badge';
+            box.style.cssText='display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35!important;margin:0!important;padding:7px 10px!important;';
+            td.appendChild(box);tr.appendChild(td);host.insertAdjacentElement('afterend',tr);return box;
+        }
+        const next=host?.nextElementSibling;
+        if(next?.classList?.contains('sl-mi-pda-badge-block')&&next.dataset.miClass===cls){
+            const existing=next.querySelector('.'+cls);if(existing)return existing;
+        }
+        const wrap=document.createElement('div');
+        wrap.className='sl-mi-pda-badge-block';wrap.dataset.miClass=cls;
+        wrap.style.cssText='display:block!important;width:100%!important;clear:both!important;box-sizing:border-box!important;margin:2px 0 6px!important;';
+        const box=document.createElement('div');box.className=cls+' sl-mi-pda-wide-badge';
+        box.style.cssText='display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35!important;padding:7px 10px!important;';
+        wrap.appendChild(box);host.insertAdjacentElement('afterend',wrap);return box;
+    }
+
     function bestRunAffordableQty(row,slots){
         const stockQty=row.stock==null?slots:Math.min(slots,Math.max(0,Number(row.stock)||0));
         const budget=Math.max(0,Number(settings.travelBudget)||0);
@@ -1039,11 +1071,11 @@
         const destination=detectDestination();if(!destination)return;
         document.getElementById('sl-mi-best-run')?.remove();
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
-        for(const img of imgs){const id=itemIdFromImg(img),row=travelRowContainer(img);if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractTornDisplayedValue(img)});}
+        for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractTornDisplayedValue(img)});}
         const unique=[...new Map(entries.map(e=>[e.id,e])).values()].slice(0,MAX_LIVE_FETCHES);
         const marketMap=new Map();
         for(const e of unique){const c=cachePeek(e.id);if(c)marketMap.set(e.id,c);}
-        await mapWithLimit(unique,async e=>{if(e.stock!=null)recordStock(destination,e.id,e.stock);const fetched=await fetchMarket(e.id);if(!fetched)return;const market=e.displayValue>0?{...fetched,price:e.displayValue,tornDisplayedValue:e.displayValue}:fetched;marketMap.set(e.id,market);const m=metrics(e.buy,market.price),box=ensureBadge(e.row,'sl-mi-travel');box.classList.toggle('loss',m.profit<Number(settings.minProfit||0));box.innerHTML='<b>☠︎ MI</b> Market '+money(market.price)+' · Net '+money(m.net)+' · <strong>'+money(m.profit)+' ('+pct(m.roi)+')</strong>'+(e.stock!=null?' · Stock '+e.stock.toLocaleString('en-US')+stockEtaText(destination,e.id,e.stock):'');state.decorated++;});
+        await mapWithLimit(unique,async e=>{if(e.stock!=null)recordStock(destination,e.id,e.stock);const fetched=await fetchMarket(e.id);if(!fetched)return;const market=e.displayValue>0?{...fetched,price:e.displayValue,tornDisplayedValue:e.displayValue}:fetched;marketMap.set(e.id,market);const m=metrics(e.buy,market.price),box=ensureTravelBadge(e.row,'sl-mi-travel');box.classList.toggle('loss',m.profit<Number(settings.minProfit||0));box.innerHTML='<b>☠︎ MI</b> Market '+money(market.price)+' · Net '+money(m.net)+' · <strong>'+money(m.profit)+' ('+pct(m.roi)+')</strong>'+(e.stock!=null?' · Stock '+e.stock.toLocaleString('en-US')+stockEtaText(destination,e.id,e.stock):'');state.decorated++;});
         flushStockHistory();
         if(settings.countryBestBuys) paintCountryBestBuys(destination,unique,marketMap);
         else paintTravelBuyPlan(buildTravelBuyPlan(destination,unique,marketMap));

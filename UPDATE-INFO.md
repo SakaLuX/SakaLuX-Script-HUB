@@ -8,9 +8,16 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.6** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.7** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.7
+- Fixed Torn PDA travel-shop layout: Market Intelligence badges no longer render inside the original item table row/first column.
+- Each travel result now renders as a dedicated full-width row directly below its Torn item, preserving the original Item / Name / Stock / Cost / Buy columns.
+- Long Market / Net / Profit / Stock text can wrap normally instead of being clipped into a narrow cell.
+- Keeps the Torn PDA-first landed price/stock fixes from v1.15.6.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.6.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.6
 - Fixed landed Torn PDA scan to use the compact shop row for buy price and stock.
