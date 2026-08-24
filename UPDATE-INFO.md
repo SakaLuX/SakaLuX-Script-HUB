@@ -8,9 +8,18 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.1.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.1.1** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.1.1
+- Best Travel Run rows are now actionable.
+- Tapping a recommended route automatically finds and selects the matching destination in Torn's Travel Agency list.
+- Added destination-name aliases for Torn labels such as **Cayman Islands**, **United Kingdom** and **UAE**.
+- Added keyboard activation support for clickable route rows.
+- Added subtle hover/focus/active styling so the route rows clearly behave like buttons.
+- Added `selectDestination(destination)` to `window.SakaLuXMarketIntelligence`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.1.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.1.0
 - Added **Best Travel Run** on the Torn Travel home screen.
@@ -78,6 +87,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.1.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.0.0.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.3.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.2.user.js`
