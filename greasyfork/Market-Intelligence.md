@@ -1,10 +1,16 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.2**
+**Current version: v1.15.3**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.3 — Torn PDA Arrival Basket No-Flicker
+
+- Fixed Arrival Basket disappearing briefly during Torn PDA flight-page rerenders.
+- The current panel remains visible while fresh data is fetched and is swapped only when the replacement is ready.
+- Force refresh no longer clears Arrival Basket before async work completes.
 
 ## v1.15.2 — Torn PDA/Mobile Flight Detection Fix
 
