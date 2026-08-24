@@ -8,9 +8,20 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.4.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.5.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.5.0
+- Added **Item Market Intelligence** with local price history per item.
+- Records Item Market floor/effective prices locally with a 5-minute minimum sampling gap and keeps up to 14 days / 120 samples.
+- Added **trend**, recent **median**, **volatility** and effective-vs-floor **spread** calculations.
+- Added direct **BUY NOW / FAIR / WAIT / LEARNING** signals based on the current floor versus recent local history and trend.
+- Added a compact 12-sample sparkline for quick price direction context.
+- Existing per-item price watchlist remains available inside the same panel.
+- Added Item Market signal/trend/volatility/sample fields to `health()` and `itemMarketIntelligence()` to the public API.
+- No additional recurring API traffic is added: history is recorded from Item Market checks the script already performs.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.4.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.4.0
 - Added **Bazaar Flip Intelligence** with a dedicated ranked deal board.
@@ -140,6 +151,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.4.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.3.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.2.1.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.2.0.user.js`
