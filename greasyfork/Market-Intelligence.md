@@ -1,25 +1,43 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.10.0**
+**Current version: v1.11.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
 
+## v1.11.0 — Best Route Basket Optimizer
+
+- Replaced the old one-item-per-route ranking with **Best Route Basket Optimizer**.
+- Every destination is evaluated as a complete shopping basket.
+- For each country, the script combines multiple profitable items while respecting:
+  - configured travel slots,
+  - current abroad stock,
+  - optional Travel budget,
+  - current/cached Item Market resale values,
+  - configured market fee.
+- With a cash budget, the same bounded optimizer used by Travel Buy Planner searches the most profitable affordable mix for that destination.
+- With unlimited budget, the route basket uses the optimal slot-only highest-profit fill.
+- Countries are ranked by the basket's estimated **profit per hour** using actual Torn flight times when available.
+- Each Best Route Basket row shows destination, basket summary, number of item types, slots used, planned cost, profit/run and profit/hour.
+- Tapping a route still selects that destination in Torn Travel.
+- The 15-item live refresh pass now gives destinations a fair first candidate before spending the remaining refresh slots, reducing country bias without returning to the old 45-request Travel load.
+- `health()` now exposes `bestRunBasketRoutes`, `bestRunBasketItems` and `bestRunBasketProfit`.
+
 ## v1.10.0 — Budget-Aware Best Travel Run
 
-- Best Travel Run now respects the configured **Travel budget ($)**.
+- Best Travel Run respects the configured **Travel budget ($)**.
 - Each route is evaluated using only the quantity that can actually be purchased with the configured budget.
 - Routes where the budget cannot afford even one unit are excluded from the ranking.
-- Recommendations now show planned buy quantity, total trip purchase cost and whether the route is **budget capped**.
+- Recommendations show planned buy quantity, total trip purchase cost and whether the route is **budget capped**.
 - Profit per run and profit per hour are recalculated from the affordable quantity instead of assuming every route can fill all travel slots.
 - The live Item Market refresh shortlist is also budget-aware, avoiding refreshes for routes that the configured budget cannot use.
 - Budget calculations are applied consistently to both instant cached results and live-refreshed results.
-- `health()` now exposes `bestRunBudgetAware`, `bestRunAffordableRoutes` and `bestRunBlockedRoutes`.
+- `health()` exposes `bestRunBudgetAware`, `bestRunAffordableRoutes` and `bestRunBlockedRoutes`.
 
 ## v1.9.0 — Travel Profit Optimizer
 
-- Travel Budget Planner now optimizes the item combination for **maximum estimated total net profit** under both slot and cash-budget constraints.
+- Travel Budget Planner optimizes the item combination for **maximum estimated total net profit** under both slot and cash-budget constraints.
 - Uses current stock and item buy prices together with the existing Item Market profit estimates.
 - The budget optimizer uses a Pareto-frontier dynamic-programming approach rather than a dollar-by-dollar budget matrix.
 - With no budget limit, the existing highest-profit-per-item fill remains because it is already optimal for a pure slot constraint.
@@ -29,12 +47,12 @@ SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and t
 
 ## v1.8.0 — Travel Budget Planner
 
-- Travel Buy Planner can now use an optional cash budget in addition to travel capacity.
+- Travel Buy Planner can use an optional cash budget in addition to travel capacity.
 - Set **Travel budget ($)** in Settings; `0` keeps the old unlimited-budget behavior.
 - Recommended quantities are automatically capped by both available slots and remaining budget.
 - The planner shows total spend, expected net profit, remaining budget, used capacity and unused slots.
 - Existing item jump/highlight behavior remains unchanged.
-- `health()` now exposes configured and unused planner budget.
+- `health()` exposes configured and unused planner budget.
 
 ## v1.7.0 — Travel Buy Planner
 
@@ -49,7 +67,7 @@ SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and t
 
 ## v1.6.0 — Real Torn Flight Times
 
-- Best Travel Run now detects destination flight durations directly from Torn's Travel Agency page.
+- Best Travel Run detects destination flight durations directly from Torn's Travel Agency page.
 - Profit/hour ranking uses the player's currently displayed Torn travel times whenever they are available.
 - Current travel modifiers are therefore reflected automatically instead of relying only on static baseline durations.
 - Static flight times remain as a fallback if a destination time cannot be read.
@@ -76,7 +94,7 @@ SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and t
 - Tapping a board row jumps to the matching Bazaar listing and highlights it.
 - Existing per-item DEAL / NO FLIP labels remain available.
 - Uses the existing cache-first market layer and bounded requests to avoid unnecessary API load.
-- `health()` now exposes Bazaar deal count, best profit and best ROI.
+- `health()` exposes Bazaar deal count, best profit and best ROI.
 
 ## v1.3.0 — Museum Set Intelligence
 
@@ -94,41 +112,34 @@ SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and t
 
 ## v1.2.1 — Travel Performance Update
 
-- Travel is now **cache-first**: cached market data can paint Best Travel Run immediately after YATA loads.
+- Travel is **cache-first**: cached market data can paint Best Travel Run immediately after YATA loads.
 - Live Item Market refresh work is limited to a prioritized **15-item shortlist** instead of up to 45 items.
 - Arrival Stock refreshes a prioritized **12-item shortlist**.
 - The smaller live shortlist runs at concurrency 6.
 - Cached Travel prices may be reused for up to 6 hours for the instant first paint; refreshed shortlist values replace them afterward.
 - Best Travel Run shows whether it is displaying instant cache data or the live-refreshed shortlist.
 - MutationObserver rescans are throttled on Travel and SakaLuX-owned DOM changes are ignored, reducing repeated work during Torn page hydration.
-- `health()` now exposes Travel cache hits, refresh count and skipped observer rescans.
+- `health()` exposes Travel cache hits, refresh count and skipped observer rescans.
 
 ## v1.2.0
 
 - Added **Arrival Stock Intelligence** while flying.
 - Detects the destination and remaining flight time from Torn travel data, with a page fallback when needed.
 - Combines current YATA destination stock with live Torn Item Market prices before landing.
-- Shows the best items to target on arrival, including:
-  - current stock,
-  - estimated stock on arrival,
-  - likely or possible restocks before landing,
-  - prediction confidence,
-  - projected profit per travel run.
-- Stock learning now records observed refill quantity as well as refill timing.
+- Shows the best items to target on arrival, including current stock, estimated stock on arrival, likely/possible restocks before landing, prediction confidence and projected profit per travel run.
+- Stock learning records observed refill quantity as well as refill timing.
 - Learned refill timing is based on the local median interval between observed restocks.
 - Learned refill quantity is based on the local median increase seen when stock refills.
 - When there is not enough history, the result is explicitly marked **LEARNING** instead of presenting a false exact prediction.
 - Added an **Arrival-stock prediction while flying** toggle in Settings.
 - Added `arrivalPrediction()` to the public `window.SakaLuXMarketIntelligence` API.
-- Health data now includes arrival rows, detected flight destination and remaining landing minutes.
 
 ## v1.1.1
 
 - Best Travel Run recommendations are directly actionable.
 - Tap any recommended route and the script automatically selects that destination in Torn's Travel Agency list.
-- Supports Torn destination labels such as **Cayman Islands**, **United Kingdom** and **UAE** while keeping the internal SakaLuX/YATA destination names.
-- Route rows have button-like hover/focus/active feedback.
-- Added keyboard activation for route rows.
+- Supports Torn destination labels such as **Cayman Islands**, **United Kingdom** and **UAE** while keeping internal SakaLuX/YATA destination names.
+- Added keyboard activation and button-like route feedback.
 - Added `selectDestination(destination)` to the public Hub API.
 
 ## v1.1.0
@@ -136,16 +147,9 @@ SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and t
 - Added **Best Travel Run** to the Torn Travel home screen.
 - Uses public YATA abroad stock/buy-price data together with live Torn Item Market prices.
 - Ranks destinations by estimated profit per hour.
-- Shows item, destination, current stock, estimated profit per run and estimated profit per hour.
 - Added configurable travel capacity/slots and flight multiplier.
-- Added **stock + restock ETA intelligence**.
-- Stock observations are stored locally per destination/item.
-- Real stock increases are learned as restock events.
-- After enough observations, next refill ETA is estimated from the learned median restock interval.
-- Before enough history exists, sold-out items show a clearly-labelled **possible restock** estimate based on the next quarter-hour tick, rather than claiming an exact refill time.
-- Landed Travel overlays show current stock and refill information directly beside profit data.
+- Added stock/restock ETA intelligence with local learning.
 - Added **BEST RUN** quick action in SakaLuX Script Hub.
-- Official Greasy Fork update/download URLs are embedded in the userscript metadata.
 
 ## v1.0.0
 
@@ -170,7 +174,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.10.0.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist, price history and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.11.0.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.
