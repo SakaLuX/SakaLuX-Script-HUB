@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.2.0
-// @description  Torn market and travel intelligence with Best Travel Run, arrival-stock prediction, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.
+// @version      1.2.1
+// @description  Torn market and travel intelligence with fast cache-first Best Travel Run, arrival-stock prediction, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.2.0';
+    const VERSION = '1.2.1';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -36,8 +36,11 @@
     };
 
     const MARKET_CACHE_MS = 10 * 60 * 1000;
+    const TRAVEL_CACHE_MAX_STALE_MS = 6 * 60 * 60 * 1000;
+    const TRAVEL_REFRESH_LIMIT = 15;
+    const ARRIVAL_REFRESH_LIMIT = 12;
     const MAX_LIVE_FETCHES = 45;
-    const CONCURRENCY = 4;
+    const CONCURRENCY = 6;
     const MAX_HISTORY_EVENTS = 8;
     const STOCK_HISTORY_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 
@@ -94,7 +97,8 @@
         page: '', apiMode: '', busy: false, lastScan: 0, lastError: '',
         scanCount: 0, marketRequests: 0, decorated: 0, observer: null,
         scanTimer: null, bestRunRows: 0, stockEtaLearned: 0,
-        arrivalRows: 0, flightDestination: '', landingMins: null
+        arrivalRows: 0, flightDestination: '', landingMins: null,
+        travelCacheHits: 0, travelRefreshes: 0, observerSkips: 0, lastObserverScan: 0
     };
 
     function loadJson(key, fallback) {
@@ -249,6 +253,7 @@
     function extractStock(node) { const txt=(node?.innerText||'').replace(/\$\s*[\d,.]+/g,' '); const nums=txt.match(/\b\d[\d,]*\b/g)||[]; if(!nums.length) return null; const vals=nums.map(x=>Number(x.replace(/,/g,''))).filter(Number.isFinite); return vals.length?Math.max(...vals):null; }
 
     function cacheGet(itemId) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>MARKET_CACHE_MS) return null; return row; }
+    function cachePeek(itemId,maxAge=TRAVEL_CACHE_MAX_STALE_MS) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>maxAge) return null; return row; }
     function cachePut(itemId,row) { marketCache[String(itemId)]=Object.assign({},row,{at:Date.now()}); saveJson(STORAGE.marketCache,marketCache); }
     async function fetchMarket(itemId,force=false) {
         if(!force){const c=cacheGet(itemId); if(c) return c;}
@@ -341,26 +346,22 @@
 
     function ensureBadge(row,cls){let box=row.querySelector(':scope > .'+cls);if(!box){box=document.createElement('div');box.className=cls;row.appendChild(box);}return box;}
 
-    async function renderBestTravelRun(){
-        document.getElementById('sl-mi-best-run')?.remove();
-        if(!settings.bestRun||detectDestination()||detectInFlight()) return;
-        const yata=await fetchYataAll(); if(!yata.length) return;
-        const profitableCandidates=[];
-        for(const r of yata){if(r.stock!=null)recordStock(r.destination,r.itemId,r.stock);if(r.stock===0)continue;profitableCandidates.push(r);}
-        flushStockHistory();
-        const ids=[...new Set(profitableCandidates.map(r=>r.itemId))].slice(0,MAX_LIVE_FETCHES);
-        const marketMap=new Map(); await mapWithLimit(ids,async id=>{const m=await fetchMarket(id);if(m)marketMap.set(id,m);});
+    function buildBestRunRows(candidates,marketMap){
         const slots=Math.max(1,Number(settings.travelSlots)||29),mult=Math.max(0.1,Number(settings.flightMultiplier)||1),ranked=[];
-        for(const r of profitableCandidates){
+        for(const r of candidates){
             const market=marketMap.get(r.itemId),flight=FLIGHT_MINS[r.destination];if(!market||!flight)continue;
             const m=metrics(r.buyPrice,market.price);if(m.profit<=0)continue;
             const qty=r.stock==null?slots:Math.min(slots,r.stock);if(qty<=0)continue;
             const profitRun=m.profit*qty,roundTrip=flight*mult*2,profitHour=profitRun/(roundTrip/60);
             ranked.push(Object.assign({},r,{market:market.price,net:m.net,profitItem:m.profit,roi:m.roi,qty,profitRun,profitHour,flightMins:flight*mult,eta:estimateRestock(r.destination,r.itemId)}));
         }
-        ranked.sort((a,b)=>b.profitHour-a.profitHour);const top=ranked.slice(0,11);state.bestRunRows=top.length;if(!top.length)return;
+        return ranked.sort((a,b)=>b.profitHour-a.profitHour).slice(0,11);
+    }
+
+    function paintBestTravelRun(top,phase){
+        document.getElementById('sl-mi-best-run')?.remove();state.bestRunRows=top.length;if(!top.length)return;
         const bar=document.createElement('div');bar.id='sl-mi-best-run';const best=top[0];
-        bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST TRAVEL RUN</span><strong>'+esc(best.name)+' → '+esc(best.destination)+'</strong><span>'+money(best.profitHour)+'/hr</span><button type="button">▾</button></div><div class="sl-mi-br-body"></div>';
+        bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST TRAVEL RUN</span><strong>'+esc(best.name)+' → '+esc(best.destination)+'</strong><span>'+money(best.profitHour)+'/hr</span><button type="button">▾</button></div><div class="sl-mi-perf-note">'+esc(phase||'cached')+'</div><div class="sl-mi-br-body"></div>';
         const body=bar.querySelector('.sl-mi-br-body');
         for(const r of top){
             const row=document.createElement('div');row.className='sl-mi-br-row sl-mi-route';row.dataset.destination=r.destination;row.setAttribute('role','button');row.tabIndex=0;row.title='Select '+r.destination+' in Torn Travel';
@@ -369,6 +370,42 @@
             const activate=()=>selectTravelDestination(r.destination);row.addEventListener('click',activate);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});body.appendChild(row);
         }
         bar.querySelector('.sl-mi-br-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
+    }
+
+    function travelRefreshIds(candidates,limit){
+        const scored=candidates.map(r=>{
+            const c=cachePeek(r.itemId),flight=FLIGHT_MINS[r.destination]||9999;
+            let score=0;
+            if(c){const m=metrics(r.buyPrice,c.price);score=Math.max(0,m.profit)*(Math.min(Math.max(1,Number(settings.travelSlots)||29),r.stock==null?999:r.stock))/(flight||1);}
+            else score=Math.max(1,r.buyPrice)/Math.max(1,flight);
+            return {id:r.itemId,score,cached:!!c};
+        }).sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+        const ids=[];const seen=new Set();
+        for(const x of scored){if(seen.has(x.id))continue;seen.add(x.id);ids.push(x.id);if(ids.length>=limit)break;}
+        return ids;
+    }
+
+    async function renderBestTravelRun(){
+        document.getElementById('sl-mi-best-run')?.remove();
+        if(!settings.bestRun||detectDestination()||detectInFlight()) return;
+        const yata=await fetchYataAll(); if(!yata.length) return;
+        const candidates=[];
+        for(const r of yata){if(r.stock!=null)recordStock(r.destination,r.itemId,r.stock);if(r.stock===0)continue;candidates.push(r);}flushStockHistory();
+
+        const cachedMap=new Map();
+        for(const r of candidates){const c=cachePeek(r.itemId);if(c)cachedMap.set(r.itemId,c);}
+        state.travelCacheHits=cachedMap.size;
+        const cachedTop=buildBestRunRows(candidates,cachedMap);
+        if(cachedTop.length) paintBestTravelRun(cachedTop,'instant cache · refreshing '+TRAVEL_REFRESH_LIMIT+' prices in background');
+
+        const ids=travelRefreshIds(candidates,TRAVEL_REFRESH_LIMIT);
+        state.travelRefreshes=ids.length;
+        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)return m;});
+
+        const finalMap=new Map();
+        for(const r of candidates){const c=cachePeek(r.itemId);if(c)finalMap.set(r.itemId,c);}
+        const finalTop=buildBestRunRows(candidates,finalMap);
+        if(finalTop.length) paintBestTravelRun(finalTop,'live-refreshed shortlist · '+ids.length+' market requests max');
     }
 
     async function renderArrivalStock(){
@@ -381,8 +418,10 @@
         state.flightDestination=destination;state.landingMins=landingMins;
         const yata=(await fetchYataAll()).filter(r=>r.destination===destination);if(!yata.length)return;
         for(const r of yata)if(r.stock!=null)recordStock(destination,r.itemId,r.stock);flushStockHistory();
-        const ids=[...new Set(yata.map(r=>r.itemId))].slice(0,MAX_LIVE_FETCHES),marketMap=new Map();
-        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id);if(m)marketMap.set(id,m);});
+        const marketMap=new Map();
+        for(const r of yata){const c=cachePeek(r.itemId);if(c)marketMap.set(r.itemId,c);}
+        const ids=travelRefreshIds(yata,ARRIVAL_REFRESH_LIMIT);
+        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)marketMap.set(id,m);});
         const slots=Math.max(1,Number(settings.travelSlots)||29),rows=[];
         for(const r of yata){
             const market=marketMap.get(r.itemId);if(!market)continue;
@@ -469,7 +508,7 @@
 .sl-mi-travel strong,.sl-mi-bazaar.good,.sl-mi-bazaar.good strong,#sl-mi-market-bar strong,#sl-mi-points-bar strong,#sl-mi-museum-bar strong,#sl-mi-best-run strong,#sl-mi-arrival strong{color:#78d98b}.sl-mi-travel.loss,.sl-mi-bazaar.bad,.sl-mi-bazaar.bad strong{color:#e06c6c}
 #sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival{margin:8px auto 10px;max-width:1100px;border-left:3px solid #d7b94c;font-size:11px}#sl-mi-market-bar.hit{border-left-color:#78d98b;background:#152219}
 .sl-mi-br-head,.sl-mi-arrival-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button,.sl-mi-arrival-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body,.sl-mi-arrival-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body,.open .sl-mi-arrival-body{display:flex;flex-direction:column}.sl-mi-br-row,.sl-mi-arrival-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name,.sl-mi-arrival-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{color:#d7b94c}.sl-mi-route{cursor:pointer;transition:background .12s ease,border-color .12s ease}.sl-mi-route:hover,.sl-mi-route:focus{background:#1c2522;border-color:#4d6957;outline:none}.sl-mi-route:active{background:#203028}
-.sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}
+.sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}
 .sl-mi-watch-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sl-mi-watch-row input{flex:1 1 140px;background:#0d0f14;color:#fff;border:1px solid #363e49;border-radius:6px;padding:8px}.sl-mi-watch-row button{border:0;border-radius:6px;padding:7px 9px;background:#303844;color:#fff;font-weight:900;font-size:10px}
 #sl-mi-button{position:fixed;right:10px;bottom:106px;z-index:2147483644;border:0;border-radius:999px;padding:9px 11px;background:#18181b;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font-weight:900;font-size:12px}
 #sl-mi-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-mi-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mi-title{font-size:16px;font-weight:900}.sl-mi-sub{margin-top:3px;color:#8e96a3;font-size:9px}#sl-mi-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}.sl-mi-toggle,.sl-mi-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mi-field input{width:45%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:7px}.sl-mi-info{margin:10px 0;color:#a6adb8;font-size:10px}.sl-mi-primary,.sl-mi-secondary{width:100%;min-height:40px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900}.sl-mi-primary{background:#2563eb}.sl-mi-secondary{background:#374151}.muted{color:#7e8793}
@@ -478,14 +517,14 @@
 
     function createButton(){if(!settings.showButton||document.getElementById('sl-mi-button'))return;const b=document.createElement('button');b.id='sl-mi-button';b.textContent='☠︎ Market';b.onclick=openSettings;document.body.appendChild(b);}
     function maybePromptHub(){if(window.SakaLuXScriptHub)return;let last=0;try{last=Number(localStorage.getItem(HUB_PROMPT_STORAGE)||0);}catch(_){}if(Date.now()-last<HUB_PROMPT_INTERVAL)return;setTimeout(()=>{if(window.SakaLuXScriptHub||document.getElementById('sl-mi-hub-prompt'))return;const box=document.createElement('div');box.id='sl-mi-hub-prompt';box.style.cssText='position:fixed;left:10px;right:10px;bottom:20px;z-index:2147483647;max-width:520px;margin:auto;background:#11161d;color:#fff;border:1px solid #39414c;border-radius:12px;padding:12px;font:12px Arial;box-shadow:0 8px 30px rgba(0,0,0,.55)';box.innerHTML='<b>☠︎ SakaLuX Script Hub</b><div style="margin:6px 0;color:#b8bec7">Install the Hub to manage Market Intelligence and the other SakaLuX add-ons from one place.</div><div style="display:flex;gap:7px"><button id="sl-mi-hub-install" style="flex:1;padding:9px;border:0;border-radius:7px;background:#2563eb;color:white;font-weight:900">INSTALL HUB</button><button id="sl-mi-hub-later" style="flex:1;padding:9px;border:0;border-radius:7px;background:#353c46;color:white;font-weight:900">NOT NOW</button></div>';document.body.appendChild(box);box.querySelector('#sl-mi-hub-install').onclick=()=>{location.href=HUB_INSTALL_URL;};box.querySelector('#sl-mi-hub-later').onclick=()=>{try{localStorage.setItem(HUB_PROMPT_STORAGE,String(Date.now()));}catch(_){}box.remove();};},1800);}
-    function startObserver(){if(state.observer)return;state.observer=new MutationObserver(muts=>{if(muts.some(m=>m.addedNodes?.length))scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>scheduleScan(true));}
+    function startObserver(){if(state.observer)return;state.observer=new MutationObserver(muts=>{const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-arrival,#sl-mi-overlay,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&now-state.lastObserverScan<1800){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>scheduleScan(true));}
 
     window.SakaLuXMarketIntelligence={
         id:'market-intelligence',name:'Market Intelligence',version:VERSION,
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
