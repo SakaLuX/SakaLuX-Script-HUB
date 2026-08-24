@@ -1,10 +1,15 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.9**
+**Current version: v1.15.10**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.10 — Torn PDA Bazaar Layout
+
+- Bazaar badges now render as full-width rows below each item instead of overlapping the item card.
+- Bazaar Flip Intelligence has cleaner mobile wrapping and remains visible while market prices refresh.
 
 ## v1.15.9 — Stable Item Market Panel
 

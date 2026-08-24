@@ -8,9 +8,15 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.9** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.10** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.10
+- Reworked Bazaar badges for Torn PDA so they render full-width below each item instead of overlapping item cards.
+- Improved mobile Bazaar Flip board spacing and wrapping.
+- Bazaar Flip board now remains visible while async price refreshes complete.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.9.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.9
 - Fixed Item Market Intelligence flicker/disappearing on Torn PDA.
