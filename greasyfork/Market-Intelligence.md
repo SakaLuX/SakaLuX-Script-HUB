@@ -1,10 +1,21 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.9.0**
+**Current version: v1.10.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.10.0 — Budget-Aware Best Travel Run
+
+- Best Travel Run now respects the configured **Travel budget ($)**.
+- Each route is evaluated using only the quantity that can actually be purchased with the configured budget.
+- Routes where the budget cannot afford even one unit are excluded from the ranking.
+- Recommendations now show planned buy quantity, total trip purchase cost and whether the route is **budget capped**.
+- Profit per run and profit per hour are recalculated from the affordable quantity instead of assuming every route can fill all travel slots.
+- The live Item Market refresh shortlist is also budget-aware, avoiding refreshes for routes that the configured budget cannot use.
+- Budget calculations are applied consistently to both instant cached results and live-refreshed results.
+- `health()` now exposes `bestRunBudgetAware`, `bestRunAffordableRoutes` and `bestRunBlockedRoutes`.
 
 ## v1.9.0 — Travel Profit Optimizer
 
@@ -159,7 +170,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.8.0.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.10.0.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.
