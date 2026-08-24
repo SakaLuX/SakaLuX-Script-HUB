@@ -8,9 +8,20 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.5.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.6.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.6.0
+- Added **real Torn Travel Agency flight-time detection** for Best Travel Run.
+- Best Travel Run now reads the currently displayed one-way time for each destination directly from the Travel page when available.
+- Actual detected times automatically include the player's current Torn travel modifiers, so profit/hour no longer depends on the old static baseline when Torn provides a time.
+- Static `FLIGHT_MINS` values remain only as a safe fallback for destinations whose time cannot be detected.
+- The existing Flight Multiplier setting is now explicitly a **Fallback flight multiplier** and is not applied on top of a real Torn time.
+- Each Best Travel Run row shows its one-way flight duration and whether it is **actual** or **fallback**.
+- The performance line shows how many destination times were detected from Torn.
+- Added `actualFlightTimes` and `travelTimeSource` to `health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.5.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.5.0
 - Added **Item Market Intelligence** with local price history per item.
@@ -151,6 +162,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.5.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.4.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.3.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.2.1.user.js`

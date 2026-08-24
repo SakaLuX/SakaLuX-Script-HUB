@@ -1,10 +1,20 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.5.0**
+**Current version: v1.6.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.6.0 — Real Torn Flight Times
+
+- Best Travel Run now detects destination flight durations directly from Torn's Travel Agency page.
+- Profit/hour ranking uses the player's currently displayed Torn travel times whenever they are available.
+- Current travel modifiers are therefore reflected automatically instead of relying only on static baseline durations.
+- Static flight times remain as a fallback if a destination time cannot be read.
+- Fallback Flight Multiplier is used only for fallback times.
+- Best Travel Run rows show the detected one-way flight time and whether it is actual or fallback.
+- `health()` exposes how many actual destination times were detected and the active travel-time source.
 
 ## v1.5.0 — Item Market Intelligence
 

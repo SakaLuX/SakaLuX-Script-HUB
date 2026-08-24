@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.5.0
-// @description  Torn market and travel intelligence with fast Travel tools, Bazaar Flip Intelligence, Item Market trend/signals, arrival-stock prediction and Museum set valuation.
+// @version      1.6.0
+// @description  Torn market and travel intelligence with real Torn flight-time detection, fast Travel tools, Bazaar Flip Intelligence, Item Market trend/signals, arrival prediction and Museum valuation.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.5.0';
+    const VERSION = '1.6.0';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -133,7 +133,8 @@
         travelCacheHits: 0, travelRefreshes: 0, observerSkips: 0, lastObserverScan: 0,
         museumSets: 0, museumRecommendation: '', museumMissingSets: 0,
         bazaarDeals: 0, bazaarBestProfit: 0, bazaarBestRoi: 0,
-        itemMarketSignal: '', itemMarketTrend: 0, itemMarketVolatility: 0, itemMarketHistorySamples: 0
+        itemMarketSignal: '', itemMarketTrend: 0, itemMarketVolatility: 0, itemMarketHistorySamples: 0,
+        actualFlightTimes: 0, travelTimeSource: 'fallback'
     };
 
     function loadJson(key, fallback) {
@@ -300,6 +301,60 @@
         return s.display!=='none' && s.visibility!=='hidden';
     }
 
+
+
+    function parseTravelDurationMinutes(text) {
+        const t=normText(text);
+        let m=t.match(/\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/);
+        if(m){
+            const h=Number(m[1]),min=Number(m[2]),sec=m[3]==null?0:Number(m[3]);
+            const total=h*60+min+sec/60;
+            if(total>=1&&total<=600)return total;
+        }
+        m=t.match(/\b(\d+)\s*h(?:ours?)?\s*(?:(\d+)\s*m(?:in(?:ute)?s?)?)?/i);
+        if(m){const total=Number(m[1])*60+Number(m[2]||0);if(total>=1&&total<=600)return total;}
+        m=t.match(/\b(\d+)\s*m(?:in(?:ute)?s?)\b/i);
+        if(m){const total=Number(m[1]);if(total>=1&&total<=600)return total;}
+        return null;
+    }
+
+    function fmtFlightMinutes(mins) {
+        const n=Math.max(0,Math.round(Number(mins)||0));
+        if(n<60)return n+'m';
+        const h=Math.floor(n/60),m=n%60;
+        return h+'h'+(m?' '+m+'m':'');
+    }
+
+    function scrapeTravelTimes() {
+        const found=new Map();
+        const nodes=[...document.querySelectorAll('tr,li,[role="row"],a,button,[class*="destination"],[class*="travel"],[class*="row"],[class*="Row"]')];
+        for(const destination of Object.keys(FLIGHT_MINS)){
+            const labels=TORN_TRAVEL_LABELS[destination]||[destination];
+            let best=null;
+            for(const el of nodes){
+                if(!isVisible(el))continue;
+                const text=normText(el.innerText||el.textContent);
+                if(!text||text.length>260)continue;
+                const lower=text.toLowerCase();
+                if(!labels.some(label=>lower.includes(label.toLowerCase())))continue;
+                const mins=parseTravelDurationMinutes(text);
+                if(!Number.isFinite(mins))continue;
+                const score=text.length+(el.children?.length||0)*2;
+                if(!best||score<best.score)best={mins,score,text};
+            }
+            if(best)found.set(destination,{mins:best.mins,source:'torn-page'});
+        }
+        return found;
+    }
+
+    function flightInfo(destination,actualMap) {
+        const actual=actualMap?.get(destination);
+        if(actual&&Number.isFinite(actual.mins))return actual;
+        const base=Number(FLIGHT_MINS[destination]);
+        if(!Number.isFinite(base))return null;
+        return {mins:base*Math.max(0.1,Number(settings.flightMultiplier)||1),source:'fallback'};
+    }
+
     function selectTravelDestination(destination) {
         if(detectPage()!=='travel' || detectDestination() || detectInFlight()) return false;
         const labels=TORN_TRAVEL_LABELS[destination]||[destination];
@@ -429,14 +484,14 @@
 
     function ensureBadge(row,cls){let box=row.querySelector(':scope > .'+cls);if(!box){box=document.createElement('div');box.className=cls;row.appendChild(box);}return box;}
 
-    function buildBestRunRows(candidates,marketMap){
-        const slots=Math.max(1,Number(settings.travelSlots)||29),mult=Math.max(0.1,Number(settings.flightMultiplier)||1),ranked=[];
+    function buildBestRunRows(candidates,marketMap,actualTimes){
+        const slots=Math.max(1,Number(settings.travelSlots)||29),ranked=[];
         for(const r of candidates){
-            const market=marketMap.get(r.itemId),flight=FLIGHT_MINS[r.destination];if(!market||!flight)continue;
+            const market=marketMap.get(r.itemId),flight=flightInfo(r.destination,actualTimes);if(!market||!flight)continue;
             const m=metrics(r.buyPrice,market.price);if(m.profit<=0)continue;
             const qty=r.stock==null?slots:Math.min(slots,r.stock);if(qty<=0)continue;
-            const profitRun=m.profit*qty,roundTrip=flight*mult*2,profitHour=profitRun/(roundTrip/60);
-            ranked.push(Object.assign({},r,{market:market.price,net:m.net,profitItem:m.profit,roi:m.roi,qty,profitRun,profitHour,flightMins:flight*mult,eta:estimateRestock(r.destination,r.itemId)}));
+            const profitRun=m.profit*qty,roundTrip=flight.mins*2,profitHour=profitRun/(roundTrip/60);
+            ranked.push(Object.assign({},r,{market:market.price,net:m.net,profitItem:m.profit,roi:m.roi,qty,profitRun,profitHour,flightMins:flight.mins,flightSource:flight.source,eta:estimateRestock(r.destination,r.itemId)}));
         }
         return ranked.sort((a,b)=>b.profitHour-a.profitHour).slice(0,11);
     }
@@ -448,16 +503,16 @@
         const body=bar.querySelector('.sl-mi-br-body');
         for(const r of top){
             const row=document.createElement('div');row.className='sl-mi-br-row sl-mi-route';row.dataset.destination=r.destination;row.setAttribute('role','button');row.tabIndex=0;row.title='Select '+r.destination+' in Torn Travel';
-            const eta=r.eta.learned?('next '+fmtDuration(r.eta.mins)):('ETA learning · possible ≤'+Math.max(1,Math.ceil(r.eta.mins))+'m');
+            const eta=(r.eta.learned?('next '+fmtDuration(r.eta.mins)):('ETA learning · possible ≤'+Math.max(1,Math.ceil(r.eta.mins))+'m'))+' · flight '+fmtFlightMinutes(r.flightMins)+' '+(r.flightSource==='torn-page'?'actual':'fallback');
             row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>'+esc(r.destination)+'</span><span>stock '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+'</span><span class="eta">'+eta+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
             const activate=()=>selectTravelDestination(r.destination);row.addEventListener('click',activate);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});body.appendChild(row);
         }
         bar.querySelector('.sl-mi-br-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
     }
 
-    function travelRefreshIds(candidates,limit){
+    function travelRefreshIds(candidates,limit,actualTimes){
         const scored=candidates.map(r=>{
-            const c=cachePeek(r.itemId),flight=FLIGHT_MINS[r.destination]||9999;
+            const c=cachePeek(r.itemId),flight=flightInfo(r.destination,actualTimes)?.mins||9999;
             let score=0;
             if(c){const m=metrics(r.buyPrice,c.price);score=Math.max(0,m.profit)*(Math.min(Math.max(1,Number(settings.travelSlots)||29),r.stock==null?999:r.stock))/(flight||1);}
             else score=Math.max(1,r.buyPrice)/Math.max(1,flight);
@@ -475,20 +530,23 @@
         const candidates=[];
         for(const r of yata){if(r.stock!=null)recordStock(r.destination,r.itemId,r.stock);if(r.stock===0)continue;candidates.push(r);}flushStockHistory();
 
+        const actualTimes=scrapeTravelTimes();
+        state.actualFlightTimes=actualTimes.size;
+        state.travelTimeSource=actualTimes.size?'torn-page':'fallback';
         const cachedMap=new Map();
         for(const r of candidates){const c=cachePeek(r.itemId);if(c)cachedMap.set(r.itemId,c);}
         state.travelCacheHits=cachedMap.size;
-        const cachedTop=buildBestRunRows(candidates,cachedMap);
-        if(cachedTop.length) paintBestTravelRun(cachedTop,'instant cache · refreshing '+TRAVEL_REFRESH_LIMIT+' prices in background');
+        const cachedTop=buildBestRunRows(candidates,cachedMap,actualTimes);
+        if(cachedTop.length) paintBestTravelRun(cachedTop,'instant cache · '+(actualTimes.size?'actual Torn times '+actualTimes.size+'/'+Object.keys(FLIGHT_MINS).length:'fallback flight times')+' · refreshing '+TRAVEL_REFRESH_LIMIT+' prices');
 
-        const ids=travelRefreshIds(candidates,TRAVEL_REFRESH_LIMIT);
+        const ids=travelRefreshIds(candidates,TRAVEL_REFRESH_LIMIT,actualTimes);
         state.travelRefreshes=ids.length;
         await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)return m;});
 
         const finalMap=new Map();
         for(const r of candidates){const c=cachePeek(r.itemId);if(c)finalMap.set(r.itemId,c);}
-        const finalTop=buildBestRunRows(candidates,finalMap);
-        if(finalTop.length) paintBestTravelRun(finalTop,'live-refreshed shortlist · '+ids.length+' market requests max');
+        const finalTop=buildBestRunRows(candidates,finalMap,actualTimes);
+        if(finalTop.length) paintBestTravelRun(finalTop,'live-refreshed · '+(actualTimes.size?'actual Torn flight times':'fallback flight times')+' · '+ids.length+' prices checked');
     }
 
     async function renderArrivalStock(){
@@ -503,7 +561,7 @@
         for(const r of yata)if(r.stock!=null)recordStock(destination,r.itemId,r.stock);flushStockHistory();
         const marketMap=new Map();
         for(const r of yata){const c=cachePeek(r.itemId);if(c)marketMap.set(r.itemId,c);}
-        const ids=travelRefreshIds(yata,ARRIVAL_REFRESH_LIMIT);
+        const ids=travelRefreshIds(yata,ARRIVAL_REFRESH_LIMIT,new Map());
         await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)marketMap.set(id,m);});
         const slots=Math.max(1,Number(settings.travelSlots)||29),rows=[];
         for(const r of yata){
@@ -760,7 +818,7 @@
     function toggle(key,label){return '<label class="sl-mi-toggle"><input id="sl-mi-'+key+'" type="checkbox" '+(settings[key]?'checked':'')+'><span>'+esc(label)+'</span></label>';}
     function openSettings(){
         document.getElementById('sl-mi-overlay')?.remove();const overlay=document.createElement('div');overlay.id='sl-mi-overlay';
-        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><button id="sl-mi-close">×</button></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label>'+(!getApiKey()?'<label class="sl-mi-field">Manual Torn API key<input id="sl-mi-api" type="password" placeholder="Public/limited key"></label>':'')+'<div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Arrival rows: <b>'+state.arrivalRows+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
+        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><button id="sl-mi-close">×</button></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label>'+(!getApiKey()?'<label class="sl-mi-field">Manual Torn API key<input id="sl-mi-api" type="password" placeholder="Public/limited key"></label>':'')+'<div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Arrival rows: <b>'+state.arrivalRows+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
         document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};overlay.querySelector('#sl-mi-close').onclick=()=>overlay.remove();
         overlay.querySelector('#sl-mi-save').onclick=()=>{for(const k of['enabled','travel','bestRun','stockEta','arrivalStock','bazaar','itemMarket','items','museum','points'])settings[k]=!!overlay.querySelector('#sl-mi-'+k)?.checked;settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;const api=overlay.querySelector('#sl-mi-api')?.value.trim();if(api)saveApiKey(api);saveJson(STORAGE.settings,settings);overlay.remove();scheduleScan(true);};
         overlay.querySelector('#sl-mi-refresh').onclick=()=>{overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-hard').onclick=()=>{marketCache={};saveJson(STORAGE.marketCache,marketCache);overlay.remove();scheduleScan(true);};
@@ -790,7 +848,7 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
