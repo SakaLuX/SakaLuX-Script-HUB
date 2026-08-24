@@ -8,8 +8,23 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
+- SakaLuX Market Intelligence: **v1.0.0**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.0.0
+- Added a new local-first market intelligence add-on written for the SakaLuX suite.
+- Added Travel profit overlays using current Torn Item Market prices, net sell after configurable market fee, absolute profit and ROI.
+- Added Bazaar deal detection with profitable/non-profitable flip verdicts.
+- Added Item Market floor/effective-price panel and a local per-item watchlist.
+- Added Items-page estimated net market value and total stack value.
+- Added Points Market rate capture and the initial Museum intelligence surface.
+- Added bounded market requests, 10-minute local market cache and limited concurrency for PDA friendliness.
+- Added Torn PDA API-key support plus manual API-key fallback.
+- Added `window.SakaLuXMarketIntelligence` with OPEN, REFRESH, HARD REFRESH, TRAVEL and MARKET Hub actions.
+- Added the shared optional Script Hub install prompt with the common 24-hour NOT NOW cooldown.
+- Added the new add-on to `scripts.json` immediately. Until a Greasy Fork script ID is assigned, the registry install/update URLs point to the live GitHub userscript.
+- Added `greasyfork/Market-Intelligence.md` ready for future Additional Info synchronization.
 
 ### SakaLuX Script Hub v1.8.4
 - Rebuilt the mobile **HUB** entry using Torn's real mobile navigation structure: `mobileLink`, area row and swiper slide classes.
