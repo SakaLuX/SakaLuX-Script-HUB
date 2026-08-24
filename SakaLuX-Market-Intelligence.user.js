@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.8
+// @version      1.15.9
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.8';
+    const VERSION = '1.15.9';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1187,7 +1187,8 @@
     function selectedMarketItemId(){const m=(location.hash||'').match(/itemID=(\d+)/i);return m?Number(m[1]):null;}
     async function scanItemMarket(){
         if(!settings.itemMarket)return;
-        const id=selectedMarketItemId();document.getElementById('sl-mi-market-bar')?.remove();if(!id)return;
+        const previous=document.getElementById('sl-mi-market-bar');
+        const id=selectedMarketItemId();if(!id){previous?.remove();return;}
         const market=await fetchMarket(id,true);if(!market)return;
         recordPriceHistory(id,market);
         const analysis=analyzePriceHistory(id,Number(market.minPrice),market);
@@ -1199,6 +1200,7 @@
             '<div class="sl-mi-market-grid"><div><small>TREND</small><strong>'+trendIcon+' '+pct(analysis.trend)+'</strong></div><div><small>MEDIAN</small><strong>'+money(analysis.median)+'</strong></div><div><small>VOLATILITY</small><strong>'+analysis.volatility.toFixed(1)+'%</strong></div><div><small>SPREAD</small><strong>'+analysis.spread.toFixed(1)+'%</strong></div></div>'+
             '<div class="sl-mi-spark"><span>'+esc(sparkText(analysis.rows))+'</span><small>'+analysis.samples+' local samples · '+esc(analysis.reason)+'</small></div>'+
             '<div class="sl-mi-watch-row"><input id="sl-mi-watch-price" inputmode="numeric" placeholder="Watch below..." value="'+esc(watched?.maxPrice||'')+'"><button id="sl-mi-watch-save">'+(watched?'UPDATE WATCH':'ADD WATCH')+'</button>'+(watched?'<button id="sl-mi-watch-remove">REMOVE</button>':'')+'</div>';
+        previous?.remove();
         mountTop(bar);
         bar.querySelector('#sl-mi-watch-save').onclick=()=>{const n=parseMoney(bar.querySelector('#sl-mi-watch-price').value);if(!(n>0))return;watchlist[String(id)]={itemId:id,maxPrice:n,updatedAt:Date.now()};saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
         const rm=bar.querySelector('#sl-mi-watch-remove');if(rm)rm.onclick=()=>{delete watchlist[String(id)];saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
@@ -1303,7 +1305,7 @@
 
     async function scan(force=false){
         if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
-        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-museum-bar,#sl-mi-bazaar-board,#sl-mi-market-bar,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
+        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-museum-bar,#sl-mi-bazaar-board,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
         catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;}
     }
     function scheduleScan(force=false){if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},450);}

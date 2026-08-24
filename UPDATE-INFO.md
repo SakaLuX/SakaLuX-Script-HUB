@@ -8,9 +8,15 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.8** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.9** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.9
+- Fixed Item Market Intelligence flicker/disappearing on Torn PDA.
+- The existing panel now stays visible while fresh market data loads and is replaced only when the new panel is ready.
+- Force scans no longer delete the Item Market panel before its async refresh completes.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.8.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.8
 - Fixed Torn PDA expanded `Value:` association so one opened item can no longer overwrite the market value shown for every other travel item.
