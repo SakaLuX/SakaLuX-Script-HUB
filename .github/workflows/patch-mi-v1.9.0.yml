@@ -21,6 +21,7 @@ jobs:
       - name: Verify
         run: |
           grep -q '@version      1.9.0' SakaLuX-Market-Intelligence.user.js
+          grep -q '@version      1.8.0' backups/SakaLuX-Market-Intelligence-v1.8.0.user.js
           grep -q 'buildOptimizedTravelPlan' SakaLuX-Market-Intelligence.user.js
           grep -q 'travelPlanOptimizationGain' SakaLuX-Market-Intelligence.user.js
           grep -q '"version": "1.9.0"' scripts.json
@@ -30,6 +31,6 @@ jobs:
         run: |
           git config user.name "SakaLuX"
           git config user.email "sakalutzu92@yahoo.com"
-          git add SakaLuX-Market-Intelligence.user.js scripts.json UPDATE-INFO.md greasyfork/Market-Intelligence.md
+          git add SakaLuX-Market-Intelligence.user.js backups/SakaLuX-Market-Intelligence-v1.8.0.user.js scripts.json UPDATE-INFO.md greasyfork/Market-Intelligence.md
           git commit -m "SakaLuX Market Intelligence v1.9.0: Travel Profit Optimizer"
           git push
