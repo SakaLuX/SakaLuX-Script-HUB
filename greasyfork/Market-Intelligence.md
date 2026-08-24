@@ -1,10 +1,16 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.6**
+**Current version: v1.15.7**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.7 — Torn PDA Travel Badge Layout
+
+- Travel-shop Market Intelligence badges now appear on their own full-width row below each item.
+- The native Torn PDA Item / Name / Stock / Cost / Buy columns are no longer squeezed or shifted by the script.
+- Market, Net, Profit, ROI and Stock text can wrap cleanly on mobile.
 
 ## v1.15.6 — Torn PDA Displayed Value Accuracy
 
