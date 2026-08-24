@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.7
+// @version      1.15.8
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.7';
+    const VERSION = '1.15.8';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -676,6 +676,19 @@
 
     function ensureBadge(row,cls){let box=row.querySelector(':scope > .'+cls);if(!box){box=document.createElement('div');box.className=cls;row.appendChild(box);}return box;}
 
+    function extractAdjacentTornDisplayedValue(row){
+        if(!row)return null;
+        let node=row.nextElementSibling,steps=0;
+        while(node&&steps<4){
+            if(node.matches?.('tr')&&node.querySelector?.('img[src*="/images/items/"]'))break;
+            const text=normText(node.innerText||node.textContent||'');
+            const m=text.match(/Value\s*:\s*\$\s*([0-9][0-9,]*(?:\.\d+)?(?:\s*[KMB])?)/i);
+            if(m){const v=parseMoney(m[1]);if(Number.isFinite(v)&&v>0)return v;}
+            node=node.nextElementSibling;steps++;
+        }
+        return null;
+    }
+
 
     function ensureTravelBadge(row,cls){
         if(!row)return null;
@@ -1071,7 +1084,7 @@
         const destination=detectDestination();if(!destination)return;
         document.getElementById('sl-mi-best-run')?.remove();
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
-        for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractTornDisplayedValue(img)});}
+        for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}
         const unique=[...new Map(entries.map(e=>[e.id,e])).values()].slice(0,MAX_LIVE_FETCHES);
         const marketMap=new Map();
         for(const e of unique){const c=cachePeek(e.id);if(c)marketMap.set(e.id,c);}

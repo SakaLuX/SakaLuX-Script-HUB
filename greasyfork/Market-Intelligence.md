@@ -1,10 +1,15 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.7**
+**Current version: v1.15.8**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.8 — Item-specific Torn Value Fix
+
+- Fixes the Torn PDA bug where opening one item detail card could make its `Value:` appear as the market value for every item in the travel shop.
+- The displayed Torn Value is now associated only with the matching item row.
 
 ## v1.15.7 — Torn PDA Travel Badge Layout
 
