@@ -4,13 +4,21 @@ Last updated: 2026-08-24
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.8.4**
+- SakaLuX Script Hub: **v1.8.5**
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
 - SakaLuX Market Intelligence: **v1.1.1** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Script Hub v1.8.5
+- Fixed false **UPDATE AVAILABLE** states left behind by a cached check made before an add-on was updated.
+- Cached update data is now considered fresh only when its recorded installed version still matches the version currently loaded.
+- Hub cards, the **UPDATES** counter and the blinking HUB alert recalculate availability from **Latest vs Installed** before rendering.
+- Added Market Intelligence v1.1.1 to the offline fallback registry.
+- Added the `SakaLuX:MarketIntelligenceReady` integration hook.
+- Added exact backup: `backups/SakaLuX-Script-Hub-v1.8.4.user.js`.
 
 ### SakaLuX Market Intelligence v1.1.1
 - Best Travel Run rows are now actionable.
@@ -87,6 +95,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Script-Hub-v1.8.4.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.1.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.0.0.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.3.user.js`
