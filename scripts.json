@@ -69,9 +69,9 @@
       "category": "Trading",
       "version": "1.0.0",
       "description": "Local-first market intelligence for Travel, Bazaar, Item Market, Items, Museum and Points Market.",
-      "greasyForkId": null,
-      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
-      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
+      "greasyForkId": "592781",
+      "metaUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js",
       "apiGlobal": "SakaLuXMarketIntelligence",
       "buttonSelector": "#sl-mi-button",
       "quickActions": [
