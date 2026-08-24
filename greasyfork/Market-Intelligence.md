@@ -1,10 +1,19 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.7.0**
+**Current version: v1.8.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.8.0 — Travel Budget Planner
+
+- Travel Buy Planner can now use an optional cash budget in addition to travel capacity.
+- Set **Travel budget ($)** in Settings; `0` keeps the old unlimited-budget behavior.
+- Recommended quantities are automatically capped by both available slots and remaining budget.
+- The planner shows total spend, expected net profit, remaining budget, used capacity and unused slots.
+- Existing item jump/highlight behavior remains unchanged.
+- `health()` now exposes configured and unused planner budget.
 
 ## v1.7.0 — Travel Buy Planner
 
@@ -140,7 +149,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.7.0.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.8.0.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.

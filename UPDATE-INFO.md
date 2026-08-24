@@ -8,9 +8,19 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.7.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.8.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.8.0
+- Added **Travel Budget Planner** on top of the existing Travel Buy Planner.
+- Added a configurable **Travel budget ($)** field; `0` means unlimited budget.
+- Recommended shopping quantities now respect both available travel slots and available cash budget.
+- The planner automatically reduces quantities when the next item would exceed the configured budget.
+- Shows configured budget, planned spend, remaining budget, expected net profit, used slots and unused slots.
+- Keeps the existing direct jump/highlight behavior for recommended abroad items.
+- Added `travelPlanBudget` and `travelPlanUnusedBudget` to `health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.7.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.7.0
 - Added **Travel Buy Planner** for the abroad shop page.
@@ -173,6 +183,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.7.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.6.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.5.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.4.0.user.js`
