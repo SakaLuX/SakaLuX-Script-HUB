@@ -1,10 +1,20 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.8.0**
+**Current version: v1.9.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.9.0 — Travel Profit Optimizer
+
+- Travel Budget Planner now optimizes the item combination for **maximum estimated total net profit** under both slot and cash-budget constraints.
+- Uses current stock and item buy prices together with the existing Item Market profit estimates.
+- The budget optimizer uses a Pareto-frontier dynamic-programming approach rather than a dollar-by-dollar budget matrix.
+- With no budget limit, the existing highest-profit-per-item fill remains because it is already optimal for a pure slot constraint.
+- Planner clearly shows **OPTIMIZED** or **GREEDY** mode.
+- When optimization beats the old greedy budget plan, the panel shows the additional expected profit gained.
+- `health()` exposes optimizer mode and optimization gain.
 
 ## v1.8.0 — Travel Budget Planner
 

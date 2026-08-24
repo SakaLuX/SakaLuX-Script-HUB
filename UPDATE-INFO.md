@@ -8,9 +8,19 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.8.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.9.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.9.0
+- Added **Travel Profit Optimizer** on top of Travel Budget Planner.
+- When a cash budget is configured, the planner now searches combinations of abroad items instead of simply taking items greedily in profit-per-item order.
+- The optimizer maximizes estimated **total net profit** while respecting both travel slots, current stock and the configured cash budget.
+- Uses a bounded Pareto-frontier dynamic-programming solver by slot count and cost/profit dominance, avoiding an impractical dollar-by-dollar budget table.
+- With unlimited budget, the planner keeps the simpler profit-per-item greedy path because that is already optimal when slots are the only constraint.
+- Planner header shows **OPTIMIZED** or **GREEDY** and, when applicable, the extra profit gained versus the old greedy budget plan.
+- Added `travelPlanMode` and `travelPlanOptimizationGain` to `health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.8.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.8.0
 - Added **Travel Budget Planner** on top of the existing Travel Buy Planner.
@@ -183,6 +193,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.8.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.7.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.6.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.5.0.user.js`
