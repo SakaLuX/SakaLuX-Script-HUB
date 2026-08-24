@@ -1,10 +1,21 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.4.0**
+**Current version: v1.5.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.5.0 — Item Market Intelligence
+
+- Added local Item Market price history per item.
+- Records floor/effective prices with a 5-minute minimum sample gap and retains up to 14 days / 120 samples.
+- Shows recent price **trend**, **median**, **volatility** and effective-vs-floor **spread**.
+- Adds **BUY NOW / FAIR / WAIT / LEARNING** signals from the current floor versus the locally observed range and trend.
+- Includes a compact recent-price sparkline.
+- Existing price watch thresholds remain available in the same panel.
+- Added Item Market intelligence fields to `health()` and `itemMarketIntelligence()` to the public API.
+- Price history stays local and creates no separate background polling.
 
 ## v1.4.0 — Bazaar Flip Intelligence
 
@@ -116,5 +127,4 @@ Current external data sources used by this version:
 
 ## Planned next modules
 
-- Expanded Bazaar and Item Market deal surfaces.
 - Optional SakaLuX community price/restock network after the local version is stable.

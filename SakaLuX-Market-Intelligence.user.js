@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.4.0
-// @description  Torn market and travel intelligence with fast Travel tools, Bazaar Flip Intelligence, Item Market tools, arrival-stock prediction and Museum set valuation.
+// @version      1.5.0
+// @description  Torn market and travel intelligence with fast Travel tools, Bazaar Flip Intelligence, Item Market trend/signals, arrival-stock prediction and Museum set valuation.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.4.0';
+    const VERSION = '1.5.0';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -33,7 +33,8 @@
         watchlist: 'SakaLuX_MI_WATCHLIST_V1',
         pointsRate: 'SakaLuX_MI_POINTS_RATE_V1',
         stockHistory: 'SakaLuX_MI_STOCK_HISTORY_V1',
-        itemCatalog: 'SakaLuX_MI_ITEM_CATALOG_V1'
+        itemCatalog: 'SakaLuX_MI_ITEM_CATALOG_V1',
+        priceHistory: 'SakaLuX_MI_PRICE_HISTORY_V1'
     };
 
     const MARKET_CACHE_MS = 10 * 60 * 1000;
@@ -46,6 +47,9 @@
     const STOCK_HISTORY_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
     const ITEM_CATALOG_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
     const POINTS_RATE_MAX_AGE = 24 * 60 * 60 * 1000;
+    const PRICE_HISTORY_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
+    const PRICE_HISTORY_MAX_SAMPLES = 120;
+    const PRICE_HISTORY_MIN_GAP = 5 * 60 * 1000;
 
     const FLIGHT_MINS = {
         Mexico: 25, Caymans: 33, Canada: 39, Hawaii: 127, UK: 151,
@@ -119,6 +123,7 @@
     let marketCache = loadJson(STORAGE.marketCache, {});
     let watchlist = loadJson(STORAGE.watchlist, {});
     let stockHistory = loadJson(STORAGE.stockHistory, {});
+    let priceHistory = loadJson(STORAGE.priceHistory, {});
 
     const state = {
         page: '', apiMode: '', busy: false, lastScan: 0, lastError: '',
@@ -127,7 +132,8 @@
         arrivalRows: 0, flightDestination: '', landingMins: null,
         travelCacheHits: 0, travelRefreshes: 0, observerSkips: 0, lastObserverScan: 0,
         museumSets: 0, museumRecommendation: '', museumMissingSets: 0,
-        bazaarDeals: 0, bazaarBestProfit: 0, bazaarBestRoi: 0
+        bazaarDeals: 0, bazaarBestProfit: 0, bazaarBestRoi: 0,
+        itemMarketSignal: '', itemMarketTrend: 0, itemMarketVolatility: 0, itemMarketHistorySamples: 0
     };
 
     function loadJson(key, fallback) {
@@ -584,12 +590,68 @@
         paintBazaarBoard(deals);
     }
 
+
+
+    function percentile(values,p){
+        const a=values.filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return null;
+        const idx=(a.length-1)*Math.max(0,Math.min(1,p));const lo=Math.floor(idx),hi=Math.ceil(idx);
+        if(lo===hi)return a[lo];const w=idx-lo;return a[lo]*(1-w)+a[hi]*w;
+    }
+    function avg(values){const a=values.filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
+    function stdev(values){const a=values.filter(Number.isFinite);if(a.length<2)return 0;const m=avg(a);return Math.sqrt(a.reduce((sum,v)=>sum+(v-m)*(v-m),0)/a.length);}
+    function recordPriceHistory(itemId,market,now=Date.now()){
+        if(!itemId||!market?.minPrice)return;
+        const key=String(itemId),current=Array.isArray(priceHistory[key])?priceHistory[key]:[];
+        const fresh=current.filter(x=>x?.at&&now-Number(x.at)<PRICE_HISTORY_MAX_AGE&&Number(x.price)>0);
+        const last=fresh[fresh.length-1];
+        if(!last||now-Number(last.at)>=PRICE_HISTORY_MIN_GAP||Number(last.price)!==Number(market.minPrice)){
+            fresh.push({at:now,price:Number(market.minPrice),effective:Number(market.price)||Number(market.minPrice),count:Number(market.count)||0});
+        } else {
+            fresh[fresh.length-1]={...last,effective:Number(market.price)||Number(market.minPrice),count:Number(market.count)||0};
+        }
+        priceHistory[key]=fresh.slice(-PRICE_HISTORY_MAX_SAMPLES);saveJson(STORAGE.priceHistory,priceHistory);
+    }
+    function analyzePriceHistory(itemId,currentPrice,market){
+        const rows=(Array.isArray(priceHistory[String(itemId)])?priceHistory[String(itemId)]:[]).filter(x=>x?.at&&Date.now()-Number(x.at)<PRICE_HISTORY_MAX_AGE&&Number(x.price)>0);
+        const prices=rows.map(x=>Number(x.price));const samples=prices.length;
+        const med=median(prices),p25=percentile(prices,.25),p75=percentile(prices,.75);
+        let trend=0;
+        if(samples>=4){const cut=Math.max(2,Math.floor(samples/3));const older=avg(prices.slice(0,cut)),recent=avg(prices.slice(-cut));if(older>0)trend=(recent-older)/older*100;}
+        const mean=avg(prices),volatility=mean>0?stdev(prices)/mean*100:0;
+        const spread=market?.minPrice>0?((Number(market.price)-Number(market.minPrice))/Number(market.minPrice))*100:0;
+        let signal='LEARNING',reason='Collecting local price history';
+        if(samples>=3&&med>0){
+            if((p25&&currentPrice<=p25)||(currentPrice<=med*.97&&trend>=0)){signal='BUY NOW';reason='Current floor is cheap versus recent history';}
+            else if((p75&&currentPrice>=p75)||(currentPrice>=med*1.05)||(trend<-3&&currentPrice>med*.98)){signal='WAIT';reason='Price is elevated or trend is falling';}
+            else {signal='FAIR';reason='Current price is close to its recent range';}
+        }
+        return {samples,median:med,p25,p75,trend,volatility,spread,signal,reason,rows};
+    }
+    function sparkText(rows){
+        const vals=rows.slice(-12).map(x=>Number(x.price)).filter(Number.isFinite);if(vals.length<2)return '···';
+        const blocks='▁▂▃▄▅▆▇█',lo=Math.min(...vals),hi=Math.max(...vals),span=Math.max(1,hi-lo);
+        return vals.map(v=>blocks[Math.min(blocks.length-1,Math.max(0,Math.round((v-lo)/span*(blocks.length-1))))]).join('');
+    }
+
     function selectedMarketItemId(){const m=(location.hash||'').match(/itemID=(\d+)/i);return m?Number(m[1]):null;}
     async function scanItemMarket(){
-        if(!settings.itemMarket)return;const id=selectedMarketItemId();document.getElementById('sl-mi-market-bar')?.remove();if(!id)return;const market=await fetchMarket(id,true);if(!market)return;const watched=watchlist[String(id)]||null,bar=document.createElement('div');bar.id='sl-mi-market-bar';
-        bar.innerHTML='<div><b>☠︎ Market Intelligence</b> · floor <strong>'+money(market.minPrice)+'</strong> · effective <strong>'+money(market.price)+'</strong> · '+market.count+' listings</div><div class="sl-mi-watch-row"><input id="sl-mi-watch-price" inputmode="numeric" placeholder="Watch below..." value="'+esc(watched?.maxPrice||'')+'"><button id="sl-mi-watch-save">'+(watched?'UPDATE WATCH':'ADD WATCH')+'</button>'+(watched?'<button id="sl-mi-watch-remove">REMOVE</button>':'')+'</div>';mountTop(bar);
+        if(!settings.itemMarket)return;
+        const id=selectedMarketItemId();document.getElementById('sl-mi-market-bar')?.remove();if(!id)return;
+        const market=await fetchMarket(id,true);if(!market)return;
+        recordPriceHistory(id,market);
+        const analysis=analyzePriceHistory(id,Number(market.minPrice),market);
+        state.itemMarketSignal=analysis.signal;state.itemMarketTrend=analysis.trend;state.itemMarketVolatility=analysis.volatility;state.itemMarketHistorySamples=analysis.samples;
+        const watched=watchlist[String(id)]||null,bar=document.createElement('div');bar.id='sl-mi-market-bar';
+        const trendIcon=analysis.trend>1?'↑':analysis.trend<-1?'↓':'→';
+        const signalClass=analysis.signal==='BUY NOW'?'buy':analysis.signal==='WAIT'?'wait':analysis.signal==='FAIR'?'fair':'learning';
+        bar.innerHTML='<div class="sl-mi-market-head"><div><b>📈 ITEM MARKET INTELLIGENCE</b><span>floor <strong>'+money(market.minPrice)+'</strong> · effective <strong>'+money(market.price)+'</strong> · '+market.count+' listings</span></div><span class="sl-mi-signal '+signalClass+'">'+esc(analysis.signal)+'</span></div>'+
+            '<div class="sl-mi-market-grid"><div><small>TREND</small><strong>'+trendIcon+' '+pct(analysis.trend)+'</strong></div><div><small>MEDIAN</small><strong>'+money(analysis.median)+'</strong></div><div><small>VOLATILITY</small><strong>'+analysis.volatility.toFixed(1)+'%</strong></div><div><small>SPREAD</small><strong>'+analysis.spread.toFixed(1)+'%</strong></div></div>'+
+            '<div class="sl-mi-spark"><span>'+esc(sparkText(analysis.rows))+'</span><small>'+analysis.samples+' local samples · '+esc(analysis.reason)+'</small></div>'+
+            '<div class="sl-mi-watch-row"><input id="sl-mi-watch-price" inputmode="numeric" placeholder="Watch below..." value="'+esc(watched?.maxPrice||'')+'"><button id="sl-mi-watch-save">'+(watched?'UPDATE WATCH':'ADD WATCH')+'</button>'+(watched?'<button id="sl-mi-watch-remove">REMOVE</button>':'')+'</div>';
+        mountTop(bar);
         bar.querySelector('#sl-mi-watch-save').onclick=()=>{const n=parseMoney(bar.querySelector('#sl-mi-watch-price').value);if(!(n>0))return;watchlist[String(id)]={itemId:id,maxPrice:n,updatedAt:Date.now()};saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
-        const rm=bar.querySelector('#sl-mi-watch-remove');if(rm)rm.onclick=()=>{delete watchlist[String(id)];saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};if(watched&&market.minPrice<=watched.maxPrice)bar.classList.add('hit');
+        const rm=bar.querySelector('#sl-mi-watch-remove');if(rm)rm.onclick=()=>{delete watchlist[String(id)];saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
+        if(watched&&market.minPrice<=watched.maxPrice)bar.classList.add('hit');
     }
 
     async function scanItems(){
@@ -690,7 +752,7 @@
 
     async function scan(force=false){
         if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
-        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-museum-bar,#sl-mi-bazaar-board').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
+        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-museum-bar,#sl-mi-bazaar-board,#sl-mi-market-bar').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}state.lastScan=Date.now();state.scanCount++;}
         catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;}
     }
     function scheduleScan(force=false){if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},450);}
@@ -712,10 +774,11 @@
 .sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}
 .sl-mi-museum-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-museum-head>div{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-museum-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-museum-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-museum-body{display:none;margin-top:7px;gap:4px}#sl-mi-museum-bar.open .sl-mi-museum-body{display:flex;flex-direction:column}.sl-mi-museum-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-museum-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-museum-row.turn{border-left:3px solid #78d98b;background:#142019}.sl-mi-museum-row.sell{border-left:3px solid #d7b94c;background:#201d13}.sl-mi-museum-row.missing{border-left:3px solid #5c6570}.sl-mi-museum-row .edge{color:#9da6b3}.sl-mi-points-link{border:1px solid #66591d;background:#2a2512;color:#e4c95d;border-radius:6px;padding:7px 9px;font-weight:900;font-size:10px;align-self:flex-start}
 .sl-mi-baz-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-baz-head>div:first-child{display:flex;gap:8px;align-items:center;min-width:0}.sl-mi-baz-head strong{color:#78d98b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-baz-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-baz-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-baz-body{display:none;margin-top:7px;gap:4px}#sl-mi-bazaar-board.open .sl-mi-baz-body{display:flex;flex-direction:column}.sl-mi-baz-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px;cursor:pointer}.sl-mi-baz-row:hover,.sl-mi-baz-row:focus{background:#1a231c;border-color:#4d6957;outline:none}.sl-mi-baz-row .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-focus{outline:2px solid #78d98b!important;outline-offset:2px!important}
+.sl-mi-market-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.sl-mi-market-head>div{display:flex;flex-direction:column;gap:3px}.sl-mi-signal{padding:4px 7px;border-radius:6px;font-weight:900;white-space:nowrap}.sl-mi-signal.buy{background:#16351f;color:#78d98b}.sl-mi-signal.wait{background:#3a1d1d;color:#f08b8b}.sl-mi-signal.fair{background:#2f2b17;color:#e1c865}.sl-mi-signal.learning{background:#252a31;color:#aab2bd}.sl-mi-market-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:7px}.sl-mi-market-grid>div{background:#0f1318;border:1px solid #2b323b;border-radius:6px;padding:6px}.sl-mi-market-grid small{display:block;color:#7f8894;font-size:8px}.sl-mi-market-grid strong{display:block;margin-top:2px}.sl-mi-spark{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:6px;border-radius:6px;background:#0f1318;border:1px solid #2b323b}.sl-mi-spark>span{font-size:15px;letter-spacing:1px;color:#d7b94c}.sl-mi-spark small{color:#8f98a5;text-align:right}
 .sl-mi-watch-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sl-mi-watch-row input{flex:1 1 140px;background:#0d0f14;color:#fff;border:1px solid #363e49;border-radius:6px;padding:8px}.sl-mi-watch-row button{border:0;border-radius:6px;padding:7px 9px;background:#303844;color:#fff;font-weight:900;font-size:10px}
 #sl-mi-button{position:fixed;right:10px;bottom:106px;z-index:2147483644;border:0;border-radius:999px;padding:9px 11px;background:#18181b;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font-weight:900;font-size:12px}
 #sl-mi-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-mi-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mi-title{font-size:16px;font-weight:900}.sl-mi-sub{margin-top:3px;color:#8e96a3;font-size:9px}#sl-mi-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}.sl-mi-toggle,.sl-mi-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mi-field input{width:45%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:7px}.sl-mi-info{margin:10px 0;color:#a6adb8;font-size:10px}.sl-mi-primary,.sl-mi-secondary{width:100%;min-height:40px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900}.sl-mi-primary{background:#2563eb}.sl-mi-secondary{background:#374151}.muted{color:#7e8793}
-@media(max-width:700px){.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-museum-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 7px}.sl-mi-museum-row .name{grid-column:1/-1}.sl-mi-baz-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-baz-row .name{grid-column:1/-1}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
+@media(max-width:700px){.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-museum-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 7px}.sl-mi-museum-row .name{grid-column:1/-1}.sl-mi-market-grid{grid-template-columns:repeat(2,1fr)}.sl-mi-spark{align-items:flex-start;flex-direction:column}.sl-mi-spark small{text-align:left}.sl-mi-baz-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-baz-row .name{grid-column:1/-1}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
 `;document.head.appendChild(s);}
 
     function createButton(){if(!settings.showButton||document.getElementById('sl-mi-button'))return;const b=document.createElement('button');b.id='sl-mi-button';b.textContent='☠︎ Market';b.onclick=openSettings;document.body.appendChild(b);}
@@ -727,12 +790,13 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
         async arrivalPrediction(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
         goToMarket(){location.href='https://www.torn.com/page.php?sid=ItemMarket';return true;},
+        itemMarketIntelligence(){if(detectPage()!=='itemmarket')return null;const id=selectedMarketItemId();if(!id)return null;const c=cachePeek(id);if(!c)return null;return analyzePriceHistory(id,Number(c.minPrice),c);},
         goToBazaar(){location.href='https://www.torn.com/bazaar.php';return true;},
         goToMuseum(){location.href='https://www.torn.com/museum.php';return true;},
         async museumIntelligence(){if(detectPage()!=='museum')return false;await scanMuseum();return true;}
