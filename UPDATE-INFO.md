@@ -8,9 +8,24 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.0.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.1.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.1.0
+- Added **Best Travel Run** on the Torn Travel home screen.
+- Uses current YATA abroad stock/buy-price data plus live Torn Item Market prices to rank travel opportunities.
+- Shows recommended item, destination, current stock, estimated profit per run and estimated profit per hour.
+- Added configurable **travel slots** and **flight multiplier** in Market Intelligence settings.
+- Added local stock-history learning per destination/item.
+- When a real stock increase is observed, it is saved as a restock event.
+- After enough local restock observations are collected, the script estimates the next stock refill using the median learned interval.
+- Until enough history exists, sold-out items show a clearly labelled next-possible quarter-hour restock estimate instead of pretending to know an exact refill time.
+- Landed Travel item overlays now show current stock plus stock/restock ETA information.
+- Added **BEST RUN** quick action to SakaLuX Script Hub.
+- Added `@connect yata.yt` for the public travel export used by Best Travel Run.
+- Changed userscript update/download metadata to the official Greasy Fork **592781** URLs.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.0.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.0.0
 - Added a new local-first market intelligence add-on written for the SakaLuX suite.
@@ -21,49 +36,24 @@ Last updated: 2026-08-24
 - Added Points Market rate capture and the initial Museum intelligence surface.
 - Added bounded market requests, 10-minute local market cache and limited concurrency for PDA friendliness.
 - Added Torn PDA API-key support plus manual API-key fallback.
-- Added `window.SakaLuXMarketIntelligence` with OPEN, REFRESH, HARD REFRESH, TRAVEL and MARKET Hub actions.
-- Added the shared optional Script Hub install prompt with the common 24-hour NOT NOW cooldown.
+- Added `window.SakaLuXMarketIntelligence` with Hub actions.
 - Published on Greasy Fork as script **592781**.
-- Updated `scripts.json` to use the official Greasy Fork install and metadata URLs.
-- Added `greasyfork/Market-Intelligence.md` for Additional Info synchronization.
 
 ### SakaLuX Script Hub v1.8.4
-- Rebuilt the mobile **HUB** entry using Torn's real mobile navigation structure: `mobileLink`, area row and swiper slide classes.
-- The HUB item is now mounted as its own navigation/swiper entry immediately before **Messages**, instead of being inserted inside the Messages slot.
-- This fixes the previous layout where HUB appeared above Messages and pushed Messages onto a second row.
-- The skull icon now reuses the native Torn SVG element, dimensions, theme color and surrounding icon wrappers; only the skull artwork itself is custom.
-- Removed custom width/height/font layout rules that made the launcher look like a separate image rather than a Torn button.
-- The **HUB** label inherits Torn's own label class and typography.
-- The blink animation affects only the skull icon opacity, so the item stays aligned with the surrounding Torn controls.
-- The floating circular Hub button remains only as a fallback when Torn's native mobile navigation cannot be detected.
-- Added exact source backup: `backups/SakaLuX-Script-Hub-v1.8.3.user.js`.
-
-### SakaLuX Script Hub v1.8.3
-- Rebuilt the Hub launcher as a native Torn navigation item inserted immediately before **Messages**.
-- Replaced the emoji-style top launcher with a monochrome skull and **HUB** label.
-- The floating circular Hub button automatically hides whenever the native launcher is available.
-
-### SakaLuX Script Hub v1.8.2
-- Added the first animated SakaLuX launcher experiment before **Messages**.
-- Added repeated blink/pulse animation and update/issue status badge.
-- Added Mission Rewards v1.0.1 to the Hub's offline fallback registry.
+- Rebuilt the mobile **HUB** entry using Torn's real mobile navigation structure.
+- The HUB item is mounted as its own navigation entry immediately before **Messages**.
+- The skull icon reuses native Torn SVG sizing/theme and blinks without moving the navigation item.
+- The floating circular Hub button remains only as fallback.
 
 ### SakaLuX Mission Rewards v1.0.1
-- Changed `@match` to all Torn pages so `window.SakaLuXMissionRewards` is available everywhere and Script Hub no longer reports the add-on as missing outside Missions.
-- Mission-specific scanning, API loading, floating button and reward processing remain restricted to `sid=missions`.
-- Improved mobile/PDA reward badges and added the shared optional Script Hub install prompt.
-
-### SakaLuX Script Hub v1.8.1
-- Fixed **WHAT'S NEW** so the button is visible and usable on mobile/PDA.
-- Cleaned `scripts.json` so it is used only as the add-on registry.
-- Kept automatic add-on discovery, **UPDATE ALL**, **SYSTEM CHECK**, registry refresh and the global `window.SakaLuXScriptHub` API.
+- Changed `@match` to all Torn pages so the Hub can detect it globally.
+- Improved mobile/PDA reward badges and added the shared Hub install prompt.
 
 ### SakaLuX Enhancer Guard v1.3.2
-- Added a SakaLuX Script Hub install prompt when the Hub is not detected.
-- Choosing **NOT NOW** postpones the prompt for 24 hours.
+- Added a SakaLuX Script Hub install prompt with 24-hour NOT NOW cooldown.
 
 ### SakaLuX Bazaar Thanker - PDA v5.3.1
-- Added the same optional SakaLuX Script Hub install prompt and shared 24-hour **NOT NOW** cooldown.
+- Added the same optional SakaLuX Script Hub install prompt and cooldown.
 
 ## Central registry policy
 
@@ -88,6 +78,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.0.0.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.3.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.2.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.1.user.js`
