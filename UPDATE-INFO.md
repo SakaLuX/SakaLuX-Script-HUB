@@ -7,9 +7,18 @@ Last updated: 2026-08-24
 - SakaLuX Script Hub: **v1.8.1**
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
-- SakaLuX Mission Rewards: **v1.0.0**
+- SakaLuX Mission Rewards: **v1.0.1**
 
 ## Latest changes
+
+### SakaLuX Mission Rewards v1.0.1
+- Changed `@match` to all Torn pages so `window.SakaLuXMissionRewards` is available everywhere and Script Hub no longer reports the add-on as missing outside Missions.
+- Mission-specific scanning, API loading, floating button and reward processing remain restricted to `sid=missions`.
+- Improved mobile/PDA reward badges by rendering them as an absolute overlay inside each reward card, preventing Torn's carousel layout from clipping the added information.
+- Added the shared optional Script Hub install prompt with a 24-hour **NOT NOW** cooldown.
+- Opening Mission Rewards from the Hub outside the Missions page now navigates to Missions.
+- Added `activePage` to Mission Rewards health information.
+- Updated `scripts.json` to v1.0.1 and synchronized Greasy Fork Additional info.
 
 ### SakaLuX Mission Rewards v1.0.0
 - Imported the currently published Mission Rewards source into the GitHub repository.
