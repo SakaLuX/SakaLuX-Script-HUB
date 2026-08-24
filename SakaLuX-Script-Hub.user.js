@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.8.2
-// @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with scripts.json auto-discovery, What's New, update-all, system diagnostics and an animated Torn top-bar launcher.
+// @version      1.8.3
+// @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with a native Torn-style HUB launcher before Messages.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -16,7 +16,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.8.2';
+    const VERSION = '1.8.3';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -24,13 +24,22 @@
 
     const HUB_CHANGELOG = [
         {
+            version: '1.8.3',
+            date: '2026-08-24',
+            changes: [
+                'Rebuilt the Hub launcher as a native Torn navigation item before Messages.',
+                'The HUB item now clones Torn navigation structure and styling instead of floating over the page.',
+                'Uses a monochrome text-presentation skull with a subtle double blink on the icon only.',
+                'The floating Hub button automatically hides when the native launcher is available and remains only as a fallback.',
+                'Issue and update badges remain available without disturbing Torn menu layout.'
+            ]
+        },
+        {
             version: '1.8.2',
             date: '2026-08-24',
             changes: [
-                'Added an animated skull launcher directly in the Torn top bar before Messages.',
-                'The skull uses a repeated double-blink/pulse animation and opens SakaLuX Script Hub when tapped.',
-                'The top-bar skull shows the same issue/update badge as the floating Hub button.',
-                'When updates, missing add-ons or errors exist, the skull switches to a faster alert blink.',
+                'Added the first animated skull launcher experiment.',
+                'Added shared issue/update status to the launcher.',
                 'Added Mission Rewards v1.0.1 to the offline fallback registry.'
             ]
         },
@@ -38,20 +47,9 @@
             version: '1.8.1',
             date: '2026-08-24',
             changes: [
-                "Fixed the WHAT'S NEW button so it is visible and usable on mobile/PDA.",
-                'Removed Hub release information from scripts.json.',
-                'scripts.json is now used only as the add-on registry.',
-                'Kept UPDATE ALL, SYSTEM CHECK and automatic add-on discovery.'
-            ]
-        },
-        {
-            version: '1.8.0',
-            date: '2026-08-24',
-            changes: [
-                'Added central scripts.json add-on discovery.',
-                'Added UPDATE ALL for installed add-ons with available updates.',
-                'Added SYSTEM CHECK diagnostics.',
-                'Added the global SakaLuXScriptHub API for reliable Hub detection.'
+                "Fixed the WHAT'S NEW control on mobile/PDA.",
+                'Kept scripts.json dedicated only to add-on discovery.',
+                'Kept UPDATE ALL and SYSTEM CHECK.'
             ]
         }
     ];
@@ -76,19 +74,13 @@
     const FALLBACK_REGISTRY = {
         scripts: [
             {
-                id: 'enhancer',
-                type: 'addon',
-                active: true,
-                name: 'Enhancer Guard',
-                icon: '🛡️',
-                category: 'Inventory',
-                version: '1.3.2',
+                id: 'enhancer', type: 'addon', active: true,
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.2',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js',
-                apiGlobal: 'SakaLuXEnhancerGuard',
-                buttonSelector: '#sl-eg-button',
+                apiGlobal: 'SakaLuXEnhancerGuard', buttonSelector: '#sl-eg-button',
                 quickActions: [
                     { id: 'open', label: 'OPEN', icon: '🛡️', method: 'open' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' },
@@ -96,19 +88,13 @@
                 ]
             },
             {
-                id: 'bazaar',
-                type: 'addon',
-                active: true,
-                name: 'Bazaar Thanker',
-                icon: '💬',
-                category: 'Trading',
-                version: '5.3.1',
+                id: 'bazaar', type: 'addon', active: true,
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.1',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js',
-                apiGlobal: 'SakaLuXBazaarThanker',
-                buttonSelector: '#sakalux-bt-settings-button',
+                apiGlobal: 'SakaLuXBazaarThanker', buttonSelector: '#sakalux-bt-settings-button',
                 quickActions: [
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' },
@@ -116,19 +102,13 @@
                 ]
             },
             {
-                id: 'mission-rewards',
-                type: 'addon',
-                active: true,
-                name: 'Mission Rewards',
-                icon: '🎯',
-                category: 'Missions',
-                version: '1.0.1',
+                id: 'mission-rewards', type: 'addon', active: true,
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.1',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js',
-                apiGlobal: 'SakaLuXMissionRewards',
-                buttonSelector: '#sl-mri-button',
+                apiGlobal: 'SakaLuXMissionRewards', buttonSelector: '#sl-mri-button',
                 quickActions: [
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open', fallbackUrl: 'https://www.torn.com/page.php?sid=missions' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh', fallbackUrl: 'https://www.torn.com/page.php?sid=missions' },
@@ -173,9 +153,7 @@
     }
 
     function saveJson(key, value) {
-        try {
-            localStorage.setItem(key, JSON.stringify(value));
-        } catch {}
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
     }
 
     function escapeHtml(value) {
@@ -209,27 +187,21 @@
 
     function normalizeRegistry(data) {
         const rows = Array.isArray(data?.scripts) ? data.scripts : FALLBACK_REGISTRY.scripts;
-        return rows
-            .filter(s => s?.active !== false)
-            .map(s => ({
-                ...s,
-                expectedVersion: String(s.version || '0'),
-                quickActions: Array.isArray(s.quickActions) ? s.quickActions : [],
-                api() {
-                    try {
-                        return s.apiGlobal ? window[s.apiGlobal] || null : null;
-                    } catch {
-                        return null;
-                    }
-                },
-                fallbackOpen() {
-                    if (!s.buttonSelector) return false;
-                    const button = document.querySelector(s.buttonSelector);
-                    if (!button) return false;
-                    button.click();
-                    return true;
-                }
-            }));
+        return rows.filter(s => s?.active !== false).map(s => ({
+            ...s,
+            expectedVersion: String(s.version || '0'),
+            quickActions: Array.isArray(s.quickActions) ? s.quickActions : [],
+            api() {
+                try { return s.apiGlobal ? window[s.apiGlobal] || null : null; } catch { return null; }
+            },
+            fallbackOpen() {
+                if (!s.buttonSelector) return false;
+                const button = document.querySelector(s.buttonSelector);
+                if (!button) return false;
+                button.click();
+                return true;
+            }
+        }));
     }
 
     function httpGet(url) {
@@ -240,33 +212,23 @@
                     .catch(reject);
                 return;
             }
-
             if (window.flutter_inappwebview?.callHandler) {
-                window.flutter_inappwebview
-                    .callHandler('PDA_httpGet', url, { Accept: 'text/plain' })
+                window.flutter_inappwebview.callHandler('PDA_httpGet', url, { Accept: 'text/plain' })
                     .then(r => resolve(String(r?.responseText ?? r?.body ?? r ?? '')))
                     .catch(reject);
                 return;
             }
-
             if (typeof GM_xmlhttpRequest === 'function') {
                 GM_xmlhttpRequest({
-                    method: 'GET',
-                    url,
-                    headers: { Accept: 'text/plain' },
-                    timeout: 15000,
+                    method: 'GET', url, headers: { Accept: 'text/plain' }, timeout: 15000,
                     onload: r => r.status >= 200 && r.status < 400 ? resolve(r.responseText || '') : reject(new Error('HTTP ' + r.status)),
                     onerror: () => reject(new Error('Network error')),
                     ontimeout: () => reject(new Error('Request timeout'))
                 });
                 return;
             }
-
             fetch(url, { cache: 'no-store' })
-                .then(r => {
-                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                    return r.text();
-                })
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
                 .then(resolve)
                 .catch(reject);
         });
@@ -306,8 +268,8 @@
             const api = script.api();
             if (!api) return null;
             if (api.version) return String(api.version);
-            const h = api.health?.();
-            return h?.version ? String(h.version) : null;
+            const health = api.health?.();
+            return health?.version ? String(health.version) : null;
         } catch {
             return null;
         }
@@ -392,36 +354,15 @@
         return SCRIPTS.filter(s => !s.api()).length;
     }
 
-    function openInstall(script) {
-        if (script?.downloadUrl) location.href = script.downloadUrl;
-    }
-
     function getHealth(script) {
         const api = script.api();
         if (!api) return { state: 'missing', text: 'NOT INSTALLED', version: null, data: null };
         try {
             const data = typeof api.health === 'function' ? api.health() : null;
-            if (data?.error) {
-                return {
-                    state: 'error',
-                    text: 'ERROR',
-                    version: api.version || data.version || '?',
-                    data
-                };
-            }
-            return {
-                state: 'ok',
-                text: 'INSTALLED',
-                version: api.version || data?.version || '?',
-                data
-            };
+            if (data?.error) return { state: 'error', text: 'ERROR', version: api.version || data.version || '?', data };
+            return { state: 'ok', text: 'INSTALLED', version: api.version || data?.version || '?', data };
         } catch (error) {
-            return {
-                state: 'error',
-                text: 'ERROR',
-                version: api.version || '?',
-                data: { error: String(error?.message || error) }
-            };
+            return { state: 'error', text: 'ERROR', version: api.version || '?', data: { error: String(error?.message || error) } };
         }
     }
 
@@ -430,23 +371,24 @@
     }
 
     function getIssueCount() {
-        return getAllHealth().filter(r => r.health.state === 'error').length + getUpdateCount() + getMissingCount();
+        return getAllHealth().filter(row => row.health.state === 'error').length + getUpdateCount() + getMissingCount();
     }
 
     function injectCss() {
         if (document.getElementById(IDS.style)) return;
-
         const style = document.createElement('style');
         style.id = IDS.style;
         style.textContent = `
 #${IDS.button}{position:fixed!important;z-index:2147483646!important;border:2px solid #555!important;border-radius:50%!important;background:#171717!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font-size:24px!important;box-shadow:0 5px 18px rgba(0,0,0,.6)!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important}
 #${IDS.badge}{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#ef4444;color:#fff;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:2px solid #171717}
-#${IDS.topSkull}{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;width:27px!important;height:27px!important;margin:0 6px 0 0!important;padding:0!important;border:0!important;border-radius:7px!important;background:rgba(18,18,20,.72)!important;color:#f5f5f5!important;font-size:18px!important;line-height:1!important;cursor:pointer!important;vertical-align:middle!important;z-index:5!important;user-select:none!important;-webkit-tap-highlight-color:transparent!important;animation:slhSkullBlink 2.45s ease-in-out infinite!important;filter:drop-shadow(0 0 2px rgba(255,255,255,.18))}
-#${IDS.topSkull}:hover{background:rgba(42,42,46,.92)!important}
-#${IDS.topSkull}.slh-alert{animation:slhSkullAlert .92s ease-in-out infinite!important;color:#fff!important;filter:drop-shadow(0 0 6px rgba(239,68,68,.9))}
-#${IDS.topBadge}{position:absolute;top:-5px;right:-6px;min-width:15px;height:15px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#ef4444;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;border:1px solid #171717;line-height:1}
-@keyframes slhSkullBlink{0%,7%,15%,23%,31%,100%{opacity:.48;transform:scale(.94)}10%,18%,26%{opacity:1;transform:scale(1.10);filter:drop-shadow(0 0 5px rgba(255,255,255,.55))}35%{opacity:.7;transform:scale(1)}55%{opacity:.55}75%{opacity:.8}}
-@keyframes slhSkullAlert{0%,100%{opacity:.35;transform:scale(.90) rotate(-2deg)}45%{opacity:1;transform:scale(1.14) rotate(2deg)}60%{opacity:.55;transform:scale(.96)}75%{opacity:1;transform:scale(1.08)}}
+#${IDS.topSkull}{position:relative!important;box-sizing:border-box!important;cursor:pointer!important;user-select:none!important;-webkit-tap-highlight-color:transparent!important}
+#${IDS.topSkull} .slh-native-link{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;box-sizing:border-box!important;color:inherit!important;text-decoration:none!important;background:transparent!important;border:0!important;padding:0!important;margin:0!important;cursor:pointer!important}
+#${IDS.topSkull} .slh-native-skull{display:block!important;color:inherit!important;font-family:Arial,Helvetica,sans-serif!important;font-size:25px!important;font-weight:700!important;line-height:27px!important;height:28px!important;min-height:28px!important;text-align:center!important;opacity:.72!important;transform-origin:center!important;animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;text-shadow:0 1px 0 rgba(255,255,255,.05)!important}
+#${IDS.topSkull} .slh-native-label{display:block!important;color:inherit!important;font-family:Arial,Helvetica,sans-serif!important;font-size:10px!important;font-weight:700!important;line-height:12px!important;text-transform:uppercase!important;text-align:center!important;white-space:nowrap!important;opacity:.82!important}
+#${IDS.topSkull}.slh-alert .slh-native-skull{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}
+#${IDS.topBadge}{position:absolute;top:0;right:calc(50% - 18px);min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#b53b3b;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}
+@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48;transform:scale(.96)}11%,19%,27%{opacity:.95;transform:scale(1.06)}40%,75%{opacity:.68;transform:scale(1)}}
+@keyframes slhNativeSkullAlert{0%,100%{opacity:.4;transform:scale(.94)}50%{opacity:1;transform:scale(1.10)}72%{opacity:.62;transform:scale(.98)}}
 #${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.76);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
 #${IDS.panel}{width:min(620px,100%);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;background:#101318;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.7)}
 .slh-header{padding:14px;border-bottom:1px solid #292f38;flex-shrink:0}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.slh-title{font-size:19px;font-weight:900}.slh-sub{margin-top:3px;color:#8b949e;font-size:10px}.slh-close{width:36px;height:36px;border:0;border-radius:9px;background:#252a32;color:#fff;font-size:20px}
@@ -464,12 +406,10 @@
     function positionButton() {
         const button = document.getElementById(IDS.button);
         if (!button) return;
-
         const size = Math.max(38, Math.min(64, Number(settings.buttonSize) || 48));
         button.style.setProperty('width', size + 'px', 'important');
         button.style.setProperty('height', size + 'px', 'important');
         ['top', 'bottom', 'left', 'right'].forEach(p => button.style.removeProperty(p));
-
         if (settings.buttonPosition === 'middle-right') {
             button.style.setProperty('top', '45%', 'important');
             button.style.setProperty('right', '12px', 'important');
@@ -497,6 +437,7 @@
         }
         positionButton();
         updateBadge();
+        syncFloatingButtonVisibility();
     }
 
     function bindMainButton(button) {
@@ -509,9 +450,7 @@
                 openQuickMenu();
             }, 650);
         };
-
         const end = () => clearTimeout(longPressTimer);
-
         button.addEventListener('touchstart', start, { passive: true });
         button.addEventListener('touchend', end);
         button.addEventListener('touchcancel', end);
@@ -543,7 +482,6 @@
             '[aria-label*="message" i]',
             '[title*="message" i]'
         ];
-
         for (const selector of directSelectors) {
             const nodes = [...document.querySelectorAll(selector)];
             const match = nodes.find(node => {
@@ -553,9 +491,7 @@
             });
             if (match) return match.closest('a,button,[role="button"]') || match;
         }
-
-        const candidates = [...document.querySelectorAll('a,button,[role="button"]')];
-        return candidates.find(node => {
+        return [...document.querySelectorAll('a,button,[role="button"]')].find(node => {
             if (node.closest('#' + IDS.overlay)) return false;
             if (!isVisibleElement(node)) return false;
             const text = String(node.textContent || '').trim().toLowerCase();
@@ -565,43 +501,80 @@
         }) || null;
     }
 
+    function getMessagesNavItem(messages) {
+        if (!messages) return null;
+        let node = messages;
+        for (let depth = 0; depth < 4 && node?.parentElement; depth++) {
+            const parent = node.parentElement;
+            const visibleChildren = [...parent.children].filter(isVisibleElement);
+            if (visibleChildren.length >= 4 && visibleChildren.length <= 20) return node;
+            node = parent;
+        }
+        return messages;
+    }
+
+    function syncFloatingButtonVisibility() {
+        const button = document.getElementById(IDS.button);
+        if (!button) return;
+        const nativeReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.topSkull));
+        button.style.setProperty('display', nativeReady ? 'none' : 'flex', 'important');
+    }
+
     function createTopbarSkull() {
         const existing = document.getElementById(IDS.topSkull);
-
         if (!settings.showTopbarSkull) {
             existing?.remove();
+            syncFloatingButtonVisibility();
             return false;
         }
-
         if (existing?.isConnected) {
             updateTopbarSkullState();
+            syncFloatingButtonVisibility();
             return true;
         }
 
         const messages = findMessagesAnchor();
-        if (!messages?.parentElement) return false;
+        if (!messages) {
+            syncFloatingButtonVisibility();
+            return false;
+        }
 
-        const skull = document.createElement('span');
-        skull.id = IDS.topSkull;
-        skull.setAttribute('role', 'button');
-        skull.setAttribute('tabindex', '0');
-        skull.setAttribute('aria-label', 'Open SakaLuX Script Hub');
-        skull.setAttribute('title', 'SakaLuX Script Hub');
-        skull.innerHTML = `☠️<span id="${IDS.topBadge}"></span>`;
+        const messagesItem = getMessagesNavItem(messages);
+        if (!messagesItem?.parentElement) {
+            syncFloatingButtonVisibility();
+            return false;
+        }
+
+        const hubItem = messagesItem.cloneNode(true);
+        hubItem.id = IDS.topSkull;
+        hubItem.querySelectorAll?.('[id]').forEach(node => node.removeAttribute('id'));
+
+        const clickable = hubItem.matches?.('a,button,[role="button"]')
+            ? hubItem
+            : hubItem.querySelector?.('a,button,[role="button"]') || hubItem;
+
+        clickable.removeAttribute?.('href');
+        clickable.removeAttribute?.('target');
+        clickable.setAttribute('role', 'button');
+        clickable.setAttribute('tabindex', '0');
+        clickable.setAttribute('aria-label', 'Open SakaLuX Script Hub');
+        clickable.setAttribute('title', 'SakaLuX Script Hub');
+        clickable.classList.add('slh-native-link');
+        clickable.innerHTML = `<span class="slh-native-skull" aria-hidden="true">☠︎</span><span class="slh-native-label">HUB</span><span id="${IDS.topBadge}"></span>`;
 
         const open = event => {
             event.preventDefault();
             event.stopPropagation();
             openHub();
         };
-
-        skull.addEventListener('click', open);
-        skull.addEventListener('keydown', event => {
+        clickable.addEventListener('click', open);
+        clickable.addEventListener('keydown', event => {
             if (event.key === 'Enter' || event.key === ' ') open(event);
         });
 
-        messages.parentElement.insertBefore(skull, messages);
+        messagesItem.parentElement.insertBefore(hubItem, messagesItem);
         updateTopbarSkullState();
+        syncFloatingButtonVisibility();
         return true;
     }
 
@@ -609,10 +582,8 @@
         const skull = document.getElementById(IDS.topSkull);
         const badge = document.getElementById(IDS.topBadge);
         if (!skull) return;
-
         const total = getIssueCount();
         skull.classList.toggle('slh-alert', total > 0);
-
         if (badge) {
             badge.style.display = total > 0 ? 'flex' : 'none';
             badge.textContent = total > 99 ? '99+' : String(total);
@@ -622,12 +593,10 @@
     function updateBadge() {
         const total = getIssueCount();
         const badge = document.getElementById(IDS.badge);
-
         if (badge) {
             badge.style.display = total > 0 ? 'flex' : 'none';
             if (total > 0) badge.textContent = total > 99 ? '99+' : String(total);
         }
-
         updateTopbarSkullState();
     }
 
@@ -656,9 +625,7 @@
         overlay.id = IDS.overlay;
         overlay.innerHTML = `<div id="${IDS.panel}">${content}</div>`;
         document.body.appendChild(overlay);
-        overlay.onclick = event => {
-            if (event.target === overlay) closeHub();
-        };
+        overlay.onclick = event => { if (event.target === overlay) closeHub(); };
         return overlay;
     }
 
@@ -666,10 +633,7 @@
         createOverlay(`
             <div class="slh-header">
                 <div class="slh-headrow">
-                    <div>
-                        <div class="slh-title">☠️ SakaLuX Script Hub</div>
-                        <div class="slh-sub">v${VERSION} • Registry: ${escapeHtml(registryStatus)} • ${SCRIPTS.length} add-ons</div>
-                    </div>
+                    <div><div class="slh-title">☠️ SakaLuX Script Hub</div><div class="slh-sub">v${VERSION} • Registry: ${escapeHtml(registryStatus)} • ${SCRIPTS.length} add-ons</div></div>
                     <button class="slh-close" id="slh-close">×</button>
                 </div>
                 <div class="slh-stats" id="slh-stats"></div>
@@ -684,12 +648,7 @@
                 <div class="slh-cats" id="slh-cats"></div>
             </div>
             <div class="slh-list" id="slh-list"></div>
-            <div class="slh-bottom">
-                <div class="slh-bottom-grid">
-                    <button class="slh-bottom-btn" id="slh-money">💸 SEND MONEY</button>
-                    <button class="slh-bottom-btn" id="slh-items">🎁 SEND ITEMS</button>
-                </div>
-            </div>
+            <div class="slh-bottom"><div class="slh-bottom-grid"><button class="slh-bottom-btn" id="slh-money">💸 SEND MONEY</button><button class="slh-bottom-btn" id="slh-items">🎁 SEND ITEMS</button></div></div>
             <div class="slh-footer">Made with ❤️ by <a class="slh-author" id="slh-author" href="${PROFILE_URL}">SakaLuX [2380374]</a></div>
         `);
 
@@ -709,7 +668,6 @@
             event.preventDefault();
             location.href = PROFILE_URL;
         };
-
         renderMainStats();
         renderCategories();
         renderList();
@@ -720,12 +678,10 @@
     function renderMainStats() {
         const box = document.getElementById('slh-stats');
         if (!box) return;
-
         const rows = getAllHealth();
         const installed = rows.filter(r => r.health.state !== 'missing').length;
         const healthy = rows.filter(r => r.health.state === 'ok').length;
         const errors = rows.filter(r => r.health.state === 'error').length;
-
         box.innerHTML = `
             <div class="slh-stat"><strong>${installed}/${SCRIPTS.length}</strong><span>ADD-ONS</span></div>
             <div class="slh-stat"><strong>${healthy}</strong><span>INSTALLED</span></div>
@@ -745,12 +701,8 @@
     function renderCategories() {
         const box = document.getElementById('slh-cats');
         if (!box) return;
-
         const categories = ['ALL', ...new Set(SCRIPTS.map(s => s.category || 'Other'))];
-        box.innerHTML = categories
-            .map(value => `<button class="slh-cat ${category === value ? 'active' : ''}" data-category="${escapeHtml(value)}">${escapeHtml(value)}</button>`)
-            .join('');
-
+        box.innerHTML = categories.map(value => `<button class="slh-cat ${category === value ? 'active' : ''}" data-category="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join('');
         box.querySelectorAll('[data-category]').forEach(button => {
             button.onclick = () => {
                 category = button.dataset.category;
@@ -763,21 +715,17 @@
     function renderList() {
         const list = document.getElementById('slh-list');
         if (!list) return;
-
         let rows = getAllHealth().map(row => ({
             ...row,
             favorite: favorites.has(row.script.id),
             usage: usage[row.script.id] || { count: 0, lastUsed: 0 },
             update: getUpdateState(row.script)
         }));
-
         rows = rows.filter(row => {
             const categoryOk = category === 'ALL' || row.script.category === category;
             const searchText = (row.script.name + ' ' + row.script.category + ' ' + (row.script.description || '')).toLowerCase();
-            const searchOk = !search || searchText.includes(search);
-            return categoryOk && searchOk;
+            return categoryOk && (!search || searchText.includes(search));
         });
-
         rows.sort((a, b) => {
             if (a.health.state === 'missing' && b.health.state !== 'missing') return -1;
             if (b.health.state === 'missing' && a.health.state !== 'missing') return 1;
@@ -786,7 +734,6 @@
             if (a.favorite !== b.favorite) return a.favorite ? -1 : 1;
             return b.usage.count - a.usage.count;
         });
-
         list.innerHTML = rows.map(renderCard).join('') || '<div style="padding:30px;text-align:center;color:#888">No scripts found.</div>';
         bindCards();
     }
@@ -798,26 +745,13 @@
         const installed = getInstalledVersion(script);
         const latest = update.data?.latest || script.expectedVersion || '?';
         const missing = health.state === 'missing';
-
         let extra = '';
-        if (script.id === 'enhancer' && health.data) {
-            extra = ` • Inventory: ${health.data.inventoryEntries ?? 0}`;
-        }
-        if (script.id === 'bazaar' && health.data) {
-            extra = (health.data.onEvents || health.data.onMessages)
-                ? ` • Buyers: ${health.data.buyers ?? 0}`
-                : ' • Standby on this page';
-        }
-        if (script.id === 'mission-rewards' && health.data) {
-            extra = health.data.onMissions === false
-                ? ' • Standby outside Missions'
-                : ` • Rewards: ${health.data.rewardCards ?? 0}`;
-        }
-
+        if (script.id === 'enhancer' && health.data) extra = ` • Inventory: ${health.data.inventoryEntries ?? 0}`;
+        if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? ` • Buyers: ${health.data.buyers ?? 0}` : ' • Standby on this page';
+        if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? ' • Standby outside Missions' : ` • Rewards: ${health.data.rewardCards ?? 0}`;
         const actions = missing
             ? `<button class="slh-action install" data-install="${escapeHtml(script.id)}">⬇ INSTALL</button>`
             : `${update.state === 'available' ? `<button class="slh-action update" data-update="${escapeHtml(script.id)}">⬆ UPDATE</button>` : ''}${script.quickActions.map(action => `<button class="slh-action ${action.id === 'open' ? '' : 'secondary'}" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(action.id)}">${action.icon || '▶'} ${escapeHtml(action.label || action.id)}</button>`).join('')}`;
-
         return `
             <div class="slh-card ${row.favorite ? 'favorite' : ''} ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''}">
                 <div class="slh-icon">${script.icon || '🧩'}</div>
@@ -846,21 +780,18 @@
                 renderList();
             };
         });
-
         document.querySelectorAll('[data-install]').forEach(button => {
             button.onclick = () => {
                 const script = SCRIPTS.find(item => item.id === button.dataset.install);
-                if (script) openInstall(script);
+                if (script?.downloadUrl) location.href = script.downloadUrl;
             };
         });
-
         document.querySelectorAll('[data-update]').forEach(button => {
             button.onclick = () => {
                 const script = SCRIPTS.find(item => item.id === button.dataset.update);
-                if (script) openInstall(script);
+                if (script?.downloadUrl) location.href = script.downloadUrl;
             };
         });
-
         document.querySelectorAll('[data-script][data-action]').forEach(button => {
             button.onclick = () => runAction(button.dataset.script, button.dataset.action);
         });
@@ -869,15 +800,12 @@
     async function runAction(id, actionId) {
         const script = SCRIPTS.find(item => item.id === id);
         if (!script) return;
-
         const api = script.api();
         if (!api) {
-            openInstall(script);
+            if (script.downloadUrl) location.href = script.downloadUrl;
             return;
         }
-
         const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
-
         try {
             if (typeof api[action.method] === 'function') {
                 recordUsage(id);
@@ -890,19 +818,16 @@
                 else setTimeout(openHub, 100);
                 return;
             }
-
             if (action.fallbackUrl) {
                 recordUsage(id);
                 location.href = action.fallbackUrl;
                 return;
             }
-
             if (actionId === 'open' && script.fallbackOpen()) {
                 recordUsage(id);
                 closeHub();
                 return;
             }
-
             alert(script.name + ' is not available on this page.');
         } catch (error) {
             console.error('[SakaLuX Hub]', error);
@@ -913,14 +838,11 @@
     async function updateAll() {
         await checkAllUpdates(true);
         const updates = SCRIPTS.filter(script => getInstalledVersion(script) && updateCache[script.id]?.available && script.downloadUrl);
-
         if (!updates.length) {
             alert('All installed SakaLuX add-ons are up to date.');
             return;
         }
-
         if (!confirm('Open ' + updates.length + ' update installer' + (updates.length === 1 ? '' : 's') + ' now?')) return;
-
         let opened = 0;
         for (const script of updates) {
             try {
@@ -928,203 +850,93 @@
                 if (win) opened++;
             } catch {}
         }
-
-        if (opened < updates.length) {
-            alert('Some installer tabs were blocked. Use the individual UPDATE buttons for the remaining add-ons.');
-        }
+        if (opened < updates.length) alert('Some installer tabs were blocked. Use the individual UPDATE buttons for the remaining add-ons.');
     }
 
     function openWhatsNew() {
         createOverlay(`
-            <div class="slh-header">
-                <div class="slh-headrow">
-                    <div>
-                        <div class="slh-title">✨ WHAT'S NEW</div>
-                        <div class="slh-sub">SakaLuX Script Hub release notes</div>
-                    </div>
-                    <button class="slh-close" id="slhn-close">×</button>
-                </div>
-            </div>
+            <div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">✨ WHAT'S NEW</div><div class="slh-sub">SakaLuX Script Hub release notes</div></div><button class="slh-close" id="slhn-close">×</button></div></div>
             <div class="slh-view">
-                ${HUB_CHANGELOG.map(release => `
-                    <div class="slh-note">
-                        <div class="slh-version-title">v${escapeHtml(release.version)} <span class="slh-version-date">${escapeHtml(release.date)}</span></div>
-                        ${release.changes.map(change => `<div>• ${escapeHtml(change)}</div>`).join('')}
-                    </div>
-                `).join('')}
+                ${HUB_CHANGELOG.map(release => `<div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version)} <span class="slh-version-date">${escapeHtml(release.date)}</span></div>${release.changes.map(change => `<div>• ${escapeHtml(change)}</div>`).join('')}</div>`).join('')}
                 <button class="slh-big-btn" id="slhn-back">← BACK</button>
             </div>
         `);
-
         document.getElementById('slhn-close').onclick = closeHub;
         document.getElementById('slhn-back').onclick = openHub;
     }
 
     async function openSystemCheck() {
-        createOverlay(`
-            <div class="slh-header">
-                <div class="slh-headrow">
-                    <div>
-                        <div class="slh-title">🩺 SYSTEM CHECK</div>
-                        <div class="slh-sub">Checking registry, Greasy Fork and add-ons...</div>
-                    </div>
-                    <button class="slh-close" id="slhc-close">×</button>
-                </div>
-            </div>
-            <div class="slh-view" id="slhc-results"><div class="slh-note">⏳ Running diagnostics...</div></div>
-        `);
-
+        createOverlay(`<div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">🩺 SYSTEM CHECK</div><div class="slh-sub">Checking registry, Greasy Fork and add-ons...</div></div><button class="slh-close" id="slhc-close">×</button></div></div><div class="slh-view" id="slhc-results"><div class="slh-note">⏳ Running diagnostics...</div></div>`);
         document.getElementById('slhc-close').onclick = closeHub;
         const results = [];
-
         try {
             const data = JSON.parse(await httpGet(REGISTRY_URL + '?check=' + Date.now()));
-            results.push({
-                level: Array.isArray(data?.scripts) ? 'ok' : 'bad',
-                label: 'scripts.json registry',
-                detail: Array.isArray(data?.scripts) ? data.scripts.length + ' add-ons found' : 'Invalid registry'
-            });
+            results.push({ level: Array.isArray(data?.scripts) ? 'ok' : 'bad', label: 'scripts.json registry', detail: Array.isArray(data?.scripts) ? data.scripts.length + ' add-ons found' : 'Invalid registry' });
         } catch (error) {
             results.push({ level: 'bad', label: 'scripts.json registry', detail: String(error?.message || error) });
         }
-
         for (const script of SCRIPTS) {
             try {
                 const latest = parseMetaVersion(await httpGet(script.metaUrl));
-                results.push({
-                    level: latest ? 'ok' : 'warn',
-                    label: script.name + ' update source',
-                    detail: latest ? 'Greasy Fork v' + latest : 'No version found'
-                });
+                results.push({ level: latest ? 'ok' : 'warn', label: script.name + ' update source', detail: latest ? 'Greasy Fork v' + latest : 'No version found' });
             } catch (error) {
-                results.push({
-                    level: 'bad',
-                    label: script.name + ' update source',
-                    detail: String(error?.message || error)
-                });
+                results.push({ level: 'bad', label: script.name + ' update source', detail: String(error?.message || error) });
             }
-
             const health = getHealth(script);
             results.push({
                 level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad',
                 label: script.name + ' local status',
-                detail: health.state === 'missing'
-                    ? 'Not installed'
-                    : health.state === 'ok'
-                        ? 'Installed v' + health.version
-                        : String(health.data?.error || 'Error')
+                detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error')
             });
         }
-
         results.push({ level: 'ok', label: 'SakaLuX Script Hub', detail: 'Loaded v' + VERSION + ' • API exposed' });
         results.push({
             level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn',
-            label: 'Torn top-bar skull',
-            detail: document.getElementById(IDS.topSkull) ? 'Visible before Messages' : 'Messages control not detected yet'
+            label: 'Native Torn HUB launcher',
+            detail: document.getElementById(IDS.topSkull) ? 'Integrated before Messages' : 'Messages navigation item not detected yet'
         });
-
         const box = document.getElementById('slhc-results');
         if (!box) return;
-
-        box.innerHTML = results
-            .map(result => `<div class="slh-check-row slh-check-${result.level}">${result.level === 'ok' ? '🟢' : result.level === 'warn' ? '🟠' : '🔴'} <b>${escapeHtml(result.label)}</b><br><span style="color:#9ca3af">${escapeHtml(result.detail)}</span></div>`)
-            .join('') + '<button class="slh-big-btn" id="slhc-back">← BACK</button>';
-
+        box.innerHTML = results.map(result => `<div class="slh-check-row slh-check-${result.level}">${result.level === 'ok' ? '🟢' : result.level === 'warn' ? '🟠' : '🔴'} <b>${escapeHtml(result.label)}</b><br><span style="color:#9ca3af">${escapeHtml(result.detail)}</span></div>`).join('') + '<button class="slh-big-btn" id="slhc-back">← BACK</button>';
         document.getElementById('slhc-back').onclick = openHub;
     }
 
     function openQuickMenu() {
         const rows = getAllHealth();
-
-        createOverlay(`
-            <div class="slh-header">
-                <div class="slh-headrow">
-                    <div>
-                        <div class="slh-title">☠️ Quick Menu</div>
-                        <div class="slh-sub">Installed add-ons and one-tap install</div>
-                    </div>
-                    <button class="slh-close" id="slhq-close">×</button>
-                </div>
-            </div>
-            <div class="slh-quick">
-                ${rows.map(row => {
-                    const update = getUpdateState(row.script);
-                    if (row.health.state === 'missing') {
-                        return `<button class="slh-big-btn install" data-quick-install="${row.script.id}">⬇ INSTALL ${row.script.icon || '🧩'} ${escapeHtml(row.script.name)}</button>`;
-                    }
-                    return `<button class="slh-big-btn ${update.state === 'available' ? 'update' : ''}" data-quick-open="${row.script.id}">${row.script.icon || '🧩'} ${escapeHtml(row.script.name)} • ${escapeHtml(row.health.text)}</button>${update.state === 'available' ? `<button class="slh-big-btn update" data-quick-update="${row.script.id}">⬆ UPDATE TO v${escapeHtml(update.data.latest)}</button>` : ''}`;
-                }).join('')}
-                <button class="slh-big-btn gray" id="slhq-full">☠️ OPEN FULL HUB</button>
-            </div>
-        `);
-
+        createOverlay(`<div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">☠️ Quick Menu</div><div class="slh-sub">Installed add-ons and one-tap install</div></div><button class="slh-close" id="slhq-close">×</button></div></div><div class="slh-quick">${rows.map(row => {
+            const update = getUpdateState(row.script);
+            if (row.health.state === 'missing') return `<button class="slh-big-btn install" data-quick-install="${row.script.id}">⬇ INSTALL ${row.script.icon || '🧩'} ${escapeHtml(row.script.name)}</button>`;
+            return `<button class="slh-big-btn ${update.state === 'available' ? 'update' : ''}" data-quick-open="${row.script.id}">${row.script.icon || '🧩'} ${escapeHtml(row.script.name)} • ${escapeHtml(row.health.text)}</button>${update.state === 'available' ? `<button class="slh-big-btn update" data-quick-update="${row.script.id}">⬆ UPDATE TO v${escapeHtml(update.data.latest)}</button>` : ''}`;
+        }).join('')}<button class="slh-big-btn gray" id="slhq-full">☠️ OPEN FULL HUB</button></div>`);
         document.getElementById('slhq-close').onclick = closeHub;
         document.getElementById('slhq-full').onclick = openHub;
-
-        document.querySelectorAll('[data-quick-install]').forEach(button => {
-            button.onclick = () => {
-                const script = SCRIPTS.find(item => item.id === button.dataset.quickInstall);
-                if (script) openInstall(script);
-            };
+        document.querySelectorAll('[data-quick-install]').forEach(button => button.onclick = () => {
+            const script = SCRIPTS.find(item => item.id === button.dataset.quickInstall);
+            if (script?.downloadUrl) location.href = script.downloadUrl;
         });
-
-        document.querySelectorAll('[data-quick-open]').forEach(button => {
-            button.onclick = () => runAction(button.dataset.quickOpen, 'open');
-        });
-
-        document.querySelectorAll('[data-quick-update]').forEach(button => {
-            button.onclick = () => {
-                const script = SCRIPTS.find(item => item.id === button.dataset.quickUpdate);
-                if (script) openInstall(script);
-            };
+        document.querySelectorAll('[data-quick-open]').forEach(button => button.onclick = () => runAction(button.dataset.quickOpen, 'open'));
+        document.querySelectorAll('[data-quick-update]').forEach(button => button.onclick = () => {
+            const script = SCRIPTS.find(item => item.id === button.dataset.quickUpdate);
+            if (script?.downloadUrl) location.href = script.downloadUrl;
         });
     }
 
     function openSettings() {
-        createOverlay(`
-            <div class="slh-header">
-                <div class="slh-headrow">
-                    <div>
-                        <div class="slh-title">⚙️ Hub Settings</div>
-                        <div class="slh-sub">SakaLuX Script Hub v${VERSION}</div>
-                    </div>
-                    <button class="slh-close" id="slhs-close">×</button>
-                </div>
-            </div>
-            <div class="slh-settings">
-                <div class="slh-setting"><label><input id="slhs-hide" type="checkbox" ${settings.hideIndividualButtons ? 'checked' : ''}> Hide individual script buttons</label></div>
-                <div class="slh-setting"><label><input id="slhs-topbar" type="checkbox" ${settings.showTopbarSkull ? 'checked' : ''}> Show blinking ☠️ before Messages</label></div>
-                <div class="slh-setting"><label><input id="slhs-long" type="checkbox" ${settings.longPressQuickMenu ? 'checked' : ''}> Long press floating ☠️ opens Quick Menu</label></div>
-                <div class="slh-setting"><label><input id="slhs-auto" type="checkbox" ${settings.autoCheckUpdates ? 'checked' : ''}> Automatically check Greasy Fork updates</label></div>
-                <div class="slh-setting">Button position
-                    <select id="slhs-position">
-                        <option value="top-right">Top right</option>
-                        <option value="middle-right">Middle right</option>
-                        <option value="bottom-right">Bottom right</option>
-                        <option value="top-left">Top left</option>
-                    </select>
-                </div>
-                <div class="slh-setting">Button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
-                <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button>
-                <button class="slh-big-btn gray" id="slhs-registry">🔄 REFRESH scripts.json</button>
-                <button class="slh-big-btn update" id="slhs-check">⬆ CHECK UPDATES NOW</button>
-                <button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button>
-                <button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button>
-                <button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button>
-                <button class="slh-big-btn gray" id="slhs-back">← BACK</button>
-            </div>
-        `);
-
+        createOverlay(`<div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">⚙️ Hub Settings</div><div class="slh-sub">SakaLuX Script Hub v${VERSION}</div></div><button class="slh-close" id="slhs-close">×</button></div></div><div class="slh-settings">
+            <div class="slh-setting"><label><input id="slhs-hide" type="checkbox" ${settings.hideIndividualButtons ? 'checked' : ''}> Hide individual script buttons</label></div>
+            <div class="slh-setting"><label><input id="slhs-topbar" type="checkbox" ${settings.showTopbarSkull ? 'checked' : ''}> Show native blinking ☠︎ HUB before Messages</label></div>
+            <div class="slh-setting"><label><input id="slhs-long" type="checkbox" ${settings.longPressQuickMenu ? 'checked' : ''}> Long press fallback floating ☠️ opens Quick Menu</label></div>
+            <div class="slh-setting"><label><input id="slhs-auto" type="checkbox" ${settings.autoCheckUpdates ? 'checked' : ''}> Automatically check Greasy Fork updates</label></div>
+            <div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div>
+            <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
+            <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-registry">🔄 REFRESH scripts.json</button><button class="slh-big-btn update" id="slhs-check">⬆ CHECK UPDATES NOW</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
+        </div>`);
         const position = document.getElementById('slhs-position');
         const size = document.getElementById('slhs-size');
         position.value = settings.buttonPosition;
-        size.oninput = function () {
-            document.getElementById('slhs-size-label').textContent = this.value + 'px';
-        };
-
+        size.oninput = function () { document.getElementById('slhs-size-label').textContent = this.value + 'px'; };
         document.getElementById('slhs-close').onclick = closeHub;
         document.getElementById('slhs-back').onclick = openHub;
-
         document.getElementById('slhs-save').onclick = () => {
             settings.hideIndividualButtons = document.getElementById('slhs-hide').checked;
             settings.showTopbarSkull = document.getElementById('slhs-topbar').checked;
@@ -1136,34 +948,18 @@
             updateHiddenButtons();
             positionButton();
             createTopbarSkull();
+            syncFloatingButtonVisibility();
             openHub();
         };
-
-        document.getElementById('slhs-registry').onclick = async () => {
-            await loadRegistry(true);
-            openSettings();
-        };
-
-        document.getElementById('slhs-check').onclick = async () => {
-            await checkAllUpdates(true);
-            openHub();
-        };
-
+        document.getElementById('slhs-registry').onclick = async () => { await loadRegistry(true); openSettings(); };
+        document.getElementById('slhs-check').onclick = async () => { await checkAllUpdates(true); openHub(); };
         document.getElementById('slhs-backup').onclick = backupSettings;
         document.getElementById('slhs-restore').onclick = restoreSettings;
         document.getElementById('slhs-reset').onclick = resetHub;
     }
 
     async function backupSettings() {
-        const text = JSON.stringify({
-            app: 'SakaLuX Script Hub',
-            version: VERSION,
-            created: Date.now(),
-            settings,
-            favorites: [...favorites],
-            usage
-        });
-
+        const text = JSON.stringify({ app: 'SakaLuX Script Hub', version: VERSION, created: Date.now(), settings, favorites: [...favorites], usage });
         try {
             await navigator.clipboard.writeText(text);
             alert('Hub backup copied to clipboard.');
@@ -1175,7 +971,6 @@
     function restoreSettings() {
         const raw = prompt('Paste SakaLuX Hub backup:');
         if (!raw) return;
-
         try {
             const data = JSON.parse(raw);
             if (data.app !== 'SakaLuX Script Hub') throw new Error();
@@ -1188,6 +983,7 @@
             updateHiddenButtons();
             positionButton();
             createTopbarSkull();
+            syncFloatingButtonVisibility();
             alert('Backup restored.');
             openHub();
         } catch {
@@ -1207,16 +1003,18 @@
         updateHiddenButtons();
         positionButton();
         createTopbarSkull();
+        syncFloatingButtonVisibility();
         updateBadge();
         openHub();
     }
 
     function ensureEverything() {
         injectCss();
-        createHubButton();
         createTopbarSkull();
+        createHubButton();
         updateHiddenButtons();
         updateBadge();
+        syncFloatingButtonVisibility();
     }
 
     function queueEnsure() {
@@ -1230,9 +1028,7 @@
     function startObserver() {
         if (observer) return;
         observer = new MutationObserver(mutations => {
-            if (mutations.some(mutation => mutation.addedNodes.length || mutation.removedNodes.length)) {
-                queueEnsure();
-            }
+            if (mutations.some(mutation => mutation.addedNodes.length || mutation.removedNodes.length)) queueEnsure();
         });
         observer.observe(document.body, { childList: true, subtree: true });
     }
@@ -1242,15 +1038,8 @@
         name: 'SakaLuX Script Hub',
         version: VERSION,
         ready: true,
-        open: () => {
-            openHub();
-            return true;
-        },
-        refresh: async () => {
-            await loadRegistry(true);
-            await checkAllUpdates(true);
-            return true;
-        },
+        open: () => { openHub(); return true; },
+        refresh: async () => { await loadRegistry(true); await checkAllUpdates(true); return true; },
         health: () => ({
             ready: true,
             version: VERSION,
@@ -1258,29 +1047,14 @@
             addOns: SCRIPTS.length,
             installed: SCRIPTS.filter(script => script.api()).length,
             updates: getUpdateCount(),
-            topbarSkull: Boolean(document.getElementById(IDS.topSkull))
+            nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull))
         })
     };
 
     window.dispatchEvent(new CustomEvent('SakaLuX:ScriptHubReady', { detail: { version: VERSION } }));
-
-    window.addEventListener('SakaLuX:EnhancerGuardReady', () => {
-        queueEnsure();
-        renderList();
-        renderMainStats();
-    });
-
-    window.addEventListener('SakaLuX:BazaarThankerReady', () => {
-        queueEnsure();
-        renderList();
-        renderMainStats();
-    });
-
-    window.addEventListener('SakaLuX:MissionRewardsReady', () => {
-        queueEnsure();
-        renderList();
-        renderMainStats();
-    });
+    window.addEventListener('SakaLuX:EnhancerGuardReady', () => { queueEnsure(); renderList(); renderMainStats(); });
+    window.addEventListener('SakaLuX:BazaarThankerReady', () => { queueEnsure(); renderList(); renderMainStats(); });
+    window.addEventListener('SakaLuX:MissionRewardsReady', () => { queueEnsure(); renderList(); renderMainStats(); });
 
     async function init() {
         ensureEverything();
@@ -1289,15 +1063,10 @@
         setTimeout(ensureEverything, 700);
         setTimeout(ensureEverything, 1800);
         setTimeout(ensureEverything, 4000);
-        if (settings.autoCheckUpdates) {
-            setTimeout(() => checkAllUpdates(false), 1500);
-        }
+        if (settings.autoCheckUpdates) setTimeout(() => checkAllUpdates(false), 1500);
         console.log('[SakaLuX Script Hub v' + VERSION + '] Loaded.');
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init, { once: true });
-    } else {
-        init();
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+    else init();
 })();
