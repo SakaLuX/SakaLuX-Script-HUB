@@ -1,10 +1,21 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.14.0**
+**Current version: v1.15.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.0 — Travel Session Summary
+
+- Added a local **Travel Session Summary** with up to 20 recent trips.
+- Captures the Arrival Basket estimate while flying and the live BEST BUYS basket after landing.
+- Shows estimated profit before landing, at landing and the resulting delta.
+- Added **MARK PLAN BOUGHT** so the user can explicitly record the displayed basket as the plan they purchased. This is a local confirmation only; the script does not claim to verify later market sales or realized profit.
+- The summary shows the active trip and five recent archived trips.
+- Added a Settings toggle and **CLEAR TRAVEL HISTORY** control.
+- Added session status/profit fields to `health()` and `travelSessionSummary()` to the public API.
+- Session data stays local and is never uploaded to a SakaLuX server.
 
 ## v1.14.0 — Smart Auto Refresh After Landing
 
@@ -206,7 +217,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist, price history and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.14.0.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist, price history and market cache are stored locally in the browser/PDA. No observations or travel-session history are uploaded to a SakaLuX server in v1.15.0.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.
