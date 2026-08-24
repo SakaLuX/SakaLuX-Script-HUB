@@ -1,0 +1,35 @@
+name: Patch Market Intelligence v1.9.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/patches/mi-v1.9.0.py'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply v1.9.0 patch
+        run: python .github/patches/mi-v1.9.0.py
+      - name: Verify
+        run: |
+          grep -q '@version      1.9.0' SakaLuX-Market-Intelligence.user.js
+          grep -q 'buildOptimizedTravelPlan' SakaLuX-Market-Intelligence.user.js
+          grep -q 'travelPlanOptimizationGain' SakaLuX-Market-Intelligence.user.js
+          grep -q '"version": "1.9.0"' scripts.json
+          grep -q 'v1.9.0' UPDATE-INFO.md
+          grep -q 'v1.9.0' greasyfork/Market-Intelligence.md
+      - name: Commit changes
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "sakalutzu92@yahoo.com"
+          git add SakaLuX-Market-Intelligence.user.js scripts.json UPDATE-INFO.md greasyfork/Market-Intelligence.md
+          git commit -m "SakaLuX Market Intelligence v1.9.0: Travel Profit Optimizer"
+          git push
