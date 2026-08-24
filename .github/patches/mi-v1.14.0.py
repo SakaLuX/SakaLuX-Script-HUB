@@ -132,3 +132,5 @@ gf_release='''## v1.14.0 — Smart Auto Refresh After Landing\n\n- Added smart p
 gf=gf.replace('## v1.13.0',gf_release+'## v1.13.0',1)
 gf=gf.replace('No observations are uploaded to a SakaLuX server in v1.13.0.','No observations are uploaded to a SakaLuX server in v1.14.0.',1)
 GF.write_text(gf,encoding='utf-8')
+
+# trigger update after workflow is present
