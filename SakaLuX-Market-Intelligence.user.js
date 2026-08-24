@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.12.0
-// @description  Torn market and travel intelligence with Best Route Basket Optimizer, Valigia-style in-country Best Buys, budget-aware Travel planning, Bazaar flips, Item Market signals, arrival prediction and Museum valuation.
+// @version      1.13.0
+// @description  Torn market and travel intelligence with Best Route Basket Optimizer, in-country Best Buys and an Arrival Basket Planner that prepares the optimal shopping mix before landing.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.12.0';
+    const VERSION = '1.13.0';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -106,6 +106,7 @@
         countryBestBuys: true,
         stockEta: true,
         arrivalStock: true,
+        arrivalBasket: true,
         bazaar: true,
         itemMarket: true,
         items: true,
@@ -129,7 +130,7 @@
         page: '', apiMode: '', busy: false, lastScan: 0, lastError: '',
         scanCount: 0, marketRequests: 0, decorated: 0, observer: null,
         scanTimer: null, bestRunRows: 0, stockEtaLearned: 0,
-        arrivalRows: 0, flightDestination: '', landingMins: null,
+        arrivalRows: 0, flightDestination: '', landingMins: null, arrivalBasketItems: 0, arrivalBasketCost: 0, arrivalBasketProfit: 0, arrivalBasketSlots: 0, arrivalBasketMode: '',
         travelCacheHits: 0, travelRefreshes: 0, observerSkips: 0, lastObserverScan: 0,
         museumSets: 0, museumRecommendation: '', museumMissingSets: 0,
         bazaarDeals: 0, bazaarBestProfit: 0, bazaarBestRoi: 0,
@@ -599,37 +600,70 @@
     async function renderArrivalStock(){
         document.getElementById('sl-mi-arrival')?.remove();
         state.arrivalRows=0;state.flightDestination='';state.landingMins=null;
+        state.arrivalBasketItems=0;state.arrivalBasketCost=0;state.arrivalBasketProfit=0;state.arrivalBasketSlots=0;state.arrivalBasketMode='';
         if(!settings.arrivalStock||!detectInFlight()) return;
         const flight=await fetchFlightStatus();
-        const destination=normalizeDestination(flight.destination);const landingMins=Number(flight.seconds)/60;
+        const destination=normalizeDestination(flight.destination),landingMins=Number(flight.seconds)/60;
         if(!destination||!Number.isFinite(landingMins)||landingMins<0) return;
         state.flightDestination=destination;state.landingMins=landingMins;
         const yata=(await fetchYataAll()).filter(r=>r.destination===destination);if(!yata.length)return;
         for(const r of yata)if(r.stock!=null)recordStock(destination,r.itemId,r.stock);flushStockHistory();
+
         const marketMap=new Map();
         for(const r of yata){const c=cachePeek(r.itemId);if(c)marketMap.set(r.itemId,c);}
         const ids=travelRefreshIds(yata,ARRIVAL_REFRESH_LIMIT,new Map());
         await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)marketMap.set(id,m);});
+
         const slots=Math.max(1,Number(settings.travelSlots)||29),rows=[];
         for(const r of yata){
             const market=marketMap.get(r.itemId);if(!market)continue;
             const m=metrics(r.buyPrice,market.price);if(m.profit<=0)continue;
             const p=predictAtArrival(destination,r.itemId,r.stock,landingMins);
-            const availableQty=p.projected==null?slots:Math.min(slots,Math.max(0,p.projected));
-            const currentQty=r.stock==null?0:Math.min(slots,Math.max(0,r.stock));
+            const projectedStock=p.projected==null?(r.stock==null?0:Number(r.stock)||0):Math.max(0,Math.floor(Number(p.projected)||0));
+            const availableQty=Math.min(slots,projectedStock);
+            const currentQty=r.stock==null?0:Math.min(slots,Math.max(0,Number(r.stock)||0));
             const projectedProfit=m.profit*availableQty,currentProfit=m.profit*currentQty;
             const score=projectedProfit+(p.expectedRestocks>0?Math.max(0,m.profit)*Math.min(slots,Number(p.eta.qty)||0)*0.25:0);
-            rows.push(Object.assign({},r,{market:market.price,profitItem:m.profit,roi:m.roi,p,currentProfit,projectedProfit,score}));
+            rows.push(Object.assign({},r,{market:market.price,profitItem:m.profit,roi:m.roi,p,currentProfit,projectedProfit,projectedStock,score}));
         }
-        rows.sort((a,b)=>b.score-a.score);const top=rows.slice(0,8);state.arrivalRows=top.length;if(!top.length)return;
+        if(!rows.length)return;
+
+        let plan=null,plannedQty=new Map();
+        if(settings.arrivalBasket){
+            const projectedEntries=rows.map(r=>({id:r.itemId,name:r.name,buy:r.buyPrice,stock:r.projectedStock,row:null,destination}));
+            plan=buildTravelBuyPlan(destination,projectedEntries,marketMap);
+            plannedQty=new Map((plan?.rows||[]).map(r=>[String(r.id),Number(r.qty)||0]));
+            state.arrivalBasketItems=plan?.rows?.length||0;
+            state.arrivalBasketCost=plan?.totalCost||0;
+            state.arrivalBasketProfit=plan?.totalProfit||0;
+            state.arrivalBasketSlots=plan?.used||0;
+            state.arrivalBasketMode=plan?.mode||'';
+        }
+
+        rows.forEach(r=>{r.plannedQty=plannedQty.get(String(r.itemId))||0;r.plannedProfit=r.plannedQty*r.profitItem;});
+        rows.sort((a,b)=>{
+            if((a.plannedQty>0)!==(b.plannedQty>0))return (b.plannedQty>0)-(a.plannedQty>0);
+            if(a.plannedQty>0&&b.plannedQty>0)return b.plannedProfit-a.plannedProfit||b.profitItem-a.profitItem;
+            return b.score-a.score;
+        });
+        const top=rows.slice(0,10);state.arrivalRows=top.length;if(!top.length)return;
+
         const bar=document.createElement('div');bar.id='sl-mi-arrival';bar.className='open';
-        bar.innerHTML='<div class="sl-mi-arrival-head"><div><span class="sl-mi-br-title">✈ ARRIVAL STOCK</span><strong>'+esc(destination)+'</strong></div><div>Landing '+fmtDuration(landingMins)+' · '+esc(flight.source)+'</div><button type="button">▾</button></div><div class="sl-mi-arrival-note">Prediction uses current YATA stock plus locally learned restock timing. “Projected” is an estimate, not guaranteed stock.</div><div class="sl-mi-arrival-body"></div>';
+        const title=settings.arrivalBasket?'✈ ARRIVAL BASKET':'✈ ARRIVAL STOCK';
+        const planSummary=settings.arrivalBasket&&plan?.rows?.length
+            ?('<strong>'+plan.used+'/'+slots+' slots · '+money(plan.totalProfit)+' profit · '+esc(plan.mode)+'</strong>')
+            :('<strong>'+top.length+' opportunities</strong>');
+        const budgetText=settings.travelBudget>0?(' · budget '+money(settings.travelBudget)):' · unlimited budget';
+        bar.innerHTML='<div class="sl-mi-arrival-head"><div><span class="sl-mi-br-title">'+title+'</span><strong>'+esc(destination)+'</strong></div><div>Landing '+fmtDuration(landingMins)+' · '+esc(flight.source)+'</div><button type="button">▾</button></div>'+
+            '<div class="sl-mi-arrival-note">'+(settings.arrivalBasket?'Pre-builds the best basket for landing using predicted stock, travel slots and your budget. ':'Prediction uses current YATA stock plus locally learned restock timing. ')+planSummary+budgetText+' · projected stock is an estimate, not guaranteed.</div><div class="sl-mi-arrival-body"></div>';
         const body=bar.querySelector('.sl-mi-arrival-body');
         for(const r of top){
-            const p=r.p,restockText=p.expectedRestocks>0?(p.eta.learned?('likely '+p.expectedRestocks+' restock'+(p.expectedRestocks===1?'':'s')+' before landing'):('possible restock before landing')):'no learned restock before landing';
-            const proj=p.projected==null?'?':Math.max(0,Math.round(p.projected)).toLocaleString('en-US');
-            const row=document.createElement('div');row.className='sl-mi-arrival-row';
-            row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>now '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+'</span><span class="eta">arrival ~'+proj+'</span><span>'+esc(restockText)+'</span><span class="conf '+p.confidence.toLowerCase()+'">'+esc(p.confidence)+'</span><strong>'+money(r.projectedProfit)+'/run</strong>';
+            const p=r.p,restockText=p.expectedRestocks>0?(p.eta.learned?('likely '+p.expectedRestocks+' restock'+(p.expectedRestocks===1?'':'s')):'possible restock'):'no learned restock';
+            const proj=Math.max(0,Math.round(r.projectedStock)).toLocaleString('en-US');
+            const row=document.createElement('div');row.className='sl-mi-arrival-row '+(r.plannedQty>0?'recommended':'alternative');
+            const buy=r.plannedQty>0?('BUY ×'+r.plannedQty):'ALT';
+            const total=r.plannedQty>0?r.plannedProfit:r.projectedProfit;
+            row.innerHTML='<span class="name">'+esc(r.name)+'</span><strong class="buy">'+buy+'</strong><span>now '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+'</span><span class="eta">arrival ~'+proj+' · '+esc(restockText)+'</span><span>+'+money(r.profitItem)+'/ea</span><span class="conf '+p.confidence.toLowerCase()+'">'+esc(p.confidence)+'</span><strong>'+money(total)+'</strong>';
             body.appendChild(row);
         }
         bar.querySelector('.sl-mi-arrival-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
@@ -1031,9 +1065,9 @@
     function toggle(key,label){return '<label class="sl-mi-toggle"><input id="sl-mi-'+key+'" type="checkbox" '+(settings[key]?'checked':'')+'><span>'+esc(label)+'</span></label>';}
     function openSettings(){
         document.getElementById('sl-mi-overlay')?.remove();const overlay=document.createElement('div');overlay.id='sl-mi-overlay';
-        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><button id="sl-mi-close">×</button></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label>'+(!getApiKey()?'<label class="sl-mi-field">Manual Torn API key<input id="sl-mi-api" type="password" placeholder="Public/limited key"></label>':'')+'<div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Arrival rows: <b>'+state.arrivalRows+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
+        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><button id="sl-mi-close">×</button></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('arrivalBasket','Arrival Basket Planner while flying')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label>'+(!getApiKey()?'<label class="sl-mi-field">Manual Torn API key<input id="sl-mi-api" type="password" placeholder="Public/limited key"></label>':'')+'<div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Arrival rows: <b>'+state.arrivalRows+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
         document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};overlay.querySelector('#sl-mi-close').onclick=()=>overlay.remove();
-        overlay.querySelector('#sl-mi-save').onclick=()=>{for(const k of['enabled','travel','bestRun','countryBestBuys','stockEta','arrivalStock','bazaar','itemMarket','items','museum','points'])settings[k]=!!overlay.querySelector('#sl-mi-'+k)?.checked;settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;const api=overlay.querySelector('#sl-mi-api')?.value.trim();if(api)saveApiKey(api);saveJson(STORAGE.settings,settings);overlay.remove();scheduleScan(true);};
+        overlay.querySelector('#sl-mi-save').onclick=()=>{for(const k of['enabled','travel','bestRun','countryBestBuys','stockEta','arrivalStock','arrivalBasket','bazaar','itemMarket','items','museum','points'])settings[k]=!!overlay.querySelector('#sl-mi-'+k)?.checked;settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;const api=overlay.querySelector('#sl-mi-api')?.value.trim();if(api)saveApiKey(api);saveJson(STORAGE.settings,settings);overlay.remove();scheduleScan(true);};
         overlay.querySelector('#sl-mi-refresh').onclick=()=>{overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-hard').onclick=()=>{marketCache={};saveJson(STORAGE.marketCache,marketCache);overlay.remove();scheduleScan(true);};
     }
 
@@ -1042,7 +1076,7 @@
 .sl-mi-travel strong,.sl-mi-bazaar.good,.sl-mi-bazaar.good strong,#sl-mi-market-bar strong,#sl-mi-points-bar strong,#sl-mi-museum-bar strong,#sl-mi-best-run strong,#sl-mi-arrival strong{color:#78d98b}.sl-mi-travel.loss,.sl-mi-bazaar.bad,.sl-mi-bazaar.bad strong{color:#e06c6c}
 #sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-bazaar-board,#sl-mi-travel-plan,#sl-mi-country-best{margin:8px auto 10px;max-width:1100px;border-left:3px solid #d7b94c;font-size:11px}#sl-mi-market-bar.hit{border-left-color:#78d98b;background:#152219}
 .sl-mi-br-head,.sl-mi-arrival-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button,.sl-mi-arrival-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body,.sl-mi-arrival-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body,.open .sl-mi-arrival-body{display:flex;flex-direction:column}.sl-mi-br-row,.sl-mi-arrival-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.8fr) auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name,.sl-mi-arrival-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{color:#d7b94c}.sl-mi-route{cursor:pointer;transition:background .12s ease,border-color .12s ease}.sl-mi-route:hover,.sl-mi-route:focus{background:#1c2522;border-color:#4d6957;outline:none}.sl-mi-route:active{background:#203028}
-.sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}
+.sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}.sl-mi-arrival-row.recommended{border-left:3px solid #78d98b;background:#142019}.sl-mi-arrival-row.alternative{border-left:3px solid #59616c}.sl-mi-arrival-row .buy{color:#78d98b}
 .sl-mi-museum-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-museum-head>div{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-museum-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-museum-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-museum-body{display:none;margin-top:7px;gap:4px}#sl-mi-museum-bar.open .sl-mi-museum-body{display:flex;flex-direction:column}.sl-mi-museum-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-museum-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-museum-row.turn{border-left:3px solid #78d98b;background:#142019}.sl-mi-museum-row.sell{border-left:3px solid #d7b94c;background:#201d13}.sl-mi-museum-row.missing{border-left:3px solid #5c6570}.sl-mi-museum-row .edge{color:#9da6b3}.sl-mi-points-link{border:1px solid #66591d;background:#2a2512;color:#e4c95d;border-radius:6px;padding:7px 9px;font-weight:900;font-size:10px;align-self:flex-start}
 
 .sl-mi-country-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-country-head>div:first-child{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-country-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-country-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-country-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;padding:6px;border:1px solid #29323a;border-radius:6px}.sl-mi-country-body{display:none;margin-top:7px;gap:4px}#sl-mi-country-best.open .sl-mi-country-body{display:flex;flex-direction:column}.sl-mi-country-row{display:grid;grid-template-columns:auto minmax(0,1.5fr) auto auto auto auto auto auto auto;gap:7px;align-items:center;padding:7px;border:1px solid #292f38;border-radius:6px;font-size:10px;cursor:pointer}.sl-mi-country-row.recommended{border-left:3px solid #78d98b;background:#142019}.sl-mi-country-row.alternative{border-left:3px solid #59616c;background:#15191f}.sl-mi-country-row:hover,.sl-mi-country-row:focus{background:#1b251f;border-color:#4d6957;outline:none}.sl-mi-country-row .rank{color:#d7b94c;font-weight:900}.sl-mi-country-row .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-country-row .buy,.sl-mi-country-row .profit,.sl-mi-country-row .total{color:#78d98b}.sl-mi-country-row.alternative .buy{color:#9da6b3}
@@ -1064,11 +1098,12 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,arrivalBasketItems:state.arrivalBasketItems,arrivalBasketCost:state.arrivalBasketCost,arrivalBasketProfit:state.arrivalBasketProfit,arrivalBasketSlots:state.arrivalBasketSlots,arrivalBasketMode:state.arrivalBasketMode,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
         async arrivalPrediction(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
+        async arrivalBasket(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
         goToMarket(){location.href='https://www.torn.com/page.php?sid=ItemMarket';return true;},
         itemMarketIntelligence(){if(detectPage()!=='itemmarket')return null;const id=selectedMarketItemId();if(!id)return null;const c=cachePeek(id);if(!c)return null;return analyzePriceHistory(id,Number(c.minPrice),c);},
         goToBazaar(){location.href='https://www.torn.com/bazaar.php';return true;},
