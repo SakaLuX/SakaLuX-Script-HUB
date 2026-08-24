@@ -59,6 +59,27 @@
         { "id": "refresh", "label": "REFRESH", "icon": "🔄", "method": "refresh", "fallbackUrl": "https://www.torn.com/page.php?sid=missions" },
         { "id": "missions", "label": "MISSIONS", "icon": "🎯", "method": "goToMissions", "fallbackUrl": "https://www.torn.com/page.php?sid=missions" }
       ]
+    },
+    {
+      "id": "market-intelligence",
+      "type": "addon",
+      "active": true,
+      "name": "Market Intelligence",
+      "icon": "📈",
+      "category": "Trading",
+      "version": "1.0.0",
+      "description": "Local-first market intelligence for Travel, Bazaar, Item Market, Items, Museum and Points Market.",
+      "greasyForkId": null,
+      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
+      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
+      "apiGlobal": "SakaLuXMarketIntelligence",
+      "buttonSelector": "#sl-mi-button",
+      "quickActions": [
+        { "id": "open", "label": "SETTINGS", "icon": "⚙️", "method": "open" },
+        { "id": "refresh", "label": "REFRESH", "icon": "🔄", "method": "refresh" },
+        { "id": "travel", "label": "TRAVEL", "icon": "✈️", "method": "goToTravel", "fallbackUrl": "https://www.torn.com/page.php?sid=travel" },
+        { "id": "market", "label": "MARKET", "icon": "📈", "method": "goToMarket", "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket" }
+      ]
     }
   ]
 }
