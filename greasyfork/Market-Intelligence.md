@@ -1,10 +1,21 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.2.0**
+**Current version: v1.2.1**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.2.1 — Travel Performance Update
+
+- Travel is now **cache-first**: cached market data can paint Best Travel Run immediately after YATA loads.
+- Live Item Market refresh work is limited to a prioritized **15-item shortlist** instead of up to 45 items.
+- Arrival Stock refreshes a prioritized **12-item shortlist**.
+- The smaller live shortlist runs at concurrency 6.
+- Cached Travel prices may be reused for up to 6 hours for the instant first paint; refreshed shortlist values replace them afterward.
+- Best Travel Run shows whether it is displaying instant cache data or the live-refreshed shortlist.
+- MutationObserver rescans are throttled on Travel and SakaLuX-owned DOM changes are ignored, reducing repeated work during Torn page hydration.
+- `health()` now exposes Travel cache hits, refresh count and skipped observer rescans.
 
 ## v1.2.0
 
@@ -73,7 +84,7 @@ Actual stock can still change before landing because other players may buy items
 
 ## Privacy / data
 
-SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.2.0.
+SakaLuX Market Intelligence remains local-first. Stock history, refill quantities, watchlist and market cache are stored locally in the browser/PDA. No observations are uploaded to a SakaLuX server in v1.2.1.
 
 Current external data sources used by this version:
 - Torn API for Item Market listings and the player's own travel information.
