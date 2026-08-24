@@ -1,10 +1,16 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.0**
+**Current version: v1.15.1**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.15.1 — Travel Session Tracking Hotfix
+
+- Fixed false session creation while the home Travel screen evaluates Best Route Baskets.
+- Landed-session data is now recorded only from the actual foreign-country **BEST BUYS** view.
+- Repeating a trip to the same destination now archives the previous session and starts a new one correctly.
 
 ## v1.15.0 — Travel Session Summary
 

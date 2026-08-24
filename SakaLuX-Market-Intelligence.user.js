@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.0
+// @version      1.15.1
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.0';
+    const VERSION = '1.15.1';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -202,7 +202,8 @@
     function ensureTravelSession(destination,phase='FLYING'){
         if(!destination)return null;
         let cur=travelSessions.current;
-        if(!cur||cur.destination!==destination){
+        const startNew=!cur||cur.destination!==destination||(phase==='FLYING'&&['LANDED','PURCHASED'].includes(cur.status));
+        if(startNew){
             if(cur)archiveCurrentSession();
             cur={id:destination+'-'+Date.now(),destination,startedAt:Date.now(),status:phase,predicted:null,landed:null,recorded:null};
             travelSessions.current=cur;
@@ -650,7 +651,6 @@
             const flight=flightInfo(destination,actualTimes);if(!flight)continue;
             const entries=routeBasketEntries(rows);
             const plan=buildTravelBuyPlan(destination,entries,marketMap);
-        updateLandedSession(destination,plan);
             if(!plan?.rows?.length||!(plan.totalProfit>0)){blocked++;continue;}
             const roundTrip=flight.mins*2,profitHour=plan.totalProfit/(roundTrip/60);
             const summary=plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':'');
@@ -916,6 +916,7 @@
         document.getElementById('sl-mi-country-best')?.remove();
         const slots=Math.max(1,Number(settings.travelSlots)||29);
         const plan=buildTravelBuyPlan(destination,entries,marketMap);
+        updateLandedSession(destination,plan);
         const plannedQty=new Map((plan?.rows||[]).map(r=>[String(r.id),Number(r.qty)||0]));
         const candidates=travelPlannerCandidates(entries,marketMap,slots).map(r=>{
             const qty=plannedQty.get(String(r.id))||0;

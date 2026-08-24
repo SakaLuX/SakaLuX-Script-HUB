@@ -8,9 +8,16 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.15.1** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.15.1
+- Hotfix for **Travel Session Summary** session lifecycle.
+- Best Route Basket calculations on the home Travel screen no longer create false landed sessions for every compared country.
+- Landed session snapshots are now captured only from the real in-country **BEST BUYS** board.
+- Starting a new outbound trip to the same country correctly archives the previous landed/purchased session and creates a fresh session.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.0
 - Added **Travel Session Summary**, the final planned development module before full testing.
@@ -264,6 +271,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.15.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.14.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.13.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.12.0.user.js`
