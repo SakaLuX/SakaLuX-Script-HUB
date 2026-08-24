@@ -8,9 +8,21 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.1.1** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.2.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.2.0
+- Added **Arrival Stock Intelligence** while the player is flying.
+- Detects destination and remaining flight time using Torn travel data, with a page-text fallback when needed.
+- Pulls the current YATA stock for the destination and combines it with live Torn Item Market prices.
+- Shows the best items to target on arrival, current stock, estimated arrival stock, likely/possible restocks before landing, confidence and projected profit per run.
+- Stock history now also learns observed refill quantities in addition to refill timing.
+- Learned refill timing uses local median intervals; learned refill quantity uses the local median observed refill amount.
+- When there is not enough history, the panel clearly shows **LEARNING** instead of presenting an exact refill prediction as guaranteed.
+- Added a new **Arrival-stock prediction while flying** setting.
+- Added `arrivalPrediction()` plus arrival/flight fields to `window.SakaLuXMarketIntelligence.health()`.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.1.1.user.js`.
 
 ### SakaLuX Script Hub v1.8.5
 - Fixed false **UPDATE AVAILABLE** states left behind by a cached check made before an add-on was updated.
@@ -49,7 +61,7 @@ Last updated: 2026-08-24
 - Added Travel profit overlays using current Torn Item Market prices, net sell after configurable market fee, absolute profit and ROI.
 - Added Bazaar deal detection with profitable/non-profitable flip verdicts.
 - Added Item Market floor/effective-price panel and a local per-item watchlist.
-- Added Items-page estimated net market value and total stack value.
+- Added Items-page estimated net market value and stack value.
 - Added Points Market rate capture and the initial Museum intelligence surface.
 - Added bounded market requests, 10-minute local market cache and limited concurrency for PDA friendliness.
 - Added Torn PDA API-key support plus manual API-key fallback.
@@ -95,6 +107,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.1.1.user.js`
 - `backups/SakaLuX-Script-Hub-v1.8.4.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.1.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.0.0.user.js`
