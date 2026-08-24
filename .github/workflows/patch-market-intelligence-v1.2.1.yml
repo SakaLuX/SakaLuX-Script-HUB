@@ -1,0 +1,158 @@
+name: Patch Market Intelligence v1.2.1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-market-intelligence-v1.2.1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Patch userscript and release files
+        shell: python
+        run: |
+          from pathlib import Path
+          import json, re
+
+          p = Path('SakaLuX-Market-Intelligence.user.js')
+          s = p.read_text(encoding='utf-8')
+
+          def rep(old, new, count=1):
+              global s
+              if old not in s:
+                  raise SystemExit('Missing expected block: ' + old[:120])
+              s = s.replace(old, new, count)
+
+          rep('// @version      1.2.0', '// @version      1.2.1')
+          rep("const VERSION = '1.2.0';", "const VERSION = '1.2.1';")
+          rep("const MARKET_CACHE_MS = 10 * 60 * 1000;\n    const MAX_LIVE_FETCHES = 45;\n    const CONCURRENCY = 4;",
+              "const MARKET_CACHE_MS = 10 * 60 * 1000;\n    const TRAVEL_CACHE_MAX_STALE_MS = 6 * 60 * 60 * 1000;\n    const TRAVEL_REFRESH_LIMIT = 15;\n    const ARRIVAL_REFRESH_LIMIT = 12;\n    const MAX_LIVE_FETCHES = 45;\n    const CONCURRENCY = 6;")
+          rep("arrivalRows: 0, flightDestination: '', landingMins: null\n    };",
+              "arrivalRows: 0, flightDestination: '', landingMins: null,\n        travelCacheHits: 0, travelRefreshes: 0, observerSkips: 0, lastObserverScan: 0\n    };")
+          rep("function cacheGet(itemId) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>MARKET_CACHE_MS) return null; return row; }",
+              "function cacheGet(itemId) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>MARKET_CACHE_MS) return null; return row; }\n    function cachePeek(itemId,maxAge=TRAVEL_CACHE_MAX_STALE_MS) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>maxAge) return null; return row; }")
+
+          start = s.index('    async function renderBestTravelRun(){')
+          end = s.index('\n    async function renderArrivalStock(){', start)
+          new_best = r'''    function buildBestRunRows(candidates,marketMap){
+        const slots=Math.max(1,Number(settings.travelSlots)||29),mult=Math.max(0.1,Number(settings.flightMultiplier)||1),ranked=[];
+        for(const r of candidates){
+            const market=marketMap.get(r.itemId),flight=FLIGHT_MINS[r.destination];if(!market||!flight)continue;
+            const m=metrics(r.buyPrice,market.price);if(m.profit<=0)continue;
+            const qty=r.stock==null?slots:Math.min(slots,r.stock);if(qty<=0)continue;
+            const profitRun=m.profit*qty,roundTrip=flight*mult*2,profitHour=profitRun/(roundTrip/60);
+            ranked.push(Object.assign({},r,{market:market.price,net:m.net,profitItem:m.profit,roi:m.roi,qty,profitRun,profitHour,flightMins:flight*mult,eta:estimateRestock(r.destination,r.itemId)}));
+        }
+        return ranked.sort((a,b)=>b.profitHour-a.profitHour).slice(0,11);
+    }
+
+    function paintBestTravelRun(top,phase){
+        document.getElementById('sl-mi-best-run')?.remove();state.bestRunRows=top.length;if(!top.length)return;
+        const bar=document.createElement('div');bar.id='sl-mi-best-run';const best=top[0];
+        bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST TRAVEL RUN</span><strong>'+esc(best.name)+' → '+esc(best.destination)+'</strong><span>'+money(best.profitHour)+'/hr</span><button type="button">▾</button></div><div class="sl-mi-perf-note">'+esc(phase||'cached')+'</div><div class="sl-mi-br-body"></div>';
+        const body=bar.querySelector('.sl-mi-br-body');
+        for(const r of top){
+            const row=document.createElement('div');row.className='sl-mi-br-row sl-mi-route';row.dataset.destination=r.destination;row.setAttribute('role','button');row.tabIndex=0;row.title='Select '+r.destination+' in Torn Travel';
+            const eta=r.eta.learned?('next '+fmtDuration(r.eta.mins)):('ETA learning · possible ≤'+Math.max(1,Math.ceil(r.eta.mins))+'m');
+            row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>'+esc(r.destination)+'</span><span>stock '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+'</span><span class="eta">'+eta+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
+            const activate=()=>selectTravelDestination(r.destination);row.addEventListener('click',activate);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});body.appendChild(row);
+        }
+        bar.querySelector('.sl-mi-br-head').onclick=()=>bar.classList.toggle('open');mountTop(bar);
+    }
+
+    function travelRefreshIds(candidates,limit){
+        const scored=candidates.map(r=>{
+            const c=cachePeek(r.itemId),flight=FLIGHT_MINS[r.destination]||9999;
+            let score=0;
+            if(c){const m=metrics(r.buyPrice,c.price);score=Math.max(0,m.profit)*(Math.min(Math.max(1,Number(settings.travelSlots)||29),r.stock==null?999:r.stock))/(flight||1);}
+            else score=Math.max(1,r.buyPrice)/Math.max(1,flight);
+            return {id:r.itemId,score,cached:!!c};
+        }).sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+        const ids=[];const seen=new Set();
+        for(const x of scored){if(seen.has(x.id))continue;seen.add(x.id);ids.push(x.id);if(ids.length>=limit)break;}
+        return ids;
+    }
+
+    async function renderBestTravelRun(){
+        document.getElementById('sl-mi-best-run')?.remove();
+        if(!settings.bestRun||detectDestination()||detectInFlight()) return;
+        const yata=await fetchYataAll(); if(!yata.length) return;
+        const candidates=[];
+        for(const r of yata){if(r.stock!=null)recordStock(r.destination,r.itemId,r.stock);if(r.stock===0)continue;candidates.push(r);}flushStockHistory();
+
+        const cachedMap=new Map();
+        for(const r of candidates){const c=cachePeek(r.itemId);if(c)cachedMap.set(r.itemId,c);}
+        state.travelCacheHits=cachedMap.size;
+        const cachedTop=buildBestRunRows(candidates,cachedMap);
+        if(cachedTop.length) paintBestTravelRun(cachedTop,'instant cache · refreshing '+TRAVEL_REFRESH_LIMIT+' prices in background');
+
+        const ids=travelRefreshIds(candidates,TRAVEL_REFRESH_LIMIT);
+        state.travelRefreshes=ids.length;
+        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)return m;});
+
+        const finalMap=new Map();
+        for(const r of candidates){const c=cachePeek(r.itemId);if(c)finalMap.set(r.itemId,c);}
+        const finalTop=buildBestRunRows(candidates,finalMap);
+        if(finalTop.length) paintBestTravelRun(finalTop,'live-refreshed shortlist · '+ids.length+' market requests max');
+    }
+'''
+          s = s[:start] + new_best + s[end:]
+
+          old_arrival = "const ids=[...new Set(yata.map(r=>r.itemId))].slice(0,MAX_LIVE_FETCHES),marketMap=new Map();\n        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id);if(m)marketMap.set(id,m);});"
+          new_arrival = "const marketMap=new Map();\n        for(const r of yata){const c=cachePeek(r.itemId);if(c)marketMap.set(r.itemId,c);}\n        const ids=travelRefreshIds(yata,ARRIVAL_REFRESH_LIMIT);\n        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)marketMap.set(id,m);});"
+          rep(old_arrival,new_arrival)
+
+          rep("function startObserver(){if(state.observer)return;state.observer=new MutationObserver(muts=>{if(muts.some(m=>m.addedNodes?.length))scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>scheduleScan(true));}",
+              "function startObserver(){if(state.observer)return;state.observer=new MutationObserver(muts=>{const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-arrival,#sl-mi-overlay,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&now-state.lastObserverScan<1800){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>scheduleScan(true));}")
+
+          rep("cachedMarketItems:Object.keys(marketCache).length};}",
+              "cachedMarketItems:Object.keys(marketCache).length,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips};}")
+
+          rep(".sl-mi-arrival-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}",
+              ".sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}")
+
+          p.write_text(s,encoding='utf-8')
+
+          # scripts.json
+          sp=Path('scripts.json'); data=json.loads(sp.read_text(encoding='utf-8'))
+          for row in data.get('scripts',[]):
+              if row.get('id')=='market-intelligence':
+                  row['version']='1.2.1'
+                  row['description']='Fast cache-first market and travel intelligence with a 15-item live shortlist, arrival-stock prediction, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.'
+          sp.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # UPDATE-INFO
+          up=Path('UPDATE-INFO.md'); u=up.read_text(encoding='utf-8')
+          u=u.replace('SakaLuX Market Intelligence: **v1.2.0**','SakaLuX Market Intelligence: **v1.2.1**',1)
+          marker='## Latest changes\n\n'
+          block='### SakaLuX Market Intelligence v1.2.1\n- Added **cache-first Travel rendering**: existing market prices are displayed immediately after YATA loads instead of waiting for every live Item Market request.\n- Reduced Best Travel Run live refreshes from up to 45 item lookups to a prioritized shortlist of **15**.\n- Reduced Arrival Stock live refreshes to a prioritized shortlist of **12**.\n- Increased market-request concurrency from 4 to 6 for the smaller shortlist.\n- Travel can reuse market cache up to 6 hours for the instant first paint, then replaces shortlist prices with live results.\n- Added a small performance status line showing whether the board is using instant cache or the refreshed shortlist.\n- Added Travel MutationObserver throttling and ignores SakaLuX-owned DOM changes, preventing the script from repeatedly rescanning itself while Torn hydrates the page.\n- Added performance counters to `health()`: cache hits, live Travel refresh count and observer skips.\n- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.2.0.user.js`.\n\n'
+          if block not in u: u=u.replace(marker,marker+block,1)
+          up.write_text(u,encoding='utf-8')
+
+          gf=Path('greasyfork/Market-Intelligence.md'); g=gf.read_text(encoding='utf-8')
+          g=g.replace('**Current version: v1.2.0**','**Current version: v1.2.1**',1)
+          marker='SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.\n\n'
+          block='## v1.2.1 — Travel Performance Update\n\n- Travel is now **cache-first**: cached market data can paint Best Travel Run immediately after YATA loads.\n- Live Item Market refresh work is limited to a prioritized **15-item shortlist** instead of up to 45 items.\n- Arrival Stock refreshes a prioritized **12-item shortlist**.\n- The small live shortlist runs at concurrency 6.\n- Cached Travel prices may be reused for up to 6 hours for the instant first paint; refreshed shortlist values replace them as they arrive.\n- Best Travel Run shows whether it is displaying instant cache data or the live-refreshed shortlist.\n- MutationObserver rescans are throttled on Travel and SakaLuX-owned DOM changes are ignored, reducing repeated work during Torn page hydration.\n- `health()` now exposes Travel cache hits, refresh count and skipped observer rescans.\n\n'
+          if block not in g:g=g.replace(marker,marker+block,1)
+          gf.write_text(g,encoding='utf-8')
+
+          # Self-delete this temporary workflow after the patch commit.
+          Path('.github/workflows/patch-market-intelligence-v1.2.1.yml').unlink()
+
+      - name: Commit v1.2.1
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "sakalutzu92@yahoo.com"
+          git add -A
+          git commit -m "SakaLuX Market Intelligence v1.2.1 Travel performance update"
+          git push origin main
