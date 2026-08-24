@@ -40,3 +40,4 @@ info=info.replace('## Latest changes\n\n','## Latest changes\n\n### SakaLuX Mark
 gf=(R/'greasyfork/Market-Intelligence.md').read_text(encoding='utf-8').replace('**Current version: v1.15.8**','**Current version: v1.15.9**',1)
 gf=gf.replace('## v1.15.8','## v1.15.9 — Stable Item Market Panel\n\n- Fixes the Item Market Intelligence panel appearing and disappearing on Torn PDA.\n- Keeps the current panel on screen while new API data loads, then swaps it atomically.\n- Force refreshes no longer blank the panel during async requests.\n\n## v1.15.8',1)
 (R/'greasyfork/Market-Intelligence.md').write_text(gf,encoding='utf-8')
+# trigger
