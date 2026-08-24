@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.1.0
-// @description  Torn market and travel intelligence with Best Travel Run, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.
+// @version      1.1.1
+// @description  Torn market and travel intelligence with Best Travel Run, clickable routes, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.1.0';
+    const VERSION = '1.1.1';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -51,6 +51,20 @@
         mex: 'Mexico', cay: 'Caymans', can: 'Canada', haw: 'Hawaii',
         uni: 'UK', arg: 'Argentina', swi: 'Switzerland', jap: 'Japan',
         chi: 'China', uae: 'UAE', sou: 'South Africa'
+    };
+
+    const TORN_TRAVEL_LABELS = {
+        Mexico: ['Mexico'],
+        Caymans: ['Cayman Islands', 'Caymans'],
+        Canada: ['Canada'],
+        Hawaii: ['Hawaii'],
+        UK: ['United Kingdom', 'UK'],
+        Argentina: ['Argentina'],
+        Switzerland: ['Switzerland'],
+        Japan: ['Japan'],
+        China: ['China'],
+        UAE: ['UAE', 'United Arab Emirates'],
+        'South Africa': ['South Africa']
     };
 
     const DEFAULT_SETTINGS = {
@@ -91,6 +105,7 @@
     function pct(v) { const n=Number(v); if(!Number.isFinite(n)) return '?'; return (n>=0?'+':'')+n.toFixed(1)+'%'; }
     function parseMoney(text) { const s=String(text||'').replace(/[^0-9]/g,''); return s?Number(s):NaN; }
     function fmtDuration(mins) { if(mins==null||!Number.isFinite(mins)) return 'learning'; mins=Math.max(0,Math.round(mins)); if(mins<60) return '~'+mins+'m'; const h=Math.floor(mins/60),m=mins%60; return '~'+h+'h'+(m?' '+m+'m':''); }
+    function normText(text) { return String(text||'').replace(/\s+/g,' ').trim(); }
 
     function getApiKey() {
         if (PDA_KEY && PDA_KEY !== '###PDA-APIKEY###') { state.apiMode='Torn PDA'; return PDA_KEY; }
@@ -130,6 +145,46 @@
     function detectDestination() { const body=document.body?.innerText||''; const m=body.match(/You are in ([A-Z][A-Za-z ]+?) and have/); return m?m[1].trim():null; }
     function detectInFlight() { const body=document.body?.innerText||''; return /Remaining Flight Time/i.test(body); }
 
+    function isVisible(el) {
+        if(!el || !(el instanceof Element)) return false;
+        const r=el.getBoundingClientRect();
+        if(r.width===0 && r.height===0) return false;
+        const s=getComputedStyle(el);
+        return s.display!=='none' && s.visibility!=='hidden';
+    }
+
+    function selectTravelDestination(destination) {
+        if(detectPage()!=='travel' || detectDestination() || detectInFlight()) return false;
+        const labels=TORN_TRAVEL_LABELS[destination]||[destination];
+        const candidates=[];
+        const nodes=document.querySelectorAll('a,button,[role="button"],li,tr,div');
+        for(const el of nodes){
+            if(!isVisible(el)) continue;
+            const text=normText(el.innerText||el.textContent);
+            if(!text || text.length>180) continue;
+            const lower=text.toLowerCase();
+            let hit=false;
+            for(const label of labels){
+                const l=label.toLowerCase();
+                if(lower===l || lower.startsWith(l+' -') || lower.startsWith(l+'-') || lower.startsWith(l+' ')){hit=true;break;}
+            }
+            if(!hit) continue;
+            candidates.push({el,textLen:text.length,area:Math.max(1,el.getBoundingClientRect().width*el.getBoundingClientRect().height)});
+        }
+        candidates.sort((a,b)=>a.textLen-b.textLen || a.area-b.area);
+        const seed=candidates[0]?.el;
+        if(!seed) return false;
+        const target=seed.closest('a,button,[role="button"],li,tr')||seed;
+        try { target.scrollIntoView({behavior:'smooth',block:'center'}); } catch (_) { try { target.scrollIntoView(); } catch(__){} }
+        setTimeout(()=>{
+            try { target.click(); }
+            catch (_) {
+                try { target.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window})); } catch(__){}
+            }
+        },120);
+        return true;
+    }
+
     function rowContainer(img) { return img.closest('tr')||img.closest('li')||img.closest('[class*="row"]')||img.closest('[class*="Row"]')||img.closest('[class*="item"]')||img.parentElement?.parentElement||img.parentElement; }
     function itemIdFromImg(img) { const m=(img?.getAttribute('src')||'').match(/\/images\/items\/(\d+)\//); return m?Number(m[1]):null; }
     function extractFirstPrice(node) { const txt=(node?.innerText||node?.textContent||'').replace(/\s+/g,' '); const m=txt.match(/\$\s*([\d,.]+)/); return m?parseMoney(m[1]):NaN; }
@@ -152,10 +207,6 @@
     async function mapWithLimit(items,fn) { const out=new Array(items.length); let i=0; async function worker(){while(i<items.length){const idx=i++; try{out[idx]=await fn(items[idx],idx);}catch(_){out[idx]=null;}}} const workers=[]; for(let w=0;w<Math.min(CONCURRENCY,items.length);w++) workers.push(worker()); await Promise.all(workers); return out; }
     function metrics(buyPrice,marketPrice) { const fee=Math.max(0,Number(settings.marketFeePct)||0)/100; const net=marketPrice*(1-fee); const profit=net-buyPrice; return {net,profit,roi:buyPrice>0?profit/buyPrice*100:0}; }
 
-    // Local stock intelligence: every observation is kept per destination/item.
-    // When stock jumps upward we learn a real restock event. After two events we
-    // estimate the next refill from the median interval. Until then we show the
-    // next possible Torn quarter-hour stock tick as a clearly-labelled fallback.
     function stockKey(destination,itemId){return destination+'|'+itemId;}
     function nextQuarterHourMins(now=Date.now()){const tick=15*60*1000; return (Math.ceil(now/tick)*tick-now)/60000;}
     function recordStock(destination,itemId,stock,now=Date.now()) {
@@ -221,9 +272,16 @@
         bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST TRAVEL RUN</span><strong>'+esc(best.name)+' → '+esc(best.destination)+'</strong><span>'+money(best.profitHour)+'/hr</span><button type="button">▾</button></div><div class="sl-mi-br-body"></div>';
         const body=bar.querySelector('.sl-mi-br-body');
         for(const r of top){
-            const row=document.createElement('div'); row.className='sl-mi-br-row';
+            const row=document.createElement('div'); row.className='sl-mi-br-row sl-mi-route';
+            row.dataset.destination=r.destination;
+            row.setAttribute('role','button');
+            row.tabIndex=0;
+            row.title='Select '+r.destination+' in Torn Travel';
             const eta=r.eta.learned?('next '+fmtDuration(r.eta.mins)):('ETA learning · possible ≤'+Math.max(1,Math.ceil(r.eta.mins))+'m');
             row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>'+esc(r.destination)+'</span><span>stock '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+'</span><span class="eta">'+eta+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
+            const activate=()=>selectTravelDestination(r.destination);
+            row.addEventListener('click',activate);
+            row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});
             body.appendChild(row);
         }
         bar.querySelector('.sl-mi-br-head').onclick=()=>bar.classList.toggle('open'); mountTop(bar);
@@ -274,7 +332,7 @@
 .sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run{box-sizing:border-box;margin:4px 0;padding:6px 8px;border-radius:6px;background:#15191f;border:1px solid #2c333d;color:#d7dce5;font:700 10px/1.4 Arial,sans-serif}
 .sl-mi-travel strong,.sl-mi-bazaar.good,.sl-mi-bazaar.good strong,#sl-mi-market-bar strong,#sl-mi-points-bar strong,#sl-mi-museum-bar strong,#sl-mi-best-run strong{color:#78d98b}.sl-mi-travel.loss,.sl-mi-bazaar.bad,.sl-mi-bazaar.bad strong{color:#e06c6c}
 #sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run{margin:8px auto 10px;max-width:1100px;border-left:3px solid #d7b94c;font-size:11px}#sl-mi-market-bar.hit{border-left-color:#78d98b;background:#152219}
-.sl-mi-br-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body{display:flex;flex-direction:column}.sl-mi-br-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta{color:#d7b94c}
+.sl-mi-br-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body{display:flex;flex-direction:column}.sl-mi-br-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta{color:#d7b94c}.sl-mi-route{cursor:pointer;transition:background .12s ease,border-color .12s ease}.sl-mi-route:hover,.sl-mi-route:focus{background:#1c2522;border-color:#4d6957;outline:none}.sl-mi-route:active{background:#203028}
 .sl-mi-watch-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sl-mi-watch-row input{flex:1 1 140px;background:#0d0f14;color:#fff;border:1px solid #363e49;border-radius:6px;padding:8px}.sl-mi-watch-row button{border:0;border-radius:6px;padding:7px 9px;background:#303844;color:#fff;font-weight:900;font-size:10px}
 #sl-mi-button{position:fixed;right:10px;bottom:106px;z-index:2147483644;border:0;border-radius:999px;padding:9px 11px;background:#18181b;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font-weight:900;font-size:12px}
 #sl-mi-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-mi-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mi-title{font-size:16px;font-weight:900}.sl-mi-sub{margin-top:3px;color:#8e96a3;font-size:9px}#sl-mi-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}.sl-mi-toggle,.sl-mi-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mi-field input{width:45%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:7px}.sl-mi-info{margin:10px 0;color:#a6adb8;font-size:10px}.sl-mi-primary,.sl-mi-secondary{width:100%;min-height:40px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900}.sl-mi-primary{background:#2563eb}.sl-mi-secondary{background:#374151}.muted{color:#7e8793}
@@ -285,7 +343,7 @@
     function maybePromptHub(){if(window.SakaLuXScriptHub)return;let last=0;try{last=Number(localStorage.getItem(HUB_PROMPT_STORAGE)||0);}catch(_){}if(Date.now()-last<HUB_PROMPT_INTERVAL)return;setTimeout(()=>{if(window.SakaLuXScriptHub||document.getElementById('sl-mi-hub-prompt'))return;const box=document.createElement('div');box.id='sl-mi-hub-prompt';box.style.cssText='position:fixed;left:10px;right:10px;bottom:20px;z-index:2147483647;max-width:520px;margin:auto;background:#11161d;color:#fff;border:1px solid #39414c;border-radius:12px;padding:12px;font:12px Arial;box-shadow:0 8px 30px rgba(0,0,0,.55)';box.innerHTML='<b>☠︎ SakaLuX Script Hub</b><div style="margin:6px 0;color:#b8bec7">Install the Hub to manage Market Intelligence and the other SakaLuX add-ons from one place.</div><div style="display:flex;gap:7px"><button id="sl-mi-hub-install" style="flex:1;padding:9px;border:0;border-radius:7px;background:#2563eb;color:white;font-weight:900">INSTALL HUB</button><button id="sl-mi-hub-later" style="flex:1;padding:9px;border:0;border-radius:7px;background:#353c46;color:white;font-weight:900">NOT NOW</button></div>';document.body.appendChild(box);box.querySelector('#sl-mi-hub-install').onclick=()=>{location.href=HUB_INSTALL_URL;};box.querySelector('#sl-mi-hub-later').onclick=()=>{try{localStorage.setItem(HUB_PROMPT_STORAGE,String(Date.now()));}catch(_){}box.remove();};},1800);}
     function startObserver(){if(state.observer)return;state.observer=new MutationObserver(muts=>{if(muts.some(m=>m.addedNodes?.length))scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>scheduleScan(true));}
 
-    window.SakaLuXMarketIntelligence={id:'market-intelligence',name:'Market Intelligence',version:VERSION,open(){openSettings();return true;},async refresh(){await scan(true);return true;},async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length};},goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},goToMarket(){location.href='https://www.torn.com/page.php?sid=ItemMarket';return true;},goToBazaar(){location.href='https://www.torn.com/bazaar.php';return true;}};
+    window.SakaLuXMarketIntelligence={id:'market-intelligence',name:'Market Intelligence',version:VERSION,open(){openSettings();return true;},async refresh(){await scan(true);return true;},async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length};},goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},selectDestination(destination){return selectTravelDestination(destination);},goToMarket(){location.href='https://www.torn.com/page.php?sid=ItemMarket';return true;},goToBazaar(){location.href='https://www.torn.com/bazaar.php';return true;}};
     window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceReady',{detail:{version:VERSION}}));
 
     function init(){injectCss();createButton();startObserver();maybePromptHub();scheduleScan(true);console.log('['+NAME+' v'+VERSION+'] Loaded.');}
