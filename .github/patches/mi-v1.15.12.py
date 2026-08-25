@@ -31,7 +31,6 @@ new2="""            const market=map.get(e.id);if(!market)continue;
 """
 if old2 not in s: raise SystemExit('bazaar badge anchor missing')
 s=s.replace(old2,new2,1)
-# Add a PDA-specific safety CSS to guarantee stale badges cannot overlay cards
 marker=""".sl-mi-bazaar-badge-wrap{display:block!important;position:relative!important;width:100%!important;max-width:100%!important;clear:both!important;margin:3px 0 8px!important;box-sizing:border-box!important;float:none!important;transform:none!important;z-index:auto!important}"""
 if marker in s:
     s=s.replace(marker,marker+"\n@media(max-width:900px){.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap{display:none!important}}",1)
@@ -48,3 +47,4 @@ info=info.replace('## Latest changes\n\n','## Latest changes\n\n### SakaLuX Mark
 gf=(R/'greasyfork/Market-Intelligence.md').read_text(encoding='utf-8').replace('**Current version: v1.15.11**','**Current version: v1.15.12**',1)
 gf=gf.replace('## v1.15.11','## v1.15.12 — Clean PDA Bazaar\n\n- Removes per-item DEAL / NO FLIP badges from Torn PDA/mobile where they were overlapping item cards.\n- Keeps the Bazaar Flip Intelligence summary board with ranked profitable deals.\n- Cleans stale Bazaar badge nodes before each scan.\n- Desktop behavior remains unchanged.\n\n## v1.15.11',1)
 (R/'greasyfork/Market-Intelligence.md').write_text(gf,encoding='utf-8')
+# trigger after exact backup
