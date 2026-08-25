@@ -42,13 +42,16 @@ Returns a rolling six-hour consensus from up to 500 observations with median, lo
 4. Add the deployed Worker URL to Market Intelligence.
 5. Keep contribution opt-in in the client until the privacy UI is accepted by the user.
 
-## Next client phase
+## Client status — Market Intelligence v1.16.0
 
-Market Intelligence will add:
+Implemented in the userscript:
 
-- opt-in `SakaLuX Price Network` setting;
-- local observation queue with rate limiting and batching;
-- anonymous upload of observed market prices;
-- network consensus shown as a secondary reference, never silently replacing Torn's own price data;
+- explicit opt-in `SakaLuX Price Network` setting;
+- configurable HTTPS Worker endpoint;
+- bounded local observation queue with duplicate suppression and batching;
+- anonymous upload contract restricted to item ID, price, timestamp and source;
+- network consensus as a secondary Item Market reference;
 - health counters for queued/sent/network samples;
 - automatic fallback to local/Torn data when the network is unavailable.
+
+The remaining deployment step is to create the Cloudflare D1 database, deploy the Worker, and paste its HTTPS URL into Market Intelligence Settings.
