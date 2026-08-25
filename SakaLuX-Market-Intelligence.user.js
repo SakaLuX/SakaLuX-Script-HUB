@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.11
+// @version      1.15.12
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.11';
+    const VERSION = '1.15.12';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1148,7 +1148,7 @@
         if(!settings.bazaar)return;
         const previousBoard=document.getElementById('sl-mi-bazaar-board');
         state.bazaarDeals=0;state.bazaarBestProfit=0;state.bazaarBestRoi=0;
-        document.querySelectorAll('.sl-mi-bazaar-badge-wrap').forEach(n=>n.remove());
+        document.querySelectorAll('.sl-mi-bazaar-badge-wrap,.sl-mi-bazaar').forEach(n=>n.remove());
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){
             const id=itemIdFromImg(img),row=rowContainer(img);if(!id||!row)continue;
@@ -1162,10 +1162,13 @@
         const deals=[];
         for(const e of entries){
             const market=map.get(e.id);if(!market)continue;
-            const m=metrics(e.buy,market.price),box=ensureBazaarBadge(e.row,'sl-mi-bazaar');
+            const m=metrics(e.buy,market.price);
             const good=m.profit>=Number(settings.minProfit||0)&&m.profit>0;
-            box.classList.toggle('good',good);box.classList.toggle('bad',!good);
-            box.innerHTML='<b>'+(good?'▲ DEAL':'▼ NO FLIP')+'</b> · Market '+money(market.price)+' · '+money(m.profit)+' · '+pct(m.roi);
+            const compactPda=window.matchMedia?.('(max-width: 900px)')?.matches;
+            if(!compactPda){
+                const box=ensureBazaarBadge(e.row,'sl-mi-bazaar');
+                if(box){box.classList.toggle('good',good);box.classList.toggle('bad',!good);box.innerHTML='<b>'+(good?'▲ DEAL':'▼ NO FLIP')+'</b> · Market '+money(market.price)+' · '+money(m.profit)+' · '+pct(m.roi);}
+            }
             if(good)deals.push({id:e.id,row:e.row,name:e.name,buy:e.buy,market:market.price,profit:m.profit,roi:m.roi});
             state.decorated++;
         }
