@@ -15,6 +15,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+      - name: Fix registry loop in staged patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/patches/mi-v1.16.0.py')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("for row in data:\n    if row.get('id')=='market-intelligence':", "for row in data.get('scripts',[]):\n    if row.get('id')=='market-intelligence':", 1)
+          p.write_text(s,encoding='utf-8')
+          PY
       - run: python .github/patches/mi-v1.16.0.py
       - run: |
           git config user.name "SakaLuX"
