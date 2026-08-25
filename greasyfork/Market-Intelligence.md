@@ -1,10 +1,20 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.15.12**
+**Current version: v1.16.0**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.16.0 — SakaLuX Price Network Client
+
+- Adds an explicit opt-in client for the anonymous **SakaLuX Price Network**.
+- Shared observations contain only item ID, observed Torn Item Market floor price, timestamp and source.
+- Torn ID, username, API key, device ID, cookies and persistent client identifiers are not sent.
+- Uses a small local queue with batching, duplicate suppression and retry behavior so Torn PDA is not spammed with requests.
+- Adds an HTTPS endpoint field in Settings; if no endpoint is configured, all existing local/Torn/YATA features continue normally.
+- Item Market Intelligence can show network median/range/sample count as a secondary reference without replacing Torn/local prices.
+- Adds network health/status counters and public API helpers.
 
 ## v1.15.12 — Clean PDA Bazaar
 

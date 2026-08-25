@@ -8,9 +8,19 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.15.12** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.16.0** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.16.0 — SakaLuX Price Network Client
+- Added the first client for **SakaLuX Price Network** as an explicit anonymous opt-in.
+- When enabled, successful Torn Item Market lookups can queue only: item ID, observed floor price, timestamp and source. No Torn ID, username, API key, device ID, cookies or persistent client identifier are sent.
+- Added a bounded local queue (200 max), 25-observation batches, 10-minute duplicate suppression and retry-on-failure behavior.
+- Added HTTPS endpoint configuration in Settings so the shared backend can be deployed independently.
+- Item Market Intelligence can show a secondary **PRICE NETWORK** consensus with shared median, range and sample count; it never silently replaces Torn/local pricing.
+- Added a 5-minute local consensus cache and automatic local/Torn fallback when the network is unavailable.
+- Added Price Network counters/status to `health()`, plus `priceNetworkStatus()` and `flushPriceNetwork()` public API actions.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.15.12.user.js`.
 
 ### SakaLuX Market Intelligence v1.15.12
 - Disabled per-item Bazaar DEAL / NO FLIP badges on Torn PDA/mobile because they distort and overlap Torn item cards.
