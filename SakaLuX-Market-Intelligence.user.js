@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.15.10
+// @version      1.15.11
 // @description  Torn market and travel intelligence with route/basket optimization, in-country Best Buys, smart landing refresh and a local Travel Session Summary with trip history.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.15.10';
+    const VERSION = '1.15.11';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -690,9 +690,20 @@
     }
 
 
+    function bazaarItemHost(img,row){
+        let el=row||img;
+        for(let depth=0;depth<8&&el?.parentElement;depth++){
+            const parent=el.parentElement;
+            const itemChildren=[...parent.children].filter(child=>child.querySelector?.('img[src*="/images/items/"]'));
+            if(itemChildren.length>=2)return el;
+            el=parent;
+        }
+        return row||img;
+    }
+
     function ensureBazaarBadge(row,cls){
         if(!row)return null;
-        const host=row.closest?.('li,[role="row"],tr')||row;
+        const host=row;
         const next=host.nextElementSibling;
         if(next?.classList?.contains('sl-mi-bazaar-badge-wrap')){
             const existing=next.querySelector('.'+cls);if(existing)return existing;
@@ -1137,11 +1148,13 @@
         if(!settings.bazaar)return;
         const previousBoard=document.getElementById('sl-mi-bazaar-board');
         state.bazaarDeals=0;state.bazaarBestProfit=0;state.bazaarBestRoi=0;
+        document.querySelectorAll('.sl-mi-bazaar-badge-wrap').forEach(n=>n.remove());
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){
-            const id=itemIdFromImg(img),row=rowContainer(img);if(!id||!row||seen.has(row))continue;
-            const buy=extractFirstPrice(row);if(!(buy>1))continue;
-            seen.add(row);entries.push({id,row,buy,name:img.alt||('Item #'+id)});
+            const id=itemIdFromImg(img),row=rowContainer(img);if(!id||!row)continue;
+            const host=bazaarItemHost(img,row);if(!host||seen.has(host))continue;
+            const buy=extractFirstPrice(host);if(!(buy>1))continue;
+            seen.add(host);entries.push({id,row:host,buy,name:img.alt||('Item #'+id)});
         }
         const ids=[...new Set(entries.map(e=>e.id))].slice(0,MAX_LIVE_FETCHES),map=new Map();
         for(const id of ids){const c=cachePeek(id);if(c)map.set(id,c);}
@@ -1360,7 +1373,7 @@
 
     function createButton(){if(!settings.showButton||document.getElementById('sl-mi-button'))return;const b=document.createElement('button');b.id='sl-mi-button';b.textContent='☠︎ Market';b.onclick=openSettings;document.body.appendChild(b);}
     function maybePromptHub(){if(window.SakaLuXScriptHub)return;let last=0;try{last=Number(localStorage.getItem(HUB_PROMPT_STORAGE)||0);}catch(_){}if(Date.now()-last<HUB_PROMPT_INTERVAL)return;setTimeout(()=>{if(window.SakaLuXScriptHub||document.getElementById('sl-mi-hub-prompt'))return;const box=document.createElement('div');box.id='sl-mi-hub-prompt';box.style.cssText='position:fixed;left:10px;right:10px;bottom:20px;z-index:2147483647;max-width:520px;margin:auto;background:#11161d;color:#fff;border:1px solid #39414c;border-radius:12px;padding:12px;font:12px Arial;box-shadow:0 8px 30px rgba(0,0,0,.55)';box.innerHTML='<b>☠︎ SakaLuX Script Hub</b><div style="margin:6px 0;color:#b8bec7">Install the Hub to manage Market Intelligence and the other SakaLuX add-ons from one place.</div><div style="display:flex;gap:7px"><button id="sl-mi-hub-install" style="flex:1;padding:9px;border:0;border-radius:7px;background:#2563eb;color:white;font-weight:900">INSTALL HUB</button><button id="sl-mi-hub-later" style="flex:1;padding:9px;border:0;border-radius:7px;background:#353c46;color:white;font-weight:900">NOT NOW</button></div>';document.body.appendChild(box);box.querySelector('#sl-mi-hub-install').onclick=()=>{location.href=HUB_INSTALL_URL;};box.querySelector('#sl-mi-hub-later').onclick=()=>{try{localStorage.setItem(HUB_PROMPT_STORAGE,String(Date.now()));}catch(_){}box.remove();};},1800);}
-    function startObserver(){if(state.observer)return;state.observer=new MutationObserver(muts=>{const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-arrival,#sl-mi-overlay,#sl-mi-country-best,#sl-mi-travel-plan,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&detectDestination()&&!detectInFlight()){scheduleLandedSmartRefresh('mutation');return;}if(detectPage()==='travel'&&now-state.lastObserverScan<1800){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>scheduleScan(true));}
+    function startObserver(){if(state.observer)return;state.observer=new MutationObserver(muts=>{const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-arrival,#sl-mi-overlay,#sl-mi-country-best,#sl-mi-travel-plan,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&detectDestination()&&!detectInFlight()){scheduleLandedSmartRefresh('mutation');return;}if(detectPage()==='travel'&&now-state.lastObserverScan<1800){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>scheduleScan(true));}
 
     window.SakaLuXMarketIntelligence={
         id:'market-intelligence',name:'Market Intelligence',version:VERSION,
