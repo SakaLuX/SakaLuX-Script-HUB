@@ -8,9 +8,19 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.16.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.16.1** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.16.1
+- Fixed the visible flicker where **BEST ROUTE BASKET** and **TRAVEL SESSION SUMMARY** repeatedly disappeared and reappeared during scans.
+- Both panels now keep the same outer DOM node and update their content in place.
+- Cached and live Best Route results replace only the panel contents instead of removing the whole panel between phases.
+- Forced refreshes no longer delete the two persistent Travel panels before recalculation.
+- MutationObserver now ignores changes inside Travel Session Summary so the script does not trigger scans from its own session UI updates.
+- The open/collapsed state of both panels is preserved across data refreshes.
+- Panels are still removed when the page context genuinely changes (for example leaving the home Travel screen or disabling the feature).
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.0.user.js`.
 
 ### SakaLuX Market Intelligence v1.16.0 — SakaLuX Price Network Client
 - Added the first client for **SakaLuX Price Network** as an explicit anonymous opt-in.
@@ -352,6 +362,7 @@ For every future script update:
 
 ## Backups available
 
+- `backups/SakaLuX-Market-Intelligence-v1.16.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.15.1.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.15.0.user.js`
 - `backups/SakaLuX-Market-Intelligence-v1.14.0.user.js`
