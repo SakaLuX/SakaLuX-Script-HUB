@@ -8,9 +8,18 @@ Last updated: 2026-08-24
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.16.1** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.16.2** — Greasy Fork **592781**
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.16.2
+- Fixed **BAZAAR FLIP INTELLIGENCE** flicker during rescans.
+- Bazaar Flip now keeps the same outer DOM panel and updates only its contents.
+- The open/collapsed state is preserved during Bazaar refreshes.
+- Removed the extra pre-paint delete from `scanBazaar()`.
+- MutationObserver now ignores changes made inside the Bazaar Flip board, preventing self-triggered refresh loops.
+- The board is removed only when there are genuinely no profitable deals or the page context changes.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.1.user.js`.
 
 ### SakaLuX Market Intelligence v1.16.1
 - Fixed the visible flicker where **BEST ROUTE BASKET** and **TRAVEL SESSION SUMMARY** repeatedly disappeared and reappeared during scans.

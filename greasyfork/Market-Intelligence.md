@@ -1,10 +1,17 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.1**
+**Current version: v1.16.2**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.16.2 — Stable Bazaar Flip Panel
+
+- Fixed the visible disappear/reappear flicker of **BAZAAR FLIP INTELLIGENCE** during Bazaar rescans.
+- The panel now remains mounted and updates its content in place.
+- Open/collapsed state is preserved while prices refresh.
+- MutationObserver ignores the script's own Bazaar board updates, preventing self-triggered rescans.
 
 ## v1.16.1 — Stable Travel Panels
 
