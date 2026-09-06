@@ -15,24 +15,9 @@
       "apiGlobal": "SakaLuXEnhancerGuard",
       "buttonSelector": "#sl-eg-button",
       "quickActions": [
-        {
-          "id": "open",
-          "label": "OPEN",
-          "icon": "🛡️",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        },
-        {
-          "id": "hardRefresh",
-          "label": "HARD",
-          "icon": "⚡",
-          "method": "hardRefresh"
-        }
+        {"id":"open","label":"OPEN","icon":"🛡️","method":"open"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
+        {"id":"hardRefresh","label":"HARD","icon":"⚡","method":"hardRefresh"}
       ]
     },
     {
@@ -50,25 +35,9 @@
       "apiGlobal": "SakaLuXBazaarThanker",
       "buttonSelector": "#sakalux-bt-settings-button",
       "quickActions": [
-        {
-          "id": "open",
-          "label": "SETTINGS",
-          "icon": "⚙️",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        },
-        {
-          "id": "events",
-          "label": "EVENTS",
-          "icon": "📋",
-          "method": "goToEvents",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=events"
-        }
+        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
+        {"id":"events","label":"EVENTS","icon":"📋","method":"goToEvents","fallbackUrl":"https://www.torn.com/page.php?sid=events"}
       ]
     },
     {
@@ -86,27 +55,9 @@
       "apiGlobal": "SakaLuXMissionRewards",
       "buttonSelector": "#sl-mri-button",
       "quickActions": [
-        {
-          "id": "open",
-          "label": "SETTINGS",
-          "icon": "⚙️",
-          "method": "open",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
-        },
-        {
-          "id": "missions",
-          "label": "MISSIONS",
-          "icon": "🎯",
-          "method": "goToMissions",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
-        }
+        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
+        {"id":"missions","label":"MISSIONS","icon":"🎯","method":"goToMissions","fallbackUrl":"https://www.torn.com/page.php?sid=missions"}
       ]
     },
     {
@@ -124,39 +75,30 @@
       "apiGlobal": "SakaLuXMarketIntelligence",
       "buttonSelector": "#sl-mi-button",
       "quickActions": [
-        {
-          "id": "open",
-          "label": "SETTINGS",
-          "icon": "⚙️",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        },
-        {
-          "id": "best-run",
-          "label": "BEST RUN",
-          "icon": "✈️",
-          "method": "goToBestRun",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=travel"
-        },
-        {
-          "id": "market",
-          "label": "MARKET",
-          "icon": "📈",
-          "method": "goToMarket",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket"
-        },
-        {
-          "id": "museum",
-          "label": "MUSEUM",
-          "icon": "🏛️",
-          "method": "goToMuseum",
-          "fallbackUrl": "https://www.torn.com/museum.php"
-        }
+        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
+        {"id":"best-run","label":"BEST RUN","icon":"✈️","method":"goToBestRun","fallbackUrl":"https://www.torn.com/page.php?sid=travel"},
+        {"id":"market","label":"MARKET","icon":"📈","method":"goToMarket","fallbackUrl":"https://www.torn.com/page.php?sid=ItemMarket"},
+        {"id":"museum","label":"MUSEUM","icon":"🏛️","method":"goToMuseum","fallbackUrl":"https://www.torn.com/museum.php"}
+      ]
+    },
+    {
+      "id": "account-auditor",
+      "type": "addon",
+      "active": true,
+      "name": "Account Auditor",
+      "icon": "🔎",
+      "category": "Account",
+      "version": "1.0.0",
+      "description": "Collects a broad Torn account snapshot locally and syncs a credential-scrubbed JSON file to a user-controlled GitHub repository for account analysis.",
+      "greasyForkId": "",
+      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js",
+      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js",
+      "apiGlobal": "SakaLuXAccountAuditor",
+      "buttonSelector": "#sl-aa-button",
+      "quickActions": [
+        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
+        {"id":"sync","label":"SYNC NOW","icon":"🔄","method":"sync"}
       ]
     }
   ]
