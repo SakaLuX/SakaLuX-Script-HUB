@@ -2,6 +2,8 @@
 
 **Current version: v1.0.0**
 
+**Distribution:** manual/private use only. This tool is intentionally excluded from `scripts.json`, so SakaLuX Script Hub will not show it as a required/recommended install and will not generate Hub update prompts for it.
+
 SakaLuX Account Auditor is a Torn PDA / Tampermonkey add-on that builds a structured account snapshot and can sync it to a user-controlled GitHub repository.
 
 ## v1.0.0
