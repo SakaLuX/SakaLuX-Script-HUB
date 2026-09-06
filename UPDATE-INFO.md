@@ -1,6 +1,6 @@
 # SakaLuX Script HUB — Update Information
 
-Last updated: 2026-09-06
+Last updated: 2026-09-07
 
 ## Current versions
 
@@ -9,7 +9,10 @@ Last updated: 2026-09-06
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
 - SakaLuX Market Intelligence: **v1.16.2** — Greasy Fork **592781**
-- SakaLuX Account Auditor: **v1.0.0** — GitHub direct install
+
+## Private / manual tools
+
+- SakaLuX Account Auditor: **v1.0.0** — manual/private use only; intentionally excluded from `scripts.json` so Script Hub does not show it as a required or recommended install.
 
 ## Latest changes
 
@@ -24,7 +27,7 @@ Last updated: 2026-09-06
 - GitHub fine-grained token is stored only in the browser/PDA local storage and must have Contents read/write access only to the chosen snapshot repository.
 - Intended snapshot repository should be **private**, because the JSON can contain detailed Torn account information.
 - Public API: `window.SakaLuXAccountAuditor.open()`, `.sync()`, `.snapshot()` and `.status()`.
-- Registered in `scripts.json`.
+- Account Auditor is intentionally **not registered in `scripts.json`** and therefore does not appear in Script Hub install/update prompts.
 
 ### SakaLuX Market Intelligence v1.16.2
 - Fixed **BAZAAR FLIP INTELLIGENCE** flicker during rescans.
