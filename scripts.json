@@ -81,25 +81,6 @@
         {"id":"market","label":"MARKET","icon":"📈","method":"goToMarket","fallbackUrl":"https://www.torn.com/page.php?sid=ItemMarket"},
         {"id":"museum","label":"MUSEUM","icon":"🏛️","method":"goToMuseum","fallbackUrl":"https://www.torn.com/museum.php"}
       ]
-    },
-    {
-      "id": "account-auditor",
-      "type": "addon",
-      "active": true,
-      "name": "Account Auditor",
-      "icon": "🔎",
-      "category": "Account",
-      "version": "1.0.0",
-      "description": "Collects a broad Torn account snapshot locally and syncs a credential-scrubbed JSON file to a user-controlled GitHub repository for account analysis.",
-      "greasyForkId": "",
-      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js",
-      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js",
-      "apiGlobal": "SakaLuXAccountAuditor",
-      "buttonSelector": "#sl-aa-button",
-      "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
-        {"id":"sync","label":"SYNC NOW","icon":"🔄","method":"sync"}
-      ]
     }
   ]
 }
