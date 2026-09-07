@@ -12,9 +12,19 @@ Last updated: 2026-09-07
 
 ## Private / manual tools
 
-- SakaLuX Account Auditor: **v1.1.1** — manual/private use only; intentionally excluded from `scripts.json` so Script Hub does not show it as a required or recommended install.
+- SakaLuX Account Auditor: **v1.1.2** — manual/private use only; intentionally excluded from `scripts.json` so Script Hub does not show it as a required or recommended install.
 
 ## Latest changes
+
+### SakaLuX Account Auditor v1.1.2
+- Added a central Torn API rate gate with a minimum ~900 ms gap between requests.
+- Added automatic retry/backoff for Torn error code 5 (`Too many requests`) using 2.5s, 5s and 10s waits.
+- Private/high-value data is collected first: messages, new messages, events, new events and logs now run before the broad account audit.
+- Reduced default private pagination cap from 20 pages to 5 to avoid exhausting the API allowance during routine syncs.
+- Removed redundant fixed sleeps; pacing is now handled centrally by the rate gate.
+- Inventory/contact/personal-stat requests use the same retry-aware scheduler.
+- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.1.user.js`.
+- Auditor remains read-only and intentionally excluded from `scripts.json` / Script Hub install prompts.
 
 ### SakaLuX Account Auditor v1.1.1
 - Fixed the three avoidable v2 errors from v1.1.0 instead of calling parameterized endpoints without their required categories.
