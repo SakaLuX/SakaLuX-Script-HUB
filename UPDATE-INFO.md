@@ -12,22 +12,26 @@ Last updated: 2026-09-07
 
 ## Private / manual tools
 
-- SakaLuX Account Auditor: **v1.0.0** — manual/private use only; intentionally excluded from `scripts.json` so Script Hub does not show it as a required or recommended install.
+- SakaLuX Account Auditor: **v1.1.0** — manual/private use only; intentionally excluded from `scripts.json` so Script Hub does not show it as a required or recommended install.
 
 ## Latest changes
 
+### SakaLuX Account Auditor v1.1.0
+- Expanded the private Auditor to broad **read-only Torn API v1 + v2 coverage**.
+- Added official API reads for attacks, ammo, inventory, item market listings, item mods, job details, medals, missions, perks, organized crimes, properties, races, reports, revives, trades, virus, stocks, money, stats and other self-account endpoints.
+- Added private-data collection for **messages, new messages, events, new events and account logs**.
+- Private endpoints follow Torn pagination links with a configurable maximum-page cap.
+- Upgraded snapshot format to `sakalux-torn-account-snapshot-v2` with `data.v1`, `data.v2` and `data.private` sections.
+- GitHub token storage now prefers userscript storage (`GM_getValue` / `GM_setValue`) rather than Torn-origin localStorage.
+- Remains strictly read-only: no message sending, trades, purchases, attacks, account-setting changes or session automation.
+- Password, Torn session, cookies, Torn API key and GitHub token are never written to the snapshot.
+- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.0.0.user.js`.
+- Auditor remains intentionally excluded from `scripts.json` / Script Hub install prompts.
+
 ### SakaLuX Account Auditor v1.0.0
-- New Torn PDA / Tampermonkey account snapshot add-on.
-- Collects available account data selection-by-selection so one unavailable Torn API selection does not cancel the whole snapshot.
-- Current snapshot coverage requests: profile, bars, cooldowns, travel, education, jobpoints, merits, refills, notifications, money, stocks, properties, Discord data, personal stats, weapon experience, work stats, skills, battle stats, net worth, inventory, display, icons and criminal record.
-- Produces `SakaLuX-Account-Snapshot.json` with successful data plus a separate errors section for unavailable/permission-limited selections.
-- Torn API key, GitHub token, cookies, browser session and passwords are explicitly stripped and are never written to the snapshot.
-- Added configurable GitHub repository, branch and snapshot path.
-- Added **SYNC NOW** button plus optional auto-sync while Torn is open.
-- GitHub fine-grained token is stored only in the browser/PDA local storage and must have Contents read/write access only to the chosen snapshot repository.
-- Intended snapshot repository should be **private**, because the JSON can contain detailed Torn account information.
-- Public API: `window.SakaLuXAccountAuditor.open()`, `.sync()`, `.snapshot()` and `.status()`.
-- Account Auditor is intentionally **not registered in `scripts.json`** and therefore does not appear in Script Hub install/update prompts.
+- Initial Torn PDA / Tampermonkey account snapshot tool.
+- Collected 23 legacy user selections independently and synced a credential-scrubbed JSON snapshot to a private GitHub repository.
+- Added configurable GitHub repository, branch and snapshot path, **SYNC NOW**, and optional auto-sync while Torn is open.
 
 ### SakaLuX Market Intelligence v1.16.2
 - Fixed **BAZAAR FLIP INTELLIGENCE** flicker during rescans.
