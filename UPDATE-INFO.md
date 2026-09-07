@@ -12,9 +12,21 @@ Last updated: 2026-09-07
 
 ## Private / manual tools
 
-- SakaLuX Account Auditor: **v1.1.0** — manual/private use only; intentionally excluded from `scripts.json` so Script Hub does not show it as a required or recommended install.
+- SakaLuX Account Auditor: **v1.1.1** — manual/private use only; intentionally excluded from `scripts.json` so Script Hub does not show it as a required or recommended install.
 
 ## Latest changes
+
+### SakaLuX Account Auditor v1.1.1
+- Fixed the three avoidable v2 errors from v1.1.0 instead of calling parameterized endpoints without their required categories.
+- `personalstats` is now requested with `cat=all`.
+- Friends / Enemies / Targets are now collected separately through `user/list?cat=...`.
+- Inventory is now collected category-by-category using Torn's official v2 inventory categories.
+- Added more official read-only self endpoints including battlestats, bounties, calendar, casino, competition, cooldowns, Discord, education, enlisted cars, equipment, faction, forum activity, gym, honors and icons.
+- Added `key/info` capability reporting so the snapshot can show what the current Torn API key can actually access without exposing the API key itself.
+- `user/log` is now treated as an explicit unavailable capability when Torn returns access error 16; Torn officially requires a **Full access** key for account logs.
+- Message collection keeps sender, topic, timestamps and read/seen state. The snapshot now explicitly records that the official Torn API `UserMessage` schema does **not** expose message body/content.
+- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.0.user.js`.
+- Auditor remains read-only and intentionally excluded from `scripts.json` / Script Hub install prompts.
 
 ### SakaLuX Account Auditor v1.1.0
 - Expanded the private Auditor to broad **read-only Torn API v1 + v2 coverage**.
