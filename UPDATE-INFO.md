@@ -10,11 +10,24 @@ Last updated: 2026-09-07
 - SakaLuX Mission Rewards: **v1.0.1**
 - SakaLuX Market Intelligence: **v1.16.2** — Greasy Fork **592781**
 
-## Private / manual tools
+## Private / standalone tools
 
-- SakaLuX Account Auditor: **v1.1.2** — manual/private use only; intentionally excluded from `scripts.json` so Script Hub does not show it as a required or recommended install.
+- SakaLuX Account Auditor: **v1.2.0** — Greasy Fork / GitHub source sync; intentionally excluded from `scripts.json` so Script Hub does not show it as required/recommended.
 
 ## Latest changes
+
+### SakaLuX Account Auditor v1.2.0
+- Added split GitHub snapshots: `summary.json`, `finance.json`, `combat.json`, `crimes.json`, `messages.json`, `events.json`, and `logs.json`.
+- Keeps `SakaLuX-Account-Snapshot.json` as the complete audit file while the smaller files make targeted reading much easier.
+- Added user-triggered **CAPTURE CURRENT MESSAGE** for message body text already visible in Torn.
+- Captured messages are deduplicated, stored in userscript storage, and can be included in `messages.json`.
+- The script never opens private conversations automatically. If the visible Torn message cannot be detected, the user can select its text and press capture again.
+- Official API message metadata remains automatic; body text is only added after explicit user capture.
+- Added **CLEAR CAPTURED MESSAGES** and a setting to include/exclude captured bodies from `messages.json`.
+- Increased central API pacing to ~1.1 seconds minimum between Torn requests while retaining retry/backoff for code 5 / Too many requests.
+- Snapshot schema upgraded to `sakalux-torn-account-snapshot-v3`.
+- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.2.user.js`.
+- Auditor remains read-only and intentionally excluded from `scripts.json` / Script Hub install prompts.
 
 ### SakaLuX Account Auditor v1.1.2
 - Added a central Torn API rate gate with a minimum ~900 ms gap between requests.
@@ -34,7 +47,7 @@ Last updated: 2026-09-07
 - Added more official read-only self endpoints including battlestats, bounties, calendar, casino, competition, cooldowns, Discord, education, enlisted cars, equipment, faction, forum activity, gym, honors and icons.
 - Added `key/info` capability reporting so the snapshot can show what the current Torn API key can actually access without exposing the API key itself.
 - `user/log` is now treated as an explicit unavailable capability when Torn returns access error 16; Torn officially requires a **Full access** key for account logs.
-- Message collection keeps sender, topic, timestamps and read/seen state. The snapshot now explicitly records that the official Torn API `UserMessage` schema does **not** expose message body/content.
+- Message collection keeps sender, topic, timestamps and read/seen state. The snapshot records that the official Torn API does **not** expose message body/content.
 - Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.0.user.js`.
 - Auditor remains read-only and intentionally excluded from `scripts.json` / Script Hub install prompts.
 
