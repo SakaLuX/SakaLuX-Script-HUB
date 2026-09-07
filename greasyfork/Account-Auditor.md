@@ -1,10 +1,19 @@
 # SakaLuX Account Auditor
 
-**Current version: v1.1.1**
+**Current version: v1.1.2**
 
 **Distribution:** manual/private use only. This tool is intentionally excluded from `scripts.json`, so SakaLuX Script Hub will not show it as a required/recommended install and will not generate Hub update prompts for it.
 
 SakaLuX Account Auditor is a private read-only Torn PDA / Tampermonkey tool that builds a structured account snapshot and can sync it to a user-controlled private GitHub repository.
+
+## v1.1.2
+
+- Added centralized API pacing (~900 ms minimum gap) for all Torn requests.
+- Added automatic retries with progressive backoff when Torn returns code 5 / Too many requests.
+- Messages, events and logs are now collected before the broad audit so private/high-value data is prioritized.
+- Reduced default private pagination from 20 pages to 5 for safer routine syncs.
+- Inventory, contacts and personal stats now use the same retry-aware scheduler.
+- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.1.user.js`.
 
 ## v1.1.1
 
