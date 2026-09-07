@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.1.1
-// @description  Private read-only Torn account snapshot collector with broad API v1/v2 coverage, corrected inventory/lists/personal-stats handling, messages/events/logs, and secure GitHub sync.
+// @version      1.1.2
+// @description  Private read-only Torn account snapshot collector with broad API v1/v2 coverage, rate-limit-safe private/account collection, priority messages/events/logs, retries, and secure GitHub sync.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.1.1';
+    const VERSION = '1.1.2';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
 
@@ -38,7 +38,7 @@
         autoSyncMinutes: 30,
         showButton: true,
         includePrivateData: true,
-        maxPrivatePages: 20
+        maxPrivatePages: 5
     };
 
     const V1_SELECTIONS = [
@@ -96,6 +96,19 @@
     function esc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+    const RATE = { minGapMs: 900, retryDelays:[2500,5000,10000], lastAt:0 };
+    async function rateGate() { const wait = Math.max(0, RATE.minGapMs - (Date.now()-RATE.lastAt)); if (wait) await sleep(wait); RATE.lastAt = Date.now(); }
+    async function apiJsonWithRetry(url, retries=RATE.retryDelays.length) {
+        for (let attempt=0;;attempt++) {
+            await rateGate();
+            const r = await apiJson(url);
+            if (r.ok || r.code !== 5 || attempt >= retries) return r;
+            const delay = RATE.retryDelays[Math.min(attempt, RATE.retryDelays.length-1)];
+            setStatus('Torn rate limit hit · retrying in ' + Math.ceil(delay/1000) + 's…');
+            await sleep(delay);
+        }
+    }
+
     function getTornApiKey() {
         if (PDA_KEY && PDA_KEY !== '###PDA-APIKEY###') return PDA_KEY;
         return getLocal(STORAGE.apiKey);
@@ -146,16 +159,16 @@
     }
 
     async function tornV1(selection, key) {
-        return apiJson('https://api.torn.com/user/?selections=' + encodeURIComponent(selection) + '&key=' + encodeURIComponent(key));
+        return apiJsonWithRetry('https://api.torn.com/user/?selections=' + encodeURIComponent(selection) + '&key=' + encodeURIComponent(key));
     }
 
     async function tornV2(endpoint, key, query='', absoluteUrl='') {
         let url = absoluteUrl || ('https://api.torn.com/v2/user/' + encodeURIComponent(endpoint) + (query ? (query.startsWith('?') ? query : '?' + query) : ''));
-        return apiJson(withKey(url, key));
+        return apiJsonWithRetry(withKey(url, key));
     }
 
     async function keyInfo(key) {
-        return apiJson(withKey('https://api.torn.com/v2/key/info', key));
+        return apiJsonWithRetry(withKey('https://api.torn.com/v2/key/info', key));
     }
 
     function sanitizeDeep(value, depth=0) {
@@ -179,7 +192,7 @@
     async function collectPagedV2(endpoint, key, query='') {
         const pages = [];
         let url = '';
-        const maxPages = Math.max(1, Math.min(100, Number(settings.maxPrivatePages) || 20));
+        const maxPages = Math.max(1, Math.min(20, Number(settings.maxPrivatePages) || 5));
         for (let page=0; page<maxPages; page++) {
             const result = await tornV2(endpoint, key, url ? '' : query, url);
             if (!result.ok) return {ok:false,error:result.error,code:result.code ?? null,httpStatus:result.httpStatus ?? null,pages};
@@ -187,7 +200,7 @@
             const next = nextLink(result.data);
             if (!next) break;
             url = next.startsWith('http') ? next : 'https://api.torn.com' + next;
-            await sleep(300);
+
         }
         const last = pages[pages.length-1];
         return {ok:true,data:{pages,pageCount:pages.length,truncated:Boolean(last && nextLink(last) && pages.length >= maxPages)}};
@@ -200,7 +213,7 @@
             const r = await collectPagedV2('list', key, 'cat=' + encodeURIComponent(cat) + '&limit=50');
             if (r.ok) out[cat.toLowerCase()] = r.data;
             else errors[cat] = {error:r.error,code:r.code ?? null,httpStatus:r.httpStatus ?? null};
-            await sleep(250);
+    
         }
         return {data:out,errors};
     }
@@ -219,7 +232,7 @@
             } else {
                 errors[cat] = {error:r.error,code:r.code ?? null,httpStatus:r.httpStatus ?? null};
             }
-            await sleep(180);
+
         }
         return {data:{categories,itemCount,categoryCount:Object.keys(categories).length},errors};
     }
@@ -247,7 +260,27 @@
         const ki = await keyInfo(key);
         if (ki.ok) { data.keyInfo = sanitizeDeep(ki.data); successful++; }
         else errors['key:info'] = {error:ki.error,code:ki.code ?? null,httpStatus:ki.httpStatus ?? null};
-        await sleep(200);
+
+        // Private/high-value endpoints first, before the broad audit can consume the API allowance.
+        if (settings.includePrivateData) {
+            for (let i=0; i<V2_PRIVATE_ENDPOINTS.length; i++) {
+                const endpoint = V2_PRIVATE_ENDPOINTS[i];
+                requested++;
+                setStatus('Reading PRIVATE v2: ' + endpoint + ' (' + (i+1) + '/' + V2_PRIVATE_ENDPOINTS.length + ')');
+                const result = await collectPagedV2(endpoint, key, endpoint.includes('events') ? 'limit=100' : 'limit=100&sort=desc');
+                if (result.ok) { data.private[endpoint] = result.data; successful++; }
+                else {
+                    if (result.pages?.length) data.private[endpoint] = {pages:result.pages,pageCount:result.pages.length,partial:true};
+                    errors['private:'+endpoint] = {error:result.error,code:result.code ?? null,httpStatus:result.httpStatus ?? null};
+                }
+            }
+            requested++;
+            setStatus('Reading PRIVATE v2: logs…');
+            const logs = await collectUserLogs(key);
+            if (logs.ok) { data.private.log = logs.data; successful++; }
+            else if (logs.code === 16) unavailable['private:log'] = {reason:'Torn requires a Full access API key for user/log.',code:16,action:'Use a Full-access key only if you explicitly want account logs included. No bypass is attempted.'};
+            else errors['private:log'] = {error:logs.error,code:logs.code ?? null,httpStatus:logs.httpStatus ?? null};
+        }
 
         for (let i=0; i<V1_SELECTIONS.length; i++) {
             const selection = V1_SELECTIONS[i];
@@ -256,7 +289,7 @@
             const result = await tornV1(selection, key);
             if (result.ok) { data.v1[selection] = sanitizeDeep(result.data); successful++; }
             else errors['v1:'+selection] = {error:result.error,code:result.code ?? null,httpStatus:result.httpStatus ?? null};
-            await sleep(220);
+
         }
 
         for (let i=0; i<V2_ENDPOINTS.length; i++) {
@@ -266,7 +299,7 @@
             const result = await tornV2(endpoint, key);
             if (result.ok) { data.v2[endpoint] = sanitizeDeep(result.data); successful++; }
             else errors['v2:'+endpoint] = {error:result.error,code:result.code ?? null,httpStatus:result.httpStatus ?? null};
-            await sleep(220);
+
         }
 
         requested++;
@@ -274,7 +307,7 @@
         const ps = await collectPersonalStatsV2(key);
         if (ps.ok) { data.special.personalstats = sanitizeDeep(ps.data); successful++; }
         else errors['v2:personalstats'] = {error:ps.error,code:ps.code ?? null,httpStatus:ps.httpStatus ?? null};
-        await sleep(250);
+
 
         requested++;
         setStatus('Reading contacts lists…');
@@ -290,36 +323,6 @@
         if (inv.data.categoryCount) successful++;
         if (Object.keys(inv.errors).length) errors['v2:inventory'] = inv.errors;
 
-        if (settings.includePrivateData) {
-            for (let i=0; i<V2_PRIVATE_ENDPOINTS.length; i++) {
-                const endpoint = V2_PRIVATE_ENDPOINTS[i];
-                requested++;
-                setStatus('Reading PRIVATE v2: ' + endpoint + ' (' + (i+1) + '/' + V2_PRIVATE_ENDPOINTS.length + ')');
-                const result = await collectPagedV2(endpoint, key, endpoint.includes('events') ? 'limit=100' : 'limit=100&sort=desc');
-                if (result.ok) { data.private[endpoint] = result.data; successful++; }
-                else {
-                    if (result.pages?.length) data.private[endpoint] = {pages:result.pages,pageCount:result.pages.length,partial:true};
-                    errors['private:'+endpoint] = {error:result.error,code:result.code ?? null,httpStatus:result.httpStatus ?? null};
-                }
-                await sleep(300);
-            }
-
-            requested++;
-            setStatus('Reading PRIVATE v2: logs…');
-            const logs = await collectUserLogs(key);
-            if (logs.ok) { data.private.log = logs.data; successful++; }
-            else {
-                if (logs.code === 16) {
-                    unavailable['private:log'] = {
-                        reason:'Torn requires a Full access API key for user/log.',
-                        code:16,
-                        action:'Use a Full-access key only if you explicitly want account logs included. No bypass is attempted.'
-                    };
-                } else {
-                    errors['private:log'] = {error:logs.error,code:logs.code ?? null,httpStatus:logs.httpStatus ?? null};
-                }
-            }
-        }
 
         const profile = data.v1.profile || data.v2.profile || data.v2.basic || {};
         return {
