@@ -1,0 +1,26 @@
+from pathlib import Path
+p=Path('SakaLuX-Account-Auditor.user.js')
+s=p.read_text()
+s=s.replace('// @version      1.1.1','// @version      1.1.2').replace("const VERSION = '1.1.1';","const VERSION = '1.1.2';")
+s=s.replace('corrected inventory/lists/personal-stats handling, messages/events/logs, and secure GitHub sync.','rate-limit-safe private/account collection, priority messages/events/logs, retries, and secure GitHub sync.')
+s=s.replace("    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }", "    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }\n\n    const RATE = { minGapMs: 900, retryDelays:[2500,5000,10000], lastAt:0 };\n    async function rateGate() { const wait = Math.max(0, RATE.minGapMs - (Date.now()-RATE.lastAt)); if (wait) await sleep(wait); RATE.lastAt = Date.now(); }\n    async function apiJsonWithRetry(url, retries=RATE.retryDelays.length) {\n        for (let attempt=0;;attempt++) {\n            await rateGate();\n            const r = await apiJson(url);\n            if (r.ok || r.code !== 5 || attempt >= retries) return r;\n            const delay = RATE.retryDelays[Math.min(attempt, RATE.retryDelays.length-1)];\n            setStatus('Torn rate limit hit · retrying in ' + Math.ceil(delay/1000) + 's…');\n            await sleep(delay);\n        }\n    }")
+s=s.replace("        return apiJson('https://api.torn.com/user/?selections=' + encodeURIComponent(selection) + '&key=' + encodeURIComponent(key));", "        return apiJsonWithRetry('https://api.torn.com/user/?selections=' + encodeURIComponent(selection) + '&key=' + encodeURIComponent(key));")
+s=s.replace("        return apiJson(withKey(url, key));", "        return apiJsonWithRetry(withKey(url, key));")
+s=s.replace("        return apiJson(withKey('https://api.torn.com/v2/key/info', key));", "        return apiJsonWithRetry(withKey('https://api.torn.com/v2/key/info', key));")
+old="""        requested++;\n        setStatus('Checking Torn API key capabilities…');\n        const ki = await keyInfo(key);\n        if (ki.ok) { data.keyInfo = sanitizeDeep(ki.data); successful++; }\n        else errors['key:info'] = {error:ki.error,code:ki.code ?? null,httpStatus:ki.httpStatus ?? null};\n        await sleep(200);\n\n        for (let i=0; i<V1_SELECTIONS.length; i++) {"""
+new="""        requested++;\n        setStatus('Checking Torn API key capabilities…');\n        const ki = await keyInfo(key);\n        if (ki.ok) { data.keyInfo = sanitizeDeep(ki.data); successful++; }\n        else errors['key:info'] = {error:ki.error,code:ki.code ?? null,httpStatus:ki.httpStatus ?? null};\n\n        // Private/high-value endpoints first, before the broad audit can consume the API allowance.\n        if (settings.includePrivateData) {\n            for (let i=0; i<V2_PRIVATE_ENDPOINTS.length; i++) {\n                const endpoint = V2_PRIVATE_ENDPOINTS[i];\n                requested++;\n                setStatus('Reading PRIVATE v2: ' + endpoint + ' (' + (i+1) + '/' + V2_PRIVATE_ENDPOINTS.length + ')');\n                const result = await collectPagedV2(endpoint, key, endpoint.includes('events') ? 'limit=100' : 'limit=100&sort=desc');\n                if (result.ok) { data.private[endpoint] = result.data; successful++; }\n                else {\n                    if (result.pages?.length) data.private[endpoint] = {pages:result.pages,pageCount:result.pages.length,partial:true};\n                    errors['private:'+endpoint] = {error:result.error,code:result.code ?? null,httpStatus:result.httpStatus ?? null};\n                }\n            }\n            requested++;\n            setStatus('Reading PRIVATE v2: logs…');\n            const logs = await collectUserLogs(key);\n            if (logs.ok) { data.private.log = logs.data; successful++; }\n            else if (logs.code === 16) unavailable['private:log'] = {reason:'Torn requires a Full access API key for user/log.',code:16,action:'Use a Full-access key only if you explicitly want account logs included. No bypass is attempted.'};\n            else errors['private:log'] = {error:logs.error,code:logs.code ?? null,httpStatus:logs.httpStatus ?? null};\n        }\n\n        for (let i=0; i<V1_SELECTIONS.length; i++) {"""
+if old not in s: raise SystemExit('anchor1 missing')
+s=s.replace(old,new)
+start=s.find("        if (settings.includePrivateData) {", s.find("setStatus('Reading inventory categories…')"))
+end=s.find("\n        const profile =", start)
+if start<0 or end<0: raise SystemExit('private tail anchor missing')
+s=s[:start]+s[end:]
+s=s.replace("            await sleep(220);", "")
+s=s.replace("        await sleep(250);", "")
+s=s.replace("            await sleep(250);", "")
+s=s.replace("            await sleep(180);", "")
+s=s.replace("            await sleep(300);", "")
+s=s.replace("        const maxPages = Math.max(1, Math.min(100, Number(settings.maxPrivatePages) || 20));", "        const maxPages = Math.max(1, Math.min(20, Number(settings.maxPrivatePages) || 5));")
+s=s.replace("        maxPrivatePages: 20", "        maxPrivatePages: 5")
+s=s.replace("schema: 'sakalux-torn-account-snapshot-v2'", "schema: 'sakalux-torn-account-snapshot-v2'")
+p.write_text(s)
