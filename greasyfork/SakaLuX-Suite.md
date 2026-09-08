@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.4.1**
+**v0.5.0**
 
 ## What it does
 
@@ -159,3 +159,17 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 ## License
 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.
+
+
+### v0.5.0 — internal module functional upgrade
+- Upgraded all experimental internal modules from simple page counters to working local tools and scanners.
+- Chain Alarm now has a floating timer, warning thresholds and drag support.
+- Faction Pulse now parses member rows and statuses.
+- Armory Loan Radar stores local loan snapshots.
+- Member Travel Map adds editable local country overrides.
+- OC Role Match surfaces the strongest visible role suitability and OC Readiness warns about missing participation/readiness.
+- War Performance stores local report snapshots and MVP signals.
+- Company Console adds employee/income/train signals and a price calculator.
+- Odds Scout calculates implied probabilities and market margin.
+- Race League Board persists F1-style points across detected results with duplicate protection.
+- Added Torn API permission plumbing for the shared-key architecture; modules remain read-only/advisory.
