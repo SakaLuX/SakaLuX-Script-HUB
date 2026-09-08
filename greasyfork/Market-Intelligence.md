@@ -1,10 +1,18 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.2**
+**Current version: v1.16.3**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.16.3
+
+- **BEST BUYS** now checks your current Torn on-hand cash automatically and uses it as the basket budget.
+- The manually configured Travel budget no longer controls the in-country Best Buys panel.
+- Cash is cached briefly to avoid unnecessary API calls and refreshed when the landed Best Buys scan runs.
+- The panel shows the live cash amount used for the calculation.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.2.user.js`.
 
 ## v1.16.2 — Stable Bazaar Flip Panel
 

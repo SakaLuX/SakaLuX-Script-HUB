@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.16.2
+// @version      1.16.3
 // @description  Torn PDA-first market/travel intelligence with stable non-flickering Travel and Bazaar panels, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.16.2';
+    const VERSION = '1.16.3';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -65,6 +65,7 @@
     const PRICE_NETWORK_CACHE_MS = 5 * 60 * 1000;
     const PRICE_NETWORK_MAX_QUEUE = 200;
     const PRICE_NETWORK_BATCH = 25;
+    const CASH_CACHE_MS = 30 * 1000;
 
     const FLIGHT_MINS = {
         Mexico: 25, Caymans: 33, Canada: 39, Hawaii: 127, UK: 151,
@@ -170,7 +171,8 @@
         countryBestBuysRows: 0, countryBestBuyName: '', countryBestBuyProfit: 0, countryBestBuyQty: 0, countryBestBuysDestination: '',
         landedRefreshes: 0, landedStockRefreshes: 0, landedMarketRefreshes: 0, landedRefreshSkips: 0, landedLastRefresh: 0, landedLastMarketRefresh: 0, landedSignature: '', landedRefreshTimer: null,
         travelSessionCount: 0, currentSessionDestination: '', currentSessionStatus: '', currentSessionPredictedProfit: 0, currentSessionLandedProfit: 0, currentSessionRecordedProfit: 0, lastSessionProfit: 0,
-        networkBusy: false, networkQueued: networkQueue.length, networkSent: 0, networkLastFlush: 0, networkLastError: '', networkSamples: 0, networkMedian: 0, networkLastConsensusAt: 0
+        networkBusy: false, networkQueued: networkQueue.length, networkSent: 0, networkLastFlush: 0, networkLastError: '', networkSamples: 0, networkMedian: 0, networkLastConsensusAt: 0,
+        availableCash: null, availableCashAt: 0
     };
 
     function loadJson(key, fallback) {
@@ -431,6 +433,20 @@
         try { const key=localStorage.getItem(STORAGE.apiKey)||''; if(key) state.apiMode='Manual'; return key; } catch (_) { return ''; }
     }
     function saveApiKey(key) { try { localStorage.setItem(STORAGE.apiKey,key); state.apiMode='Manual'; } catch (_) {} }
+
+    async function fetchAvailableCash(force=false) {
+        const now=Date.now();
+        if(!force&&Number.isFinite(state.availableCash)&&now-state.availableCashAt<CASH_CACHE_MS)return state.availableCash;
+        const key=getApiKey();if(!key)return Number.isFinite(state.availableCash)?state.availableCash:null;
+        try{
+            const data=await requestJson('https://api.torn.com/user/?selections=money&key='+encodeURIComponent(key));
+            checkApiError(data);
+            const raw=data?.money_onhand??data?.money?.onhand??data?.money?.cash??data?.cash;
+            const cash=Number(raw);
+            if(Number.isFinite(cash)&&cash>=0){state.availableCash=Math.floor(cash);state.availableCashAt=now;return state.availableCash;}
+        }catch(_){}
+        return Number.isFinite(state.availableCash)?state.availableCash:null;
+    }
 
     function requestJson(url) {
         return new Promise((resolve,reject)=>{
@@ -864,7 +880,7 @@
         for(const [destination,rows] of grouped){
             const flight=flightInfo(destination,actualTimes);if(!flight)continue;
             const entries=routeBasketEntries(rows);
-            const plan=buildTravelBuyPlan(destination,entries,marketMap);
+            const plan=buildTravelBuyPlan(destination,entries,marketMap,availableCash);
             if(!plan?.rows?.length||!(plan.totalProfit>0)){blocked++;continue;}
             const roundTrip=flight.mins*2,profitHour=plan.totalProfit/(roundTrip/60);
             const summary=plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':'');
@@ -1118,9 +1134,9 @@
         return {destination,slots,used,remaining:slots-used,totalCost,totalProfit,rows,budget:configuredBudget,unusedBudget:Math.max(0,configuredBudget-totalCost),mode:'OPTIMIZED'};
     }
 
-    function buildTravelBuyPlan(destination, entries, marketMap) {
+    function buildTravelBuyPlan(destination, entries, marketMap, budgetOverride=null) {
         const slots=Math.max(1,Number(settings.travelSlots)||29);
-        const configuredBudget=Math.max(0,Number(settings.travelBudget)||0);
+        const configuredBudget=Number.isFinite(Number(budgetOverride))&&Number(budgetOverride)>=0?Math.max(0,Number(budgetOverride)):Math.max(0,Number(settings.travelBudget)||0);
         const candidates=travelPlannerCandidates(entries,marketMap,slots);
         const greedy=buildGreedyTravelPlan(destination,candidates,slots,configuredBudget);
         const optimized=buildOptimizedTravelPlan(destination,candidates,slots,configuredBudget);
@@ -1131,7 +1147,7 @@
     }
 
 
-    function paintCountryBestBuys(destination,entries,marketMap){
+    function paintCountryBestBuys(destination,entries,marketMap,availableCash=null){
         document.getElementById('sl-mi-country-best')?.remove();
         const slots=Math.max(1,Number(settings.travelSlots)||29);
         const plan=buildTravelBuyPlan(destination,entries,marketMap);
@@ -1158,9 +1174,9 @@
 
         const bar=document.createElement('div');bar.id='sl-mi-country-best';bar.className='open';
         const plannedCount=top.filter(r=>r.plannedQty>0).length;
-        const budgetText=plan?.budget>0?(' · budget '+money(plan.budget)):' · unlimited budget';
+        const budgetText=Number.isFinite(Number(availableCash))?(' · cash '+money(availableCash)):(plan?.budget>0?(' · fallback budget '+money(plan.budget)):' · cash unavailable');
         bar.innerHTML='<div class="sl-mi-country-head"><div><span class="sl-mi-br-title">🌍 BEST BUYS · '+esc(destination.toUpperCase())+'</span><strong>'+plannedCount+' recommended item'+(plannedCount===1?'':'s')+'</strong></div><div>'+((plan?.used)||0)+'/'+slots+' slots · '+money(plan?.totalProfit||0)+' profit'+budgetText+'</div><button type="button">▾</button></div>'+
-            '<div class="sl-mi-country-note">Shows what is best to buy here right now. Green rows are in the optimized basket; alternatives stay ranked below. Tap an item to jump to it in Torn.</div>'+
+            '<div class="sl-mi-country-note">Shows what is best to buy here right now. The recommended basket uses your live Torn cash balance automatically; the manual Travel budget is ignored for this Best Buys panel. Green rows are recommended; alternatives stay ranked below.</div>'+
             '<div class="sl-mi-country-summary"><span>Spend <strong>'+money(plan?.totalCost||0)+'</strong></span><span>Expected net profit <strong>'+money(plan?.totalProfit||0)+'</strong></span><span>Mode <strong>'+esc(plan?.mode||'GREEDY')+'</strong></span>'+(plan?.unusedBudget!=null?'<span>Budget left <strong>'+money(plan.unusedBudget)+'</strong></span>':'')+'<button type="button" id="sl-mi-mark-bought">'+(travelSessions.current?.recorded?'PLAN RECORDED ✓':'MARK PLAN BOUGHT')+'</button></div><div class="sl-mi-country-body"></div>';
         const body=bar.querySelector('.sl-mi-country-body');
         top.forEach((r,index)=>{
@@ -1211,6 +1227,7 @@
         if(!detectDestination()){await renderBestTravelRun();paintTravelSessionSummary();return;}
         const destination=detectDestination();if(!destination)return;
         document.getElementById('sl-mi-best-run')?.remove();
+        const availableCash=await fetchAvailableCash(true);
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}
         const unique=[...new Map(entries.map(e=>[e.id,e])).values()].slice(0,MAX_LIVE_FETCHES);
@@ -1218,7 +1235,7 @@
         for(const e of unique){const c=cachePeek(e.id);if(c)marketMap.set(e.id,c);}
         await mapWithLimit(unique,async e=>{if(e.stock!=null)recordStock(destination,e.id,e.stock);const fetched=await fetchMarket(e.id);if(!fetched)return;const market=e.displayValue>0?{...fetched,price:e.displayValue,tornDisplayedValue:e.displayValue}:fetched;marketMap.set(e.id,market);const m=metrics(e.buy,market.price),box=ensureTravelBadge(e.row,'sl-mi-travel');box.classList.toggle('loss',m.profit<Number(settings.minProfit||0));box.innerHTML='<b>☠︎ MI</b> Market '+money(market.price)+' · Net '+money(m.net)+' · <strong>'+money(m.profit)+' ('+pct(m.roi)+')</strong>'+(e.stock!=null?' · Stock '+e.stock.toLocaleString('en-US')+stockEtaText(destination,e.id,e.stock):'');state.decorated++;});
         flushStockHistory();
-        if(settings.countryBestBuys) paintCountryBestBuys(destination,unique,marketMap);
+        if(settings.countryBestBuys) paintCountryBestBuys(destination,unique,marketMap,availableCash);
         else paintTravelBuyPlan(buildTravelBuyPlan(destination,unique,marketMap));
         state.landedSignature=travelShopSignature();
         state.landedLastRefresh=Date.now();
@@ -1486,7 +1503,7 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,travelSessionCount:state.travelSessionCount,currentSessionDestination:state.currentSessionDestination,currentSessionStatus:state.currentSessionStatus,currentSessionPredictedProfit:state.currentSessionPredictedProfit,currentSessionLandedProfit:state.currentSessionLandedProfit,currentSessionRecordedProfit:state.currentSessionRecordedProfit,lastSessionProfit:state.lastSessionProfit,landedRefreshes:state.landedRefreshes,landedStockRefreshes:state.landedStockRefreshes,landedMarketRefreshes:state.landedMarketRefreshes,landedRefreshSkips:state.landedRefreshSkips,landedLastRefresh:state.landedLastRefresh,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,arrivalBasketItems:state.arrivalBasketItems,arrivalBasketCost:state.arrivalBasketCost,arrivalBasketProfit:state.arrivalBasketProfit,arrivalBasketSlots:state.arrivalBasketSlots,arrivalBasketMode:state.arrivalBasketMode,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,priceNetworkEnabled:settings.priceNetwork,priceNetworkConfigured:priceNetworkConfigured(),networkQueued:networkQueue.length,networkSent:state.networkSent,networkBusy:state.networkBusy,networkLastFlush:state.networkLastFlush,networkLastError:state.networkLastError,networkSamples:state.networkSamples,networkMedian:state.networkMedian,networkLastConsensusAt:state.networkLastConsensusAt,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,availableCash:state.availableCash,availableCashAt:state.availableCashAt,travelSessionCount:state.travelSessionCount,currentSessionDestination:state.currentSessionDestination,currentSessionStatus:state.currentSessionStatus,currentSessionPredictedProfit:state.currentSessionPredictedProfit,currentSessionLandedProfit:state.currentSessionLandedProfit,currentSessionRecordedProfit:state.currentSessionRecordedProfit,lastSessionProfit:state.lastSessionProfit,landedRefreshes:state.landedRefreshes,landedStockRefreshes:state.landedStockRefreshes,landedMarketRefreshes:state.landedMarketRefreshes,landedRefreshSkips:state.landedRefreshSkips,landedLastRefresh:state.landedLastRefresh,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,arrivalBasketItems:state.arrivalBasketItems,arrivalBasketCost:state.arrivalBasketCost,arrivalBasketProfit:state.arrivalBasketProfit,arrivalBasketSlots:state.arrivalBasketSlots,arrivalBasketMode:state.arrivalBasketMode,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,priceNetworkEnabled:settings.priceNetwork,priceNetworkConfigured:priceNetworkConfigured(),networkQueued:networkQueue.length,networkSent:state.networkSent,networkBusy:state.networkBusy,networkLastFlush:state.networkLastFlush,networkLastError:state.networkLastError,networkSamples:state.networkSamples,networkMedian:state.networkMedian,networkLastConsensusAt:state.networkLastConsensusAt,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},

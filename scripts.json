@@ -15,9 +15,24 @@
       "apiGlobal": "SakaLuXEnhancerGuard",
       "buttonSelector": "#sl-eg-button",
       "quickActions": [
-        {"id":"open","label":"OPEN","icon":"🛡️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"hardRefresh","label":"HARD","icon":"⚡","method":"hardRefresh"}
+        {
+          "id": "open",
+          "label": "OPEN",
+          "icon": "🛡️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "hardRefresh",
+          "label": "HARD",
+          "icon": "⚡",
+          "method": "hardRefresh"
+        }
       ]
     },
     {
@@ -35,9 +50,25 @@
       "apiGlobal": "SakaLuXBazaarThanker",
       "buttonSelector": "#sakalux-bt-settings-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"events","label":"EVENTS","icon":"📋","method":"goToEvents","fallbackUrl":"https://www.torn.com/page.php?sid=events"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "events",
+          "label": "EVENTS",
+          "icon": "📋",
+          "method": "goToEvents",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=events"
+        }
       ]
     },
     {
@@ -55,9 +86,27 @@
       "apiGlobal": "SakaLuXMissionRewards",
       "buttonSelector": "#sl-mri-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
-        {"id":"missions","label":"MISSIONS","icon":"🎯","method":"goToMissions","fallbackUrl":"https://www.torn.com/page.php?sid=missions"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        },
+        {
+          "id": "missions",
+          "label": "MISSIONS",
+          "icon": "🎯",
+          "method": "goToMissions",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        }
       ]
     },
     {
@@ -67,19 +116,47 @@
       "name": "Market Intelligence",
       "icon": "📈",
       "category": "Trading",
-      "version": "1.16.2",
-      "description": "Torn PDA-first market/travel intelligence with stable non-flickering Travel and Bazaar panels, anonymous opt-in Price Network, Bazaar Flip and travel/basket tools.",
+      "version": "1.16.3",
+      "description": "Torn PDA-first market/travel intelligence with automatic live-cash Best Buys, stable Travel/Bazaar panels, Price Network, Bazaar Flip and travel basket tools.",
       "greasyForkId": "592781",
       "metaUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "downloadUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js",
       "apiGlobal": "SakaLuXMarketIntelligence",
       "buttonSelector": "#sl-mi-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"best-run","label":"BEST RUN","icon":"✈️","method":"goToBestRun","fallbackUrl":"https://www.torn.com/page.php?sid=travel"},
-        {"id":"market","label":"MARKET","icon":"📈","method":"goToMarket","fallbackUrl":"https://www.torn.com/page.php?sid=ItemMarket"},
-        {"id":"museum","label":"MUSEUM","icon":"🏛️","method":"goToMuseum","fallbackUrl":"https://www.torn.com/museum.php"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "best-run",
+          "label": "BEST RUN",
+          "icon": "✈️",
+          "method": "goToBestRun",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=travel"
+        },
+        {
+          "id": "market",
+          "label": "MARKET",
+          "icon": "📈",
+          "method": "goToMarket",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket"
+        },
+        {
+          "id": "museum",
+          "label": "MUSEUM",
+          "icon": "🏛️",
+          "method": "goToMuseum",
+          "fallbackUrl": "https://www.torn.com/museum.php"
+        }
       ]
     }
   ]

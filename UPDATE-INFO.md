@@ -8,13 +8,20 @@ Last updated: 2026-09-07
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.16.2** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.16.3** — Greasy Fork **592781**
 
 ## Private / standalone tools
 
 - SakaLuX Account Auditor: **v1.2.0** — Greasy Fork / GitHub source sync; intentionally excluded from `scripts.json` so Script Hub does not show it as required/recommended.
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.16.3
+- In-country **BEST BUYS** now reads the player's current Torn on-hand cash automatically through the existing API key.
+- The manual Travel budget setting is ignored for the in-country Best Buys calculation.
+- Added a 30-second cash cache and exposes `availableCash` / `availableCashAt` in `health()`.
+- Best Buys labels the live cash used for the recommendation and falls back gracefully if cash cannot be read.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.2.user.js`.
 
 ### SakaLuX Account Auditor v1.2.0
 - Added split GitHub snapshots: `summary.json`, `finance.json`, `combat.json`, `crimes.json`, `messages.json`, `events.json`, and `logs.json`.
