@@ -89,8 +89,8 @@
       "name": "Elimination Assistant",
       "icon": "⚔️",
       "category": "Combat",
-      "version": "1.0.0",
-      "description": "Eliminations target scanner with SAFE/RISKY/SKIP scoring, filters, local target history and quick attack access.",
+      "version": "1.1.0",
+      "description": "Eliminations target intelligence with Torn API, optional FFScouter fair-fight and battle-stat estimates, SAFE/RISKY/SKIP scoring, filters and attack history.",
       "greasyForkId": "594921",
       "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "downloadUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js",
@@ -99,6 +99,7 @@
       "quickActions": [
         {"id":"open","label":"OPEN","icon":"⚔️","method":"open"},
         {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
+        {"id":"ffscan","label":"FF SCAN","icon":"📊","method":"scanFF"},
         {"id":"event","label":"ELIMS","icon":"🎯","method":"goToEliminations","fallbackUrl":"https://www.torn.com/page.php?sid=elimination"}
       ]
     }
