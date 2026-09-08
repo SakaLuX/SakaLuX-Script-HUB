@@ -1,10 +1,17 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.3**
+**Current version: v1.16.4**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.16.4
+
+- Hotfixes the v1.16.3 live-cash change.
+- **BEST BUYS** now correctly uses the player's automatically fetched Torn on-hand cash as its basket budget.
+- BEST ROUTE BASKET remains independent and keeps its existing Travel budget behavior.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.3.user.js`.
 
 ## v1.16.3
 

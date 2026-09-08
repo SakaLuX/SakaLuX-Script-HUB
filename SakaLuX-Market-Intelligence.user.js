@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.16.3
+// @version      1.16.4
 // @description  Torn PDA-first market/travel intelligence with stable non-flickering Travel and Bazaar panels, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -18,7 +18,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.16.3';
+    const VERSION = '1.16.4';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -880,7 +880,7 @@
         for(const [destination,rows] of grouped){
             const flight=flightInfo(destination,actualTimes);if(!flight)continue;
             const entries=routeBasketEntries(rows);
-            const plan=buildTravelBuyPlan(destination,entries,marketMap,availableCash);
+            const plan=buildTravelBuyPlan(destination,entries,marketMap);
             if(!plan?.rows?.length||!(plan.totalProfit>0)){blocked++;continue;}
             const roundTrip=flight.mins*2,profitHour=plan.totalProfit/(roundTrip/60);
             const summary=plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':'');
@@ -1150,7 +1150,7 @@
     function paintCountryBestBuys(destination,entries,marketMap,availableCash=null){
         document.getElementById('sl-mi-country-best')?.remove();
         const slots=Math.max(1,Number(settings.travelSlots)||29);
-        const plan=buildTravelBuyPlan(destination,entries,marketMap);
+        const plan=buildTravelBuyPlan(destination,entries,marketMap,availableCash);
         updateLandedSession(destination,plan);
         const plannedQty=new Map((plan?.rows||[]).map(r=>[String(r.id),Number(r.qty)||0]));
         const candidates=travelPlannerCandidates(entries,marketMap,slots).map(r=>{
