@@ -9,29 +9,32 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 ## What it does
 
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
-- `scripts.json` is dedicated to complementary add-ons managed by the Hub.
-- Detects installed and missing SakaLuX add-ons.
-- Shows one-tap INSTALL actions for missing add-ons.
-- Checks Greasy Fork for available updates.
+- Detects installed, missing and outdated SakaLuX add-ons.
+- Shows one-tap INSTALL and UPDATE actions.
 - Provides **UPDATE ALL** for installed add-ons with newer versions available.
-- Revalidates cached update status against the version currently installed, preventing stale false update alerts after an add-on has already been updated.
+- Revalidates cached update status against the version currently installed, preventing stale false update alerts.
 - Provides **SYSTEM CHECK** for registry access, Greasy Fork update sources and local add-on health.
-- Provides a dedicated **WHAT'S NEW** view for Hub release notes.
-- Provides quick actions, favorites, search, health status and backup/restore.
-- Supports add-on-specific controls such as Elimination Assistant's persistent **ON / OFF** state.
-- Adds a Torn-native **skull HUB** mobile navigation entry immediately before **Messages**.
-- Reuses Torn's own mobile navigation structure so the HUB entry matches surrounding navigation buttons.
-- The floating circular Hub button automatically hides when the native navigation entry is available and remains as a fallback.
-- Exposes `window.SakaLuXScriptHub` so complementary scripts can detect the Hub reliably.
+- Provides **WHAT'S NEW**, quick actions, favorites, search, health status and backup / restore.
+- Adds a Torn-native **skull HUB** mobile navigation entry immediately before Messages.
+- Uses Torn's own mobile navigation structure so the HUB entry matches the surrounding interface.
+- Keeps a floating circular Hub button only as a fallback when the native launcher is unavailable.
+- Exposes `window.SakaLuXScriptHub` so complementary scripts can detect and integrate with the Hub.
+- Supports add-on-specific controls such as Elimination Assistant's persistent ON / OFF mode.
 - Designed for Torn PDA and Tampermonkey.
 
 ## Current release notes
 
 ### v1.8.5
-- Fixed false **UPDATE AVAILABLE** indicators after an add-on has already been updated.
-- A cached update result is reused only when its stored installed version still equals the version currently loaded.
-- **Latest vs Installed** is recalculated before rendering cards, the UPDATES counter and the native HUB alert badge.
+- Fixed false **UPDATE AVAILABLE** indicators after an add-on had already been updated.
+- Cached update data is reused only when its stored installed version still matches the version currently loaded.
+- **Latest vs Installed** is recalculated before rendering cards, counters and the HUB alert badge.
 - Added Market Intelligence to the offline fallback registry and ready-event integration.
+- Live `scripts.json` now includes the current Market Intelligence **v1.16.4** and Elimination Assistant **v1.2.8** entries.
+- Added Elimination Assistant quick-action integration.
+- Elimination Assistant can remain installed while disabled from Hub.
+- When Elimination is **ON**, its full action set is available.
+- When Elimination is **OFF**, only the red OFF control remains visible; the other Elimination actions are hidden until it is turned back ON.
+- The Hub can still detect and re-enable Elimination Assistant while the add-on itself is disabled.
 
 ### v1.8.4
 - Fixed the mobile layout where HUB appeared above Messages and pushed Messages onto a second row.
@@ -56,10 +59,15 @@ Complementary add-ons currently registered in the live `scripts.json` registry:
 
 ### Elimination Assistant integration
 
-Elimination Assistant can remain installed but disabled when the event is not needed. In its Hub card:
+Because Eliminations is only needed periodically, Elimination Assistant has a persistent power control in its Hub card:
 
-- **ON** is green and shows the complete action set.
-- **OFF** is red and hides the other Elimination actions.
-- The OFF state persists across reloads.
+- **ON** is green and shows OPEN, REFRESH, FF SCAN, CALIBRATE, TEST KEY, API KEY and ELIMS.
+- **OFF** is red and hides all other Elimination actions.
+- The OFF state persists across page reloads.
+- The userscript remains installed and its API stays available so Hub can turn it back ON without reinstalling it.
 
-Every new complementary SakaLuX script should be added to `scripts.json` so the Hub can discover it automatically.
+## Standalone tool
+
+SakaLuX Account Auditor **v1.2.1** is maintained separately and intentionally excluded from `scripts.json`, so Hub does not present it as a required/recommended complementary add-on.
+
+Every new complementary SakaLuX script should be added to `scripts.json` and its dedicated `greasyfork/*.md` information file should be updated with the current version and release notes.
