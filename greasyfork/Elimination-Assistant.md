@@ -1,6 +1,6 @@
 # SakaLuX Elimination Assistant
 
-**Current version:** v1.2.2  
+**Current version:** v1.2.3  
 **Greasy Fork:** 594921  
 **Category:** Combat / Eliminations
 
@@ -12,24 +12,35 @@ SakaLuX Elimination Assistant is a Torn PDA / Tampermonkey helper for the Elimin
 
 ### Torn API key
 
-For normal team loading, the script uses Torn API data. For **CALIBRATE ME**, create a **Custom Torn API key** and enable the **`battlestats`** permission.
+For **CALIBRATE ME**, the script needs a **Custom Torn API key** with **`basic` + `battlestats`** enabled.
 
-A Public-only Torn key cannot expose your private battle stats. If the key does not have enough access, Torn can return API error 16 (access level not high enough).
+From v1.2.3, Settings includes **🔑 CREATE REQUIRED TORN KEY**. Pressing it opens Torn's official API-key creation page with the required permissions already preselected and the key name `SakaLuX_Elimination_Assistant`.
 
-If you do not want to grant `battlestats`, you can enter your **total battle stats manually** in Settings and the Smart Target Score can still use that value.
+Torn still shows the permissions for confirmation. After the key is created, copy it and paste it back into the Torn API key field in Elimination Assistant.
+
+If you do not want to grant `battlestats`, you can enter your **total battle stats manually** in Settings and Smart Target Score can still use that value.
 
 ### FFScouter API key
 
 The FFScouter key is **separate and optional**. It is used for Fair Fight and target battle-stat estimates. It is not the Torn API key.
 
+## v1.2.3
+
+- Added **🔑 CREATE REQUIRED TORN KEY** directly in Settings.
+- Opens Torn's official custom-key creator preconfigured with `user=basic,battlestats`.
+- Uses the key title `SakaLuX_Elimination_Assistant`.
+- After creation, the user only needs to copy the generated key back into Settings.
+- Added `API KEY` as a SakaLuX Script Hub quick action.
+- Calibration errors now point directly to the new key-creation button.
+- Keeps the manual battle-stats fallback and the separate optional FFScouter key.
+
 ## v1.2.2
 
-- Settings now clearly states that automatic calibration needs a **Custom Torn API key with `battlestats` enabled**.
+- Settings clearly states that automatic calibration needs a **Custom Torn API key with `battlestats` enabled**.
 - Added an API-key help box directly in the Settings panel.
 - Clearly separates the Torn API key from the optional FFScouter API key.
-- `CALIBRATE ME` now gives a specific error when the Torn key does not have sufficient access.
-- Error message tells the user to either replace the Torn key with a `battlestats` Custom key or enter total battle stats manually.
-- Torn API error codes are now preserved internally so access error 16 can be explained correctly.
+- `CALIBRATE ME` gives a specific error when the Torn key does not have sufficient access.
+- Torn API error codes are preserved internally so access error 16 can be explained correctly.
 - Keeps the shared once-per-24h SakaLuX Hub install reminder.
 
 ## v1.2.0
