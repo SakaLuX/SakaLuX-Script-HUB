@@ -8,13 +8,18 @@ Last updated: 2026-09-07
 - SakaLuX Enhancer Guard: **v1.3.2**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.16.3** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.16.4** — Greasy Fork **592781**
 
 ## Private / standalone tools
 
 - SakaLuX Account Auditor: **v1.2.0** — Greasy Fork / GitHub source sync; intentionally excluded from `scripts.json` so Script Hub does not show it as required/recommended.
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.16.4
+- Hotfix: restored BEST ROUTE BASKET to its normal budget logic after v1.16.3 accidentally referenced the in-country live-cash variable there.
+- In-country **BEST BUYS** now correctly passes the automatically fetched Torn on-hand cash into the basket optimizer.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.3.user.js`.
 
 ### SakaLuX Market Intelligence v1.16.3
 - In-country **BEST BUYS** now reads the player's current Torn on-hand cash automatically through the existing API key.
