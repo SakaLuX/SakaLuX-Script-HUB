@@ -1,6 +1,6 @@
 # SakaLuX Elimination Assistant
 
-**Current version:** v1.2.3  
+**Current version:** v1.2.4  
 **Greasy Fork:** 594921  
 **Category:** Combat / Eliminations
 
@@ -12,26 +12,37 @@ SakaLuX Elimination Assistant is a Torn PDA / Tampermonkey helper for the Elimin
 
 ### Torn API key
 
-For **CALIBRATE ME**, the script needs a **Custom Torn API key** with **`basic` + `battlestats`** enabled.
+The assistant needs a **Custom Torn API key** with all of these permissions:
 
-From v1.2.3, Settings includes **🔑 CREATE REQUIRED TORN KEY**. Pressing it opens Torn's official API-key creation page with the required permissions already preselected and the key name `SakaLuX_Elimination_Assistant`.
+- **User:** `basic`, `battlestats`
+- **Torn:** `elimination`, `eliminationteam`
 
-Torn still shows the permissions for confirmation. After the key is created, copy it and paste it back into the Torn API key field in Elimination Assistant.
+`basic` and `battlestats` are used for your own data and **CALIBRATE ME**. `elimination` and `eliminationteam` are required to load Eliminations teams and targets.
 
-If you do not want to grant `battlestats`, you can enter your **total battle stats manually** in Settings and Smart Target Score can still use that value.
+From v1.2.4, Settings includes **🔑 CREATE REQUIRED TORN KEY**. Pressing it opens Torn's official API-key creation page preconfigured with all four required permissions and the key name `SakaLuX_Elimination_Assistant`.
+
+Torn still shows the permissions for confirmation. Create a **new key**, copy it, then paste it back into the Torn API key field in Elimination Assistant.
+
+If you do not want to grant `battlestats`, you can enter your **total battle stats manually** in Settings, but the key still needs the Torn Eliminations permissions for team/target loading.
 
 ### FFScouter API key
 
 The FFScouter key is **separate and optional**. It is used for Fair Fight and target battle-stat estimates. It is not the Torn API key.
 
+## v1.2.4
+
+- Fixed the one-click Torn key creator after API error 16 / `Access level of this key is not high enough`.
+- The generated Custom key now requests **User: `basic,battlestats`** and **Torn: `elimination,eliminationteam`**.
+- Settings now lists all four required permissions explicitly.
+- The key-creation status message now tells the user to create a **new** key and copy it back into Settings.
+- Access-level errors now point to the corrected key creator.
+- Registry / SakaLuX Hub version updated to v1.2.4.
+
 ## v1.2.3
 
 - Added **🔑 CREATE REQUIRED TORN KEY** directly in Settings.
-- Opens Torn's official custom-key creator preconfigured with `user=basic,battlestats`.
-- Uses the key title `SakaLuX_Elimination_Assistant`.
-- After creation, the user only needs to copy the generated key back into Settings.
 - Added `API KEY` as a SakaLuX Script Hub quick action.
-- Calibration errors now point directly to the new key-creation button.
+- Calibration errors point directly to the key-creation button.
 - Keeps the manual battle-stats fallback and the separate optional FFScouter key.
 
 ## v1.2.2
