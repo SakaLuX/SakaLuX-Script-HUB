@@ -1,0 +1,31 @@
+name: Run Suite v0.5.0 upgrade
+on:
+  push:
+    paths:
+      - '.github/workflows/run-suite-v050.yml'
+permissions:
+  contents: write
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply prepared upgrade
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+          src = Path('.github/workflows/suite-v050-upgrade.yml').read_text(encoding='utf-8')
+          code = src.split('        run: |\n',1)[1].split('      - name: Syntax check',1)[0]
+          exec(textwrap.dedent(code), {})
+          PY
+      - name: Verify JavaScript
+        run: node --check SakaLuX-Suite.user.js
+      - name: Commit upgraded Suite
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "sakalutzu92@yahoo.com"
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git commit -m "Upgrade all SakaLuX Suite internal modules to v0.5.0"
+          git push origin HEAD:main
