@@ -1,0 +1,84 @@
+name: One-time SakaLuX Suite v0.5.0 migration
+
+on:
+  push:
+    paths:
+      - '.github/workflows/suite-v050-migration.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify staged chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/expected <<'EOF'
+          d394f311829bea38c166cfc5196532878ffd56f83f493a00dd5cef3eb2085104  .migration/suite-v050/part00.b64
+          db1957d7b10f5af74c4cef78cc76ee49171a0b1d2d5e47067fd2580737983d93  .migration/suite-v050/part01.b64
+          e612d9a45f6f5ec02268777d4a7a6f10a4eb040b4672913b8c532c6bac71384f  .migration/suite-v050/part02.b64
+          156f2127ea1e55fc811148b58dbdf9e0f894382d2a55c8b6b25dc90b39b8dead  .migration/suite-v050/part03.b64
+          d3236ec01c7fb6f2e394432484665e3162bc47b3f544c9ff5ba8ae9a7f673cd7  .migration/suite-v050/part04.b64
+          44eb18e47d9d1db845dbff2832ef6910b8995d65abb5ab7c29742ddd441a7177  .migration/suite-v050/part05.b64
+          aa9055cf0af84729d3c8273cbb83724b4d47236456b10e7a236a0739952f04a5  .migration/suite-v050/part06.b64
+          ab43111728eda438f1fef76c6d47c0748d6b9bb91a3229a3a7dbc018dc652a1d  .migration/suite-v050/part07.b64
+          81b422c4f66237eb83eb66b327646a5d407edac2ca895bf63c6e58659f8b059f  .migration/suite-v050/part08.b64
+          EOF
+          echo 'Actual chunk hashes:'
+          sha256sum .migration/suite-v050/part*.b64
+          sha256sum -c /tmp/expected
+
+      - name: Reconstruct and validate Suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .migration/suite-v050/part*.b64 | base64 -d > /tmp/SakaLuX-Suite.user.js
+          echo '2042d6fe6acf01d4dfd05795d7ea7ad02d25939f52befc7e14bf68a3ef6a897b  /tmp/SakaLuX-Suite.user.js' | sha256sum -c -
+          node --check /tmp/SakaLuX-Suite.user.js
+          grep -q '^// @version      0.5.0$' /tmp/SakaLuX-Suite.user.js
+          grep -q '^// @grant        GM_xmlhttpRequest$' /tmp/SakaLuX-Suite.user.js
+          grep -q '^// @connect      api.torn.com$' /tmp/SakaLuX-Suite.user.js
+          grep -q '^// @license      All Rights Reserved$' /tmp/SakaLuX-Suite.user.js
+          mv /tmp/SakaLuX-Suite.user.js SakaLuX-Suite.user.js
+
+      - name: Update Suite documentation
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('greasyfork/SakaLuX-Suite.md')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('**v0.4.1**', '**v0.5.0**', 1)
+          heading = '## Current release notes'
+          release = '''\n\n### v0.5.0\n\n- Rebuilt the internal Suite modules from prototype helpers into functional modules with Torn API-aware and DOM-fallback behavior.\n- Added a shared read-only Torn API transport for Torn PDA / Tampermonkey plus API-key diagnostics.\n- **Daily Prayer Bell** now keeps UTC completion state and detects visible prayer completion.\n- **Recovery Planner** now combines Life, hospital state, medical inventory when available, configurable bonuses and recommendation priorities.\n- **Item Signals** now marks OC/crime/energy/nerve/happiness/heal/enhancer item roles.\n- **Event Lens** now supports API/DOM events, categories, search, local saves and refresh.\n- **Chain Alarm** now supports draggable/resizable display, focus dimming, warning/critical thresholds, optional sound/flash and Alt+C.\n- **Faction Pulse**, **Armory Loan Radar**, **Member Travel Map**, **OC Role Match**, **OC Readiness** and **War Performance** received functional implementations.\n- **Company Console**, **Odds Scout** and **Race League Board** received functional implementations.\n- The Suite does not automate attacks, organized-crime actions, item consumption, bets, races or other account actions.\n'''
+          if heading in text and '### v0.5.0' not in text:
+              text = text.replace(heading, heading + release, 1)
+          p.write_text(text, encoding='utf-8')
+
+          p = Path('UPDATE-INFO.md')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('SakaLuX Suite: **v0.4.1**', 'SakaLuX Suite: **v0.5.0**')
+          block = '''### SakaLuX Suite v0.5.0 — functional module pass\n- Rebuilt all internal Suite modules into functional, independently implemented SakaLuX modules.\n- Added shared Torn API support with Torn PDA/Tampermonkey fallbacks and local caching.\n- Expanded Reminders, Faction, Company, Casino and Racing modules with real page behavior, panels, settings and local persistence.\n- Added safety-focused DOM fallbacks and observer filtering to avoid self-triggered Torn PDA loops.\n- No attack, bet, item-use, race or organized-crime action is automated.\n\n'''
+          marker = '## Latest changes\n\n'
+          if '### SakaLuX Suite v0.5.0 — functional module pass' not in text:
+              text = text.replace(marker, marker + block, 1)
+          p.write_text(text, encoding='utf-8')
+
+      - name: Remove staging and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .migration/suite-v050
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add -A SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md UPDATE-INFO.md .migration/suite-v050
+          git commit -m 'Make SakaLuX Suite v0.5.0 modules functional'
+          git push origin HEAD:main
