@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.2.5
+// @version      1.2.6
 // @description  Personalised Torn Eliminations target intelligence with FFScouter estimates, Smart Target Score, battle-stat calibration, attack learning, filters, history and Hub/PDA support.
 // @author       SakaLuX [2380374]
 // @license      MIT
@@ -16,7 +16,7 @@
 (() => {
 'use strict';
 
-const VERSION='1.2.5';
+const VERSION='1.2.6';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_INTERVAL=24*60*60*1000;
@@ -37,7 +37,7 @@ const state={
   history:loadJSON(KEYS.history,[]),learning:loadJSON(KEYS.learning,{}),
   settings:{...DEFAULTS,...loadJSON(KEYS.settings,{})},ffCache:loadJSON(KEYS.ffCache,{}),
   myStats:loadJSON(KEYS.myStats,{total:null,at:0,source:''}),busy:false,lastRefresh:0,
-  ffLoaded:false,ffLoadedCount:0
+  ffLoaded:false,ffLoadedCount:0,keyCreateBusy:false
 };
 
 const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
@@ -98,6 +98,22 @@ function shouldOfferHub(){if(!state.enabled||isHubInstalled())return false;try{c
 function closeHubPrompt(remember=true){if(remember)rememberHubPrompt();document.getElementById(HUB_PROMPT_ID)?.remove()}
 function showHubInstallPrompt(){if(!shouldOfferHub()||document.getElementById(HUB_PROMPT_ID))return;const overlay=document.createElement('div');overlay.id=HUB_PROMPT_ID;overlay.style.cssText='position:fixed;z-index:2147483647;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;font-family:Arial,sans-serif;';overlay.innerHTML=`<div style="width:min(420px,94vw);background:#101318;color:#fff;border:1px solid #303640;border-radius:16px;padding:18px;box-sizing:border-box"><div style="font-size:19px;font-weight:900;margin-bottom:8px">☠️ SakaLuX Script Hub</div><div style="font-size:12px;line-height:1.5;color:#c9d1d9;margin-bottom:14px">SakaLuX Elimination Assistant is part of the SakaLuX suite. Install the main Script Hub for add-on management, quick actions and update checking?</div><div style="display:flex;gap:8px;justify-content:flex-end"><button id="slxe-hub-later">LATER</button><button id="slxe-hub-install">INSTALL HUB</button></div><div style="font-size:10px;color:#8f9aa6;margin-top:10px">If you choose Later, this reminder can appear again after 24 hours. It stops once Script Hub is detected.</div></div>`;document.body.appendChild(overlay);overlay.querySelector('#slxe-hub-later').onclick=()=>closeHubPrompt(true);overlay.querySelector('#slxe-hub-install').onclick=()=>{rememberHubPrompt();location.href=HUB_INSTALL_URL};overlay.onclick=e=>{if(e.target===overlay)closeHubPrompt(true)}}
 
+function syncHubToggleButton(){
+  const buttons=$$('[data-script="elimination-assistant"][data-action="toggle"]');
+  buttons.forEach(b=>{
+    b.textContent=state.enabled?'⏻ ON':'⏻ OFF';
+    b.style.setProperty('background',state.enabled?'#166534':'#991b1b','important');
+    b.style.setProperty('border-color',state.enabled?'#22c55e':'#ef4444','important');
+    b.style.setProperty('color','#fff','important');
+    b.style.setProperty('font-weight','900','important');
+  });
+}
+function watchHubToggle(){
+  syncHubToggleButton();
+  const observer=new MutationObserver(()=>syncHubToggleButton());
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+}
+
 function injectCSS(){if(document.getElementById(IDS.style))return;const s=document.createElement('style');s.id=IDS.style;s.textContent=`#${IDS.button}{position:fixed;right:12px;bottom:82px;z-index:999999;border:1px solid #414a55;background:#171b21;color:#fff;border-radius:999px;padding:10px 13px;font:800 12px Arial;box-shadow:0 5px 18px #0008}#${IDS.panel}{display:none;position:fixed;right:8px;bottom:130px;z-index:999998;width:min(940px,calc(100vw - 16px));height:min(82vh,800px);background:#101419;color:#e9eef4;border:1px solid #343c45;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px #000b;font:12px Arial}#${IDS.panel}.open{display:flex;flex-direction:column}#${IDS.panel} *{box-sizing:border-box}.slxeh{display:flex;gap:7px;align-items:center;padding:9px 11px;background:#171c22;border-bottom:1px solid #2c343d}.slxeh b{flex:1;font-size:14px}.slxeh small{opacity:.55}.slxeh button,.slxet button,.slxef button,.slxe-act{background:#202832;color:#fff;border:1px solid #3b4652;border-radius:7px;padding:6px 8px}.slxet{display:flex;gap:6px;flex-wrap:wrap;padding:8px;background:#12171c;border-bottom:1px solid #28313a}.slxet input,.slxet select{background:#0f1318;color:#fff;border:1px solid #343e49;border-radius:7px;padding:7px;min-width:105px}.slxet input{flex:1;min-width:125px}.slxes{display:flex;gap:10px;align-items:center;padding:7px 9px;color:#aeb9c5;border-bottom:1px solid #28313a}.slxes strong{color:#e7edf4}.slxes .grow{flex:1}.slxeb{overflow:auto;flex:1}.slxeb table{width:100%;border-collapse:collapse}.slxeb th{position:sticky;top:0;background:#181e25;text-align:left;color:#aab4c0;z-index:2}.slxeb td,.slxeb th{padding:6px;border-bottom:1px solid #242c34;vertical-align:middle}.slxe-safe{color:#63d889;font-weight:900}.slxe-risky{color:#f2c15c;font-weight:900}.slxe-skip{color:#ef7474;font-weight:900}.slxe-act{display:inline-block;text-decoration:none;margin:1px;cursor:pointer}.slxe-win{border-color:#397f50}.slxe-loss{border-color:#8a4545}.slxe-muted{opacity:.65}.slxe-signal{font-weight:800;min-width:210px}.slxe-signal small{display:block;font-weight:400;opacity:.58;margin-top:2px}.slxef{display:flex;gap:6px;align-items:center;padding:7px 9px;background:#171c22;border-top:1px solid #2b343d}.slxef span{flex:1}.slxe-modal{display:none;position:absolute;inset:0;z-index:20;background:#0c1015f5;padding:14px;overflow:auto}.slxe-modal.open{display:block}.slxe-modal label{display:block;margin:9px 0 4px;color:#aeb9c5}.slxe-modal input{width:100%;padding:8px;background:#11161c;color:#fff;border:1px solid #35404c;border-radius:7px}.slxe-row{display:flex;gap:8px}.slxe-row>div{flex:1}.slxe-keyhelp{padding:10px;margin:8px 0;border:1px solid #3d4b5b;border-radius:8px;background:#151c24;color:#d8e1eb;line-height:1.45}.slxe-keyhelp b{color:#fff}.slxe-key-create{width:100%;margin:8px 0!important;background:#166534!important;border-color:#238547!important;font-weight:900!important}@media(max-width:680px){#${IDS.panel}{right:4px;bottom:123px;width:calc(100vw - 8px);height:82vh}.slxe-hide-m{display:none}.slxeb td,.slxeb th{font-size:11px;padding:5px 4px}.slxe-signal{min-width:155px;white-space:normal}}`;document.head.appendChild(s)}
 
 function inject(){
@@ -110,8 +126,9 @@ function inject(){
 <div class="slxeb"><table><thead><tr><th>Smart target signal</th><th>Player</th><th>Lvl</th><th>Last</th><th class="slxe-hide-m">Status</th><th>Actions</th></tr></thead><tbody id="slxe-rows"></tbody></table></div>
 <div class="slxef"><span id="slxe-count">0 targets</span><button id="slxe-best">BEST 10</button><button id="slxe-history">HISTORY</button><button id="slxe-clear">CLEAR HISTORY</button></div>
 <div class="slxe-modal" id="slxe-settings-modal"><h3>Elimination Assistant Settings</h3>
-<div class="slxe-keyhelp"><b>Torn Custom API key required:</b> the assistant needs <b>User: basic + battlestats</b> and <b>Torn: elimination + eliminationteam</b>. These permissions cover team loading and <b>CALIBRATE ME</b>. Press the button below, verify all four permissions in Torn, create the key, then copy it back into this field.</div>
+<div class="slxe-keyhelp"><b>Torn Custom API key:</b> required selections are <b>User: basic + battlestats</b> and <b>Torn: elimination + eliminationteam</b>. If Torn still returns API error 16, use <b>TEST TORN KEY</b> below to see exactly which selection is being rejected. A Limited Access key can be used as a fallback if Torn's custom-key builder is misbehaving.</div>
 <button class="slxe-act slxe-key-create" id="slxe-create-key">🔑 CREATE REQUIRED TORN KEY</button>
+<button class="slxe-act" id="slxe-test-key" style="width:100%;margin:4px 0;font-weight:900">🧪 TEST TORN KEY</button>
 <label>Torn API key — basic + battlestats + elimination + eliminationteam</label><input id="slxe-torn-key" type="text" autocomplete="off" placeholder="Paste the newly created Torn API key here">
 <label>FFScouter API key (optional, separate key)</label><input id="slxe-ff-key" type="text" autocomplete="off" placeholder="Only needed for FF / target BS estimates">
 <div class="slxe-row"><div><label>SAFE FF threshold</label><input id="slxe-safeff" type="number" step="0.1" min="1"></div><div><label>RISKY FF threshold</label><input id="slxe-riskyff" type="number" step="0.1" min="1"></div></div>
@@ -121,22 +138,49 @@ function inject(){
 <div style="margin-top:14px"><button class="slxe-act" id="slxe-save">SAVE</button> <button class="slxe-act" id="slxe-cancel">CLOSE</button></div></div>
 <div class="slxe-modal" id="slxe-history-modal"><h3>Attack learning & history</h3><div id="slxe-history-list"></div><div style="margin-top:14px"><button class="slxe-act" id="slxe-history-close">CLOSE</button></div></div>`;
   document.body.append(btn,panel);
-  btn.onclick=()=>panel.classList.toggle('open');$('#slxe-close',panel).onclick=()=>panel.classList.remove('open');$('#slxe-settings',panel).onclick=openSettings;$('#slxe-cancel',panel).onclick=()=>$('#slxe-settings-modal',panel).classList.remove('open');$('#slxe-save',panel).onclick=saveSettings;$('#slxe-create-key',panel).onclick=createRequiredTornKey;$('#slxe-load',panel).onclick=()=>busy(loadSelectedTeam);$('#slxe-ff',panel).onclick=()=>busy(()=>loadFFForPlayers(true));$('#slxe-calibrate',panel).onclick=()=>busy(()=>loadMyStats(true));$('#slxe-q',panel).oninput=apply;$('#slxe-filter',panel).onchange=apply;$('#slxe-sort',panel).onchange=apply;$('#slxe-team',panel).onchange=e=>{state.teamId=Number(e.target.value||0);localStorage.setItem(KEYS.team,String(state.teamId||''))};$('#slxe-history',panel).onclick=openHistory;$('#slxe-history-close',panel).onclick=()=>$('#slxe-history-modal',panel).classList.remove('open');$('#slxe-clear',panel).onclick=()=>{state.history=[];saveJSON(KEYS.history,[]);apply();renderSummary()};$('#slxe-best',panel).onclick=()=>{$('#slxe-filter',panel).value='ok';$('#slxe-sort',panel).value='smart';apply();setStatus('Best SAFE/RISKY targets ranked by Smart Score')};
+  btn.onclick=()=>panel.classList.toggle('open');$('#slxe-close',panel).onclick=()=>panel.classList.remove('open');$('#slxe-settings',panel).onclick=openSettings;$('#slxe-cancel',panel).onclick=()=>$('#slxe-settings-modal',panel).classList.remove('open');$('#slxe-save',panel).onclick=saveSettings;$('#slxe-create-key',panel).onclick=createRequiredTornKey;$('#slxe-test-key',panel).onclick=()=>busy(testTornKey);$('#slxe-load',panel).onclick=()=>busy(loadSelectedTeam);$('#slxe-ff',panel).onclick=()=>busy(()=>loadFFForPlayers(true));$('#slxe-calibrate',panel).onclick=()=>busy(()=>loadMyStats(true));$('#slxe-q',panel).oninput=apply;$('#slxe-filter',panel).onchange=apply;$('#slxe-sort',panel).onchange=apply;$('#slxe-team',panel).onchange=e=>{state.teamId=Number(e.target.value||0);localStorage.setItem(KEYS.team,String(state.teamId||''))};$('#slxe-history',panel).onclick=openHistory;$('#slxe-history-close',panel).onclick=()=>$('#slxe-history-modal',panel).classList.remove('open');$('#slxe-clear',panel).onclick=()=>{state.history=[];saveJSON(KEYS.history,[]);apply();renderSummary()};$('#slxe-best',panel).onclick=()=>{$('#slxe-filter',panel).value='ok';$('#slxe-sort',panel).value='smart';apply();setStatus('Best SAFE/RISKY targets ranked by Smart Score')};
   if(state.tornKey)busy(refresh);
 }
 function removeUI(){document.getElementById(IDS.panel)?.remove();document.getElementById(IDS.button)?.remove();document.getElementById(HUB_PROMPT_ID)?.remove()}
 function setEnabled(value){
   state.enabled=Boolean(value);localStorage.setItem(KEYS.enabled,state.enabled?'1':'0');
   if(state.enabled){inject();setTimeout(showHubInstallPrompt,1200)}else{removeUI()}
+  syncHubToggleButton();
+  setTimeout(syncHubToggleButton,150);
   window.dispatchEvent(new CustomEvent('SakaLuXEliminationAssistantStateChanged',{detail:{enabled:state.enabled,version:VERSION}}));
   return state.enabled;
 }
 function toggleEnabled(){return setEnabled(!state.enabled)}
 function setStatus(t){const e=$('#slxe-status');if(e)e.textContent=t}
 function createRequiredTornKey(){
-  setStatus('Opening Torn API key creator with User: basic + battlestats and Torn: elimination + eliminationteam. Create a NEW key, then copy it back into Settings.');
-  const w=window.open(TORN_KEY_CREATE_URL,'_blank','noopener,noreferrer');
-  if(!w)location.href=TORN_KEY_CREATE_URL;
+  if(state.keyCreateBusy)return false;
+  state.keyCreateBusy=true;
+  setStatus('Opening Torn API key creator once. Required: User basic + battlestats; Torn elimination + eliminationteam.');
+  setTimeout(()=>{state.keyCreateBusy=false},3000);
+  location.assign(TORN_KEY_CREATE_URL);
+  return true;
+}
+async function testTornKey(){
+  const m=$('#slxe-settings-modal');
+  const typed=$('#slxe-torn-key',m)?.value.trim();
+  if(typed){state.tornKey=typed;localStorage.setItem(KEYS.torn,state.tornKey)}
+  if(!state.tornKey)throw new Error('Paste a Torn API key first.');
+  const checks=[
+    ['user/battlestats','User → battlestats'],
+    ['torn/elimination','Torn → elimination']
+  ];
+  const results=[];
+  for(const [path,label] of checks){
+    try{await torn(path);results.push(`${label}: OK`)}
+    catch(e){results.push(`${label}: FAIL${e?.code?` (API ${e.code})`:''} — ${e?.message||'error'}`)}
+  }
+  if(state.teamId){
+    try{await torn(`torn/${state.teamId}/eliminationteam`,{limit:1,offset:0});results.push('Torn → eliminationteam: OK')}
+    catch(e){results.push(`Torn → eliminationteam: FAIL${e?.code?` (API ${e.code})`:''} — ${e?.message||'error'}`)}
+  }else results.push('Torn → eliminationteam: not tested until a team is selected');
+  const failed=results.some(x=>x.includes('FAIL'));
+  setStatus((failed?'KEY TEST FAILED: ':'KEY TEST OK: ')+results.join(' | '));
+  return !failed;
 }
 function openSettings(){const m=$('#slxe-settings-modal');if(!m)return;$('#slxe-torn-key',m).value=state.tornKey;$('#slxe-ff-key',m).value=state.ffKey;$('#slxe-safeff',m).value=state.settings.safeFF;$('#slxe-riskyff',m).value=state.settings.riskyFF;$('#slxe-cachemin',m).value=state.settings.ffCacheMinutes;$('#slxe-manualbs',m).value=state.myStats.source==='manual'?(state.myStats.total||0):0;$('#slxe-hide-unavail',m).checked=!!state.settings.hideUnavailable;m.classList.add('open')}
 function saveSettings(){const m=$('#slxe-settings-modal');state.tornKey=$('#slxe-torn-key',m).value.trim();state.ffKey=$('#slxe-ff-key',m).value.trim();state.settings.safeFF=Number($('#slxe-safeff',m).value||3);state.settings.riskyFF=Number($('#slxe-riskyff',m).value||1.5);state.settings.ffCacheMinutes=Number($('#slxe-cachemin',m).value||30);state.settings.hideUnavailable=$('#slxe-hide-unavail',m).checked;const manual=Number($('#slxe-manualbs',m).value||0);if(manual>0)state.myStats={total:manual,at:Date.now(),source:'manual'};localStorage.setItem(KEYS.torn,state.tornKey);localStorage.setItem(KEYS.ff,state.ffKey);saveJSON(KEYS.settings,state.settings);saveJSON(KEYS.myStats,state.myStats);m.classList.remove('open');busy(refresh)}
@@ -152,11 +196,11 @@ async function loadMyStats(force=false){
   try{raw=await torn('user/battlestats')}
   catch(e){
     if(state.myStats.total)return state.myStats.total;
-    if(Number(e?.code)===16||/access|permission|level/i.test(String(e?.message||'')))throw new Error('API access is insufficient. Open ⚙ Settings → CREATE REQUIRED TORN KEY and create a NEW Custom key with User: basic + battlestats and Torn: elimination + eliminationteam.');
-    throw new Error(`Could not calibrate battle stats. Use CREATE REQUIRED TORN KEY in Settings, or enter total BS manually. (${e?.message||'API error'})`);
+    if(Number(e?.code)===16||/access|permission|level/i.test(String(e?.message||'')))throw new Error('API access is insufficient for User → battlestats. Open ⚙ Settings → TEST TORN KEY. If the custom key still returns API 16, create a Limited Access Torn key as fallback.');
+    throw new Error(`Could not calibrate battle stats. Use TEST TORN KEY in Settings, or enter total BS manually. (${e?.message||'API error'})`);
   }
   const total=extractMyStats(raw);
-  if(!total)throw new Error('Battle stats were not returned. Use CREATE REQUIRED TORN KEY in Settings, or enter your total BS manually.');
+  if(!total)throw new Error('Battle stats were not returned. Use TEST TORN KEY in Settings, or enter your total BS manually.');
   state.myStats={total,at:Date.now(),source:'Torn API'};saveJSON(KEYS.myStats,state.myStats);apply();renderSummary();setStatus(`Calibration ready: your total BS ${fmtBS(total)}`);return total;
 }
 async function loadSelectedTeam(){if(!state.teamId)state.teamId=Number($('#slxe-team')?.value||0);if(!state.teamId)throw new Error('Choose an Eliminations team');const all=[];let offset=0,limit=100;for(let page=0;page<5;page++){const batch=normalizePlayers(await torn(`torn/${state.teamId}/eliminationteam`,{limit,offset}));all.push(...batch);if(batch.length<limit)break;offset+=limit}state.players=[...new Map(all.map(p=>[p.id,p])).values()];state.ffLoaded=false;state.ffLoadedCount=0;applyFFCache();if(!state.myStats.total)try{await loadMyStats(false)}catch{}if(state.ffKey&&state.settings.autoFF)await loadFFForPlayers(false);apply();renderSummary();setStatus(`Loaded ${state.players.length} players`)}
@@ -168,7 +212,7 @@ function renderSummary(){const team=state.teams.find(t=>t.id===state.teamId),ts=
 async function refresh(){if(!state.enabled)return false;await loadTeams();if(!state.myStats.total)try{await loadMyStats(false)}catch{}if(state.teamId)await loadSelectedTeam();state.lastRefresh=Date.now();renderSummary();return true}
 async function busy(fn){if(!state.enabled||state.busy)return false;state.busy=true;try{setStatus('Working…');await fn();return true}catch(e){console.error('[SakaLuX Elimination]',e);setStatus(`Error: ${e.message}`);return false}finally{state.busy=false}}
 function open(){if(!state.enabled)setEnabled(true);inject();$('#'+IDS.panel)?.classList.add('open');return true}function close(){$('#'+IDS.panel)?.classList.remove('open')}function goToEliminations(){location.href='https://www.torn.com/page.php?sid=elimination'}function health(){return{version:VERSION,enabled:state.enabled,ready:state.enabled&&!!$('#'+IDS.panel),teamId:state.teamId,targets:state.players.length,myBattleStats:state.myStats.total||null,ffLoaded:state.ffLoaded,ffLoadedCount:state.ffLoadedCount,lastRefresh:state.lastRefresh}}
-window.SakaLuXEliminationAssistant={version:VERSION,open,close,refresh:()=>busy(refresh),scanFF:()=>busy(()=>loadFFForPlayers(true)),calibrate:()=>busy(()=>loadMyStats(true)),createRequiredTornKey,setEnabled,toggleEnabled,isEnabled:()=>state.enabled,goToEliminations,health};window.dispatchEvent(new CustomEvent('SakaLuXEliminationAssistantReady',{detail:{version:VERSION,enabled:state.enabled}}));
-function start(){if(!state.enabled)return;inject();setTimeout(showHubInstallPrompt,1200)}
+window.SakaLuXEliminationAssistant={version:VERSION,open,close,refresh:()=>busy(refresh),scanFF:()=>busy(()=>loadFFForPlayers(true)),calibrate:()=>busy(()=>loadMyStats(true)),testTornKey:()=>busy(testTornKey),createRequiredTornKey,setEnabled,toggleEnabled,isEnabled:()=>state.enabled,goToEliminations,health};window.dispatchEvent(new CustomEvent('SakaLuXEliminationAssistantReady',{detail:{version:VERSION,enabled:state.enabled}}));
+function start(){watchHubToggle();if(!state.enabled){syncHubToggleButton();return}inject();setTimeout(showHubInstallPrompt,1200);setTimeout(syncHubToggleButton,1500)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
