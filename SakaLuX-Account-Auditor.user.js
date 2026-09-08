@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.2.0
+// @version      1.2.1
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -19,9 +19,13 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.2.0';
+    const VERSION = '1.2.1';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
+    const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+    const HUB_PROMPT_STORAGE = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
+    const HUB_PROMPT_INTERVAL = 24 * 60 * 60 * 1000;
+    const HUB_PROMPT_ID = 'sakalux-hub-install-prompt';
     const STORAGE = {
         apiKey:'SakaLuX_AUDITOR_TORN_API_KEY',
         githubToken:'SakaLuX_AUDITOR_GITHUB_TOKEN',
@@ -65,7 +69,7 @@
     function rawSet(key,value){ const text=String(value??''); try{if(typeof GM_setValue==='function')GM_setValue(key,text);}catch(_){} try{localStorage.removeItem(key);}catch(_){} }
     function loadJson(key,fallback){ try{const raw=rawGet(key); return raw?JSON.parse(raw):fallback;}catch(_){return fallback;} }
     function saveJson(key,value){ try{rawSet(key,JSON.stringify(value));}catch(_){} }
-    function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+    function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;');}
     function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
     function getTornApiKey(){return PDA_KEY && PDA_KEY!=='###PDA-APIKEY###' ? PDA_KEY : rawGet(STORAGE.apiKey);}
 
@@ -180,6 +184,22 @@
     function lastSyncText(){const s=loadJson(STORAGE.lastSync,null);if(!s?.at)return'Never';try{return new Date(s.at).toLocaleString();}catch(_){return'Unknown';}}
     function updatePanelStatus(){const el=document.getElementById('sl-aa-last-sync');if(el)el.textContent=lastSyncText();const c=document.getElementById('sl-aa-captures');if(c)c.textContent=String(loadJson(STORAGE.captures,[]).length);setStatus(lastStatus);}
 
+    function isHubInstalled(){return Boolean(window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button'));}
+    function rememberHubPrompt(){try{localStorage.setItem(HUB_PROMPT_STORAGE,String(Date.now()));}catch(_){}}
+    function shouldOfferHub(){
+        if(isHubInstalled())return false;
+        try{const last=Number(localStorage.getItem(HUB_PROMPT_STORAGE)||0);return !last||Date.now()-last>=HUB_PROMPT_INTERVAL;}catch(_){return true;}
+    }
+    function closeHubPrompt(remember=true){if(remember)rememberHubPrompt();document.getElementById(HUB_PROMPT_ID)?.remove();}
+    function showHubInstallPrompt(){
+        if(!shouldOfferHub()||document.getElementById(HUB_PROMPT_ID))return;
+        const overlay=document.createElement('div');overlay.id=HUB_PROMPT_ID;overlay.style.cssText='position:fixed;z-index:2147483647;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;font-family:Arial,sans-serif;';
+        overlay.innerHTML='<div style="width:min(420px,94vw);background:#101318;color:#fff;border:1px solid #303640;border-radius:16px;padding:18px;box-sizing:border-box;box-shadow:0 15px 50px rgba(0,0,0,.65);"><div style="font-size:19px;font-weight:900;margin-bottom:8px;">☠️ SakaLuX Script Hub</div><div style="font-size:12px;line-height:1.5;color:#c9d1d9;margin-bottom:14px;">This script is part of the SakaLuX suite. Install the main Script Hub for add-on management, quick access and update checking?</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><button id="sl-aa-hub-later" style="border:0;border-radius:9px;padding:10px;font-weight:900;color:#fff;background:#374151;">LATER</button><button id="sl-aa-hub-install" style="border:0;border-radius:9px;padding:10px;font-weight:900;color:#fff;background:#16a34a;">INSTALL HUB</button></div></div>';
+        document.body.appendChild(overlay);
+        overlay.querySelector('#sl-aa-hub-later').onclick=()=>closeHubPrompt(true);
+        overlay.querySelector('#sl-aa-hub-install').onclick=()=>{rememberHubPrompt();location.href=HUB_INSTALL_URL;};
+    }
+
     function openSettings(){
         document.getElementById('sl-aa-overlay')?.remove();const overlay=document.createElement('div');overlay.id='sl-aa-overlay';overlay.innerHTML='<div id="sl-aa-panel">'+
         '<div class="sl-aa-head"><div><b>☠︎ SakaLuX Account Auditor</b><small>v'+VERSION+' · PRIVATE / READ-ONLY</small></div><button id="sl-aa-close">×</button></div>'+
@@ -200,6 +220,6 @@
 
     window.SakaLuXAccountAuditor={id:'account-auditor',name:'Account Auditor',version:VERSION,open(){openSettings();return true;},async sync(){return syncNow();},async snapshot(){return collectSnapshot();},captureCurrentMessage(){return captureCurrentMessage();},capturedMessages(){return loadJson(STORAGE.captures,[]);},status(){return{version:VERSION,busy,lastStatus,lastSync:loadJson(STORAGE.lastSync,null),capturedMessages:loadJson(STORAGE.captures,[]).length,settings:{repo:settings.repo,branch:settings.branch,path:settings.path,autoSync:settings.autoSync,autoSyncMinutes:settings.autoSyncMinutes,includePrivateData:settings.includePrivateData,maxPrivatePages:settings.maxPrivatePages,splitSnapshots:settings.splitSnapshots,includeCapturedMessages:settings.includeCapturedMessages},hasTornKey:Boolean(getTornApiKey()),hasGitHubToken:Boolean(rawGet(STORAGE.githubToken))};}};
     window.dispatchEvent(new CustomEvent('SakaLuX:AccountAuditorReady',{detail:{version:VERSION}}));
-    function init(){injectCss();createButton();scheduleAutoSync();console.log('['+NAME+' v'+VERSION+'] Loaded.');}
+    function init(){injectCss();createButton();scheduleAutoSync();setTimeout(showHubInstallPrompt,3500);console.log('['+NAME+' v'+VERSION+'] Loaded.');}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
