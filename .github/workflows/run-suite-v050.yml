@@ -18,6 +18,7 @@ jobs:
           src = Path('.github/workflows/suite-v050-upgrade.yml').read_text(encoding='utf-8')
           code = src.split('        run: |\n',1)[1].split('      - name: Syntax check',1)[0]
           code = '\n'.join(line[10:] if line.startswith('          ') else line for line in code.splitlines())
+          code = code.replace(",block,s,flags=re.S)",",lambda _m:block,s,flags=re.S)")
           exec(code, {})
           PY
       - name: Verify JavaScript
