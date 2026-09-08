@@ -1,6 +1,6 @@
 # SakaLuX Script HUB — Update Information
 
-Last updated: 2026-09-07
+Last updated: 2026-09-08
 
 ## Current versions
 
@@ -9,12 +9,27 @@ Last updated: 2026-09-07
 - SakaLuX Bazaar Thanker - PDA: **v5.3.1**
 - SakaLuX Mission Rewards: **v1.0.1**
 - SakaLuX Market Intelligence: **v1.16.4** — Greasy Fork **592781**
+- SakaLuX Elimination Assistant: **v1.2.8** — Greasy Fork **594921**
 
 ## Private / standalone tools
 
-- SakaLuX Account Auditor: **v1.2.0** — Greasy Fork / GitHub source sync; intentionally excluded from `scripts.json` so Script Hub does not show it as required/recommended.
+- SakaLuX Account Auditor: **v1.2.1** — Greasy Fork / GitHub source sync; intentionally excluded from `scripts.json` so Script Hub does not show it as required/recommended.
 
 ## Latest changes
+
+### SakaLuX Elimination Assistant v1.2.8
+- Added clear **What it does**, Hub integration and API-key information to its Greasy Fork info page.
+- Torn API **32** on `eliminationteam` is treated as a temporarily unavailable event endpoint instead of a bad API key.
+- `TEST TORN KEY` reports `battlestats`, `elimination` and `eliminationteam` separately.
+- Persistent Hub power control now uses **ON = green** and **OFF = red**.
+- When OFF, every other Elimination action is hidden and only the OFF button remains.
+- Turning it ON restores OPEN, REFRESH, FF SCAN, CALIBRATE, TEST KEY, API KEY and ELIMS.
+- API-key creation uses a single navigation in Torn PDA to avoid duplicate creation attempts.
+
+### SakaLuX Account Auditor v1.2.1
+- Added the standard SakaLuX Script Hub installation prompt.
+- Uses the shared `SakaLuX_HUB_INSTALL_PROMPT_LAST` cooldown used by the other suite add-ons.
+- The reminder is suppressed for 24 hours after LATER and is skipped when the Hub is already detected.
 
 ### SakaLuX Market Intelligence v1.16.4
 - Hotfix: restored BEST ROUTE BASKET to its normal budget logic after v1.16.3 accidentally referenced the in-country live-cash variable there.
@@ -58,8 +73,8 @@ Last updated: 2026-09-07
 - Inventory is now collected category-by-category using Torn's official v2 inventory categories.
 - Added more official read-only self endpoints including battlestats, bounties, calendar, casino, competition, cooldowns, Discord, education, enlisted cars, equipment, faction, forum activity, gym, honors and icons.
 - Added `key/info` capability reporting so the snapshot can show what the current Torn API key can actually access without exposing the API key itself.
-- `user/log` is now treated as an explicit unavailable capability when Torn returns access error 16; Torn officially requires a **Full access** key for account logs.
-- Message collection keeps sender, topic, timestamps and read/seen state. The snapshot records that the official Torn API does **not** expose message body/content.
+- `user/log` is treated as an explicit unavailable capability when Torn returns access error 16.
+- Message collection keeps sender, topic, timestamps and read/seen state.
 - Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.0.user.js`.
 - Auditor remains read-only and intentionally excluded from `scripts.json` / Script Hub install prompts.
 
@@ -69,7 +84,7 @@ Last updated: 2026-09-07
 - Added private-data collection for **messages, new messages, events, new events and account logs**.
 - Private endpoints follow Torn pagination links with a configurable maximum-page cap.
 - Upgraded snapshot format to `sakalux-torn-account-snapshot-v2` with `data.v1`, `data.v2` and `data.private` sections.
-- GitHub token storage now prefers userscript storage (`GM_getValue` / `GM_setValue`) rather than Torn-origin localStorage.
+- GitHub token storage prefers userscript storage (`GM_getValue` / `GM_setValue`) rather than Torn-origin localStorage.
 - Remains strictly read-only: no message sending, trades, purchases, attacks, account-setting changes or session automation.
 - Password, Torn session, cookies, Torn API key and GitHub token are never written to the snapshot.
 - Added exact backup: `backups/SakaLuX-Account-Auditor-v1.0.0.user.js`.
@@ -85,16 +100,16 @@ Last updated: 2026-09-07
 - Bazaar Flip now keeps the same outer DOM panel and updates only its contents.
 - The open/collapsed state is preserved during Bazaar refreshes.
 - Removed the extra pre-paint delete from `scanBazaar()`.
-- MutationObserver now ignores changes made inside the Bazaar Flip board, preventing self-triggered refresh loops.
+- MutationObserver ignores changes made inside the Bazaar Flip board, preventing self-triggered refresh loops.
 - The board is removed only when there are genuinely no profitable deals or the page context changes.
 - Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.1.user.js`.
 
 ### SakaLuX Market Intelligence v1.16.1
 - Fixed the visible flicker where **BEST ROUTE BASKET** and **TRAVEL SESSION SUMMARY** repeatedly disappeared and reappeared during scans.
-- Both panels now keep the same outer DOM node and update their content in place.
+- Both panels keep the same outer DOM node and update their content in place.
 - Cached and live Best Route results replace only the panel contents instead of removing the whole panel between phases.
 - Forced refreshes no longer delete the two persistent Travel panels before recalculation.
-- MutationObserver now ignores changes inside Travel Session Summary so the script does not trigger scans from its own session UI updates.
+- MutationObserver ignores changes inside Travel Session Summary so the script does not trigger scans from its own session UI updates.
 - The open/collapsed state of both panels is preserved across data refreshes.
-- Panels are still removed when the page context genuinely changes (for example leaving the home Travel screen or disabling the feature).
+- Panels are still removed when the page context genuinely changes.
 - Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.0.user.js`.
