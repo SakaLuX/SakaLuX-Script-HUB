@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.8.1**
+**v0.9.0**
 
 ## What it does
 
@@ -223,3 +223,16 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Added one-time reminder bootstrap for older installs that inherited those modules as OFF.
 - Hardened reminder dock placement and SPA self-healing.
 - Prayer completion is now only detected on the Church page.
+
+
+### v0.9.0 — deep parity pass
+- Item Signals now uses richer DOM/item-ID discovery, semantic effect inference, touch/click tooltips, and duplicate-safe markers.
+- Recovery Planner now respects medical cooldown, owned quantity, estimated restore, waste, and efficiency ranking.
+- Member Travel Map now covers all Torn travel destinations with aliases, filter cards, sorting, profile/faction flags, and mobile-friendly controls.
+- OC Role Match now exposes Low/Normal/High/Critical suitability tiers and configurable threshold status.
+- OC Readiness now scans visible Recruiting/Planning sections, caches role-item requirements, and correlates armory loans to those requirements.
+- War Performance now adds reliability, participation, L5 history, risk levels and risk filters.
+- Company Console adds employee effectiveness ranking, stock-change history and richer local management records.
+- Odds Scout adds sport detection, favourite/risk context and improved market analysis.
+- Race League Board adds championship rename and CSV export.
+- Daily Prayer completion was made idempotent to prevent recursive rerender loops.
