@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.7.0**
+**v0.8.0**
 
 ## What it does
 
@@ -100,6 +100,20 @@ The following remain bridge modules during testing and keep their existing SakaL
 Their production standalone scripts are not removed or modified by Suite v0.4.0.
 
 ## Current release notes
+
+### v0.8.0 — final documented-parity hardening
+- Added `@updateURL` and `@downloadURL` for direct raw-GitHub update support in compatible userscript managers.
+- Added Suite Diagnostics and route-aware scan throttling for Torn PDA/mobile performance.
+- Prayer completion detection hardened so the reminder hides only after success text is detected.
+- Recovery Planner now reads visible medical cooldown and can use the saved faction-armory snapshot as an item source.
+- Item Signals avoids nested ancestor duplication and keeps item-ID + name-based detection.
+- Armory Loan Radar now fully cleans its styling when rescanned/disabled.
+- OC Role Match visibly applies the configured suitability threshold.
+- War Performance now keeps a local visible ranked-war W/L history in addition to reports/AAR/risk view.
+- Company Console adds a visible employee/wage report alongside stock, pricing, training and tax history.
+- Odds Scout nested-market duplicate protection and Race League duplicate signatures were hardened.
+- Export/import now includes all internal module settings while still excluding the Torn API key.
+
 
 ### v0.4.1
 
