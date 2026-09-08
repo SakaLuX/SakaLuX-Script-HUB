@@ -1,0 +1,211 @@
+name: One-time SakaLuX license migration
+
+on:
+  push:
+    paths:
+      - '.github/workflows/license-migration.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply All Rights Reserved license and patch versions
+        shell: python
+        run: |
+          from pathlib import Path
+          import json, re
+
+          scripts = {
+              'SakaLuX-Script-Hub.user.js': ('1.8.5', '1.8.6'),
+              'SakaLuX-Enhancer-Guard.user.js': ('1.3.2', '1.3.3'),
+              'SakaLuX-Bazaar-Thanker-PDA.user.js': ('5.3.1', '5.3.2'),
+              'SakaLuX-Mission-Rewards.user.js': ('1.0.1', '1.0.2'),
+              'SakaLuX-Market-Intelligence.user.js': ('1.16.4', '1.16.5'),
+              'SakaLuX-Elimination-Assistant.user.js': ('1.2.8', '1.2.9'),
+              'SakaLuX-Suite.user.js': ('0.4.0', '0.4.1'),
+          }
+
+          license_block = '''/*
+           * Copyright © 2026 SakaLuX [2380374]
+           * All Rights Reserved.
+           *
+           * Personal use and private modification are permitted.
+           * Redistribution, republication, rebranding, or publication of
+           * modified versions requires prior written permission from
+           * SakaLuX [2380374].
+           *
+           * Original author attribution must be retained in all authorized
+           * derivative works.
+           */'''
+
+          for filename, (old, new) in scripts.items():
+              p = Path(filename)
+              text = p.read_text(encoding='utf-8')
+              original = text
+
+              text = re.sub(r'(?m)^// @version\s+\S+\s*$', f'// @version      {new}', text, count=1)
+              text = re.sub(r'(?m)^// @author\s+.*$', '// @author       SakaLuX [2380374]', text, count=1)
+              if not re.search(r'(?m)^// @copyright\s+', text):
+                  text = re.sub(r'(?m)^(// @author\s+.*)$', r'\1\n// @copyright    2026 SakaLuX [2380374]', text, count=1)
+              text = re.sub(r'(?m)^// @license\s+.*$', '// @license      All Rights Reserved', text, count=1)
+
+              marker = '// ==/UserScript=='
+              if license_block not in text:
+                  text = text.replace(marker, marker + '\n\n' + license_block, 1)
+
+              # Keep every visible/current version indicator aligned with metadata.
+              text = text.replace(old, new)
+
+              if filename == 'SakaLuX-Script-Hub.user.js':
+                  # Keep the Hub offline/fallback registry aligned with active public add-ons.
+                  for a, b in [('1.3.2','1.3.3'),('5.3.1','5.3.2'),('1.0.1','1.0.2'),('1.16.4','1.16.5'),('1.2.8','1.2.9')]:
+                      text = text.replace(a, b)
+
+              if text == original:
+                  raise SystemExit(f'No changes applied to {filename}')
+              p.write_text(text, encoding='utf-8')
+
+          # Central registry versions.
+          registry_path = Path('scripts.json')
+          registry = json.loads(registry_path.read_text(encoding='utf-8'))
+          version_map = {
+              'enhancer': '1.3.3',
+              'bazaar': '5.3.2',
+              'mission-rewards': '1.0.2',
+              'market-intelligence': '1.16.5',
+              'elimination-assistant': '1.2.9',
+          }
+          for entry in registry.get('scripts', []):
+              if entry.get('id') in version_map:
+                  entry['version'] = version_map[entry['id']]
+          registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          # Root repository license, exactly as approved.
+          Path('LICENSE').write_text('''Copyright © 2026 SakaLuX [2380374]
+          All Rights Reserved.
+
+          This software is provided for personal use only.
+
+          Permission is granted to:
+          - Install and use this software for personal use.
+          - Inspect the source code for security and educational purposes.
+          - Modify the software for private, personal use only.
+
+          Without prior written permission from SakaLuX [2380374], you may not:
+          - Redistribute this software.
+          - Publish modified versions of this software.
+          - Rebrand or republish this software under another name.
+          - Remove or alter the original author attribution.
+          - Sell, sublicense, or commercially redistribute this software.
+          - Incorporate substantial portions of this source code into another
+            distributed project.
+
+          Any public redistribution, derivative publication, or reuse of
+          substantial portions of the source code requires prior written
+          permission from SakaLuX [2380374].
+
+          The original author attribution must be retained in all authorized
+          derivative or redistributed versions.
+
+          THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+          EXPRESS OR IMPLIED. THE AUTHOR SHALL NOT BE LIABLE FOR ANY CLAIM,
+          DAMAGES OR OTHER LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.
+          '''.replace('          ', ''), encoding='utf-8')
+
+          docs = {
+              'greasyfork/Script-Hub.md': ('1.8.5','1.8.6','Changed project licensing from MIT to **All Rights Reserved** and added explicit SakaLuX copyright/redistribution terms.'),
+              'greasyfork/Enhancer-Guard.md': ('1.3.2','1.3.3','Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.'),
+              'greasyfork/Bazaar-Thanker.md': ('5.3.1','5.3.2','Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.'),
+              'greasyfork/Mission-Rewards.md': ('1.0.1','1.0.2','Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.'),
+              'greasyfork/Market-Intelligence.md': ('1.16.4','1.16.5','Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.'),
+              'greasyfork/Elimination-Assistant.md': ('1.2.8','1.2.9','Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.'),
+              'greasyfork/SakaLuX-Suite.md': ('0.4.0','0.4.1','Changed SakaLuX Suite licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.'),
+          }
+
+          for filename, (old, new, note) in docs.items():
+              p = Path(filename)
+              text = p.read_text(encoding='utf-8')
+              # Update only the first/current-version occurrence; historical headings remain historical.
+              text = text.replace(f'v{old}', f'v{new}', 1)
+              heading = '## Current release notes'
+              release = f'\n\n### v{new}\n\n- {note}\n- Added `Copyright © 2026 SakaLuX [2380374]` and retained-author requirements.\n- Personal use and private modification remain permitted; redistribution/republication require prior written permission.\n'
+              if heading in text and f'### v{new}' not in text:
+                  text = text.replace(heading, heading + release, 1)
+              elif f'### v{new}' not in text:
+                  text += '\n\n## Current release notes' + release
+              if '## License' not in text:
+                  text += '\n\n## License\n\n**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.\n'
+              p.write_text(text, encoding='utf-8')
+
+          # Update the central release summary without rewriting historical release headings.
+          info = Path('UPDATE-INFO.md')
+          text = info.read_text(encoding='utf-8')
+          text = re.sub(r'Last updated:\s*\d{4}-\d{2}-\d{2}', 'Last updated: 2026-09-08', text, count=1)
+          top_end = text.find('## Private / standalone tools')
+          if top_end < 0:
+              top_end = text.find('## Latest changes')
+          head, tail = text[:top_end], text[top_end:]
+          for old, new in [('1.8.5','1.8.6'),('1.3.2','1.3.3'),('5.3.1','5.3.2'),('1.0.1','1.0.2'),('1.16.4','1.16.5'),('1.2.8','1.2.9')]:
+              head = head.replace(f'v{old}', f'v{new}')
+          if 'SakaLuX Suite:' not in head:
+              head += '- SakaLuX Suite: **v0.4.1** — experimental / GitHub test build\n\n'
+          else:
+              head = head.replace('v0.4.0', 'v0.4.1')
+          text = head + tail
+          latest = '## Latest changes'
+          block = '''## Latest changes
+
+          ### Licensing protection update — 2026-09-08
+          - Public SakaLuX userscripts now use **All Rights Reserved** instead of MIT.
+          - Added `Copyright © 2026 SakaLuX [2380374]` to userscript metadata and source headers.
+          - Personal use and private modification remain permitted.
+          - Redistribution, republication, rebranding, commercial redistribution, and publication of modified versions require prior written permission.
+          - Patch releases: Hub v1.8.6, Enhancer Guard v1.3.3, Bazaar Thanker v5.3.2, Mission Rewards v1.0.2, Market Intelligence v1.16.5, Elimination Assistant v1.2.9, SakaLuX Suite v0.4.1.
+          - Account Auditor and historical backup snapshots were intentionally left untouched by this public-script migration.
+          '''.replace('          ', '')
+          if '### Licensing protection update — 2026-09-08' not in text:
+              text = text.replace(latest, block, 1)
+          info.write_text(text, encoding='utf-8')
+
+          # Safety checks: every active public userscript must have the intended metadata/header.
+          for filename, (_, new) in scripts.items():
+              text = Path(filename).read_text(encoding='utf-8')
+              required = [
+                  f'// @version      {new}',
+                  '// @author       SakaLuX [2380374]',
+                  '// @copyright    2026 SakaLuX [2380374]',
+                  '// @license      All Rights Reserved',
+                  'Copyright © 2026 SakaLuX [2380374]',
+                  'All Rights Reserved.'
+              ]
+              missing = [x for x in required if x not in text]
+              if missing:
+                  raise SystemExit(f'{filename}: missing {missing}')
+
+          # Ensure active public scripts no longer declare MIT.
+          for filename in scripts:
+              if re.search(r'(?m)^// @license\s+MIT\s*$', Path(filename).read_text(encoding='utf-8')):
+                  raise SystemExit(f'{filename}: MIT metadata still present')
+
+          print('License migration checks passed.')
+
+      - name: Commit migration
+        shell: bash
+        run: |
+          set -e
+          git config user.name "SakaLuX"
+          git config user.email "sakalutzu92@yahoo.com"
+          git add LICENSE scripts.json UPDATE-INFO.md greasyfork/*.md SakaLuX-*.user.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Protect public SakaLuX scripts with All Rights Reserved licensing"
+          git push origin HEAD:main
