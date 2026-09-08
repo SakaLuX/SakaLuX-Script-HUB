@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.1.0
-// @description  Experimental one-install modular master control for the SakaLuX Torn script suite. Prototype only; existing standalone scripts remain untouched.
+// @version      0.1.1
+// @description  Experimental modular master control for the SakaLuX Torn suite. Existing standalone scripts remain untouched.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        none
@@ -11,402 +11,45 @@
 // ==/UserScript==
 
 (() => {
-  'use strict';
-
-  const VERSION = '0.1.0';
-  const BUILD = 'CONTROL-LAYER PROTOTYPE';
-  const IDS = {
-    button: 'slx-suite-button',
-    overlay: 'slx-suite-overlay',
-    panel: 'slx-suite-panel',
-    style: 'slx-suite-style'
-  };
-  const STORAGE = {
-    modules: 'SakaLuX_SUITE_MODULES_V1',
-    settings: 'SakaLuX_SUITE_SETTINGS_V1',
-    apiKey: 'SakaLuX_SUITE_TORN_API_KEY',
-    migration: 'SakaLuX_SUITE_MIGRATION_V1'
-  };
-
-  const DEFAULT_SETTINGS = {
-    buttonPosition: 'bottom-right',
-    compactCards: false,
-    showExperimentalNotice: true
-  };
-
-  const MODULE_DEFS = [
-    {
-      id: 'enhancer',
-      name: 'Enhancer Guard',
-      icon: '🛡️',
-      category: 'Inventory',
-      description: 'Enhancer inventory tracker and missing-item intelligence.',
-      legacyGlobal: 'SakaLuXEnhancerGuard',
-      legacyButton: '#sl-eg-button',
-      openMethod: 'open',
-      defaultEnabled: true,
-      stage: 'BRIDGE'
-    },
-    {
-      id: 'bazaar',
-      name: 'Bazaar Thanker',
-      icon: '💬',
-      category: 'Trading',
-      description: 'Buyer grouping, thank-you messages, statistics and history.',
-      legacyGlobal: 'SakaLuXBazaarThanker',
-      legacyButton: '#sakalux-bt-settings-button',
-      openMethod: 'open',
-      defaultEnabled: true,
-      stage: 'BRIDGE'
-    },
-    {
-      id: 'mission-rewards',
-      name: 'Mission Rewards',
-      icon: '🎯',
-      category: 'Missions',
-      description: 'Mission Shop values, ammo ownership and mod intelligence.',
-      legacyGlobal: 'SakaLuXMissionRewards',
-      legacyButton: '#sl-mri-button',
-      openMethod: 'open',
-      defaultEnabled: true,
-      stage: 'BRIDGE'
-    },
-    {
-      id: 'market-intelligence',
-      name: 'Market Intelligence',
-      icon: '📈',
-      category: 'Trading',
-      description: 'Travel, Bazaar, Item Market, Museum and basket optimization.',
-      legacyGlobal: 'SakaLuXMarketIntelligence',
-      legacyButton: '#sl-mi-button',
-      openMethod: 'open',
-      defaultEnabled: true,
-      stage: 'BRIDGE'
-    },
-    {
-      id: 'elimination-assistant',
-      name: 'Elimination Assistant',
-      icon: '⚔️',
-      category: 'Combat',
-      description: 'Eliminations target scoring, FF/BS estimates and learning.',
-      legacyGlobal: 'SakaLuXEliminationAssistant',
-      legacyButton: '#slx-elim-btn',
-      openMethod: 'open',
-      defaultEnabled: false,
-      stage: 'BRIDGE'
-    }
-  ];
-
-  const loadJson = (key, fallback) => {
-    try {
-      const value = localStorage.getItem(key);
-      return value ? JSON.parse(value) : fallback;
-    } catch {
-      return fallback;
-    }
-  };
-
-  const saveJson = (key, value) => {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
-  };
-
-  const escapeHtml = value => String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-
-  let settings = { ...DEFAULT_SETTINGS, ...loadJson(STORAGE.settings, {}) };
-  let moduleState = loadJson(STORAGE.modules, {});
-  let sharedApiKey = localStorage.getItem(STORAGE.apiKey) || '';
-
-  for (const def of MODULE_DEFS) {
-    if (typeof moduleState[def.id] !== 'boolean') moduleState[def.id] = Boolean(def.defaultEnabled);
-  }
-  saveJson(STORAGE.modules, moduleState);
-
-  function getLegacyApi(def) {
-    try { return window[def.legacyGlobal] || null; } catch { return null; }
-  }
-
-  function getLegacyVersion(def) {
-    const api = getLegacyApi(def);
-    try {
-      if (api?.version) return String(api.version);
-      const health = api?.health?.();
-      return health?.version ? String(health.version) : null;
-    } catch {
-      return null;
-    }
-  }
-
-  function isLegacyReady(def) {
-    if (getLegacyApi(def)) return true;
-    try { return Boolean(document.querySelector(def.legacyButton)); } catch { return false; }
-  }
-
-  function moduleStatus(def) {
-    const enabled = Boolean(moduleState[def.id]);
-    const ready = isLegacyReady(def);
-    if (!enabled) return { key: 'off', label: 'OFF' };
-    if (ready) return { key: 'ready', label: 'READY' };
-    return { key: 'planned', label: 'WAITING' };
-  }
-
-  function injectCss() {
-    if (document.getElementById(IDS.style)) return;
-    const style = document.createElement('style');
-    style.id = IDS.style;
-    style.textContent = `
-#${IDS.button}{position:fixed;z-index:2147483645;width:52px;height:52px;border-radius:50%;border:1px solid #b78b34;background:#171717;color:#f3c75f;font-size:23px;font-weight:900;box-shadow:0 5px 20px #0009;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+'use strict';
+const VERSION='0.1.1';
+const IDS={fallback:'slx-suite-button',native:'slx-suite-native-button',overlay:'slx-suite-overlay',style:'slx-suite-style'};
+const K={modules:'SakaLuX_SUITE_MODULES_V1',api:'SakaLuX_SUITE_TORN_API_KEY'};
+const MODULES=[
+{id:'enhancer',name:'Enhancer Guard',icon:'🛡️',cat:'Inventory',desc:'Enhancer inventory tracker and missing-item intelligence.',global:'SakaLuXEnhancerGuard',button:'#sl-eg-button',enabled:true},
+{id:'bazaar',name:'Bazaar Thanker',icon:'💬',cat:'Trading',desc:'Buyer grouping, thank-you messages, statistics and history.',global:'SakaLuXBazaarThanker',button:'#sakalux-bt-settings-button',enabled:true},
+{id:'market',name:'Market Intelligence',icon:'📈',cat:'Trading',desc:'Travel, Bazaar, Item Market, Museum and basket optimization.',global:'SakaLuXMarketIntelligence',button:'#sl-mi-button',enabled:true},
+{id:'missions',name:'Mission Rewards',icon:'🎯',cat:'Missions',desc:'Mission Shop values, ammo ownership and mod intelligence.',global:'SakaLuXMissionRewards',button:'#sl-mri-button',enabled:true},
+{id:'elimination',name:'Elimination Assistant',icon:'⚔️',cat:'Combat',desc:'Eliminations target scoring, FF/BS estimates and learning.',global:'SakaLuXEliminationAssistant',button:'#slx-elim-btn',enabled:false}
+];
+const load=(k,f)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??f}catch{return f}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+let state=load(K.modules,{}),apiKey=localStorage.getItem(K.api)||'';
+for(const m of MODULES)if(typeof state[m.id]!=='boolean')state[m.id]=m.enabled;save(K.modules,state);
+function api(m){try{return window[m.global]||null}catch{return null}}
+function ready(m){return!!(api(m)||document.querySelector(m.button))}
+function version(m){try{return String(api(m)?.version||api(m)?.health?.()?.version||'')}catch{return''}}
+function css(){if(document.getElementById(IDS.style))return;const s=document.createElement('style');s.id=IDS.style;s.textContent=`
+#${IDS.fallback}{position:fixed;right:12px;bottom:88px;z-index:2147483645;width:52px;height:52px;border-radius:50%;border:1px solid #b78b34;background:#171717;color:#e2b34b;font-size:24px;font-weight:900;box-shadow:0 5px 20px #0009}
+#${IDS.native}{cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}#${IDS.native} .slxs-skull{display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;color:#e2b34b!important;min-width:28px;min-height:28px}
 #${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:#000b;display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
-#${IDS.panel}{width:min(720px,100%);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;background:#111318;color:#f3f4f6;border:1px solid #7c6233;border-radius:20px 20px 0 0;box-shadow:0 -12px 45px #000c}
-.slxs-head{padding:16px 18px;border-bottom:1px solid #30333a;flex-shrink:0}.slxs-headrow{display:flex;gap:10px;align-items:flex-start}.slxs-titlebox{flex:1}.slxs-kicker{font-size:10px;letter-spacing:3px;color:#e8bf67;font-weight:900}.slxs-title{font-size:21px;font-weight:900;margin-top:5px}.slxs-sub{font-size:11px;color:#9ca3af;margin-top:5px;line-height:1.45}.slxs-close{width:38px;height:38px;border:1px solid #3b414c;border-radius:10px;background:#252933;color:#fff;font-size:21px}
-.slxs-tools{padding:12px 16px;border-bottom:1px solid #2d3139;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.slxs-tool{border:1px solid #3a414d;background:#20242d;color:#fff;border-radius:10px;padding:10px;font-size:11px;font-weight:900}.slxs-tool.danger{border-color:#7d3447;color:#ff9bb3}
-.slxs-api{margin:12px 16px;padding:14px;border:1px solid #5f5131;border-radius:14px;background:#17191f}.slxs-api-title{font-size:10px;letter-spacing:2px;color:#e8bf67;font-weight:900}.slxs-api-note{font-size:10px;color:#8e949f;margin-top:5px;line-height:1.4}.slxs-api-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}.slxs-api input{min-width:0;background:#101218;color:#fff;border:1px solid #353b46;border-radius:9px;padding:10px}.slxs-api button{border:0;border-radius:9px;background:#d5a63e;color:#17120a;font-weight:900;padding:0 16px}
-.slxs-body{overflow-y:auto;padding:0 16px 16px;-webkit-overflow-scrolling:touch}.slxs-cat{margin-top:12px;border:1px solid #2d3139;border-radius:14px;overflow:hidden;background:#15181e}.slxs-cat-title{padding:11px 14px;border-bottom:1px solid #2d3139;color:#e8bf67;font-size:10px;letter-spacing:2px;font-weight:900}.slxs-module{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px 14px;border-bottom:1px solid #282c33}.slxs-module:last-child{border-bottom:0}.slxs-name{font-size:14px;font-weight:900}.slxs-meta{font-size:10px;color:#9298a3;line-height:1.45;margin-top:5px}.slxs-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.slxs-badge{font-size:8px;font-weight:900;border:1px solid #3e4653;border-radius:999px;padding:3px 7px}.slxs-badge.ready{border-color:#2d7654;color:#8ee5b4}.slxs-badge.off{border-color:#7d3447;color:#ff9bb3}.slxs-badge.planned{border-color:#75622e;color:#e8bf67}.slxs-actions{display:flex;flex-direction:column;gap:7px;align-items:flex-end}.slxs-toggle{min-width:78px;border-radius:999px;padding:8px 12px;border:1px solid #7d3447;background:#411c28;color:#ffb3c4;font-size:10px;font-weight:900}.slxs-toggle.on{border-color:#2d7654;background:#183b2c;color:#9bf0bd}.slxs-open{border:1px solid #3a414d;background:#242a34;color:#fff;border-radius:8px;padding:7px 10px;font-size:9px;font-weight:900}.slxs-open:disabled{opacity:.35}
-.slxs-foot{padding:11px 16px;border-top:1px solid #2d3139;background:#0e1014;color:#7f8590;font-size:9px;display:flex;justify-content:space-between;gap:10px;flex-shrink:0}.slxs-notice{margin:12px 16px 0;padding:11px;border:1px solid #6b5627;background:#282111;color:#e8c777;border-radius:10px;font-size:10px;line-height:1.45}
-@media(min-width:700px){#${IDS.overlay}{align-items:center}#${IDS.panel}{border-radius:20px;max-height:88vh}.slxs-tools{grid-template-columns:repeat(4,minmax(0,1fr))}}
-    `;
-    document.head.appendChild(style);
-  }
-
-  function positionButton() {
-    const button = document.getElementById(IDS.button);
-    if (!button) return;
-    ['top', 'bottom', 'left', 'right'].forEach(k => button.style.removeProperty(k));
-    if (settings.buttonPosition === 'top-right') {
-      button.style.top = '82px'; button.style.right = '12px';
-    } else if (settings.buttonPosition === 'top-left') {
-      button.style.top = '82px'; button.style.left = '12px';
-    } else if (settings.buttonPosition === 'bottom-left') {
-      button.style.bottom = '88px'; button.style.left = '12px';
-    } else {
-      button.style.bottom = '88px'; button.style.right = '12px';
-    }
-  }
-
-  function createButton() {
-    let button = document.getElementById(IDS.button);
-    if (!button) {
-      button = document.createElement('button');
-      button.id = IDS.button;
-      button.type = 'button';
-      button.title = 'SakaLuX Suite';
-      button.textContent = '☠';
-      button.onclick = openSuite;
-      document.body.appendChild(button);
-    }
-    positionButton();
-  }
-
-  function closeSuite() {
-    document.getElementById(IDS.overlay)?.remove();
-  }
-
-  function moduleCard(def) {
-    const enabled = Boolean(moduleState[def.id]);
-    const status = moduleStatus(def);
-    const version = getLegacyVersion(def);
-    const ready = isLegacyReady(def);
-    return `
-      <div class="slxs-module" data-module="${escapeHtml(def.id)}">
-        <div>
-          <div class="slxs-name">${def.icon} ${escapeHtml(def.name)}</div>
-          <div class="slxs-meta">${escapeHtml(def.description)}</div>
-          <div class="slxs-badges">
-            <span class="slxs-badge ${status.key}">${escapeHtml(status.label)}</span>
-            <span class="slxs-badge planned">${escapeHtml(def.stage)}</span>
-            ${version ? `<span class="slxs-badge ready">LEGACY v${escapeHtml(version)}</span>` : ''}
-          </div>
-        </div>
-        <div class="slxs-actions">
-          <button class="slxs-toggle ${enabled ? 'on' : ''}" data-toggle="${escapeHtml(def.id)}">${enabled ? 'ON' : 'OFF'}</button>
-          <button class="slxs-open" data-open="${escapeHtml(def.id)}" ${ready && enabled ? '' : 'disabled'}>OPEN</button>
-        </div>
-      </div>`;
-  }
-
-  function openSuite() {
-    closeSuite();
-    const overlay = document.createElement('div');
-    overlay.id = IDS.overlay;
-    const categories = [...new Set(MODULE_DEFS.map(m => m.category))];
-    overlay.innerHTML = `
-      <div id="${IDS.panel}">
-        <div class="slxs-head">
-          <div class="slxs-headrow">
-            <div class="slxs-titlebox">
-              <div class="slxs-kicker">MASTER CONTROL • EXPERIMENTAL</div>
-              <div class="slxs-title">☠ SakaLuX Suite</div>
-              <div class="slxs-sub">One installation target. Enable only the modules you use. Existing standalone scripts are untouched in this prototype.</div>
-            </div>
-            <button class="slxs-close" id="slxs-close">×</button>
-          </div>
-        </div>
-        ${settings.showExperimentalNotice ? `<div class="slxs-notice"><b>TEST BUILD v${VERSION}</b> — module switches currently control Suite state and bridge access to your existing scripts. The real module code will be moved inside Suite progressively after UI/performance testing.</div>` : ''}
-        <div class="slxs-tools">
-          <button class="slxs-tool" id="slxs-enable-ready">ENABLE READY</button>
-          <button class="slxs-tool" id="slxs-disable-all">DISABLE ALL</button>
-          <button class="slxs-tool" id="slxs-export">EXPORT SETTINGS</button>
-          <button class="slxs-tool" id="slxs-import">IMPORT SETTINGS</button>
-        </div>
-        <div class="slxs-api">
-          <div class="slxs-api-title">SHARED TORN API KEY</div>
-          <div class="slxs-api-note">Stored only in this browser. It is not included in exported Suite settings. Future embedded modules will read this single shared key.</div>
-          <div class="slxs-api-row"><input id="slxs-api-key" type="password" autocomplete="off" placeholder="Enter your Torn API key" value="${escapeHtml(sharedApiKey)}"><button id="slxs-save-key">SAVE KEY</button></div>
-        </div>
-        <div class="slxs-body">
-          ${categories.map(cat => `<div class="slxs-cat"><div class="slxs-cat-title">${escapeHtml(cat.toUpperCase())}</div>${MODULE_DEFS.filter(m => m.category === cat).map(moduleCard).join('')}</div>`).join('')}
-        </div>
-        <div class="slxs-foot"><span>Active build: v${VERSION}</span><span>${BUILD}</span></div>
-      </div>`;
-    document.body.appendChild(overlay);
-    overlay.onclick = e => { if (e.target === overlay) closeSuite(); };
-    document.getElementById('slxs-close').onclick = closeSuite;
-    document.getElementById('slxs-save-key').onclick = saveSharedKey;
-    document.getElementById('slxs-enable-ready').onclick = enableReady;
-    document.getElementById('slxs-disable-all').onclick = disableAll;
-    document.getElementById('slxs-export').onclick = exportSettings;
-    document.getElementById('slxs-import').onclick = importSettings;
-    overlay.querySelectorAll('[data-toggle]').forEach(btn => btn.onclick = () => toggleModule(btn.dataset.toggle));
-    overlay.querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openLegacy(btn.dataset.open));
-  }
-
-  function toggleModule(id) {
-    if (!(id in moduleState)) return;
-    moduleState[id] = !moduleState[id];
-    saveJson(STORAGE.modules, moduleState);
-    openSuite();
-  }
-
-  function enableReady() {
-    for (const def of MODULE_DEFS) if (isLegacyReady(def)) moduleState[def.id] = true;
-    saveJson(STORAGE.modules, moduleState);
-    openSuite();
-  }
-
-  function disableAll() {
-    for (const def of MODULE_DEFS) moduleState[def.id] = false;
-    saveJson(STORAGE.modules, moduleState);
-    openSuite();
-  }
-
-  function saveSharedKey() {
-    const input = document.getElementById('slxs-api-key');
-    sharedApiKey = String(input?.value || '').trim();
-    try { localStorage.setItem(STORAGE.apiKey, sharedApiKey); } catch {}
-    const button = document.getElementById('slxs-save-key');
-    if (button) {
-      const old = button.textContent;
-      button.textContent = 'SAVED ✓';
-      setTimeout(() => { if (button.isConnected) button.textContent = old; }, 1200);
-    }
-  }
-
-  function openLegacy(id) {
-    const def = MODULE_DEFS.find(m => m.id === id);
-    if (!def || !moduleState[id]) return false;
-    const api = getLegacyApi(def);
-    try {
-      if (api && typeof api[def.openMethod] === 'function') {
-        closeSuite();
-        api[def.openMethod]();
-        return true;
-      }
-    } catch (error) {
-      console.error('[SakaLuX Suite] legacy API open failed', def.id, error);
-    }
-    const button = document.querySelector(def.legacyButton);
-    if (button) {
-      closeSuite();
-      button.click();
-      return true;
-    }
-    return false;
-  }
-
-  async function exportSettings() {
-    const payload = JSON.stringify({
-      app: 'SakaLuX Suite',
-      version: VERSION,
-      createdAt: Date.now(),
-      settings,
-      modules: moduleState
-    });
-    try {
-      await navigator.clipboard.writeText(payload);
-      alert('SakaLuX Suite settings copied to clipboard. API key was NOT included.');
-    } catch {
-      prompt('Copy Suite settings:', payload);
-    }
-  }
-
-  function importSettings() {
-    const raw = prompt('Paste SakaLuX Suite settings:');
-    if (!raw) return;
-    try {
-      const data = JSON.parse(raw);
-      if (data.app !== 'SakaLuX Suite') throw new Error('Wrong backup type');
-      settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
-      const importedModules = data.modules && typeof data.modules === 'object' ? data.modules : {};
-      for (const def of MODULE_DEFS) {
-        if (typeof importedModules[def.id] === 'boolean') moduleState[def.id] = importedModules[def.id];
-      }
-      saveJson(STORAGE.settings, settings);
-      saveJson(STORAGE.modules, moduleState);
-      positionButton();
-      openSuite();
-    } catch {
-      alert('Invalid SakaLuX Suite backup.');
-    }
-  }
-
-  function migrateLegacyHints() {
-    if (localStorage.getItem(STORAGE.migration)) return;
-    const detected = MODULE_DEFS.filter(isLegacyReady).map(m => m.id);
-    saveJson(STORAGE.migration, { at: Date.now(), detected });
-  }
-
-  function health() {
-    return {
-      version: VERSION,
-      build: BUILD,
-      modules: MODULE_DEFS.map(def => ({
-        id: def.id,
-        enabled: Boolean(moduleState[def.id]),
-        legacyReady: isLegacyReady(def),
-        legacyVersion: getLegacyVersion(def)
-      })),
-      sharedApiKeyStored: Boolean(sharedApiKey)
-    };
-  }
-
-  window.SakaLuXSuite = {
-    version: VERSION,
-    build: BUILD,
-    open: openSuite,
-    close: closeSuite,
-    health,
-    setModuleEnabled(id, enabled) {
-      if (!(id in moduleState)) return false;
-      moduleState[id] = Boolean(enabled);
-      saveJson(STORAGE.modules, moduleState);
-      return true;
-    },
-    isModuleEnabled(id) { return Boolean(moduleState[id]); },
-    getSharedApiKey() { return sharedApiKey; }
-  };
-
-  function init() {
-    injectCss();
-    createButton();
-    migrateLegacyHints();
-    window.dispatchEvent(new CustomEvent('SakaLuXSuiteReady', { detail: { version: VERSION, build: BUILD } }));
-    console.log(`[SakaLuX Suite v${VERSION}] ${BUILD} loaded.`);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
-  else init();
+.slxs-panel{width:min(720px,100%);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;background:#111318;color:#f3f4f6;border:1px solid #7c6233;border-radius:20px 20px 0 0;box-shadow:0 -12px 45px #000c}
+.slxs-head{padding:16px 18px;border-bottom:1px solid #30333a;flex:none}.slxs-row{display:flex;gap:10px;align-items:flex-start}.slxs-grow{flex:1}.slxs-kicker{font-size:10px;letter-spacing:3px;color:#e8bf67;font-weight:900}.slxs-title{font-size:21px;font-weight:900;margin-top:5px}.slxs-sub{font-size:11px;color:#9ca3af;margin-top:5px;line-height:1.45}.slxs-close{width:38px;height:38px;border:1px solid #3b414c;border-radius:10px;background:#252933;color:#fff;font-size:21px}
+.slxs-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;flex:1;min-height:0}.slxs-tools{padding:12px 16px;border-bottom:1px solid #2d3139;display:grid;grid-template-columns:1fr 1fr;gap:8px}.slxs-tool{border:1px solid #3a414d;background:#20242d;color:#fff;border-radius:10px;padding:10px;font-size:11px;font-weight:900}
+.slxs-api{margin:12px 16px;padding:14px;border:1px solid #5f5131;border-radius:14px;background:#17191f}.slxs-api h4,.slxs-cat h4{margin:0;color:#e8bf67;font-size:10px;letter-spacing:2px}.slxs-note{font-size:10px;color:#8e949f;margin-top:5px;line-height:1.4}.slxs-apirow{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}.slxs-api input{min-width:0;background:#101218;color:#fff;border:1px solid #353b46;border-radius:9px;padding:10px}.slxs-api button{border:0;border-radius:9px;background:#d5a63e;color:#17120a;font-weight:900;padding:0 16px}
+.slxs-body{padding:0 16px 16px}.slxs-cat{margin-top:12px;border:1px solid #2d3139;border-radius:14px;overflow:hidden;background:#15181e}.slxs-cat h4{padding:11px 14px;border-bottom:1px solid #2d3139}.slxs-mod{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px 14px;border-bottom:1px solid #282c33}.slxs-mod:last-child{border-bottom:0}.slxs-name{font-size:14px;font-weight:900}.slxs-meta{font-size:10px;color:#9298a3;line-height:1.45;margin-top:5px}.slxs-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.slxs-badge{font-size:8px;font-weight:900;border:1px solid #3e4653;border-radius:999px;padding:3px 7px}.ready{border-color:#2d7654!important;color:#8ee5b4}.off{border-color:#7d3447!important;color:#ff9bb3}.bridge{border-color:#75622e!important;color:#e8bf67}.slxs-actions{display:flex;flex-direction:column;gap:7px;align-items:flex-end}.slxs-toggle{min-width:78px;border-radius:999px;padding:8px 12px;border:1px solid #7d3447;background:#411c28;color:#ffb3c4;font-size:10px;font-weight:900}.slxs-toggle.on{border-color:#2d7654;background:#183b2c;color:#9bf0bd}.slxs-open{border:1px solid #3a414d;background:#242a34;color:#fff;border-radius:8px;padding:7px 10px;font-size:9px;font-weight:900}.slxs-open:disabled{opacity:.35}.slxs-foot{padding:11px 16px;border-top:1px solid #2d3139;background:#0e1014;color:#7f8590;font-size:9px;display:flex;justify-content:space-between;flex:none}
+@media(min-width:700px){#${IDS.overlay}{align-items:center}.slxs-panel{border-radius:20px;max-height:88vh}.slxs-tools{grid-template-columns:repeat(4,1fr)}}`;document.head.appendChild(s)}
+function close(){document.getElementById(IDS.overlay)?.remove()}
+function card(m){const on=!!state[m.id],r=ready(m),v=version(m);return`<div class="slxs-mod"><div><div class="slxs-name">${m.icon} ${esc(m.name)}</div><div class="slxs-meta">${esc(m.desc)}</div><div class="slxs-badges"><span class="slxs-badge ${on?(r?'ready':'bridge'):'off'}">${on?(r?'READY':'WAITING'):'OFF'}</span><span class="slxs-badge bridge">BRIDGE</span>${v?`<span class="slxs-badge ready">LEGACY v${esc(v)}</span>`:''}</div></div><div class="slxs-actions"><button class="slxs-toggle ${on?'on':''}" data-toggle="${m.id}">${on?'ON':'OFF'}</button><button class="slxs-open" data-open="${m.id}" ${on&&r?'':'disabled'}>OPEN</button></div></div>`}
+function open(){close();const o=document.createElement('div');o.id=IDS.overlay;const cats=[...new Set(MODULES.map(m=>m.cat))];o.innerHTML=`<div class="slxs-panel"><div class="slxs-head"><div class="slxs-row"><div class="slxs-grow"><div class="slxs-kicker">MASTER CONTROL • EXPERIMENTAL</div><div class="slxs-title">☠ SakaLuX Suite</div><div class="slxs-sub">One installation target. Enable only the modules you use. Existing standalone scripts remain untouched.</div></div><button class="slxs-close" id="slxs-close">×</button></div></div><div class="slxs-scroll"><div class="slxs-tools"><button class="slxs-tool" id="slxs-enable">ENABLE READY</button><button class="slxs-tool" id="slxs-disable">DISABLE ALL</button><button class="slxs-tool" id="slxs-export">EXPORT SETTINGS</button><button class="slxs-tool" id="slxs-import">IMPORT SETTINGS</button></div><div class="slxs-api"><h4>SHARED TORN API KEY</h4><div class="slxs-note">Stored only in this browser and excluded from exported Suite settings.</div><div class="slxs-apirow"><input id="slxs-key" type="password" autocomplete="off" placeholder="Enter your Torn API key" value="${esc(apiKey)}"><button id="slxs-save">SAVE KEY</button></div></div><div class="slxs-body">${cats.map(c=>`<div class="slxs-cat"><h4>${esc(c.toUpperCase())}</h4>${MODULES.filter(m=>m.cat===c).map(card).join('')}</div>`).join('')}</div></div><div class="slxs-foot"><span>Active build: v${VERSION}</span><span>CONTROL-LAYER PROTOTYPE</span></div></div>`;document.body.appendChild(o);o.onclick=e=>{if(e.target===o)close()};document.getElementById('slxs-close').onclick=close;document.getElementById('slxs-save').onclick=()=>{apiKey=document.getElementById('slxs-key').value.trim();localStorage.setItem(K.api,apiKey);document.getElementById('slxs-save').textContent='SAVED ✓'};document.getElementById('slxs-enable').onclick=()=>{for(const m of MODULES)if(ready(m))state[m.id]=true;save(K.modules,state);open()};document.getElementById('slxs-disable').onclick=()=>{for(const m of MODULES)state[m.id]=false;save(K.modules,state);open()};document.getElementById('slxs-export').onclick=()=>prompt('Copy Suite settings:',JSON.stringify({app:'SakaLuX Suite',version:VERSION,modules:state}));document.getElementById('slxs-import').onclick=()=>{const raw=prompt('Paste Suite settings:');if(!raw)return;try{const d=JSON.parse(raw);if(d.app!=='SakaLuX Suite')throw 0;for(const m of MODULES)if(typeof d.modules?.[m.id]==='boolean')state[m.id]=d.modules[m.id];save(K.modules,state);open()}catch{alert('Invalid Suite backup.')}};o.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{state[b.dataset.toggle]=!state[b.dataset.toggle];save(K.modules,state);open()});o.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openModule(b.dataset.open))}
+function openModule(id){const m=MODULES.find(x=>x.id===id);if(!m||!state[id])return;try{const a=api(m);if(typeof a?.open==='function'){close();a.open();return}}catch{}const b=document.querySelector(m.button);if(b){close();b.click()}}
+function fallback(){let b=document.getElementById(IDS.fallback);if(!b){b=document.createElement('button');b.id=IDS.fallback;b.textContent='☠';b.title='SakaLuX Suite';b.onclick=open;document.body.appendChild(b)}syncLaunchers()}
+function moneyTarget(){const all=[...document.querySelectorAll('a,button,[role="button"]')];return all.find(el=>{if(el.id===IDS.native||el.closest('#'+IDS.overlay))return false;const t=`${el.getAttribute('aria-label')||''} ${el.getAttribute('title')||''} ${el.textContent||''}`.toLowerCase();const h=String(el.getAttribute('href')||'').toLowerCase();return /\b(money|cash|wallet|bank)\b/.test(t)||/(money|wallet|bank)/.test(h)})||null}
+function nativeLauncher(){if(document.getElementById(IDS.native)){syncLaunchers();return true}const target=moneyTarget();if(!target?.parentElement)return false;const n=target.cloneNode(false);n.id=IDS.native;n.removeAttribute('href');n.removeAttribute('target');n.setAttribute('role','button');n.setAttribute('aria-label','Open SakaLuX Suite');n.setAttribute('title','SakaLuX Suite');n.innerHTML='<span class="slxs-skull">☠</span>';n.onclick=e=>{e.preventDefault();e.stopPropagation();open()};target.parentElement.insertBefore(n,target);syncLaunchers();return true}
+function syncLaunchers(){const b=document.getElementById(IDS.fallback);if(b)b.style.display=document.getElementById(IDS.native)?'none':'block'}
+function health(){return{version:VERSION,nativeLauncher:!!document.getElementById(IDS.native),sharedApiKeyStored:!!apiKey,modules:MODULES.map(m=>({id:m.id,enabled:!!state[m.id],legacyReady:ready(m),legacyVersion:version(m)}))}}
+window.SakaLuXSuite={version:VERSION,open,close,health,isModuleEnabled:id=>!!state[id],getSharedApiKey:()=>apiKey};
+function init(){css();fallback();nativeLauncher();setInterval(()=>{if(!document.getElementById(IDS.native))nativeLauncher();syncLaunchers()},1500);window.addEventListener('hashchange',()=>setTimeout(nativeLauncher,300));window.dispatchEvent(new CustomEvent('SakaLuXSuiteReady',{detail:{version:VERSION}}));console.log('[SakaLuX Suite v'+VERSION+'] loaded')}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
