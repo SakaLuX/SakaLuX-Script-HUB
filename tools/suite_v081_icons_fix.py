@@ -5,8 +5,6 @@ s=p.read_text(encoding='utf-8')
 s=s.replace('// @version      0.8.0','// @version      0.8.1',1)
 s=s.replace("const VERSION='0.8.0';","const VERSION='0.8.1';",1)
 
-# One-time migration: make the two reminder icons visible for existing installs
-# where all internal modules were inherited as OFF from older experimental builds.
 needle="for(const m of MODULES)if(typeof state[m.id]!=='boolean')state[m.id]=m.enabled;\nsave(K.modules,state);"
 replacement="""for(const m of MODULES)if(typeof state[m.id]!=='boolean')state[m.id]=m.enabled;
 const REMINDER_BOOTSTRAP='SakaLuX_SUITE_REMINDER_BOOTSTRAP_V1';
@@ -20,7 +18,6 @@ if needle not in s:
     raise SystemExit('state bootstrap anchor not found')
 s=s.replace(needle,replacement,1)
 
-# Make the dock attachment deterministic on Torn PDA/mobile.
 start=s.index('function ensureDock(){')
 end=s.index('function iconButton', start)
 new_ensure=r'''function ensureDock(){
@@ -43,21 +40,18 @@ new_ensure=r'''function ensureDock(){
 '''
 s=s[:start]+new_ensure+s[end:]
 
-# Only mark prayer complete from actual church-page confirmation text.
-old="function observePrayerSuccess(){const t=(document.body.innerText||'').toLowerCase();if(state['daily-prayer']&&/you (?:have )?prayed|prayer (?:was )?successful|already prayed today/.test(t))markPrayed()}"
-new="function observePrayerSuccess(){if(!/church\\.php/i.test(location.href))return;const t=(document.body.innerText||'').toLowerCase();if(state['daily-prayer']&&/you (?:have )?prayed|prayer (?:was )?successful|already prayed today/.test(t))markPrayed()}"
+old="function observePrayerSuccess(){if(!state['daily-prayer'])return;const t=(document.body.innerText||'').toLowerCase();if(/you (?:have )?prayed|prayer (?:was )?successful|already prayed today|you pray|you prayed/.test(t))markPrayed()}"
+new="function observePrayerSuccess(){if(!state['daily-prayer']||!/church\\.php/i.test(location.href))return;const t=(document.body.innerText||'').toLowerCase();if(/you (?:have )?prayed|prayer (?:was )?successful|already prayed today|you pray|you prayed/.test(t))markPrayed()}"
 if old not in s:
     raise SystemExit('prayer observer anchor not found')
 s=s.replace(old,new,1)
 
-# Add a lightweight self-heal if the reminder dock was removed by Torn SPA rerenders.
 old_interval="setInterval(()=>{if(!document.getElementById(IDS.native))nativeLauncher();syncLaunchers();syncReminderIcons();if(state['chain-alarm'])chainAlarm()},1800);"
 new_interval="setInterval(()=>{if(!document.getElementById(IDS.native))nativeLauncher();syncLaunchers();if(!document.getElementById(IDS.dock))ensureDock();syncReminderIcons();if(state['chain-alarm'])chainAlarm()},1800);"
 if old_interval not in s:
     raise SystemExit('interval anchor not found')
 s=s.replace(old_interval,new_interval,1)
 
-# Docs version bump.
 doc=Path('greasyfork/SakaLuX-Suite.md')
 if doc.exists():
     d=doc.read_text(encoding='utf-8')
