@@ -1,0 +1,23 @@
+name: Apply SakaLuX Suite v0.9.0 deep parity
+on:
+  push:
+    paths:
+      - '.github/workflows/suite-v090-parity.yml'
+permissions:
+  contents: write
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v0.9.0 patch
+        run: python tools/suite_v090_parity.py
+      - name: Verify JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Commit v0.9.0
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "sakalutzu92@yahoo.com"
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git commit -m "Deepen SakaLuX Suite parity to v0.9.0"
+          git push origin HEAD:main
