@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.5.0**
+**v0.6.0**
 
 ## What it does
 
@@ -173,3 +173,20 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Odds Scout calculates implied probabilities and market margin.
 - Race League Board persists F1-style points across detected results with duplicate protection.
 - Added Torn API permission plumbing for the shared-key architecture; modules remain read-only/advisory.
+
+
+### v0.6.0 — parity expansion
+- Daily Prayer Bell now marks completion only after detected prayer success; clicking the icon only opens Church.
+- Recovery Planner now shows ranked recommendations, visible owned quantities when detectable, waste estimates and No Drug Usage behavior.
+- Item Signals gained per-category settings and tighter item-row scanning.
+- Event Lens gained Saved-only mode and local export.
+- Chain Alarm gained persistent drag/resize, warning/critical thresholds, focus dimming, flashing and Alt+C toggle.
+- Faction Pulse now provides member-level attention signals.
+- Armory Loan Radar gained explicit scan controls, saved snapshots and per-loan popup buttons.
+- Member Travel Map gained country summaries plus editable overrides.
+- OC Role Match now adds estimated success/risk and configurable suitability threshold; OC Readiness captures visible requirements.
+- War Performance now stores de-duplicated reports, command-style rankings and risk flags.
+- Company Console now stores snapshots and local training/tax logs in addition to wage/income/train signals and price calculator.
+- Odds Scout scans complete visible markets, displays margin and provides a research shortcut without placing bets.
+- Race League Board now supports separate championships, driver stats, backup/import and duplicate protection.
+- All internal modules now expose a SETTINGS action in Master Control.
