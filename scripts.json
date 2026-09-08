@@ -89,8 +89,8 @@
       "name": "Elimination Assistant",
       "icon": "⚔️",
       "category": "Combat",
-      "version": "1.2.2",
-      "description": "Personalised Eliminations advisor with FF/BS estimates, battle-stat calibration, Smart Target Score, learned WIN/LOSS history, target filters, daily Hub prompt, and clear API-key requirements.",
+      "version": "1.2.3",
+      "description": "Personalised Eliminations advisor with FF/BS estimates, battle-stat calibration, Smart Target Score, learned WIN/LOSS history, target filters, daily Hub prompt and one-click required Torn API key creation.",
       "greasyForkId": "594921",
       "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "downloadUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js",
@@ -101,6 +101,7 @@
         {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
         {"id":"ffscan","label":"FF SCAN","icon":"📊","method":"scanFF"},
         {"id":"calibrate","label":"CALIBRATE","icon":"🎯","method":"calibrate"},
+        {"id":"create-key","label":"API KEY","icon":"🔑","method":"createRequiredTornKey"},
         {"id":"event","label":"ELIMS","icon":"🏆","method":"goToEliminations","fallbackUrl":"https://www.torn.com/page.php?sid=elimination"}
       ]
     }
