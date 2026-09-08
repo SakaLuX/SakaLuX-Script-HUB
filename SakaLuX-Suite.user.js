@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.8.0
+// @version      0.8.1
 // @description  Experimental all-in-one modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,7 +30,7 @@
 (() => {
 'use strict';
 
-const VERSION='0.8.0';
+const VERSION='0.8.1';
 const IDS={fallback:'slx-suite-button',native:'slx-suite-native-button',overlay:'slx-suite-overlay',style:'slx-suite-style',dock:'slx-reminder-dock'};
 const K={
  modules:'SakaLuX_SUITE_MODULES_V2',api:'SakaLuX_SUITE_TORN_API_KEY',
@@ -87,6 +87,12 @@ const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 let state=load(K.modules,{}),apiKey=localStorage.getItem(K.api)||'',recoveryCfg={...RECOVERY_DEFAULTS,...load(K.recovery,{})};
 for(const m of MODULES)if(typeof state[m.id]!=='boolean')state[m.id]=m.enabled;
+const REMINDER_BOOTSTRAP='SakaLuX_SUITE_REMINDER_BOOTSTRAP_V1';
+if(!localStorage.getItem(REMINDER_BOOTSTRAP)){
+ state['daily-prayer']=true;
+ state['recovery-planner']=true;
+ localStorage.setItem(REMINDER_BOOTSTRAP,'1');
+}
 save(K.modules,state);
 
 function legacyApi(m){try{return m.kind==='bridge'?(window[m.global]||null):null}catch{return null}}
@@ -144,7 +150,23 @@ function nativeLauncher(){if(document.getElementById(IDS.native)){syncLaunchers(
 function syncLaunchers(){const b=document.getElementById(IDS.fallback);if(b)b.style.display=document.getElementById(IDS.native)?'none':'block'}
 
 function settingsTarget(){const all=[...document.querySelectorAll('a,button,[role="button"]')];return all.find(el=>{if(el.closest('#'+IDS.overlay)||el.closest('.slxs-modal'))return false;const t=`${el.getAttribute('aria-label')||''} ${el.getAttribute('title')||''} ${el.textContent||''}`.toLowerCase();return /\b(settings?|preferences?)\b/.test(t)||t.trim()==='⚙'||t.trim()==='⚙️'})||null}
-function ensureDock(){let d=document.getElementById(IDS.dock);if(!d){d=document.createElement('div');d.id=IDS.dock}const target=settingsTarget();if(target?.parentElement&&!d.isConnected){d.className='';target.parentElement.insertBefore(d,target)}if(!d.isConnected){d.className='slx-rem-fallback';document.body.appendChild(d)}return d}
+function ensureDock(){
+ let d=document.getElementById(IDS.dock);
+ if(!d){d=document.createElement('div');d.id=IDS.dock}
+ const target=settingsTarget();
+ if(target?.parentElement){
+  if(!d.isConnected){try{target.parentElement.insertBefore(d,target)}catch{}}
+  if(d.isConnected){d.className='';d.style.display='flex';return d}
+ }
+ if(!d.isConnected){document.body.appendChild(d)}
+ d.className='slx-rem-fallback';
+ d.style.display='flex';
+ d.style.position='fixed';
+ d.style.right='10px';
+ d.style.top='150px';
+ d.style.zIndex='2147483644';
+ return d
+}
 function iconButton(id,text,title,fn){const b=document.createElement('button');b.type='button';b.id=id;b.className='slx-rem-btn';b.textContent=text;b.title=title;b.onclick=fn;return b}
 function syncReminderIcons(){
  const d=ensureDock();
@@ -308,11 +330,11 @@ window.SakaLuXSuite={version:VERSION,open,close,health,isModuleEnabled:id=>!!sta
 
 let scanTimer=0;
 function scheduleScan(){clearTimeout(scanTimer);scanTimer=setTimeout(()=>applyModules(false),500)}
-function observePrayerSuccess(){if(!state['daily-prayer'])return;const t=(document.body.innerText||'').toLowerCase();if(/you (?:have )?prayed|prayer (?:was )?successful|already prayed today|you pray|you prayed/.test(t))markPrayed()}
+function observePrayerSuccess(){if(!state['daily-prayer']||!/church\.php/i.test(location.href))return;const t=(document.body.innerText||'').toLowerCase();if(/you (?:have )?prayed|prayer (?:was )?successful|already prayed today|you pray|you prayed/.test(t))markPrayed()}
 document.addEventListener('click',e=>{if(!state['daily-prayer'])return;const b=e.target.closest?.('button,a');if(!b)return;const t=((b.textContent||'')+' '+(b.getAttribute('title')||'')).toLowerCase();if(/\bpray\b/.test(t))setTimeout(observePrayerSuccess,900)},true);
 function init(){
  css();fallback();nativeLauncher();applyModules();observePrayerSuccess();
- setInterval(()=>{if(!document.getElementById(IDS.native))nativeLauncher();syncLaunchers();syncReminderIcons();if(state['chain-alarm'])chainAlarm()},1800);
+ setInterval(()=>{if(!document.getElementById(IDS.native))nativeLauncher();syncLaunchers();if(!document.getElementById(IDS.dock))ensureDock();syncReminderIcons();if(state['chain-alarm'])chainAlarm()},1800);
  new MutationObserver(ms=>{if(ms.some(m=>[...m.addedNodes].some(n=>n.nodeType===1&&!String(n.id||'').startsWith('slx-')&&!String(n.className||'').includes('slx-'))))scheduleScan()}).observe(document.body,{childList:true,subtree:true});
  window.addEventListener('hashchange',()=>setTimeout(()=>{nativeLauncher();applyModules(true)},300));
  window.addEventListener('popstate',()=>setTimeout(()=>applyModules(true),300));
