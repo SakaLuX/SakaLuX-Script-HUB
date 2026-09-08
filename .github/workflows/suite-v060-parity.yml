@@ -1,4 +1,4 @@
-name: Run SakaLuX Suite v0.6.0 parity upgrade
+name: Apply SakaLuX Suite v0.6.0 parity
 on:
   push:
     paths:
@@ -10,64 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Run prepared parity patch
-        shell: bash
-        run: |
-          git show 2db9209a51d867ae5178a396affbfeea9ea426b5:.github/workflows/suite-v060-parity.yml > /tmp/slx-old.yml
-          python - <<'PY'
-          from pathlib import Path
-          text=Path('/tmp/slx-old.yml').read_text(encoding='utf-8')
-          a=text.index("          python - <<'PY'\n")+len("          python - <<'PY'\n")
-          b=text.index("          PY\n",a)
-          code='\n'.join(line[10:] if line.startswith('          ') else line for line in text[a:b].splitlines())
-          exec(compile(code,'slx-suite-v060-patch.py','exec'),{})
-          p=Path('SakaLuX-Suite.user.js')
-          s=p.read_text(encoding='utf-8')
-          a=s.index('function raceLeague(){')
-          b=s.index('function openModuleSettings',a)
-          race=r'''function raceLeague(){
- document.getElementById('slx-race-league')?.remove();
- if(!state['race-league-board']||!/race/i.test(location.href))return;
- const rows=[];const seen=new Set();
- for(const e of document.querySelectorAll('tr,li,[class*="result"]')){
-  const t=(e.innerText||'').trim().replace(/\s+/g,' ');
-  const m=t.match(/(?:^|\s)(\d{1,2})(?:st|nd|rd|th)?[.)\s-]+([A-Za-z0-9_\-\[\] ]{2,35})/i);
-  if(m&&Number(m[1])<=30&&!seen.has(m[1]+'|'+m[2])){seen.add(m[1]+'|'+m[2]);rows.push({p:Number(m[1]),n:m[2].trim()})}
- }
- const d=load(SLX_KEYS.race2,{active:'Default',champs:{Default:{races:[],drivers:{}}}});
- if(!d.champs)d.champs={Default:{races:[],drivers:{}}};
- if(!d.active||!d.champs[d.active])d.active=Object.keys(d.champs)[0]||'Default';
- if(!d.champs[d.active])d.champs[d.active]={races:[],drivers:{}};
- const c=d.champs[d.active];
- if(rows.length>=2){
-  const pts=[25,18,15,12,10,8,6,4,2,1];
-  const key=rows.map(x=>x.p+':'+x.n).join('|');
-  if(!c.races.some(x=>x.key===key)){
-   c.races.unshift({key,at:Date.now(),rows});
-   for(const x of rows){
-    if(!c.drivers[x.n])c.drivers[x.n]={pts:0,w:0,podiums:0,r:0};
-    c.drivers[x.n].pts+=pts[x.p-1]||0;c.drivers[x.n].r++;
-    if(x.p===1)c.drivers[x.n].w++;if(x.p<=3)c.drivers[x.n].podiums++;
-   }
-   c.races=c.races.slice(0,250);save(SLX_KEYS.race2,d);
-  }
- }
- const z=Object.entries(c.drivers).sort((a,b)=>b[1].pts-a[1].pts).slice(0,15);
- if(!z.length&&!rows.length)return;
- const standing=z.map(([n,v],i)=>`${i+1}. <button data-driver="${esc(encodeURIComponent(n))}">${esc(n)}</button> <b>${v.pts} pts</b> · ${v.w}W · ${v.podiums}P · ${v.r} races`).join('<br>');
- pagePanel('slx-race-league','🏁 Race League Board',`Championship: <b>${esc(d.active)}</b> · races: <b>${c.races.length}</b> · duplicate protection ON<br><button id="slx-race-new">NEW CHAMP</button> <button id="slx-race-switch">SWITCH</button> <button id="slx-race-backup">BACKUP</button><br>${standing}`);
- document.getElementById('slx-race-new')?.addEventListener('click',()=>{const n=prompt('New championship name:');if(n&&n.trim()){d.champs[n.trim()]={races:[],drivers:{}};d.active=n.trim();save(SLX_KEYS.race2,d);raceLeague()}});
- document.getElementById('slx-race-switch')?.addEventListener('click',()=>{const n=prompt('Championship:\n'+Object.keys(d.champs).join('\n'),d.active);if(n&&d.champs[n]){d.active=n;save(SLX_KEYS.race2,d);raceLeague()}});
- document.getElementById('slx-race-backup')?.addEventListener('click',()=>prompt('Race League backup:',JSON.stringify(d)));
- document.querySelectorAll('[data-driver]').forEach(btn=>{btn.onclick=()=>{const n=decodeURIComponent(btn.dataset.driver);const v=c.drivers[n];alert(`${n}\nPoints: ${v.pts}\nWins: ${v.w}\nPodiums: ${v.podiums}\nRaces: ${v.r}`)}});
-}
-
-'''
-          s=s[:a]+race+s[b:]
-          p.write_text(s,encoding='utf-8')
-          PY
+      - name: Apply parity patch
+        run: python tools/suite_v060_patch.py
       - name: Verify JavaScript syntax
         run: node --check SakaLuX-Suite.user.js
       - name: Commit v0.6.0
