@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.4.0**
+**v0.4.1**
 
 ## What it does
 
@@ -101,6 +101,13 @@ Their production standalone scripts are not removed or modified by Suite v0.4.0.
 
 ## Current release notes
 
+### v0.4.1
+
+- Changed SakaLuX Suite licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.
+- Added `Copyright © 2026 SakaLuX [2380374]` and retained-author requirements.
+- Personal use and private modification remain permitted; redistribution/republication require prior written permission.
+
+
 ### v0.4.0
 
 - Renamed **Quality of Life** to **REMINDERS**.
@@ -147,3 +154,8 @@ Their production standalone scripts are not removed or modified by Suite v0.4.0.
 The shared Torn API key is stored locally under `SakaLuX_SUITE_TORN_API_KEY` and is not included in exported Suite settings.
 
 The Suite does not automate attacks, crimes, bets, item consumption or race entry.
+
+
+## License
+
+**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.

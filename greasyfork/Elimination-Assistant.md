@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 ## Current version
 
-**v1.2.8**
+**v1.2.9**
 
 ## What it does
 
@@ -55,6 +55,13 @@ The FFScouter key is separate and optional. It provides Fair Fight and estimated
 
 ## Current release notes
 
+### v1.2.9
+
+- Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.
+- Added `Copyright © 2026 SakaLuX [2380374]` and retained-author requirements.
+- Personal use and private modification remain permitted; redistribution/republication require prior written permission.
+
+
 ### v1.2.8
 - Added correct handling for Torn API **32** on `eliminationteam`.
 - `TEST TORN KEY` now reports `eliminationteam` as unavailable instead of incorrectly marking the API key as rejected.
@@ -72,3 +79,7 @@ The FFScouter key is separate and optional. It provides Fair Fight and estimated
 ## Important
 
 FFScouter battle stats are estimates and Smart Target Score is advisory only. Equipment, temporary bonuses, weapon effects and other combat factors can affect the actual result of a fight.
+
+## License
+
+**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.

@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.2.8
+// @version      1.2.9
 // @description  Torn Eliminations target advisor with FFScouter, BS calibration, learning, PDA support and safe Hub ON/OFF control.
 // @author       SakaLuX [2380374]
-// @license      MIT
+// @copyright    2026 SakaLuX [2380374]
+// @license      All Rights Reserved
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
 // @connect      api.torn.com
@@ -12,9 +13,22 @@
 // @downloadURL  https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js
 // @updateURL    https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js
 // ==/UserScript==
+
+/*
+ * Copyright © 2026 SakaLuX [2380374]
+ * All Rights Reserved.
+ *
+ * Personal use and private modification are permitted.
+ * Redistribution, republication, rebranding, or publication of
+ * modified versions requires prior written permission from
+ * SakaLuX [2380374].
+ *
+ * Original author attribution must be retained in all authorized
+ * derivative works.
+ */
 (() => {
 'use strict';
-const VERSION='1.2.8';
+const VERSION='1.2.9';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';

@@ -1,6 +1,6 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.4**
+**Current version: v1.16.5**
 
 **Greasy Fork:** script **592781**
 
@@ -339,3 +339,17 @@ Current external data sources used by this version:
 ## Planned next modules
 
 - Optional SakaLuX community price/restock network after the local version is stable.
+
+
+## Current release notes
+
+### v1.16.5
+
+- Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.
+- Added `Copyright © 2026 SakaLuX [2380374]` and retained-author requirements.
+- Personal use and private modification remain permitted; redistribution/republication require prior written permission.
+
+
+## License
+
+**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.

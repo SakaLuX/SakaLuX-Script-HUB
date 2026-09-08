@@ -1,21 +1,29 @@
-MIT License
+Copyright © 2026 SakaLuX [2380374]
+All Rights Reserved.
 
-Copyright (c) 2026 SakaLuX
+This software is provided for personal use only.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is granted to:
+- Install and use this software for personal use.
+- Inspect the source code for security and educational purposes.
+- Modify the software for private, personal use only.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Without prior written permission from SakaLuX [2380374], you may not:
+- Redistribute this software.
+- Publish modified versions of this software.
+- Rebrand or republish this software under another name.
+- Remove or alter the original author attribution.
+- Sell, sublicense, or commercially redistribute this software.
+- Incorporate substantial portions of this source code into another
+  distributed project.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Any public redistribution, derivative publication, or reuse of
+substantial portions of the source code requires prior written
+permission from SakaLuX [2380374].
+
+The original author attribution must be retained in all authorized
+derivative or redistributed versions.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED. THE AUTHOR SHALL NOT BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.

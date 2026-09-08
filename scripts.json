@@ -7,7 +7,7 @@
       "name": "Enhancer Guard",
       "icon": "🛡️",
       "category": "Inventory",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "description": "Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.",
       "greasyForkId": "592698",
       "metaUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
@@ -15,9 +15,24 @@
       "apiGlobal": "SakaLuXEnhancerGuard",
       "buttonSelector": "#sl-eg-button",
       "quickActions": [
-        {"id":"open","label":"OPEN","icon":"🛡️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"hardRefresh","label":"HARD","icon":"⚡","method":"hardRefresh"}
+        {
+          "id": "open",
+          "label": "OPEN",
+          "icon": "🛡️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "hardRefresh",
+          "label": "HARD",
+          "icon": "⚡",
+          "method": "hardRefresh"
+        }
       ]
     },
     {
@@ -27,7 +42,7 @@
       "name": "Bazaar Thanker",
       "icon": "💬",
       "category": "Trading",
-      "version": "5.3.1",
+      "version": "5.3.2",
       "description": "Bazaar buyer grouping, thank-you messages, statistics and history management.",
       "greasyForkId": "592388",
       "metaUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
@@ -35,9 +50,25 @@
       "apiGlobal": "SakaLuXBazaarThanker",
       "buttonSelector": "#sakalux-bt-settings-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"events","label":"EVENTS","icon":"📋","method":"goToEvents","fallbackUrl":"https://www.torn.com/page.php?sid=events"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "events",
+          "label": "EVENTS",
+          "icon": "📋",
+          "method": "goToEvents",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=events"
+        }
       ]
     },
     {
@@ -47,7 +78,7 @@
       "name": "Mission Rewards",
       "icon": "🎯",
       "category": "Missions",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.",
       "greasyForkId": "592711",
       "metaUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
@@ -55,9 +86,27 @@
       "apiGlobal": "SakaLuXMissionRewards",
       "buttonSelector": "#sl-mri-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
-        {"id":"missions","label":"MISSIONS","icon":"🎯","method":"goToMissions","fallbackUrl":"https://www.torn.com/page.php?sid=missions"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        },
+        {
+          "id": "missions",
+          "label": "MISSIONS",
+          "icon": "🎯",
+          "method": "goToMissions",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        }
       ]
     },
     {
@@ -67,7 +116,7 @@
       "name": "Market Intelligence",
       "icon": "📈",
       "category": "Trading",
-      "version": "1.16.4",
+      "version": "1.16.5",
       "description": "Torn PDA-first market/travel intelligence with automatic live-cash Best Buys, stable Travel/Bazaar panels, Price Network, Bazaar Flip and travel basket tools.",
       "greasyForkId": "592781",
       "metaUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
@@ -75,11 +124,39 @@
       "apiGlobal": "SakaLuXMarketIntelligence",
       "buttonSelector": "#sl-mi-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"best-run","label":"BEST RUN","icon":"✈️","method":"goToBestRun","fallbackUrl":"https://www.torn.com/page.php?sid=travel"},
-        {"id":"market","label":"MARKET","icon":"📈","method":"goToMarket","fallbackUrl":"https://www.torn.com/page.php?sid=ItemMarket"},
-        {"id":"museum","label":"MUSEUM","icon":"🏛️","method":"goToMuseum","fallbackUrl":"https://www.torn.com/museum.php"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "best-run",
+          "label": "BEST RUN",
+          "icon": "✈️",
+          "method": "goToBestRun",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=travel"
+        },
+        {
+          "id": "market",
+          "label": "MARKET",
+          "icon": "📈",
+          "method": "goToMarket",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket"
+        },
+        {
+          "id": "museum",
+          "label": "MUSEUM",
+          "icon": "🏛️",
+          "method": "goToMuseum",
+          "fallbackUrl": "https://www.torn.com/museum.php"
+        }
       ]
     },
     {
@@ -89,7 +166,7 @@
       "name": "Elimination Assistant",
       "icon": "⚔️",
       "category": "Combat",
-      "version": "1.2.8",
+      "version": "1.2.9",
       "description": "Eliminations advisor with FF/BS estimates, calibration, learning, API 32-aware diagnostics and Hub ON/OFF action hiding.",
       "greasyForkId": "594921",
       "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
@@ -97,14 +174,55 @@
       "apiGlobal": "SakaLuXEliminationAssistant",
       "buttonSelector": "#slx-elim-btn",
       "quickActions": [
-        {"id":"toggle","label":"POWER","icon":"⏻","method":"toggleEnabled"},
-        {"id":"open","label":"OPEN","icon":"⚔️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"ffscan","label":"FF SCAN","icon":"📊","method":"scanFF"},
-        {"id":"calibrate","label":"CALIBRATE","icon":"🎯","method":"calibrate"},
-        {"id":"test-key","label":"TEST KEY","icon":"🧪","method":"testTornKey"},
-        {"id":"create-key","label":"API KEY","icon":"🔑","method":"createRequiredTornKey"},
-        {"id":"event","label":"ELIMS","icon":"🏆","method":"goToEliminations","fallbackUrl":"https://www.torn.com/page.php?sid=elimination"}
+        {
+          "id": "toggle",
+          "label": "POWER",
+          "icon": "⏻",
+          "method": "toggleEnabled"
+        },
+        {
+          "id": "open",
+          "label": "OPEN",
+          "icon": "⚔️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "ffscan",
+          "label": "FF SCAN",
+          "icon": "📊",
+          "method": "scanFF"
+        },
+        {
+          "id": "calibrate",
+          "label": "CALIBRATE",
+          "icon": "🎯",
+          "method": "calibrate"
+        },
+        {
+          "id": "test-key",
+          "label": "TEST KEY",
+          "icon": "🧪",
+          "method": "testTornKey"
+        },
+        {
+          "id": "create-key",
+          "label": "API KEY",
+          "icon": "🔑",
+          "method": "createRequiredTornKey"
+        },
+        {
+          "id": "event",
+          "label": "ELIMS",
+          "icon": "🏆",
+          "method": "goToEliminations",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=elimination"
+        }
       ]
     }
   ]
