@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.6.0**
+**v0.7.0**
 
 ## What it does
 
@@ -190,3 +190,15 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Odds Scout scans complete visible markets, displays margin and provides a research shortcut without placing bets.
 - Race League Board now supports separate championships, driver stats, backup/import and duplicate protection.
 - All internal modules now expose a SETTINGS action in Master Control.
+
+
+### v0.7.0 — parity hardening
+- Item Signals now prefers stable item IDs when available and keeps text fallback.
+- Armory Loan Radar adds member/profile loan buttons from the saved armory snapshot.
+- Member Travel Map adds country filtering, show-all and wipe controls.
+- OC Readiness cross-references stored armory loans and captured OC requirements.
+- War Performance adds wide command view, search, risk sort, member hiding, AAR summary and backup.
+- Company Console adds stock signal, history, pricing records and larger training/tax logs.
+- Odds Scout adds collapsed state, market de-duplication and sport-aware research.
+- Race League Board adds race logs, stats, driver recent history, delete championship and backup/import.
+- Faction Pulse adds sorting and watchlist export.
