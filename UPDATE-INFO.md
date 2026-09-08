@@ -10,7 +10,6 @@ Last updated: 2026-09-08
 - SakaLuX Mission Rewards: **v1.0.2**
 - SakaLuX Market Intelligence: **v1.16.5** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.2.9** — Greasy Fork **594921**
-
 - SakaLuX Suite: **v0.4.1** — experimental / GitHub test build
 
 ## Private / standalone tools
@@ -19,15 +18,16 @@ Last updated: 2026-09-08
 
 ## Documentation / release-note audit — 2026-09-08
 
-All current scripts were checked against the `@version` in their live `.user.js` file.
+All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
-- **Script Hub v1.8.5** — info current; suite list refreshed; Elimination ON/OFF integration documented.
-- **Enhancer Guard v1.3.2** — info and current release notes match the live script.
-- **Bazaar Thanker - PDA v5.3.1** — info and current release notes match the live script.
-- **Mission Rewards v1.0.1** — info and current release notes match the live script.
-- **Market Intelligence v1.16.4** — info and release history match the live script.
-- **Elimination Assistant v1.2.8** — dedicated What it does, Hub behavior, API-key information and current release notes are present.
-- **Account Auditor v1.2.1** — info and current release notes match the live script.
+- **Script Hub v1.8.6** — info/release notes current; All Rights Reserved metadata and source header present.
+- **Enhancer Guard v1.3.3** — info/release notes current; All Rights Reserved metadata and source header present.
+- **Bazaar Thanker - PDA v5.3.2** — info/release notes current; All Rights Reserved metadata and source header present.
+- **Mission Rewards v1.0.2** — info/release notes current; All Rights Reserved metadata and source header present.
+- **Market Intelligence v1.16.5** — info/release notes current; All Rights Reserved metadata and source header present.
+- **Elimination Assistant v1.2.9** — info/release notes current; All Rights Reserved metadata and source header present.
+- **SakaLuX Suite v0.4.1** — experimental info/release notes current; All Rights Reserved metadata and source header present.
+- **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
 
 Dedicated information files:
 
@@ -37,6 +37,7 @@ Dedicated information files:
 - `greasyfork/Mission-Rewards.md`
 - `greasyfork/Market-Intelligence.md`
 - `greasyfork/Elimination-Assistant.md`
+- `greasyfork/SakaLuX-Suite.md`
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
@@ -48,7 +49,6 @@ Dedicated information files:
 - Redistribution, republication, rebranding, commercial redistribution, and publication of modified versions require prior written permission.
 - Patch releases: Hub v1.8.6, Enhancer Guard v1.3.3, Bazaar Thanker v5.3.2, Mission Rewards v1.0.2, Market Intelligence v1.16.5, Elimination Assistant v1.2.9, SakaLuX Suite v0.4.1.
 - Account Auditor and historical backup snapshots were intentionally left untouched by this public-script migration.
-
 
 ### SakaLuX Script Hub v1.8.5 — documentation refresh
 - Updated the suite list to the current live registry versions.
