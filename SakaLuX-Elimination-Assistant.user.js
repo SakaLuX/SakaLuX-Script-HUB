@@ -4,6 +4,7 @@
 // @version      1.0.0
 // @description  Eliminations target scanner with SAFE/RISKY/SKIP scoring, quick filters, local history and Torn PDA support.
 // @author       SakaLuX [2380374]
+// @license      MIT
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
 // @connect      api.torn.com
