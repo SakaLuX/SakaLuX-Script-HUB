@@ -21,3 +21,4 @@ jobs:
           git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
           git commit -m "Fix Suite reminder icons in v0.8.1"
           git push origin HEAD:main
+# rerun after anchor fix
