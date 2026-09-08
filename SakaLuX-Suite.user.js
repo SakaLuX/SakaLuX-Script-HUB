@@ -1,19 +1,33 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.4.0
+// @version      0.4.1
 // @description  Experimental all-in-one modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
+// @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        none
-// @license      MIT
+// @license      All Rights Reserved
 // @run-at       document-end
 // ==/UserScript==
+
+/*
+ * Copyright © 2026 SakaLuX [2380374]
+ * All Rights Reserved.
+ *
+ * Personal use and private modification are permitted.
+ * Redistribution, republication, rebranding, or publication of
+ * modified versions requires prior written permission from
+ * SakaLuX [2380374].
+ *
+ * Original author attribution must be retained in all authorized
+ * derivative works.
+ */
 
 (() => {
 'use strict';
 
-const VERSION='0.4.0';
+const VERSION='0.4.1';
 const IDS={fallback:'slx-suite-button',native:'slx-suite-native-button',overlay:'slx-suite-overlay',style:'slx-suite-style',dock:'slx-reminder-dock'};
 const K={
  modules:'SakaLuX_SUITE_MODULES_V2',api:'SakaLuX_SUITE_TORN_API_KEY',

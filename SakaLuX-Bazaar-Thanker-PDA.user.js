@@ -1,15 +1,29 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.1
+// @version      5.3.2
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
-// @author SakaLuX
+// @author       SakaLuX [2380374]
+// @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        none
-// @license      MIT
+// @license      All Rights Reserved
 // @downloadURL https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js
 // @updateURL https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js
 // ==/UserScript==
+
+/*
+ * Copyright © 2026 SakaLuX [2380374]
+ * All Rights Reserved.
+ *
+ * Personal use and private modification are permitted.
+ * Redistribution, republication, rebranding, or publication of
+ * modified versions requires prior written permission from
+ * SakaLuX [2380374].
+ *
+ * Original author attribution must be retained in all authorized
+ * derivative works.
+ */
 
 (function () {
     'use strict';
@@ -733,7 +747,7 @@
 
         panel.innerHTML = `
             <div style="font-size:21px;font-weight:bold;margin-bottom:6px;">⚙️ SakaLuX Bazaar Thanker</div>
-            <div style="font-size:12px;color:#888;margin-bottom:15px;">Version 5.3.1</div>
+            <div style="font-size:12px;color:#888;margin-bottom:15px;">Version 5.3.2</div>
             <div id="sbtStats" style="background:#222;border:1px solid #333;border-radius:9px;padding:12px;margin-bottom:15px;"></div>
             <label>Your Torn ID</label><input id="sbtSellerId" value="${escapeHtml(settings.sellerId)}" style="${inputStyle()}">
             <label>Bazaar URL</label><input id="sbtBazaarUrl" value="${escapeHtml(settings.bazaarUrl)}" style="${inputStyle()}">
@@ -949,7 +963,7 @@
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION = '5.3.1';
+    const BAZAAR_VERSION = '5.3.2';
 
     function openSettingsPanel() {
         if (!location.href.includes('sid=events')) return false;

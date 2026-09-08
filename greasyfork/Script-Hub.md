@@ -4,7 +4,7 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 
 ## Current version
 
-**v1.8.5**
+**v1.8.6**
 
 ## What it does
 
@@ -23,6 +23,13 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - Designed for Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.8.6
+
+- Changed project licensing from MIT to **All Rights Reserved** and added explicit SakaLuX copyright/redistribution terms.
+- Added `Copyright © 2026 SakaLuX [2380374]` and retained-author requirements.
+- Personal use and private modification remain permitted; redistribution/republication require prior written permission.
+
 
 ### v1.8.5
 - Fixed false **UPDATE AVAILABLE** indicators after an add-on had already been updated.
@@ -71,3 +78,7 @@ Because Eliminations is only needed periodically, Elimination Assistant has a pe
 SakaLuX Account Auditor **v1.2.1** is maintained separately and intentionally excluded from `scripts.json`, so Hub does not present it as a required/recommended complementary add-on.
 
 Every new complementary SakaLuX script should be added to `scripts.json` and its dedicated `greasyfork/*.md` information file should be updated with the current version and release notes.
+
+## License
+
+**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.

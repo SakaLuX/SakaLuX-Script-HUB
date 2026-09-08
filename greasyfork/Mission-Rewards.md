@@ -4,7 +4,7 @@ SakaLuX Mission Rewards enhances Torn's Mission Shop with practical reward infor
 
 ## Current version
 
-**v1.0.1**
+**v1.0.2**
 
 ## What it does
 
@@ -27,6 +27,13 @@ If Script Hub is not installed, Mission Rewards can offer the optional Hub insta
 
 ## Current release notes
 
+### v1.0.2
+
+- Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.
+- Added `Copyright © 2026 SakaLuX [2380374]` and retained-author requirements.
+- Personal use and private modification remain permitted; redistribution/republication require prior written permission.
+
+
 ### v1.0.1
 - Changed the userscript match to all Torn pages so Script Hub can reliably detect Mission Rewards everywhere.
 - Kept Mission Shop scanning and reward processing restricted to the Missions page.
@@ -42,3 +49,8 @@ If Script Hub is not installed, Mission Rewards can offer the optional Hub insta
 - Local weapon mod price-range learning.
 - Mission Shop card badges and detailed reward information.
 - SakaLuX Script Hub API included.
+
+
+## License
+
+**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.

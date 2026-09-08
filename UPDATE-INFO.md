@@ -4,12 +4,14 @@ Last updated: 2026-09-08
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.8.5**
-- SakaLuX Enhancer Guard: **v1.3.2**
-- SakaLuX Bazaar Thanker - PDA: **v5.3.1**
-- SakaLuX Mission Rewards: **v1.0.1**
-- SakaLuX Market Intelligence: **v1.16.4** — Greasy Fork **592781**
-- SakaLuX Elimination Assistant: **v1.2.8** — Greasy Fork **594921**
+- SakaLuX Script Hub: **v1.8.6**
+- SakaLuX Enhancer Guard: **v1.3.3**
+- SakaLuX Bazaar Thanker - PDA: **v5.3.2**
+- SakaLuX Mission Rewards: **v1.0.2**
+- SakaLuX Market Intelligence: **v1.16.5** — Greasy Fork **592781**
+- SakaLuX Elimination Assistant: **v1.2.9** — Greasy Fork **594921**
+
+- SakaLuX Suite: **v0.4.1** — experimental / GitHub test build
 
 ## Private / standalone tools
 
@@ -38,6 +40,15 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### Licensing protection update — 2026-09-08
+- Public SakaLuX userscripts now use **All Rights Reserved** instead of MIT.
+- Added `Copyright © 2026 SakaLuX [2380374]` to userscript metadata and source headers.
+- Personal use and private modification remain permitted.
+- Redistribution, republication, rebranding, commercial redistribution, and publication of modified versions require prior written permission.
+- Patch releases: Hub v1.8.6, Enhancer Guard v1.3.3, Bazaar Thanker v5.3.2, Mission Rewards v1.0.2, Market Intelligence v1.16.5, Elimination Assistant v1.2.9, SakaLuX Suite v0.4.1.
+- Account Auditor and historical backup snapshots were intentionally left untouched by this public-script migration.
+
 
 ### SakaLuX Script Hub v1.8.5 — documentation refresh
 - Updated the suite list to the current live registry versions.

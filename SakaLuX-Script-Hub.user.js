@@ -1,22 +1,36 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.8.5
+// @version      1.8.6
 // @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with a Torn-native mobile HUB entry integrated before Messages.
-// @author       SakaLuX
+// @author       SakaLuX [2380374]
+// @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
 // @connect      update.greasyfork.org
 // @connect      raw.githubusercontent.com
-// @license      MIT
+// @license      All Rights Reserved
 // @downloadURL https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js
 // @updateURL https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js
 // ==/UserScript==
 
+/*
+ * Copyright © 2026 SakaLuX [2380374]
+ * All Rights Reserved.
+ *
+ * Personal use and private modification are permitted.
+ * Redistribution, republication, rebranding, or publication of
+ * modified versions requires prior written permission from
+ * SakaLuX [2380374].
+ *
+ * Original author attribution must be retained in all authorized
+ * derivative works.
+ */
+
 (function () {
     'use strict';
 
-    const VERSION = '1.8.5';
+    const VERSION = '1.8.6';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -24,7 +38,7 @@
 
     const HUB_CHANGELOG = [
         {
-            version: '1.8.5',
+            version: '1.8.6',
             date: '2026-08-24',
             changes: [
                 'Fixed false UPDATE AVAILABLE states caused by cached checks from an older installed add-on version.',
@@ -57,7 +71,7 @@
             date: '2026-08-24',
             changes: [
                 'Added the first animated skull launcher experiment.',
-                'Added Mission Rewards v1.0.1 to the offline fallback registry.'
+                'Added Mission Rewards v1.0.2 to the offline fallback registry.'
             ]
         }
     ];
@@ -83,7 +97,7 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.2',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.3',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -97,7 +111,7 @@
             },
             {
                 id: 'bazaar', type: 'addon', active: true,
-                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.1',
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.2',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
@@ -111,7 +125,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.1',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.2',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
