@@ -1,0 +1,23 @@
+name: Apply SakaLuX Suite v0.8.0 final parity
+on:
+  push:
+    paths:
+      - '.github/workflows/suite-v080-final-parity.yml'
+permissions:
+  contents: write
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v0.8.0 patch
+        run: python tools/suite_v080_final_parity.py
+      - name: Verify JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Commit v0.8.0
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "sakalutzu92@yahoo.com"
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git commit -m "Finish documented parity hardening in SakaLuX Suite v0.8.0"
+          git push origin HEAD:main
