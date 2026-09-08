@@ -10,12 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
       - name: Run prepared parity patch
         shell: bash
         run: |
-          git show HEAD^:.github/workflows/suite-v060-parity.yml > /tmp/slx-old.yml
+          git show 2db9209a51d867ae5178a396affbfeea9ea426b5:.github/workflows/suite-v060-parity.yml > /tmp/slx-old.yml
           python - <<'PY'
           from pathlib import Path
           text=Path('/tmp/slx-old.yml').read_text(encoding='utf-8')
@@ -24,6 +22,7 @@ jobs:
           code='\n'.join(line[10:] if line.startswith('          ') else line for line in text[a:b].splitlines())
           exec(compile(code,'slx-suite-v060-patch.py','exec'),{})
           PY
+          nl -ba SakaLuX-Suite.user.js | sed -n '175,205p'
       - name: Verify JavaScript syntax
         run: node --check SakaLuX-Suite.user.js
       - name: Commit v0.6.0
