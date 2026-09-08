@@ -8,8 +8,8 @@
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
 // @connect      api.torn.com
-// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
-// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
+// @downloadURL  https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js
+// @updateURL    https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js
 // ==/UserScript==
 
 (() => {
