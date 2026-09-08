@@ -1,10 +1,18 @@
 # SakaLuX Account Auditor
 
-**Current version: v1.2.0**
+**Current version: v1.2.1**
 
 **Distribution:** Greasy Fork / GitHub source sync. The script remains intentionally excluded from `scripts.json`, so SakaLuX Script Hub does not show it as a required/recommended install.
 
 SakaLuX Account Auditor is a private read-only Torn PDA / Tampermonkey tool that builds a structured account snapshot and syncs sanitized data to a user-controlled private GitHub repository.
+
+## v1.2.1
+
+- Added the same SakaLuX Script Hub install prompt used by the rest of the suite.
+- Uses the shared `SakaLuX_HUB_INSTALL_PROMPT_LAST` localStorage key.
+- The Hub prompt is offered at most once every 24 hours across the SakaLuX scripts on the same Torn origin.
+- The prompt is skipped when `window.SakaLuXScriptHub` or the Hub button is already detected.
+- **LATER** records the shared cooldown; **INSTALL HUB** records the cooldown and opens the official Greasy Fork Hub installer.
 
 ## v1.2.0
 
