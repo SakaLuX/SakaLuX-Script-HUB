@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.2.3
+// @version      1.2.4
 // @description  Personalised Torn Eliminations target intelligence with FFScouter estimates, Smart Target Score, battle-stat calibration, attack learning, filters, history and Hub/PDA support.
 // @author       SakaLuX [2380374]
 // @license      MIT
@@ -16,12 +16,12 @@
 (() => {
 'use strict';
 
-const VERSION='1.2.3';
+const VERSION='1.2.4';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_INTERVAL=24*60*60*1000;
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
-const TORN_KEY_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Elimination_Assistant&user=basic,battlestats';
+const TORN_KEY_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Elimination_Assistant&user=basic,battlestats&torn=elimination,eliminationteam';
 const IDS={button:'slx-elim-btn',panel:'slx-elim',style:'slx-elim-style'};
 const KEYS={
   torn:'slx_elim_torn_key',ff:'slx_elim_ff_key',team:'slx_elim_team',
@@ -109,9 +109,9 @@ function inject(){
 <div class="slxeb"><table><thead><tr><th>Smart target signal</th><th>Player</th><th>Lvl</th><th>Last</th><th class="slxe-hide-m">Status</th><th>Actions</th></tr></thead><tbody id="slxe-rows"></tbody></table></div>
 <div class="slxef"><span id="slxe-count">0 targets</span><button id="slxe-best">BEST 10</button><button id="slxe-history">HISTORY</button><button id="slxe-clear">CLEAR HISTORY</button></div>
 <div class="slxe-modal" id="slxe-settings-modal"><h3>Elimination Assistant Settings</h3>
-<div class="slxe-keyhelp"><b>Torn API key required:</b> create a <b>Custom API key</b> in Torn and enable <b>basic + battlestats</b>. This permission is needed for <b>CALIBRATE ME</b>. Press the button below, verify the permissions in Torn, create the key, then copy it back into this field.</div>
+<div class="slxe-keyhelp"><b>Torn Custom API key required:</b> the assistant needs <b>User: basic + battlestats</b> and <b>Torn: elimination + eliminationteam</b>. These permissions cover team loading and <b>CALIBRATE ME</b>. Press the button below, verify all four permissions in Torn, create the key, then copy it back into this field.</div>
 <button class="slxe-act slxe-key-create" id="slxe-create-key">🔑 CREATE REQUIRED TORN KEY</button>
-<label>Torn API key — Custom key with battlestats permission</label><input id="slxe-torn-key" type="text" autocomplete="off" placeholder="Paste the created Torn API key here">
+<label>Torn API key — basic + battlestats + elimination + eliminationteam</label><input id="slxe-torn-key" type="text" autocomplete="off" placeholder="Paste the newly created Torn API key here">
 <label>FFScouter API key (optional, separate key)</label><input id="slxe-ff-key" type="text" autocomplete="off" placeholder="Only needed for FF / target BS estimates">
 <div class="slxe-row"><div><label>SAFE FF threshold</label><input id="slxe-safeff" type="number" step="0.1" min="1"></div><div><label>RISKY FF threshold</label><input id="slxe-riskyff" type="number" step="0.1" min="1"></div></div>
 <label>FF cache minutes</label><input id="slxe-cachemin" type="number" min="1" max="240">
@@ -125,7 +125,7 @@ function inject(){
 }
 function setStatus(t){const e=$('#slxe-status');if(e)e.textContent=t}
 function createRequiredTornKey(){
-  setStatus('Opening Torn API key creator: basic + battlestats. After Torn creates the key, copy it and paste it in Settings.');
+  setStatus('Opening Torn API key creator with User: basic + battlestats and Torn: elimination + eliminationteam. Create a NEW key, then copy it back into Settings.');
   const w=window.open(TORN_KEY_CREATE_URL,'_blank','noopener,noreferrer');
   if(!w)location.href=TORN_KEY_CREATE_URL;
 }
@@ -143,7 +143,7 @@ async function loadMyStats(force=false){
   try{raw=await torn('user/battlestats')}
   catch(e){
     if(state.myStats.total)return state.myStats.total;
-    if(Number(e?.code)===16||/access|permission|level/i.test(String(e?.message||'')))throw new Error('CALIBRATE ME needs a Torn Custom API key with the battlestats permission enabled. Open ⚙ Settings and press CREATE REQUIRED TORN KEY, or enter your total battle stats manually.');
+    if(Number(e?.code)===16||/access|permission|level/i.test(String(e?.message||'')))throw new Error('API access is insufficient. Open ⚙ Settings → CREATE REQUIRED TORN KEY and create a NEW Custom key with User: basic + battlestats and Torn: elimination + eliminationteam.');
     throw new Error(`Could not calibrate battle stats. Use CREATE REQUIRED TORN KEY in Settings, or enter total BS manually. (${e?.message||'API error'})`);
   }
   const total=extractMyStats(raw);
