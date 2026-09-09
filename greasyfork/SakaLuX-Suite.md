@@ -4,27 +4,27 @@ SakaLuX Suite is a one-install modular toolkit for Torn PDA and desktop userscri
 
 ## Current version
 
-**v0.9.903**
+**v0.9.904**
 
-## Fortie parity modules
+## Complete SakaLuX modules
 
-Version 0.9.903 rebuilds the Suite from the complete Fortie module implementations rather than reduced approximations:
+Version 0.9.904 includes the complete module implementations with the established SakaLuX names:
 
-- Prayer Reminder
-- Med Advisor
-- Item Intel
-- Event Intel
-- Activity Intelligence
-- Faction Member View
-- Armory Loan Scanner
-- War Ledger
-- OC Operations
-- Company Management Suite
-- Championship Tracker
-- Edge Scanner
-- Target & Enemy Alerts
+- Daily Prayer Bell
+- Recovery Planner
+- Item Signal
+- Event Lens
+- Faction Pulse
+- Member Travel Map
+- Armory Loan Radar
+- War Performance
+- OC Role Match + Readiness
+- Company Console
+- Race League Board
+- Odds Scout
+- Target Alerts
 
-Event Intel also includes the verified TornPDA route and native-row compatibility adapter.
+Event Lens also includes the verified TornPDA route and native-row compatibility adapter.
 
 ## SakaLuX additions
 
@@ -34,21 +34,22 @@ Event Intel also includes the verified TornPDA route and native-row compatibilit
 
 ## Master Control
 
-- Fortie-style sliding ON/OFF controls.
+- Sliding ON/OFF controls.
 - Module settings actions where supported.
 - The control window and its scroll position remain in place when a module is toggled.
 - Shared Torn API key storage.
 - Settings import/export excludes the API key.
 - Shortcut: Alt + F.
 
-## v0.9.903 release notes
+## v0.9.904 release notes
 
-- Replaced all simplified principal modules with their complete Fortie counterparts.
-- Restored every Item Intel signal/rule from the reference implementation.
-- Retained the working Event Intel TornPDA compatibility fix.
+- Restored the established SakaLuX name for every visible module and panel.
+- Removed the external base name from script metadata, documentation and validation messages.
+- Kept one TornPDA-compatible GM request grant instead of advertising both API variants.
+- Retained every Item Signal rule and the working Event Lens TornPDA compatibility fix.
+- Restored clickable Trade continuation links inside expanded Event Lens cards.
 - Preserved the five requested standalone SakaLuX modules and Chain Alarm.
 - Added automated checks for all 13 principal module/factory pairs.
-- Improved the Master Control layout and persistent switch behavior.
 
 ## Privacy and safety
 
