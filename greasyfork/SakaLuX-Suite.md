@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.9.7**
+**v0.9.8**
 
 ## What it does
 
@@ -31,14 +31,17 @@ The old `Quality of Life` category has been renamed to **REMINDERS** and all pub
 - Supports item source, education bonuses, faction bonus, recommendation priority and drug exclusion.
 - Never consumes an item automatically.
 
-### Item Signals
-- Adds compact markers to recognized items.
+### Item Signal
+- Adds compact O / E / C and resource markers directly over recognized item images.
+- Opens a centered Torn-native tooltip with the item purpose and effect on tap or click.
 - Covers OC role items plus Energy, Nerve, Happiness, Heal and Enhancer signals.
-- Works locally from visible item information.
+- Uses stable item IDs when available and visible item information as fallback.
 
 ### Event Lens
-- Searchable Torn Events helper.
-- Adds local categories, counts and Saved Events.
+- Replaces the native Events list with a compact categorized dashboard on the Events page.
+- Adds horizontally scrollable filter chips, category counts, search, refresh, reset and visible/total count.
+- Groups cards by day and uses category-specific icons, accent colors, time, date and amount styling.
+- Adds collapsible day sections and locally saved events.
 - Saved event text remains local to the browser.
 
 ### Chain Alarm
@@ -286,3 +289,9 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Only Recovery Planner keeps a Settings button in the Reminders group.
 - Daily Prayer Bell hides its top-bar icon immediately after prayer completion is detected and resets by UTC day.
 - Recovery Planner now opens a dedicated SakaLuX card with HP, hospital, bonus, item source, rescan and recommendation sections.
+
+### v0.9.8 — Item Signal and Event Lens visual rebuild
+- Rebuilt Item Signal as compact image-corner markers with touch-friendly floating effect tooltips.
+- Added ID-backed enhancer, energy, nerve and health details while retaining visible-text fallbacks.
+- Rebuilt Event Lens as the full mobile event dashboard with filter chips, category counts, search, refresh, reset, day grouping, colored cards and Saved Events.
+- Kept the implementation stable under Torn's dynamic PDA navigation without recreating unchanged panels on every scan.
