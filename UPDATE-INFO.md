@@ -10,7 +10,7 @@ Last updated: 2026-09-09
 - SakaLuX Mission Rewards: **v1.0.2**
 - SakaLuX Market Intelligence: **v1.16.5** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.2.9** — Greasy Fork **594921**
-- SakaLuX Suite: **v0.9.904** — complete SakaLuX module build / GitHub test build
+- SakaLuX Suite: **v0.9.905** — improved TornPDA Event Lens readability / GitHub test build
 
 ## Private / standalone tools
 
@@ -26,7 +26,7 @@ All current scripts were checked against the `@version` in their live `.user.js`
 - **Mission Rewards v1.0.2** — info/release notes current; All Rights Reserved metadata and source header present.
 - **Market Intelligence v1.16.5** — info/release notes current; All Rights Reserved metadata and source header present.
 - **Elimination Assistant v1.2.9** — info/release notes current; All Rights Reserved metadata and source header present.
-- **SakaLuX Suite v0.9.904** — complete 13-module implementation, established SakaLuX names, TornPDA Event compatibility, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
+- **SakaLuX Suite v0.9.905** — complete 13-module implementation, established SakaLuX names, improved TornPDA Event Lens readability, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
 - **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
 
 Dedicated information files:
@@ -41,6 +41,10 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### SakaLuX Suite v0.9.905 — TornPDA readability
+- Increased Event Lens title, subtitle, detail, original-message and timestamp sizes for mobile.
+- Changed event names and restored links to high-contrast gold.
 
 ### SakaLuX Suite v0.9.904 — SakaLuX naming cleanup
 - Restored the established SakaLuX names for every visible module and panel.
