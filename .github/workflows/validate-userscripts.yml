@@ -7,13 +7,13 @@ on:
       - '*.user.js'
       - 'scripts.json'
       - 'greasyfork/**'
-      - '.github/workflows/validate-userscripts.yml'
+      - '.github/workflows/**'
   pull_request:
     paths:
       - '*.user.js'
       - 'scripts.json'
       - 'greasyfork/**'
-      - '.github/workflows/validate-userscripts.yml'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
@@ -85,13 +85,54 @@ jobs:
 
           print(f'SakaLuX Suite v{meta.group(1)} metadata: OK')
 
-      - name: Ensure temporary patch workflows are gone
+      - name: Validate reminder and Recovery Planner invariants
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          text = Path('SakaLuX-Suite.user.js').read_text(encoding='utf-8')
+
+          expected = {
+              'daily-prayer': False,
+              'recovery-planner': True,
+              'item-signals': False,
+              'event-lens': False,
+              'chain-alarm': False,
+          }
+          for module_id, should_have_settings in expected.items():
+              m = re.search(r"\{id:'" + re.escape(module_id) + r"'[^\n]*settings:(true|false)", text)
+              if not m:
+                  raise SystemExit(f'Module settings flag missing for {module_id}')
+              actual = m.group(1) == 'true'
+              if actual != should_have_settings:
+                  raise SystemExit(f'Unexpected settings flag for {module_id}: {actual}')
+
+          required_runtime = [
+              "document.getElementById('slx-daily-prayer')?.remove()",
+              "function openRecoveryPanel(){",
+              "className='slx-recovery-card'",
+              "id=\"slx-recovery-scan\"",
+              "id=\"slx-recovery-settings-open\"",
+              "setTimeout(observePrayerSuccess,700)",
+              "setTimeout(observePrayerSuccess,1600)",
+              "setTimeout(observePrayerSuccess,3000)",
+          ]
+          missing = [x for x in required_runtime if x not in text]
+          if missing:
+              raise SystemExit('Reminder/Recovery runtime invariant missing: ' + ', '.join(missing))
+
+          print('Reminder and Recovery Planner invariants: OK')
+
+      - name: Ensure only stable workflow remains
         shell: bash
         run: |
           set -euo pipefail
-          if find .github/workflows -maxdepth 1 -type f \( -name 'suite-v*-migration.yml' -o -name 'suite-v*-resource-icons.yml' -o -name 'suite-v*-reminder*.yml' \) | grep -q .; then
-            echo 'Obsolete one-time Suite patch workflow found:' >&2
-            find .github/workflows -maxdepth 1 -type f \( -name 'suite-v*-migration.yml' -o -name 'suite-v*-resource-icons.yml' -o -name 'suite-v*-reminder*.yml' \) >&2
+          mapfile -t workflows < <(find .github/workflows -maxdepth 1 -type f -printf '%f\n' | sort)
+          printf 'Workflow files: %s\n' "${workflows[*]:-none}"
+          if ((${#workflows[@]} != 1)) || [[ "${workflows[0]:-}" != "validate-userscripts.yml" ]]; then
+            echo 'Unexpected workflow file detected. Only validate-userscripts.yml is allowed.' >&2
+            printf '%s\n' "${workflows[@]}" >&2
             exit 1
           fi
-          echo 'No obsolete one-time Suite patch workflows found.'
+          echo 'Workflow directory clean: only stable validator remains.'
