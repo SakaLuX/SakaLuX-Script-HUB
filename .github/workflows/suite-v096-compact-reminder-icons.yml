@@ -1,74 +1,74 @@
 name: Apply SakaLuX Suite v0.9.6 compact reminder icons
+
 on:
   push:
     paths:
-      - '.github/workflows/suite-v096-compact-reminder-icons.yml'
+      - .github/workflows/suite-v096-compact-reminder-icons.yml
+
 permissions:
   contents: write
+
 jobs:
   patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Make reminder icons compact and Torn-row friendly
+
+      - name: Patch Suite
         shell: python
         run: |
           from pathlib import Path
           import re
 
-          p=Path('SakaLuX-Suite.user.js')
-          s=p.read_text(encoding='utf-8')
-          s=re.sub(r'// @version\s+0\.9\.\d+', '// @version      0.9.6', s, count=1)
-          s=re.sub(r"const VERSION='0\.9\.\d+';", "const VERSION='0.9.6';", s, count=1)
+          p = Path('SakaLuX-Suite.user.js')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('// @version      0.9.5', '// @version      0.9.6', 1)
+          s = s.replace("const VERSION='0.9.5';", "const VERSION='0.9.6';", 1)
 
-          # Replace the reminder button styling with a two-layer control:
-          # a small transparent hit area + an even smaller circular glyph.
-          s=re.sub(
-              r"#\$\{IDS\.dock\}\{[^}]*\}\.slx-rem-btn\{[^}]*\}\.slx-rem-btn:active\{[^}]*\}",
-              "#${IDS.dock}{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:1px!important;z-index:2147483644;order:2147483647!important;flex:0 0 auto!important;width:auto!important;height:24px!important;min-height:24px!important;margin:0 1px!important;padding:0!important}.slx-rem-btn{all:unset!important;box-sizing:border-box!important;width:23px!important;height:24px!important;min-width:23px!important;min-height:24px!important;max-width:23px!important;max-height:24px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;flex:0 0 23px!important;-webkit-tap-highlight-color:transparent!important}.slx-rem-glyph{box-sizing:border-box!important;width:19px!important;height:19px!important;min-width:19px!important;min-height:19px!important;max-width:19px!important;max-height:19px!important;border-radius:50%!important;border:1px solid #4d5c68!important;background:radial-gradient(circle at 38% 32%,#33414c 0,#26323b 58%,#1c252c 100%)!important;color:#e2e9ee!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:11px!important;font-weight:700!important;line-height:19px!important;font-family:Arial,sans-serif!important;box-shadow:inset 0 1px 1px #ffffff14,0 1px 2px #0008!important;overflow:hidden!important}.slx-rem-btn:active .slx-rem-glyph{transform:scale(.9)!important;opacity:.82!important}",
-              s,
-              count=1
-          )
+          old_css = "#${IDS.dock}{--slx-rem-size:34px;--slx-rem-font:17px;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;z-index:2147483644;order:2147483647!important;flex:0 0 auto!important}.slx-rem-btn{box-sizing:border-box!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;max-width:28px!important;max-height:28px!important;padding:0!important;margin:0!important;border-radius:50%!important;border:1px solid #4b5965!important;background:radial-gradient(circle at 35% 30%,#34434e 0,#26343d 58%,#1b252c 100%)!important;color:#dce7ef!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:15px!important;font-weight:700!important;line-height:1!important;box-shadow:inset 0 1px 1px #ffffff18,0 1px 3px #0009!important;vertical-align:middle!important;overflow:hidden!important;-webkit-appearance:none!important;appearance:none!important;flex:0 0 28px!important;}.slx-rem-btn:active{transform:scale(.92)!important;opacity:.8!important}"
+          new_css = "#${IDS.dock}{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:1px!important;z-index:2147483644;order:2147483647!important;flex:0 0 auto!important;width:auto!important;height:24px!important;min-height:24px!important;margin:0 1px!important;padding:0!important}.slx-rem-btn{all:unset!important;box-sizing:border-box!important;width:23px!important;height:24px!important;min-width:23px!important;min-height:24px!important;max-width:23px!important;max-height:24px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;flex:0 0 23px!important;-webkit-tap-highlight-color:transparent!important}.slx-rem-glyph{box-sizing:border-box!important;width:19px!important;height:19px!important;min-width:19px!important;min-height:19px!important;max-width:19px!important;max-height:19px!important;border-radius:50%!important;border:1px solid #4d5c68!important;background:radial-gradient(circle at 38% 32%,#33414c 0,#26323b 58%,#1c252c 100%)!important;color:#e2e9ee!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:11px!important;font-weight:700!important;line-height:19px!important;font-family:Arial,sans-serif!important;box-shadow:inset 0 1px 1px #ffffff14,0 1px 2px #0008!important;overflow:hidden!important}.slx-rem-btn:active .slx-rem-glyph{transform:scale(.9)!important;opacity:.82!important}"
+          if old_css not in s:
+              raise SystemExit('old reminder css not found')
+          s = s.replace(old_css, new_css, 1)
 
-          old="""function iconButton(id,text,title,fn){
+          old_dock = "d.style.cssText='display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:4px!important;position:static!important;inset:auto!important;margin-left:auto!important;margin-right:4px!important;padding:0!important;width:auto!important;height:30px!important;min-height:30px!important;z-index:auto!important;vertical-align:middle!important;flex:0 0 auto!important;order:2147483647!important;'"
+          new_dock = "d.style.cssText='display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:1px!important;position:static!important;inset:auto!important;margin-left:auto!important;margin-right:2px!important;padding:0!important;width:auto!important;height:24px!important;min-height:24px!important;z-index:auto!important;vertical-align:middle!important;flex:0 0 auto!important;order:2147483647!important;'"
+          if old_dock not in s:
+              raise SystemExit('old dock style not found')
+          s = s.replace(old_dock, new_dock, 1)
+
+          old_btn = """function iconButton(id,text,title,fn){
  const b=document.createElement('button');
  b.type='button';b.id=id;b.className='slx-rem-btn';b.textContent=text;b.title=title;b.setAttribute('aria-label',title);
  b.onclick=e=>{e.preventDefault();e.stopPropagation();fn()};
  return b
 }"""
-          new="""function iconButton(id,text,title,fn){
+          new_btn = """function iconButton(id,text,title,fn){
  const b=document.createElement('button');
  b.type='button';b.id=id;b.className='slx-rem-btn';b.title=title;b.setAttribute('aria-label',title);
  const g=document.createElement('span');g.className='slx-rem-glyph';g.textContent=text;b.appendChild(g);
  b.onclick=e=>{e.preventDefault();e.stopPropagation();fn()};
  return b
 }"""
-          if old not in s:
-              raise SystemExit('iconButton block not found')
-          s=s.replace(old,new,1)
+          if old_btn not in s:
+              raise SystemExit('old iconButton not found')
+          s = s.replace(old_btn, new_btn, 1)
+          p.write_text(s, encoding='utf-8')
 
-          # Ensure the dock stays at the visual right/end of the discovered resource strip.
-          a=s.index('function ensureDock(){')
-          b=s.index('function iconButton',a)
-          block=s[a:b]
-          block=re.sub(r"d\.style\.cssText='[^']*';\n  return d", "d.style.cssText='display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:1px!important;position:static!important;inset:auto!important;margin:0 1px!important;padding:0!important;width:auto!important;height:24px!important;min-height:24px!important;z-index:auto!important;vertical-align:middle!important;flex:0 0 auto!important;order:2147483647!important;';\n  return d", block, count=1)
-          s=s[:a]+block+s[b:]
+          d = Path('greasyfork/SakaLuX-Suite.md')
+          t = d.read_text(encoding='utf-8')
+          t = re.sub(r'\*\*v0\.9\.\d+\*\*', '**v0.9.6**', t, count=1)
+          if '### v0.9.6 — compact reminder controls' not in t:
+              t += '\n\n### v0.9.6 — compact reminder controls\n- Rebuilt reminder icons as a 23 px hit area containing a 19 px circle, preventing Torn PDA button CSS from inflating the visible control.\n- Reduced icon spacing and kept the group at the far-right end of the resource strip.\n- Implementation remains original SakaLuX code based only on observed public behavior.\n'
+          d.write_text(t, encoding='utf-8')
 
-          p.write_text(s,encoding='utf-8')
-
-          d=Path('greasyfork/SakaLuX-Suite.md')
-          if d.exists():
-              t=d.read_text(encoding='utf-8')
-              t=re.sub(r'\*\*v0\.9\.\d+\*\*','**v0.9.6**',t,count=1)
-              if '### v0.9.6 — compact native-style reminder icons' not in t:
-                  t += '\n\n### v0.9.6 — compact native-style reminder icons\n- Rebuilt reminder controls as a small transparent hit area with a 19 px circular glyph to avoid Torn/PDA inherited button sizing.\n- Reduced spacing to 1 px and kept the reminder group at the visual end/right side of the resource strip.\n- Styling is independently implemented from observed public behavior; no third-party source/CSS was copied.\n'
-              d.write_text(t,encoding='utf-8')
-      - name: Verify JavaScript syntax
+      - name: Verify JavaScript
         run: node --check SakaLuX-Suite.user.js
-      - name: Commit v0.9.6
+
+      - name: Commit
         run: |
-          git config user.name 'SakaLuX'
-          git config user.email 'sakalutzu92@yahoo.com'
+          git config user.name SakaLuX
+          git config user.email sakalutzu92@yahoo.com
           git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
-          git commit -m 'Shrink Suite reminder icons and isolate Torn button styles in v0.9.6'
+          git commit -m "Compact Suite reminder icons in v0.9.6"
           git push origin HEAD:main
