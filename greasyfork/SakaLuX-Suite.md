@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.9.4**
+**v0.9.5**
 
 ## What it does
 
@@ -268,3 +268,9 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Daily Prayer Bell, Recovery Planner and Chain Alarm controls now measure the surrounding Torn resource-row controls and automatically use the median native icon size.
 - Removed cloning of the larger SakaLuX launcher for reminder buttons, preventing oversized circular controls.
 - Reminder buttons keep a compact circular Torn-style shell and scale their symbol proportionally for PDA/mobile.
+
+
+### v0.9.5 — compact resource-row integration
+- Finds the full Torn resource strip instead of the money-item wrapper, so reminder controls are appended at the visual far-right end.
+- Uses compact 28 px circular controls with 15 px glyphs and restrained native-style borders/shading.
+- Prevents the reminder group from inheriting oversized resource-item dimensions.
