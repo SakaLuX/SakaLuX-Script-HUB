@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.9.8**
+**v0.9.9**
 
 ## What it does
 
@@ -295,3 +295,9 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Added ID-backed enhancer, energy, nerve and health details while retaining visible-text fallbacks.
 - Rebuilt Event Lens as the full mobile event dashboard with filter chips, category counts, search, refresh, reset, day grouping, colored cards and Saved Events.
 - Kept the implementation stable under Torn's dynamic PDA navigation without recreating unchanged panels on every scan.
+
+### v0.9.9 — complete Item Signal data and TornPDA Event Lens fix
+- Replaced the partial Item Signal catalogue with the complete OC, enhancer, crime, energy, nerve, happiness and health ID maps used by the reference behavior.
+- Added every multi-purpose marker combination, including O/E/C overlaps and the full effect tooltip details.
+- Replaced the generic event-row detector with TornPDA's native `listItemWrapper`, message and `dateTime` structure.
+- Ported the full Event Lens lifecycle: delayed startup, PDA synchronization, native-list observation, filters, search, quick statistics, saved events, expanded cards and responsive layouts.
