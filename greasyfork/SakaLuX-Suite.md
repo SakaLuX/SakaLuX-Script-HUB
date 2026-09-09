@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.9.9**
+**v0.9.901**
 
 ## What it does
 
@@ -301,3 +301,12 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Added every multi-purpose marker combination, including O/E/C overlaps and the full effect tooltip details.
 - Replaced the generic event-row detector with TornPDA's native `listItemWrapper`, message and `dateTime` structure.
 - Ported the full Event Lens lifecycle: delayed startup, PDA synchronization, native-list observation, filters, search, quick statistics, saved events, expanded cards and responsive layouts.
+
+### v0.9.901 — persistent Suite panel and Events SPA adapter
+- Kept Item Signal as an exact transformed copy of Fortie's complete Item Intel module, including every OC, enhancer, crime, energy, nerve, happiness and health item map.
+- Kept Fortie's Event Lens dashboard and added a Suite-to-TornPDA adapter for Events routes exposed through query strings, hashes or SPA navigation.
+- Added a TornPDA fallback discovery layer for event rows whose generated wrapper classes differ, while retaining Fortie's native selectors as the first choice.
+- Replaced the Suite's text ON/OFF buttons with Fortie-style sliding switches.
+- The Suite window is now created once and hidden/reopened in place, so toggling modules no longer closes it or resets its scroll position.
+- Tightened spacing, controls and mobile sizing so more modules remain readable on small screens.
+- Added Event Lens route, row-count, waiting and mount information to Suite Diagnostics.
