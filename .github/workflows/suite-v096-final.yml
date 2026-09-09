@@ -1,0 +1,26 @@
+name: Apply SakaLuX Suite v0.9.6 final compact icons
+
+on:
+  push:
+    paths:
+      - '.github/workflows/suite-v096-final.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python tools/suite_v096_icon_fix.py
+      - name: Verify syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Commit changes
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git commit -m 'Compact Suite reminder icons in v0.9.6'
+          git push origin HEAD:main
