@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.9.901**
+**v0.9.902**
 
 ## What it does
 
@@ -310,3 +310,8 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - The Suite window is now created once and hidden/reopened in place, so toggling modules no longer closes it or resets its scroll position.
 - Tightened spacing, controls and mobile sizing so more modules remain readable on small screens.
 - Added Event Lens route, row-count, waiting and mount information to Suite Diagnostics.
+
+### v0.9.902 — Event Lens factory scope fix
+- Removed the stray unary `+` that turned the Event Lens factory declaration into an isolated expression.
+- Event Lens can now instantiate when its Suite switch is enabled.
+- Added a validation invariant for the exact factory declaration so this scope regression cannot pass CI again.
