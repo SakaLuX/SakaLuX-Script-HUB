@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.9.6**
+**v0.9.7**
 
 ## What it does
 
@@ -280,3 +280,9 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Rebuilt reminder icons as a compact 22 px hit area with an 18 px visible circle, preventing Torn PDA CSS from inflating the controls.
 - Reduced spacing and retained far-right placement in the resource strip.
 - Original SakaLuX implementation based on observed public behavior only.
+
+
+### v0.9.7 — reminder cleanup and Recovery Planner card
+- Only Recovery Planner keeps a Settings button in the Reminders group.
+- Daily Prayer Bell hides its top-bar icon immediately after prayer completion is detected and resets by UTC day.
+- Recovery Planner now opens a dedicated SakaLuX card with HP, hospital, bonus, item source, rescan and recommendation sections.
