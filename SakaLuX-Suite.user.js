@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.9
+// @version      0.9.901
 // @description  Experimental all-in-one modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,7 +30,7 @@
 (() => {
 'use strict';
 
-const VERSION='0.9.9';
+const VERSION='0.9.901';
 const IDS={fallback:'slx-suite-button',native:'slx-suite-native-button',overlay:'slx-suite-overlay',style:'slx-suite-style',dock:'slx-reminder-dock'};
 const K={
  modules:'SakaLuX_SUITE_MODULES_V2',api:'SakaLuX_SUITE_TORN_API_KEY',
@@ -116,11 +116,11 @@ function css(){
 :root{--sakalux-bg:#111318;--sakalux-bg-soft:#15181e;--sakalux-panel:#181b22;--sakalux-panel-2:#20242d;--sakalux-elevated:#252a33;--sakalux-border:#343a46;--sakalux-border-soft:#ffffff13;--sakalux-text:#f2f4f7;--sakalux-text-soft:#c8ccd4;--sakalux-muted:#969eaa;--sakalux-gold:#d8b35f;--sakalux-gold-bright:#f0cc72;--sakalux-gold-deep:#b88a35;--sakalux-green:#4fbd83;--sakalux-green-bright:#1ed786;--sakalux-red:#df5968;--sakalux-red-bright:#f25572;--sakalux-orange:#e69a4b;--sakalux-blue:#579bd5;--sakalux-blue-bright:#7bb7e6}
 #${IDS.fallback}{position:fixed;right:12px;bottom:88px;z-index:2147483645;width:52px;height:52px;border-radius:50%;border:1px solid #b78b34;background:#171717;color:#e2b34b;font-size:24px;font-weight:900;box-shadow:0 5px 20px #0009}
 #${IDS.native}{cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}#${IDS.native} .slxs-skull{display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;color:#e2b34b!important;min-width:28px;min-height:28px}
-#${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:#000b;display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
-.slxs-panel{width:min(720px,100%);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;background:#111318;color:#f3f4f6;border:1px solid #7c6233;border-radius:20px 20px 0 0;box-shadow:0 -12px 45px #000c}
-.slxs-head{padding:16px 18px;border-bottom:1px solid #30333a;flex:none}.slxs-row{display:flex;gap:10px;align-items:flex-start}.slxs-grow{flex:1}.slxs-kicker{font-size:10px;letter-spacing:3px;color:#e8bf67;font-weight:900}.slxs-title{font-size:21px;font-weight:900;margin-top:5px}.slxs-sub{font-size:11px;color:#9ca3af;margin-top:5px;line-height:1.45}.slxs-close{width:38px;height:38px;border:1px solid #3b414c;border-radius:10px;background:#252933;color:#fff;font-size:21px}
-.slxs-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;flex:1;min-height:0}.slxs-tools{padding:12px 16px;border-bottom:1px solid #2d3139;display:grid;grid-template-columns:1fr 1fr;gap:8px}.slxs-tool{border:1px solid #3a414d;background:#20242d;color:#fff;border-radius:10px;padding:10px;font-size:11px;font-weight:900}.slxs-api{margin:12px 16px;padding:14px;border:1px solid #5f5131;border-radius:14px;background:#17191f}.slxs-api h4,.slxs-cat h4{margin:0;color:#e8bf67;font-size:10px;letter-spacing:2px}.slxs-note{font-size:10px;color:#8e949f;margin-top:5px;line-height:1.4}.slxs-apirow{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}.slxs-api input{min-width:0;background:#101218;color:#fff;border:1px solid #353b46;border-radius:9px;padding:10px}.slxs-api button{border:0;border-radius:9px;background:#d5a63e;color:#17120a;font-weight:900;padding:0 16px}
-.slxs-body{padding:0 16px 16px}.slxs-cat{margin-top:12px;border:1px solid #2d3139;border-radius:14px;overflow:hidden;background:#15181e}.slxs-cat h4{padding:11px 14px;border-bottom:1px solid #2d3139}.slxs-mod{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px 14px;border-bottom:1px solid #282c33}.slxs-mod:last-child{border-bottom:0}.slxs-name{font-size:14px;font-weight:900}.slxs-meta{font-size:10px;color:#9298a3;line-height:1.45;margin-top:5px}.slxs-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.slxs-badge{font-size:8px;font-weight:900;border:1px solid #3e4653;border-radius:999px;padding:3px 7px}.ready{border-color:#2d7654!important;color:#8ee5b4}.off{border-color:#7d3447!important;color:#ff9bb3}.bridge{border-color:#75622e!important;color:#e8bf67}.internal{border-color:#376b96!important;color:#8acbff}.slxs-actions{display:flex;flex-direction:column;gap:7px;align-items:flex-end}.slxs-toggle{min-width:78px;border-radius:999px;padding:8px 12px;border:1px solid #7d3447;background:#411c28;color:#ffb3c4;font-size:10px;font-weight:900}.slxs-toggle.on{border-color:#2d7654;background:#183b2c;color:#9bf0bd}.slxs-open,.slxs-settings{border:1px solid #3a414d;background:#242a34;color:#fff;border-radius:8px;padding:7px 10px;font-size:9px;font-weight:900}.slxs-open:disabled,.slxs-settings:disabled{opacity:.35}.slxs-foot{padding:11px 16px;border-top:1px solid #2d3139;background:#0e1014;color:#7f8590;font-size:9px;display:flex;justify-content:space-between;flex:none}
+#${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:#000b;display:none;align-items:flex-end;justify-content:center;padding-top:max(8px,env(safe-area-inset-top));font-family:Arial,sans-serif}#${IDS.overlay}.slxs-visible{display:flex}
+.slxs-panel{width:min(760px,100%);height:min(92dvh,820px);display:flex;flex-direction:column;overflow:hidden;background:#111318;color:#f3f4f6;border:1px solid #7c6233;border-radius:18px 18px 0 0;box-shadow:0 -12px 45px #000c}
+.slxs-head{padding:13px 15px;border-bottom:1px solid #30333a;flex:none;background:#15181e}.slxs-row{display:flex;gap:10px;align-items:flex-start}.slxs-grow{flex:1;min-width:0}.slxs-kicker{font-size:9px;letter-spacing:2px;color:#e8bf67;font-weight:900}.slxs-title{font-size:19px;font-weight:900;margin-top:4px}.slxs-sub{font-size:10px;color:#9ca3af;margin-top:3px;line-height:1.35}.slxs-close{width:36px;height:36px;flex:0 0 auto;border:1px solid #3b414c;border-radius:10px;background:#252933;color:#fff;font-size:21px}
+.slxs-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;flex:1;min-height:0;scrollbar-gutter:stable}.slxs-tools{padding:10px 12px;border-bottom:1px solid #2d3139;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;background:#12151a}.slxs-tool{min-width:0;border:1px solid #3a414d;background:#20242d;color:#dfe3e8;border-radius:8px;padding:8px 5px;font-size:9px;font-weight:700}.slxs-api{margin:10px 12px;padding:11px 12px;border:1px solid #5f5131;border-radius:11px;background:#17191f}.slxs-api h4,.slxs-cat h4{margin:0;color:#e8bf67;font-size:9px;letter-spacing:1.5px}.slxs-note{font-size:9px;color:#8e949f;margin-top:4px;line-height:1.35}.slxs-apirow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;margin-top:8px}.slxs-api input{min-width:0;background:#101218;color:#fff;border:1px solid #353b46;border-radius:8px;padding:9px}.slxs-api button{border:0;border-radius:8px;background:#d5a63e;color:#17120a;font-weight:900;padding:0 13px}
+.slxs-body{padding:0 12px 14px}.slxs-cat{margin-top:10px;border:1px solid #2d3139;border-radius:11px;overflow:hidden;background:#15181e}.slxs-cat h4{padding:9px 11px;border-bottom:1px solid #2d3139;background:#181b21}.slxs-mod{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 11px;border-bottom:1px solid #282c33}.slxs-mod:last-child{border-bottom:0}.slxs-name{font-size:13px;font-weight:700}.slxs-meta{font-size:10px;color:#9298a3;line-height:1.35;margin-top:3px}.slxs-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}.slxs-badge{font-size:8px;font-weight:700;border:1px solid #3e4653;border-radius:999px;padding:2px 6px}.ready{border-color:#2d7654!important;color:#8ee5b4}.off{border-color:#4b515c!important;color:#9aa1ac}.bridge{border-color:#75622e!important;color:#e8bf67}.internal{border-color:#376b96!important;color:#8acbff}.slxs-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;max-width:155px}.slxs-toggle{position:relative;width:46px;height:25px;flex:0 0 46px;margin:0;padding:0;border:1px solid #404652;border-radius:999px;background:#292d35;cursor:pointer;appearance:none;box-shadow:none;transition:border-color .18s ease,background-color .18s ease}.slxs-toggle::after{content:"";position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#8c939e;transition:left .18s ease,background-color .18s ease}.slxs-toggle[aria-checked="true"]{border-color:#d8b35fb8;background:#d8b35f36}.slxs-toggle[aria-checked="true"]::after{left:24px;background:#f0cc72}.slxs-toggle:focus-visible{outline:2px solid #d8b35f66;outline-offset:2px}.slxs-open,.slxs-settings{height:27px;border:1px solid #3a414d;background:#242a34;color:#cdd2d9;border-radius:7px;padding:0 8px;font-size:8px;font-weight:700}.slxs-open:disabled,.slxs-settings:disabled{opacity:.35}.slxs-foot{padding:9px 13px calc(9px + env(safe-area-inset-bottom));border-top:1px solid #2d3139;background:#0e1014;color:#7f8590;font-size:9px;display:flex;justify-content:space-between;flex:none}
 #${IDS.dock}{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:1px!important;z-index:2147483644;order:2147483647!important;flex:0 0 auto!important;width:auto!important;height:22px!important;min-height:22px!important;margin:0 1px!important;padding:0!important}.slx-rem-btn{all:unset!important;box-sizing:border-box!important;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;max-width:22px!important;max-height:22px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;flex:0 0 22px!important;-webkit-tap-highlight-color:transparent!important}.slx-rem-glyph{box-sizing:border-box!important;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;max-width:18px!important;max-height:18px!important;border-radius:50%!important;border:1px solid #4d5c68!important;background:radial-gradient(circle at 38% 32%,#33414c 0,#26323b 58%,#1c252c 100%)!important;color:#e2e9ee!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:10px!important;font-weight:700!important;line-height:18px!important;font-family:Arial,sans-serif!important;box-shadow:inset 0 1px 1px #ffffff14,0 1px 2px #0008!important;overflow:hidden!important}.slx-rem-btn:active .slx-rem-glyph{transform:scale(.9)!important;opacity:.82!important}.slx-rem-fallback{position:fixed;right:10px;top:180px;display:flex;flex-direction:row;gap:3px;z-index:2147483643}
 
 .slx-recovery-card{position:fixed;z-index:2147483646;left:50%;top:50%;transform:translate(-50%,-50%);width:min(650px,calc(100vw - 24px));max-height:88vh;overflow:auto;background:#11151b;color:#edf2f7;border:1px solid #3e4b5b;border-radius:16px;box-shadow:0 16px 50px #000c;font-family:Arial,sans-serif}.slx-recovery-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #2f3946}.slx-recovery-head strong{flex:1;font-size:17px}.slx-recovery-sub{font-size:10px;color:#8d98a6;margin-top:2px}.slx-recovery-body{padding:14px}.slx-recovery-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.slx-recovery-stat{background:#171c24;border:1px solid #344050;border-radius:11px;padding:10px}.slx-recovery-label{font-size:9px;letter-spacing:1.2px;color:#8e99a7}.slx-recovery-value{font-size:17px;margin-top:4px;color:#8ee5b4}.slx-recovery-source{margin-top:10px;border:1px solid #344050;border-radius:10px;padding:10px;background:#151a21;font-size:12px}.slx-recovery-source b{color:#e8bf67}.slx-recovery-scan{width:100%;margin-top:10px;padding:11px;border:1px solid #5b5137;border-radius:10px;background:linear-gradient(#302d25,#201e1a);color:#fff;font-size:14px;font-weight:800}.slx-recovery-section{margin-top:14px;padding-top:12px;border-top:1px solid #303946}.slx-recovery-section-title{font-size:9px;letter-spacing:1.4px;color:#8d98a6;margin-bottom:8px}.slx-recovery-rec{border-left:3px solid #4cc38a;background:#171c24;border-radius:9px;padding:11px 12px;font-size:13px;line-height:1.45}.slx-recovery-list{margin-top:9px;font-size:10px;color:#aab3bf;line-height:1.5}.slx-recovery-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.slx-recovery-actions button{border:1px solid #3c4653;background:#242a34;color:#fff;border-radius:8px;padding:8px 11px;font-size:10px;font-weight:800}@media(max-width:430px){.slx-recovery-card{width:calc(100vw - 14px);max-height:84vh}.slx-recovery-stats{gap:5px}.slx-recovery-stat{padding:8px}.slx-recovery-value{font-size:14px}}
@@ -131,27 +131,32 @@ function css(){
 #slx-event-lens{--el-bg:#13171b;--el-panel:#171b20;--el-border:#2d333b;--el-gold:#e0bd62;--el-blue:#57a5df;--el-green:#67c65c;--el-red:#e96773;--el-muted:#969da5;margin:8px 0 14px;padding:0;border:1px solid #2b3340;border-radius:11px;background:linear-gradient(180deg,#171b21,#11151a);color:#eef1f3;overflow:hidden;font-family:Arial,sans-serif;box-shadow:0 5px 18px #0006}#slx-event-lens *{box-sizing:border-box}.slx-el-filters{display:flex;gap:8px;padding:9px;overflow-x:auto;scrollbar-width:none;background:#141923;border-bottom:1px solid #29313b;-webkit-overflow-scrolling:touch}.slx-el-filters::-webkit-scrollbar{display:none}.slx-el-chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;min-height:36px;padding:6px 10px;border:1px solid #35404c;border-radius:11px;background:#171d25;color:#cbd1d6;font-size:11px;white-space:nowrap}.slx-el-chip.is-active{border-color:#a98b49;background:linear-gradient(90deg,#493e26,#24241f);color:#f4e7bd;box-shadow:inset 3px 0 var(--el-gold),0 0 0 1px #d8b35f26}.slx-el-glyph{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid currentColor;border-radius:50%;font-size:11px}.slx-el-count{padding:3px 6px;border:1px solid #49515b;border-radius:6px;background:#ffffff09;color:#d8dde1;font-size:10px}.slx-el-controls{padding:9px}.slx-el-search{display:flex;align-items:center;gap:7px;height:42px;padding:0 11px;border:1px solid #303844;border-radius:9px;background:#121720}.slx-el-search span{opacity:.65}.slx-el-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#eef1f3;font-size:12px}.slx-el-search input::placeholder{color:#747c86}.slx-el-clear{border:0;background:transparent;color:#89919a;font-size:18px}.slx-el-actions{display:grid;grid-template-columns:1fr 2.6fr 1fr;gap:7px;margin-top:7px}.slx-el-actions button,.slx-el-meter{height:37px;border:1px solid #30353c;border-radius:9px;background:linear-gradient(#202328,#15171a);color:#cbd0d4;font-size:10px}.slx-el-meter{display:flex;align-items:center;justify-content:center;color:#858c94}.slx-el-list{border-top:1px solid #242b32}.slx-el-day{border-bottom:1px solid #242b32}.slx-el-day-head{display:flex;align-items:center;min-height:39px;padding:0 11px;border-left:3px solid var(--el-gold);background:#171a1e;color:var(--el-gold);font-size:10px;font-weight:700}.slx-el-day-head strong{flex:1}.slx-el-day-count{margin-right:8px;padding:4px 9px;border:1px solid #685d3d;border-radius:999px;background:#d8b35f12;color:#e3c66f;font-weight:400}.slx-el-collapse{width:28px;height:28px;border:1px solid #313b48;border-radius:50%;background:#19202a;color:#c8ced5}.slx-el-card{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr) 65px;gap:8px;min-height:67px;padding:8px 8px 8px 9px;border-top:1px solid #293038;border-left:4px solid var(--tone,var(--el-muted));background:linear-gradient(90deg,color-mix(in srgb,var(--tone,var(--el-muted)) 9%,#151a1e),#151a1e 33%)}.slx-el-icon{display:flex;align-items:center;justify-content:center;width:29px;height:29px;margin-top:1px;border:1px solid var(--tone,var(--el-muted));border-radius:50%;color:var(--tone,var(--el-muted));background:color-mix(in srgb,var(--tone,var(--el-muted)) 10%,transparent);font-size:13px}.slx-el-body{min-width:0}.slx-el-title{display:block;overflow:hidden;color:var(--tone,var(--el-blue));font-size:12px;line-height:1.3;text-decoration:none;text-overflow:ellipsis;white-space:nowrap}.slx-el-title:hover{text-decoration:underline}.slx-el-detail{color:#9ba2aa;font-size:10px;line-height:1.25}.slx-el-amount{color:var(--el-green);font-size:11px;line-height:1.35}.slx-el-time{text-align:right;color:#e2e5e7;font-size:10px;line-height:1.2}.slx-el-date{color:#8e959c}.slx-el-star{position:absolute;right:4px;bottom:3px;border:0;background:transparent;color:#626b74;font-size:13px}.slx-el-star.is-saved{color:var(--el-gold)}.slx-el-empty{padding:28px 12px;text-align:center;color:#848c94;font-size:11px}.slx-event-native-row-hidden{display:none!important}@media(max-width:430px){.slx-item-signal{min-width:12px;height:12px;padding:0 2px;font-size:6px}.slx-item-signal.energy,.slx-item-signal.nerve,.slx-item-signal.happy,.slx-item-signal.heal{min-width:12px}.slx-item-tip{font-size:11px}.slx-el-card{grid-template-columns:31px minmax(0,1fr) 62px;gap:6px}.slx-el-filters{gap:6px}.slx-el-chip{padding:5px 8px}}
 .slx-war-wide{position:fixed!important;inset:8px!important;z-index:2147483646!important;overflow:auto!important;margin:0!important}.slx-armory-loaned{outline:1px solid #b44!important}.slx-armory-available{outline:1px solid #285!important}
 .slx-item-tip{position:fixed;z-index:2147483647;max-width:min(340px,calc(100vw - 24px));background:#0f141c;color:#eef4ff;border:1px solid #4b6685;border-radius:10px;padding:10px 12px;box-shadow:0 10px 30px #000b;font-size:11px;line-height:1.45;pointer-events:auto}.slx-item-tip b{color:#8acbff}.slx-travel-grid,.slx-company-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-top:8px}.slx-mini-card{border:1px solid #374353;border-radius:8px;background:#111821;padding:7px}.slx-mini-card b{display:block;color:#eef4ff}.slx-risk-good{color:#8ee5b4}.slx-risk-mid{color:#e8bf67}.slx-risk-bad{color:#ff9bb3}
-@media(min-width:700px){#${IDS.overlay}{align-items:center}.slxs-panel{border-radius:20px;max-height:88vh}.slxs-tools{grid-template-columns:repeat(4,1fr)}.slxs-modal{align-items:center}.slxs-modal-card{border-radius:18px}}
+@media(max-width:560px){.slxs-panel{height:calc(100dvh - max(8px,env(safe-area-inset-top)))}.slxs-tools{grid-template-columns:repeat(3,minmax(0,1fr))}.slxs-mod{padding:10px}.slxs-meta{font-size:9px}.slxs-actions{max-width:105px}.slxs-open,.slxs-settings{width:100%}.slxs-api{margin:8px 10px}.slxs-body{padding:0 10px 12px}}
+@media(min-width:700px){#${IDS.overlay}{align-items:center;padding:16px}.slxs-panel{border-radius:18px;height:min(88vh,820px)}.slxs-modal{align-items:center}.slxs-modal-card{border-radius:18px}}
 `;document.head.appendChild(s)
 }
 
-function close(){document.getElementById(IDS.overlay)?.remove()}
+function close(){document.getElementById(IDS.overlay)?.classList.remove('slxs-visible')}
 function card(m){
  const on=!!state[m.id],r=ready(m),v=legacyVersion(m);
- return `<div class="slxs-mod"><div><div class="slxs-name">${m.icon} ${esc(m.name)}</div><div class="slxs-meta">${esc(m.desc)}</div><div class="slxs-badges"><span class="slxs-badge ${on?(r?'ready':'bridge'):'off'}">${on?(r?'READY':'WAITING'):'OFF'}</span><span class="slxs-badge ${m.kind==='internal'?'internal':'bridge'}">${m.kind==='internal'?'INTERNAL':'BRIDGE'}</span>${m.kind==='bridge'&&v?`<span class="slxs-badge ready">LEGACY v${esc(v)}</span>`:''}</div></div><div class="slxs-actions"><button class="slxs-toggle ${on?'on':''}" data-toggle="${m.id}">${on?'ON':'OFF'}</button>${m.settings?`<button class="slxs-settings" data-settings="${m.id}" ${on?'':'disabled'}>SETTINGS</button>`:''}${m.kind==='bridge'?`<button class="slxs-open" data-open="${m.id}" ${on&&r?'':'disabled'}>OPEN</button>`:''}</div></div>`;
+ return `<div class="slxs-mod" data-module-row="${m.id}"><div><div class="slxs-name">${m.icon} ${esc(m.name)}</div><div class="slxs-meta">${esc(m.desc)}</div><div class="slxs-badges"><span class="slxs-badge ${on?(r?'ready':'bridge'):'off'}" data-module-status>${on?(r?'READY':'WAITING'):'OFF'}</span><span class="slxs-badge ${m.kind==='internal'?'internal':'bridge'}">${m.kind==='internal'?'INTERNAL':'BRIDGE'}</span>${m.kind==='bridge'&&v?`<span class="slxs-badge ready">LEGACY v${esc(v)}</span>`:''}</div></div><div class="slxs-actions"><button class="slxs-toggle" type="button" role="switch" aria-label="${esc(m.name)}" aria-checked="${on?'true':'false'}" data-toggle="${m.id}" title="${on?'Disable':'Enable'} ${esc(m.name)}"></button>${m.settings?`<button class="slxs-settings" data-settings="${m.id}" ${on?'':'disabled'}>SETTINGS</button>`:''}${m.kind==='bridge'?`<button class="slxs-open" data-open="${m.id}" ${on&&r?'':'disabled'}>OPEN</button>`:''}</div></div>`;
+}
+function refreshPanelControls(){
+ const o=document.getElementById(IDS.overlay);if(!o)return;
+ for(const m of MODULES){const row=o.querySelector(`[data-module-row="${m.id}"]`);if(!row)continue;const on=!!state[m.id],r=ready(m),toggle=row.querySelector('[data-toggle]'),status=row.querySelector('[data-module-status]');if(toggle){toggle.setAttribute('aria-checked',on?'true':'false');toggle.title=`${on?'Disable':'Enable'} ${m.name}`}if(status){status.className=`slxs-badge ${on?(r?'ready':'bridge'):'off'}`;status.textContent=on?(r?'READY':'WAITING'):'OFF'}const settings=row.querySelector('[data-settings]');if(settings)settings.disabled=!on;const launch=row.querySelector('[data-open]');if(launch)launch.disabled=!(on&&r)}
 }
 function open(){
- close();const o=document.createElement('div');o.id=IDS.overlay;const cats=[...new Set(MODULES.map(m=>m.cat))];
+ let o=document.getElementById(IDS.overlay);if(o){refreshPanelControls();o.classList.add('slxs-visible');return}o=document.createElement('div');o.id=IDS.overlay;const cats=[...new Set(MODULES.map(m=>m.cat))];
  o.innerHTML=`<div class="slxs-panel"><div class="slxs-head"><div class="slxs-row"><div class="slxs-grow"><div class="slxs-kicker">MASTER CONTROL • EXPERIMENTAL</div><div class="slxs-title">☠ SakaLuX Suite</div><div class="slxs-sub">One installation target. Enable only the modules you use.</div></div><button class="slxs-close" id="slxs-close">×</button></div></div><div class="slxs-scroll"><div class="slxs-tools"><button class="slxs-tool" id="slxs-enable">ENABLE READY</button><button class="slxs-tool" id="slxs-disable">DISABLE ALL</button><button class="slxs-tool" id="slxs-export">EXPORT SETTINGS</button><button class="slxs-tool" id="slxs-import">IMPORT SETTINGS</button><button class="slxs-tool" id="slxs-diag">DIAGNOSTICS</button></div><div class="slxs-api"><h4>SHARED TORN API KEY</h4><div class="slxs-note">Stored only in this browser and excluded from exported Suite settings.</div><div class="slxs-apirow"><input id="slxs-key" type="password" autocomplete="off" placeholder="Enter your Torn API key" value="${esc(apiKey)}"><button id="slxs-save">SAVE KEY</button></div></div><div class="slxs-body">${cats.map(c=>`<div class="slxs-cat"><h4>${esc(c.toUpperCase())}</h4>${MODULES.filter(m=>m.cat===c).map(card).join('')}</div>`).join('')}</div></div><div class="slxs-foot"><span>Active build: v${VERSION}</span><span>SAKALUX MODULAR SUITE</span></div></div>`;
- document.body.appendChild(o);o.onclick=e=>{if(e.target===o)close()};
+ document.body.appendChild(o);o.classList.add('slxs-visible');o.onclick=e=>{if(e.target===o)close()};
  document.getElementById('slxs-close').onclick=close;
  document.getElementById('slxs-save').onclick=()=>{apiKey=document.getElementById('slxs-key').value.trim();localStorage.setItem(K.api,apiKey);document.getElementById('slxs-save').textContent='SAVED ✓'};
- document.getElementById('slxs-enable').onclick=()=>{for(const m of MODULES)if(ready(m))state[m.id]=true;save(K.modules,state);applyModules();open()};
- document.getElementById('slxs-disable').onclick=()=>{for(const m of MODULES)state[m.id]=false;save(K.modules,state);applyModules();open()};
+ document.getElementById('slxs-enable').onclick=()=>{for(const m of MODULES)if(ready(m))state[m.id]=true;save(K.modules,state);refreshPanelControls();applyModules()};
+ document.getElementById('slxs-disable').onclick=()=>{for(const m of MODULES)state[m.id]=false;save(K.modules,state);refreshPanelControls();applyModules()};
  document.getElementById('slxs-export').onclick=()=>prompt('Copy Suite settings:',JSON.stringify({app:'SakaLuX Suite',version:VERSION,modules:state,recovery:recoveryCfg,chain:load(SLX_KEYS.chain,CHAIN_DEFAULTS),item:load(SLX_KEYS.item,ITEM_CFG_DEFAULTS),events:load(SLX_KEYS.events,EVENT_CFG_DEFAULTS),odds:load(SLX_KEYS.odds,ODDS_CFG_DEFAULTS),pulse:load(SLX_KEYS.pulse,PULSE_CFG_DEFAULTS),oc:load(SLX_KEYS.ocCfg,OC_CFG_DEFAULTS)}));
  document.getElementById('slxs-diag').onclick=()=>openDiagnostics();
- document.getElementById('slxs-import').onclick=()=>{const raw=prompt('Paste Suite settings:');if(!raw)return;try{const d=JSON.parse(raw);if(d.app!=='SakaLuX Suite')throw 0;for(const m of MODULES)if(typeof d.modules?.[m.id]==='boolean')state[m.id]=d.modules[m.id];if(d.recovery)recoveryCfg={...RECOVERY_DEFAULTS,...d.recovery};if(d.chain)save(SLX_KEYS.chain,d.chain);if(d.item)save(SLX_KEYS.item,d.item);if(d.events)save(SLX_KEYS.events,d.events);if(d.odds)save(SLX_KEYS.odds,d.odds);if(d.pulse)save(SLX_KEYS.pulse,d.pulse);if(d.oc)save(SLX_KEYS.ocCfg,d.oc);save(K.modules,state);save(K.recovery,recoveryCfg);applyModules();open()}catch{alert('Invalid Suite backup.')}};
- o.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{state[b.dataset.toggle]=!state[b.dataset.toggle];save(K.modules,state);applyModules();open()});
+ document.getElementById('slxs-import').onclick=()=>{const raw=prompt('Paste Suite settings:');if(!raw)return;try{const d=JSON.parse(raw);if(d.app!=='SakaLuX Suite')throw 0;for(const m of MODULES)if(typeof d.modules?.[m.id]==='boolean')state[m.id]=d.modules[m.id];if(d.recovery)recoveryCfg={...RECOVERY_DEFAULTS,...d.recovery};if(d.chain)save(SLX_KEYS.chain,d.chain);if(d.item)save(SLX_KEYS.item,d.item);if(d.events)save(SLX_KEYS.events,d.events);if(d.odds)save(SLX_KEYS.odds,d.odds);if(d.pulse)save(SLX_KEYS.pulse,d.pulse);if(d.oc)save(SLX_KEYS.ocCfg,d.oc);save(K.modules,state);save(K.recovery,recoveryCfg);refreshPanelControls();applyModules()}catch{alert('Invalid Suite backup.')}};
+ o.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{state[b.dataset.toggle]=!state[b.dataset.toggle];save(K.modules,state);refreshPanelControls();applyModules()});
  o.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openBridge(b.dataset.open));
  o.querySelectorAll('[data-settings]').forEach(b=>b.onclick=()=>openModuleSettings(b.dataset.settings));
 }
@@ -270,8 +275,19 @@ function toggleFloat(id,title,html,after){const old=document.getElementById(id);
       let moduleActive = false;
       let eventController = null;
       function onEventsPage() {
-          return /\/page\.php$/i.test(location.pathname) &&
-              new URLSearchParams(location.search).get('sid') === 'events';
+          const search = new URLSearchParams(location.search);
+          const hash = String(location.hash || '');
+          const hashQuery = hash.includes('?')
+              ? new URLSearchParams(hash.slice(hash.indexOf('?') + 1))
+              : new URLSearchParams(hash.replace(/^#/, ''));
+          const sid = String(search.get('sid') || hashQuery.get('sid') || '').toLowerCase();
+          if (sid === 'events') return true;
+          const route = `${location.pathname}${location.search}${hash}`.toLowerCase();
+          if (/(?:^|[\/#?&=])events(?:\.php)?(?:$|[\/#?&=])/.test(route)) return true;
+          return [...document.querySelectorAll('h1,h2')].some(title =>
+              !title.closest(`#${ROOT_ID}, #slx-suite-overlay`) &&
+              cleanText(title.textContent).toLowerCase() === 'events'
+          );
       }
       const EVENT_TONES = {
           green:  ['var(--sakalux-green)',       'color-mix(in srgb, var(--sakalux-green) 16%, transparent)',       'color-mix(in srgb, var(--sakalux-green) 46%, transparent)'],
@@ -589,13 +605,13 @@ function toggleFloat(id,title,html,after){const old=document.getElementById(id);
                   const message =
                       cleanText(
                           row.querySelector(
-                              '[class*="message"]'
+                              '[class*="message"], [data-sakalux-event-message]'
                           )?.textContent
                       );
                   const time =
                       cleanText(
                           row.querySelector(
-                              'time[class*="dateTime"]'
+                              'time[class*="dateTime"], [data-sakalux-event-time]'
                           )?.textContent
                       );
                   return `${message}|${time}`;
@@ -759,7 +775,7 @@ function toggleFloat(id,title,html,after){const old=document.getElementById(id);
               }, 450);
       }
       function getNativeRows() {
-          return [
+          const exact = [
               ...document.querySelectorAll(
                   'li[class*="listItemWrapper"]'
               )
@@ -768,6 +784,19 @@ function toggleFloat(id,title,html,after){const old=document.getElementById(id);
                   row.querySelector('[class*="message"]') &&
                   row.querySelector('time[class*="dateTime"]')
               );
+          });
+          if (exact.length) return exact;
+
+          // Fortie's parser stays unchanged; this adapter only discovers the
+          // equivalent TornPDA SPA nodes when generated class names differ.
+          return [...document.querySelectorAll('li, [role="listitem"]')].filter(row => {
+              if (row.closest(`#${ROOT_ID}, #slx-suite-overlay`)) return false;
+              const message = row.querySelector('[class*="message"], [class*="contentGroup"], [class*="eventText"]');
+              const time = row.querySelector('time[class*="dateTime"], time, [class*="dateTime"]');
+              if (!message || !time || cleanText(message.textContent).length < 3) return false;
+              message.setAttribute('data-sakalux-event-message', '');
+              time.setAttribute('data-sakalux-event-time', '');
+              return true;
           });
       }
       function buildDashboard() {
@@ -1126,11 +1155,11 @@ function toggleFloat(id,title,html,after){const old=document.getElementById(id);
       function parseRow(row, index) {
           const messageEl =
               row.querySelector(
-                  '[class*="message"]'
+                  '[class*="message"], [data-sakalux-event-message]'
               );
           const timeEl =
               row.querySelector(
-                  'time[class*="dateTime"]'
+                  'time[class*="dateTime"], [data-sakalux-event-time]'
               );
           const buttonsEl =
               row.querySelector(
@@ -2863,11 +2892,11 @@ function toggleFloat(id,title,html,after){const old=document.getElementById(id);
                   .find(row => {
                       const msgEl =
                           row.querySelector(
-                              '[class*="message"]'
+                              '[class*="message"], [data-sakalux-event-message]'
                           );
                       const timeEl =
                           row.querySelector(
-                              'time[class*="dateTime"]'
+                              'time[class*="dateTime"], [data-sakalux-event-time]'
                           );
                       if (!msgEl || !timeEl) {
                           return false;
@@ -5882,6 +5911,16 @@ function toggleFloat(id,title,html,after){const old=document.getElementById(id);
                   stopDashboard();
               }
           },
+          status() {
+              const eventsRoute = onEventsPage();
+              return {
+                  active: moduleActive,
+                  onEventsPage: eventsRoute,
+                  nativeRows: eventsRoute ? getNativeRows().length : 0,
+                  mounted: !!document.getElementById(ROOT_ID),
+                  waiting: !!state.startupTimer
+              };
+          },
           destroy
       };
   }
@@ -6388,6 +6427,8 @@ function openDiagnostics(){
  add('Prayer detection',typeof observePrayerSuccess==='function');
  add('Recovery life parser',!!visibleLife()||true,visibleLife()?'Life detected':'Life not visible on this page');
  add('Chain parser',!!chainText()||true,chainText()?'Chain detected':'Chain not visible on this page');
+ const eventStatus=sakaluxEventLensModule?.status?.();
+ add('Event Lens',!state['event-lens']||!!eventStatus?.mounted||!eventStatus?.onEventsPage,eventStatus?`${eventStatus.onEventsPage?'Events route':'Other route'} · ${eventStatus.nativeRows} native rows · ${eventStatus.mounted?'mounted':eventStatus.waiting?'waiting for rows':'not mounted'}`:'disabled');
  add('Faction rows',factionRows().length>0||!/faction/i.test(location.href),`${factionRows().length} rows`);
  add('Recovery settings',MODULES.find(m=>m.id==='recovery-planner')?.settings===true);
  const html=checks.map(x=>`${x.ok?'✅':'❌'} <b>${esc(x.name)}</b>${x.detail?' — '+esc(x.detail):''}`).join('<br>');
@@ -6401,7 +6442,7 @@ function applyModules(force=false){
  itemSignals();eventLens();factionPulse();armoryRadar();travelMap();ocRoleMatch();ocReadiness();warPerformance();companyConsole();oddsScout();raceLeague();
 }
 function health(){return{version:VERSION,nativeLauncher:!!document.getElementById(IDS.native),sharedApiKeyStored:!!apiKey,modules:MODULES.map(m=>({id:m.id,name:m.name,enabled:!!state[m.id],kind:m.kind,ready:ready(m),legacyVersion:m.kind==='bridge'?legacyVersion(m):null}))}}
-window.SakaLuXSuite={version:VERSION,open,close,health,isModuleEnabled:id=>!!state[id],getSharedApiKey:()=>apiKey,openRecoverySettings,openModuleSettings,markPrayed};
+window.SakaLuXSuite={version:VERSION,open,close,health,eventLensStatus:()=>sakaluxEventLensModule?.status?.()||{active:false,onEventsPage:false,nativeRows:0,mounted:false,waiting:false},isModuleEnabled:id=>!!state[id],getSharedApiKey:()=>apiKey,openRecoverySettings,openModuleSettings,markPrayed};
 
 let scanTimer=0;
 function scheduleScan(){clearTimeout(scanTimer);scanTimer=setTimeout(()=>applyModules(false),500)}
