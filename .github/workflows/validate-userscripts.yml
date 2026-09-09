@@ -109,6 +109,7 @@ jobs:
                   raise SystemExit(f'Unexpected settings flag for {module_id}: {actual}')
 
           required_runtime = [
+              "function createSakaLuXEventLensModule(context) {",
               "document.getElementById('slx-daily-prayer')?.remove()",
               "function openRecoveryPanel(){",
               "className='slx-recovery-card'",
@@ -121,6 +122,14 @@ jobs:
           missing = [x for x in required_runtime if x not in text]
           if missing:
               raise SystemExit('Reminder/Recovery runtime invariant missing: ' + ', '.join(missing))
+
+          event_factory = re.search(
+              r'^\s*function createSakaLuXEventLensModule\(context\) \{',
+              text,
+              re.M,
+          )
+          if not event_factory:
+              raise SystemExit('Event Lens factory is not a scoped function declaration')
 
           print('Reminder and Recovery Planner invariants: OK')
 
