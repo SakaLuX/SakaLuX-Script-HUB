@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.903
-// @description  Fortie-parity modular SakaLuX toolkit for Torn PDA / Tampermonkey.
+// @version      0.9.904
+// @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @match        https://torn.com/*
 // @grant        GM_xmlhttpRequest
-// @grant        GM.xmlHttpRequest
 // @connect      tornprobability.com
 // @connect      api.torn.com
 // @connect      tc-armasync.netlify.app
@@ -20,11 +19,11 @@
 // @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 // ==/UserScript==
 /* Copyright © 2026 SakaLuX [2380374]. All Rights Reserved.
- * Module implementations are integrated from the user-provided Fortie base,
- * with SakaLuX namespacing, settings migration and TornPDA compatibility. */
+ * Complete module implementations with SakaLuX naming,
+ * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = "0.9.903";
+  const VERSION = "0.9.904";
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -285,17 +284,17 @@
   const MODULES = [
     {
       id: "prayerReminder",
-      name: "Prayer Reminder",
-      category: "Quality of Life",
-      description: "Daily prayer reminder icon that hides after praying until the next UTC day.",
+      name: "Daily Prayer Bell",
+      category: "Reminders",
+      description: "Daily prayer cue that hides after praying until the next UTC day.",
       ready: true,
       requiresReload: false,
       factory: createPrayerReminderModule
     },
     {
       id: "medAdvisor",
-      name: "Med Advisor",
-      category: "Quality of Life",
+      name: "Recovery Planner",
+      category: "Reminders",
       description: "Smart medical item recommendations using current life and hospital time.",
       ready: true,
       requiresReload: false,
@@ -303,8 +302,8 @@
     },
     {
       id: "itemIntel",
-      name: "Item Intel",
-      category: "Quality of Life",
+      name: "Item Signal",
+      category: "Reminders",
       description: "Adds compact item markers for OC uses, enhancers, crime requirements, energy, nerve, happiness and health gains.",
       ready: true,
       requiresReload: false,
@@ -312,8 +311,8 @@
     },
     {
       id: "eventsDashboard",
-      name: "Event Intel",
-      category: "Quality of Life",
+      name: "Event Lens",
+      category: "Reminders",
       description: "Cleaner, searchable and categorised Torn Events dashboard with quick stats, event actions and Saved Events support.",
       ready: true,
       requiresReload: false,
@@ -321,7 +320,7 @@
     },
     {
       id: "activityIntelligence",
-      name: "Activity Intelligence",
+      name: "Faction Pulse",
       category: "Faction",
       description: "Compact faction activity intelligence with last action, travel, abroad, hospital and jail information using the shared Torn API key.",
       ready: true,
@@ -330,16 +329,16 @@
     },
     {
       id: "factionMemberView",
-      name: "Faction Member View",
+      name: "Member Travel Map",
       category: "Faction",
-      description: "Compact faction command view with shared countries, live member status, master-managed tags and automatic War Ledger rating tags.",
+      description: "Compact faction command view with shared countries, live member status, master-managed tags and automatic War Performance rating tags.",
       ready: true,
       requiresReload: false,
       factory: createFactionMemberViewModule
     },
     {
       id: "armoryLoanScanner",
-      name: "Armory Loan Scanner",
+      name: "Armory Loan Radar",
       category: "Faction",
       description: "Scan faction armory pages, save loaned items locally, colour loan status and show member loan popups on faction and mini-profile views.",
       ready: true,
@@ -348,7 +347,7 @@
     },
     {
       id: "warLedger",
-      name: "War Ledger",
+      name: "War Performance",
       category: "Faction",
       description: "Ranked war performance analytics, member reliability, risk tracking, command views and ArmaSync after-action reports.",
       ready: true,
@@ -357,7 +356,7 @@
     },
     {
       id: "ocOperations",
-      name: "OC Operations",
+      name: "OC Role Match + Readiness",
       category: "Faction",
       description: "OC reminders, missing role-item alerts, armoury loan intelligence, role weights, suitability scoring and estimated success.",
       ready: true,
@@ -366,7 +365,7 @@
     },
     {
       id: "companyManagement",
-      name: "Company Management Suite",
+      name: "Company Console",
       category: "Company",
       description: "Stock, pricing, employees, wages, training logs, tax tracking and company snapshots.",
       ready: true,
@@ -375,7 +374,7 @@
     },
     {
       id: "racingChampionship",
-      name: "Championship Tracker",
+      name: "Race League Board",
       category: "Racing",
       description: "Scans race results and tracks championships, standings, race logs, driver profiles and statistics.",
       ready: true,
@@ -384,7 +383,7 @@
     },
     {
       id: "casinoEdgeScanner",
-      name: "Edge Scanner",
+      name: "Odds Scout",
       category: "Casino",
       description: "Sports betting market scanner with no-vig probabilities, bookmaker margin analysis, market strength and live probability search.",
       ready: true,
@@ -393,7 +392,7 @@
     },
     {
       id: "targetAlerts",
-      name: "Target & Enemy Alerts",
+      name: "Target Alerts",
       category: "Lists",
       description: "Monitors Targets and Enemies, adds People-panel tabs, Okay counters and configurable status alerts.",
       ready: true,
@@ -403,7 +402,7 @@
     {
       id: "chainAlarm",
       name: "Chain Alarm",
-      category: "Quality of Life",
+      category: "Reminders",
       description: "SakaLuX chain timer warning with persistent position and thresholds.",
       ready: true,
       requiresReload: false,
@@ -2433,7 +2432,7 @@ const POPUP_ID = "sakalux-oco-popup";
 
     writeStageScanState(state);
   }
-  const log = (...a) => console.log("[SakaLuX OC Operations]", ...a);
+  const log = (...a) => console.log("[SakaLuX OC Role Match + Readiness]", ...a);
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const now = () => Date.now();
   function loadLS(key) {
@@ -4844,7 +4843,7 @@ const POPUP_ID = "sakalux-oco-popup";
     bd.innerHTML = `
       <div class="sakalux-oco-panel sakalux-oco-card">
         <div class="sakalux-oco-header">
-          <span>OC Operations - Settings</span>
+          <span>OC Role Match + Readiness - Settings</span>
           <button class="sakalux-oco-btn icon" id="sakalux-oco-settings-close" type="button" title="Close">✕</button>
         </div>
         <div class="sakalux-oco-body">
@@ -4982,7 +4981,7 @@ const POPUP_ID = "sakalux-oco-popup";
     hud.className = "sakalux-oco-panel";
     hud.innerHTML = `
       <div class="sakalux-oco-hud-header">
-        <span>OC Operations</span>
+        <span>OC Role Match + Readiness</span>
         <button class="sakalux-oco-btn icon" id="sakalux-oco-hud-gear" type="button" title="Settings">⚙</button>
       </div>
       <div class="sakalux-oco-hud-row" id="sakalux-oco-hud-oc"></div>
@@ -6146,7 +6145,7 @@ const POPUP_ID = "sakalux-oco-popup";
           flashScanStatus(statusEl, sessionScanSummary(), "success");
         }
       } catch (err) {
-        console.error("[SakaLuX OC Operations] Scan error:", err);
+        console.error("[SakaLuX OC Role Match + Readiness] Scan error:", err);
         flashScanStatus(statusEl, "Scan failed", "error", 2200);
       } finally {
         btn.disabled = false;
@@ -9264,7 +9263,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             <div class="fse-head">
                 <div class="fse-title-wrap">
                     <div class="fse-title">
-                        SakaLuX Edge Scanner
+                        SakaLuX Odds Scout
                     </div>
                     <div class="fse-sub">
                         <span>
@@ -10822,7 +10821,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         `).join("");
         panel.innerHTML = `
             <div class="sakalux-alert-settings-head">
-                <div class="sakalux-alert-heading">Target & Enemy Alerts</div>
+                <div class="sakalux-alert-heading">Target Alerts</div>
                 <button
                     type="button"
                     class="sakalux-alert-settings-close"
@@ -14261,7 +14260,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       try {
         localStorage.setItem(key, JSON.stringify(value));
       } catch (error) {
-        console.warn("[SakaLuX Faction Member View] Storage error", error);
+        console.warn("[SakaLuX Member Travel Map] Storage error", error);
       }
     }
     function moduleSettings() {
@@ -15654,7 +15653,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         state.members = await fetchMembers(force, page);
       } catch (error) {
         state.error = error.message || "Member data could not be refreshed";
-        console.warn("[SakaLuX Faction Member View]", error);
+        console.warn("[SakaLuX Member Travel Map]", error);
       } finally {
         state.loading = false;
         render();
@@ -16021,7 +16020,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       layer.innerHTML = `
         <div class="sakalux-fmv-settings-card">
           <div class="sakalux-fmv-settings-head">
-            <div><strong>Faction Member View Settings</strong><small>Part of T.E.S Master Settings. Uses the shared Torn API key automatically. Country flags, country map, import/export, PC member intelligence, tags and profile fields are all managed by Faction Member View.</small></div>
+            <div><strong>Member Travel Map Settings</strong><small>Part of T.E.S Master Settings. Uses the shared Torn API key automatically. Country flags, country map, import/export, PC member intelligence, tags and profile fields are all managed by Member Travel Map.</small></div>
             <button type="button" data-fmv-close>×</button>
           </div>
           <div class="sakalux-fmv-settings-body">
@@ -16051,7 +16050,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             </section>
             <section class="sakalux-fmv-section">
               <div class="sakalux-fmv-section-title">Shared Data</div>
-              <div style="color:var(--sakalux-muted);font-size:9px;line-height:1.55">Country &amp; Flags: <b style="color:var(--sakalux-text)">Faction Member View</b><br>War rating: <b style="color:var(--sakalux-text)">War Ledger</b><br>API key: <b style="color:var(--sakalux-text)">T.E.S Shared Torn API Key</b></div>
+              <div style="color:var(--sakalux-muted);font-size:9px;line-height:1.55">Country &amp; Flags: <b style="color:var(--sakalux-text)">Member Travel Map</b><br>War rating: <b style="color:var(--sakalux-text)">War Performance</b><br>API key: <b style="color:var(--sakalux-text)">T.E.S Shared Torn API Key</b></div>
             </section>
           </div>
           <div class="sakalux-fmv-settings-foot">
@@ -16106,7 +16105,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         });
         close();
         render();
-        context.showToast?.("Faction Member View settings saved");
+        context.showToast?.("Member Travel Map settings saved");
       });
     }
     function renderSettingTagRow(item = {}) {
@@ -22160,7 +22159,7 @@ const STYLE_ID = "sakalux-Armory-loan-style";
   let cachedMemberSummary = null;
   let moduleActive = false;
   let eventController = null;
-  const log = (...a) => console.log("[SakaLuX Armory Loan Scanner]", ...a);
+  const log = (...a) => console.log("[SakaLuX Armory Loan Radar]", ...a);
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   function cleanText(s) {
     return String(s || "").replace(/\s+/g, " ").trim();
@@ -23328,7 +23327,7 @@ const STYLE_ID = "sakalux-Armory-loan-style";
         btn.disabled = false;
       }, 2000);
     } catch (err) {
-      console.error("[SakaLuX Armory Loan Scanner] Scan failed:", err);
+      console.error("[SakaLuX Armory Loan Radar] Scan failed:", err);
       if (label) label.textContent = "Failed";
       else btn.innerHTML = "Failed";
       setTimeout(() => {
@@ -23801,7 +23800,7 @@ function armoryLoanIconSvg() {
         ensureProfileLoanButton();
         cleanupProfileLoanButtons();
       } catch (err) {
-        console.error("[SakaLuX Armory Loan Scanner] UI heartbeat failed:", err);
+        console.error("[SakaLuX Armory Loan Radar] UI heartbeat failed:", err);
       }
     }, 1800);
     onPageUpdate(true);
@@ -26365,6 +26364,12 @@ function armoryLoanIconSvg() {
               card,
               event.links
           );
+          restoreMessageLinks(
+              card.querySelector(
+                  '.ax-expanded-message'
+              ),
+              event.links
+          );
           copyButtons(
               card,
               event.buttonsEl,
@@ -26476,9 +26481,12 @@ function armoryLoanIconSvg() {
               card.querySelector(
                   '.ax-event-title'
               );
-          if (!title) return;
+          restoreMessageLinks(title, links);
+      }
+      function restoreMessageLinks(element, links) {
+          if (!element) return;
           let html =
-              title.innerHTML;
+              element.innerHTML;
           links.forEach(link => {
               if (!link.text) return;
               const escaped =
@@ -26486,15 +26494,15 @@ function armoryLoanIconSvg() {
               if (!html.includes(escaped)) {
                   return;
               }
-              html =
-                  html.replace(
-                      escaped,
+                  html =
+                      html.replace(
+                          escaped,
                       `<a href="${escapeHTML(
                           link.href
                       )}">${escaped}</a>`
-                  );
+                      );
           });
-          title.innerHTML = html;
+          element.innerHTML = html;
       }
       function addViewAction(card, viewLink) {
           if (!viewLink) return;
@@ -31472,7 +31480,7 @@ const STORAGE_KEY = "sakalux_war_tracker_v26_blank";
                 }));
             }
         } catch (error) {
-            console.warn("[SakaLuX War Ledger] Could not publish member ratings", error);
+            console.warn("[SakaLuX War Performance] Could not publish member ratings", error);
         }
         const showGhosted = store.get(GHOST_SHOW_KEY, false);
         result = result.filter(r => {
@@ -31823,7 +31831,7 @@ const STORAGE_KEY = "sakalux_war_tracker_v26_blank";
         panel.classList.toggle("fw-cards-collapsed", !cardsExpanded);
         panel.innerHTML = `
             <div class="fw-header">
-                <div class="fw-header-top"><div class="fw-title" id="fw-clear-title">SakaLuX Faction: War Ledger</div></div>
+                <div class="fw-header-top"><div class="fw-title" id="fw-clear-title">SakaLuX Faction: War Performance</div></div>
                 <div class="fw-header-controls">
                     <button
                         id="fw-ghost-toggle"
@@ -31846,13 +31854,13 @@ const STORAGE_KEY = "sakalux_war_tracker_v26_blank";
                     <span><b>O</b> = Outside</span>
                     <span><b>B</b> = Bleed</span>
                     <span><b>Combined</b> = War Hits + (Outside Hits × 0.5)</span>
-                    <button type="button" class="fw-legend-info" id="fw-legend-info" aria-label="Open War Ledger guide">i</button>
+                    <button type="button" class="fw-legend-info" id="fw-legend-info" aria-label="Open War Performance guide">i</button>
                 </div>
                 <div class="fw-guide-backdrop" id="fw-guide-backdrop" hidden>
-                    <section class="fw-guide-panel" role="dialog" aria-modal="true" aria-label="War Ledger guide">
+                    <section class="fw-guide-panel" role="dialog" aria-modal="true" aria-label="War Performance guide">
                         <div class="fw-guide-head">
                             <div>
-                                <strong>War Ledger Guide</strong>
+                                <strong>War Performance Guide</strong>
                                 <small>How Command View ratings and metrics are calculated</small>
                             </div>
                             <button type="button" id="fw-guide-close" aria-label="Close">×</button>
@@ -33329,7 +33337,7 @@ const STORAGE_KEY = "sakalux_war_tracker_v26_blank";
                     }
                 } catch (error) {
                     console.warn(
-                        "[SakaLuX War Ledger] Historical roster API fallback:",
+                        "[SakaLuX War Performance] Historical roster API fallback:",
                         error
                     );
 
@@ -33492,7 +33500,7 @@ const STORAGE_KEY = "sakalux_war_tracker_v26_blank";
                     applyCompletedWarAttackIntel(warId, attackIntel);
                 } catch (error) {
                     attackIntelError = String(error?.message || error || "Attack-log scan failed");
-                    console.warn("[SakaLuX War Ledger] Completed-war attack scan failed:", error);
+                    console.warn("[SakaLuX War Performance] Completed-war attack scan failed:", error);
                 } finally {
                     btn.disabled = false;
                 }
@@ -35700,7 +35708,7 @@ const STORAGE_KEY = "sakalux_war_tracker_v26_blank";
         return callback?.();
       } catch (error) {
         console.error(
-          `[SakaLuX Suite] OC Operations ${label} failed`,
+          `[SakaLuX Suite] OC Role Match + Readiness ${label} failed`,
           error
         );
         return undefined;
@@ -38528,7 +38536,7 @@ function scan(){
     };
   }
   function createRacingChampionshipModule(context) {
-  const SCRIPT_NAME = 'SakaLuX Racing: Championship Tracker';
+  const SCRIPT_NAME = 'SakaLuX Racing: Race League Board';
   const STORAGE_KEY = 'torn_racing_leaderboard';
   const SETTINGS_KEY = 'torn_racing_leaderboard_settings';
   const STYLE_ID = 'trl-styles';
@@ -41572,8 +41580,8 @@ function scan(){
       badge.textContent=info.label;
       badge.title=
         info.label==="ENHANCER"
-          ?"Item Intel Enhancer"
-          :"Item Intel OC Item";
+          ?"Item Signal Enhancer"
+          :"Item Signal OC Item";
 
       const abandon=node.querySelector(
         ':scope > [class*="abandonButtonWrapper"]'
@@ -41912,7 +41920,7 @@ function scan(){
         url.searchParams.set("key", key);
         url.searchParams.set(
           "comment",
-          "SakaLuX Torn Enhancement Suite Med Advisor"
+          "SakaLuX Torn Enhancement Suite Recovery Planner"
         );
         const data = await requestJson(url.toString());
         if (data?.error) {
@@ -41964,7 +41972,7 @@ function scan(){
         };
       } catch (error) {
         console.warn(
-          "[SakaLuX Suite] Med Advisor API lookup failed:",
+          "[SakaLuX Suite] Recovery Planner API lookup failed:",
           error
         );
         return null;
@@ -42887,7 +42895,7 @@ function scan(){
           <div class="tma-header-left">
             <span class="tma-header-icon">⚕</span>
             <div>
-              <div class="tma-header-title">Med Advisor</div>
+              <div class="tma-header-title">Recovery Planner</div>
               <div class="tma-header-sub">SakaLuX QOL Module</div>
             </div>
           </div>
@@ -42944,7 +42952,7 @@ function scan(){
       settingsPanel.id = IDS.settings;
       settingsPanel.innerHTML = `
         <div class="tma-header" style="cursor:default">
-          <span class="tma-header-title">⚙ Med Advisor Settings</span>
+          <span class="tma-header-title">⚙ Recovery Planner Settings</span>
           <button class="tma-icon-btn" id="tma-settings-close" type="button">✕</button>
         </div>
         <div class="tma-settings-body">
@@ -43143,7 +43151,7 @@ function scan(){
       saveSettings();
       updateBonusDisplay();
       updateSourceLabel();
-      context.showToast("Med Advisor settings saved");
+      context.showToast("Recovery Planner settings saved");
     }
     function attachEvents(panel, settingsPanel) {
       const close = document.getElementById("tma-close-btn");
@@ -43206,7 +43214,7 @@ function scan(){
       document.getElementById("tma-status-tooltip")?.remove();
       const tooltip = createStatusTooltip(
         anchor,
-        "SakaLuX Med Advisor"
+        "SakaLuX Recovery Planner"
       );
       tooltip.id = "tma-status-tooltip";
       return tooltip;
@@ -43298,14 +43306,14 @@ function scan(){
         anchor.href = "#";
         anchor.setAttribute(
           "aria-label",
-          "Med Advisor"
+          "Recovery Planner"
         );
         anchor.setAttribute("tabindex", "0");
         anchor.setAttribute(
           "data-is-tooltip-opened",
           "false"
         );
-        anchor.title = "SakaLuX Med Advisor";
+        anchor.title = "SakaLuX Recovery Planner";
         let medTooltip = null;
         const showMedTooltip = () => {
           if (medTooltip) return;
@@ -43737,7 +43745,7 @@ function scan(){
         const settingsPanel = document.getElementById(IDS.settings);
         if (!settingsPanel) {
           context.showToast(
-            "Could not create Med Advisor settings"
+            "Could not create Recovery Planner settings"
           );
           return;
         }
