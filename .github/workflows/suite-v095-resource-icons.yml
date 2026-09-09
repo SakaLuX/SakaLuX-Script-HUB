@@ -1,0 +1,43 @@
+name: Apply SakaLuX Suite v0.9.5 resource-row icon fix
+on:
+  push:
+    paths:
+      - '.github/workflows/suite-v095-resource-icons.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Place compact reminder icons at visual end of resource row
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('SakaLuX-Suite.user.js')
+          s=p.read_text(encoding='utf-8')
+          s=re.sub(r'// @version\s+0\.9\.\d+', '// @version      0.9.5', s, count=1)
+          s=re.sub(r"const VERSION='0\.9\.\d+';", "const VERSION='0.9.5';", s, count=1)
+          s=re.sub(r"\.slx-rem-btn\{[^}]*\}", ".slx-rem-btn{box-sizing:border-box!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;max-width:28px!important;max-height:28px!important;padding:0!important;margin:0!important;border-radius:50%!important;border:1px solid #4b5965!important;background:radial-gradient(circle at 35% 30%,#34434e 0,#26343d 58%,#1b252c 100%)!important;color:#dce7ef!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:15px!important;font-weight:700!important;line-height:1!important;box-shadow:inset 0 1px 1px #ffffff18,0 1px 3px #0009!important;vertical-align:middle!important;overflow:hidden!important;-webkit-appearance:none!important;appearance:none!important;flex:0 0 28px!important;}", s, count=1)
+          a=s.index('function ensureDock(){')
+          b=s.index('function iconButton',a)
+          new='''function resourceRowTarget(){\n const money=moneyTarget();\n if(!money)return null;\n let el=money.parentElement,best=null;\n for(let i=0;el&&i<6;i++,el=el.parentElement){\n  const r=el.getBoundingClientRect?.();\n  const controls=el.querySelectorAll?.('a,button,[role="button"]')?.length||0;\n  const kids=el.children?.length||0;\n  if(r&&r.width>=Math.min(innerWidth*0.72,500)&&kids>=5)best=el;\n  if(r&&r.width>=innerWidth*0.92&&controls>=5){best=el;break}\n }\n return best||money.parentElement?.parentElement||money.parentElement||null\n}\nfunction ensureDock(){\n let d=document.getElementById(IDS.dock);\n if(!d){d=document.createElement('div');d.id=IDS.dock}\n const row=resourceRowTarget();\n if(row){\n  if(d.parentElement!==row||row.lastElementChild!==d)row.appendChild(d);\n  d.className='';\n  d.style.cssText='display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:4px!important;position:static!important;inset:auto!important;margin-left:auto!important;margin-right:4px!important;padding:0!important;width:auto!important;height:30px!important;min-height:30px!important;z-index:auto!important;vertical-align:middle!important;flex:0 0 auto!important;order:2147483647!important;';\n  return d\n }\n if(!d.isConnected)document.body.appendChild(d);\n d.className='slx-rem-fallback';\n d.style.cssText='position:fixed!important;right:8px!important;top:150px!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:4px!important;z-index:2147483644!important;';\n return d\n}\n'''
+          s=s[:a]+new+s[b:]
+          p.write_text(s,encoding='utf-8')
+          d=Path('greasyfork/SakaLuX-Suite.md')
+          if d.exists():
+              t=d.read_text(encoding='utf-8')
+              t=re.sub(r'\*\*v0\.9\.\d+\*\*','**v0.9.5**',t,count=1)
+              if '### v0.9.5 — compact resource-row integration' not in t:
+                  t += '\n\n### v0.9.5 — compact resource-row integration\n- Finds the full Torn resource strip instead of the money-item wrapper, so reminder controls are appended at the visual far-right end.\n- Uses compact 28 px circular controls with 15 px glyphs and restrained native-style borders/shading.\n- Prevents the reminder group from inheriting oversized resource-item dimensions.\n'
+              d.write_text(t,encoding='utf-8')
+      - name: Verify JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Commit v0.9.5
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git commit -m 'Fix Suite reminder icon placement and sizing in v0.9.5'
+          git push origin HEAD:main
