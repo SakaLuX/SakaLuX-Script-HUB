@@ -123,6 +123,7 @@ jobs:
               "function createPrayerReminderModule(context) {",
               "function migrateLegacySakaLuXSettings() {",
               "function createSakaLuXChainAlarmModule() {",
+              "function restoreMessageLinks(element, links) {",
           ]
           missing = [x for x in required_runtime if x not in text]
           if missing:
@@ -136,7 +137,7 @@ jobs:
           if not event_factory:
               raise SystemExit('Event Lens factory is not a scoped function declaration')
 
-          print('Suite Fortie-parity invariants: OK')
+          print('Suite complete-module invariants: OK')
 
       - name: Ensure only stable workflow remains
         shell: bash
