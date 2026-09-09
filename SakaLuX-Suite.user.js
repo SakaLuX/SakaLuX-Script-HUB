@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.901
+// @version      0.9.902
 // @description  Experimental all-in-one modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,7 +30,7 @@
 (() => {
 'use strict';
 
-const VERSION='0.9.901';
+const VERSION='0.9.902';
 const IDS={fallback:'slx-suite-button',native:'slx-suite-native-button',overlay:'slx-suite-overlay',style:'slx-suite-style',dock:'slx-reminder-dock'};
 const K={
  modules:'SakaLuX_SUITE_MODULES_V2',api:'SakaLuX_SUITE_TORN_API_KEY',
@@ -247,7 +247,7 @@ document.getElementById('slx-recovery-settings-open').onclick=()=>openRecoverySe
 function openRecoverySettings(){document.getElementById('slx-recovery-settings')?.remove();const m=document.createElement('div');m.className='slxs-modal';m.id='slx-recovery-settings';const choices=[['smart','Balanced'],['exit','Hospital Exit'],['full','Full Life'],['waste','Low Waste'],['cooldown','Low Cooldown'],['strongest','Strongest']],sw=(key,label)=>`<div class="slxs-setting-row"><span>${label}</span><button class="slxs-switch ${recoveryCfg[key]?'on':''}" data-rsw="${key}"><i></i></button></div>`;m.innerHTML=`<div class="slxs-modal-card"><div class="slxs-modal-head"><strong>⚙ Recovery Planner Settings</strong><button class="slxs-close" id="slx-r-close">×</button></div><div class="slxs-modal-body"><div class="slxs-box"><div>Total recovery bonus: <b style="color:#e8bf67">+${recoveryBonus()}%</b></div></div><div class="slxs-box"><div class="slxs-box-title">ITEM SOURCE</div><div class="slxs-choice-grid"><button class="slxs-choice ${recoveryCfg.source==='personal'?'active':''}" data-rsource="personal">Personal Items</button><button class="slxs-choice ${recoveryCfg.source==='faction'?'active':''}" data-rsource="faction">Faction Armory</button></div></div><div class="slxs-box"><div class="slxs-box-title">EDUCATION</div>${sw('bio1','Intermediate Biochemistry +10%')}${sw('bio2','Advanced Biochemistry +10%')}${sw('iv','Intravenous Therapy')}</div><div class="slxs-box"><div class="slxs-box-title">FACTION BONUS</div><input id="slx-r-range" type="range" min="0" max="10" value="${Number(recoveryCfg.factionUpgrades)||0}" style="width:100%"><div id="slx-r-label">${Number(recoveryCfg.factionUpgrades)||0} upgrades (+${(Number(recoveryCfg.factionUpgrades)||0)*5}%)</div></div><div class="slxs-box"><div class="slxs-box-title">PRIORITY</div><div class="slxs-choice-grid">${choices.map(([k,l])=>`<button class="slxs-choice ${recoveryCfg.order===k?'active':''}" data-rorder="${k}">${l}</button>`).join('')}</div></div><div class="slxs-box">${sw('noDrugs','No Drug Usage (exclude Opium)')}${sw('respectCooldown','Respect visible medical cooldown')}</div><button class="slxs-save-wide" id="slx-r-save">Save Settings</button></div></div>`;document.body.appendChild(m);m.onclick=e=>{if(e.target===m)m.remove()};document.getElementById('slx-r-close').onclick=()=>m.remove();m.querySelectorAll('[data-rsource]').forEach(b=>b.onclick=()=>{recoveryCfg.source=b.dataset.rsource;save(K.recovery,recoveryCfg);openRecoverySettings()});m.querySelectorAll('[data-rorder]').forEach(b=>b.onclick=()=>{recoveryCfg.order=b.dataset.rorder;save(K.recovery,recoveryCfg);openRecoverySettings()});m.querySelectorAll('[data-rsw]').forEach(b=>b.onclick=()=>{recoveryCfg[b.dataset.rsw]=!recoveryCfg[b.dataset.rsw];save(K.recovery,recoveryCfg);openRecoverySettings()});const r=document.getElementById('slx-r-range');r.oninput=()=>{recoveryCfg.factionUpgrades=Number(r.value);document.getElementById('slx-r-label').textContent=`${r.value} upgrades (+${Number(r.value)*5}%)`};document.getElementById('slx-r-save').onclick=()=>{save(K.recovery,recoveryCfg);m.remove()}}
 function toggleFloat(id,title,html,after){const old=document.getElementById(id);if(old){old.remove();return}const p=document.createElement('div');p.id=id;p.className='slx-suite-float';p.innerHTML=`<div class="slx-float-head"><strong>${esc(title)}</strong><button class="slxs-close">×</button></div><div class="slx-float-body">${html}</div>`;document.body.appendChild(p);p.querySelector('.slxs-close').onclick=()=>p.remove();after?.(p)}
 
-+  function createSakaLuXEventLensModule(context) {
+  function createSakaLuXEventLensModule(context) {
   'use strict';
       const ROOT_ID = 'sakalux-events-dashboard';
       const state = {
