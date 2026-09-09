@@ -1,0 +1,58 @@
+name: Apply SakaLuX Suite v0.9.3 native reminder icon styling
+on:
+  push:
+    paths:
+      - '.github/workflows/suite-v093-native-reminder-icons.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Match reminder icons to Torn resource row
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p=Path('SakaLuX-Suite.user.js')
+          s=p.read_text(encoding='utf-8')
+          s=re.sub(r'// @version\s+0\.9\.\d+', '// @version      0.9.3', s, count=1)
+          s=re.sub(r"const VERSION='0\.9\.\d+';", "const VERSION='0.9.3';", s, count=1)
+
+          # Compact buttons: visually match the small circular resource-row controls rather than the large popup buttons.
+          s=re.sub(
+              r"\.slx-rem-btn\{[^}]*\}",
+              ".slx-rem-btn{box-sizing:border-box!important;width:23px!important;height:23px!important;min-width:23px!important;min-height:23px!important;max-width:23px!important;max-height:23px!important;padding:0!important;margin:0!important;border-radius:50%!important;border:1px solid #53606d!important;background:linear-gradient(#34414d,#222c35)!important;color:#d9e4ee!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:13px!important;font-weight:700!important;line-height:1!important;box-shadow:inset 0 1px 1px #ffffff18,0 1px 2px #0008!important;vertical-align:middle!important;overflow:hidden!important;-webkit-appearance:none!important;appearance:none!important;}",
+              s,
+              count=1
+          )
+
+          a=s.index('function ensureDock(){')
+          b=s.index('function iconButton',a)
+          new='''function ensureDock(){\n let d=document.getElementById(IDS.dock);\n if(!d){d=document.createElement('div');d.id=IDS.dock}\n const native=document.getElementById(IDS.native);\n const money=moneyTarget();\n const row=native?.parentElement||money?.parentElement||null;\n if(row){\n  const rev=(getComputedStyle(row).flexDirection||'').includes('reverse');\n  if(rev){if(row.firstElementChild!==d)row.prepend(d)}\n  else{if(row.lastElementChild!==d)row.appendChild(d)}\n  d.className='';\n  d.style.cssText='display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:3px!important;position:static!important;inset:auto!important;margin:0 2px!important;padding:0!important;width:auto!important;height:23px!important;min-height:23px!important;z-index:auto!important;vertical-align:middle!important;flex:0 0 auto!important;';\n  return d\n }\n if(!d.isConnected)document.body.appendChild(d);\n d.className='slx-rem-fallback';\n d.style.cssText='position:fixed!important;right:10px!important;top:150px!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:3px!important;z-index:2147483644!important;';\n return d\n}\n'''
+          s=s[:a]+new+s[b:]
+
+          # Keep emoji/glyphs centered and free of inherited Torn button text styles.
+          s=s.replace("function iconButton(id,text,title,fn){const b=document.createElement('button');b.type='button';b.id=id;b.className='slx-rem-btn';b.textContent=text;b.title=title;b.onclick=fn;return b}",
+                      "function iconButton(id,text,title,fn){const b=document.createElement('button');b.type='button';b.id=id;b.className='slx-rem-btn';b.textContent=text;b.title=title;b.setAttribute('aria-label',title);b.onclick=fn;return b}",1)
+
+          p.write_text(s,encoding='utf-8')
+
+          d=Path('greasyfork/SakaLuX-Suite.md')
+          if d.exists():
+              t=d.read_text(encoding='utf-8')
+              t=re.sub(r'\*\*v0\.9\.\d+\*\*','**v0.9.3**',t,count=1)
+              if '### v0.9.3 — native reminder icon polish' not in t:
+                  t += '\n\n### v0.9.3 — native reminder icon polish\n- Reduced Daily Prayer Bell, Recovery Planner and Chain Alarm controls to the compact Torn resource-row size.\n- Removed oversized padding/inherited button sizing and normalized circular styling.\n- Detects reversed resource-row direction so the SakaLuX reminder group stays at the visual end of the row on Torn PDA.\n'
+              d.write_text(t,encoding='utf-8')
+      - name: Verify JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Commit v0.9.3
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git commit -m 'Polish Suite reminder icons for Torn resource row in v0.9.3'
+          git push origin HEAD:main
