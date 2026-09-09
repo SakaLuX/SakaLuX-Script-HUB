@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.0
+// @version      0.9.1
 // @description  Experimental all-in-one modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,7 +30,7 @@
 (() => {
 'use strict';
 
-const VERSION='0.9.0';
+const VERSION='0.9.1';
 const IDS={fallback:'slx-suite-button',native:'slx-suite-native-button',overlay:'slx-suite-overlay',style:'slx-suite-style',dock:'slx-reminder-dock'};
 const K={
  modules:'SakaLuX_SUITE_MODULES_V2',api:'SakaLuX_SUITE_TORN_API_KEY',
@@ -156,18 +156,18 @@ function settingsTarget(){const all=[...document.querySelectorAll('a,button,[rol
 function ensureDock(){
  let d=document.getElementById(IDS.dock);
  if(!d){d=document.createElement('div');d.id=IDS.dock}
- const target=settingsTarget();
- if(target?.parentElement){
-  if(!d.isConnected){try{target.parentElement.insertBefore(d,target)}catch{}}
-  if(d.isConnected){d.className='';d.style.display='flex';return d}
+ const native=document.getElementById(IDS.native);
+ const money=moneyTarget();
+ const row=native?.parentElement||money?.parentElement||null;
+ if(row){
+  if(d.parentElement!==row)row.appendChild(d);
+  d.className='';
+  d.style.cssText='display:inline-flex!important;flex-direction:row!important;align-items:center!important;gap:4px!important;position:static!important;inset:auto!important;margin:0 0 0 5px!important;z-index:auto!important;vertical-align:middle!important;';
+  return d
  }
- if(!d.isConnected){document.body.appendChild(d)}
+ if(!d.isConnected)document.body.appendChild(d);
  d.className='slx-rem-fallback';
- d.style.display='flex';
- d.style.position='fixed';
- d.style.right='10px';
- d.style.top='150px';
- d.style.zIndex='2147483644';
+ d.style.cssText='position:fixed!important;right:10px!important;top:150px!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:5px!important;z-index:2147483644!important;';
  return d
 }
 function iconButton(id,text,title,fn){const b=document.createElement('button');b.type='button';b.id=id;b.className='slx-rem-btn';b.textContent=text;b.title=title;b.onclick=fn;return b}

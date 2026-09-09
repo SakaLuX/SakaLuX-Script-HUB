@@ -4,7 +4,7 @@ SakaLuX Suite is an experimental one-install modular toolkit for Torn PDA / Tamp
 
 ## Current version
 
-**v0.9.0**
+**v0.9.1**
 
 ## What it does
 
@@ -236,3 +236,9 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Odds Scout adds sport detection, favourite/risk context and improved market analysis.
 - Race League Board adds championship rename and CSV export.
 - Daily Prayer completion was made idempotent to prevent recursive rerender loops.
+
+
+### v0.9.1 — reminder row placement
+- Moved Daily Prayer Bell, Recovery Planner and Chain Alarm icons out of the profile/settings popup.
+- Reminder icons now attach to the same Torn resource row as the SakaLuX skull/money balance and are appended at the end of that row.
+- Kept a horizontal PDA fallback only when the native resource row is unavailable.
