@@ -1,0 +1,97 @@
+name: Validate SakaLuX userscripts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.user.js'
+      - 'scripts.json'
+      - 'greasyfork/**'
+      - '.github/workflows/validate-userscripts.yml'
+  pull_request:
+    paths:
+      - '*.user.js'
+      - 'scripts.json'
+      - 'greasyfork/**'
+      - '.github/workflows/validate-userscripts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: userscript-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(SakaLuX-*.user.js)
+          if ((${#files[@]} == 0)); then
+            echo 'No root SakaLuX userscripts found.' >&2
+            exit 1
+          fi
+          printf 'Checking %d userscripts\n' "${#files[@]}"
+          for file in "${files[@]}"; do
+            echo "node --check $file"
+            node --check "$file"
+          done
+
+      - name: Validate scripts.json
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          p = Path('scripts.json')
+          json.loads(p.read_text(encoding='utf-8'))
+          print('scripts.json: valid JSON')
+
+      - name: Validate Suite metadata
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          p = Path('SakaLuX-Suite.user.js')
+          text = p.read_text(encoding='utf-8')
+
+          meta = re.search(r'^// @version\s+([^\s]+)\s*$', text, re.M)
+          runtime = re.search(r"const VERSION='([^']+)';", text)
+          if not meta or not runtime:
+              raise SystemExit('Suite version metadata/runtime constant missing')
+          if meta.group(1) != runtime.group(1):
+              raise SystemExit(f"Suite version mismatch: metadata={meta.group(1)} runtime={runtime.group(1)}")
+
+          required = [
+              '// ==UserScript==',
+              '// @match        https://www.torn.com/*',
+              '// @license      All Rights Reserved',
+              '// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
+              '// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
+              '// ==/UserScript=='
+          ]
+          missing = [x for x in required if x not in text]
+          if missing:
+              raise SystemExit('Suite metadata missing: ' + ', '.join(missing))
+
+          print(f'SakaLuX Suite v{meta.group(1)} metadata: OK')
+
+      - name: Ensure temporary patch workflows are gone
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find .github/workflows -maxdepth 1 -type f \( -name 'suite-v*-migration.yml' -o -name 'suite-v*-resource-icons.yml' -o -name 'suite-v*-reminder*.yml' \) | grep -q .; then
+            echo 'Obsolete one-time Suite patch workflow found:' >&2
+            find .github/workflows -maxdepth 1 -type f \( -name 'suite-v*-migration.yml' -o -name 'suite-v*-resource-icons.yml' -o -name 'suite-v*-reminder*.yml' \) >&2
+            exit 1
+          fi
+          echo 'No obsolete one-time Suite patch workflows found.'
