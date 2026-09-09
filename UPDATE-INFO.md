@@ -1,6 +1,6 @@
 # SakaLuX Script HUB — Update Information
 
-Last updated: 2026-09-08
+Last updated: 2026-09-09
 
 ## Current versions
 
@@ -10,7 +10,7 @@ Last updated: 2026-09-08
 - SakaLuX Mission Rewards: **v1.0.2**
 - SakaLuX Market Intelligence: **v1.16.5** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.2.9** — Greasy Fork **594921**
-- SakaLuX Suite: **v0.4.1** — experimental / GitHub test build
+- SakaLuX Suite: **v0.9.901** — experimental / GitHub test build
 
 ## Private / standalone tools
 
@@ -26,7 +26,7 @@ All current scripts were checked against the `@version` in their live `.user.js`
 - **Mission Rewards v1.0.2** — info/release notes current; All Rights Reserved metadata and source header present.
 - **Market Intelligence v1.16.5** — info/release notes current; All Rights Reserved metadata and source header present.
 - **Elimination Assistant v1.2.9** — info/release notes current; All Rights Reserved metadata and source header present.
-- **SakaLuX Suite v0.4.1** — experimental info/release notes current; All Rights Reserved metadata and source header present.
+- **SakaLuX Suite v0.9.901** — persistent controls, Fortie-based Item Signal and TornPDA Event Lens adapter; All Rights Reserved metadata and source header present.
 - **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
 
 Dedicated information files:
@@ -47,7 +47,7 @@ Dedicated information files:
 - Added `Copyright © 2026 SakaLuX [2380374]` to userscript metadata and source headers.
 - Personal use and private modification remain permitted.
 - Redistribution, republication, rebranding, commercial redistribution, and publication of modified versions require prior written permission.
-- Patch releases: Hub v1.8.6, Enhancer Guard v1.3.3, Bazaar Thanker v5.3.2, Mission Rewards v1.0.2, Market Intelligence v1.16.5, Elimination Assistant v1.2.9, SakaLuX Suite v0.4.1.
+- Patch releases: Hub v1.8.6, Enhancer Guard v1.3.3, Bazaar Thanker v5.3.2, Mission Rewards v1.0.2, Market Intelligence v1.16.5, Elimination Assistant v1.2.9, SakaLuX Suite v0.9.901.
 - Account Auditor and historical backup snapshots were intentionally left untouched by this public-script migration.
 
 ### SakaLuX Script Hub v1.8.5 — documentation refresh
