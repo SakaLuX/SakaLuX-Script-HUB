@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.904
+// @version      0.9.905
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -23,7 +23,7 @@
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = "0.9.904";
+  const VERSION = "0.9.905";
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -29505,6 +29505,65 @@ function armoryLoanIconSvg() {
                   max-height: none !important;
                   overflow: visible !important;
                   padding-bottom: 0 !important;
+              }
+              /* TornPDA readability pass: keep event names and links legible on small screens. */
+              #${ROOT_ID} .ax-event-title,
+              #${ROOT_ID} .ax-event-title a,
+              #${ROOT_ID} .ax-expanded-message a {
+                  color: var(--sakalux-gold-bright) !important;
+                  font-weight: 700 !important;
+                  text-shadow: 0 1px 2px rgba(0,0,0,.48);
+              }
+              #${ROOT_ID} .ax-event-title {
+                  font-size: 12px !important;
+                  line-height: 1.28 !important;
+              }
+              #${ROOT_ID} .ax-event-subtitle {
+                  font-size: 10px !important;
+                  line-height: 1.25 !important;
+                  color: #c2c7cc !important;
+              }
+              #${ROOT_ID} .ax-event-details,
+              #${ROOT_ID} .ax-context-label {
+                  font-size: 10px !important;
+                  line-height: 1.2 !important;
+              }
+              #${ROOT_ID} .ax-expanded-message {
+                  color: #d4d8dc !important;
+                  font-size: 10.5px !important;
+                  line-height: 1.45 !important;
+              }
+              #${ROOT_ID} .ax-expanded-label {
+                  color: var(--sakalux-gold-bright) !important;
+                  font-size: 8.5px !important;
+              }
+              #${ROOT_ID} .ax-time-value {
+                  font-size: 10px !important;
+              }
+              #${ROOT_ID} .ax-date-value {
+                  font-size: 8.5px !important;
+              }
+              @media (max-width: 700px) {
+                  #${ROOT_ID} .ax-event-title {
+                      font-size: 11.5px !important;
+                      line-height: 1.25 !important;
+                  }
+                  #${ROOT_ID} .ax-event-subtitle {
+                      font-size: 9.5px !important;
+                  }
+                  #${ROOT_ID} .ax-event-details,
+                  #${ROOT_ID} .ax-context-label {
+                      font-size: 9.5px !important;
+                  }
+                  #${ROOT_ID} .ax-expanded-message {
+                      font-size: 10px !important;
+                  }
+                  #${ROOT_ID} .ax-time-value {
+                      font-size: 9.5px !important;
+                  }
+                  #${ROOT_ID} .ax-date-value {
+                      font-size: 8px !important;
+                  }
               }
           `;
           document.head.appendChild(style);
