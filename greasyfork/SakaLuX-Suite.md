@@ -4,7 +4,7 @@ SakaLuX Suite is a one-install modular toolkit for Torn PDA and desktop userscri
 
 ## Current version
 
-**v0.9.904**
+**v0.9.905**
 
 ## Complete SakaLuX modules
 
@@ -41,12 +41,13 @@ Event Lens also includes the verified TornPDA route and native-row compatibility
 - Settings import/export excludes the API key.
 - Shortcut: Alt + F.
 
-## v0.9.904 release notes
+## v0.9.905 release notes
 
 - Restored the established SakaLuX name for every visible module and panel.
 - Removed the external base name from script metadata, documentation and validation messages.
 - Kept one TornPDA-compatible GM request grant instead of advertising both API variants.
 - Retained every Item Signal rule and the working Event Lens TornPDA compatibility fix.
+- Increased TornPDA Event Lens text sizes and changed event names/links to high-contrast gold.
 - Restored clickable Trade continuation links inside expanded Event Lens cards.
 - Preserved the five requested standalone SakaLuX modules and Chain Alarm.
 - Added automated checks for all 13 principal module/factory pairs.
