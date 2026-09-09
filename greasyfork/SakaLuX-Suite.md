@@ -255,3 +255,10 @@ The Suite does not automate attacks, crimes, bets, item consumption or race entr
 - Reduced Daily Prayer Bell, Recovery Planner and Chain Alarm controls to the compact Torn resource-row size.
 - Removed oversized padding/inherited button sizing and normalized circular styling.
 - Detects reversed resource-row direction so the SakaLuX reminder group stays at the visual end of the row on Torn PDA.
+
+
+### v0.9.2 — native resource-row icon styling
+- Reduced Daily Prayer Bell, Recovery Planner and Chain Alarm controls to native resource-row scale.
+- Removed the oversized circular background, border and shadow.
+- Reminder controls clone the existing SakaLuX/Torn resource-row control structure when available, so spacing and alignment match the surrounding row.
+- Kept only a compact transparent PDA fallback when the native row is unavailable.
