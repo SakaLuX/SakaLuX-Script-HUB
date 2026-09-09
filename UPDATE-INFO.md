@@ -10,7 +10,7 @@ Last updated: 2026-09-09
 - SakaLuX Mission Rewards: **v1.0.2**
 - SakaLuX Market Intelligence: **v1.16.5** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.2.9** — Greasy Fork **594921**
-- SakaLuX Suite: **v0.9.903** — full Fortie-parity rebuild / GitHub test build
+- SakaLuX Suite: **v0.9.904** — complete SakaLuX module build / GitHub test build
 
 ## Private / standalone tools
 
@@ -26,7 +26,7 @@ All current scripts were checked against the `@version` in their live `.user.js`
 - **Mission Rewards v1.0.2** — info/release notes current; All Rights Reserved metadata and source header present.
 - **Market Intelligence v1.16.5** — info/release notes current; All Rights Reserved metadata and source header present.
 - **Elimination Assistant v1.2.9** — info/release notes current; All Rights Reserved metadata and source header present.
-- **SakaLuX Suite v0.9.903** — complete 13-module Fortie parity, TornPDA Event compatibility, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
+- **SakaLuX Suite v0.9.904** — complete 13-module implementation, established SakaLuX names, TornPDA Event compatibility, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
 - **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
 
 Dedicated information files:
@@ -42,11 +42,18 @@ Dedicated information files:
 
 ## Latest changes
 
-### SakaLuX Suite v0.9.903 — complete module parity
-- Rebuilt the Suite core and all 13 principal modules directly from the Fortie implementation.
-- Added the TornPDA Events route/native-row adapter verified by the Event Intel fix.
+### SakaLuX Suite v0.9.904 — SakaLuX naming cleanup
+- Restored the established SakaLuX names for every visible module and panel.
+- Removed the external base name from code metadata, documentation and validation messages.
+- Kept only the TornPDA-compatible GM request grant in userscript metadata.
+- Retained all 13 complete implementations, the Event Lens compatibility adapter, Chain Alarm and the five standalone bridges.
+- Trade events now keep the native continuation link so pending trades can be accepted from Event Lens.
+
+### SakaLuX Suite v0.9.903 — complete module rebuild
+- Rebuilt the Suite core and all 13 principal modules from the complete reference implementation.
+- Added the TornPDA Events route/native-row adapter verified by the Event Lens fix.
 - Preserved the Master Control window and scroll position when toggling modules.
-- Added Fortie-style sliding ON/OFF controls throughout the Suite.
+- Added sliding ON/OFF controls throughout the Suite.
 - Migrates earlier SakaLuX Suite module states and the shared Torn API key.
 - Retains Chain Alarm plus the five requested standalone SakaLuX launch bridges.
 
