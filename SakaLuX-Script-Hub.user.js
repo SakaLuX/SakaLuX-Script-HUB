@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.1
+// @version      1.9.2
 // @description  Professional TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.1';
+    const VERSION = '1.9.2';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -123,7 +123,7 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.12',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.13',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -168,7 +168,7 @@
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.0',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.1',
                 description: 'Market and travel intelligence with clickable Best Travel Run routes, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
@@ -216,7 +216,6 @@
     let usage = loadJson(STORAGE.usage, {});
     let updateCache = loadJson(STORAGE.updates, {});
     let modulePower = loadJson(STORAGE.modulePower, {});
-    let search = '';
     let category = 'ALL';
     let registryStatus = 'cached';
     let updateCheckRunning = false;
@@ -882,7 +881,6 @@
                 </div>
                 <div class="slh-stats" id="slh-stats"></div>
                 <div class="slh-tools">
-                    <input class="slh-search" id="slh-search" type="search" placeholder="🔎 Search..." value="${escapeHtml(search)}">
                     <button class="slh-tool" id="slh-update-check" title="Check updates">⬆️</button>
                     <button class="slh-tool" id="slh-update-all" title="Update all">⏫</button>
                     <button class="slh-tool" id="slh-health" title="System check">🩺</button>
@@ -897,10 +895,6 @@
         `);
 
         document.getElementById('slh-close').onclick = closeHub;
-        document.getElementById('slh-search').oninput = function () {
-            search = this.value.trim().toLowerCase();
-            renderList();
-        };
         document.getElementById('slh-update-check').onclick = () => checkAllUpdates(true);
         document.getElementById('slh-update-all').onclick = updateAll;
         document.getElementById('slh-health').onclick = openSystemCheck;
@@ -967,8 +961,7 @@
         }));
         rows = rows.filter(row => {
             const categoryOk = category === 'ALL' || row.script.category === category;
-            const searchText = (row.script.name + ' ' + row.script.category + ' ' + (row.script.description || '')).toLowerCase();
-            return categoryOk && (!search || searchText.includes(search));
+            return categoryOk;
         });
         rows.sort((a, b) => {
             if (a.health.state === 'missing' && b.health.state !== 'missing') return -1;
