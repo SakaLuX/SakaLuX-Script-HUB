@@ -30,13 +30,12 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - Added `Copyright © 2026 SakaLuX [2380374]` and retained-author requirements.
 - Personal use and private modification remain permitted; redistribution/republication require prior written permission.
 
-
 ### v1.8.5
+
 - Fixed false **UPDATE AVAILABLE** indicators after an add-on had already been updated.
 - Cached update data is reused only when its stored installed version still matches the version currently loaded.
 - **Latest vs Installed** is recalculated before rendering cards, counters and the HUB alert badge.
 - Added Market Intelligence to the offline fallback registry and ready-event integration.
-- Live `scripts.json` now includes the current Market Intelligence **v1.16.4** and Elimination Assistant **v1.2.8** entries.
 - Added Elimination Assistant quick-action integration.
 - Elimination Assistant can remain installed while disabled from Hub.
 - When Elimination is **ON**, its full action set is available.
@@ -44,6 +43,7 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - The Hub can still detect and re-enable Elimination Assistant while the add-on itself is disabled.
 
 ### v1.8.4
+
 - Fixed the mobile layout where HUB appeared above Messages and pushed Messages onto a second row.
 - HUB is mounted as its own Torn swiper/navigation entry directly before Messages.
 - Reuses a native Torn SVG element and icon wrappers for sizing and alignment.
@@ -51,18 +51,19 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - Blink animation changes only skull opacity, keeping the navigation row stable.
 
 ### v1.8.3
+
 - Introduced the Torn-style navigation version of the HUB launcher.
 - Added the monochrome skull plus HUB label and floating-button fallback behavior.
 
-## SakaLuX suite
+## Current SakaLuX add-ons
 
 Complementary add-ons currently registered in the live `scripts.json` registry:
 
-- SakaLuX Enhancer Guard **v1.3.2**
-- SakaLuX Bazaar Thanker - PDA **v5.3.1**
-- SakaLuX Mission Rewards **v1.0.1**
-- SakaLuX Market Intelligence **v1.16.4**
-- SakaLuX Elimination Assistant **v1.2.8**
+- SakaLuX Enhancer Guard **v1.3.3**
+- SakaLuX Bazaar Thanker - PDA **v5.3.2**
+- SakaLuX Mission Rewards **v1.0.2**
+- SakaLuX Market Intelligence **v1.16.5**
+- SakaLuX Elimination Assistant **v1.2.9**
 
 ### Elimination Assistant integration
 
