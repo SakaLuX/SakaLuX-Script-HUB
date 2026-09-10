@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.8
+// @version      1.3.9
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.8';
+    const VERSION = '1.3.9';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -205,8 +205,113 @@
         try { localStorage.setItem(PROTECTOR_SETTINGS, JSON.stringify(settings)); } catch {}
         try { window.saveDashSettings?.(settings); } catch {}
         try { window.mmpRefreshAll?.(); } catch {}
-        render();
+        refreshInventoryProtectionBadges();
+        injectProtectorSizeButton();
         return settings.lockSize;
+    }
+
+    function isItemsPage() {
+        const href = String(location.href || '').toLowerCase();
+        return href.includes('sid=items') || href.includes('/items') || Boolean(document.querySelector('.items-list, .thumbnail-wrap, span.image-wrap'));
+    }
+
+    function inventoryItemName(target) {
+        if (!target) return '';
+        const image = target.querySelector('img');
+        const direct = target.dataset.itemName || target.getAttribute('data-item-name') || image?.alt || image?.title || image?.getAttribute('aria-label');
+        if (direct && normalizeProtectedName(direct)) return String(direct).replace(/\s+x\s*[\d,]+$/i, '').trim();
+        const row = target.closest('li, .item, [class*="item"]');
+        const text = (row?.innerText || '').split('\n').map(value => value.trim()).filter(Boolean);
+        const candidate = text.find(value => !/^x?\s*[\d,]+$/i.test(value) && !/^\d+[\s/]/.test(value) && value.length > 1);
+        return candidate ? candidate.replace(/\s+x\s*[\d,]+$/i, '').trim() : '';
+    }
+
+    function inventoryBadgeMarkup(target, name) {
+        const protection = protectionFor({ name });
+        const settings = getProtectorDisplaySettings();
+        const size = settings.invisible ? 12 : settings.lockSize === 'small' ? 18 : settings.lockSize === 'large' ? 27 : 22;
+        const font = settings.invisible ? 7 : settings.lockSize === 'large' ? 12 : 10;
+        const qtyFont = settings.invisible ? 6 : settings.lockSize === 'small' ? 7 : settings.lockSize === 'large' ? 11 : 9;
+        const badge = target.querySelector('[data-sl-eg-inventory-lock]') || document.createElement('button');
+        badge.type = 'button';
+        badge.dataset.slEgInventoryLock = '1';
+        badge.dataset.name = name;
+        badge.title = protection.full ? 'Unlock item' : protection.partial ? 'Edit reserved quantity' : 'Protect item';
+        badge.innerHTML = protection.partial
+            ? `<span style="font-size:${qtyFont}px;font-weight:900">${protection.partial}</span><span style="font-size:${font}px">🔒</span>`
+            : protection.full ? '🔒' : '🔓';
+        badge.style.cssText = `position:absolute;top:1px;left:1px;width:${size}px;height:${size}px;padding:0;margin:0;border:0;border-radius:50%;background:${protection.full ? '#a00000' : protection.partial ? '#d07a00' : '#0a8f08'};color:#fff;display:flex;align-items:center;justify-content:center;gap:1px;z-index:2147483000;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.5);font:${font}px/1 Arial,sans-serif;touch-action:none;`;
+        if (!badge.parentNode) target.appendChild(badge);
+        if (!badge.dataset.bound) {
+            badge.dataset.bound = '1';
+            let timer = null;
+            let held = false;
+            badge.addEventListener('pointerdown', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                held = false;
+                clearTimeout(timer);
+                timer = setTimeout(async () => {
+                    held = true;
+                    const current = protectionFor({ name }).partial || 1;
+                    const value = window.prompt('Protected quantity:', String(current));
+                    if (value !== null) await toggleItemProtection({ name }, value);
+                    refreshInventoryProtectionBadges();
+                }, 850);
+            });
+            badge.addEventListener('pointerup', event => { event.preventDefault(); event.stopPropagation(); clearTimeout(timer); });
+            badge.addEventListener('pointercancel', () => clearTimeout(timer));
+            badge.addEventListener('click', async event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (held) { held = false; return; }
+                await toggleItemProtection({ name });
+                refreshInventoryProtectionBadges();
+            });
+        }
+    }
+
+    function refreshInventoryProtectionBadges() {
+        if (!isItemsPage()) return;
+        document.querySelectorAll('div.thumbnail-wrap, span.image-wrap').forEach(target => {
+            const name = inventoryItemName(target);
+            if (name) inventoryBadgeMarkup(target, name);
+        });
+    }
+
+    function findProtectorPanel() {
+        return [...document.querySelectorAll('body *')].find(element => {
+            if (element.children.length > 40 || !/item protector/i.test(element.textContent || '')) return false;
+            return [...element.querySelectorAll('button')].some(button => button.textContent.trim() === '×' || /close/i.test(button.getAttribute('aria-label') || ''));
+        });
+    }
+
+    function injectProtectorSizeButton() {
+        const panel = findProtectorPanel();
+        if (!panel || panel.querySelector('[data-sl-eg-lock-size]')) return;
+        const close = [...panel.querySelectorAll('button')].find(button => button.textContent.trim() === '×' || /close/i.test(button.getAttribute('aria-label') || ''));
+        if (!close) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.slEgLockSize = '1';
+        button.textContent = '↕';
+        button.title = 'Schimbă mărimea lacătului';
+        button.style.cssText = 'width:36px;height:36px;margin-right:6px;border:1px solid #66591d;border-radius:10px;background:#2a2512;color:#f5d85f;font-size:17px;font-weight:900;';
+        button.onclick = event => { event.preventDefault(); event.stopPropagation(); cycleProtectorLockSize(); };
+        close.parentNode.insertBefore(button, close);
+    }
+
+    let inventoryProtectionObserver = null;
+    let inventoryProtectionTimer = null;
+    function installInventoryProtection() {
+        if (!document.body || inventoryProtectionObserver) return;
+        const refresh = () => {
+            clearTimeout(inventoryProtectionTimer);
+            inventoryProtectionTimer = setTimeout(() => { refreshInventoryProtectionBadges(); injectProtectorSizeButton(); }, 80);
+        };
+        refresh();
+        inventoryProtectionObserver = new MutationObserver(refresh);
+        inventoryProtectionObserver.observe(document.body, { childList: true, subtree: true });
     }
 
     function renderProtectionBadge(item) {
@@ -963,7 +1068,7 @@
         const overlay = document.createElement('div');
         overlay.id = 'sl-eg-protection-overlay';
         overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif;';
-        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><div class="sl-eg-api-head-actions"><button class="sl-eg-lock-size" data-lock-size="1" title="Schimbă mărimea lacătului">↕</button><button class="sl-eg-close" data-close="1">×</button></div></div><div class="sl-eg-protection-note">Lacătul de pe iconița itemului funcționează ca Item Protector: verde = deblocat, roșu = protejat, portocaliu = cantitate rezervată. Apăsare scurtă schimbă protecția, iar apăsarea lungă setează cantitatea rezervată. Pentru alte iteme folosește lacătul din pagina Items.</div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">Nu ai iteme protejate.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">ȘTERGE TOATE PROTECȚIILE</button></div>`;
+        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><button class="sl-eg-close" data-close="1">×</button></div><div class="sl-eg-protection-note">Lacătul este afișat direct peste iconița itemului în pagina Items, ca în Item Protector: verde = deblocat, roșu = protejat, portocaliu = cantitate rezervată. Apăsare scurtă schimbă protecția, iar apăsarea lungă setează cantitatea rezervată.</div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">Nu ai iteme protejate.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">ȘTERGE TOATE PROTECȚIILE</button></div>`;
         document.body.appendChild(overlay);
         overlay.onclick = event => { if (event.target === overlay || event.target.closest('[data-close]')) overlay.remove(); };
         overlay.querySelectorAll('.sl-eg-unlock').forEach(button => {
@@ -974,11 +1079,6 @@
                 await writeProtectorLocks(next.full, next.partial);
                 openProtectionPanel();
             };
-        });
-        overlay.querySelector('[data-lock-size]')?.addEventListener('click', () => {
-            const size = cycleProtectorLockSize();
-            const button = overlay.querySelector('[data-lock-size]');
-            if (button) button.title = 'Mărime lacăt: ' + size;
         });
         overlay.querySelector('[data-clear]')?.addEventListener('click', async () => {
             await writeProtectorLocks({}, {});
@@ -1048,7 +1148,7 @@
             const marketHref = itemMarketUrl(item);
             html += `
                 <div class="sl-eg-row ${rowClass} ${item.favorite ? 'favorite' : ''}">
-                    <div class="sl-eg-icon">${icon}${renderProtectionBadge(item)}</div>
+                    <div class="sl-eg-icon">${icon}</div>
                     <div>
                         <div class="sl-eg-name"><a class="sl-eg-name-link" href="${marketHref}" title="Open in Item Market">${escapeHtml(item.name)}</a><button class="sl-eg-star" data-name="${escapeHtml(item.name)}" title="Priority">${item.favorite ? '★' : '☆'}</button></div>
                         <div class="sl-eg-status ${item.owned ? 'yes' : 'no'}">${escapeHtml(status)}</div>
@@ -1219,6 +1319,7 @@
             configureAutoRefresh();
             createButton();
             installSaleProtectionFallback();
+            installInventoryProtection();
             scheduleHubInstallPrompt();
             if (apiSetupPending() && !/preferences\.php/i.test(location.pathname + location.href)) setTimeout(openApiPanel, 900);
         }
