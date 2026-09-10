@@ -1,0 +1,86 @@
+name: Elimination v1.3.2 Load and UI Fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/elimination-v132-load-ui-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch Elimination Assistant
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+
+          p=Path('SakaLuX-Elimination-Assistant.user.js')
+          s=p.read_text()
+          old=s
+          b=Path('backups/SakaLuX-Elimination-Assistant-v1.3.1.user.js')
+          if not b.exists(): b.write_text(s)
+
+          s=s.replace('// @version      1.3.1','// @version      1.3.2',1)
+          s=s.replace("const VERSION='1.3.1';","const VERSION='1.3.2';",1)
+
+          old_load="async function loadTeam(){if(!state.teamId)throw new Error('Choose a team');const a=[];for(let off=0,i=0;i<5;i++,off+=100){let raw;try{raw=await torn(`torn/${state.teamId}/eliminationteam`,{limit:100,offset:off})}catch(e){if(Number(e.code)===32)throw new Error('Elimination team data is currently unavailable from Torn (API 32). Your API key was not rejected; try again when Torn enables the Eliminations team endpoint.');throw e}const batch=normPlayers(raw);a.push(...batch);if(batch.length<100)break}state.players=[...new Map(a.map(p=>[p.id,p])).values()];applyCache();if(state.ffKey)await loadFF(false);apply();setStatus('Loaded '+state.players.length+' players')}"
+          new_load="async function loadTeam(){if(!state.teamId)throw new Error('Choose a team');setStatus('Loading team…');const a=[];for(let off=0,i=0;i<5;i++,off+=100){let raw;try{raw=await torn(`torn/${state.teamId}/eliminationteam`,{limit:100,offset:off})}catch(e){if(Number(e.code)===32)throw new Error('Elimination team data is currently unavailable from Torn (API 32). Your API key was not rejected; try again when Torn enables the Eliminations team endpoint.');throw e}const batch=normPlayers(raw);a.push(...batch);if(batch.length<100)break}state.players=[...new Map(a.map(p=>[p.id,p])).values()];applyCache();apply();let note='Loaded '+state.players.length+' players';if(state.ffKey){try{await loadFF(false);note='Loaded '+state.players.length+' players · FF ready'}catch(e){apply();note='Loaded '+state.players.length+' players · FFScouter unavailable: '+e.message}}setStatus(note)}"
+          if old_load not in s: raise SystemExit('loadTeam marker missing')
+          s=s.replace(old_load,new_load,1)
+
+          old_css="function css(){if($('#'+IDS.style))return;const s=document.createElement('style');s.id=IDS.style;s.textContent=`#${IDS.button}{position:fixed;right:12px;bottom:82px;z-index:999999;background:#171b21;color:#fff;border:1px solid #414a55;border-radius:999px;padding:10px 13px;font-weight:800}#${IDS.panel}{display:none;position:fixed;right:6px;bottom:125px;z-index:999998;width:min(920px,calc(100vw - 12px));height:80vh;background:#101419;color:#fff;border:1px solid #343c45;border-radius:14px;overflow:hidden;font:12px Arial}#${IDS.panel}.open{display:flex;flex-direction:column}.slx-h,.slx-t,.slx-s{display:flex;gap:6px;align-items:center;padding:8px;border-bottom:1px solid #28313a;flex-wrap:wrap}.slx-h b,.slx-s span{flex:1}.slx-t input,.slx-t select,.slx-t button,.slx-a,.slx-h button{background:#171d24;color:#fff;border:1px solid #3b4652;border-radius:7px;padding:7px}.slx-body{overflow:auto;flex:1}.slx-body table{width:100%;border-collapse:collapse}.slx-body td,.slx-body th{padding:6px;border-bottom:1px solid #242c34;text-align:left}.safe{color:#63d889;font-weight:900}.risky{color:#f2c15c;font-weight:900}.skip{color:#ef7474;font-weight:900}.slx-modal{display:none;position:absolute;inset:0;z-index:20;background:#0c1015f5;padding:14px;overflow:auto}.slx-modal.open{display:block}.slx-modal input{width:100%;padding:8px;margin:4px 0 10px;background:#11161c;color:#fff;border:1px solid #35404c;border-radius:7px}`;document.head.appendChild(s)}"
+          new_css="function css(){if($('#'+IDS.style))return;const s=document.createElement('style');s.id=IDS.style;s.textContent=`#${IDS.button}{position:fixed;right:12px;bottom:82px;z-index:999999;background:#171b21;color:#fff;border:1px solid #414a55;border-radius:999px;padding:11px 14px;font-weight:900;font-size:14px}#${IDS.panel}{display:none;position:fixed;right:6px;bottom:125px;z-index:999998;width:min(920px,calc(100vw - 12px));height:80vh;background:#0d1117;color:#f8fafc;border:1px solid #3c4652;border-radius:14px;overflow:hidden;font:14px Arial,sans-serif}#${IDS.panel}.open{display:flex;flex-direction:column}.slx-h,.slx-t,.slx-s{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid #2d3742;flex-wrap:wrap}.slx-h{background:#111821}.slx-h b{font-size:16px;color:#f8fafc}.slx-h b,.slx-s span{flex:1}.slx-s{background:#121a23;font-size:14px;line-height:1.35}.slx-s span{color:#e5e7eb}.slx-s b{color:#facc15}.slx-t input,.slx-t select,.slx-t button,.slx-a,.slx-h button{background:#18212c;color:#f8fafc;border:1px solid #475569;border-radius:8px;padding:9px 10px;font-size:14px}.slx-t button{font-weight:800}.slx-t input{min-width:180px;flex:1}.slx-body{overflow:auto;flex:1;background:#0d1117}.slx-body table{width:100%;border-collapse:collapse;table-layout:auto}.slx-body td,.slx-body th{padding:9px 8px;border-bottom:1px solid #26313c;text-align:left;vertical-align:top;font-size:14px;line-height:1.35}.slx-body th{position:sticky;top:0;background:#121a23;color:#f1f5f9;z-index:2}.slx-body td:first-child{min-width:190px}.slx-body td:nth-child(2){min-width:130px}.slx-a{display:inline-block;text-decoration:none;margin:2px}.safe{color:#4ade80!important;font-weight:900}.risky{color:#fbbf24!important;font-weight:900}.skip{color:#fb7185!important;font-weight:900}.slx-modal{display:none;position:absolute;inset:0;z-index:20;background:#0c1015f5;padding:16px;overflow:auto;font-size:14px}.slx-modal.open{display:block}.slx-modal input{width:100%;padding:10px;margin:4px 0 10px;background:#11161c;color:#fff;border:1px solid #475569;border-radius:8px;font-size:14px}@media(max-width:640px){#${IDS.panel}{right:4px;width:calc(100vw - 8px);height:82vh;font-size:14px}.slx-h,.slx-t,.slx-s{padding:9px}.slx-t input,.slx-t select,.slx-t button{min-height:42px;font-size:14px}.slx-body td,.slx-body th{font-size:13px;padding:8px 6px}.slx-body td:first-child{min-width:170px}.slx-a{padding:8px 9px}}`;document.head.appendChild(s)}"
+          if old_css not in s: raise SystemExit('css marker missing')
+          s=s.replace(old_css,new_css,1)
+          p.write_text(s)
+          if s==old: raise SystemExit('no changes')
+
+          j=Path('scripts.json'); data=json.loads(j.read_text())
+          for row in data.get('scripts',[]):
+              if row.get('id')=='elimination-assistant': row['version']='1.3.2'
+          j.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
+
+          md=Path('greasyfork/Elimination-Assistant.md'); t=md.read_text()
+          t=t.replace('**Current version: v1.3.1**','**Current version: v1.3.2**',1)
+          entry='''\n## v1.3.2 — LOAD rendering + mobile readability\n\n- Fixed **LOAD** so team rows render immediately even when FFScouter is unreachable.\n- FFScouter failures are now non-blocking: the Torn team list remains visible and the status line explains that only FF enrichment failed.\n- Increased text size, spacing and contrast for TornPDA/mobile.\n- SAFE is brighter green, RISKY amber and SKIP rose/red; headers and action buttons are clearer.\n- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.3.1.user.js`.\n\n'''
+          if '## v1.3.2 — LOAD rendering + mobile readability' not in t:
+              pos=t.find('\n## '); t=t[:pos+1]+entry+t[pos+1:]
+          md.write_text(t)
+
+          u=Path('UPDATE-INFO.md'); x=u.read_text()
+          x=x.replace('SakaLuX Elimination Assistant: **v1.3.1**','SakaLuX Elimination Assistant: **v1.3.2**',1)
+          latest='''\n### SakaLuX Elimination Assistant v1.3.2\n- LOAD now renders team members before FFScouter enrichment, so an FFScouter network failure no longer leaves the table apparently empty.\n- Improved TornPDA font sizing, spacing and SAFE/RISKY/SKIP contrast.\n- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.3.1.user.js`.\n\n'''
+          if '### SakaLuX Elimination Assistant v1.3.2' not in x:
+              x=x.replace('## Latest changes\n','## Latest changes\n'+latest,1)
+          u.write_text(x)
+          PY
+      - name: Validate
+        run: |
+          node --check SakaLuX-Elimination-Assistant.user.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          s=Path('SakaLuX-Elimination-Assistant.user.js').read_text()
+          assert '// @version      1.3.2' in s
+          assert "const VERSION='1.3.2';" in s
+          assert "FFScouter unavailable:" in s
+          assert "apply();let note='Loaded '" in s
+          assert 'font:14px Arial,sans-serif' in s
+          d=json.loads(Path('scripts.json').read_text())
+          assert next(x for x in d['scripts'] if x['id']=='elimination-assistant')['version']=='1.3.2'
+          assert Path('backups/SakaLuX-Elimination-Assistant-v1.3.1.user.js').exists()
+          PY
+      - name: Commit
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-Elimination-Assistant.user.js scripts.json greasyfork/Elimination-Assistant.md UPDATE-INFO.md backups/SakaLuX-Elimination-Assistant-v1.3.1.user.js
+          git diff --cached --quiet || git commit -m "fix: Elimination Assistant v1.3.2 load rendering and mobile UI"
+          git push origin main
