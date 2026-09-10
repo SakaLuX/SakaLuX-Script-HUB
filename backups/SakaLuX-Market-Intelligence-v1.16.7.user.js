@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.16.8
+// @version      1.16.7
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -32,7 +32,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.16.8';
+    const VERSION = '1.16.7';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -604,7 +604,7 @@
         // Torn's mobile/PDA in-flight screen is not always kept on ?sid=travel.
         // Detect the actual flight card too so Arrival Basket runs on /index.php-style travel views.
         if(/sid=travel/i.test(u)||/Remaining Flight Time/i.test(body)||/(?:Traveling\s+(?:from\s+.+?\s+)?to|Torn\s+to)\s+[A-Za-zÀ-ÿ .'-]+/i.test(body)) return 'travel';
-        if(/sid=ItemMarket/i.test(u)||(document.querySelector('input[type="search"],input[placeholder*="item" i]')&&/Item Market/i.test(body))) return 'itemmarket';
+        if(/sid=ItemMarket/i.test(u)) return 'itemmarket';
         if(/bazaar\.php/i.test(u)) return 'bazaar';
         if(/item\.php/i.test(u)) return 'items';
         if(/museum\.php/i.test(u)) return 'museum';
@@ -1469,34 +1469,11 @@
         return vals.map(v=>blocks[Math.min(blocks.length-1,Math.max(0,Math.round((v-lo)/span*(blocks.length-1))))]).join('');
     }
 
-    function selectedMarketItemId(){
-        const sources=[location.hash||'',location.search||'',location.href||''];
-        for(const src of sources){
-            const m=String(src).match(/(?:itemID|itemId|item_id)=(\d+)/i);
-            if(m&&Number(m[1])>0)return Number(m[1]);
-        }
-        const links=[...document.querySelectorAll('a[href*="itemID="],a[href*="itemId="],[data-itemid],[data-item-id],[data-item]')];
-        for(const el of links){
-            const raw=el.getAttribute('href')||el.getAttribute('data-itemid')||el.getAttribute('data-item-id')||el.getAttribute('data-item')||'';
-            const m=String(raw).match(/(?:itemID|itemId|item_id)?=?\b(\d{1,6})\b/i);
-            if(m&&Number(m[1])>0)return Number(m[1]);
-        }
-        const searchText=normText(document.querySelector('input[type="search"],input[placeholder*="Search" i],input[placeholder*="item" i]')?.value||'').toLowerCase();
-        const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')].filter(isVisible);
-        if(searchText){
-            const exact=imgs.find(img=>normText(img.alt||img.getAttribute('title')||'').toLowerCase()===searchText);
-            const id=itemIdFromImg(exact);if(id)return id;
-        }
-        const ids=imgs.map(itemIdFromImg).filter(Boolean);
-        const unique=[...new Set(ids)];
-        if(unique.length===1)return unique[0];
-        if(ids.length)return ids[0];
-        return null;
-    }
+    function selectedMarketItemId(){const m=(location.hash||'').match(/itemID=(\d+)/i);return m?Number(m[1]):null;}
     async function scanItemMarket(){
         if(!settings.itemMarket)return;
         const previous=document.getElementById('sl-mi-market-bar');
-        const id=selectedMarketItemId();if(!id){if(detectPage()==='itemmarket'){setTimeout(()=>scheduleScan(false),700);return;}previous?.remove();return;}
+        const id=selectedMarketItemId();if(!id){previous?.remove();return;}
         const market=await fetchMarket(id,true);if(!market)return;
         recordPriceHistory(id,market);
         const analysis=analyzePriceHistory(id,Number(market.minPrice),market);

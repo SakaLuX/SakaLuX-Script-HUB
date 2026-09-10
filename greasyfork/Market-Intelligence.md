@@ -1,11 +1,20 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.7**
+**Current version: v1.16.8**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
 
+
+
+## v1.16.8 — TornPDA Item Detection Fix
+
+- Fixed Item Market Intelligence / Loadout Comparator disappearing after TornPDA rerenders or when an item is selected through the search UI without `itemID` remaining in the URL hash.
+- Selected item detection now checks URL hash/query, Torn item links/data attributes and visible item images as fallbacks.
+- If TornPDA is temporarily rebuilding the Item Market DOM, the existing Market Intelligence panel is kept instead of being removed and a short retry is scheduled.
+- Added a TornPDA-oriented Item Market page fallback detector.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.7.user.js`.
 
 ## v1.16.7 — Live Sliding Settings + Required API Key
 
