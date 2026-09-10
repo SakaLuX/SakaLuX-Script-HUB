@@ -8,7 +8,7 @@ SakaLuX Suite is a one-install modular toolkit for Torn PDA and desktop userscri
 
 ## Complete SakaLuX modules
 
-Version 0.9.904 includes the complete module implementations with the established SakaLuX names:
+The current **v0.9.905** build includes the established SakaLuX module set:
 
 - Daily Prayer Bell
 - Recovery Planner
@@ -24,7 +24,7 @@ Version 0.9.904 includes the complete module implementations with the establishe
 - Odds Scout
 - Target Alerts
 
-Event Lens also includes the verified TornPDA route and native-row compatibility adapter.
+Event Lens also includes the TornPDA route and native-row compatibility adapter used by the current release.
 
 ## SakaLuX additions
 
@@ -41,7 +41,9 @@ Event Lens also includes the verified TornPDA route and native-row compatibility
 - Settings import/export excludes the API key.
 - Shortcut: Alt + F.
 
-## v0.9.905 release notes
+## Current release notes
+
+### v0.9.905
 
 - Restored the established SakaLuX name for every visible module and panel.
 - Removed the external base name from script metadata, documentation and validation messages.
