@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.11
+// @version      1.3.12
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.11';
+    const VERSION = '1.3.12';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -205,6 +205,7 @@
         try { localStorage.setItem(PROTECTOR_SETTINGS, JSON.stringify(settings)); } catch {}
         try { window.saveDashSettings?.(settings); } catch {}
         try { window.mmpRefreshAll?.(); } catch {}
+        try { window.dispatchEvent(new CustomEvent('SakaLuX:ItemProtectorSettingsChanged', { detail: settings })); } catch {}
         refreshInventoryProtectionBadges();
         return settings.lockSize;
     }
@@ -273,7 +274,6 @@
     }
 
     function refreshInventoryProtectionBadges() {
-        if (!isItemsPage()) return;
         document.querySelectorAll('div.thumbnail-wrap, span.image-wrap').forEach(target => {
             const name = inventoryItemName(target);
             if (name) inventoryBadgeMarkup(target, name);
