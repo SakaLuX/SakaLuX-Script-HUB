@@ -1,10 +1,20 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.5**
+**Current version: v1.16.6**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+## v1.16.6 — Loadout Comparator
+
+- Added **Loadout Comparator** to Item Market Intelligence for weapons and armor.
+- Reads your currently equipped combat gear from Torn API v2 `user/equipment` with a short local cache.
+- Compares each stat-bearing Item Market listing against the matching equipped slot.
+- Shows **UPGRADE / SIDEGRADE / DOWNGRADE**, listing price, Damage/Accuracy or Armor deltas, Quality and up to two listed bonuses.
+- Weapon verdicts use base Damage + Accuracy direction; armor verdicts use Armor. Bonuses/mods are shown but intentionally not folded into a fake universal score.
+- Added a manual refresh button, a Settings toggle, health diagnostics and `loadoutComparator()` to the public API.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.5.user.js`.
 
 ## v1.16.4
 
