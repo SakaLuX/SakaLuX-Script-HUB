@@ -78,7 +78,7 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 
 Complementary add-ons currently registered in the live `scripts.json` registry:
 
-- SakaLuX Enhancer Guard **v1.3.6**
+- SakaLuX Enhancer Guard **v1.3.7**
 - SakaLuX Bazaar Thanker - PDA **v5.3.3**
 - SakaLuX Mission Rewards **v1.0.3**
 - SakaLuX Market Intelligence **v1.17.0**
