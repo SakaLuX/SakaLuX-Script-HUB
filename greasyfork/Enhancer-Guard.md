@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.8**
+**v1.3.9**
 
 ## What it does
 
@@ -17,11 +17,15 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current release notes
 
+### v1.3.9
+
+- Moved protection badges from the Enhancer panel to the Torn Items inventory, matching Item Protector.
+- Added full, partial-quantity and unlocked lock badge states with long-press quantity editing directly on item icons.
+- Added a working lock-size button beside the Item Protector close button; it cycles small, medium and large using shared settings.
+
 ### v1.3.8
 
-- Removed the manual item-name / `ADD ITEM` flow; protection is now controlled from the lock badge on each item icon, matching Item Protector.
-- Added full, partial-quantity and unlocked lock badge states with long-press quantity editing.
-- Added a lock-size button in the Item Protector panel that cycles small, medium and large using the shared Item Protector setting.
+- Removed the manual item-name / `ADD ITEM` flow.
 
 ### v1.3.7
 
