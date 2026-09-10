@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.10
+// @version      1.3.11
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.10';
+    const VERSION = '1.3.11';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -206,7 +206,6 @@
         try { window.saveDashSettings?.(settings); } catch {}
         try { window.mmpRefreshAll?.(); } catch {}
         refreshInventoryProtectionBadges();
-        injectProtectorSizeButton();
         return settings.lockSize;
     }
 
@@ -281,37 +280,13 @@
         });
     }
 
-    function findProtectorPanel() {
-        const byId = [...document.querySelectorAll('[id*="mmp" i], [class*="mmp" i]')].find(element => [...element.querySelectorAll('button')].some(button => button.textContent.trim() === '×' || /close/i.test(button.getAttribute('aria-label') || '')));
-        if (byId) return byId;
-        return [...document.querySelectorAll('body *')].find(element => {
-            if (element.children.length > 40 || !/item protector/i.test(element.textContent || '')) return false;
-            return [...element.querySelectorAll('button')].some(button => button.textContent.trim() === '×' || /close/i.test(button.getAttribute('aria-label') || ''));
-        });
-    }
-
-    function injectProtectorSizeButton() {
-        const panel = findProtectorPanel();
-        if (!panel || panel.querySelector('[data-sl-eg-lock-size]')) return;
-        const close = [...panel.querySelectorAll('button')].find(button => button.textContent.trim() === '×' || /close/i.test(button.getAttribute('aria-label') || ''));
-        if (!close) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.dataset.slEgLockSize = '1';
-        button.textContent = '↕';
-        button.title = 'Schimbă mărimea lacătului';
-        button.style.cssText = 'width:36px;height:36px;margin-right:6px;border:1px solid #66591d;border-radius:10px;background:#2a2512;color:#f5d85f;font-size:17px;font-weight:900;';
-        button.onclick = event => { event.preventDefault(); event.stopPropagation(); cycleProtectorLockSize(); };
-        close.parentNode.insertBefore(button, close);
-    }
-
     let inventoryProtectionObserver = null;
     let inventoryProtectionTimer = null;
     function installInventoryProtection() {
         if (!document.body || inventoryProtectionObserver) return;
         const refresh = () => {
             clearTimeout(inventoryProtectionTimer);
-            inventoryProtectionTimer = setTimeout(() => { refreshInventoryProtectionBadges(); injectProtectorSizeButton(); }, 80);
+            inventoryProtectionTimer = setTimeout(refreshInventoryProtectionBadges, 80);
         };
         refresh();
         inventoryProtectionObserver = new MutationObserver(refresh);
@@ -901,7 +876,7 @@
                     <div id="sl-eg-controls">
                         <input id="sl-eg-search" type="search" placeholder="🔎 Caută...">
                         <button class="sl-eg-control" id="sl-eg-relics" title="Relics">⭐</button>
-                        <button class="sl-eg-control" id="sl-eg-protect" title="Item Protector">🔒</button>
+                        <button class="sl-eg-control" id="sl-eg-protect" title="Schimbă mărimea lacătelor din Items">🔒</button>
                         <button class="sl-eg-control" id="sl-eg-refresh" title="Refresh">🔄</button>
                     </div>
                     <div id="sl-eg-filters"><button class="sl-eg-filter" data-filter="all">ALL</button><button class="sl-eg-filter" data-filter="owned">OWNED</button><button class="sl-eg-filter" data-filter="missing">MISSING</button></div>
@@ -915,7 +890,7 @@
         document.getElementById('sl-eg-close').onclick = closePanel;
         document.getElementById('sl-eg-api-button').onclick = openApiPanel;
         document.getElementById('sl-eg-refresh').onclick = () => refreshData();
-        document.getElementById('sl-eg-protect').onclick = openProtectionPanel;
+        document.getElementById('sl-eg-protect').onclick = () => cycleProtectorLockSize();
         document.getElementById('sl-eg-relics').onclick = () => {
             state.showRelics = !state.showRelics;
             setBool(STORAGE.showRelics, state.showRelics);
