@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.9
+// @version      1.3.10
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.9';
+    const VERSION = '1.3.10';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -218,11 +218,13 @@
     function inventoryItemName(target) {
         if (!target) return '';
         const image = target.querySelector('img');
-        const direct = target.dataset.itemName || target.getAttribute('data-item-name') || image?.alt || image?.title || image?.getAttribute('aria-label');
+        const itemNode = target.closest('[data-item-name], [data-name], [data-item-id]');
+        const labelled = target.querySelector('[title], [aria-label]') || target.parentElement?.querySelector('[title], [aria-label]');
+        const direct = target.dataset.itemName || target.getAttribute('data-item-name') || itemNode?.dataset.itemName || itemNode?.dataset.name || image?.alt || image?.title || image?.getAttribute('aria-label') || labelled?.getAttribute('title') || labelled?.getAttribute('aria-label');
         if (direct && normalizeProtectedName(direct)) return String(direct).replace(/\s+x\s*[\d,]+$/i, '').trim();
-        const row = target.closest('li, .item, [class*="item"]');
-        const text = (row?.innerText || '').split('\n').map(value => value.trim()).filter(Boolean);
-        const candidate = text.find(value => !/^x?\s*[\d,]+$/i.test(value) && !/^\d+[\s/]/.test(value) && value.length > 1);
+        const rows = [target.closest('li'), target.closest('.item'), target.parentElement?.parentElement, target.parentElement?.parentElement?.parentElement].filter(Boolean);
+        const text = rows.flatMap(row => (row.innerText || '').split('\n').map(value => value.trim())).filter(Boolean);
+        const candidate = text.find(value => !/^items?$/i.test(value) && !/^x?\s*[\d,]+$/i.test(value) && !/^\d+[\s/]/.test(value) && value.length > 1);
         return candidate ? candidate.replace(/\s+x\s*[\d,]+$/i, '').trim() : '';
     }
 
@@ -280,6 +282,8 @@
     }
 
     function findProtectorPanel() {
+        const byId = [...document.querySelectorAll('[id*="mmp" i], [class*="mmp" i]')].find(element => [...element.querySelectorAll('button')].some(button => button.textContent.trim() === '×' || /close/i.test(button.getAttribute('aria-label') || '')));
+        if (byId) return byId;
         return [...document.querySelectorAll('body *')].find(element => {
             if (element.children.length > 40 || !/item protector/i.test(element.textContent || '')) return false;
             return [...element.querySelectorAll('button')].some(button => button.textContent.trim() === '×' || /close/i.test(button.getAttribute('aria-label') || ''));
