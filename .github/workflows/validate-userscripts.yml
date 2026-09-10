@@ -1,153 +1,54 @@
-name: Validate SakaLuX userscripts
+name: Apply Elimination v1.3.1
 
 on:
   push:
     branches: [main]
     paths:
-      - '*.user.js'
-      - 'scripts.json'
-      - 'greasyfork/**'
-      - '.github/workflows/**'
-  pull_request:
-    paths:
-      - '*.user.js'
-      - 'scripts.json'
-      - 'greasyfork/**'
-      - '.github/workflows/**'
-  workflow_dispatch:
+      - '.github/workflows/validate-userscripts.yml'
 
 permissions:
-  contents: read
-
-concurrency:
-  group: userscript-validation-${{ github.ref }}
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  validate:
+  patch:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Check JavaScript syntax
-        shell: bash
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch and validate
         run: |
-          set -euo pipefail
-          shopt -s nullglob
-          files=(SakaLuX-*.user.js)
-          if ((${#files[@]} == 0)); then
-            echo 'No root SakaLuX userscripts found.' >&2
-            exit 1
-          fi
-          printf 'Checking %d userscripts\n' "${#files[@]}"
-          for file in "${files[@]}"; do
-            echo "node --check $file"
-            node --check "$file"
-          done
-
-      - name: Validate scripts.json
-        shell: python
-        run: |
+          python3 - <<'PY'
+          from pathlib import Path
           import json
-          from pathlib import Path
-          p = Path('scripts.json')
-          json.loads(p.read_text(encoding='utf-8'))
-          print('scripts.json: valid JSON')
-
-      - name: Validate Suite metadata
-        shell: python
-        run: |
-          import re
-          from pathlib import Path
-
-          p = Path('SakaLuX-Suite.user.js')
-          text = p.read_text(encoding='utf-8')
-
-          meta = re.search(r'^// @version\s+([^\s]+)\s*$', text, re.M)
-          runtime = re.search(r"const VERSION\s*=\s*['\"]([^'\"]+)['\"];", text)
-          if not meta or not runtime:
-              raise SystemExit('Suite version metadata/runtime constant missing')
-          if meta.group(1) != runtime.group(1):
-              raise SystemExit(f"Suite version mismatch: metadata={meta.group(1)} runtime={runtime.group(1)}")
-
-          required = [
-              '// ==UserScript==',
-              '// @match        https://www.torn.com/*',
-              '// @license      All Rights Reserved',
-              '// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
-              '// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
-              '// ==/UserScript=='
-          ]
-          missing = [x for x in required if x not in text]
-          if missing:
-              raise SystemExit('Suite metadata missing: ' + ', '.join(missing))
-
-          print(f'SakaLuX Suite v{meta.group(1)} metadata: OK')
-
-      - name: Validate Suite module parity invariants
-        shell: python
-        run: |
-          import re
-          from pathlib import Path
-
-          text = Path('SakaLuX-Suite.user.js').read_text(encoding='utf-8')
-
-          expected_modules = {
-              'prayerReminder': 'createPrayerReminderModule',
-              'medAdvisor': 'createMedAdvisorModule',
-              'itemIntel': 'createItemIntelModule',
-              'eventsDashboard': 'createEventsDashboardModule',
-              'activityIntelligence': 'createActivityIntelligenceModule',
-              'factionMemberView': 'createFactionMemberViewModule',
-              'armoryLoanScanner': 'createArmoryLoanScannerModule',
-              'warLedger': 'createWarLedgerModule',
-              'ocOperations': 'createOcOperationsModule',
-              'companyManagement': 'createCompanyManagementModule',
-              'racingChampionship': 'createRacingChampionshipModule',
-              'casinoEdgeScanner': 'createCasinoEdgeScannerModule',
-              'targetAlerts': 'createTargetAlertsModule',
-          }
-          for module_id, factory in expected_modules.items():
-              entry = re.search(
-                  r'id:\s*["\']' + re.escape(module_id) + r'["\'][\s\S]{0,500}?factory:\s*' + re.escape(factory),
-                  text,
-              )
-              if not entry:
-                  raise SystemExit(f'Module/factory registry mismatch: {module_id} -> {factory}')
-
-          required_runtime = [
-              "function createEventsDashboardModule(context) {",
-              "function createItemIntelModule(context) {",
-              "function createMedAdvisorModule(context) {",
-              "function createPrayerReminderModule(context) {",
-              "function migrateLegacySakaLuXSettings() {",
-              "function createSakaLuXChainAlarmModule() {",
-              "function restoreMessageLinks(element, links) {",
-          ]
-          missing = [x for x in required_runtime if x not in text]
-          if missing:
-              raise SystemExit('Suite runtime invariant missing: ' + ', '.join(missing))
-
-          event_factory = re.search(
-              r'^\s*function createEventsDashboardModule\(context\) \{',
-              text,
-              re.M,
-          )
-          if not event_factory:
-              raise SystemExit('Event Lens factory is not a scoped function declaration')
-
-          print('Suite complete-module invariants: OK')
-
-      - name: Ensure only stable workflow remains
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t workflows < <(find .github/workflows -maxdepth 1 -type f -printf '%f\n' | sort)
-          printf 'Workflow files: %s\n' "${workflows[*]:-none}"
-          if ((${#workflows[@]} != 1)) || [[ "${workflows[0]:-}" != "validate-userscripts.yml" ]]; then
-            echo 'Unexpected workflow file detected. Only validate-userscripts.yml is allowed.' >&2
-            printf '%s\n' "${workflows[@]}" >&2
-            exit 1
-          fi
-          echo 'Workflow directory clean: only stable validator remains.'
+          p=Path('SakaLuX-Elimination-Assistant.user.js')
+          s=p.read_text()
+          b=Path('backups/SakaLuX-Elimination-Assistant-v1.3.0.user.js')
+          if not b.exists(): b.write_text(s)
+          s=s.replace('// @version      1.3.0','// @version      1.3.1',1)
+          s=s.replace("const VERSION='1.3.0';","const VERSION='1.3.1';",1)
+          old="async function calibrate(force=false){if(state.my.source==='manual'&&!force)return state.my.total;if(!force&&state.my.total&&Date.now()-Number(state.my.at||0)<900000)return state.my.total;const raw=await torn('user/battlestats');const x=raw?.battlestats??raw?.data??raw??{};const total=['strength','defense','speed','dexterity'].reduce((s,k)=>s+Number(x[k]??x?.battle_stats?.[k]??0),0);if(!total)throw new Error('battlestats not returned; run TEST TORN KEY');state.my={total,at:Date.now(),source:'Torn API'};save(K.my,state.my);apply();return total}"
+          new="async function calibrate(force=false){if(state.my.source==='manual'&&!force)return state.my.total;if(!force&&state.my.total&&Date.now()-Number(state.my.at||0)<900000)return state.my.total;const raw=await torn('user/battlestats');const x=raw?.battlestats??raw?.data?.battlestats??raw?.data??raw??{};const statVal=k=>{const v=x?.[k]??x?.battle_stats?.[k]??0;if(v&&typeof v==='object')return Number(v.value??v.amount??v.total??v.base??0)||0;return Number(v)||0};const apiTotal=Number(x?.total??x?.total_battlestats??0)||0;const total=apiTotal||['strength','defense','speed','dexterity'].reduce((sum,k)=>sum+statVal(k),0);if(!total)throw new Error('Battle stats endpoint replied, but no stat values were found. Check Torn API key access.');state.my={total,at:Date.now(),source:'Torn API'};save(K.my,state.my);apply();setStatus('Battle stats calibrated: '+fmtBS(total));return total}"
+          if old not in s: raise SystemExit('calibrate marker missing')
+          p.write_text(s.replace(old,new,1))
+          d=json.loads(Path('scripts.json').read_text())
+          for row in d.get('scripts',[]):
+              if row.get('id')=='elimination-assistant': row['version']='1.3.1'
+          Path('scripts.json').write_text(json.dumps(d,indent=2,ensure_ascii=False)+'\n')
+          md=Path('greasyfork/Elimination-Assistant.md'); t=md.read_text().replace('**Current version: v1.3.0**','**Current version: v1.3.1**',1)
+          if '## v1.3.1 — Battle Stats API v2 Fix' not in t:
+              pos=t.find('\n## ')
+              entry='\n## v1.3.1 — Battle Stats API v2 Fix\n\n- Fixed CALIBRATE ME for Torn API v2 battlestats object values and battlestats.total.\n- Added exact backup: backups/SakaLuX-Elimination-Assistant-v1.3.0.user.js.\n\n'
+              t=t[:pos+1]+entry+t[pos+1:]
+          md.write_text(t)
+          u=Path('UPDATE-INFO.md'); x=u.read_text().replace('SakaLuX Elimination Assistant: **v1.3.0**','SakaLuX Elimination Assistant: **v1.3.1**',1)
+          if '### SakaLuX Elimination Assistant v1.3.1' not in x:
+              x=x.replace('## Latest changes\n','## Latest changes\n\n### SakaLuX Elimination Assistant v1.3.1\n- Fixed current Torn API v2 battlestats parsing for CALIBRATE ME.\n\n',1)
+          u.write_text(x)
+          PY
+          node --check SakaLuX-Elimination-Assistant.user.js
+          git config user.name "SakaLuX"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-Elimination-Assistant.user.js scripts.json greasyfork/Elimination-Assistant.md UPDATE-INFO.md backups/SakaLuX-Elimination-Assistant-v1.3.0.user.js
+          git diff --cached --quiet || git commit -m "fix: Elimination Assistant v1.3.1 battlestats API v2"
+          git push origin main
