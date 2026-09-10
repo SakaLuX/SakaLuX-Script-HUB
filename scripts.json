@@ -166,8 +166,8 @@
       "name": "Elimination Assistant",
       "icon": "⚔️",
       "category": "Combat",
-      "version": "1.3.3",
-      "description": "Eliminations advisor with FF/BS estimates, calibration, learning, API 32-aware diagnostics and Hub ON/OFF action hiding.",
+      "version": "1.3.4",
+      "description": "Eliminations advisor with live location status, Attackable-only filtering, TornPDA target export, FF/BS estimates and learning.",
       "greasyForkId": "594921",
       "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "downloadUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js",
@@ -197,6 +197,12 @@
           "label": "FF SCAN",
           "icon": "📊",
           "method": "scanFF"
+        },
+        {
+          "id": "export-targets",
+          "label": "EXPORT TARGETS",
+          "icon": "📤",
+          "method": "exportTargets"
         },
         {
           "id": "calibrate",
