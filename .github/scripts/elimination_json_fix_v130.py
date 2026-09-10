@@ -1,0 +1,78 @@
+from pathlib import Path
+import json
+
+p=Path('SakaLuX-Elimination-Assistant.user.js')
+s=p.read_text()
+old=s
+b=Path('backups/SakaLuX-Elimination-Assistant-v1.2.9.user.js')
+if not b.exists():
+    b.write_text(s)
+
+s=s.replace('// @version      1.2.9','// @version      1.3.0',1)
+s=s.replace("const VERSION='1.2.9';","const VERSION='1.3.0';",1)
+
+old_fn="""function requestJSON(url){return new Promise((resolve,reject)=>{const parse=t=>{try{const j=JSON.parse(t);if(j?.error){const e=new Error(j.error.error||j.error.message||'API error');e.code=Number(j.error.code||0);reject(e)}else resolve(j)}catch(e){reject(e)}};if(typeof window.PDA_httpGet==='function'){window.PDA_httpGet(url,{Accept:'application/json'}).then(r=>parse(String(r?.responseText??r?.body??r??''))).catch(reject);return}if(window.flutter_inappwebview?.callHandler){window.flutter_inappwebview.callHandler('PDA_httpGet',url,{Accept:'application/json'}).then(r=>parse(String(r?.responseText??r?.body??r??''))).catch(reject);return}if(typeof GM_xmlhttpRequest==='function'){GM_xmlhttpRequest({method:'GET',url,timeout:15000,onload:r=>r.status>=200&&r.status<400?parse(r.responseText):reject(new Error('HTTP '+r.status)),onerror:()=>reject(new Error('Network error')),ontimeout:()=>reject(new Error('Timeout'))});return}fetch(url).then(r=>r.text()).then(parse).catch(reject)})}"""
+new_fn="""function requestJSON(url){
+  const decode=raw=>{
+    let v=raw;
+    if(v&&typeof v==='object'){
+      if(v.responseText!==undefined)v=v.responseText;
+      else if(v.body!==undefined)v=v.body;
+      else if(v.data!==undefined)v=v.data;
+      else if(v.response!==undefined)v=v.response;
+      else return v;
+    }
+    if(typeof v!=='string')v=String(v??'');
+    v=v.trim();
+    if(!v)throw new Error('Empty API response');
+    try{return JSON.parse(v)}catch(e){
+      const a=v.indexOf('{'),b=v.lastIndexOf('}');
+      if(a>=0&&b>a){try{return JSON.parse(v.slice(a,b+1))}catch(_){}}
+      throw new Error('Invalid API response: '+e.message);
+    }
+  };
+  const checked=raw=>{const j=decode(raw);if(j?.error){const e=new Error(j.error.error||j.error.message||'API error');e.code=Number(j.error.code||0);throw e}return j};
+  const viaGM=()=>new Promise((resolve,reject)=>{
+    if(typeof GM_xmlhttpRequest!=='function'){reject(new Error('GM request unavailable'));return}
+    GM_xmlhttpRequest({method:'GET',url,timeout:15000,onload:r=>{try{if(r.status<200||r.status>=400)throw new Error('HTTP '+r.status);resolve(checked(r))}catch(e){reject(e)}},onerror:()=>reject(new Error('Network error')),ontimeout:()=>reject(new Error('Timeout'))});
+  });
+  const viaFetch=()=>fetch(url,{headers:{Accept:'application/json'}}).then(async r=>{if(!r.ok)throw new Error('HTTP '+r.status);return checked(await r.text())});
+  return (async()=>{
+    let last=null;
+    if(typeof window.PDA_httpGet==='function')try{return checked(await window.PDA_httpGet(url,{Accept:'application/json'}))}catch(e){last=e}
+    if(window.flutter_inappwebview?.callHandler)try{return checked(await window.flutter_inappwebview.callHandler('PDA_httpGet',url,{Accept:'application/json'}))}catch(e){last=e}
+    if(typeof GM_xmlhttpRequest==='function')try{return await viaGM()}catch(e){last=e}
+    try{return await viaFetch()}catch(e){last=e}
+    throw last||new Error('API request failed');
+  })();
+}"""
+if old_fn not in s:
+    raise SystemExit('requestJSON marker missing')
+s=s.replace(old_fn,new_fn,1)
+p.write_text(s)
+if s==old:
+    raise SystemExit('no changes')
+
+j=Path('scripts.json')
+data=json.loads(j.read_text())
+for row in data.get('scripts',[]):
+    if row.get('id')=='elimination-assistant':
+        row['version']='1.3.0'
+j.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
+
+md=Path('greasyfork/Elimination-Assistant.md')
+t=md.read_text()
+t=t.replace('**Current version: v1.2.9**','**Current version: v1.3.0**',1)
+entry='''\n## v1.3.0 — TornPDA JSON Transport Fix\n\n- Fixed `Unexpected end of JSON input` on TornPDA when the PDA bridge returns an empty or differently shaped response object.\n- API responses now accept `responseText`, `body`, `data`, `response`, or an already-decoded object.\n- If the TornPDA bridge fails or returns an unusable response, the script falls back to `GM_xmlhttpRequest` and then normal `fetch` instead of stopping immediately.\n- Empty and malformed responses now show clear errors instead of raw JSON parser messages.\n- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.2.9.user.js`.\n\n'''
+if '## v1.3.0 — TornPDA JSON Transport Fix' not in t:
+    pos=t.find('\n## ')
+    t=t[:pos+1]+entry+t[pos+1:]
+md.write_text(t)
+
+u=Path('UPDATE-INFO.md')
+x=u.read_text()
+x=x.replace('SakaLuX Elimination Assistant: **v1.2.9**','SakaLuX Elimination Assistant: **v1.3.0**',1)
+latest='''\n### SakaLuX Elimination Assistant v1.3.0\n- Fixed TornPDA `Unexpected end of JSON input` by hardening API response decoding and adding transport fallback from PDA bridge to GM request/fetch.\n- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.2.9.user.js`.\n\n'''
+if '### SakaLuX Elimination Assistant v1.3.0' not in x:
+    x=x.replace('## Latest changes\n','## Latest changes\n'+latest,1)
+u.write_text(x)
