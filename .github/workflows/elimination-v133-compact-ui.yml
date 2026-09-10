@@ -1,0 +1,120 @@
+name: Elimination v1.3.3 Compact UI
+
+on:
+  push:
+    paths:
+      - '.github/workflows/elimination-v133-compact-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch Elimination Assistant
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, re
+
+          p=Path('SakaLuX-Elimination-Assistant.user.js')
+          s=p.read_text()
+          old=s
+          b=Path('backups/SakaLuX-Elimination-Assistant-v1.3.2.user.js')
+          if not b.exists(): b.write_text(s)
+
+          s=s.replace('// @version      1.3.2','// @version      1.3.3',1)
+          s=s.replace("const VERSION='1.3.2';","const VERSION='1.3.3';",1)
+
+          s,n=re.subn(
+            r"function signal\(p\)\{[^\n]*\}",
+            "function signal(p){const r=risk(p);const top=`${p.ff?'FF '+p.ff.toFixed(2):'FF —'} · ${p.bs?'BS '+fmtBS(p.bs):'BS —'}`;const bottom=`${r.edge!==null?r.edge.toFixed(1)+'× · ':''}${r.label} · ${smart(p)}/100`;return top+'\\n'+bottom}",
+            s,count=1)
+          if n!=1: raise SystemExit('signal marker missing')
+
+          new_css="""function css(){if($('#'+IDS.style))return;const s=document.createElement('style');s.id=IDS.style;s.textContent=`
+#${IDS.button}{position:fixed;right:12px;bottom:82px;z-index:999999;background:#171b21;color:#fff;border:1px solid #414a55;border-radius:999px;padding:10px 13px;font-weight:900;font-size:13px}
+#${IDS.panel}{display:none;position:fixed;right:4px;bottom:72px;z-index:999998;width:min(920px,calc(100vw - 8px));height:88vh;max-height:calc(100vh - 88px);background:#0b1016;color:#f8fafc;border:1px solid #3b4652;border-radius:14px;overflow:hidden;font:13px Arial,sans-serif}
+#${IDS.panel}.open{display:flex;flex-direction:column}
+.slx-h,.slx-t,.slx-s{display:flex;align-items:center;border-bottom:1px solid #27323d}
+.slx-h{gap:6px;padding:7px 8px;background:#111821;min-height:38px}.slx-h b{flex:1;font-size:14px;color:#fff;line-height:1.15}.slx-h button{min-width:38px}
+.slx-t{gap:6px;padding:6px 8px;background:#0f151d}.slx-top{flex-wrap:nowrap}.slx-search{flex-wrap:nowrap;padding-top:5px;padding-bottom:6px}
+.slx-top #slx-team{flex:1;min-width:0}.slx-search #slx-filter{width:112px;flex:0 0 112px}.slx-search #slx-q{flex:1;min-width:0}
+.slx-t input,.slx-t select,.slx-t button,.slx-a,.slx-h button,.slx-cal-mini{background:#18212c;color:#f8fafc;border:1px solid #475569;border-radius:7px;padding:7px 8px;font-size:13px;min-height:36px}.slx-t button{font-weight:900;white-space:nowrap}
+.slx-s{gap:6px;padding:5px 8px;background:#121a23;min-height:34px;flex-wrap:nowrap}.slx-s span{flex:1;min-width:0;color:#dbe4ee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.slx-s b{color:#facc15;font-size:12px;white-space:nowrap}.slx-cal-mini{padding:5px 7px;min-height:28px;font-size:11px;font-weight:900;color:#fde68a;border-color:#7c5f11;background:#2a220b;white-space:nowrap}
+.slx-body{overflow:auto;flex:1;background:#0b1016}.slx-body table{width:100%;border-collapse:collapse;table-layout:fixed}.slx-body col.signal{width:34%}.slx-body col.player{width:24%}.slx-body col.lvl{width:8%}.slx-body col.last{width:10%}.slx-body col.actions{width:24%}
+.slx-body th,.slx-body td{border-bottom:1px solid #22303c;text-align:left;vertical-align:middle;padding:6px 5px;font-size:12px;line-height:1.15;overflow:hidden}.slx-body th{position:sticky;top:0;z-index:2;background:#131c25;color:#f8fafc;font-weight:900;white-space:nowrap}.slx-body td:first-child{white-space:pre-line;font-weight:900}.slx-body td:nth-child(3),.slx-body td:nth-child(4){text-align:center;white-space:nowrap}.slx-body td:nth-child(2){white-space:nowrap;text-overflow:ellipsis}.slx-body td:nth-child(2) small{display:block;font-size:9px;color:#94a3b8;margin-top:2px}
+.slx-a{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;margin:1px;padding:5px 6px;min-height:27px;font-size:11px}.slx-player{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.slx-actions{white-space:nowrap!important;text-align:right!important}.slx-actions .slx-a{padding:4px 5px;min-width:27px;font-size:10px}.slx-actions .atk{min-width:38px;font-weight:900;color:#fff;border-color:#64748b}.slx-actions .win{color:#86efac}.slx-actions .loss{color:#fda4af}
+.safe{color:#4ade80!important;font-weight:900}.risky{color:#fbbf24!important;font-weight:900}.skip{color:#fb7185!important;font-weight:900}
+.slx-modal{display:none;position:absolute;inset:0;z-index:20;background:#0c1015f5;padding:14px;overflow:auto;font-size:13px}.slx-modal.open{display:block}.slx-modal input{width:100%;padding:9px;margin:4px 0 9px;background:#11161c;color:#fff;border:1px solid #475569;border-radius:8px;font-size:13px}
+@media(max-width:640px){#${IDS.panel}{height:90vh;max-height:calc(100vh - 72px)}.slx-h{padding:6px 7px}.slx-h b{font-size:13px}.slx-t{padding:5px 6px;gap:5px}.slx-t input,.slx-t select,.slx-t button{font-size:12px;padding:6px;min-height:34px}.slx-search #slx-filter{width:94px;flex-basis:94px}.slx-s{padding:4px 6px;gap:4px}.slx-s span,.slx-s b{font-size:11px}.slx-cal-mini{font-size:10px;padding:4px 5px}.slx-body th,.slx-body td{font-size:11px;padding:5px 3px}.slx-body col.signal{width:35%}.slx-body col.player{width:23%}.slx-body col.lvl{width:7%}.slx-body col.last{width:9%}.slx-body col.actions{width:26%}.slx-a{font-size:10px;padding:4px}.slx-actions .slx-a{font-size:9px;padding:3px 4px;min-width:23px}.slx-actions .atk{min-width:34px}}
+`;document.head.appendChild(s)}"""
+          s,n=re.subn(r"function css\(\)\{[\s\S]*?document\.head\.appendChild\(s\)\}",new_css,s,count=1)
+          if n!=1: raise SystemExit('css marker missing')
+
+          old_html=re.search(r"p\.innerHTML=`[\s\S]*?`;document\.body\.append\(b,p\);",s)
+          if not old_html: raise SystemExit('panel html marker missing')
+          new_html="""p.innerHTML=`<div class=\"slx-h\"><b>SakaLuX Elimination Assistant v${VERSION}</b><button id=\"slx-set\">⚙</button><button id=\"slx-close\">✕</button></div><div class=\"slx-t slx-top\"><select id=\"slx-team\"><option value=\"\">Team…</option></select><button id=\"slx-load\">LOAD</button><button id=\"slx-ff\">FF SCAN</button></div><div class=\"slx-t slx-search\"><select id=\"slx-filter\"><option value=\"all\">All</option><option value=\"safe\">SAFE</option><option value=\"ok\">SAFE + RISKY</option><option value=\"new\">Not opened</option></select><input id=\"slx-q\" placeholder=\"Player / ID\"></div><div class=\"slx-s\"><span id=\"slx-status\">Set Torn API key in ⚙ Settings.</span><button class=\"slx-cal-mini\" id=\"slx-cal\">CALIBRATE</button><b id=\"slx-summary\"></b></div><div class=\"slx-body\"><table><colgroup><col class=\"signal\"><col class=\"player\"><col class=\"lvl\"><col class=\"last\"><col class=\"actions\"></colgroup><thead><tr><th>Signal</th><th>Player</th><th>Lvl</th><th>Last</th><th>Actions</th></tr></thead><tbody id=\"slx-rows\"></tbody></table></div><div class=\"slx-modal\" id=\"slx-settings\"><h3>Settings</h3><p>TEST TORN KEY checks battlestats and Eliminations separately. API 32 on eliminationteam means that Torn is not currently exposing that event endpoint; it is not treated as a bad API key.</p><button class=\"slx-a\" id=\"slx-create\">🔑 CREATE REQUIRED TORN KEY</button> <button class=\"slx-a\" id=\"slx-test\">🧪 TEST TORN KEY</button><label>Torn API key</label><input id=\"slx-torn\"><label>FFScouter API key (optional)</label><input id=\"slx-ffkey\"><label>Manual total BS</label><input id=\"slx-manual\" type=\"number\"><button class=\"slx-a\" id=\"slx-save\">SAVE</button> <button class=\"slx-a\" id=\"slx-cancel\">CLOSE</button></div>`;document.body.append(b,p);"""
+          s=s[:old_html.start()]+new_html+s[old_html.end():]
+
+          new_render="""function render(){const e=$('#slx-rows');if(!e)return;e.innerHTML=state.view.map(p=>{const r=risk(p),c=r.label==='SAFE'?'safe':r.label==='RISKY'?'risky':'skip',l=learn(p.id);return`<tr><td class=\"${c}\">${esc(signal(p))}</td><td><a class=\"slx-a slx-player\" href=\"https://www.torn.com/profiles.php?XID=${p.id}\" target=\"_blank\">${esc(p.name)}</a><small>${l.wins}W/${l.losses}L</small></td><td>${p.level||'—'}</td><td>${age(p.last)}</td><td class=\"slx-actions\"><a class=\"slx-a atk\" data-id=\"${p.id}\" href=\"https://www.torn.com/loader.php?sid=attack&user2ID=${p.id}\">ATK</a><button class=\"slx-a win\" data-id=\"${p.id}\">W</button><button class=\"slx-a loss\" data-id=\"${p.id}\">L</button></td></tr>`}).join('');$$('.atk',e).forEach(a=>a.onclick=()=>{const p=state.players.find(x=>x.id===Number(a.dataset.id));if(p){state.history.unshift({id:p.id,name:p.name,action:'opened',at:Date.now()});save(K.hist,state.history.slice(0,1000))}});$$('.win',e).forEach(b=>b.onclick=()=>record(state.players.find(x=>x.id===Number(b.dataset.id)),'win'));$$('.loss',e).forEach(b=>b.onclick=()=>record(state.players.find(x=>x.id===Number(b.dataset.id)),'loss'));const safe=state.players.filter(p=>!unavailable(p)&&risk(p).label==='SAFE').length;$('#slx-summary').textContent=`ME ${state.my.total?fmtBS(state.my.total):'—'} · SAFE ${safe}`}"""
+          s,n=re.subn(r"function render\(\)\{[^\n]*\}",new_render,s,count=1)
+          if n!=1: raise SystemExit('render marker missing')
+
+          p.write_text(s)
+          if s==old: raise SystemExit('no changes')
+
+          j=Path('scripts.json'); data=json.loads(j.read_text())
+          for row in data.get('scripts',[]):
+              if row.get('id')=='elimination-assistant':
+                  row['version']='1.3.3'
+                  row['description']='Compact TornPDA Eliminations target advisor with FF/BS estimates, calibration, learning and dense attack-first layout.'
+          j.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
+
+          md=Path('greasyfork/Elimination-Assistant.md'); t=md.read_text()
+          t=re.sub(r'## Current version\s+\*\*v[^*]+\*\*','## Current version\n\n**v1.3.3**',t,count=1)
+          entry='''\n## v1.3.3 — Compact attack-first TornPDA layout\n\n- Moved the **All / SAFE / SAFE + RISKY / Not opened** filter beside Player / ID.\n- Moved **CALIBRATE** into the thin status bar immediately before `ME ... · SAFE ...`.\n- Reduced control/header height so substantially more target rows are visible.\n- Forced Signal / Player / Lvl / Last / Actions into one fixed-width row layout on mobile.\n- Compact Signal now uses two short lines: FF + BS, then edge + recommendation + smart score.\n- Actions are compact **ATK / W / L** controls to avoid vertical wrapping.\n- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.3.2.user.js`.\n\n'''
+          if '## v1.3.3 — Compact attack-first TornPDA layout' not in t:
+              pos=t.find('\n## '); t=t[:pos+1]+entry+t[pos+1:]
+          t=re.sub(r'## Current release notes\s+\n\n### v[^\n]+','## Current release notes\n\n### v1.3.3',t,count=1)
+          md.write_text(t)
+
+          u=Path('UPDATE-INFO.md'); x=u.read_text()
+          x=x.replace('Last updated: 2026-09-09','Last updated: 2026-09-10',1)
+          x=x.replace('SakaLuX Elimination Assistant: **v1.3.2**','SakaLuX Elimination Assistant: **v1.3.3**',1)
+          latest='''\n### SakaLuX Elimination Assistant v1.3.3\n- Reworked TornPDA into a compact attack-first layout: two small control rows, CALIBRATE in the status bar and more visible targets.\n- Fixed-width Signal / Player / Lvl / Last / Actions columns stay on one row; Signal is two compact lines and actions are ATK / W / L.\n- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.3.2.user.js`.\n\n'''
+          if '### SakaLuX Elimination Assistant v1.3.3' not in x:
+              x=x.replace('## Latest changes\n','## Latest changes\n'+latest,1)
+          x=x.replace('**Elimination Assistant v1.2.9** — info/release notes current','**Elimination Assistant v1.3.3** — info/release notes current',1)
+          u.write_text(x)
+          PY
+
+          node --check SakaLuX-Elimination-Assistant.user.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          s=Path('SakaLuX-Elimination-Assistant.user.js').read_text()
+          assert '// @version      1.3.3' in s
+          assert "const VERSION='1.3.3';" in s
+          assert 'slx-cal-mini' in s
+          assert '<col class="signal">' in s
+          assert '>ATK</a>' in s and '>W</button>' in s and '>L</button>' in s
+          assert "top+'\\n'+bottom" in s
+          d=json.loads(Path('scripts.json').read_text())
+          assert next(x for x in d['scripts'] if x['id']=='elimination-assistant')['version']=='1.3.3'
+          assert Path('backups/SakaLuX-Elimination-Assistant-v1.3.2.user.js').exists()
+          md=Path('greasyfork/Elimination-Assistant.md').read_text()
+          assert '**v1.3.3**' in md and '### v1.3.3' in md
+          PY
+      - name: Commit
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-Elimination-Assistant.user.js scripts.json greasyfork/Elimination-Assistant.md UPDATE-INFO.md backups/SakaLuX-Elimination-Assistant-v1.3.2.user.js
+          git diff --cached --quiet || git commit -m "feat: Elimination Assistant v1.3.3 compact attack-first UI"
+          git push origin main
