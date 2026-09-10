@@ -1,10 +1,21 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.6**
+**Current version: v1.16.7**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
+
+
+## v1.16.7 — Live Sliding Settings + Required API Key
+
+- Replaced all Settings checkboxes with mobile-friendly sliding ON/OFF switches.
+- Toggle changes apply immediately without closing the Settings panel, clearing caches, resetting history, or rebuilding unrelated UI.
+- Turning a feature off removes only that feature's visible panel/badges; turning it on schedules an immediate normal rescan.
+- Added **CREATE REQUIRED API KEY** directly below Hard Refresh.
+- The button opens Torn's official custom-key creator prefilled as **SakaLuX Market Intelligence** with the selections used by this script: user money, travel and equipment; Torn items; Market itemmarket.
+- Numeric/text settings remain under **SAVE VALUES** and saving them no longer closes the panel.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.6.user.js`.
 
 ## v1.16.6 — Loadout Comparator
 
