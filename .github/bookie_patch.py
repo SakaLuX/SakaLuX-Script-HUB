@@ -1,0 +1,227 @@
+from pathlib import Path
+
+path = Path('SakaLuX-Suite.user.js')
+text = path.read_text(encoding='utf-8')
+
+OLD_VERSION = '0.9.905'
+NEW_VERSION = '0.9.906'
+if OLD_VERSION not in text:
+    raise SystemExit(f'Expected Suite version {OLD_VERSION} not found')
+text = text.replace(OLD_VERSION, NEW_VERSION)
+
+old_catalog = '''      name: "Odds Scout",
+      category: "Casino",
+      description: "Sports betting market scanner with no-vig probabilities, bookmaker margin analysis, market strength and live probability search.",'''
+new_catalog = '''      name: "Bookie Scout",
+      category: "Casino",
+      description: "Sports betting value scanner with Torn implied probability, no-vig fair probability, external probability input, edge, EV and BET/SKIP signals.",'''
+if old_catalog not in text:
+    raise SystemExit('Odds Scout catalog entry not found')
+text = text.replace(old_catalog, new_catalog, 1)
+
+start = text.index('function createCasinoEdgeScannerModule(context) {')
+end = text.index('function createTargetAlertsModule(context)', start)
+seg = text[start:end]
+
+anchor = "    const PANEL_KEY_ATTR = 'data-fse-key';"
+if anchor not in seg:
+    raise SystemExit('Bookie Scout constants anchor not found')
+constants = """
+    const BOOKIE_PROB_STORAGE_KEY = 'sakalux_bookie_scout_external_prob_v1';
+    const BOOKIE_VALUE_STYLE_ID = `${SCRIPT_ID}-bookie-value-styles`;
+    let bookieObserver = null;
+    let bookieInputBound = false;
+"""
+seg = seg.replace(anchor, anchor + constants, 1)
+
+helper = r'''
+    function loadBookieExternalProbabilities() {
+        try {
+            const value = JSON.parse(localStorage.getItem(BOOKIE_PROB_STORAGE_KEY) || '{}');
+            return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+        } catch {
+            return {};
+        }
+    }
+    function saveBookieExternalProbabilities(value) {
+        try {
+            localStorage.setItem(BOOKIE_PROB_STORAGE_KEY, JSON.stringify(value));
+        } catch (error) {
+            console.warn('[Bookie Scout] Could not save external probabilities.', error);
+        }
+    }
+    function bookieNumber(value) {
+        const match = String(value || '').replace(',', '.').match(/-?\d+(?:\.\d+)?/);
+        return match ? Number(match[0]) : NaN;
+    }
+    function bookieSelectionKey(row) {
+        const panel = row.closest(`.${PANEL_CLASS}`);
+        const marketKey = panel?.getAttribute(PANEL_KEY_ATTR) || cleanText(panel?.textContent || '').slice(0, 120);
+        const selection = cleanText(row.querySelector('.fse-team')?.textContent || 'selection');
+        return `${marketKey}|${selection}`;
+    }
+    function bookieMetric(row, label) {
+        const wanted = String(label).toLowerCase();
+        for (const cell of row.querySelectorAll('.fse-cell')) {
+            const cellLabel = cleanText(cell.querySelector('.fse-label')?.textContent).toLowerCase();
+            if (cellLabel === wanted) {
+                return bookieNumber(cell.querySelector('.fse-number-strong')?.textContent || cell.textContent);
+            }
+        }
+        return NaN;
+    }
+    function updateBookieValueRow(row) {
+        const valueRow = row?.querySelector('.fse-bookie-value');
+        if (!valueRow) return;
+        const odds = bookieMetric(row, 'Odds');
+        const fair = bookieNumber(row.querySelector('.fse-number-novig')?.textContent);
+        const input = valueRow.querySelector('.fse-bookie-external');
+        const external = bookieNumber(input?.value);
+        const implied = Number.isFinite(odds) && odds > 0 ? 100 / odds : NaN;
+        const edge = Number.isFinite(external) && Number.isFinite(fair) ? external - fair : NaN;
+        const ev = Number.isFinite(external) && Number.isFinite(odds) && odds > 0
+            ? ((external / 100) * odds - 1) * 100
+            : NaN;
+        const signal = Number.isFinite(edge) && Number.isFinite(ev)
+            ? (edge > 0 && ev > 0 ? 'BET' : 'SKIP')
+            : 'SET %';
+        const impliedNode = valueRow.querySelector('[data-bookie-metric="implied"]');
+        const edgeNode = valueRow.querySelector('[data-bookie-metric="edge"]');
+        const evNode = valueRow.querySelector('[data-bookie-metric="ev"]');
+        const signalNode = valueRow.querySelector('[data-bookie-metric="signal"]');
+        if (impliedNode) impliedNode.textContent = Number.isFinite(implied) ? `${implied.toFixed(1)}%` : '—';
+        if (edgeNode) edgeNode.textContent = Number.isFinite(edge) ? `${edge >= 0 ? '+' : ''}${edge.toFixed(1)}pp` : '—';
+        if (evNode) evNode.textContent = Number.isFinite(ev) ? `${ev >= 0 ? '+' : ''}${ev.toFixed(1)}%` : '—';
+        if (signalNode) {
+            signalNode.textContent = signal;
+            signalNode.dataset.signal = signal.toLowerCase().replace(/[^a-z]/g, '');
+        }
+    }
+    function decorateBookieSelection(row) {
+        if (!row || row.querySelector('.fse-bookie-value')) return;
+        const odds = bookieMetric(row, 'Odds');
+        const fair = bookieNumber(row.querySelector('.fse-number-novig')?.textContent);
+        if (!Number.isFinite(odds) || odds <= 0 || !Number.isFinite(fair)) return;
+        const key = bookieSelectionKey(row);
+        const saved = loadBookieExternalProbabilities();
+        const savedValue = bookieNumber(saved[key]);
+        const block = document.createElement('div');
+        block.className = 'fse-bookie-value';
+        block.dataset.bookieKey = key;
+        block.innerHTML = `
+            <div class="fse-bookie-metric"><span>Implied</span><strong data-bookie-metric="implied">—</strong></div>
+            <label class="fse-bookie-metric fse-bookie-input-wrap"><span>External %</span><input class="fse-bookie-external" type="number" inputmode="decimal" min="0.1" max="99.9" step="0.1" placeholder="e.g. 58.0" value="${Number.isFinite(savedValue) ? savedValue : ''}"></label>
+            <div class="fse-bookie-metric"><span>Edge</span><strong data-bookie-metric="edge">—</strong></div>
+            <div class="fse-bookie-metric"><span>EV</span><strong data-bookie-metric="ev">—</strong></div>
+            <div class="fse-bookie-metric fse-bookie-signal-wrap"><span>Signal</span><strong class="fse-bookie-signal" data-bookie-metric="signal">SET %</strong></div>`;
+        row.appendChild(block);
+        updateBookieValueRow(row);
+    }
+    function scanBookieValueRows(root = document) {
+        if (!moduleActive) return;
+        if (root?.matches?.('.fse-selection')) decorateBookieSelection(root);
+        root?.querySelectorAll?.('.fse-selection').forEach(decorateBookieSelection);
+    }
+    function injectBookieValueStyles() {
+        if (document.getElementById(BOOKIE_VALUE_STYLE_ID)) return;
+        const style = document.createElement('style');
+        style.id = BOOKIE_VALUE_STYLE_ID;
+        style.textContent = `
+            .fse-bookie-value{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-top:7px;padding-top:7px;border-top:1px solid rgba(255,255,255,.065)}
+            .fse-bookie-metric{min-width:0;display:flex;flex-direction:column;gap:2px;padding:5px 6px;border:1px solid rgba(255,255,255,.055);border-radius:7px;background:rgba(255,255,255,.018)}
+            .fse-bookie-metric>span{font-size:8px;line-height:1.1;letter-spacing:.45px;text-transform:uppercase;color:#aeb4bf}
+            .fse-bookie-metric>strong{font-size:11px;line-height:1.2;color:#fff;font-weight:600;white-space:nowrap}
+            .fse-bookie-external{box-sizing:border-box;width:100%;min-width:0;height:24px;padding:2px 5px;border:1px solid rgba(240,204,114,.30);border-radius:5px;background:#101217;color:#fff;font:600 11px/1.1 inherit;outline:none}
+            .fse-bookie-external:focus{border-color:rgba(240,204,114,.72);box-shadow:0 0 0 2px rgba(240,204,114,.08)}
+            .fse-bookie-signal[data-signal="bet"]{color:#5ee08f}
+            .fse-bookie-signal[data-signal="skip"]{color:#f25572}
+            .fse-bookie-signal[data-signal="set"]{color:#ead9aa}
+            @media(max-width:650px){.fse-bookie-value{grid-template-columns:repeat(3,minmax(0,1fr))}.fse-bookie-metric{padding:5px}.fse-bookie-external{height:25px;font-size:12px}}
+            @media(max-width:390px){.fse-bookie-value{grid-template-columns:repeat(2,minmax(0,1fr))}.fse-bookie-signal-wrap{grid-column:1/-1}}
+        `;
+        document.head.appendChild(style);
+    }
+    function bookieInputHandler(event) {
+        const input = event.target?.closest?.('.fse-bookie-external');
+        if (!input) return;
+        const row = input.closest('.fse-selection');
+        const block = input.closest('.fse-bookie-value');
+        if (!row || !block) return;
+        const value = bookieNumber(input.value);
+        const saved = loadBookieExternalProbabilities();
+        const key = block.dataset.bookieKey || bookieSelectionKey(row);
+        if (Number.isFinite(value) && value > 0 && value < 100) saved[key] = Number(value.toFixed(2));
+        else delete saved[key];
+        saveBookieExternalProbabilities(saved);
+        updateBookieValueRow(row);
+    }
+    function installBookieScoutValueLayer() {
+        injectBookieValueStyles();
+        if (!bookieInputBound) {
+            document.addEventListener('input', bookieInputHandler, true);
+            bookieInputBound = true;
+        }
+        scanBookieValueRows(document);
+        if (!bookieObserver && document.body) {
+            bookieObserver = new MutationObserver(mutations => {
+                if (!moduleActive) return;
+                for (const mutation of mutations) {
+                    for (const node of mutation.addedNodes) {
+                        if (node?.nodeType === 1) scanBookieValueRows(node);
+                    }
+                }
+            });
+            bookieObserver.observe(document.body, { childList: true, subtree: true });
+        }
+    }
+'''
+
+init_pos = seg.find('    function init() {')
+if init_pos < 0:
+    raise SystemExit('Bookie Scout init() not found')
+seg = seg[:init_pos] + helper + seg[init_pos:]
+
+init_pos = seg.find('    function init() {')
+inject_pos = seg.find('        injectStyles();', init_pos)
+if inject_pos < 0:
+    raise SystemExit('Bookie Scout injectStyles() call not found')
+inject_line = '        injectStyles();'
+seg = seg[:inject_pos] + inject_line + '\n        installBookieScoutValueLayer();' + seg[inject_pos + len(inject_line):]
+
+old_note = '''                <div class=\"fse-note\">
+                    <strong>No-vig %</strong>
+                    removes the bookmaker margin.
+                    Market pricing, not a match prediction.
+                </div>'''
+new_note = '''                <div class=\"fse-note\">
+                    <strong>Bookie Scout:</strong>
+                    Implied % comes from Torn odds; No-Vig removes bookmaker margin. Enter an external/researched probability to calculate Edge and EV. BET/SKIP is a value signal, not a match prediction.
+                </div>'''
+if old_note not in seg:
+    raise SystemExit('Bookie Scout explanatory note not found')
+seg = seg.replace(old_note, new_note, 1)
+
+dpos = seg.rfind('    function destroy() {')
+if dpos < 0:
+    raise SystemExit('Bookie Scout destroy() not found')
+brace_end = dpos + len('    function destroy() {')
+cleanup = '''
+        bookieObserver?.disconnect();
+        bookieObserver = null;
+        if (bookieInputBound) {
+            document.removeEventListener('input', bookieInputHandler, true);
+            bookieInputBound = false;
+        }
+        document.getElementById(BOOKIE_VALUE_STYLE_ID)?.remove();
+        document.querySelectorAll('.fse-bookie-value').forEach(node => node.remove());'''
+seg = seg[:brace_end] + cleanup + seg[brace_end:]
+
+text = text[:start] + seg + text[end:]
+path.write_text(text, encoding='utf-8')
+
+info = Path('UPDATE-INFO.md')
+if info.exists():
+    info_text = info.read_text(encoding='utf-8')
+    info_text = info_text.replace('v0.9.905', 'v0.9.906')
+    info_text = info_text.replace('improved TornPDA Event Lens readability / GitHub test build', 'Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP')
+    info.write_text(info_text, encoding='utf-8')
