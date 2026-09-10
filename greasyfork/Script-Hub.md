@@ -4,7 +4,7 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 
 ## Current version
 
-**v1.9.0**
+**v1.9.1**
 
 ## What it does
 
@@ -24,6 +24,14 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - Designed for Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.1
+
+- Made the live `scripts.json` Registry the canonical minimum for **Latest**, so a delayed Greasy Fork mirror cannot display an older version.
+- Update caches now expire immediately whenever a module Registry version changes.
+- When Greasy Fork is behind, Hub install/update actions use the current GitHub userscript source to prevent downgrades.
+- Synchronized the offline fallback Registry with every current module version.
+- Added automated cross-file version validation for future releases.
 
 ### v1.9.0
 
@@ -74,7 +82,7 @@ Complementary add-ons currently registered in the live `scripts.json` registry:
 - SakaLuX Bazaar Thanker - PDA **v5.3.3**
 - SakaLuX Mission Rewards **v1.0.3**
 - SakaLuX Market Intelligence **v1.17.0**
-- SakaLuX Elimination Assistant **v1.3.6**
+- SakaLuX Elimination Assistant **v1.3.7**
 
 ### Native module power integration
 
