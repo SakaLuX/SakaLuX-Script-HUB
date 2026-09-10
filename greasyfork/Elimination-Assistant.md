@@ -2,6 +2,15 @@
 
 Complementary add-on for SakaLuX Script Hub, built specifically for Torn Eliminations.
 
+## v1.3.4 — Target availability + TornPDA export
+
+- Shows each 🟢 **Torn**, ✈️ **Flying**, 🌍 **Abroad**, 🏥 **Hospital**, 🔒 **Jail**, Federal, Fallen or Unknown directly below every target.
+- Added **Attackable only**, which keeps only players currently reported in Torn.
+- Known unavailable targets remain visible under **All targets**, but their ATK action is replaced by WAIT.
+- Added **EXPORT**: copies the current attackable SAFE/RISKY results in TornPDA's real `target_backup` import format.
+- Import path after copying: **TornPDA → Chaining → Targets → Import / Export → paste → Add**.
+- The exported notes retain the SakaLuX recommendation and Smart Target Score; SAFE entries are green and RISKY entries red.
+
 
 
 
@@ -37,7 +46,7 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 ## Current version
 
-**v1.3.3**
+**v1.3.4**
 
 ## What it does
 
@@ -49,6 +58,8 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 - Includes **CALIBRATE ME** plus a manual total battle-stats fallback.
 - Learns per target from manually recorded **WIN / LOSS** results.
 - Includes player search, target filters, smart sorting and quick PROFILE / ATTACK actions.
+- Shows target location/availability and includes an **Attackable only** filter.
+- Exports attackable SAFE/RISKY targets to TornPDA Chain Targets import format.
 - Includes **TEST TORN KEY** so API permissions and endpoint availability can be checked separately.
 - Includes one-click Torn API-key creation helper and keeps the FFScouter key separate.
 - Works with Torn PDA and Tampermonkey.
