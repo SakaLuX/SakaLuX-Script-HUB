@@ -2,6 +2,12 @@
 
 Complementary add-on for SakaLuX Script Hub, built specifically for Torn Eliminations.
 
+## v1.3.6 — Visible Lvl/Last + new-tab attacks
+
+- **Lvl** values now use high-contrast gold text and **Last** values use high-contrast light cyan text.
+- Both columns are bold and protected from Torn theme color overrides.
+- **ATK** now opens the attack page in a separate tab, keeping Elimination Assistant open in the original tab.
+
 ## v1.3.5 — LOAD NEXT batches + stacked actions
 
 - **L** now sits directly under **W**, with **ATK** beside them, so Actions fits better on TornPDA.
@@ -54,7 +60,7 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 ## Current version
 
-**v1.3.5**
+**v1.3.6**
 
 ## What it does
 
