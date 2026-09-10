@@ -2,6 +2,14 @@
 
 Complementary add-on for SakaLuX Script Hub, built specifically for Torn Eliminations.
 
+## v1.3.5 — LOAD NEXT batches + stacked actions
+
+- **L** now sits directly under **W**, with **ATK** beside them, so Actions fits better on TornPDA.
+- **LOAD NEXT** replaces LOAD and retrieves the next group of up to 500 different team members.
+- Only the active group is kept in memory, so moving through a large team does not make the panel progressively heavier.
+- The current group is remembered per team; after the last group, the next press returns to targets 1–500.
+- FFScouter enrichment and all existing filters continue to work on the currently loaded group.
+
 ## v1.3.4 — Target availability + TornPDA export
 
 - Shows each 🟢 **Torn**, ✈️ **Flying**, 🌍 **Abroad**, 🏥 **Hospital**, 🔒 **Jail**, Federal, Fallen or Unknown directly below every target.
@@ -46,11 +54,12 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 ## Current version
 
-**v1.3.4**
+**v1.3.5**
 
 ## What it does
 
 - Loads Eliminations teams and available target data from Torn API v2.
+- Loads large teams in rotating groups of up to 500 players with **LOAD NEXT**.
 - Ranks targets with **SAFE / RISKY / SKIP** recommendations.
 - Calculates a **Smart Target Score** to surface the most attractive targets first.
 - Supports optional **FFScouter** data for Fair Fight and estimated target battle stats.
