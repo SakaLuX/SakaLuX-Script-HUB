@@ -92,3 +92,4 @@ jobs:
           git add SakaLuX-Elimination-Assistant.user.js scripts.json greasyfork/Elimination-Assistant.md UPDATE-INFO.md backups/SakaLuX-Elimination-Assistant-v1.3.0.user.js
           git diff --cached --quiet || git commit -m "fix: Elimination Assistant v1.3.1 battlestats API v2"
           git push origin main
+# trigger
