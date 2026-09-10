@@ -1,0 +1,47 @@
+name: Market Intelligence Settings v1.16.7
+
+on:
+  push:
+    paths:
+      - '.github/workflows/market-settings-v1167.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Apply patch
+        run: python3 .github/scripts/market_settings_patch_v1167.py
+      - name: Validate
+        run: |
+          node --check SakaLuX-Market-Intelligence.user.js
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          s=Path('SakaLuX-Market-Intelligence.user.js').read_text()
+          assert '// @version      1.16.7' in s
+          assert "const VERSION = '1.16.7';" in s
+          assert 'sl-mi-switch-ui' in s
+          assert 'applyLiveToggle' in s
+          assert 'CREATE REQUIRED API KEY' in s
+          assert 'SakaLuX%20Market%20Intelligence' in s
+          assert 'user=money,travel,equipment' in s
+          assert 'market=itemmarket' in s
+          data=json.loads(Path('scripts.json').read_text())
+          row=next(x for x in data['scripts'] if x['id']=='market-intelligence')
+          assert row['version']=='1.16.7'
+          assert Path('backups/SakaLuX-Market-Intelligence-v1.16.6.user.js').exists()
+          assert '**Current version: v1.16.7**' in Path('greasyfork/Market-Intelligence.md').read_text()
+          PY
+      - name: Commit
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-Market-Intelligence.user.js scripts.json greasyfork/Market-Intelligence.md UPDATE-INFO.md backups/SakaLuX-Market-Intelligence-v1.16.6.user.js
+          git diff --cached --quiet || git commit -m "feat: Market Intelligence v1.16.7 live settings and API key"
+          git push origin main
