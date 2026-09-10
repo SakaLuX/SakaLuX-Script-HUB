@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v5.3.4**
+**v5.3.5**
 
 ## What it does
 
@@ -14,6 +14,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Exposes its status to SakaLuX Script Hub on all Torn pages while its working features remain limited to Events and Messages.
 
 ## Current release notes
+
+### v5.3.5
+
+- Refreshed the Settings panel and floating Settings button with a cleaner professional TornPDA-style UI.
+- Fixed purchase messages to show the per-item price instead of the full batch total.
 
 ### v5.3.4
 
