@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.4
+// @version      5.3.5
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -382,6 +382,11 @@
         };
     }
 
+    function unitPrice(purchase) {
+        const qty = Math.max(1, Number(purchase?.qty) || 1);
+        return Math.round((Number(purchase?.price) || 0) / qty);
+    }
+
     function getBuyerFromEvent(p) {
         const link = p.querySelector('a[href*="XID="]');
         if (!link) return null;
@@ -553,7 +558,7 @@
         let purchaseLines = '';
         Object.keys(group.purchases).forEach(item => {
             const p = group.purchases[item];
-            purchaseLines += '• ' + escapeHtml(item) + ' (' + p.qty + ' x $' + formatMoney(p.spent) + ')<br>';
+            purchaseLines += '• ' + escapeHtml(item) + ' (' + p.qty + ' x $' + formatMoney(Math.round(p.spent / Math.max(1, p.qty))) + ')<br>';
         });
 
         let mainMessage = String(settings.message || '').trim();
@@ -746,12 +751,12 @@
         const settings = loadSettings();
         const panel = document.createElement('div');
         panel.id = 'sakalux-bt-settings';
-        panel.style.cssText = 'position:fixed;z-index:999999;top:60px;left:50%;transform:translateX(-50%);width:94vw;max-width:620px;max-height:85vh;overflow:auto;background:#181818;color:#fff;border:1px solid #666;border-radius:14px;padding:16px;box-sizing:border-box;display:none;box-shadow:0 10px 40px rgba(0,0,0,.8);font-family:Arial,sans-serif;';
+        panel.style.cssText = 'position:fixed;z-index:999999;top:52px;left:50%;transform:translateX(-50%);width:min(94vw,640px);max-height:88vh;overflow:auto;background:linear-gradient(160deg,#111a26,#0b1119);color:#f8fafc;border:1px solid #334155;border-radius:18px;padding:18px;box-sizing:border-box;display:none;box-shadow:0 18px 55px rgba(0,0,0,.75);font-family:Arial,sans-serif;';
 
         panel.innerHTML = `
-            <div style="font-size:21px;font-weight:bold;margin-bottom:6px;">⚙️ SakaLuX Bazaar Thanker</div>
-            <div style="font-size:12px;color:#888;margin-bottom:15px;">Version 5.3.3</div>
-            <div id="sbtStats" style="background:#222;border:1px solid #333;border-radius:9px;padding:12px;margin-bottom:15px;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;"><div style="font-size:21px;font-weight:900;letter-spacing:.01em;">⚙️ SakaLuX Bazaar Thanker</div><span style="padding:5px 8px;border:1px solid #334155;border-radius:999px;background:#172235;color:#93c5fd;font-size:10px;font-weight:900;">PDA</span></div>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:15px;">Version 5.3.5 · buyer messages and bazaar analytics</div>
+            <div id="sbtStats" style="background:linear-gradient(145deg,#172334,#111923);border:1px solid #334155;border-radius:12px;padding:12px;margin-bottom:15px;"></div>
             <label>Your Torn ID</label><input id="sbtSellerId" value="${escapeHtml(settings.sellerId)}" style="${inputStyle()}">
             <label>Bazaar URL</label><input id="sbtBazaarUrl" value="${escapeHtml(settings.bazaarUrl)}" style="${inputStyle()}">
             <label>Bazaar Name <span style="color:#777;font-size:11px;">(leave empty for automatic detection)</span></label>
@@ -785,7 +790,7 @@
         const settingsButton = document.createElement('button');
         settingsButton.id = 'sakalux-bt-settings-button';
         settingsButton.textContent = '⚙️';
-        settingsButton.style.cssText = 'position:fixed;z-index:999998;right:18px;bottom:90px;width:58px;height:58px;border-radius:50%;border:2px solid #666;background:#292929;color:#fff;font-size:25px;box-shadow:0 4px 15px rgba(0,0,0,.5);cursor:pointer;';
+        settingsButton.style.cssText = 'position:fixed;z-index:999998;right:14px;bottom:88px;width:52px;height:52px;border-radius:15px;border:1px solid #41607f;background:linear-gradient(145deg,#243b55,#172235);color:#dbeafe;font-size:22px;box-shadow:0 7px 22px rgba(0,0,0,.5);cursor:pointer;';
         settingsButton.onclick = function () {
             const open = panel.style.display === 'none';
             panel.style.display = open ? 'block' : 'none';
@@ -968,7 +973,7 @@
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION = '5.3.4';
+    const BAZAAR_VERSION = '5.3.5';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
