@@ -4,17 +4,27 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.4**
+**v1.3.5**
 
 ## What it does
 
 - Tracks Enhancers and Enhancer Relics in Torn.
 - Shows owned/missing status and quantities.
 - Uses Torn API v2.
+- Provides a dedicated API Access panel with exact permission creation and validation.
 - Includes search, filters, sorting, favorites, compact mode and optional auto-refresh.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.3.5
+
+- Added a gold key button to the main Enhancer header.
+- Added a dedicated Market Intelligence-style API Access panel with active key source and access status.
+- **CREATE ENHANCER API KEY** requests only User Inventory and Torn Items access; it requests no write permissions.
+- Added save, exact Inventory + Torn Items permission check and local-key clearing controls.
+- Automatically returns to the API panel after creating a key.
+- Shared Hub keys remain preferred, while TornPDA injection and a local standalone fallback continue to work.
 
 ### v1.3.4
 
