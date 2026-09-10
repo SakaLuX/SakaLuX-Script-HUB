@@ -5,7 +5,7 @@ Last updated: 2026-09-10
 ## Current versions
 
 - SakaLuX Script Hub: **v1.9.1**
-- SakaLuX Enhancer Guard: **v1.3.6**
+- SakaLuX Enhancer Guard: **v1.3.7**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.3**
 - SakaLuX Mission Rewards: **v1.0.3**
 - SakaLuX Market Intelligence: **v1.17.0** — Greasy Fork **592781**
@@ -21,7 +21,7 @@ Last updated: 2026-09-10
 All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
 - **Script Hub v1.9.1** — canonical Registry versions, automatic cache invalidation and downgrade-safe update sources.
-- **Enhancer Guard v1.3.6** — compact PDA layout, direct Item Market links and shared Item Protector locking with full/partial quantity protection.
+- **Enhancer Guard v1.3.7** — manual protection for any item name and removal of Owned first/Auto refresh controls.
 - **Bazaar Thanker - PDA v5.3.3** — persistent native Hub power API.
 - **Mission Rewards v1.0.3** — persistent native Hub power API.
 - **Market Intelligence v1.17.0** — persistent native Hub power API.
@@ -57,6 +57,10 @@ Dedicated information files:
 - Kept FFScouter optional and separate from the shared Hub Torn key.
 - Preserved manual battle-stats calibration at the bottom of the new API panel.
 - Automatically reopens the API panel after returning from Torn's key creator.
+
+### SakaLuX Enhancer Guard v1.3.7
+- Added manual protection for any item through the shared Item Protector panel.
+- Removed `Owned first` and `Auto refresh`; list order is alphabetic and refresh is manual.
 
 ### SakaLuX Enhancer Guard v1.3.6
 - Compact single-row statistics for PDA and removed the redundant compact-mode control.
