@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.7**
+**v1.3.8**
 
 ## What it does
 
@@ -16,6 +16,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.3.8
+
+- Removed the manual item-name / `ADD ITEM` flow; protection is now controlled from the lock badge on each item icon, matching Item Protector.
+- Added full, partial-quantity and unlocked lock badge states with long-press quantity editing.
+- Added a lock-size button in the Item Protector panel that cycles small, medium and large using the shared Item Protector setting.
 
 ### v1.3.7
 
