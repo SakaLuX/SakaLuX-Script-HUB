@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.16.6
-// @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
+// @version      1.16.5
+// @description  Torn PDA-first market/travel intelligence with stable non-flickering Travel and Bazaar panels, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -32,7 +32,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.16.6';
+    const VERSION = '1.16.5';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -53,8 +53,7 @@
         travelSessions: 'SakaLuX_MI_TRAVEL_SESSIONS_V1',
         networkQueue: 'SakaLuX_MI_PRICE_NETWORK_QUEUE_V1',
         networkConsensus: 'SakaLuX_MI_PRICE_NETWORK_CONSENSUS_V1',
-        networkLastObservation: 'SakaLuX_MI_PRICE_NETWORK_LAST_OBS_V1',
-        loadoutCache: 'SakaLuX_MI_LOADOUT_CACHE_V1'
+        networkLastObservation: 'SakaLuX_MI_PRICE_NETWORK_LAST_OBS_V1'
     };
 
     const MARKET_CACHE_MS = 10 * 60 * 1000;
@@ -81,7 +80,6 @@
     const PRICE_NETWORK_MAX_QUEUE = 200;
     const PRICE_NETWORK_BATCH = 25;
     const CASH_CACHE_MS = 30 * 1000;
-    const LOADOUT_CACHE_MS = 2 * 60 * 1000;
 
     const FLIGHT_MINS = {
         Mexico: 25, Caymans: 33, Canada: 39, Hawaii: 127, UK: 151,
@@ -143,7 +141,6 @@
         sessionSummary: true,
         bazaar: true,
         itemMarket: true,
-        loadoutComparator: true,
         priceNetwork: false,
         priceNetworkEndpoint: PRICE_NETWORK_DEFAULT_URL,
         items: true,
@@ -189,8 +186,7 @@
         landedRefreshes: 0, landedStockRefreshes: 0, landedMarketRefreshes: 0, landedRefreshSkips: 0, landedLastRefresh: 0, landedLastMarketRefresh: 0, landedSignature: '', landedRefreshTimer: null,
         travelSessionCount: 0, currentSessionDestination: '', currentSessionStatus: '', currentSessionPredictedProfit: 0, currentSessionLandedProfit: 0, currentSessionRecordedProfit: 0, lastSessionProfit: 0,
         networkBusy: false, networkQueued: networkQueue.length, networkSent: 0, networkLastFlush: 0, networkLastError: '', networkSamples: 0, networkMedian: 0, networkLastConsensusAt: 0,
-        availableCash: null, availableCashAt: 0,
-        loadoutReady: false, loadoutItems: 0, loadoutComparisons: 0, loadoutBestVerdict: '', loadoutLastError: ''
+        availableCash: null, availableCashAt: 0
     };
 
     function loadJson(key, fallback) {
@@ -466,120 +462,6 @@
         return Number.isFinite(state.availableCash)?state.availableCash:null;
     }
 
-    function normalizeGearStats(raw) {
-        const stats=raw?.stats||raw?.item_details?.stats||raw?.itemDetails?.stats||raw?.item?.stats||{};
-        const num=v=>{const n=Number(v);return Number.isFinite(n)?n:null;};
-        return {damage:num(stats.damage),accuracy:num(stats.accuracy),armor:num(stats.armor??stats.armour),quality:num(stats.quality)};
-    }
-
-    function inferGearSlot(raw, hint='') {
-        const text=normText([hint,raw?.slot,raw?.position,raw?.type,raw?.sub_type,raw?.subType,raw?.name,raw?.item?.type,raw?.item?.sub_type,raw?.item?.name].filter(Boolean).join(' ')).toLowerCase();
-        if(/primary/.test(text))return 'primary';
-        if(/secondary/.test(text))return 'secondary';
-        if(/melee/.test(text))return 'melee';
-        if(/temporary/.test(text))return 'temporary';
-        if(/helmet|mask|head/.test(text))return 'armor-head';
-        if(/glove|gauntlet|hand/.test(text))return 'armor-hands';
-        if(/boot|shoe|foot|feet/.test(text))return 'armor-feet';
-        if(/pant|trouser|legging|leg/.test(text))return 'armor-legs';
-        if(/vest|body|chest|mail/.test(text))return 'armor-body';
-        if(/armor|armour/.test(text))return 'armor';
-        if(/weapon|rifle|pistol|smg|shotgun|machine gun/.test(text))return 'weapon';
-        return '';
-    }
-
-    function normalizeEquipmentItem(raw, hint='') {
-        if(!raw||typeof raw!=='object')return null;
-        const details=raw.item_details||raw.itemDetails||raw.item||raw;
-        const stats=normalizeGearStats(raw);
-        if(stats.damage==null&&stats.accuracy==null&&stats.armor==null)return null;
-        const name=details?.name||raw.name||raw.item_name||raw.label||hint||'Equipped item';
-        const uid=details?.uid??raw.uid??raw.item_uid??null;
-        const type=details?.type||raw.type||'';
-        const subType=details?.sub_type||details?.subType||raw.sub_type||raw.subType||'';
-        const slot=inferGearSlot({...raw,...details,name,type,sub_type:subType},hint);
-        const bonuses=Array.isArray(details?.bonuses)?details.bonuses:(Array.isArray(raw.bonuses)?raw.bonuses:[]);
-        return {name:String(name),uid,slot,type,subType,stats,bonuses};
-    }
-
-    function collectEquipmentItems(payload) {
-        const out=[],seen=new Set();
-        const visit=(node,hint='',depth=0)=>{
-            if(depth>6||node==null)return;
-            if(Array.isArray(node)){node.forEach((x,i)=>visit(x,hint||String(i),depth+1));return;}
-            if(typeof node!=='object')return;
-            const item=normalizeEquipmentItem(node,hint);
-            if(item){const key=String(item.uid||'')+'|'+item.name+'|'+item.slot;if(!seen.has(key)){seen.add(key);out.push(item);}return;}
-            for(const [k,v] of Object.entries(node)){
-                if(['ammo','mods','modifications','clothing'].includes(String(k).toLowerCase()))continue;
-                visit(v,k,depth+1);
-            }
-        };
-        visit(payload?.equipment??payload,'equipment',0);
-        return out;
-    }
-
-    async function fetchEquippedLoadout(force=false) {
-        const cached=loadJson(STORAGE.loadoutCache,null);
-        if(!force&&cached?.at&&Date.now()-Number(cached.at)<LOADOUT_CACHE_MS&&Array.isArray(cached.items)){
-            state.loadoutReady=true;state.loadoutItems=cached.items.length;state.loadoutLastError='';return cached.items;
-        }
-        const key=getApiKey();
-        if(!key){state.loadoutReady=false;state.loadoutLastError='API key not configured';return [];}
-        try{
-            const data=await requestJson('https://api.torn.com/v2/user/equipment?key='+encodeURIComponent(key));
-            checkApiError(data);
-            const items=collectEquipmentItems(data);
-            saveJson(STORAGE.loadoutCache,{at:Date.now(),items});
-            state.loadoutReady=items.length>0;state.loadoutItems=items.length;state.loadoutLastError=items.length?'':'No equipped combat items returned';
-            return items;
-        }catch(e){state.loadoutReady=false;state.loadoutLastError=String(e?.message||e);return cached?.items||[];}
-    }
-
-    function marketGearListings(market) { return Array.isArray(market?.gearListings)?market.gearListings:[]; }
-    function candidateSlot(market) { const meta=market?.itemMeta||{};return inferGearSlot(meta,meta.type||''); }
-    function armorFamily(slot){return String(slot||'').startsWith('armor-')?slot:(slot==='armor'?'armor':'');}
-    function compatibleEquipped(candidateSlotValue,equipped){
-        if(!candidateSlotValue)return [];
-        if(candidateSlotValue==='weapon')return equipped.filter(x=>['primary','secondary','melee','weapon'].includes(x.slot));
-        if(candidateSlotValue==='armor')return equipped.filter(x=>armorFamily(x.slot));
-        if(candidateSlotValue.startsWith('armor-')){const exact=equipped.filter(x=>x.slot===candidateSlotValue);return exact.length?exact:equipped.filter(x=>armorFamily(x.slot));}
-        return equipped.filter(x=>x.slot===candidateSlotValue);
-    }
-    function equippedScore(item,slot){const st=item?.stats||{};return String(slot).startsWith('armor')?(Number(st.armor)||0):((Number(st.damage)||0)+(Number(st.accuracy)||0));}
-    function compareGear(candidate,equippedItem,slot) {
-        const cs=candidate?.stats||{},es=equippedItem?.stats||{};
-        const delta=(a,b)=>a==null||b==null?null:Number(a)-Number(b);
-        const dd=delta(cs.damage,es.damage),da=delta(cs.accuracy,es.accuracy),dar=delta(cs.armor,es.armor),dq=delta(cs.quality,es.quality);
-        let verdict='SIDEGRADE';
-        if(String(slot).startsWith('armor')) verdict=dar==null?'UNKNOWN':dar>0.05?'UPGRADE':dar<-0.05?'DOWNGRADE':'SIDEGRADE';
-        else if(dd!=null||da!=null){const vals=[dd,da].filter(v=>v!=null);if(vals.length&&vals.every(v=>v>=0)&&vals.some(v=>v>0.05))verdict='UPGRADE';else if(vals.length&&vals.every(v=>v<=0)&&vals.some(v=>v<-0.05))verdict='DOWNGRADE';}
-        else verdict='UNKNOWN';
-        return {verdict,deltaDamage:dd,deltaAccuracy:da,deltaArmor:dar,deltaQuality:dq};
-    }
-    function signedStat(v){if(v==null||!Number.isFinite(Number(v)))return '—';const n=Number(v);return (n>=0?'+':'')+n.toFixed(2);}
-    function statValue(v){return v==null||!Number.isFinite(Number(v))?'—':Number(v).toFixed(2);}
-    function verdictClass(v){return v==='UPGRADE'?'upgrade':v==='DOWNGRADE'?'downgrade':v==='SIDEGRADE'?'sidegrade':'unknown';}
-
-    async function renderLoadoutComparator(bar,market,id) {
-        bar.querySelector('.sl-mi-loadout')?.remove();
-        if(!settings.loadoutComparator)return;
-        const gear=marketGearListings(market),slot=candidateSlot(market),block=document.createElement('div');block.className='sl-mi-loadout';
-        if(!gear.length||!slot){block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>Not a comparable weapon/armor listing</span></div>';bar.appendChild(block);state.loadoutComparisons=0;state.loadoutBestVerdict='';return;}
-        block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>Loading equipped gear…</span></div>';bar.appendChild(block);
-        const equipped=await fetchEquippedLoadout(false);if(!bar.isConnected||bar.dataset.itemId!==String(id))return;
-        const matches=compatibleEquipped(slot,equipped).sort((a,b)=>equippedScore(b,slot)-equippedScore(a,slot)),current=matches[0]||null;
-        if(!current){block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>Could not match equipped '+esc(slot)+'</span></div><small class="sl-mi-loadout-error">'+esc(state.loadoutLastError||'The Torn API key may need user/equipment access.')+'</small>';state.loadoutComparisons=0;state.loadoutBestVerdict='';return;}
-        const rows=gear.slice(0,8).map(g=>({...g,comparison:compareGear(g,current,slot)})),rank={UPGRADE:3,SIDEGRADE:2,UNKNOWN:1,DOWNGRADE:0};
-        rows.sort((a,b)=>(rank[b.comparison.verdict]-rank[a.comparison.verdict])||(Number(a.price)-Number(b.price)));
-        state.loadoutComparisons=rows.length;state.loadoutBestVerdict=rows[0]?.comparison?.verdict||'';
-        const cs=current.stats||{},currentStats=String(slot).startsWith('armor')?'Armor '+statValue(cs.armor):'Dmg '+statValue(cs.damage)+' · Acc '+statValue(cs.accuracy);
-        block.innerHTML='<div class="sl-mi-loadout-head"><div><b>⚔ LOADOUT COMPARATOR</b><span>Equipped: <strong>'+esc(current.name)+'</strong> · '+esc(currentStats)+'</span></div><button type="button" class="sl-mi-loadout-refresh">↻</button></div><div class="sl-mi-loadout-note">Verdict compares base combat stats only. Weapon bonuses/mods can change the practical choice.</div><div class="sl-mi-loadout-rows"></div>';
-        const host=block.querySelector('.sl-mi-loadout-rows');
-        rows.forEach(g=>{const c=g.comparison,row=document.createElement('div');row.className='sl-mi-loadout-row '+verdictClass(c.verdict);const stats=String(slot).startsWith('armor')?'Armor '+statValue(g.stats.armor)+' ('+signedStat(c.deltaArmor)+')':'Dmg '+statValue(g.stats.damage)+' ('+signedStat(c.deltaDamage)+') · Acc '+statValue(g.stats.accuracy)+' ('+signedStat(c.deltaAccuracy)+')';const bonus=(g.bonuses||[]).map(x=>x?.title).filter(Boolean).slice(0,2).join(', ');row.innerHTML='<strong class="sl-mi-loadout-verdict">'+esc(c.verdict)+'</strong><span>'+money(g.price)+'</span><span>'+esc(stats)+'</span><span>Q '+statValue(g.stats.quality)+(bonus?' · '+esc(bonus):'')+'</span>';host.appendChild(row);});
-        block.querySelector('.sl-mi-loadout-refresh').onclick=async()=>{localStorage.removeItem(STORAGE.loadoutCache);await renderLoadoutComparator(bar,market,id);};
-    }
-
     function requestJson(url) {
         return new Promise((resolve,reject)=>{
             if (typeof window.PDA_httpGet === 'function') {
@@ -830,14 +712,12 @@
         checkApiError(data);
         const listings=Array.isArray(data?.itemmarket?.listings)?data.itemmarket.listings:(Array.isArray(data?.itemmarket)?data.itemmarket:[]);
         const norm=listings.map(l=>({price:Number(l.price??l.cost??0),qty:Number(l.amount??l.quantity??1)})).filter(l=>l.price>0).sort((a,b)=>a.price-b.price);
-        const itemMeta=data?.itemmarket?.item||{};
-        const gearListings=listings.map(l=>{const d=l?.item_details||l?.itemDetails||null;if(!d?.stats)return null;return{price:Number(l.price??l.cost??0),qty:Number(l.amount??l.quantity??1),uid:d.uid??null,stats:normalizeGearStats(d),bonuses:Array.isArray(d.bonuses)?d.bonuses:[],rarity:d.rarity||null};}).filter(x=>x&&x.price>0);
         const average=Number(data?.itemmarket?.average_price??data?.itemmarket?.market_value??0);
         if(!norm.length && !(average>0)) return null;
         const effective=norm.length?(norm.find(l=>l.qty>=2)||norm[0]):null;
         const floor=norm[0]?.price||average;
         const marketValue=average>0?average:(effective?.price||floor);
-        const row={price:marketValue,averagePrice:average>0?average:null,minPrice:floor,listingPrice:effective?.price||floor,qty:effective?.qty||0,count:norm.length,itemMeta,gearListings}; cachePut(itemId,row); queueNetworkObservation(itemId,row.minPrice,'itemmarket'); return row;
+        const row={price:marketValue,averagePrice:average>0?average:null,minPrice:floor,listingPrice:effective?.price||floor,qty:effective?.qty||0,count:norm.length}; cachePut(itemId,row); queueNetworkObservation(itemId,row.minPrice,'itemmarket'); return row;
     }
     async function mapWithLimit(items,fn) { const out=new Array(items.length); let i=0; async function worker(){while(i<items.length){const idx=i++; try{out[idx]=await fn(items[idx],idx);}catch(_){out[idx]=null;}}} const workers=[]; for(let w=0;w<Math.min(CONCURRENCY,items.length);w++) workers.push(worker()); await Promise.all(workers); return out; }
     function metrics(buyPrice,marketPrice) { const fee=Math.max(0,Number(settings.marketFeePct)||0)/100; const net=marketPrice*(1-fee); const profit=net-buyPrice; return {net,profit,roi:buyPrice>0?profit/buyPrice*100:0}; }
@@ -1490,7 +1370,6 @@
         previous?.remove();
         mountTop(bar);
         if(settings.priceNetwork&&priceNetworkConfigured())fetchNetworkConsensus(id).then(data=>{if(bar.dataset.itemId===String(id))updateNetworkBlock(bar,data);});
-        await renderLoadoutComparator(bar,market,id);
         bar.querySelector('#sl-mi-watch-save').onclick=()=>{const n=parseMoney(bar.querySelector('#sl-mi-watch-price').value);if(!(n>0))return;watchlist[String(id)]={itemId:id,maxPrice:n,updatedAt:Date.now()};saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
         const rm=bar.querySelector('#sl-mi-watch-remove');if(rm)rm.onclick=()=>{delete watchlist[String(id)];saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
         if(watched&&market.minPrice<=watched.maxPrice)bar.classList.add('hit');
@@ -1602,9 +1481,9 @@
     function toggle(key,label){return '<label class="sl-mi-toggle"><input id="sl-mi-'+key+'" type="checkbox" '+(settings[key]?'checked':'')+'><span>'+esc(label)+'</span></label>';}
     function openSettings(){
         document.getElementById('sl-mi-overlay')?.remove();const overlay=document.createElement('div');overlay.id='sl-mi-overlay';
-        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><button id="sl-mi-close">×</button></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('arrivalBasket','Arrival Basket Planner while flying')+toggle('smartLandedRefresh','Smart refresh after landing')+toggle('sessionSummary','Travel Session Summary + local history')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('loadoutComparator','Loadout Comparator — compare market gear vs equipped')+toggle('priceNetwork','SakaLuX Price Network — anonymous opt-in')+'<label class="sl-mi-field">Price Network HTTPS endpoint<input id="sl-mi-network-endpoint" inputmode="url" placeholder="https://your-worker.workers.dev" value="'+esc(settings.priceNetworkEndpoint||'')+'"></label><div class="sl-mi-network-privacy">When enabled, only item ID, observed Item Market floor price, timestamp and source are shared. Torn ID, username, API key, device ID and cookies are never sent.</div>'+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label>'+(!getApiKey()?'<label class="sl-mi-field">Manual Torn API key<input id="sl-mi-api" type="password" placeholder="Public/limited key"></label>':'')+'<div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Travel sessions: <b>'+((travelSessions.history||[]).length+(travelSessions.current?1:0))+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE</button><button class="sl-mi-secondary" id="sl-mi-clear-sessions">CLEAR TRAVEL HISTORY</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
+        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><button id="sl-mi-close">×</button></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('arrivalBasket','Arrival Basket Planner while flying')+toggle('smartLandedRefresh','Smart refresh after landing')+toggle('sessionSummary','Travel Session Summary + local history')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('priceNetwork','SakaLuX Price Network — anonymous opt-in')+'<label class="sl-mi-field">Price Network HTTPS endpoint<input id="sl-mi-network-endpoint" inputmode="url" placeholder="https://your-worker.workers.dev" value="'+esc(settings.priceNetworkEndpoint||'')+'"></label><div class="sl-mi-network-privacy">When enabled, only item ID, observed Item Market floor price, timestamp and source are shared. Torn ID, username, API key, device ID and cookies are never sent.</div>'+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label>'+(!getApiKey()?'<label class="sl-mi-field">Manual Torn API key<input id="sl-mi-api" type="password" placeholder="Public/limited key"></label>':'')+'<div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Travel sessions: <b>'+((travelSessions.history||[]).length+(travelSessions.current?1:0))+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE</button><button class="sl-mi-secondary" id="sl-mi-clear-sessions">CLEAR TRAVEL HISTORY</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
         document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};overlay.querySelector('#sl-mi-close').onclick=()=>overlay.remove();
-        overlay.querySelector('#sl-mi-save').onclick=()=>{for(const k of['enabled','travel','bestRun','countryBestBuys','stockEta','arrivalStock','arrivalBasket','smartLandedRefresh','sessionSummary','bazaar','itemMarket','loadoutComparator','priceNetwork','items','museum','points'])settings[k]=!!overlay.querySelector('#sl-mi-'+k)?.checked;settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;settings.priceNetworkEndpoint=normalizeNetworkEndpoint(overlay.querySelector('#sl-mi-network-endpoint')?.value||'');const api=overlay.querySelector('#sl-mi-api')?.value.trim();if(api)saveApiKey(api);saveJson(STORAGE.settings,settings);if(settings.priceNetwork)schedulePriceNetworkFlush(500);overlay.remove();scheduleScan(true);};
+        overlay.querySelector('#sl-mi-save').onclick=()=>{for(const k of['enabled','travel','bestRun','countryBestBuys','stockEta','arrivalStock','arrivalBasket','smartLandedRefresh','sessionSummary','bazaar','itemMarket','priceNetwork','items','museum','points'])settings[k]=!!overlay.querySelector('#sl-mi-'+k)?.checked;settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;settings.priceNetworkEndpoint=normalizeNetworkEndpoint(overlay.querySelector('#sl-mi-network-endpoint')?.value||'');const api=overlay.querySelector('#sl-mi-api')?.value.trim();if(api)saveApiKey(api);saveJson(STORAGE.settings,settings);if(settings.priceNetwork)schedulePriceNetworkFlush(500);overlay.remove();scheduleScan(true);};
         overlay.querySelector('#sl-mi-clear-sessions').onclick=()=>{travelSessions={current:null,history:[]};saveTravelSessions();overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-refresh').onclick=()=>{overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-hard').onclick=()=>{marketCache={};saveJson(STORAGE.marketCache,marketCache);overlay.remove();scheduleScan(true);};
     }
 
@@ -1623,7 +1502,6 @@
 .sl-mi-baz-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-baz-head>div:first-child{display:flex;gap:8px;align-items:center;min-width:0}.sl-mi-baz-head strong{color:#78d98b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-baz-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-baz-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-baz-body{display:none;margin-top:7px;gap:4px}#sl-mi-bazaar-board.open .sl-mi-baz-body{display:flex;flex-direction:column}.sl-mi-baz-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px;cursor:pointer}.sl-mi-baz-row:hover,.sl-mi-baz-row:focus{background:#1a231c;border-color:#4d6957;outline:none}.sl-mi-baz-row .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-focus{outline:2px solid #78d98b!important;outline-offset:2px!important}
 .sl-mi-bazaar-badge-wrap{display:block!important;width:100%!important;clear:both!important;box-sizing:border-box!important;margin:2px 0 7px!important}.sl-mi-bazaar-wide{display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35!important;padding:7px 10px!important;margin:0!important}.sl-mi-baz-head>div:first-child{flex:1;min-width:0}.sl-mi-baz-head>div:nth-child(2){white-space:nowrap}
 .sl-mi-market-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.sl-mi-market-head>div{display:flex;flex-direction:column;gap:3px}.sl-mi-signal{padding:4px 7px;border-radius:6px;font-weight:900;white-space:nowrap}.sl-mi-signal.buy{background:#16351f;color:#78d98b}.sl-mi-signal.wait{background:#3a1d1d;color:#f08b8b}.sl-mi-signal.fair{background:#2f2b17;color:#e1c865}.sl-mi-signal.learning{background:#252a31;color:#aab2bd}.sl-mi-market-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:7px}.sl-mi-market-grid>div{background:#0f1318;border:1px solid #2b323b;border-radius:6px;padding:6px}.sl-mi-market-grid small{display:block;color:#7f8894;font-size:8px}.sl-mi-market-grid strong{display:block;margin-top:2px}.sl-mi-spark{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:6px;border-radius:6px;background:#0f1318;border:1px solid #2b323b}.sl-mi-spark>span{font-size:15px;letter-spacing:1px;color:#d7b94c}.sl-mi-spark small{color:#8f98a5;text-align:right}
-.sl-mi-loadout{margin-top:7px;padding:7px;border:1px solid #374151;border-radius:7px;background:#10151b}.sl-mi-loadout-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.sl-mi-loadout-head>div{display:flex;flex-direction:column;gap:2px}.sl-mi-loadout-head>b,.sl-mi-loadout-head div>b{color:#d7b94c}.sl-mi-loadout-head span{color:#b8c0cb;font-size:9px}.sl-mi-loadout-refresh{border:1px solid #3a4654;background:#1a222c;color:#d7b94c;border-radius:6px;padding:4px 8px;font-weight:900}.sl-mi-loadout-note,.sl-mi-loadout-error{display:block;margin-top:5px;color:#8f98a5;font-size:8px;font-weight:600}.sl-mi-loadout-rows{display:flex;flex-direction:column;gap:4px;margin-top:6px}.sl-mi-loadout-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) minmax(0,1fr);gap:6px;align-items:center;padding:6px;border-radius:5px;border:1px solid #29323a;font-size:9px}.sl-mi-loadout-row.upgrade{border-left:3px solid #78d98b;background:#142019}.sl-mi-loadout-row.downgrade{border-left:3px solid #e06c6c;background:#211515}.sl-mi-loadout-row.sidegrade{border-left:3px solid #d7b94c;background:#211e13}.sl-mi-loadout-row.unknown{border-left:3px solid #6b7280}.sl-mi-loadout-row.upgrade .sl-mi-loadout-verdict{color:#78d98b}.sl-mi-loadout-row.downgrade .sl-mi-loadout-verdict{color:#e06c6c}.sl-mi-loadout-row.sidegrade .sl-mi-loadout-verdict{color:#d7b94c}@media(max-width:700px){.sl-mi-loadout-row{grid-template-columns:auto auto;gap:3px 7px}.sl-mi-loadout-row>span:nth-child(3),.sl-mi-loadout-row>span:nth-child(4){grid-column:1/-1}}
 .sl-mi-network{display:flex;flex-direction:column;gap:3px;margin-top:7px;padding:7px;border:1px solid #2b3b49;border-radius:6px;background:#101820}.sl-mi-network>b{color:#7fc8ff}.sl-mi-network>span{color:#cbd5df}.sl-mi-network small{color:#7f8996;font-weight:600}.sl-mi-network-privacy{margin:6px 0;padding:8px;border-radius:7px;background:#111820;border:1px solid #273542;color:#9da8b5;font-size:9px;line-height:1.45}.sl-mi-watch-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sl-mi-watch-row input{flex:1 1 140px;background:#0d0f14;color:#fff;border:1px solid #363e49;border-radius:6px;padding:8px}.sl-mi-watch-row button{border:0;border-radius:6px;padding:7px 9px;background:#303844;color:#fff;font-weight:900;font-size:10px}
 #sl-mi-button{position:fixed;right:10px;bottom:106px;z-index:2147483644;border:0;border-radius:999px;padding:9px 11px;background:#18181b;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font-weight:900;font-size:12px}
 #sl-mi-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-mi-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mi-title{font-size:16px;font-weight:900}.sl-mi-sub{margin-top:3px;color:#8e96a3;font-size:9px}#sl-mi-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}.sl-mi-toggle,.sl-mi-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mi-field input{width:45%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:7px}.sl-mi-info{margin:10px 0;color:#a6adb8;font-size:10px}.sl-mi-primary,.sl-mi-secondary{width:100%;min-height:40px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900}.sl-mi-primary{background:#2563eb}.sl-mi-secondary{background:#374151}.muted{color:#7e8793}
@@ -1639,7 +1517,7 @@
         open(){openSettings();return true;},
         async refresh(){await scan(true);return true;},
         async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
-        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,availableCash:state.availableCash,availableCashAt:state.availableCashAt,travelSessionCount:state.travelSessionCount,currentSessionDestination:state.currentSessionDestination,currentSessionStatus:state.currentSessionStatus,currentSessionPredictedProfit:state.currentSessionPredictedProfit,currentSessionLandedProfit:state.currentSessionLandedProfit,currentSessionRecordedProfit:state.currentSessionRecordedProfit,lastSessionProfit:state.lastSessionProfit,landedRefreshes:state.landedRefreshes,landedStockRefreshes:state.landedStockRefreshes,landedMarketRefreshes:state.landedMarketRefreshes,landedRefreshSkips:state.landedRefreshSkips,landedLastRefresh:state.landedLastRefresh,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,arrivalBasketItems:state.arrivalBasketItems,arrivalBasketCost:state.arrivalBasketCost,arrivalBasketProfit:state.arrivalBasketProfit,arrivalBasketSlots:state.arrivalBasketSlots,arrivalBasketMode:state.arrivalBasketMode,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,priceNetworkEnabled:settings.priceNetwork,priceNetworkConfigured:priceNetworkConfigured(),networkQueued:networkQueue.length,networkSent:state.networkSent,networkBusy:state.networkBusy,networkLastFlush:state.networkLastFlush,networkLastError:state.networkLastError,networkSamples:state.networkSamples,networkMedian:state.networkMedian,networkLastConsensusAt:state.networkLastConsensusAt,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples,loadoutComparatorEnabled:settings.loadoutComparator,loadoutReady:state.loadoutReady,loadoutItems:state.loadoutItems,loadoutComparisons:state.loadoutComparisons,loadoutBestVerdict:state.loadoutBestVerdict,loadoutLastError:state.loadoutLastError};},
+        health(){return{ready:true,version:VERSION,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,availableCash:state.availableCash,availableCashAt:state.availableCashAt,travelSessionCount:state.travelSessionCount,currentSessionDestination:state.currentSessionDestination,currentSessionStatus:state.currentSessionStatus,currentSessionPredictedProfit:state.currentSessionPredictedProfit,currentSessionLandedProfit:state.currentSessionLandedProfit,currentSessionRecordedProfit:state.currentSessionRecordedProfit,lastSessionProfit:state.lastSessionProfit,landedRefreshes:state.landedRefreshes,landedStockRefreshes:state.landedStockRefreshes,landedMarketRefreshes:state.landedMarketRefreshes,landedRefreshSkips:state.landedRefreshSkips,landedLastRefresh:state.landedLastRefresh,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,arrivalBasketItems:state.arrivalBasketItems,arrivalBasketCost:state.arrivalBasketCost,arrivalBasketProfit:state.arrivalBasketProfit,arrivalBasketSlots:state.arrivalBasketSlots,arrivalBasketMode:state.arrivalBasketMode,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,priceNetworkEnabled:settings.priceNetwork,priceNetworkConfigured:priceNetworkConfigured(),networkQueued:networkQueue.length,networkSent:state.networkSent,networkBusy:state.networkBusy,networkLastFlush:state.networkLastFlush,networkLastError:state.networkLastError,networkSamples:state.networkSamples,networkMedian:state.networkMedian,networkLastConsensusAt:state.networkLastConsensusAt,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples};},
         goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
         selectDestination(destination){return selectTravelDestination(destination);},
@@ -1649,7 +1527,6 @@
         async arrivalBasket(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
         goToMarket(){location.href='https://www.torn.com/page.php?sid=ItemMarket';return true;},
         itemMarketIntelligence(){if(detectPage()!=='itemmarket')return null;const id=selectedMarketItemId();if(!id)return null;const c=cachePeek(id);if(!c)return null;return analyzePriceHistory(id,Number(c.minPrice),c);},
-        async loadoutComparator(force=false){const id=selectedMarketItemId();if(!id)return null;const market=await fetchMarket(id,!!force);const equipped=await fetchEquippedLoadout(!!force);const slot=candidateSlot(market),current=compatibleEquipped(slot,equipped).sort((a,b)=>equippedScore(b,slot)-equippedScore(a,slot))[0]||null;return{itemId:id,slot,equipped:current,listings:marketGearListings(market).map(g=>({...g,comparison:current?compareGear(g,current,slot):null}))};},
         priceNetworkStatus(){return{enabled:settings.priceNetwork,configured:priceNetworkConfigured(),endpoint:priceNetworkEndpoint(),queued:networkQueue.length,sent:state.networkSent,lastFlush:state.networkLastFlush,lastError:state.networkLastError,samples:state.networkSamples,median:state.networkMedian};},
         async flushPriceNetwork(){return flushPriceNetwork();},
         goToBazaar(){location.href='https://www.torn.com/bazaar.php';return true;},
