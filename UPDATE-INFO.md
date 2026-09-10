@@ -8,7 +8,7 @@ Last updated: 2026-09-09
 - SakaLuX Enhancer Guard: **v1.3.3**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.2**
 - SakaLuX Mission Rewards: **v1.0.2**
-- SakaLuX Market Intelligence: **v1.16.7** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.16.8** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.2.9** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
@@ -41,6 +41,12 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.16.8
+- Fixed Loadout Comparator / Item Market Intelligence disappearing on TornPDA when the selected item ID is not kept in the URL hash.
+- Added URL, DOM-link/data-attribute and visible-item-image fallbacks plus a short DOM rebuild retry that keeps the existing panel visible.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.7.user.js`.
+
 
 ### SakaLuX Market Intelligence v1.16.7
 - Settings toggles are now sliding switches and apply instantly without resetting caches/history or closing the panel.
