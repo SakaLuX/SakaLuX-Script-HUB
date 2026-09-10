@@ -9,7 +9,7 @@ Last updated: 2026-09-09
 - SakaLuX Bazaar Thanker - PDA: **v5.3.2**
 - SakaLuX Mission Rewards: **v1.0.2**
 - SakaLuX Market Intelligence: **v1.16.9** — Greasy Fork **592781**
-- SakaLuX Elimination Assistant: **v1.3.1** — Greasy Fork **594921**
+- SakaLuX Elimination Assistant: **v1.3.2** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
 ## Private / standalone tools
@@ -41,6 +41,12 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### SakaLuX Elimination Assistant v1.3.2
+- LOAD now renders team members before FFScouter enrichment, so an FFScouter network failure no longer leaves the table apparently empty.
+- Improved TornPDA font sizing, spacing and SAFE/RISKY/SKIP contrast.
+- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.3.1.user.js`.
+
 
 ### SakaLuX Elimination Assistant v1.3.1
 - Fixed current Torn API v2 battlestats parsing for CALIBRATE ME.
