@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.7
+// @version      1.3.8
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.7';
+    const VERSION = '1.3.8';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -59,6 +59,7 @@
         partial: 'mmp_v91_partial',
         showProtected: 'mmp_show_protected'
     };
+    const PROTECTOR_SETTINGS = 'mmp_dashboard_settings';
 
     const CACHE_MS = 6 * 60 * 60 * 1000;
 
@@ -183,6 +184,40 @@
         const locks = readProtectorLocks();
         const key = protectorKey(item);
         return { key, full: Boolean(locks.full[key]), partial: Number(locks.partial[key] || 0) };
+    }
+
+    function getProtectorDisplaySettings() {
+        try {
+            const value = JSON.parse(localStorage.getItem(PROTECTOR_SETTINGS) || '{}');
+            return {
+                lockSize: ['small', 'medium', 'large'].includes(value.lockSize) ? value.lockSize : 'medium',
+                invisible: Boolean(value.invisible)
+            };
+        } catch {
+            return { lockSize: 'medium', invisible: false };
+        }
+    }
+
+    function cycleProtectorLockSize() {
+        const settings = getProtectorDisplaySettings();
+        const sizes = ['small', 'medium', 'large'];
+        settings.lockSize = sizes[(sizes.indexOf(settings.lockSize) + 1) % sizes.length];
+        try { localStorage.setItem(PROTECTOR_SETTINGS, JSON.stringify(settings)); } catch {}
+        try { window.saveDashSettings?.(settings); } catch {}
+        try { window.mmpRefreshAll?.(); } catch {}
+        render();
+        return settings.lockSize;
+    }
+
+    function renderProtectionBadge(item) {
+        const protection = protectionFor(item);
+        const settings = getProtectorDisplaySettings();
+        const badgeSize = settings.invisible ? 12 : settings.lockSize === 'small' ? 18 : settings.lockSize === 'large' ? 27 : 22;
+        const fontSize = settings.invisible ? 7 : settings.lockSize === 'large' ? 12 : 10;
+        const quantitySize = settings.invisible ? 6 : settings.lockSize === 'small' ? 7 : settings.lockSize === 'large' ? 11 : 9;
+        const color = protection.full ? '#a00000' : protection.partial ? '#d07a00' : '#0a8f08';
+        const label = protection.partial ? `${protection.partial} 🔒` : protection.full ? '🔒' : '🔓';
+        return `<button class="sl-eg-lock ${protection.full || protection.partial ? 'is-locked' : ''}" data-name="${escapeHtml(item.name)}" title="${protection.full ? 'Unlock item' : protection.partial ? 'Edit reserved quantity' : 'Protect item'}" style="position:absolute;top:1px;left:1px;width:${badgeSize}px;height:${badgeSize}px;padding:0;margin:0;border:0;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;gap:1px;z-index:4;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.5);font-size:${fontSize}px;line-height:1;">${protection.partial ? `<span style="font-size:${quantitySize}px;font-weight:900">${protection.partial}</span><span style="font-size:${fontSize}px">🔒</span>` : label}</button>`;
     }
 
     async function toggleItemProtection(item, quantity = null) {
@@ -718,14 +753,14 @@
             .sl-eg-section{margin:7px 0 8px;color:#fbbf24;font-size:12px;font-weight:900;text-transform:uppercase}
             .sl-eg-row{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;background:#181d24;border:1px solid #292f38;border-radius:11px;padding:9px;margin-bottom:7px}
             .sl-eg-row.owned{border-left:4px solid #22c55e}.sl-eg-row.not-owned{border-left:4px solid #ef4444;opacity:.82}.sl-eg-row.favorite{box-shadow:0 0 0 1px #fbbf24}
-            .sl-eg-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#252a32;font-size:15px}
+            .sl-eg-icon{position:relative;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#252a32;font-size:15px;overflow:visible}
             .sl-eg-name{font-size:13px;font-weight:900}.sl-eg-name-link{color:#f3f4f6;text-decoration:none;border-bottom:1px dotted #718096}.sl-eg-name-link:active{color:#fbbf24}.sl-eg-status{margin-top:3px;font-size:10px;font-weight:800}.sl-eg-status.yes{color:#4ade80}.sl-eg-status.no{color:#f87171}
-            .sl-eg-price{text-align:right;white-space:nowrap}.sl-eg-mv{font-size:12px;font-weight:900}.sl-eg-total{margin-top:3px;color:#9ca3af;font-size:9px}.sl-eg-relic{color:#c084fc;font-size:11px;font-weight:900}.sl-eg-star,.sl-eg-lock{border:0;background:transparent;font-size:16px;padding:0;margin-left:5px;vertical-align:middle}.sl-eg-star{color:#fbbf24}.sl-eg-lock{color:#9ca3af}.sl-eg-lock.is-locked{color:#fbbf24}
+            .sl-eg-price{text-align:right;white-space:nowrap}.sl-eg-mv{font-size:12px;font-weight:900}.sl-eg-total{margin-top:3px;color:#9ca3af;font-size:9px}.sl-eg-relic{color:#c084fc;font-size:11px;font-weight:900}.sl-eg-star{border:0;background:transparent;color:#fbbf24;font-size:16px;padding:0;margin-left:5px;vertical-align:middle}.sl-eg-lock{touch-action:none}
             .sl-eg-protection-note{padding:10px;background:#181d24;border:1px solid #303640;border-radius:9px;color:#c9d1d9;font-size:11px;line-height:1.45}.sl-eg-protection-list{margin-top:8px;max-height:38vh;overflow:auto}.sl-eg-protection-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #292f38}.sl-eg-protection-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-eg-protection-clear{width:100%;margin-top:10px;min-height:38px;border:0;border-radius:8px;background:#7f1d1d;color:#fff;font-weight:900}
             .sl-eg-diagnostics{padding:10px;margin-top:10px;background:#111827;border-radius:8px;color:#9ca3af;font-size:9px;line-height:1.5}.sl-eg-footer{padding:8px 10px;border-top:1px solid #272c34;color:#6b7280;font-size:9px;text-align:center;flex-shrink:0}.sl-eg-empty{padding:30px 10px;text-align:center;color:#9ca3af}.sl-eg-error{padding:15px;background:#32191d;border:1px solid #6b252d;color:#fca5a5;border-radius:12px;margin:10px;font-size:12px;line-height:1.5}
             #sl-eg-api-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
             #sl-eg-api-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.55)}
-            .sl-eg-api-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-eg-api-title{font-size:17px;font-weight:900}.sl-eg-api-sub{margin-top:3px;color:#8e96a3;font-size:10px}.sl-eg-api-required{margin:9px 0;padding:10px;border:1px solid #66591d;border-radius:9px;background:#211d10;color:#e4c95d;font-size:11px;line-height:1.5}.sl-eg-api-required b{color:#fde68a}.sl-eg-api-create{width:100%;min-height:42px;border:1px solid #7c681e;border-radius:9px;background:#2a2512;color:#f5d85f;font-weight:900}.sl-eg-api-box{margin-top:10px;padding:9px;border:1px solid #2f3945;border-radius:10px;background:#121820}.sl-eg-api-status{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:#181d24;font-size:10px;line-height:1.35}.sl-eg-api-status b{color:#d7b94c}.sl-eg-api-status.ok span{color:#78d98b}.sl-eg-api-status.missing span,.sl-eg-api-status.missing-permission span,.sl-eg-api-status.error span{color:#f08b8b}.sl-eg-api-source{margin:8px 0;color:#9ca3af;font-size:10px}.sl-eg-api-field{display:block;margin:8px 0;color:#d1d5db;font-size:10px}.sl-eg-api-field input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:10px;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:8px;font-size:12px}.sl-eg-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.sl-eg-api-actions button,.sl-eg-api-clear{min-height:38px;border:0;border-radius:8px;background:#374151;color:#fff;font-weight:900;font-size:10px}.sl-eg-api-actions button:first-child{background:#2563eb}.sl-eg-api-clear{width:100%;margin-top:7px}.sl-eg-api-note{margin-top:9px;color:#8e96a3;font-size:9px;line-height:1.5}
+            .sl-eg-api-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-eg-api-head-actions{display:flex;align-items:center;gap:7px}.sl-eg-api-title{font-size:17px;font-weight:900}.sl-eg-api-sub{margin-top:3px;color:#8e96a3;font-size:10px}.sl-eg-api-required{margin:9px 0;padding:10px;border:1px solid #66591d;border-radius:9px;background:#211d10;color:#e4c95d;font-size:11px;line-height:1.5}.sl-eg-api-required b{color:#fde68a}.sl-eg-api-create{width:100%;min-height:42px;border:1px solid #7c681e;border-radius:9px;background:#2a2512;color:#f5d85f;font-weight:900}.sl-eg-api-box{margin-top:10px;padding:9px;border:1px solid #2f3945;border-radius:10px;background:#121820}.sl-eg-api-status{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:#181d24;font-size:10px;line-height:1.35}.sl-eg-api-status b{color:#d7b94c}.sl-eg-api-status.ok span{color:#78d98b}.sl-eg-api-status.missing span,.sl-eg-api-status.missing-permission span,.sl-eg-api-status.error span{color:#f08b8b}.sl-eg-api-source{margin:8px 0;color:#9ca3af;font-size:10px}.sl-eg-api-field{display:block;margin:8px 0;color:#d1d5db;font-size:10px}.sl-eg-api-field input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:10px;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:8px;font-size:12px}.sl-eg-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.sl-eg-api-actions button,.sl-eg-api-clear{min-height:38px;border:0;border-radius:8px;background:#374151;color:#fff;font-weight:900;font-size:10px}.sl-eg-api-actions button:first-child{background:#2563eb}.sl-eg-api-clear{width:100%;margin-top:7px}.sl-eg-api-note{margin-top:9px;color:#8e96a3;font-size:9px;line-height:1.5}.sl-eg-lock-size{width:36px;height:36px;border:1px solid #66591d;border-radius:10px;background:#2a2512;color:#f5d85f;font-size:17px;font-weight:900}
             #sl-eg-panel.compact .sl-eg-row{padding:6px;margin-bottom:4px}#sl-eg-panel.compact .sl-eg-icon{width:25px;height:25px}#sl-eg-panel.compact .sl-eg-name{font-size:12px}#sl-eg-panel.compact .sl-eg-category{display:none}
             @media(min-width:700px){#sl-eg-overlay,#sl-eg-api-overlay{align-items:center}#sl-eg-panel,#sl-eg-api-panel{border-radius:18px;max-height:90vh}}
         `;
@@ -928,7 +963,7 @@
         const overlay = document.createElement('div');
         overlay.id = 'sl-eg-protection-overlay';
         overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif;';
-        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><button class="sl-eg-close" data-close="1">×</button></div><div class="sl-eg-protection-note">Protejează orice item, nu doar Enhancers. Introdu numele exact al itemului și apasă ADD. Lacătul complet ascunde itemul din vânzare; apăsarea lungă pe lacătul unui Enhancer rezervă o cantitate și permite vânzarea restului.</div><div class="sl-eg-api-actions"><input id="sl-eg-protection-name" type="text" placeholder="Item name, ex. Xanax" autocomplete="off"><button type="button" id="sl-eg-protection-add">🔒 ADD ITEM</button></div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">Nu ai iteme protejate.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">ȘTERGE TOATE PROTECȚIILE</button></div>`;
+        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><div class="sl-eg-api-head-actions"><button class="sl-eg-lock-size" data-lock-size="1" title="Schimbă mărimea lacătului">↕</button><button class="sl-eg-close" data-close="1">×</button></div></div><div class="sl-eg-protection-note">Lacătul de pe iconița itemului funcționează ca Item Protector: verde = deblocat, roșu = protejat, portocaliu = cantitate rezervată. Apăsare scurtă schimbă protecția, iar apăsarea lungă setează cantitatea rezervată. Pentru alte iteme folosește lacătul din pagina Items.</div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">Nu ai iteme protejate.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">ȘTERGE TOATE PROTECȚIILE</button></div>`;
         document.body.appendChild(overlay);
         overlay.onclick = event => { if (event.target === overlay || event.target.closest('[data-close]')) overlay.remove(); };
         overlay.querySelectorAll('.sl-eg-unlock').forEach(button => {
@@ -940,15 +975,10 @@
                 openProtectionPanel();
             };
         });
-        overlay.querySelector('#sl-eg-protection-add')?.addEventListener('click', async () => {
-            const input = overlay.querySelector('#sl-eg-protection-name');
-            const name = String(input?.value || '').replace(/\s+/g, ' ').trim();
-            if (!name) { input?.focus(); return; }
-            const next = readProtectorLocks();
-            next.full[protectorKey({ name })] = true;
-            delete next.partial[protectorKey({ name })];
-            await writeProtectorLocks(next.full, next.partial);
-            openProtectionPanel();
+        overlay.querySelector('[data-lock-size]')?.addEventListener('click', () => {
+            const size = cycleProtectorLockSize();
+            const button = overlay.querySelector('[data-lock-size]');
+            if (button) button.title = 'Mărime lacăt: ' + size;
         });
         overlay.querySelector('[data-clear]')?.addEventListener('click', async () => {
             await writeProtectorLocks({}, {});
@@ -1018,9 +1048,9 @@
             const marketHref = itemMarketUrl(item);
             html += `
                 <div class="sl-eg-row ${rowClass} ${item.favorite ? 'favorite' : ''}">
-                    <div class="sl-eg-icon">${icon}</div>
+                    <div class="sl-eg-icon">${icon}${renderProtectionBadge(item)}</div>
                     <div>
-                        <div class="sl-eg-name"><a class="sl-eg-name-link" href="${marketHref}" title="Open in Item Market">${escapeHtml(item.name)}</a><button class="sl-eg-star" data-name="${escapeHtml(item.name)}" title="Priority">${item.favorite ? '★' : '☆'}</button><button class="sl-eg-lock ${protection.full || protection.partial ? 'is-locked' : ''}" data-name="${escapeHtml(item.name)}" title="${protection.full ? 'Unlock item' : protection.partial ? 'Edit reserved quantity' : 'Protect item'}">${protection.full || protection.partial ? '🔒' : '🔓'}</button></div>
+                        <div class="sl-eg-name"><a class="sl-eg-name-link" href="${marketHref}" title="Open in Item Market">${escapeHtml(item.name)}</a><button class="sl-eg-star" data-name="${escapeHtml(item.name)}" title="Priority">${item.favorite ? '★' : '☆'}</button></div>
                         <div class="sl-eg-status ${item.owned ? 'yes' : 'no'}">${escapeHtml(status)}</div>
                     </div>
                     <div class="sl-eg-price">
