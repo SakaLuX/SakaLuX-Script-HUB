@@ -4,11 +4,11 @@ Last updated: 2026-09-10
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.8.6**
-- SakaLuX Enhancer Guard: **v1.3.3**
-- SakaLuX Bazaar Thanker - PDA: **v5.3.2**
-- SakaLuX Mission Rewards: **v1.0.2**
-- SakaLuX Market Intelligence: **v1.16.9** — Greasy Fork **592781**
+- SakaLuX Script Hub: **v1.9.0**
+- SakaLuX Enhancer Guard: **v1.3.4**
+- SakaLuX Bazaar Thanker - PDA: **v5.3.3**
+- SakaLuX Mission Rewards: **v1.0.3**
+- SakaLuX Market Intelligence: **v1.17.0** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.3.6** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
@@ -20,11 +20,11 @@ Last updated: 2026-09-10
 
 All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
-- **Script Hub v1.8.6** — info/release notes current; All Rights Reserved metadata and source header present.
-- **Enhancer Guard v1.3.3** — info/release notes current; All Rights Reserved metadata and source header present.
-- **Bazaar Thanker - PDA v5.3.2** — info/release notes current; All Rights Reserved metadata and source header present.
-- **Mission Rewards v1.0.2** — info/release notes current; All Rights Reserved metadata and source header present.
-- **Market Intelligence v1.16.6** — info/release notes current; All Rights Reserved metadata and source header present.
+- **Script Hub v1.9.0** — professional TornPDA module cards with two controls and native power integration.
+- **Enhancer Guard v1.3.4** — persistent native Hub power API.
+- **Bazaar Thanker - PDA v5.3.3** — persistent native Hub power API.
+- **Mission Rewards v1.0.3** — persistent native Hub power API.
+- **Market Intelligence v1.17.0** — persistent native Hub power API.
 - **Elimination Assistant v1.3.6** — high-contrast Lvl/Last values and new-tab ATK links; All Rights Reserved metadata and source header present.
 - **SakaLuX Suite v0.9.906** — complete 13-module implementation, established SakaLuX names, improved TornPDA Event Lens readability, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
 - **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
@@ -41,6 +41,15 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### SakaLuX Script Hub v1.9.0 + native module power
+- Redesigned module cards for TornPDA with only a sliding ON/OFF control and one OPEN or SETTINGS button.
+- Removed all repeated quick-action clusters from module cards while keeping module features inside their own panels.
+- Added the shared `setEnabled`, `toggleEnabled` and `isEnabled` API to Enhancer Guard v1.3.4, Bazaar Thanker v5.3.3, Mission Rewards v1.0.3 and Market Intelligence v1.17.0.
+- Elimination Assistant v1.3.6 already implements the same API.
+- OFF states persist and stop module observers/timers while removing injected UI; ON restores the module without reinstalling it.
+- Hub Settings now creates, tests and stores one general Torn API key; managed modules prefer it automatically and retain standalone key creators/fallbacks.
+- Bazaar Thanker requires no Torn API key. Elimination Assistant's optional FFScouter key remains separate because it is not a Torn service.
 
 ### SakaLuX Elimination Assistant v1.3.6
 - Changed Lvl values to high-contrast gold and Last values to high-contrast light cyan.

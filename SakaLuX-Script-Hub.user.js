@@ -1,14 +1,15 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.8.6
-// @description  Central manager, installer, updater and health monitor for SakaLuX Torn add-ons with a Torn-native mobile HUB entry integrated before Messages.
+// @version      1.9.0
+// @description  Professional TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
 // @connect      update.greasyfork.org
 // @connect      raw.githubusercontent.com
+// @connect      api.torn.com
 // @license      All Rights Reserved
 // @downloadURL https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js
 // @updateURL https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js
@@ -30,13 +31,26 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.8.6';
+    const VERSION = '1.9.0';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
+    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,money,travel,equipment,inventory,battlestats,ammo&torn=items,elimination,eliminationteam&market=itemmarket';
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.0',
+            date: '2026-09-10',
+            changes: [
+                'Redesigned the Hub as a cleaner professional TornPDA control center.',
+                'Replaced every module action cluster with one persistent ON/OFF slide switch and one OPEN or SETTINGS button.',
+                'Removed favorite, refresh, scan, calibration, key and navigation buttons from module cards.',
+                'All managed add-ons now use the same native setEnabled, toggleEnabled and isEnabled power API.',
+                'Added one shared Hub Torn API key with a general key creator; installed add-ons automatically prefer it while retaining standalone key support.',
+                'Kept update, diagnostics and management tools in the Hub header instead of repeating them on every card.'
+            ]
+        },
         {
             version: '1.8.6',
             date: '2026-08-24',
@@ -81,7 +95,9 @@
         favorites: 'SakaLuX_HUB_FAVORITES_V16',
         usage: 'SakaLuX_HUB_USAGE_V16',
         updates: 'SakaLuX_HUB_UPDATES_V16',
-        registry: 'SakaLuX_HUB_REGISTRY_V18'
+        registry: 'SakaLuX_HUB_REGISTRY_V18',
+        modulePower: 'SakaLuX_HUB_MODULE_POWER_V19',
+        apiKey: 'SakaLuX_HUB_TORN_API_KEY'
     };
 
     const DEFAULT_SETTINGS = {
@@ -97,7 +113,7 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.3',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.4',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -111,7 +127,7 @@
             },
             {
                 id: 'bazaar', type: 'addon', active: true,
-                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.2',
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.3',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
@@ -125,7 +141,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.2',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.3',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -139,7 +155,7 @@
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.1.1',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.0',
                 description: 'Market and travel intelligence with clickable Best Travel Run routes, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
@@ -150,6 +166,19 @@
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' },
                     { id: 'best-run', label: 'BEST RUN', icon: '✈️', method: 'goToBestRun', fallbackUrl: 'https://www.torn.com/page.php?sid=travel' },
                     { id: 'market', label: 'MARKET', icon: '📈', method: 'goToMarket', fallbackUrl: 'https://www.torn.com/page.php?sid=ItemMarket' }
+                ]
+            },
+            {
+                id: 'elimination-assistant', type: 'addon', active: true,
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.6',
+                description: 'Eliminations advisor with rotating target batches, availability status and TornPDA export.',
+                greasyForkId: '594921',
+                metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
+                downloadUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js',
+                apiGlobal: 'SakaLuXEliminationAssistant', buttonSelector: '#slx-elim-btn',
+                quickActions: [
+                    { id: 'open', label: 'OPEN', icon: '⚔️', method: 'open' },
+                    { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' }
                 ]
             }
         ]
@@ -171,6 +200,7 @@
     let favorites = new Set(loadJson(STORAGE.favorites, []));
     let usage = loadJson(STORAGE.usage, {});
     let updateCache = loadJson(STORAGE.updates, {});
+    let modulePower = loadJson(STORAGE.modulePower, {});
     let search = '';
     let category = 'ALL';
     let registryStatus = 'cached';
@@ -191,6 +221,35 @@
 
     function saveJson(key, value) {
         try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    }
+
+    function getSharedApiKey() {
+        try { return (localStorage.getItem(STORAGE.apiKey) || '').trim(); }
+        catch { return ''; }
+    }
+
+    function setSharedApiKey(value) {
+        const key = String(value || '').trim();
+        try {
+            if (key) localStorage.setItem(STORAGE.apiKey, key);
+            else localStorage.removeItem(STORAGE.apiKey);
+        } catch {}
+        window.dispatchEvent(new CustomEvent('SakaLuX:HubApiKeyChanged', { detail: { available: Boolean(key) } }));
+        return Boolean(key);
+    }
+
+    async function testSharedApiKey(key = getSharedApiKey()) {
+        if (!key) throw new Error('Paste or create the shared Torn API key first.');
+        const raw = await httpGet('https://api.torn.com/v2/user/battlestats?key=' + encodeURIComponent(key));
+        const data = JSON.parse(String(raw || '{}'));
+        if (data?.error) throw new Error(data.error.error || data.error.message || 'Torn rejected the API key.');
+        return true;
+    }
+
+    function createSharedApiKey() {
+        try { sessionStorage.setItem('SakaLuX_HUB_API_SETUP_PENDING', '1'); } catch {}
+        location.href = SHARED_API_KEY_URL;
+        return true;
     }
 
     function escapeHtml(value) {
@@ -245,13 +304,13 @@
         return new Promise((resolve, reject) => {
             if (typeof window.PDA_httpGet === 'function') {
                 window.PDA_httpGet(url, { Accept: 'text/plain' })
-                    .then(r => resolve(String(r?.responseText ?? r?.body ?? r ?? '')))
+                    .then(r => { const body = r?.responseText ?? r?.body ?? r?.data ?? r ?? ''; resolve(typeof body === 'string' ? body : JSON.stringify(body)); })
                     .catch(reject);
                 return;
             }
             if (window.flutter_inappwebview?.callHandler) {
                 window.flutter_inappwebview.callHandler('PDA_httpGet', url, { Accept: 'text/plain' })
-                    .then(r => resolve(String(r?.responseText ?? r?.body ?? r ?? '')))
+                    .then(r => { const body = r?.responseText ?? r?.body ?? r?.data ?? r ?? ''; resolve(typeof body === 'string' ? body : JSON.stringify(body)); })
                     .catch(reject);
                 return;
             }
@@ -425,6 +484,40 @@
         return SCRIPTS.map(script => ({ script, health: getHealth(script) }));
     }
 
+    function getPrimaryAction(script) {
+        const actions = Array.isArray(script.quickActions) ? script.quickActions : [];
+        return actions.find(action => action.id === 'open')
+            || actions.find(action => action.id === 'settings' || /settings/i.test(action.label || ''))
+            || actions.find(action => action.method === 'open')
+            || { id: 'open', label: 'OPEN', icon: '↗', method: 'open' };
+    }
+
+    function isModuleEnabled(script) {
+        const api = script.api();
+        try {
+            if (api && typeof api.isEnabled === 'function') return api.isEnabled() !== false;
+            const health = api && typeof api.health === 'function' ? api.health() : null;
+            if (typeof health?.enabled === 'boolean') return health.enabled;
+        } catch {}
+        return Object.prototype.hasOwnProperty.call(modulePower, script.id) ? modulePower[script.id] !== false : true;
+    }
+
+    async function setModulePower(id, enabled) {
+        const script = SCRIPTS.find(item => item.id === id);
+        if (!script) return false;
+        const api = script.api();
+        if (!api || typeof api.setEnabled !== 'function' || typeof api.isEnabled !== 'function') {
+            throw new Error('Update ' + script.name + ' to the latest version to use its ON/OFF switch.');
+        }
+        await api.setEnabled(Boolean(enabled));
+        modulePower[id] = Boolean(enabled);
+        saveJson(STORAGE.modulePower, modulePower);
+        updateHiddenButtons();
+        renderList();
+        renderMainStats();
+        return true;
+    }
+
     function getIssueCount() {
         return getAllHealth().filter(row => row.health.state === 'error').length + getUpdateCount() + getMissingCount();
     }
@@ -450,8 +543,11 @@
 .slh-tools{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:9px}.slh-search{grid-column:1/-1;min-width:0;background:#181d24;color:#fff;border:1px solid #303640;border-radius:9px;padding:9px}.slh-tool{height:42px;border:0;border-radius:9px;background:#252a32;color:#fff;font-size:16px;font-weight:900}.slh-tool.checking{opacity:.55}.slh-tool.whatsnew{background:#5b3a86}
 .slh-cats{display:flex;gap:5px;margin-top:7px;overflow-x:auto}.slh-cat{flex-shrink:0;background:#181d24;border:1px solid #303640;color:#ddd;border-radius:8px;padding:6px 9px;font-size:9px;font-weight:900}.slh-cat.active{background:#2563eb}
 .slh-list,.slh-view,.slh-settings,.slh-quick{overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}.slh-card{display:grid;grid-template-columns:40px 1fr;gap:9px;padding:10px;margin-bottom:8px;background:#181d24;border:1px solid #292f38;border-radius:12px}.slh-card.favorite{box-shadow:0 0 0 1px #fbbf24}.slh-card.update{border-color:#d97706}.slh-card.missing{border-color:#475569}.slh-icon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#252a32;border-radius:10px;font-size:20px}.slh-name{font-size:13px;font-weight:900}.slh-star{border:0;background:transparent;color:#fbbf24;font-size:16px}.slh-meta{margin-top:3px;font-size:9px;color:#8b949e;line-height:1.5}.slh-health,.slh-update-status{font-weight:900}.slh-health.ok,.slh-update-status.current,.slh-check-ok{color:#4ade80}.slh-health.error,.slh-update-status.failed,.slh-check-bad{color:#fb7185}.slh-health.missing,.slh-update-status.available,.slh-check-warn{color:#fbbf24}.slh-update-status.missing,.slh-update-status.unknown{color:#94a3b8}
-.slh-actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.slh-action{border:0;border-radius:7px;background:#2563eb;color:#fff;padding:6px 8px;font-size:9px;font-weight:900}.slh-action.secondary{background:#374151}.slh-action.update{background:#d97706}.slh-action.install{background:#16a34a}.slh-bottom{padding:10px;background:#0d1117;border-top:1px solid #292f38;flex-shrink:0}.slh-bottom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.slh-bottom-btn{border:0;border-radius:9px;padding:9px;background:#252a32;color:#fff;font-size:10px;font-weight:900}.slh-footer{padding:9px;text-align:center;color:#6b7280;font-size:9px;border-top:1px solid #20252c}.slh-author{color:#60a5fa;font-weight:900;text-decoration:none}
-.slh-setting,.slh-note,.slh-check-row{background:#181d24;border:1px solid #292f38;border-radius:10px;padding:10px;margin-bottom:8px;font-size:11px;line-height:1.5}.slh-setting select,.slh-setting input[type=range]{width:100%;margin-top:7px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:900}.slh-big-btn.gray{background:#374151}.slh-big-btn.red{background:#8b3030}.slh-big-btn.update{background:#d97706}.slh-big-btn.install{background:#16a34a}.slh-version-title{font-size:13px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#8b949e;font-size:9px;margin-left:5px}
+.slh-actions{display:none}.slh-action{border:0;border-radius:7px;background:#2563eb;color:#fff;padding:6px 8px;font-size:9px;font-weight:900}.slh-action.secondary{background:#374151}.slh-action.update{background:#d97706}.slh-action.install{background:#16a34a}.slh-bottom{padding:10px;background:#0b1016;border-top:1px solid #253041;flex-shrink:0}.slh-bottom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.slh-bottom-btn{border:1px solid #2c3747;border-radius:10px;padding:10px;background:#17202c;color:#f8fafc;font-size:10px;font-weight:900}.slh-footer{padding:9px;text-align:center;color:#6b7280;font-size:9px;border-top:1px solid #202936;background:#0b1016}.slh-author{color:#60a5fa;font-weight:900;text-decoration:none}
+.slh-list{background:linear-gradient(180deg,#0b1119 0%,#0d131c 100%)}.slh-card{grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;align-items:center;padding:12px;margin-bottom:9px;background:linear-gradient(145deg,#161e29,#111821);border:1px solid #2a3646;border-radius:14px;box-shadow:0 5px 16px rgba(0,0,0,.18)}.slh-card.update{border-color:#a86b19;box-shadow:inset 3px 0 #d97706,0 5px 16px rgba(0,0,0,.18)}.slh-card.missing{border-color:#475569}.slh-card.off .slh-card-copy{opacity:.58}.slh-card-copy{min-width:0}.slh-icon{width:42px;height:42px;background:linear-gradient(145deg,#263142,#1b2431);border:1px solid #334155;border-radius:12px;font-size:21px}.slh-name{display:flex;align-items:center;gap:5px;color:#f8fafc;font-size:14px;line-height:1.25}.slh-favorite-mark{color:#fbbf24;font-size:13px}.slh-description{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:#aab4c3}.slh-module-controls{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:7px}.slh-switch,.slh-primary{width:100%;min-height:36px;border-radius:10px;font-family:Arial,sans-serif;font-size:10px;font-weight:900;touch-action:manipulation}.slh-switch{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:5px;padding:5px 7px;border:1px solid #475569;background:#111827;color:#94a3b8}.slh-switch-track{position:relative;display:block;width:36px;height:20px;border-radius:999px;background:#4b5563;box-shadow:inset 0 1px 3px rgba(0,0,0,.55);transition:.18s ease}.slh-switch-track i{position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#e5e7eb;box-shadow:0 1px 4px #0008;transition:.18s ease}.slh-switch.on{border-color:#16804b;background:#0d2b20;color:#86efac}.slh-switch.on .slh-switch-track{background:#22c55e}.slh-switch.on .slh-switch-track i{transform:translateX(16px);background:#fff}.slh-switch.off{border-color:#60404a;background:#29151b;color:#fda4af}.slh-switch:disabled{opacity:.5}.slh-primary{border:1px solid #3478d4;background:linear-gradient(180deg,#2f80ed,#1d5fc5);color:#fff;padding:7px}.slh-primary:disabled{border-color:#374151;background:#202733;color:#6b7280}.slh-primary.install{border-color:#16804b;background:linear-gradient(180deg,#1e9b5f,#147443)}
+#${IDS.overlay}{background:rgba(2,6,12,.84);backdrop-filter:blur(3px)}#${IDS.panel}{background:#0b1119;border:1px solid #2a3748;box-shadow:0 -16px 55px rgba(0,0,0,.78)}.slh-header{padding:14px;background:linear-gradient(155deg,#151e2a 0%,#0c131d 72%);border-bottom-color:#2a3748}.slh-title{color:#f8fafc;letter-spacing:.01em}.slh-close{border:1px solid #364255;background:#1b2431}.slh-stats{gap:7px}.slh-stat{background:rgba(21,30,42,.88);border-color:#334155}.slh-stat strong{color:#f8fafc}.slh-search{background:#0d1520;border-color:#344258;min-height:42px}.slh-tool{border:1px solid #303c4e;background:#1a2330}.slh-tool.whatsnew{background:linear-gradient(160deg,#67409a,#4c2d77)}.slh-cats{padding-bottom:2px}.slh-cat{background:#101824;border-color:#303d50}.slh-cat.active{background:linear-gradient(180deg,#347ff0,#215fc5);border-color:#4b91f5}.slh-bottom-btn:active,.slh-tool:active,.slh-primary:active,.slh-switch:active{transform:translateY(1px)}
+@media(max-width:520px){.slh-header{padding:11px}.slh-title{font-size:17px}.slh-stats{margin-top:8px}.slh-stat{padding:6px 2px}.slh-tools{margin-top:8px}.slh-card{grid-template-columns:40px minmax(0,1fr) 88px;gap:8px;padding:10px 9px}.slh-icon{width:38px;height:38px}.slh-name{font-size:13px}.slh-meta{font-size:8.5px}.slh-module-controls{gap:5px}.slh-switch,.slh-primary{min-height:34px;font-size:9px}.slh-switch{grid-template-columns:34px 1fr;padding:4px 5px}.slh-switch-track{width:32px;height:18px}.slh-switch-track i{width:12px;height:12px}.slh-switch.on .slh-switch-track i{transform:translateX(14px)}}
+.slh-setting,.slh-note,.slh-check-row{background:#181d24;border:1px solid #292f38;border-radius:10px;padding:10px;margin-bottom:8px;font-size:11px;line-height:1.5}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password]{min-height:40px;padding:9px;border:1px solid #3a4657;border-radius:8px;background:#0d131b;color:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:900}.slh-big-btn.gray{background:#374151}.slh-big-btn.red{background:#8b3030}.slh-big-btn.update{background:#d97706}.slh-big-btn.install{background:#16a34a}.slh-version-title{font-size:13px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#8b949e;font-size:9px;margin-left:5px}
 @media(min-width:700px){#${IDS.overlay}{align-items:center}#${IDS.panel}{border-radius:18px;max-height:88vh}.slh-tools{grid-template-columns:1fr repeat(5,44px)}.slh-search{grid-column:auto}}
         `;
         document.head.appendChild(style);
@@ -721,8 +817,9 @@
     function updateHiddenButtons() {
         for (const script of SCRIPTS) {
             if (!script.buttonSelector) continue;
+            const moduleEnabled = isModuleEnabled(script);
             document.querySelectorAll(script.buttonSelector).forEach(element => {
-                if (settings.hideIndividualButtons) {
+                if (!moduleEnabled || settings.hideIndividualButtons) {
                     element.style.setProperty('display', 'none', 'important');
                     element.style.setProperty('visibility', 'hidden', 'important');
                 } else {
@@ -867,28 +964,46 @@
         if (script.id === 'enhancer' && health.data) extra = ` • Inventory: ${health.data.inventoryEntries ?? 0}`;
         if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? ` • Buyers: ${health.data.buyers ?? 0}` : ' • Standby on this page';
         if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? ' • Standby outside Missions' : ` • Rewards: ${health.data.rewardCards ?? 0}`;
-        const actions = missing
-            ? `<button class="slh-action install" data-install="${escapeHtml(script.id)}">⬇ INSTALL</button>`
-            : `${update.state === 'available' ? `<button class="slh-action update" data-update="${escapeHtml(script.id)}">⬆ UPDATE</button>` : ''}${script.quickActions.map(action => `<button class="slh-action ${action.id === 'open' ? '' : 'secondary'}" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(action.id)}">${action.icon || '▶'} ${escapeHtml(action.label || action.id)}</button>`).join('')}`;
+        const enabled = !missing && isModuleEnabled(script);
+        const moduleApi = script.api();
+        const powerReady = Boolean(moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function');
+        const primary = getPrimaryAction(script);
+        const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
+        const controls = missing
+            ? `<button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
+            : `<button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
         return `
-            <div class="slh-card ${row.favorite ? 'favorite' : ''} ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''}">
+            <div class="slh-card ${row.favorite ? 'favorite' : ''} ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''} ${!missing && !enabled ? 'off' : ''}">
                 <div class="slh-icon">${script.icon || '🧩'}</div>
-                <div>
-                    <div class="slh-name">${escapeHtml(script.name)} <button class="slh-star" data-fav="${escapeHtml(script.id)}">${row.favorite ? '★' : '☆'}</button></div>
+                <div class="slh-card-copy">
+                    <div class="slh-name">${escapeHtml(script.name)}${row.favorite ? ' <span class="slh-favorite-mark">★</span>' : ''}</div>
                     <div class="slh-meta">
                         Installed: <b>${installed ? 'v' + escapeHtml(installed) : 'NOT INSTALLED'}</b> • Registry: <b>v${escapeHtml(script.expectedVersion)}</b> • Latest: <b>${latest === '?' ? '?' : 'v' + escapeHtml(latest)}</b><br>
                         <span class="slh-update-status ${update.state}">${escapeHtml(update.text)}</span>${update.data?.checkedAt ? ' • Checked ' + escapeHtml(formatAgo(update.data.checkedAt)) : ''}<br>
                         Status: <span class="slh-health ${health.state}">${escapeHtml(health.text)}</span>${extra}<br>
-                        ${script.description ? escapeHtml(script.description) + '<br>' : ''}
-                        Used: ${row.usage.count} • ${escapeHtml(formatAgo(row.usage.lastUsed))}
+                        ${script.description ? `<span class="slh-description">${escapeHtml(script.description)}</span>` : ''}
                     </div>
-                    <div class="slh-actions">${actions}</div>
                 </div>
+                <div class="slh-module-controls">${controls}</div>
             </div>
         `;
     }
 
     function bindCards() {
+        document.querySelectorAll('[data-module-toggle]').forEach(button => {
+            button.onclick = async () => {
+                const id = button.dataset.moduleToggle;
+                const next = button.getAttribute('aria-checked') !== 'true';
+                button.disabled = true;
+                try {
+                    await setModulePower(id, next);
+                } catch (error) {
+                    console.error('[SakaLuX Hub]', error);
+                    alert('Power control failed: ' + String(error?.message || error));
+                    renderList();
+                }
+            };
+        });
         document.querySelectorAll('[data-fav]').forEach(button => {
             button.onclick = event => {
                 event.stopPropagation();
@@ -924,6 +1039,7 @@
             return;
         }
         const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
+        const isPanelAction = actionId === getPrimaryAction(script).id || actionId === 'open' || actionId === 'settings';
         try {
             if (typeof api[action.method] === 'function') {
                 recordUsage(id);
@@ -932,7 +1048,7 @@
                     location.href = action.fallbackUrl;
                     return;
                 }
-                if (actionId === 'open') closeHub();
+                if (isPanelAction) closeHub();
                 else setTimeout(openHub, 100);
                 return;
             }
@@ -941,7 +1057,7 @@
                 location.href = action.fallbackUrl;
                 return;
             }
-            if (actionId === 'open' && script.fallbackOpen()) {
+            if (isPanelAction && script.fallbackOpen()) {
                 recordUsage(id);
                 closeHub();
                 return;
@@ -1047,6 +1163,7 @@
             <div class="slh-setting"><label><input id="slhs-auto" type="checkbox" ${settings.autoCheckUpdates ? 'checked' : ''}> Automatically check Greasy Fork updates</label></div>
             <div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
+            <div class="slh-setting"><b>🔑 SHARED SAKALUX TORN API KEY</b><div style="margin-top:4px;color:#9ca3af">One key for Enhancer Guard, Mission Rewards, Market Intelligence and Elimination Assistant. Bazaar Thanker does not require a Torn API key.</div><div id="slhs-api-status" style="margin-top:6px;color:${getSharedApiKey() ? '#4ade80' : '#fbbf24'}">${getSharedApiKey() ? '✅ Shared key saved' : '⚠️ No shared key saved'}</div><input id="slhs-api-key" type="password" autocomplete="off" placeholder="Paste the newly created Torn API key"><button class="slh-big-btn update" id="slhs-api-create">🔑 CREATE GENERAL API KEY</button><div class="slh-api-actions"><button class="slh-big-btn" id="slhs-api-save">SAVE & TEST</button><button class="slh-big-btn red" id="slhs-api-clear">CLEAR KEY</button></div></div>
             <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-registry">🔄 REFRESH scripts.json</button><button class="slh-big-btn update" id="slhs-check">⬆ CHECK UPDATES NOW</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
         </div>`);
         const position = document.getElementById('slhs-position');
@@ -1055,6 +1172,29 @@
         size.oninput = function () { document.getElementById('slhs-size-label').textContent = this.value + 'px'; };
         document.getElementById('slhs-close').onclick = closeHub;
         document.getElementById('slhs-back').onclick = openHub;
+        document.getElementById('slhs-api-create').onclick = createSharedApiKey;
+        document.getElementById('slhs-api-save').onclick = async () => {
+            const input = document.getElementById('slhs-api-key');
+            const status = document.getElementById('slhs-api-status');
+            const key = input.value.trim() || getSharedApiKey();
+            status.style.color = '#fbbf24';
+            status.textContent = '⏳ Testing shared key...';
+            try {
+                await testSharedApiKey(key);
+                setSharedApiKey(key);
+                input.value = '';
+                status.style.color = '#4ade80';
+                status.textContent = '✅ Shared key valid and saved';
+            } catch (error) {
+                status.style.color = '#fb7185';
+                status.textContent = '❌ ' + String(error?.message || error);
+            }
+        };
+        document.getElementById('slhs-api-clear').onclick = () => {
+            if (!confirm('Remove the shared SakaLuX Torn API key?')) return;
+            setSharedApiKey('');
+            openSettings();
+        };
         document.getElementById('slhs-save').onclick = () => {
             settings.hideIndividualButtons = document.getElementById('slhs-hide').checked;
             settings.showTopbarSkull = document.getElementById('slhs-topbar').checked;
@@ -1113,7 +1253,7 @@
 
     function resetHub() {
         if (!confirm('Reset only SakaLuX Script Hub settings?')) return;
-        Object.values(STORAGE).forEach(key => localStorage.removeItem(key));
+        Object.entries(STORAGE).forEach(([name, key]) => { if (name !== 'apiKey') localStorage.removeItem(key); });
         settings = { ...DEFAULT_SETTINGS };
         favorites = new Set();
         usage = {};
@@ -1161,6 +1301,10 @@
         version: VERSION,
         ready: true,
         open: () => { openHub(); return true; },
+        getApiKey: getSharedApiKey,
+        setApiKey: setSharedApiKey,
+        hasApiKey: () => Boolean(getSharedApiKey()),
+        createRequiredTornKey: createSharedApiKey,
         refresh: async () => { await loadRegistry(true); await checkAllUpdates(true); return true; },
         health: () => ({
             ready: true,
@@ -1169,6 +1313,7 @@
             addOns: SCRIPTS.length,
             installed: SCRIPTS.filter(script => script.api()).length,
             updates: getUpdateCount(),
+            sharedApiKey: Boolean(getSharedApiKey()),
             nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull))
         })
     };
@@ -1186,6 +1331,12 @@
         setTimeout(ensureEverything, 700);
         setTimeout(ensureEverything, 1800);
         setTimeout(ensureEverything, 4000);
+        try {
+            if (sessionStorage.getItem('SakaLuX_HUB_API_SETUP_PENDING') === '1' && !/preferences\.php/i.test(location.pathname + location.href)) {
+                sessionStorage.removeItem('SakaLuX_HUB_API_SETUP_PENDING');
+                setTimeout(openSettings, 900);
+            }
+        } catch {}
         if (settings.autoCheckUpdates) setTimeout(() => checkAllUpdates(false), 1500);
         console.log('[SakaLuX Script Hub v' + VERSION + '] Loaded.');
     }

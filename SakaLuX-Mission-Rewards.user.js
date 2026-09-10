@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.2
+// @version      1.0.3
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,13 +30,14 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.0.2';
+    const VERSION = '1.0.3';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
     const HUB_PROMPT_STORAGE = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
     const HUB_PROMPT_INTERVAL = 24 * 60 * 60 * 1000;
     const HUB_PROMPT_ID = 'sakalux-hub-install-prompt';
+    const REQUIRED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Mission%20Rewards&user=ammo&torn=items';
 
     const STORAGE = {
         apiKey: 'SakaLuX_MR_API_KEY',
@@ -45,7 +46,8 @@
         catalogueTime: 'SakaLuX_MR_CATALOGUE_TIME_V1',
         ammo: 'SakaLuX_MR_AMMO_V1',
         ammoTime: 'SakaLuX_MR_AMMO_TIME_V1',
-        modRanges: 'SakaLuX_MR_MOD_RANGES_V1'
+        modRanges: 'SakaLuX_MR_MOD_RANGES_V1',
+        enabled: 'SakaLuX_MR_ENABLED'
     };
 
     const CATALOGUE_CACHE = 6 * 60 * 60 * 1000;
@@ -68,7 +70,8 @@
         lastScan: 0,
         observer: null,
         scanTimer: null,
-        processedCards: new WeakSet()
+        processedCards: new WeakSet(),
+        enabled: loadJson(STORAGE.enabled, true) !== false
     };
 
     function isMissionsPage() {
@@ -117,6 +120,17 @@
     }
 
     function getApiKey() {
+        try {
+            const hubKey = window.SakaLuXScriptHub?.getApiKey?.() || '';
+            if (hubKey) {
+                state.apiMode = 'SakaLuX Hub';
+                return hubKey;
+            }
+            if (window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button')) {
+                const storedHubKey = localStorage.getItem('SakaLuX_HUB_TORN_API_KEY') || '';
+                if (storedHubKey) { state.apiMode = 'SakaLuX Hub'; return storedHubKey; }
+            }
+        } catch {}
         if (PDA_KEY && PDA_KEY !== '###PDA-APIKEY###') {
             state.apiMode = 'Torn PDA';
             return PDA_KEY;
@@ -135,6 +149,12 @@
             localStorage.setItem(STORAGE.apiKey, key);
             state.apiMode = 'Manual';
         } catch {}
+    }
+
+    function createRequiredApiKey() {
+        if (window.SakaLuXScriptHub?.createRequiredTornKey) return window.SakaLuXScriptHub.createRequiredTornKey();
+        location.href = REQUIRED_API_KEY_URL;
+        return true;
     }
 
     function parseApiResponse(response) {
@@ -465,7 +485,7 @@
     }
 
     async function scanRewards(force = false) {
-        if (!isMissionsPage()) return;
+        if (!state.enabled || !isMissionsPage()) return;
         for (const card of getRewardCards()) {
             if (!force && state.processedCards.has(card)) continue;
             state.processedCards.add(card);
@@ -477,7 +497,7 @@
     }
 
     function scheduleScan(force = false) {
-        if (!isMissionsPage()) return;
+        if (!state.enabled || !isMissionsPage()) return;
         if (state.scanTimer) clearTimeout(state.scanTimer);
         state.scanTimer = setTimeout(() => {
             state.scanTimer = null;
@@ -502,12 +522,14 @@
                 <label class="sl-mr-setting"><input id="sl-mr-learn-mods" type="checkbox" ${settings.learnModPrices ? 'checked' : ''}> Learn weapon mod price ranges locally</label>
                 <label class="sl-mr-setting"><input id="sl-mr-show-badges" type="checkbox" ${settings.showCardBadges ? 'checked' : ''}> Show information directly on reward cards</label>
                 <div class="sl-mr-api-box"><div>API: <b>${getApiKey() ? '✅ Available' : '⚠️ Missing'}</b></div>${!getApiKey() ? '<input id="sl-mr-api-key" type="password" placeholder="Minimal Torn API key...">' : ''}</div>
+                <button class="sl-mr-settings-btn gray" id="sl-mr-create-key">🔑 ${window.SakaLuXScriptHub ? 'CREATE GENERAL HUB API KEY' : 'CREATE REQUIRED API KEY'}</button>
                 <button class="sl-mr-settings-btn" id="sl-mr-save">💾 SAVE</button>
                 <button class="sl-mr-settings-btn gray" id="sl-mr-refresh">🔄 REFRESH DATA</button>
                 <button class="sl-mr-settings-btn gray" id="sl-mr-clear-mods">🧩 CLEAR LEARNED MOD RANGES</button>
             </div>`;
         document.body.appendChild(overlay);
         document.getElementById('sl-mr-settings-close').onclick = () => overlay.remove();
+        document.getElementById('sl-mr-create-key').onclick = createRequiredApiKey;
         overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
         document.getElementById('sl-mr-save').onclick = () => {
             settings.showItemValue = document.getElementById('sl-mr-show-items').checked;
@@ -557,7 +579,7 @@
     }
 
     function createButton() {
-        if (!isMissionsPage() || document.getElementById('sl-mri-button')) return;
+        if (!state.enabled || !isMissionsPage() || document.getElementById('sl-mri-button')) return;
         const button = document.createElement('button');
         button.id = 'sl-mri-button';
         button.textContent = '🎯 Missions';
@@ -566,7 +588,7 @@
     }
 
     function startObserver() {
-        if (!isMissionsPage() || state.observer) return;
+        if (!state.enabled || !isMissionsPage() || state.observer) return;
         state.observer = new MutationObserver(mutations => {
             if (mutations.some(m => m.addedNodes.length)) {
                 removeDetailPanel();
@@ -581,7 +603,7 @@
     }
 
     function maybePromptForHub() {
-        if (hubInstalled() || document.getElementById(HUB_PROMPT_ID)) return;
+        if (!state.enabled || hubInstalled() || document.getElementById(HUB_PROMPT_ID)) return;
         let last = 0;
         try { last = Number(localStorage.getItem(HUB_PROMPT_STORAGE) || 0); } catch {}
         if (last && Date.now() - last < HUB_PROMPT_INTERVAL) return;
@@ -595,12 +617,55 @@
         document.getElementById('sl-mr-hub-install').onclick = () => { remember(); location.href = HUB_INSTALL_URL; };
     }
 
+    function startRuntime() {
+        if (!state.enabled || !isMissionsPage()) return;
+        injectCss();
+        createButton();
+        startObserver();
+        loadCatalogueCache();
+        loadAmmoCache();
+        if (settings.showItemValue && !state.catalogue.size) loadCatalogue().then(() => scheduleScan(true));
+        if (settings.showAmmoOwned && !state.ammo.length) loadAmmo().then(() => scheduleScan(true));
+        scheduleScan(true);
+    }
+
+    function stopRuntime() {
+        if (state.scanTimer) clearTimeout(state.scanTimer);
+        state.scanTimer = null;
+        state.observer?.disconnect();
+        state.observer = null;
+        document.getElementById('sl-mri-button')?.remove();
+        document.getElementById('sl-mr-settings-overlay')?.remove();
+        document.getElementById(HUB_PROMPT_ID)?.remove();
+        removeDetailPanel();
+        document.querySelectorAll('.sl-mr-card-info').forEach(box => {
+            const card = box.parentElement;
+            box.remove();
+            if (card?.style.getPropertyValue('position') === 'relative') card.style.removeProperty('position');
+        });
+        state.processedCards = new WeakSet();
+    }
+
+    function setEnabled(value) {
+        state.enabled = Boolean(value);
+        saveJson(STORAGE.enabled, state.enabled);
+        if (state.enabled) startRuntime();
+        else stopRuntime();
+        window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
+        return state.enabled;
+    }
+
+    function toggleEnabled() {
+        return setEnabled(!state.enabled);
+    }
+
     window.SakaLuXMissionRewards = {
         id: 'mission-rewards',
         name: 'Mission Rewards',
         version: VERSION,
         ready: true,
         open() {
+            if (!state.enabled) setEnabled(true);
             if (!isMissionsPage()) {
                 location.href = MISSIONS_URL;
                 return true;
@@ -626,10 +691,15 @@
             await scanRewards(true);
             return true;
         },
+        setEnabled,
+        toggleEnabled,
+        isEnabled() { return state.enabled; },
+        createRequiredTornKey: createRequiredApiKey,
         health() {
             return {
                 ready: true,
                 version: VERSION,
+                enabled: state.enabled,
                 activePage: isMissionsPage(),
                 apiMode: state.apiMode,
                 hasApiKey: Boolean(getApiKey()),
@@ -646,30 +716,18 @@
         }
     };
 
-    window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsReady', { detail: { version: VERSION } }));
+    window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsReady', { detail: { version: VERSION, enabled: state.enabled } }));
 
     async function init() {
-        setTimeout(maybePromptForHub, 3500);
+        state.enabled = loadJson(STORAGE.enabled, true) !== false;
+        if (state.enabled) setTimeout(maybePromptForHub, 3500);
 
         if (!isMissionsPage()) {
             console.log('[SakaLuX Mission Rewards v' + VERSION + '] Hub API ready; Mission features on standby.');
             return;
         }
 
-        injectCss();
-        createButton();
-        startObserver();
-        loadCatalogueCache();
-        loadAmmoCache();
-
-        if (settings.showItemValue && !state.catalogue.size) {
-            loadCatalogue().then(() => scheduleScan(true));
-        }
-        if (settings.showAmmoOwned && !state.ammo.length) {
-            loadAmmo().then(() => scheduleScan(true));
-        }
-
-        scheduleScan(true);
+        if (state.enabled) startRuntime();
         console.log('[SakaLuX Mission Rewards v' + VERSION + '] Loaded.');
     }
 

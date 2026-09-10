@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.3
+// @version      1.3.4
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,13 +29,14 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.3';
+    const VERSION = '1.3.4';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
     const HUB_PROMPT_STORAGE = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
     const HUB_PROMPT_INTERVAL = 24 * 60 * 60 * 1000;
     const HUB_PROMPT_ID = 'sakalux-hub-install-prompt';
+    const REQUIRED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Enhancer%20Guard&user=inventory&torn=items';
 
     const STORAGE = {
         apiKey: 'SakaLuX_EG_API_KEY',
@@ -47,7 +48,8 @@
         compact: 'SakaLuX_EG_COMPACT',
         diagnostics: 'SakaLuX_EG_DIAGNOSTICS',
         favorites: 'SakaLuX_EG_FAVORITES',
-        autoRefresh: 'SakaLuX_EG_AUTO_REFRESH'
+        autoRefresh: 'SakaLuX_EG_AUTO_REFRESH',
+        enabled: 'SakaLuX_EG_ENABLED'
     };
 
     const CACHE_MS = 6 * 60 * 60 * 1000;
@@ -76,7 +78,8 @@
         autoRefreshTimer: null,
         categories: [],
         apiMode: '',
-        diagnostics: []
+        diagnostics: [],
+        enabled: getBool(STORAGE.enabled, true)
     };
 
     function normalize(v) {
@@ -140,6 +143,17 @@
     }
 
     function getApiKey() {
+        try {
+            const hubKey = window.SakaLuXScriptHub?.getApiKey?.() || '';
+            if (hubKey) {
+                state.apiMode = 'SakaLuX Hub';
+                return hubKey;
+            }
+            if (window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button')) {
+                const storedHubKey = localStorage.getItem('SakaLuX_HUB_TORN_API_KEY') || '';
+                if (storedHubKey) { state.apiMode = 'SakaLuX Hub'; return storedHubKey; }
+            }
+        } catch {}
         if (PDA_KEY && PDA_KEY !== '###PDA-APIKEY###') {
             state.apiMode = 'Torn PDA';
             return PDA_KEY;
@@ -162,6 +176,12 @@
 
     function clearApiKey() {
         try { localStorage.removeItem(STORAGE.apiKey); } catch {}
+    }
+
+    function createRequiredApiKey() {
+        if (window.SakaLuXScriptHub?.createRequiredTornKey) return window.SakaLuXScriptHub.createRequiredTornKey();
+        location.href = REQUIRED_API_KEY_URL;
+        return true;
     }
 
     function parseResponse(response) {
@@ -461,7 +481,7 @@
             clearInterval(state.autoRefreshTimer);
             state.autoRefreshTimer = null;
         }
-        if (state.autoRefreshMinutes <= 0) return;
+        if (!state.enabled || state.autoRefreshMinutes <= 0) return;
         state.autoRefreshTimer = setInterval(() => refreshData(), state.autoRefreshMinutes * 60 * 1000);
     }
 
@@ -503,7 +523,7 @@
     }
 
     function createButton() {
-        if (document.getElementById('sl-eg-button')) return;
+        if (!state.enabled || document.getElementById('sl-eg-button')) return;
         const button = document.createElement('button');
         button.id = 'sl-eg-button';
         button.textContent = '🛡️ Enhancers';
@@ -512,6 +532,7 @@
     }
 
     function openPanel() {
+        if (!state.enabled) setEnabled(true);
         if (document.getElementById('sl-eg-overlay')) return true;
         const overlay = document.createElement('div');
         overlay.id = 'sl-eg-overlay';
@@ -596,6 +617,28 @@
         return true;
     }
 
+    function setEnabled(value) {
+        state.enabled = Boolean(value);
+        setBool(STORAGE.enabled, state.enabled);
+        if (state.enabled) {
+            injectCss();
+            createButton();
+            configureAutoRefresh();
+        } else {
+            if (state.autoRefreshTimer) clearInterval(state.autoRefreshTimer);
+            state.autoRefreshTimer = null;
+            document.getElementById('sl-eg-overlay')?.remove();
+            document.getElementById('sl-eg-button')?.remove();
+            document.getElementById(HUB_PROMPT_ID)?.remove();
+        }
+        window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
+        return state.enabled;
+    }
+
+    function toggleEnabled() {
+        return setEnabled(!state.enabled);
+    }
+
     function showKeyPrompt() {
         if (!document.getElementById('sl-eg-overlay')) {
             openPanel();
@@ -608,10 +651,12 @@
                 <b>🔑 Minimal API Key required</b><br><br>
                 Torn PDA should inject it automatically.<br><br>
                 <input id="sl-eg-key" type="password" placeholder="Torn API key..." style="width:100%;box-sizing:border-box;padding:10px;background:#101318;color:#fff;border:1px solid #444;border-radius:8px;">
+                <button id="sl-eg-create-key" style="width:100%;margin-top:8px;padding:10px;border:1px solid #7c5f11;border-radius:8px;background:#2a220b;color:#fde68a;font-weight:800;">🔑 ${window.SakaLuXScriptHub ? 'CREATE GENERAL HUB API KEY' : 'CREATE REQUIRED API KEY'}</button>
                 <button id="sl-eg-save-key" style="width:100%;margin-top:8px;padding:10px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-weight:800;">SAVE</button>
                 <button id="sl-eg-clear-key" style="width:100%;margin-top:8px;padding:10px;border:0;border-radius:8px;background:#374151;color:#fff;">CLEAR KEY</button>
             </div>
         `;
+        document.getElementById('sl-eg-create-key').onclick = createRequiredApiKey;
         document.getElementById('sl-eg-save-key').onclick = () => {
             const key = document.getElementById('sl-eg-key').value.trim();
             if (!key) return;
@@ -780,10 +825,15 @@
         close() { return closePanel(); },
         async refresh() { await refreshData(); return true; },
         async hardRefresh() { clearCatalogueCache(); await refreshData({ forceCatalogue: true }); return true; },
+        createRequiredTornKey: createRequiredApiKey,
+        setEnabled,
+        toggleEnabled,
+        isEnabled() { return state.enabled; },
         health() {
             return {
                 ready: true,
                 version: VERSION,
+                enabled: state.enabled,
                 loading: state.loading,
                 error: state.error,
                 lastUpdate: state.lastUpdate ? state.lastUpdate.getTime() : null,
@@ -797,10 +847,10 @@
         }
     };
 
-    window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardReady', { detail: { version: VERSION } }));
+    window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardReady', { detail: { version: VERSION, enabled: state.enabled } }));
 
     function init() {
-        injectCss();
+        state.enabled = getBool(STORAGE.enabled, true);
         state.showRelics = getBool(STORAGE.showRelics, true);
         state.compact = getBool(STORAGE.compact, false);
         state.diagnosticsVisible = getBool(STORAGE.diagnostics, false);
@@ -808,9 +858,12 @@
         state.sort = getString(STORAGE.sort, 'owned');
         state.favorites = loadFavorites();
         state.autoRefreshMinutes = Number(getString(STORAGE.autoRefresh, '0'));
-        configureAutoRefresh();
-        createButton();
-        scheduleHubInstallPrompt();
+        if (state.enabled) {
+            injectCss();
+            configureAutoRefresh();
+            createButton();
+            scheduleHubInstallPrompt();
+        }
         console.log('[SakaLuX Enhancer Guard v' + VERSION + '] Loaded.');
     }
 

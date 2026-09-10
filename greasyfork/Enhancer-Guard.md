@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.3**
+**v1.3.4**
 
 ## What it does
 
@@ -15,6 +15,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.3.4
+
+- Added persistent `setEnabled`, `toggleEnabled` and `isEnabled` Hub power controls.
+- OFF closes the panel, removes the launcher and stops auto-refresh; ON restores the runtime without reloading Torn.
+- Automatically uses the shared Hub key when available; standalone mode includes a creator for the required Inventory + Torn Items key.
 
 ### v1.3.3
 

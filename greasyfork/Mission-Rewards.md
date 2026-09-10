@@ -4,7 +4,7 @@ SakaLuX Mission Rewards enhances Torn's Mission Shop with practical reward infor
 
 ## Current version
 
-**v1.0.2**
+**v1.0.3**
 
 ## What it does
 
@@ -26,6 +26,12 @@ The Hub can now detect Mission Rewards as installed even when you are not on the
 If Script Hub is not installed, Mission Rewards can offer the optional Hub installer with the shared 24-hour **NOT NOW** cooldown used by the other SakaLuX add-ons.
 
 ## Current release notes
+
+### v1.0.3
+
+- Added persistent `setEnabled`, `toggleEnabled` and `isEnabled` Hub power controls.
+- OFF disconnects Mission Shop scanning and removes injected badges/panels; ON restores them without a page reload.
+- Automatically uses the shared Hub key when available; standalone mode includes a creator for the required Ammo + Torn Items key.
 
 ### v1.0.2
 
