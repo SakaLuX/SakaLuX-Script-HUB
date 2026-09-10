@@ -4,12 +4,12 @@ Last updated: 2026-09-10
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.9.0**
+- SakaLuX Script Hub: **v1.9.1**
 - SakaLuX Enhancer Guard: **v1.3.5**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.3**
 - SakaLuX Mission Rewards: **v1.0.3**
 - SakaLuX Market Intelligence: **v1.17.0** — Greasy Fork **592781**
-- SakaLuX Elimination Assistant: **v1.3.6** — Greasy Fork **594921**
+- SakaLuX Elimination Assistant: **v1.3.7** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
 ## Private / standalone tools
@@ -20,12 +20,12 @@ Last updated: 2026-09-10
 
 All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
-- **Script Hub v1.9.0** — professional TornPDA module cards with two controls and native power integration.
+- **Script Hub v1.9.1** — canonical Registry versions, automatic cache invalidation and downgrade-safe update sources.
 - **Enhancer Guard v1.3.5** — dedicated API-key panel with exact Inventory + Torn Items access creation and validation.
 - **Bazaar Thanker - PDA v5.3.3** — persistent native Hub power API.
 - **Mission Rewards v1.0.3** — persistent native Hub power API.
 - **Market Intelligence v1.17.0** — persistent native Hub power API.
-- **Elimination Assistant v1.3.6** — high-contrast Lvl/Last values and new-tab ATK links; All Rights Reserved metadata and source header present.
+- **Elimination Assistant v1.3.7** — unified Torn + FFScouter API Access panel with exact Torn-key creation and validation.
 - **SakaLuX Suite v0.9.906** — complete 13-module implementation, established SakaLuX names, improved TornPDA Event Lens readability, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
 - **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
 
@@ -42,6 +42,22 @@ Dedicated information files:
 
 ## Latest changes
 
+### SakaLuX Script Hub v1.9.1 — synchronized versions
+- `scripts.json` is now the canonical minimum version, so **Latest** can never display an older Greasy Fork mirror version.
+- Update cache is invalidated immediately when a Registry version changes, even when the installed version is unchanged.
+- When Greasy Fork is behind Registry, install/update actions use the current GitHub `.user.js` source and cannot downgrade the module.
+- The offline fallback Registry is synchronized with all current module versions.
+- GitHub validation now blocks a release when userscript metadata, runtime version, `scripts.json`, Hub fallback or release documentation disagree.
+
+### SakaLuX Elimination Assistant v1.3.7
+- Replaced the Settings gear with a gold API key button in the Elimination header.
+- Added an Enhancer-style API Access panel with exact Torn key creation for `user/battlestats`, `torn/elimination` and `torn/eliminationteam`.
+- Added local Torn-key save, full access validation, active-source display and local-key clearing.
+- Added a dedicated FFScouter section directly below the Torn key with save/test, service shortcut and clear controls.
+- Kept FFScouter optional and separate from the shared Hub Torn key.
+- Preserved manual battle-stats calibration at the bottom of the new API panel.
+- Automatically reopens the API panel after returning from Torn's key creator.
+
 ### SakaLuX Enhancer Guard v1.3.5
 - Added a gold key button directly in the Enhancer panel header.
 - Added a dedicated Market Intelligence-style API Access panel available at any time.
@@ -54,7 +70,7 @@ Dedicated information files:
 - Redesigned module cards for TornPDA with only a sliding ON/OFF control and one OPEN or SETTINGS button.
 - Removed all repeated quick-action clusters from module cards while keeping module features inside their own panels.
 - Added the shared `setEnabled`, `toggleEnabled` and `isEnabled` API to Enhancer Guard v1.3.4, Bazaar Thanker v5.3.3, Mission Rewards v1.0.3 and Market Intelligence v1.17.0.
-- Elimination Assistant v1.3.6 already implements the same API.
+- Elimination Assistant v1.3.7 implements the same native power API.
 - OFF states persist and stop module observers/timers while removing injected UI; ON restores the module without reinstalling it.
 - Hub Settings now creates, tests and stores one general Torn API key; managed modules prefer it automatically and retain standalone key creators/fallbacks.
 - Bazaar Thanker requires no Torn API key. Elimination Assistant's optional FFScouter key remains separate because it is not a Torn service.

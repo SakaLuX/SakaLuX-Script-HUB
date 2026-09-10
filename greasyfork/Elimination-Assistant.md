@@ -2,6 +2,16 @@
 
 Complementary add-on for SakaLuX Script Hub, built specifically for Torn Eliminations.
 
+## v1.3.7 — Unified Torn + FFScouter API Access
+
+- Replaced the Settings gear with a gold key button in the Elimination header.
+- Added an Enhancer-style API Access panel with exact Torn permission creation and validation.
+- The Torn key requests only Battlestats, Elimination and Elimination Team access, with no write permission.
+- Added save/test, active key source and clear-local-key controls.
+- Added FFScouter directly below the Torn key with separate save/test, service shortcut and clear controls.
+- Preserved the optional manual total battle-stats fallback.
+- Automatically returns to the API panel after Torn key creation.
+
 ## v1.3.6 — Visible Lvl/Last + new-tab attacks
 
 - **Lvl** values now use high-contrast gold text and **Last** values use high-contrast light cyan text.
@@ -60,7 +70,7 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 ## Current version
 
-**v1.3.6**
+**v1.3.7**
 
 ## What it does
 
@@ -75,8 +85,8 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 - Includes player search, target filters, smart sorting and quick PROFILE / ATTACK actions.
 - Shows target location/availability and includes an **Attackable only** filter.
 - Exports attackable SAFE/RISKY targets to TornPDA Chain Targets import format.
-- Includes **TEST TORN KEY** so API permissions and endpoint availability can be checked separately.
-- Includes one-click Torn API-key creation helper and keeps the FFScouter key separate.
+- Includes a dedicated API Access panel that validates Torn permissions and endpoint availability separately.
+- Includes exact one-click Torn API-key creation and separate FFScouter save/test controls.
 - Works with Torn PDA and Tampermonkey.
 - Never attacks automatically.
 

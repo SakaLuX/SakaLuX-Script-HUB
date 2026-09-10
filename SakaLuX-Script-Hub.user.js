@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.0
+// @version      1.9.1
 // @description  Professional TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.0';
+    const VERSION = '1.9.1';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -39,6 +39,16 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.1',
+            date: '2026-09-10',
+            changes: [
+                'Made scripts.json the canonical minimum version so Latest can never fall behind Registry.',
+                'Invalidates update cache whenever a registry version changes.',
+                'Uses the current GitHub userscript source when the Greasy Fork mirror is behind, preventing downgrades.',
+                'Synchronized the offline fallback registry and added automated cross-file version checks.'
+            ]
+        },
         {
             version: '1.9.0',
             date: '2026-09-10',
@@ -113,11 +123,12 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.4',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.5',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js',
+                sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js',
                 apiGlobal: 'SakaLuXEnhancerGuard', buttonSelector: '#sl-eg-button',
                 quickActions: [
                     { id: 'open', label: 'OPEN', icon: '🛡️', method: 'open' },
@@ -132,6 +143,7 @@
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js',
+                sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js',
                 apiGlobal: 'SakaLuXBazaarThanker', buttonSelector: '#sakalux-bt-settings-button',
                 quickActions: [
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open' },
@@ -146,6 +158,7 @@
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js',
+                sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js',
                 apiGlobal: 'SakaLuXMissionRewards', buttonSelector: '#sl-mri-button',
                 quickActions: [
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open', fallbackUrl: 'https://www.torn.com/page.php?sid=missions' },
@@ -160,6 +173,7 @@
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js',
+                sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js',
                 apiGlobal: 'SakaLuXMarketIntelligence', buttonSelector: '#sl-mi-button',
                 quickActions: [
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open' },
@@ -170,11 +184,12 @@
             },
             {
                 id: 'elimination-assistant', type: 'addon', active: true,
-                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.6',
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.7',
                 description: 'Eliminations advisor with rotating target batches, availability status and TornPDA export.',
                 greasyForkId: '594921',
                 metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js',
+                sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js',
                 apiGlobal: 'SakaLuXEliminationAssistant', buttonSelector: '#slx-elim-btn',
                 quickActions: [
                     { id: 'open', label: 'OPEN', icon: '⚔️', method: 'open' },
@@ -281,6 +296,18 @@
         return 0;
     }
 
+    function canonicalLatestVersion(script, publishedVersion) {
+        const registryVersion = String(script?.expectedVersion || script?.version || '0');
+        const published = publishedVersion ? String(publishedVersion) : null;
+        return published && compareVersions(published, registryVersion) > 0 ? published : registryVersion;
+    }
+
+    function getInstallUrl(script) {
+        const data = normalizeCachedUpdate(script);
+        if (data?.distributionBehind && script.sourceUrl) return script.sourceUrl;
+        return script.downloadUrl || script.sourceUrl || '';
+    }
+
     function normalizeRegistry(data) {
         const rows = Array.isArray(data?.scripts) ? data.scripts : FALLBACK_REGISTRY.scripts;
         return rows.filter(s => s?.active !== false).map(s => ({
@@ -384,7 +411,8 @@
         return Boolean(
             data?.checkedAt &&
             Date.now() - Number(data.checkedAt) < UPDATE_CACHE_TIME &&
-            String(data.installed || '') === String(installed || '')
+            String(data.installed || '') === String(installed || '') &&
+            String(data.expected || '') === String(script.expectedVersion || '')
         );
     }
 
@@ -392,10 +420,12 @@
         const data = updateCache[script.id];
         if (!data) return null;
         const installed = getInstalledVersion(script);
-        const latest = data.latest ? String(data.latest) : null;
+        const publishedLatest = data.publishedLatest ? String(data.publishedLatest) : (data.latest ? String(data.latest) : null);
+        const latest = canonicalLatestVersion(script, publishedLatest);
+        const distributionBehind = Boolean(publishedLatest && compareVersions(publishedLatest, script.expectedVersion) < 0);
         const available = Boolean(installed && latest && compareVersions(latest, installed) > 0);
-        if (String(data.installed || '') !== String(installed || '') || Boolean(data.available) !== available) {
-            updateCache[script.id] = { ...data, installed, latest, available };
+        if (String(data.installed || '') !== String(installed || '') || String(data.latest || '') !== latest || String(data.expected || '') !== String(script.expectedVersion || '') || Boolean(data.available) !== available || Boolean(data.distributionBehind) !== distributionBehind) {
+            updateCache[script.id] = { ...data, installed, expected: script.expectedVersion, publishedLatest, latest, distributionBehind, available };
             saveJson(STORAGE.updates, updateCache);
         }
         return updateCache[script.id];
@@ -404,31 +434,30 @@
     async function checkScriptUpdate(script, force = false) {
         if (!force && isUpdateCacheFresh(script)) return normalizeCachedUpdate(script);
         const installed = getInstalledVersion(script);
+        let publishedLatest = null;
+        let sourceError = null;
         try {
-            const latest = parseMetaVersion(await httpGet(script.metaUrl));
-            if (!latest) throw new Error('No @version found');
-            const data = {
-                installed,
-                latest,
-                available: Boolean(installed && compareVersions(latest, installed) > 0),
-                checkedAt: Date.now(),
-                error: null
-            };
-            updateCache[script.id] = data;
-            saveJson(STORAGE.updates, updateCache);
-            return data;
+            publishedLatest = parseMetaVersion(await httpGet(script.metaUrl));
+            if (!publishedLatest) throw new Error('No @version found');
         } catch (error) {
-            const data = {
-                installed,
-                latest: null,
-                available: false,
-                checkedAt: Date.now(),
-                error: String(error?.message || error)
-            };
-            updateCache[script.id] = data;
-            saveJson(STORAGE.updates, updateCache);
-            return data;
+            sourceError = String(error?.message || error);
         }
+        const latest = canonicalLatestVersion(script, publishedLatest);
+        const distributionBehind = Boolean(publishedLatest && compareVersions(publishedLatest, script.expectedVersion) < 0);
+        const data = {
+            installed,
+            expected: script.expectedVersion,
+            publishedLatest,
+            latest,
+            distributionBehind,
+            available: Boolean(installed && compareVersions(latest, installed) > 0),
+            checkedAt: Date.now(),
+            sourceError,
+            error: null
+        };
+        updateCache[script.id] = data;
+        saveJson(STORAGE.updates, updateCache);
+        return data;
     }
 
     async function checkAllUpdates(force = false) {
@@ -1016,13 +1045,15 @@
         document.querySelectorAll('[data-install]').forEach(button => {
             button.onclick = () => {
                 const script = SCRIPTS.find(item => item.id === button.dataset.install);
-                if (script?.downloadUrl) location.href = script.downloadUrl;
+                const url = script ? getInstallUrl(script) : '';
+                if (url) location.href = url;
             };
         });
         document.querySelectorAll('[data-update]').forEach(button => {
             button.onclick = () => {
                 const script = SCRIPTS.find(item => item.id === button.dataset.update);
-                if (script?.downloadUrl) location.href = script.downloadUrl;
+                const url = script ? getInstallUrl(script) : '';
+                if (url) location.href = url;
             };
         });
         document.querySelectorAll('[data-script][data-action]').forEach(button => {
@@ -1035,7 +1066,8 @@
         if (!script) return;
         const api = script.api();
         if (!api) {
-            if (script.downloadUrl) location.href = script.downloadUrl;
+            const url = getInstallUrl(script);
+            if (url) location.href = url;
             return;
         }
         const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
@@ -1071,7 +1103,7 @@
 
     async function updateAll() {
         await checkAllUpdates(true);
-        const updates = SCRIPTS.filter(script => getUpdateState(script).state === 'available' && script.downloadUrl);
+        const updates = SCRIPTS.filter(script => getUpdateState(script).state === 'available' && getInstallUrl(script));
         if (!updates.length) {
             alert('All installed SakaLuX add-ons are up to date.');
             return;
@@ -1080,7 +1112,7 @@
         let opened = 0;
         for (const script of updates) {
             try {
-                const win = window.open(script.downloadUrl, '_blank');
+                const win = window.open(getInstallUrl(script), '_blank');
                 if (win) opened++;
             } catch {}
         }
@@ -1111,10 +1143,16 @@
         }
         for (const script of SCRIPTS) {
             try {
-                const latest = parseMetaVersion(await httpGet(script.metaUrl));
-                results.push({ level: latest ? 'ok' : 'warn', label: script.name + ' update source', detail: latest ? 'Greasy Fork v' + latest : 'No version found' });
+                const published = parseMetaVersion(await httpGet(script.metaUrl));
+                const canonical = canonicalLatestVersion(script, published);
+                const behind = Boolean(published && compareVersions(published, script.expectedVersion) < 0);
+                results.push({
+                    level: behind || !published ? 'warn' : 'ok',
+                    label: script.name + ' update source',
+                    detail: 'Canonical v' + canonical + (published ? ' • Greasy Fork v' + published + (behind ? ' (mirror behind; GitHub source used)' : '') : ' • Greasy Fork unavailable')
+                });
             } catch (error) {
-                results.push({ level: 'bad', label: script.name + ' update source', detail: String(error?.message || error) });
+                results.push({ level: 'warn', label: script.name + ' update source', detail: 'Canonical Registry v' + script.expectedVersion + ' • ' + String(error?.message || error) });
             }
             const health = getHealth(script);
             results.push({
@@ -1146,12 +1184,14 @@
         document.getElementById('slhq-full').onclick = openHub;
         document.querySelectorAll('[data-quick-install]').forEach(button => button.onclick = () => {
             const script = SCRIPTS.find(item => item.id === button.dataset.quickInstall);
-            if (script?.downloadUrl) location.href = script.downloadUrl;
+            const url = script ? getInstallUrl(script) : '';
+            if (url) location.href = url;
         });
         document.querySelectorAll('[data-quick-open]').forEach(button => button.onclick = () => runAction(button.dataset.quickOpen, 'open'));
         document.querySelectorAll('[data-quick-update]').forEach(button => button.onclick = () => {
             const script = SCRIPTS.find(item => item.id === button.dataset.quickUpdate);
-            if (script?.downloadUrl) location.href = script.downloadUrl;
+            const url = script ? getInstallUrl(script) : '';
+            if (url) location.href = url;
         });
     }
 
