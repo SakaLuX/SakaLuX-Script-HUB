@@ -4,6 +4,15 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 
 
+
+## v1.3.2 — LOAD rendering + mobile readability
+
+- Fixed **LOAD** so team rows render immediately even when FFScouter is unreachable.
+- FFScouter failures are now non-blocking: the Torn team list remains visible and the status line explains that only FF enrichment failed.
+- Increased text size, spacing and contrast for TornPDA/mobile.
+- SAFE is brighter green, RISKY amber and SKIP rose/red; headers and action buttons are clearer.
+- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.3.1.user.js`.
+
 ## v1.3.1 — Battle Stats API v2 Fix
 
 - Fixed CALIBRATE ME for Torn API v2 battlestats object values and battlestats.total.
