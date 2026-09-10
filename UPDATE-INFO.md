@@ -6,7 +6,7 @@ Last updated: 2026-09-10
 
 - SakaLuX Script Hub: **v1.9.2**
 - SakaLuX Enhancer Guard: **v1.3.13**
-- SakaLuX Bazaar Thanker - PDA: **v5.3.3**
+- SakaLuX Bazaar Thanker - PDA: **v5.3.4**
 - SakaLuX Mission Rewards: **v1.0.3**
 - SakaLuX Market Intelligence: **v1.17.1** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.3.7** — Greasy Fork **594921**
@@ -22,7 +22,7 @@ All current scripts were checked against the `@version` in their live `.user.js`
 
 - **Script Hub v1.9.2** — removed the Hub search field.
 - **Enhancer Guard v1.3.13** — removed the unused lock control beside the Enhancer favorite star.
-- **Bazaar Thanker - PDA v5.3.3** — persistent native Hub power API.
+- **Bazaar Thanker - PDA v5.3.4** — fixed Settings opening from Hub and TornPDA routes.
 - **Mission Rewards v1.0.3** — persistent native Hub power API.
 - **Market Intelligence v1.17.1** — no market panel on Items or player profile pages.
 - **Elimination Assistant v1.3.7** — unified Torn + FFScouter API Access panel with exact Torn-key creation and validation.
