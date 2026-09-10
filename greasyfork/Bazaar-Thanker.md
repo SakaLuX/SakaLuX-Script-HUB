@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v5.3.3**
+**v5.3.4**
 
 ## What it does
 
@@ -14,6 +14,10 @@ Complementary add-on for SakaLuX Script Hub.
 - Exposes its status to SakaLuX Script Hub on all Torn pages while its working features remain limited to Events and Messages.
 
 ## Current release notes
+
+### v5.3.4
+
+- Fixed Settings opening from the Hub and from any TornPDA route; it no longer depends on an exact `sid=events` URL.
 
 ### v5.3.3
 
