@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.10**
+**v1.3.11**
 
 ## What it does
 
@@ -17,12 +17,15 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current release notes
 
-### v1.3.10
+### v1.3.11
 
 - Moved protection badges from the Enhancer panel to the Torn Items inventory, matching Item Protector.
 - Added full, partial-quantity and unlocked lock badge states with long-press quantity editing directly on item icons.
-- Added a working lock-size button beside the Item Protector close button; it cycles small, medium and large using shared settings.
+- The Enhancer header lock now cycles the Item Protector badge size directly: small → medium → large → small.
+- Removed the extra injected resize button and the separate protection panel so the Items page remains the single lock interface.
 - Improved item-name detection across TornPDA’s dynamically rendered inventory layouts.
+
+### v1.3.10
 
 ### v1.3.9
 
