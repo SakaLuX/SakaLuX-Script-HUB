@@ -111,3 +111,4 @@ jobs:
           git add SakaLuX-Elimination-Assistant.user.js scripts.json greasyfork/Elimination-Assistant.md UPDATE-INFO.md backups/SakaLuX-Elimination-Assistant-v1.2.9.user.js
           git diff --cached --quiet || git commit -m "fix: Elimination Assistant v1.3.0 TornPDA JSON transport"
           git push origin main
+# trigger
