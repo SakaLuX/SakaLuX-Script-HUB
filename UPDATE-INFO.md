@@ -9,7 +9,7 @@ Last updated: 2026-09-10
 - SakaLuX Bazaar Thanker - PDA: **v5.3.2**
 - SakaLuX Mission Rewards: **v1.0.2**
 - SakaLuX Market Intelligence: **v1.16.9** — Greasy Fork **592781**
-- SakaLuX Elimination Assistant: **v1.3.4** — Greasy Fork **594921**
+- SakaLuX Elimination Assistant: **v1.3.5** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
 ## Private / standalone tools
@@ -25,7 +25,7 @@ All current scripts were checked against the `@version` in their live `.user.js`
 - **Bazaar Thanker - PDA v5.3.2** — info/release notes current; All Rights Reserved metadata and source header present.
 - **Mission Rewards v1.0.2** — info/release notes current; All Rights Reserved metadata and source header present.
 - **Market Intelligence v1.16.6** — info/release notes current; All Rights Reserved metadata and source header present.
-- **Elimination Assistant v1.3.4** — availability status, Attackable-only filtering and TornPDA target export; All Rights Reserved metadata and source header present.
+- **Elimination Assistant v1.3.5** — rotating 500-player batches and stacked W/L actions; All Rights Reserved metadata and source header present.
 - **SakaLuX Suite v0.9.906** — complete 13-module implementation, established SakaLuX names, improved TornPDA Event Lens readability, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
 - **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
 
@@ -41,6 +41,12 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### SakaLuX Elimination Assistant v1.3.5
+- Moved L directly under W beside the ATK action for a narrower TornPDA layout.
+- Replaced LOAD with **LOAD NEXT**, cycling through separate groups of up to 500 team members.
+- Keeps only one group in memory and remembers the current group independently for each team.
+- Automatically wraps back to the first group after reaching the end.
 
 ### SakaLuX Elimination Assistant v1.3.4
 - Added Torn/Flying/Abroad/Hospital/Jail/Federal/Fallen/Unknown status badges to each target.
