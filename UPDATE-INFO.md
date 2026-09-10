@@ -5,7 +5,7 @@ Last updated: 2026-09-10
 ## Current versions
 
 - SakaLuX Script Hub: **v1.9.1**
-- SakaLuX Enhancer Guard: **v1.3.11**
+- SakaLuX Enhancer Guard: **v1.3.12**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.3**
 - SakaLuX Mission Rewards: **v1.0.3**
 - SakaLuX Market Intelligence: **v1.17.0** — Greasy Fork **592781**
@@ -21,7 +21,7 @@ Last updated: 2026-09-10
 All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
 - **Script Hub v1.9.1** — canonical Registry versions, automatic cache invalidation and downgrade-safe update sources.
-- **Enhancer Guard v1.3.11** — the Enhancer header lock now controls Items lock size; removed the extra protection/resize panels.
+- **Enhancer Guard v1.3.12** — fixed immediate Items badge refresh when changing size from the Enhancer header lock.
 - **Bazaar Thanker - PDA v5.3.3** — persistent native Hub power API.
 - **Mission Rewards v1.0.3** — persistent native Hub power API.
 - **Market Intelligence v1.17.0** — persistent native Hub power API.
