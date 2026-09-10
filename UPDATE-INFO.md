@@ -5,7 +5,7 @@ Last updated: 2026-09-10
 ## Current versions
 
 - SakaLuX Script Hub: **v1.9.1**
-- SakaLuX Enhancer Guard: **v1.3.5**
+- SakaLuX Enhancer Guard: **v1.3.6**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.3**
 - SakaLuX Mission Rewards: **v1.0.3**
 - SakaLuX Market Intelligence: **v1.17.0** — Greasy Fork **592781**
@@ -21,7 +21,7 @@ Last updated: 2026-09-10
 All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
 - **Script Hub v1.9.1** — canonical Registry versions, automatic cache invalidation and downgrade-safe update sources.
-- **Enhancer Guard v1.3.5** — dedicated API-key panel with exact Inventory + Torn Items access creation and validation.
+- **Enhancer Guard v1.3.6** — compact PDA layout, direct Item Market links and shared Item Protector locking with full/partial quantity protection.
 - **Bazaar Thanker - PDA v5.3.3** — persistent native Hub power API.
 - **Mission Rewards v1.0.3** — persistent native Hub power API.
 - **Market Intelligence v1.17.0** — persistent native Hub power API.
@@ -57,6 +57,12 @@ Dedicated information files:
 - Kept FFScouter optional and separate from the shared Hub Torn key.
 - Preserved manual battle-stats calibration at the bottom of the new API panel.
 - Automatically reopens the API panel after returning from Torn's key creator.
+
+### SakaLuX Enhancer Guard v1.3.6
+- Compact single-row statistics for PDA and removed the redundant compact-mode control.
+- Item names open the matching Item Market search directly.
+- Added a lock button and a protection manager shared with `#1 Item Protector 🔐 MP`.
+- Full locks hide protected items from compatible selling screens; long-pressing a lock reserves a partial quantity.
 
 ### SakaLuX Enhancer Guard v1.3.5
 - Added a gold key button directly in the Enhancer panel header.
