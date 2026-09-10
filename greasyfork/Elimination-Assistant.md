@@ -5,6 +5,15 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 
 
+
+## v1.3.3 — Compact attack-first TornPDA layout
+
+- Moved the target filter beside Player / ID and moved CALIBRATE into the thin status bar.
+- Reduced header/control height to show substantially more targets.
+- Signal / Player / Lvl / Last / Actions now use fixed mobile columns on one row.
+- Signal is condensed to two lines and actions are compact ATK / W / L controls.
+- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.3.2.user.js`.
+
 ## v1.3.2 — LOAD rendering + mobile readability
 
 - Fixed **LOAD** so team rows render immediately even when FFScouter is unreachable.
@@ -28,7 +37,7 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 ## Current version
 
-**v1.2.9**
+**v1.3.3**
 
 ## What it does
 
