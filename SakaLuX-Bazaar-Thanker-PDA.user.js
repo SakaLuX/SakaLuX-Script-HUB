@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.2
+// @version      5.3.3
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -35,6 +35,7 @@
     const PENDING_HTML_KEY = 'sakalux_pending_bazaar_html';
     const PENDING_PLAIN_KEY = 'sakalux_pending_bazaar_plain';
     const PENDING_XID_KEY = 'sakalux_pending_bazaar_xid';
+    const ENABLED_KEY = 'SakaLuX_BT_ENABLED';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
     const HUB_PROMPT_STORAGE = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -58,6 +59,8 @@
         bigBuyerItems: 10,
         bigBuyerSpent: 1000000
     };
+
+    let moduleEnabled = localStorage.getItem(ENABLED_KEY) !== '0';
 
     function loadSettings() {
         try {
@@ -709,7 +712,7 @@
     }
 
     function processBuyerGroups() {
-        if (!location.href.includes('sid=events')) return;
+        if (!moduleEnabled || !location.href.includes('sid=events')) return;
         const groups = getBuyerGroups();
 
         document.querySelectorAll('.sakalux-bt-ui[data-buyer-id]').forEach(ui => {
@@ -747,7 +750,7 @@
 
         panel.innerHTML = `
             <div style="font-size:21px;font-weight:bold;margin-bottom:6px;">⚙️ SakaLuX Bazaar Thanker</div>
-            <div style="font-size:12px;color:#888;margin-bottom:15px;">Version 5.3.2</div>
+            <div style="font-size:12px;color:#888;margin-bottom:15px;">Version 5.3.3</div>
             <div id="sbtStats" style="background:#222;border:1px solid #333;border-radius:9px;padding:12px;margin-bottom:15px;"></div>
             <label>Your Torn ID</label><input id="sbtSellerId" value="${escapeHtml(settings.sellerId)}" style="${inputStyle()}">
             <label>Bazaar URL</label><input id="sbtBazaarUrl" value="${escapeHtml(settings.bazaarUrl)}" style="${inputStyle()}">
@@ -860,6 +863,7 @@
     }
 
     function fillSubject() {
+        if (!moduleEnabled) return;
         const subject = localStorage.getItem(PENDING_SUBJECT_KEY);
         if (!subject) return;
         const input = document.querySelector('input.subject');
@@ -869,6 +873,7 @@
     }
 
     function fillMessageEditor() {
+        if (!moduleEnabled) return;
         const html = localStorage.getItem(PENDING_HTML_KEY);
         if (!html) return;
 
@@ -930,7 +935,7 @@
     let eventProcessTimer = null;
 
     function scheduleProcess() {
-        if (eventProcessTimer) return;
+        if (!moduleEnabled || eventProcessTimer) return;
         eventProcessTimer = setTimeout(function () {
             eventProcessTimer = null;
             processBuyerGroups();
@@ -939,7 +944,7 @@
     }
 
     function startEventObserver() {
-        if (eventObserver) return;
+        if (!moduleEnabled || eventObserver) return;
         eventObserver = new MutationObserver(function () { scheduleProcess(); });
         eventObserver.observe(document.body, { childList: true, subtree: true });
     }
@@ -947,7 +952,7 @@
     let messageObserver = null;
 
     function startMessageObserver() {
-        if (messageObserver) return;
+        if (!moduleEnabled || messageObserver) return;
         messageObserver = new MutationObserver(function () {
             fillSubject();
             fillMessageEditor();
@@ -963,9 +968,10 @@
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION = '5.3.2';
+    const BAZAAR_VERSION = '5.3.3';
 
     function openSettingsPanel() {
+        if (!moduleEnabled) setEnabled(true);
         if (!location.href.includes('sid=events')) return false;
         createSettings();
         const panel = document.getElementById('sakalux-bt-settings');
@@ -980,6 +986,43 @@
         if (!panel) return false;
         panel.style.display = 'none';
         return true;
+    }
+
+    function startRuntime() {
+        if (!moduleEnabled) return;
+        if (location.href.includes('sid=events')) {
+            createSettings();
+            processBuyerGroups();
+            startEventObserver();
+        }
+        if (location.pathname.includes('messages.php')) startMessageObserver();
+    }
+
+    function stopRuntime() {
+        eventObserver?.disconnect();
+        messageObserver?.disconnect();
+        eventObserver = null;
+        messageObserver = null;
+        if (eventProcessTimer) clearTimeout(eventProcessTimer);
+        eventProcessTimer = null;
+        document.querySelectorAll('.sakalux-bt-ui').forEach(element => element.remove());
+        document.getElementById('sakalux-bt-details')?.remove();
+        document.getElementById('sakalux-bt-settings')?.remove();
+        document.getElementById('sakalux-bt-settings-button')?.remove();
+        document.getElementById(HUB_PROMPT_ID)?.remove();
+    }
+
+    function setEnabled(value) {
+        moduleEnabled = Boolean(value);
+        localStorage.setItem(ENABLED_KEY, moduleEnabled ? '1' : '0');
+        if (moduleEnabled) startRuntime();
+        else stopRuntime();
+        window.dispatchEvent(new CustomEvent('SakaLuX:BazaarThankerStateChanged', { detail: { version: BAZAAR_VERSION, enabled: moduleEnabled } }));
+        return moduleEnabled;
+    }
+
+    function toggleEnabled() {
+        return setEnabled(!moduleEnabled);
     }
 
     window.SakaLuXBazaarThanker = {
@@ -1002,6 +1045,9 @@
             }
             return true;
         },
+        setEnabled,
+        toggleEnabled,
+        isEnabled() { return moduleEnabled; },
 
         stats() {
             if (!location.href.includes('sid=events')) {
@@ -1026,6 +1072,7 @@
             return {
                 ready: true,
                 version: BAZAAR_VERSION,
+                enabled: moduleEnabled,
                 onEvents,
                 onMessages,
                 settingsAvailable: Boolean(document.getElementById('sakalux-bt-settings')),
@@ -1046,21 +1093,14 @@
     };
 
     window.dispatchEvent(new CustomEvent('SakaLuX:BazaarThankerReady', {
-        detail: { version: BAZAAR_VERSION }
+        detail: { version: BAZAAR_VERSION, enabled: moduleEnabled }
     }));
 
     function init() {
-        if (location.href.includes('sid=events')) {
-            createSettings();
-            processBuyerGroups();
-            startEventObserver();
+        if (moduleEnabled) {
+            startRuntime();
+            scheduleHubInstallPrompt();
         }
-
-        if (location.pathname.includes('messages.php')) {
-            startMessageObserver();
-        }
-
-        scheduleHubInstallPrompt();
     }
 
     if (document.readyState === 'loading') {

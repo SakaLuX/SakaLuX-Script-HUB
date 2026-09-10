@@ -114,6 +114,12 @@ The FFScouter key is separate and optional. It provides Fair Fight and estimated
 
 ## Current release notes
 
+### Hub v1.9.0 integration
+
+- Automatically prefers the shared SakaLuX Hub Torn API key when Hub is installed.
+- Keeps its standalone Torn key creator and local fallback key when used without Hub.
+- FFScouter remains optional and separate because it is an external service, not part of the Torn API.
+
 ### v1.2.9
 
 - Changed project licensing from MIT to **All Rights Reserved** and added explicit author/copyright protection.

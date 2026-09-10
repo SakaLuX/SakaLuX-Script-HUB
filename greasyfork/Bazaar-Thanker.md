@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v5.3.2**
+**v5.3.3**
 
 ## What it does
 
@@ -14,6 +14,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Exposes its status to SakaLuX Script Hub on all Torn pages while its working features remain limited to Events and Messages.
 
 ## Current release notes
+
+### v5.3.3
+
+- Added persistent `setEnabled`, `toggleEnabled` and `isEnabled` Hub power controls.
+- OFF disconnects Events/Messages observers and removes Bazaar Thanker controls; ON restores them on the active page.
 
 ### v5.3.2
 

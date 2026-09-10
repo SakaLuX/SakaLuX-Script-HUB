@@ -1,6 +1,6 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.9**
+**Current version: v1.17.0**
 
 **Greasy Fork:** script **592781**
 
@@ -8,6 +8,13 @@ SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and t
 
 
 
+
+## v1.17.0 — Native Hub Power API
+
+- Added `setEnabled`, `toggleEnabled` and `isEnabled` for direct Script Hub control.
+- OFF disconnects the DOM/route observer, cancels scheduled scans and removes all injected Market Intelligence panels.
+- ON restores observation, scanning and configured background services without reloading Torn.
+- Automatically prefers the shared Hub key while keeping its standalone required-key creator and local fallback key.
 
 ## v1.16.9 — Loadout API Key Fix
 
