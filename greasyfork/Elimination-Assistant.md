@@ -3,6 +3,12 @@
 Complementary add-on for SakaLuX Script Hub, built specifically for Torn Eliminations.
 
 
+
+## v1.3.1 — Battle Stats API v2 Fix
+
+- Fixed CALIBRATE ME for Torn API v2 battlestats object values and battlestats.total.
+- Added exact backup: backups/SakaLuX-Elimination-Assistant-v1.3.0.user.js.
+
 ## v1.3.0 — TornPDA JSON Transport Fix
 
 - Fixed `Unexpected end of JSON input` on TornPDA when the PDA bridge returns an empty or differently shaped response object.
