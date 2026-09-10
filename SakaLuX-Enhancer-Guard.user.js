@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.6
+// @version      1.3.7
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.6';
+    const VERSION = '1.3.7';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -709,7 +709,7 @@
             .sl-eg-stat-value{font-size:12px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
             .sl-eg-stat-label{color:#8b949e;font-size:8px;margin-top:2px;white-space:nowrap}
             #sl-eg-controls{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;margin-top:9px}
-            #sl-eg-search,#sl-eg-sort,#sl-eg-auto{border:1px solid #303640;background:#181d24;color:#fff;border-radius:9px;padding:9px;outline:none}
+            #sl-eg-search{border:1px solid #303640;background:#181d24;color:#fff;border-radius:9px;padding:9px;outline:none}
             .sl-eg-control{border:0;border-radius:9px;min-width:40px;background:#252a32;color:#fff;font-weight:800}
             #sl-eg-filters{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:7px}
             .sl-eg-filter{border:1px solid #303640;border-radius:8px;background:#181d24;color:#c9d1d9;padding:7px;font-size:11px;font-weight:800}
@@ -760,10 +760,6 @@
                         <button class="sl-eg-control" id="sl-eg-protect" title="Item Protector">🔒</button>
                         <button class="sl-eg-control" id="sl-eg-refresh" title="Refresh">🔄</button>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px;">
-                        <select id="sl-eg-sort"><option value="owned">Owned first</option><option value="name">Name A-Z</option><option value="priceHigh">Price high-low</option><option value="priceLow">Price low-high</option></select>
-                        <select id="sl-eg-auto"><option value="0">Auto refresh OFF</option><option value="5">Auto refresh 5m</option><option value="10">Auto refresh 10m</option><option value="30">Auto refresh 30m</option></select>
-                    </div>
                     <div id="sl-eg-filters"><button class="sl-eg-filter" data-filter="all">ALL</button><button class="sl-eg-filter" data-filter="owned">OWNED</button><button class="sl-eg-filter" data-filter="missing">MISSING</button></div>
                 </div>
                 <div id="sl-eg-list"></div>
@@ -780,22 +776,6 @@
             state.showRelics = !state.showRelics;
             setBool(STORAGE.showRelics, state.showRelics);
             render();
-        };
-
-        const sort = document.getElementById('sl-eg-sort');
-        sort.value = state.sort;
-        sort.onchange = function () {
-            state.sort = this.value;
-            setString(STORAGE.sort, state.sort);
-            render();
-        };
-
-        const auto = document.getElementById('sl-eg-auto');
-        auto.value = String(state.autoRefreshMinutes);
-        auto.onchange = function () {
-            state.autoRefreshMinutes = Number(this.value);
-            setString(STORAGE.autoRefresh, state.autoRefreshMinutes);
-            configureAutoRefresh();
         };
 
         document.getElementById('sl-eg-search').oninput = function () {
@@ -948,7 +928,7 @@
         const overlay = document.createElement('div');
         overlay.id = 'sl-eg-protection-overlay';
         overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif;';
-        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><button class="sl-eg-close" data-close="1">×</button></div><div class="sl-eg-protection-note">Apasă lacătul de lângă un item pentru protecție completă. Ține-l apăsat pentru a păstra o cantitate rezervată și a vinde restul. Itemele protejate sunt ascunse automat din ecranele de vânzare compatibile.</div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">Nu ai iteme protejate.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">ȘTERGE TOATE PROTECȚIILE</button></div>`;
+        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><button class="sl-eg-close" data-close="1">×</button></div><div class="sl-eg-protection-note">Protejează orice item, nu doar Enhancers. Introdu numele exact al itemului și apasă ADD. Lacătul complet ascunde itemul din vânzare; apăsarea lungă pe lacătul unui Enhancer rezervă o cantitate și permite vânzarea restului.</div><div class="sl-eg-api-actions"><input id="sl-eg-protection-name" type="text" placeholder="Item name, ex. Xanax" autocomplete="off"><button type="button" id="sl-eg-protection-add">🔒 ADD ITEM</button></div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">Nu ai iteme protejate.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">ȘTERGE TOATE PROTECȚIILE</button></div>`;
         document.body.appendChild(overlay);
         overlay.onclick = event => { if (event.target === overlay || event.target.closest('[data-close]')) overlay.remove(); };
         overlay.querySelectorAll('.sl-eg-unlock').forEach(button => {
@@ -959,6 +939,16 @@
                 await writeProtectorLocks(next.full, next.partial);
                 openProtectionPanel();
             };
+        });
+        overlay.querySelector('#sl-eg-protection-add')?.addEventListener('click', async () => {
+            const input = overlay.querySelector('#sl-eg-protection-name');
+            const name = String(input?.value || '').replace(/\s+/g, ' ').trim();
+            if (!name) { input?.focus(); return; }
+            const next = readProtectorLocks();
+            next.full[protectorKey({ name })] = true;
+            delete next.partial[protectorKey({ name })];
+            await writeProtectorLocks(next.full, next.partial);
+            openProtectionPanel();
         });
         overlay.querySelector('[data-clear]')?.addEventListener('click', async () => {
             await writeProtectorLocks({}, {});
@@ -1008,7 +998,7 @@
         if (state.showRelics) html += renderSection('⭐ Enhancer Relics', filteredRelics);
 
         if (state.lastUpdate) {
-            html += `<div class="sl-eg-diagnostics">✅ Connected<br>Updated: ${escapeHtml(state.lastUpdate.toLocaleTimeString())}<br>Cache age: ${escapeHtml(cacheAgeText())}<br>Auto refresh: ${state.autoRefreshMinutes ? state.autoRefreshMinutes + ' min' : 'OFF'}</div>`;
+            html += `<div class="sl-eg-diagnostics">✅ Connected<br>Updated: ${escapeHtml(state.lastUpdate.toLocaleTimeString())}<br>Cache age: ${escapeHtml(cacheAgeText())}</div>`;
         }
 
         list.innerHTML = html || '<div class="sl-eg-empty">No results.</div>';
@@ -1189,9 +1179,11 @@
         state.compact = getBool(STORAGE.compact, false);
         state.diagnosticsVisible = getBool(STORAGE.diagnostics, false);
         state.filter = getString(STORAGE.filter, 'all');
-        state.sort = getString(STORAGE.sort, 'owned');
+        state.sort = 'name';
         state.favorites = loadFavorites();
-        state.autoRefreshMinutes = Number(getString(STORAGE.autoRefresh, '0'));
+        state.autoRefreshMinutes = 0;
+        setString(STORAGE.sort, 'name');
+        setString(STORAGE.autoRefresh, '0');
         if (state.enabled) {
             injectCss();
             configureAutoRefresh();
