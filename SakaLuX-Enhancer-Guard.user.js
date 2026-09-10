@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.4
+// @version      1.3.5
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.4';
+    const VERSION = '1.3.5';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -78,6 +78,10 @@
         autoRefreshTimer: null,
         categories: [],
         apiMode: '',
+        apiKeySource: 'None',
+        apiAccessStatus: 'unknown',
+        apiAccessMessage: 'Not checked yet',
+        apiAccessCheckedAt: 0,
         diagnostics: [],
         enabled: getBool(STORAGE.enabled, true)
     };
@@ -147,22 +151,26 @@
             const hubKey = window.SakaLuXScriptHub?.getApiKey?.() || '';
             if (hubKey) {
                 state.apiMode = 'SakaLuX Hub';
+                state.apiKeySource = 'SakaLuX Hub';
                 return hubKey;
             }
             if (window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button')) {
                 const storedHubKey = localStorage.getItem('SakaLuX_HUB_TORN_API_KEY') || '';
-                if (storedHubKey) { state.apiMode = 'SakaLuX Hub'; return storedHubKey; }
+                if (storedHubKey) { state.apiMode = 'SakaLuX Hub'; state.apiKeySource = 'SakaLuX Hub'; return storedHubKey; }
             }
         } catch {}
         if (PDA_KEY && PDA_KEY !== '###PDA-APIKEY###') {
             state.apiMode = 'Torn PDA';
+            state.apiKeySource = 'Torn PDA';
             return PDA_KEY;
         }
         try {
             const key = localStorage.getItem(STORAGE.apiKey) || '';
-            if (key) state.apiMode = 'Manual';
+            if (key) { state.apiMode = 'Manual'; state.apiKeySource = 'Local standalone'; }
+            else state.apiKeySource = 'None';
             return key;
         } catch {
+            state.apiKeySource = 'None';
             return '';
         }
     }
@@ -171,6 +179,7 @@
         try {
             localStorage.setItem(STORAGE.apiKey, key);
             state.apiMode = 'Manual';
+            state.apiKeySource = 'Local standalone';
         } catch {}
     }
 
@@ -179,9 +188,16 @@
     }
 
     function createRequiredApiKey() {
-        if (window.SakaLuXScriptHub?.createRequiredTornKey) return window.SakaLuXScriptHub.createRequiredTornKey();
+        state.apiAccessStatus = 'setup';
+        state.apiAccessMessage = 'Create the named key in Torn, then return and paste it below.';
+        try { sessionStorage.setItem('SakaLuX_EG_KEY_SETUP_PENDING', '1'); } catch {}
         location.href = REQUIRED_API_KEY_URL;
         return true;
+    }
+
+    function apiSetupPending() {
+        try { return sessionStorage.getItem('SakaLuX_EG_KEY_SETUP_PENDING') === '1'; }
+        catch { return false; }
     }
 
     function parseResponse(response) {
@@ -240,6 +256,50 @@
         if (!data?.error) return null;
         if (typeof data.error === 'string') return data.error;
         return data.error.error || data.error.message || data.error.code || 'Unknown Torn API error';
+    }
+
+    async function checkRequiredApiAccess(keyOverride = '') {
+        const key = String(keyOverride || getApiKey() || '').trim();
+        if (!key) {
+            state.apiAccessStatus = 'missing';
+            state.apiAccessMessage = 'No API key configured';
+            state.apiAccessCheckedAt = Date.now();
+            return { ok: false, status: state.apiAccessStatus, message: state.apiAccessMessage };
+        }
+
+        try {
+            const items = await apiGet('https://api.torn.com/v2/torn/items?cat=Enhancer&sort=ASC&key=' + encodeURIComponent(key));
+            const itemsError = apiError(items);
+            if (itemsError) throw new Error('Torn Items: ' + itemsError);
+
+            const inventory = await apiGet('https://api.torn.com/v2/user/inventory?cat=Enhancer&limit=1&offset=0&key=' + encodeURIComponent(key));
+            const inventoryError = apiError(inventory);
+            if (inventoryError) throw new Error('User Inventory: ' + inventoryError);
+
+            state.apiAccessStatus = 'ok';
+            state.apiAccessMessage = 'API access OK · Inventory + Torn Items available';
+            state.apiAccessCheckedAt = Date.now();
+            return { ok: true, status: state.apiAccessStatus, message: state.apiAccessMessage };
+        } catch (error) {
+            const message = String(error?.message || error || 'API request failed');
+            state.apiAccessStatus = /permission|access|scope|key|incorrect|invalid/i.test(message) ? 'missing-permission' : 'error';
+            state.apiAccessMessage = state.apiAccessStatus === 'missing-permission'
+                ? 'API KEY MISSING INVENTORY OR TORN ITEMS ACCESS'
+                : message;
+            state.apiAccessCheckedAt = Date.now();
+            return { ok: false, status: state.apiAccessStatus, message: state.apiAccessMessage, raw: message };
+        }
+    }
+
+    function saveReplacementApiKey(key) {
+        const clean = String(key || '').trim();
+        if (!clean) return false;
+        saveApiKey(clean);
+        state.apiAccessStatus = 'unknown';
+        state.apiAccessMessage = 'New key saved · checking access…';
+        state.apiAccessCheckedAt = 0;
+        try { sessionStorage.removeItem('SakaLuX_EG_KEY_SETUP_PENDING'); } catch {}
+        return clean;
     }
 
     function normalizeCatalogue(data) {
@@ -495,9 +555,11 @@
             #sl-eg-panel{width:min(700px,100%);max-height:94vh;overflow:hidden;background:#101318;color:#f3f4f6;border-radius:18px 18px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.5);display:flex;flex-direction:column}
             #sl-eg-header{padding:14px;border-bottom:1px solid #272c34;flex-shrink:0}
             #sl-eg-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+            #sl-eg-title-actions{display:flex;align-items:center;gap:7px}
             #sl-eg-title{font-size:19px;font-weight:900}
             #sl-eg-subtitle{margin-top:4px;color:#9ca3af;font-size:10px}
-            .sl-eg-close{width:34px;height:34px;border:0;border-radius:10px;background:#252a32;color:#fff;font-size:19px}
+            .sl-eg-close,.sl-eg-key-button{width:36px;height:36px;border:1px solid #343b45;border-radius:10px;background:#252a32;color:#fff;font-size:18px}
+            .sl-eg-key-button{border-color:#66591d;background:#2a2512;color:#e4c95d;font-size:16px}
             #sl-eg-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:11px}
             .sl-eg-stat{background:#181d24;border:1px solid #292f38;border-radius:10px;padding:8px;text-align:center;min-width:0}
             .sl-eg-stat-value{font-size:14px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -516,8 +578,11 @@
             .sl-eg-name{font-size:13px;font-weight:900}.sl-eg-category{margin-top:2px;color:#6b7280;font-size:9px}.sl-eg-status{margin-top:3px;font-size:10px;font-weight:800}.sl-eg-status.yes{color:#4ade80}.sl-eg-status.no{color:#f87171}
             .sl-eg-price{text-align:right;white-space:nowrap}.sl-eg-mv{font-size:12px;font-weight:900}.sl-eg-total{margin-top:3px;color:#9ca3af;font-size:9px}.sl-eg-relic{color:#c084fc;font-size:11px;font-weight:900}.sl-eg-star{border:0;background:transparent;color:#fbbf24;font-size:16px;padding:0;margin-left:5px}
             .sl-eg-diagnostics{padding:10px;margin-top:10px;background:#111827;border-radius:8px;color:#9ca3af;font-size:9px;line-height:1.5}.sl-eg-footer{padding:8px 10px;border-top:1px solid #272c34;color:#6b7280;font-size:9px;text-align:center;flex-shrink:0}.sl-eg-empty{padding:30px 10px;text-align:center;color:#9ca3af}.sl-eg-error{padding:15px;background:#32191d;border:1px solid #6b252d;color:#fca5a5;border-radius:12px;margin:10px;font-size:12px;line-height:1.5}
+            #sl-eg-api-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
+            #sl-eg-api-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.55)}
+            .sl-eg-api-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-eg-api-title{font-size:17px;font-weight:900}.sl-eg-api-sub{margin-top:3px;color:#8e96a3;font-size:10px}.sl-eg-api-required{margin:9px 0;padding:10px;border:1px solid #66591d;border-radius:9px;background:#211d10;color:#e4c95d;font-size:11px;line-height:1.5}.sl-eg-api-required b{color:#fde68a}.sl-eg-api-create{width:100%;min-height:42px;border:1px solid #7c681e;border-radius:9px;background:#2a2512;color:#f5d85f;font-weight:900}.sl-eg-api-box{margin-top:10px;padding:9px;border:1px solid #2f3945;border-radius:10px;background:#121820}.sl-eg-api-status{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:#181d24;font-size:10px;line-height:1.35}.sl-eg-api-status b{color:#d7b94c}.sl-eg-api-status.ok span{color:#78d98b}.sl-eg-api-status.missing span,.sl-eg-api-status.missing-permission span,.sl-eg-api-status.error span{color:#f08b8b}.sl-eg-api-source{margin:8px 0;color:#9ca3af;font-size:10px}.sl-eg-api-field{display:block;margin:8px 0;color:#d1d5db;font-size:10px}.sl-eg-api-field input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:10px;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:8px;font-size:12px}.sl-eg-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.sl-eg-api-actions button,.sl-eg-api-clear{min-height:38px;border:0;border-radius:8px;background:#374151;color:#fff;font-weight:900;font-size:10px}.sl-eg-api-actions button:first-child{background:#2563eb}.sl-eg-api-clear{width:100%;margin-top:7px}.sl-eg-api-note{margin-top:9px;color:#8e96a3;font-size:9px;line-height:1.5}
             #sl-eg-panel.compact .sl-eg-row{padding:6px;margin-bottom:4px}#sl-eg-panel.compact .sl-eg-icon{width:25px;height:25px}#sl-eg-panel.compact .sl-eg-name{font-size:12px}#sl-eg-panel.compact .sl-eg-category{display:none}
-            @media(min-width:700px){#sl-eg-overlay{align-items:center}#sl-eg-panel{border-radius:18px;max-height:90vh}}
+            @media(min-width:700px){#sl-eg-overlay,#sl-eg-api-overlay{align-items:center}#sl-eg-panel,#sl-eg-api-panel{border-radius:18px;max-height:90vh}}
         `;
         document.head.appendChild(style);
     }
@@ -541,7 +606,7 @@
                 <div id="sl-eg-header">
                     <div id="sl-eg-title-row">
                         <div><div id="sl-eg-title">🛡️ SakaLuX Enhancer Guard</div><div id="sl-eg-subtitle">v${VERSION} • API v2 • Cache ${cacheAgeText()}</div></div>
-                        <button class="sl-eg-close" id="sl-eg-close">×</button>
+                        <div id="sl-eg-title-actions"><button class="sl-eg-key-button" id="sl-eg-api-button" title="API key settings" aria-label="API key settings">🔑</button><button class="sl-eg-close" id="sl-eg-close">×</button></div>
                     </div>
                     <div id="sl-eg-stats"></div>
                     <div id="sl-eg-controls">
@@ -563,6 +628,7 @@
         document.body.appendChild(overlay);
 
         document.getElementById('sl-eg-close').onclick = closePanel;
+        document.getElementById('sl-eg-api-button').onclick = openApiPanel;
         document.getElementById('sl-eg-refresh').onclick = () => refreshData();
         document.getElementById('sl-eg-relics').onclick = () => {
             state.showRelics = !state.showRelics;
@@ -628,6 +694,7 @@
             if (state.autoRefreshTimer) clearInterval(state.autoRefreshTimer);
             state.autoRefreshTimer = null;
             document.getElementById('sl-eg-overlay')?.remove();
+            document.getElementById('sl-eg-api-overlay')?.remove();
             document.getElementById('sl-eg-button')?.remove();
             document.getElementById(HUB_PROMPT_ID)?.remove();
         }
@@ -639,36 +706,80 @@
         return setEnabled(!state.enabled);
     }
 
-    function showKeyPrompt() {
-        if (!document.getElementById('sl-eg-overlay')) {
-            openPanel();
-            return;
+    function updateApiPanelStatus() {
+        const panel = document.getElementById('sl-eg-api-panel');
+        if (!panel) return;
+        const status = panel.querySelector('.sl-eg-api-status');
+        const source = panel.querySelector('.sl-eg-api-source');
+        if (status) {
+            status.className = 'sl-eg-api-status ' + state.apiAccessStatus;
+            status.querySelector('span').textContent = state.apiAccessMessage || 'Not checked yet';
         }
-        const list = document.getElementById('sl-eg-list');
-        if (!list) return;
-        list.innerHTML = `
-            <div class="sl-eg-error">
-                <b>🔑 Minimal API Key required</b><br><br>
-                Torn PDA should inject it automatically.<br><br>
-                <input id="sl-eg-key" type="password" placeholder="Torn API key..." style="width:100%;box-sizing:border-box;padding:10px;background:#101318;color:#fff;border:1px solid #444;border-radius:8px;">
-                <button id="sl-eg-create-key" style="width:100%;margin-top:8px;padding:10px;border:1px solid #7c5f11;border-radius:8px;background:#2a220b;color:#fde68a;font-weight:800;">🔑 ${window.SakaLuXScriptHub ? 'CREATE GENERAL HUB API KEY' : 'CREATE REQUIRED API KEY'}</button>
-                <button id="sl-eg-save-key" style="width:100%;margin-top:8px;padding:10px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-weight:800;">SAVE</button>
-                <button id="sl-eg-clear-key" style="width:100%;margin-top:8px;padding:10px;border:0;border-radius:8px;background:#374151;color:#fff;">CLEAR KEY</button>
-            </div>
-        `;
-        document.getElementById('sl-eg-create-key').onclick = createRequiredApiKey;
-        document.getElementById('sl-eg-save-key').onclick = () => {
-            const key = document.getElementById('sl-eg-key').value.trim();
-            if (!key) return;
-            saveApiKey(key);
-            refreshData();
+        getApiKey();
+        if (source) source.innerHTML = 'Active source: <b>' + escapeHtml(state.apiKeySource || 'None') + '</b>';
+    }
+
+    function openApiPanel() {
+        injectCss();
+        document.getElementById('sl-eg-api-overlay')?.remove();
+        getApiKey();
+        const overlay = document.createElement('div');
+        overlay.id = 'sl-eg-api-overlay';
+        overlay.innerHTML = `
+            <div id="sl-eg-api-panel">
+                <div class="sl-eg-api-head">
+                    <div><div class="sl-eg-api-title">🔑 Enhancer API Access</div><div class="sl-eg-api-sub">SakaLuX Enhancer Guard v${VERSION}</div></div>
+                    <button class="sl-eg-close" id="sl-eg-api-close">×</button>
+                </div>
+                <div class="sl-eg-api-required"><b>Exact permissions required</b><br>User: Inventory<br>Torn: Items<br>No write permission is requested.</div>
+                <button type="button" class="sl-eg-api-create" id="sl-eg-create-key">🔑 CREATE ENHANCER API KEY</button>
+                <div class="sl-eg-api-box">
+                    <div class="sl-eg-api-status ${escapeHtml(state.apiAccessStatus)}"><b>API ACCESS</b><span>${escapeHtml(state.apiAccessMessage || 'Not checked yet')}</span></div>
+                    <div class="sl-eg-api-source">Active source: <b>${escapeHtml(state.apiKeySource || 'None')}</b></div>
+                    <label class="sl-eg-api-field">Replace / paste Torn API key<input id="sl-eg-key" type="password" autocomplete="off" placeholder="Paste newly created key here"></label>
+                    <div class="sl-eg-api-actions"><button type="button" id="sl-eg-save-key">SAVE NEW API KEY</button><button type="button" id="sl-eg-check-key">CHECK API ACCESS</button></div>
+                    <button type="button" class="sl-eg-api-clear" id="sl-eg-clear-key">CLEAR LOCAL KEY</button>
+                    <div class="sl-eg-api-note">The Hub general key is used first when available. This local key remains the standalone fallback. TornPDA's injected key is never overwritten.</div>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        overlay.onclick = event => { if (event.target === overlay) overlay.remove(); };
+        overlay.querySelector('#sl-eg-api-close').onclick = () => overlay.remove();
+        overlay.querySelector('#sl-eg-create-key').onclick = createRequiredApiKey;
+        overlay.querySelector('#sl-eg-save-key').onclick = async () => {
+            const input = overlay.querySelector('#sl-eg-key');
+            const clean = saveReplacementApiKey(input?.value);
+            if (!clean) { input?.focus(); return; }
+            const button = overlay.querySelector('#sl-eg-save-key');
+            button.textContent = 'CHECKING…';
+            const result = await checkRequiredApiAccess(clean);
+            button.textContent = result.ok ? 'API KEY OK ✓' : 'KEY SAVED · CHECK FAILED';
+            if (result.ok) { input.value = ''; refreshData(); }
+            updateApiPanelStatus();
         };
-        document.getElementById('sl-eg-clear-key').onclick = () => {
+        overlay.querySelector('#sl-eg-check-key').onclick = async () => {
+            const button = overlay.querySelector('#sl-eg-check-key');
+            button.textContent = 'CHECKING…';
+            const result = await checkRequiredApiAccess();
+            button.textContent = result.ok ? 'ACCESS OK ✓' : 'CHECK FAILED';
+            updateApiPanelStatus();
+        };
+        overlay.querySelector('#sl-eg-clear-key').onclick = () => {
             clearApiKey();
-            state.lastUpdate = null;
-            state.error = null;
-            showKeyPrompt();
+            const remainingKey = getApiKey();
+            state.apiAccessStatus = remainingKey ? 'unknown' : 'missing';
+            state.apiAccessMessage = remainingKey ? 'Local key cleared · another active source remains' : 'No API key configured';
+            state.apiAccessCheckedAt = Date.now();
+            updateApiPanelStatus();
         };
+        return true;
+    }
+
+    function showKeyPrompt() {
+        if (!document.getElementById('sl-eg-overlay')) openPanel();
+        state.apiAccessStatus = 'missing';
+        state.apiAccessMessage = 'No API key configured';
+        openApiPanel();
     }
 
     function render() {
@@ -826,6 +937,8 @@
         async refresh() { await refreshData(); return true; },
         async hardRefresh() { clearCatalogueCache(); await refreshData({ forceCatalogue: true }); return true; },
         createRequiredTornKey: createRequiredApiKey,
+        openApiSettings: openApiPanel,
+        checkApiAccess: checkRequiredApiAccess,
         setEnabled,
         toggleEnabled,
         isEnabled() { return state.enabled; },
@@ -841,7 +954,11 @@
                 catalogueEntries: state.catalogue.size,
                 categories: [...state.categories],
                 apiMode: state.apiMode,
+                apiKeySource: state.apiKeySource,
                 hasApiKey: Boolean(getApiKey()),
+                apiAccessStatus: state.apiAccessStatus,
+                apiAccessMessage: state.apiAccessMessage,
+                apiAccessCheckedAt: state.apiAccessCheckedAt,
                 autoRefreshMinutes: state.autoRefreshMinutes
             };
         }
@@ -863,6 +980,7 @@
             configureAutoRefresh();
             createButton();
             scheduleHubInstallPrompt();
+            if (apiSetupPending() && !/preferences\.php/i.test(location.pathname + location.href)) setTimeout(openApiPanel, 900);
         }
         console.log('[SakaLuX Enhancer Guard v' + VERSION + '] Loaded.');
     }

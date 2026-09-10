@@ -5,7 +5,7 @@ Last updated: 2026-09-10
 ## Current versions
 
 - SakaLuX Script Hub: **v1.9.0**
-- SakaLuX Enhancer Guard: **v1.3.4**
+- SakaLuX Enhancer Guard: **v1.3.5**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.3**
 - SakaLuX Mission Rewards: **v1.0.3**
 - SakaLuX Market Intelligence: **v1.17.0** — Greasy Fork **592781**
@@ -21,7 +21,7 @@ Last updated: 2026-09-10
 All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
 - **Script Hub v1.9.0** — professional TornPDA module cards with two controls and native power integration.
-- **Enhancer Guard v1.3.4** — persistent native Hub power API.
+- **Enhancer Guard v1.3.5** — dedicated API-key panel with exact Inventory + Torn Items access creation and validation.
 - **Bazaar Thanker - PDA v5.3.3** — persistent native Hub power API.
 - **Mission Rewards v1.0.3** — persistent native Hub power API.
 - **Market Intelligence v1.17.0** — persistent native Hub power API.
@@ -41,6 +41,14 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### SakaLuX Enhancer Guard v1.3.5
+- Added a gold key button directly in the Enhancer panel header.
+- Added a dedicated Market Intelligence-style API Access panel available at any time.
+- **CREATE ENHANCER API KEY** opens Torn's key creator with only the required `user/inventory` and `torn/items` permissions.
+- Added local key save, exact permission validation, active-source display and local-key clearing.
+- Keeps the shared Hub key as first priority, TornPDA injection as second priority and the local key as standalone fallback.
+- Automatically reopens the API panel after returning from Torn's key creator.
 
 ### SakaLuX Script Hub v1.9.0 + native module power
 - Redesigned module cards for TornPDA with only a sliding ON/OFF control and one OPEN or SETTINGS button.
