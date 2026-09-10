@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.6**
+**v1.3.7**
 
 ## What it does
 
@@ -16,6 +16,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.3.7
+
+- Added manual protection for any item name, not only Enhancers.
+- Removed the `Owned first` and `Auto refresh` controls; the list stays alphabetic and refresh remains manual.
 
 ### v1.3.6
 
