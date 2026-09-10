@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.0
+// @version      1.2.9
 // @description  Torn Eliminations target advisor with FFScouter, BS calibration, learning, PDA support and safe Hub ON/OFF control.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -28,7 +28,7 @@
  */
 (() => {
 'use strict';
-const VERSION='1.3.0';
+const VERSION='1.2.9';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -43,40 +43,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const state={enabled:localStorage.getItem(K.enabled)!=='0',tornKey:localStorage.getItem(K.torn)||'',ffKey:localStorage.getItem(K.ff)||'',teamId:Number(localStorage.getItem(K.team)||0),teams:[],players:[],view:[],history:load(K.hist,[]),learning:load(K.learn,{}),cache:load(K.cache,{}),my:load(K.my,{total:null,at:0,source:''}),busy:false,keyBusy:false,lastRefresh:0};
 const fmtBS=n=>{n=Number(n||0);if(!n)return'—';if(n>=1e12)return(n/1e12).toFixed(2)+'T';if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(Math.round(n))};
 const age=ts=>{if(!ts)return'—';const s=Math.max(0,Math.floor(Date.now()/1000)-Number(ts));return s<60?s+'s':s<3600?Math.floor(s/60)+'m':s<86400?Math.floor(s/3600)+'h':Math.floor(s/86400)+'d'};
-function requestJSON(url){
-  const decode=raw=>{
-    let v=raw;
-    if(v&&typeof v==='object'){
-      if(v.responseText!==undefined)v=v.responseText;
-      else if(v.body!==undefined)v=v.body;
-      else if(v.data!==undefined)v=v.data;
-      else if(v.response!==undefined)v=v.response;
-      else return v;
-    }
-    if(typeof v!=='string')v=String(v??'');
-    v=v.trim();
-    if(!v)throw new Error('Empty API response');
-    try{return JSON.parse(v)}catch(e){
-      const a=v.indexOf('{'),b=v.lastIndexOf('}');
-      if(a>=0&&b>a){try{return JSON.parse(v.slice(a,b+1))}catch(_){}}
-      throw new Error('Invalid API response: '+e.message);
-    }
-  };
-  const checked=raw=>{const j=decode(raw);if(j?.error){const e=new Error(j.error.error||j.error.message||'API error');e.code=Number(j.error.code||0);throw e}return j};
-  const viaGM=()=>new Promise((resolve,reject)=>{
-    if(typeof GM_xmlhttpRequest!=='function'){reject(new Error('GM request unavailable'));return}
-    GM_xmlhttpRequest({method:'GET',url,timeout:15000,onload:r=>{try{if(r.status<200||r.status>=400)throw new Error('HTTP '+r.status);resolve(checked(r))}catch(e){reject(e)}},onerror:()=>reject(new Error('Network error')),ontimeout:()=>reject(new Error('Timeout'))});
-  });
-  const viaFetch=()=>fetch(url,{headers:{Accept:'application/json'}}).then(async r=>{if(!r.ok)throw new Error('HTTP '+r.status);return checked(await r.text())});
-  return (async()=>{
-    let last=null;
-    if(typeof window.PDA_httpGet==='function')try{return checked(await window.PDA_httpGet(url,{Accept:'application/json'}))}catch(e){last=e}
-    if(window.flutter_inappwebview?.callHandler)try{return checked(await window.flutter_inappwebview.callHandler('PDA_httpGet',url,{Accept:'application/json'}))}catch(e){last=e}
-    if(typeof GM_xmlhttpRequest==='function')try{return await viaGM()}catch(e){last=e}
-    try{return await viaFetch()}catch(e){last=e}
-    throw last||new Error('API request failed');
-  })();
-}
+function requestJSON(url){return new Promise((resolve,reject)=>{const parse=t=>{try{const j=JSON.parse(t);if(j?.error){const e=new Error(j.error.error||j.error.message||'API error');e.code=Number(j.error.code||0);reject(e)}else resolve(j)}catch(e){reject(e)}};if(typeof window.PDA_httpGet==='function'){window.PDA_httpGet(url,{Accept:'application/json'}).then(r=>parse(String(r?.responseText??r?.body??r??''))).catch(reject);return}if(window.flutter_inappwebview?.callHandler){window.flutter_inappwebview.callHandler('PDA_httpGet',url,{Accept:'application/json'}).then(r=>parse(String(r?.responseText??r?.body??r??''))).catch(reject);return}if(typeof GM_xmlhttpRequest==='function'){GM_xmlhttpRequest({method:'GET',url,timeout:15000,onload:r=>r.status>=200&&r.status<400?parse(r.responseText):reject(new Error('HTTP '+r.status)),onerror:()=>reject(new Error('Network error')),ontimeout:()=>reject(new Error('Timeout'))});return}fetch(url).then(r=>r.text()).then(parse).catch(reject)})}
 function torn(path,params={}){if(!state.tornKey)return Promise.reject(new Error('Set Torn API key in Settings'));const u=new URL('https://api.torn.com/v2/'+path.replace(/^\/+/,''));u.searchParams.set('key',state.tornKey.trim());u.searchParams.set('striptags','true');Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,String(v)));return requestJSON(u.href)}
 function ffReq(ids){if(!state.ffKey)return Promise.reject(new Error('Set FFScouter API key in Settings'));const u=new URL('https://ffscouter.com/api/v1/get-stats');u.searchParams.set('key',state.ffKey.trim());u.searchParams.set('targets',ids.join(','));return requestJSON(u.href)}
 function normTeams(raw){const r=raw?.elimination||raw?.teams||raw?.data||raw;const a=Array.isArray(r)?r:(r&&typeof r==='object'?(Array.isArray(r.teams)?r.teams:Object.entries(r).map(([id,x])=>({id:Number(id),...(x||{})}))):[]);return a.map((t,i)=>({id:Number(t.id??t.team_id??i),name:t.name??t.team_name??('Team '+(t.id??i)),score:Number(t.score??t.points??0)})).filter(x=>Number.isFinite(x.id))}

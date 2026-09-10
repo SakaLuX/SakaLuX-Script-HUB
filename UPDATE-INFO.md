@@ -9,7 +9,7 @@ Last updated: 2026-09-09
 - SakaLuX Bazaar Thanker - PDA: **v5.3.2**
 - SakaLuX Mission Rewards: **v1.0.2**
 - SakaLuX Market Intelligence: **v1.16.9** — Greasy Fork **592781**
-- SakaLuX Elimination Assistant: **v1.2.9** — Greasy Fork **594921**
+- SakaLuX Elimination Assistant: **v1.3.0** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
 ## Private / standalone tools
@@ -41,6 +41,11 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### SakaLuX Elimination Assistant v1.3.0
+- Fixed TornPDA `Unexpected end of JSON input` by hardening API response decoding and adding transport fallback from PDA bridge to GM request/fetch.
+- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.2.9.user.js`.
+
 
 ### SakaLuX Market Intelligence v1.16.9
 - Added live `user/equipment` API permission diagnostics and a clear `API KEY MISSING EQUIPMENT ACCESS` state.

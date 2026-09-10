@@ -2,6 +2,15 @@
 
 Complementary add-on for SakaLuX Script Hub, built specifically for Torn Eliminations.
 
+
+## v1.3.0 — TornPDA JSON Transport Fix
+
+- Fixed `Unexpected end of JSON input` on TornPDA when the PDA bridge returns an empty or differently shaped response object.
+- API responses now accept `responseText`, `body`, `data`, `response`, or an already-decoded object.
+- If the TornPDA bridge fails or returns an unusable response, the script falls back to `GM_xmlhttpRequest` and then normal `fetch` instead of stopping immediately.
+- Empty and malformed responses now show clear errors instead of raw JSON parser messages.
+- Added exact backup: `backups/SakaLuX-Elimination-Assistant-v1.2.9.user.js`.
+
 ## Current version
 
 **v1.2.9**
