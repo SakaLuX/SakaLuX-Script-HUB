@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.1
+// @version      1.3.0
 // @description  Torn Eliminations target advisor with FFScouter, BS calibration, learning, PDA support and safe Hub ON/OFF control.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -28,7 +28,7 @@
  */
 (() => {
 'use strict';
-const VERSION='1.3.1';
+const VERSION='1.3.0';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -118,7 +118,7 @@ function createKey(){if(state.keyBusy)return false;state.keyBusy=true;setTimeout
 function openSettings(){const m=$('#slx-settings');if(!m)return;$('#slx-torn',m).value=state.tornKey;$('#slx-ffkey',m).value=state.ffKey;$('#slx-manual',m).value=state.my.source==='manual'?(state.my.total||0):0;m.classList.add('open')}
 function saveSettings(){const m=$('#slx-settings');state.tornKey=$('#slx-torn',m).value.trim();state.ffKey=$('#slx-ffkey',m).value.trim();const n=Number($('#slx-manual',m).value||0);if(n>0){state.my={total:n,at:Date.now(),source:'manual'};save(K.my,state.my)}localStorage.setItem(K.torn,state.tornKey);localStorage.setItem(K.ff,state.ffKey);m.classList.remove('open');busy(refresh)}
 async function testKey(){const typed=$('#slx-torn')?.value.trim();if(typed){state.tornKey=typed;localStorage.setItem(K.torn,typed)}if(!state.tornKey)throw new Error('Paste a Torn API key first');const out=[];for(const [path,label] of [['user/battlestats','battlestats'],['torn/elimination','elimination']]){try{await torn(path);out.push(label+': OK')}catch(e){out.push(label+': FAIL'+(e.code?' API '+e.code:''))}}if(state.teamId){try{await torn(`torn/${state.teamId}/eliminationteam`,{limit:1,offset:0});out.push('eliminationteam: OK')}catch(e){if(Number(e.code)===32)out.push('eliminationteam: ⏸ UNAVAILABLE (API 32) — key not rejected');else out.push('eliminationteam: FAIL'+(e.code?' API '+e.code:''))}}else out.push('eliminationteam: not tested until a team is selected');setStatus(out.join(' | '));return !out.some(x=>x.includes('FAIL'))}
-async function calibrate(force=false){if(state.my.source==='manual'&&!force)return state.my.total;if(!force&&state.my.total&&Date.now()-Number(state.my.at||0)<900000)return state.my.total;const raw=await torn('user/battlestats');const x=raw?.battlestats??raw?.data?.battlestats??raw?.data??raw??{};const statVal=k=>{const v=x?.[k]??x?.battle_stats?.[k]??0;if(v&&typeof v==='object')return Number(v.value??v.amount??v.total??v.base??0)||0;return Number(v)||0};const apiTotal=Number(x?.total??x?.total_battlestats??0)||0;const total=apiTotal||['strength','defense','speed','dexterity'].reduce((sum,k)=>sum+statVal(k),0);if(!total)throw new Error('Battle stats endpoint replied, but no stat values were found. Check Torn API key access.');state.my={total,at:Date.now(),source:'Torn API'};save(K.my,state.my);apply();setStatus('Battle stats calibrated: '+fmtBS(total));return total}
+async function calibrate(force=false){if(state.my.source==='manual'&&!force)return state.my.total;if(!force&&state.my.total&&Date.now()-Number(state.my.at||0)<900000)return state.my.total;const raw=await torn('user/battlestats');const x=raw?.battlestats??raw?.data??raw??{};const total=['strength','defense','speed','dexterity'].reduce((s,k)=>s+Number(x[k]??x?.battle_stats?.[k]??0),0);if(!total)throw new Error('battlestats not returned; run TEST TORN KEY');state.my={total,at:Date.now(),source:'Torn API'};save(K.my,state.my);apply();return total}
 async function loadTeams(){state.teams=normTeams(await torn('torn/elimination'));if(!state.teamId&&state.teams[0])state.teamId=state.teams[0].id;const e=$('#slx-team');if(e)e.innerHTML='<option value="">Team…</option>'+state.teams.map(t=>`<option value="${t.id}" ${t.id===state.teamId?'selected':''}>${esc(t.name)}</option>`).join('')}
 async function loadTeam(){if(!state.teamId)throw new Error('Choose a team');const a=[];for(let off=0,i=0;i<5;i++,off+=100){let raw;try{raw=await torn(`torn/${state.teamId}/eliminationteam`,{limit:100,offset:off})}catch(e){if(Number(e.code)===32)throw new Error('Elimination team data is currently unavailable from Torn (API 32). Your API key was not rejected; try again when Torn enables the Eliminations team endpoint.');throw e}const batch=normPlayers(raw);a.push(...batch);if(batch.length<100)break}state.players=[...new Map(a.map(p=>[p.id,p])).values()];applyCache();if(state.ffKey)await loadFF(false);apply();setStatus('Loaded '+state.players.length+' players')}
 function applyCache(){for(const p of state.players){const c=state.cache[String(p.id)];if(c&&Date.now()-Number(c.at||0)<1800000){p.ff=c.ff||null;p.bs=c.bs||null}}}
