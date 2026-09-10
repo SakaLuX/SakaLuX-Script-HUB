@@ -4,11 +4,11 @@ Last updated: 2026-09-10
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.9.1**
-- SakaLuX Enhancer Guard: **v1.3.12**
+- SakaLuX Script Hub: **v1.9.2**
+- SakaLuX Enhancer Guard: **v1.3.13**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.3**
 - SakaLuX Mission Rewards: **v1.0.3**
-- SakaLuX Market Intelligence: **v1.17.0** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.17.1** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.3.7** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
@@ -20,11 +20,11 @@ Last updated: 2026-09-10
 
 All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
-- **Script Hub v1.9.1** — canonical Registry versions, automatic cache invalidation and downgrade-safe update sources.
-- **Enhancer Guard v1.3.12** — fixed immediate Items badge refresh when changing size from the Enhancer header lock.
+- **Script Hub v1.9.2** — removed the Hub search field.
+- **Enhancer Guard v1.3.13** — removed the unused lock control beside the Enhancer favorite star.
 - **Bazaar Thanker - PDA v5.3.3** — persistent native Hub power API.
 - **Mission Rewards v1.0.3** — persistent native Hub power API.
-- **Market Intelligence v1.17.0** — persistent native Hub power API.
+- **Market Intelligence v1.17.1** — no market panel on Items or player profile pages.
 - **Elimination Assistant v1.3.7** — unified Torn + FFScouter API Access panel with exact Torn-key creation and validation.
 - **SakaLuX Suite v0.9.906** — complete 13-module implementation, established SakaLuX names, improved TornPDA Event Lens readability, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
 - **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
