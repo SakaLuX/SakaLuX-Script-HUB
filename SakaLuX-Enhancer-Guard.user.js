@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.5
+// @version      1.3.6
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.5';
+    const VERSION = '1.3.6';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -50,6 +50,14 @@
         favorites: 'SakaLuX_EG_FAVORITES',
         autoRefresh: 'SakaLuX_EG_AUTO_REFRESH',
         enabled: 'SakaLuX_EG_ENABLED'
+    };
+
+    // Shared with #1 Item Protector 🔐 MP. When that script is installed,
+    // its public storage bridge is preferred (including TornPDA storage).
+    const PROTECTOR_STORAGE = {
+        full: 'mmp_v91_full',
+        partial: 'mmp_v91_partial',
+        showProtected: 'mmp_show_protected'
     };
 
     const CACHE_MS = 6 * 60 * 60 * 1000;
@@ -131,6 +139,142 @@
 
     function setString(key, value) {
         try { localStorage.setItem(key, String(value)); } catch {}
+    }
+
+    function normalizeProtectedName(name) {
+        return String(name || '').replace(/\s+x\s*[\d,]+$/i, '').replace(/\s+/g, ' ').trim().toLowerCase();
+    }
+
+    function readProtectorLocks() {
+        try {
+            const full = typeof window.mmpStorageGetFullLocks === 'function'
+                ? window.mmpStorageGetFullLocks()
+                : JSON.parse(localStorage.getItem(PROTECTOR_STORAGE.full) || '{}');
+            const partial = typeof window.mmpStorageGetPartialLocks === 'function'
+                ? window.mmpStorageGetPartialLocks()
+                : JSON.parse(localStorage.getItem(PROTECTOR_STORAGE.partial) || '{}');
+            return {
+                full: full && typeof full === 'object' ? full : {},
+                partial: partial && typeof partial === 'object' ? partial : {}
+            };
+        } catch {
+            return { full: {}, partial: {} };
+        }
+    }
+
+    async function writeProtectorLocks(full, partial) {
+        const nextFull = full && typeof full === 'object' ? full : {};
+        const nextPartial = partial && typeof partial === 'object' ? partial : {};
+        try {
+            localStorage.setItem(PROTECTOR_STORAGE.full, JSON.stringify(nextFull));
+            localStorage.setItem(PROTECTOR_STORAGE.partial, JSON.stringify(nextPartial));
+        } catch {}
+        if (typeof window.mmpStorageSetLocks === 'function') {
+            try { await window.mmpStorageSetLocks(nextFull, nextPartial); } catch {}
+        }
+        try { window.mmpRefreshAll?.(); } catch {}
+    }
+
+    function protectorKey(item) {
+        return 'stack_' + normalizeProtectedName(item?.name);
+    }
+
+    function protectionFor(item) {
+        const locks = readProtectorLocks();
+        const key = protectorKey(item);
+        return { key, full: Boolean(locks.full[key]), partial: Number(locks.partial[key] || 0) };
+    }
+
+    async function toggleItemProtection(item, quantity = null) {
+        if (!item?.name) return;
+        const locks = readProtectorLocks();
+        const key = protectorKey(item);
+        if (quantity !== null) {
+            const safeQuantity = Math.max(1, Math.floor(Number(quantity) || 1));
+            delete locks.full[key];
+            locks.partial[key] = safeQuantity;
+        } else if (locks.full[key]) {
+            delete locks.full[key];
+            delete locks.partial[key];
+        } else {
+            locks.full[key] = true;
+            delete locks.partial[key];
+        }
+        await writeProtectorLocks(locks.full, locks.partial);
+        render();
+    }
+
+    function saleRowName(row) {
+        if (!row) return '';
+        const name = row.querySelector('.name')?.textContent
+            || row.querySelector('img')?.alt
+            || row.querySelector('[aria-label*="available:" i]')?.getAttribute('aria-label')?.match(/about the (.*?) \(available/i)?.[1]
+            || (row.innerText || '').split('\n')[0];
+        return normalizeProtectedName(name);
+    }
+
+    function isProtectedSalePage() {
+        const href = String(location.href || '').toLowerCase();
+        return href.includes('#/addlisting')
+            || href.includes('displaycase.php#add')
+            || href.includes('factions.php?step=your&type=1')
+            || href.includes('bazaar.php?step=add')
+            || href.includes('trade.php');
+    }
+
+    function hideProtectedSaleRows() {
+        if (typeof window.mmpRefreshAll === 'function' || !isProtectedSalePage()) return;
+        const locks = readProtectorLocks();
+        const isLocked = row => Boolean(locks.full['stack_' + saleRowName(row)]);
+        document.querySelectorAll('li.clearfix, .sell-items-list > li').forEach(row => {
+            if (!saleRowName(row)) return;
+            const locked = isLocked(row);
+            row.style.display = locked ? 'none' : '';
+            if (locked) {
+                row.querySelectorAll('input[type="checkbox"]').forEach(input => {
+                    if (input.checked) input.click();
+                    input.checked = false;
+                });
+                row.querySelectorAll('input[placeholder="Qty"], input.input-money').forEach(input => {
+                    if (input.value !== '0') {
+                        input.value = '0';
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+            }
+        });
+        if (String(location.href).toLowerCase().includes('#/addlisting')) {
+            document.querySelectorAll('[class*="virtualListing___"]').forEach(row => {
+                if (!saleRowName(row)) return;
+                const locked = isLocked(row);
+                row.style.display = locked ? 'none' : '';
+                if (locked) {
+                    row.querySelectorAll('input.input-money').forEach(input => {
+                        if (input.value !== '0') {
+                            input.value = '0';
+                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    });
+                    row.querySelectorAll('input[type="checkbox"]').forEach(input => {
+                        if (input.checked) input.click();
+                    });
+                }
+            });
+        }
+    }
+
+    let saleObserverTimer = null;
+    let saleObserver = null;
+    function installSaleProtectionFallback() {
+        if (saleObserver || !document.body) return;
+        saleObserver = new MutationObserver(() => {
+            clearTimeout(saleObserverTimer);
+            saleObserverTimer = setTimeout(hideProtectedSaleRows, 40);
+        });
+        saleObserver.observe(document.body, { childList: true, subtree: true });
+        hideProtectedSaleRows();
     }
 
     function loadFavorites() {
@@ -560,10 +704,10 @@
             #sl-eg-subtitle{margin-top:4px;color:#9ca3af;font-size:10px}
             .sl-eg-close,.sl-eg-key-button{width:36px;height:36px;border:1px solid #343b45;border-radius:10px;background:#252a32;color:#fff;font-size:18px}
             .sl-eg-key-button{border-color:#66591d;background:#2a2512;color:#e4c95d;font-size:16px}
-            #sl-eg-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:11px}
-            .sl-eg-stat{background:#181d24;border:1px solid #292f38;border-radius:10px;padding:8px;text-align:center;min-width:0}
-            .sl-eg-stat-value{font-size:14px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-            .sl-eg-stat-label{color:#8b949e;font-size:9px;margin-top:2px}
+            #sl-eg-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:11px}
+            .sl-eg-stat{background:#181d24;border:1px solid #292f38;border-radius:10px;padding:7px 4px;text-align:center;min-width:0}
+            .sl-eg-stat-value{font-size:12px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+            .sl-eg-stat-label{color:#8b949e;font-size:8px;margin-top:2px;white-space:nowrap}
             #sl-eg-controls{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;margin-top:9px}
             #sl-eg-search,#sl-eg-sort,#sl-eg-auto{border:1px solid #303640;background:#181d24;color:#fff;border-radius:9px;padding:9px;outline:none}
             .sl-eg-control{border:0;border-radius:9px;min-width:40px;background:#252a32;color:#fff;font-weight:800}
@@ -575,8 +719,9 @@
             .sl-eg-row{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;background:#181d24;border:1px solid #292f38;border-radius:11px;padding:9px;margin-bottom:7px}
             .sl-eg-row.owned{border-left:4px solid #22c55e}.sl-eg-row.not-owned{border-left:4px solid #ef4444;opacity:.82}.sl-eg-row.favorite{box-shadow:0 0 0 1px #fbbf24}
             .sl-eg-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#252a32;font-size:15px}
-            .sl-eg-name{font-size:13px;font-weight:900}.sl-eg-category{margin-top:2px;color:#6b7280;font-size:9px}.sl-eg-status{margin-top:3px;font-size:10px;font-weight:800}.sl-eg-status.yes{color:#4ade80}.sl-eg-status.no{color:#f87171}
-            .sl-eg-price{text-align:right;white-space:nowrap}.sl-eg-mv{font-size:12px;font-weight:900}.sl-eg-total{margin-top:3px;color:#9ca3af;font-size:9px}.sl-eg-relic{color:#c084fc;font-size:11px;font-weight:900}.sl-eg-star{border:0;background:transparent;color:#fbbf24;font-size:16px;padding:0;margin-left:5px}
+            .sl-eg-name{font-size:13px;font-weight:900}.sl-eg-name-link{color:#f3f4f6;text-decoration:none;border-bottom:1px dotted #718096}.sl-eg-name-link:active{color:#fbbf24}.sl-eg-status{margin-top:3px;font-size:10px;font-weight:800}.sl-eg-status.yes{color:#4ade80}.sl-eg-status.no{color:#f87171}
+            .sl-eg-price{text-align:right;white-space:nowrap}.sl-eg-mv{font-size:12px;font-weight:900}.sl-eg-total{margin-top:3px;color:#9ca3af;font-size:9px}.sl-eg-relic{color:#c084fc;font-size:11px;font-weight:900}.sl-eg-star,.sl-eg-lock{border:0;background:transparent;font-size:16px;padding:0;margin-left:5px;vertical-align:middle}.sl-eg-star{color:#fbbf24}.sl-eg-lock{color:#9ca3af}.sl-eg-lock.is-locked{color:#fbbf24}
+            .sl-eg-protection-note{padding:10px;background:#181d24;border:1px solid #303640;border-radius:9px;color:#c9d1d9;font-size:11px;line-height:1.45}.sl-eg-protection-list{margin-top:8px;max-height:38vh;overflow:auto}.sl-eg-protection-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #292f38}.sl-eg-protection-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-eg-protection-clear{width:100%;margin-top:10px;min-height:38px;border:0;border-radius:8px;background:#7f1d1d;color:#fff;font-weight:900}
             .sl-eg-diagnostics{padding:10px;margin-top:10px;background:#111827;border-radius:8px;color:#9ca3af;font-size:9px;line-height:1.5}.sl-eg-footer{padding:8px 10px;border-top:1px solid #272c34;color:#6b7280;font-size:9px;text-align:center;flex-shrink:0}.sl-eg-empty{padding:30px 10px;text-align:center;color:#9ca3af}.sl-eg-error{padding:15px;background:#32191d;border:1px solid #6b252d;color:#fca5a5;border-radius:12px;margin:10px;font-size:12px;line-height:1.5}
             #sl-eg-api-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
             #sl-eg-api-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.55)}
@@ -612,7 +757,7 @@
                     <div id="sl-eg-controls">
                         <input id="sl-eg-search" type="search" placeholder="🔎 Caută...">
                         <button class="sl-eg-control" id="sl-eg-relics" title="Relics">⭐</button>
-                        <button class="sl-eg-control" id="sl-eg-compact" title="Compact mode">↕</button>
+                        <button class="sl-eg-control" id="sl-eg-protect" title="Item Protector">🔒</button>
                         <button class="sl-eg-control" id="sl-eg-refresh" title="Refresh">🔄</button>
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px;">
@@ -630,15 +775,11 @@
         document.getElementById('sl-eg-close').onclick = closePanel;
         document.getElementById('sl-eg-api-button').onclick = openApiPanel;
         document.getElementById('sl-eg-refresh').onclick = () => refreshData();
+        document.getElementById('sl-eg-protect').onclick = openProtectionPanel;
         document.getElementById('sl-eg-relics').onclick = () => {
             state.showRelics = !state.showRelics;
             setBool(STORAGE.showRelics, state.showRelics);
             render();
-        };
-        document.getElementById('sl-eg-compact').onclick = () => {
-            state.compact = !state.compact;
-            setBool(STORAGE.compact, state.compact);
-            document.getElementById('sl-eg-panel').classList.toggle('compact', state.compact);
         };
 
         const sort = document.getElementById('sl-eg-sort');
@@ -693,6 +834,7 @@
         } else {
             if (state.autoRefreshTimer) clearInterval(state.autoRefreshTimer);
             state.autoRefreshTimer = null;
+            if (saleObserver) { saleObserver.disconnect(); saleObserver = null; }
             document.getElementById('sl-eg-overlay')?.remove();
             document.getElementById('sl-eg-api-overlay')?.remove();
             document.getElementById('sl-eg-button')?.remove();
@@ -782,6 +924,48 @@
         openApiPanel();
     }
 
+    function itemMarketUrl(item) {
+        const value = item?.id
+            ? 'itemID=' + encodeURIComponent(item.id)
+            : 'searchname=' + encodeURIComponent(item?.name || '');
+        return 'https://www.torn.com/page.php?sid=ItemMarket#/market?' + value;
+    }
+
+    function openProtectionPanel() {
+        document.getElementById('sl-eg-protection-overlay')?.remove();
+        const locks = readProtectorLocks();
+        const entries = Object.entries(locks.full).filter(([, value]) => value);
+        const partialEntries = Object.entries(locks.partial).filter(([, value]) => Number(value) > 0);
+        const names = new Map();
+        ENHANCERS.concat(RELICS).forEach(name => names.set(protectorKey({ name }), name));
+        const rows = entries.concat(partialEntries.map(([key]) => [key, false]))
+            .filter(([key], index, all) => all.findIndex(row => row[0] === key) === index)
+            .map(([key]) => {
+                const name = names.get(key) || key.replace(/^stack_/, '');
+                const amount = Number(locks.partial[key] || 0);
+                return `<div class="sl-eg-protection-row"><span>🔒 ${escapeHtml(name)}${amount ? ' · ' + amount + ' reserved' : ''}</span><button class="sl-eg-control sl-eg-unlock" data-key="${escapeHtml(key)}">UNLOCK</button></div>`;
+            }).join('');
+        const overlay = document.createElement('div');
+        overlay.id = 'sl-eg-protection-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif;';
+        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><button class="sl-eg-close" data-close="1">×</button></div><div class="sl-eg-protection-note">Apasă lacătul de lângă un item pentru protecție completă. Ține-l apăsat pentru a păstra o cantitate rezervată și a vinde restul. Itemele protejate sunt ascunse automat din ecranele de vânzare compatibile.</div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">Nu ai iteme protejate.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">ȘTERGE TOATE PROTECȚIILE</button></div>`;
+        document.body.appendChild(overlay);
+        overlay.onclick = event => { if (event.target === overlay || event.target.closest('[data-close]')) overlay.remove(); };
+        overlay.querySelectorAll('.sl-eg-unlock').forEach(button => {
+            button.onclick = async () => {
+                const next = readProtectorLocks();
+                delete next.full[button.dataset.key];
+                delete next.partial[button.dataset.key];
+                await writeProtectorLocks(next.full, next.partial);
+                openProtectionPanel();
+            };
+        });
+        overlay.querySelector('[data-clear]')?.addEventListener('click', async () => {
+            await writeProtectorLocks({}, {});
+            openProtectionPanel();
+        });
+    }
+
     function render() {
         const stats = document.getElementById('sl-eg-stats');
         const list = document.getElementById('sl-eg-list');
@@ -829,6 +1013,7 @@
 
         list.innerHTML = html || '<div class="sl-eg-empty">No results.</div>';
         bindStars();
+        bindLocks();
     }
 
     function renderSection(title, items) {
@@ -839,12 +1024,13 @@
             const icon = item.owned ? '🟢' : '🔴';
             const status = item.owned ? 'AI ×' + formatNumber(item.quantity) : 'NU AI';
             const total = !item.isRelic && item.owned && item.marketValue ? item.marketValue * item.quantity : null;
+            const protection = protectionFor(item);
+            const marketHref = itemMarketUrl(item);
             html += `
                 <div class="sl-eg-row ${rowClass} ${item.favorite ? 'favorite' : ''}">
                     <div class="sl-eg-icon">${icon}</div>
                     <div>
-                        <div class="sl-eg-name">${escapeHtml(item.name)} <button class="sl-eg-star" data-name="${escapeHtml(item.name)}">${item.favorite ? '★' : '☆'}</button></div>
-                        <div class="sl-eg-category">${escapeHtml(item.category || (item.isRelic ? 'Enhancer Relic' : 'Unknown'))}</div>
+                        <div class="sl-eg-name"><a class="sl-eg-name-link" href="${marketHref}" title="Open in Item Market">${escapeHtml(item.name)}</a><button class="sl-eg-star" data-name="${escapeHtml(item.name)}" title="Priority">${item.favorite ? '★' : '☆'}</button><button class="sl-eg-lock ${protection.full || protection.partial ? 'is-locked' : ''}" data-name="${escapeHtml(item.name)}" title="${protection.full ? 'Unlock item' : protection.partial ? 'Edit reserved quantity' : 'Protect item'}">${protection.full || protection.partial ? '🔒' : '🔓'}</button></div>
                         <div class="sl-eg-status ${item.owned ? 'yes' : 'no'}">${escapeHtml(status)}</div>
                     </div>
                     <div class="sl-eg-price">
@@ -866,6 +1052,37 @@
                 saveFavorites();
                 render();
             };
+        });
+    }
+
+    function bindLocks() {
+        document.querySelectorAll('.sl-eg-lock').forEach(button => {
+            let holdTimer = null;
+            let holdTriggered = false;
+            const item = { name: button.dataset.name };
+            const setPartial = async () => {
+                holdTriggered = true;
+                const current = protectionFor(item).partial || 1;
+                const value = window.prompt('Protected quantity:', String(current));
+                if (value !== null) await toggleItemProtection(item, value);
+            };
+            button.addEventListener('pointerdown', event => {
+                event.stopPropagation();
+                holdTriggered = false;
+                clearTimeout(holdTimer);
+                holdTimer = setTimeout(setPartial, 750);
+            });
+            button.addEventListener('pointerup', event => {
+                event.stopPropagation();
+                clearTimeout(holdTimer);
+            });
+            button.addEventListener('pointerleave', () => clearTimeout(holdTimer));
+            button.addEventListener('click', async event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (holdTriggered) { holdTriggered = false; return; }
+                await toggleItemProtection(item);
+            });
         });
     }
 
@@ -979,6 +1196,7 @@
             injectCss();
             configureAutoRefresh();
             createButton();
+            installSaleProtectionFallback();
             scheduleHubInstallPrompt();
             if (apiSetupPending() && !/preferences\.php/i.test(location.pathname + location.href)) setTimeout(openApiPanel, 900);
         }
