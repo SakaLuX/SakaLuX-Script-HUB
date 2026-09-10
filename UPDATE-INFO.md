@@ -8,7 +8,7 @@ Last updated: 2026-09-09
 - SakaLuX Enhancer Guard: **v1.3.3**
 - SakaLuX Bazaar Thanker - PDA: **v5.3.2**
 - SakaLuX Mission Rewards: **v1.0.2**
-- SakaLuX Market Intelligence: **v1.16.8** — Greasy Fork **592781**
+- SakaLuX Market Intelligence: **v1.16.9** — Greasy Fork **592781**
 - SakaLuX Elimination Assistant: **v1.2.9** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
@@ -41,6 +41,13 @@ Dedicated information files:
 - `greasyfork/Account-Auditor.md`
 
 ## Latest changes
+
+### SakaLuX Market Intelligence v1.16.9
+- Added live `user/equipment` API permission diagnostics and a clear `API KEY MISSING EQUIPMENT ACCESS` state.
+- Added named-key setup handoff, always-visible replacement key field, SAVE NEW API KEY and CHECK API ACCESS controls.
+- Returning from Torn API setup now reopens Settings for immediate paste/verification; stale loadout cache is cleared on key replacement.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.8.user.js`.
+
 
 ### SakaLuX Market Intelligence v1.16.8
 - Fixed Loadout Comparator / Item Market Intelligence disappearing on TornPDA when the selected item ID is not kept in the URL hash.

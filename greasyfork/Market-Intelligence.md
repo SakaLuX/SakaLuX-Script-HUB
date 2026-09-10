@@ -1,12 +1,23 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.16.8**
+**Current version: v1.16.9**
 
 **Greasy Fork:** script **592781**
 
 SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and travel decisions, fully integrated with **SakaLuX Script Hub**.
 
 
+
+
+## v1.16.9 — Loadout API Key Fix
+
+- Added explicit API permission diagnostics for `user/equipment`.
+- Loadout Comparator now shows `API KEY MISSING EQUIPMENT ACCESS` when the active key cannot read equipped gear.
+- `CREATE REQUIRED API KEY` opens Torn's named-key flow for **SakaLuX Market Intelligence** with the selections used by the script and clears stale loadout cache first.
+- Settings now always exposes a secure replacement-key field plus **SAVE NEW API KEY** and **CHECK API ACCESS** controls.
+- After returning from Torn's API-key page, Market Intelligence reopens Settings so the new key can be pasted and verified immediately.
+- No script can safely read a newly created Torn API secret directly from Torn's preferences page; the one-time paste step is intentionally retained.
+- Added exact backup: `backups/SakaLuX-Market-Intelligence-v1.16.8.user.js`.
 
 ## v1.16.8 — TornPDA Item Detection Fix
 
