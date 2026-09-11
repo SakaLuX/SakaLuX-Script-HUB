@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.0.5
+// @version      1.0.6
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,14 +29,14 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.0.5',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.0.6',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
 const KEY={
  api:APP.key+':api', mode:APP.key+':mode', compact:APP.key+':compact', enabled:APP.key+':enabled',
  agreements:APP.key+':agreements', trains:APP.key+':trains',
- offers:APP.key+':offers', snapshots:APP.key+':snapshots'
+ offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -98,6 +98,7 @@ const work=()=>{
 };
 const job=()=>unwrap(S.data.job,'job')||{};
 const userProfile=()=>unwrap(S.data.userProfile,'profile','user')||{};
+const jobCompanyName=()=>first(job(),['company_name','company.name','job.company_name','job.company.name'],first(userProfile(),['job.company_name','job.company.name'],'Unknown company'));
 function companyIdFromPage(){
  for(const a of document.querySelectorAll('a[href*="company"]')){
   const h=String(a.getAttribute('href')||'');
@@ -206,7 +207,7 @@ function saveSnapshot(){
  const m=meta();if(!m.id&&m.name==='Unknown company')return;
  const a=arr(KEY.snapshots),date=new Date().toISOString().slice(0,10),w=work();
  const snap={date,ts:now(),company:m,workstats:w,myPosition:me()?.position||first(job(),['position','position_name','company.position','company.position_name'],'')};
- const i=a.findIndex(x=>x.date===date&&(x.company?.id||x.company?.name)===(m.id||m.name));i>=0?a[i]=snap:a.push(snap);
+ const i=a.findIndex(x=>x.date===date);if(i>=0)a[i]=snap;else a.push(snap);
  set(KEY.snapshots,a.slice(-120));
 }
 async function refresh(){
@@ -215,13 +216,15 @@ async function refresh(){
  const userResults=await Promise.allSettled(Object.entries(userEndpoints).map(async([k,p])=>[k,await api(p)]));
  for(const x of userResults)x.status==='fulfilled'?S.data[x.value[0]]=x.value[1]:S.errors.push(x.reason?.message||String(x.reason));
  try{S.data.userProfile=await api('/user/profile')}catch{}
- if(!detectCompanyId()||meta().name==='Unknown company')try{S.data.job=await legacyApi('user','','job')}catch{}
+ if(!detectCompanyId()||jobCompanyName()==='Unknown company')try{S.data.job=await legacyApi('user','','job')}catch{}
  const companyId=detectCompanyId();
- delete S.data.profile;delete S.data.employees;delete S.data.stock;
+ delete S.data.employees;delete S.data.stock;
  if(companyId){
-  try{S.data.profile=await api(`/company/${companyId}/profile`)}catch(e){
-   try{S.data.profile=await legacyApi('company',companyId,'profile')}catch{S.errors.push(e.code===7?'Company profile access is unavailable for this API key.':e.message||String(e))}
+  let freshProfile=null;
+  try{freshProfile=await api(`/company/${companyId}/profile`)}catch(e){
+   try{freshProfile=await legacyApi('company',companyId,'profile')}catch{if(!S.data.profile)S.errors.push(e.code===7?'Company profile access is unavailable for this API key.':e.message||String(e))}
   }
+  if(freshProfile){S.data.profile=freshProfile;set(KEY.company,freshProfile)}
   if(isDirector()&&get(KEY.mode,null)==null)S.mode='director';
   if(S.mode==='director'&&isDirector()){
    const directorEndpoints={employees:`/company/${companyId}/employees`,stock:`/company/${companyId}/stock`};
@@ -236,14 +239,22 @@ const kv=(k,v,h='')=>`<div class="ci-kv"><span>${esc(k)}</span><b>${v}</b>${h?`<
 const badge=(x,c='')=>`<span class="ci-badge ${c}">${esc(x)}</span>`;
 const empty=x=>`<div class="ci-empty">${esc(x)}</div>`;
 function risk(s){return s>=80?['LOW','good']:s>=60?['MODERATE','warn']:['HIGH','bad']}
+function starOutlook(){
+ const m=meta(),rows=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>a.ts-b.ts),latest=rows.at(-1),older=rows.length>1?rows[0]:null;
+ const d=new Date(),until=(7-d.getUTCDay())%7||7,next=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+until));
+ if(!health().available)return card('Star Outlook',`<div class="ci-score warn"><b>—</b><span>WAITING FOR PROFILE</span></div><p class="ci-note">A real Company Profile snapshot is required. No star probability is invented from missing data.</p>`);
+ let state='BUILDING HISTORY',cls='warn',detail='At least two daily snapshots are needed for a trend.';
+ if(older&&latest){const income=num(latest.company?.weeklyIncome)-num(older.company?.weeklyIncome),perf=[m.popularity,m.efficiency,m.environment].filter(v=>v>0),avg=perf.length?perf.reduce((a,v)=>a+v,0)/perf.length:0;if(income>0&&avg>=80){state='POSITIVE TREND';cls='good'}else if(income<0||avg&&avg<55){state='RISK TREND';cls='bad'}else state='STABLE TREND';detail=`Weekly income change: ${money(income)} · ${rows.length} saved days.`}
+ return card('Star Outlook',`<div class="ci-score ${cls}"><b>${m.stars}★</b><span>${state}</span></div>${kv('Next rating review',next.toLocaleDateString())}${kv('Snapshots',rows.length)}<p class="ci-note">${esc(detail)} Torn ranks companies against others of the same type, so this is a trend indicator—not a guaranteed percentage.</p>`);
+}
 
 function employeeOverview(){
- const m=meta(),w=work(),u=me(),h=health(),[rl,rc]=h.available?risk(h.score):['UNAVAILABLE','warn'],ags=arr(KEY.agreements),a=ags.filter(x=>x.active!==false).slice(-1)[0],got=arr(KEY.trains).filter(x=>now()-x.ts<7*86400000).length;
+ const m=meta(),w=work(),u=me(),h=health(),[rl,rc]=h.available?risk(h.score):['UNAVAILABLE','warn'];
  return `<div class="ci-grid">
  ${card('Company',kv('Name',esc(m.name))+kv('Type',h.available?esc(m.type):'—')+kv('Stars',h.available?m.stars+'★':'—')+kv('Age',h.available?fmt(m.age)+' days':'—')+kv('Position',esc(u?.position||first(job(),['position','position_name','company.position','company.position_name'],'Unknown'))))}
  ${card('My Work Stats',kv('Manual Labor',fmt(w.manual))+kv('Intelligence',fmt(w.intelligence))+kv('Endurance',fmt(w.endurance))+kv('Total',fmt(w.manual+w.intelligence+w.endurance))+kv('Effectiveness',u?fmt(u.effectiveness):'—'))}
  ${card('Company Risk',h.available?`<div class="ci-score ${rc}"><b>${h.score}/100</b><span>${rl} RISK</span></div>${h.breakdown.slice(0,6).map(x=>`<div class="ci-line"><span>${esc(x.label)} <small>${esc(x.reason)}</small></span><b class="${x.delta>=0?'pos':'neg'}">${x.delta>=0?'+':''}${x.delta}</b></div>`).join('')}`:`<div class="ci-score warn"><b>—</b><span>UNAVAILABLE</span></div><p class="ci-note">Company Profile data is missing. Risk is not calculated from zero or incomplete values.</p>`)}
- ${card('Train Promise',a?kv('Promised',fmt(a.perWeek)+'/week')+kv('Received 7d',got+'/'+fmt(a.perWeek))+kv('Cost',a.cost?money(a.cost)+'/train':'FREE')+kv('Starts',esc(a.startDate||'Now'))+`<button class="ci-btn" data-act="log-train">+ Log train</button>`:empty('No train agreement saved.')+`<button class="ci-btn" data-act="new-agreement">Add agreement</button>`)}
+ ${starOutlook()}
  </div>`;
 }
 function employeePosition(){
@@ -264,7 +275,7 @@ function employeeOffers(){
  return `<div class="ci-actions"><button class="ci-btn primary" data-act="new-offer">+ Add offer</button></div>${card('Company Offer Analyzer',o.length?`<div class="ci-tablewrap"><table><thead><tr><th>Company</th><th>Type</th><th>Stars</th><th>Salary/day</th><th>Trains/wk</th><th>Train cost</th><th>Est. weekly value</th></tr></thead><tbody>${o.map(x=>`<tr><td>${esc(x.company)}</td><td>${esc(x.type)}</td><td>${fmt(x.stars)}★</td><td>${money(x.dailySalary)}</td><td>${fmt(x.trainsPerWeek)}</td><td>${x.trainCost?money(x.trainCost):'FREE'}</td><td><b>${money(offerScore(x))}</b></td></tr>`).join('')}</tbody></table></div><p class="ci-note">Comparison aid only: salary + your train value − train cost + small star-quality weight.</p>`:empty('No saved offers.'))}`;
 }
 function history(){
- const a=arr(KEY.snapshots).slice().sort((x,y)=>y.ts-x.ts);
+ const byDate=new Map();for(const x of arr(KEY.snapshots).slice().sort((a,b)=>a.ts-b.ts)){const old=byDate.get(x.date);if(!old||x.company?.name!=='Unknown company')byDate.set(x.date,x)}const a=[...byDate.values()].sort((x,y)=>y.ts-x.ts);
  return card('Daily Snapshots',a.length?`<div class="ci-snapshots">${a.slice(0,60).map(x=>`<article class="ci-snapshot"><div class="ci-snapshot-head"><b>${esc(x.date)}</b><span>${esc(x.company?.name||'Unknown company')} · ${fmt(x.company?.stars)}★</span></div><div class="ci-snapshot-position"><span>POSITION</span><b>${esc(x.myPosition||'Unknown')}</b></div><div class="ci-snapshot-stats"><div><span>MAN</span><b>${fmt(x.workstats?.manual)}</b></div><div><span>INT</span><b>${fmt(x.workstats?.intelligence)}</b></div><div><span>END</span><b>${fmt(x.workstats?.endurance)}</b></div></div></article>`).join('')}</div>`:empty('Snapshots are saved automatically on refresh.'));
 }
 function directorOverview(){
@@ -362,6 +373,7 @@ function act(a){
 function setEnabled(value){S.enabled=!!value;set(KEY.enabled,S.enabled);if(!S.enabled){S.open=false;$('#ci-root')?.remove();$('#ci-launch')?.remove()}else init();try{window.dispatchEvent(new CustomEvent('SakaLuXCompanyIntelligenceStateChanged',{detail:{enabled:S.enabled,version:APP.version}}))}catch{}return S.enabled}
 function init(){
  css();S.enabled=get(KEY.enabled,true)!==false;S.compact=get(KEY.compact,true)!==false;S.mode=get(KEY.mode,'employee')||'employee';
+ if(!S.data.profile){const cached=get(KEY.company,null),last=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>b.ts-a.ts)[0]?.company;if(cached||last)S.data.profile=cached||last}
  try{localStorage.setItem('SakaLuX_Installed_company-intelligence',APP.version)}catch{}
  if(S.enabled&&!$('#ci-launch')){const b=document.createElement('button');b.id='ci-launch';b.textContent='🏢 Company Intel';b.onclick=()=>{S.open=true;S.tab='overview';render();if(!S.updated&&apiKey())refresh()};document.body.appendChild(b)}
  try{
