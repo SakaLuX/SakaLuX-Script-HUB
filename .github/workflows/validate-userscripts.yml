@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: userscript-validation-${{ github.ref }}
@@ -29,6 +29,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Apply one-time per-script UI embed
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[ui-embed]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .migration/embed-unified-ui-theme.py
 
       - name: Check JavaScript syntax
         shell: bash
@@ -214,3 +221,18 @@ jobs:
             exit 1
           fi
           echo 'Workflow directory clean: only stable validator remains.'
+
+      - name: Commit validated per-script UI embed
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[ui-embed]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'No UI embed changes to commit.'
+            exit 0
+          fi
+          git config user.name 'SakaLuX UI Migration'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-*.user.js scripts.json greasyfork/*.md
+          git commit -m 'Embed unified SakaLuX UI in every script [skip ci]'
+          git push
