@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.17**
+**v1.3.18**
 
 ## What it does
 
@@ -18,6 +18,10 @@ Complementary add-on for SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.3.18 — Violentmonkey Hub bridge
+
+- Added an isolated-context DOM bridge so Script Hub can detect, open and switch Enhancer Guard ON/OFF in Violentmonkey on macOS and desktop browsers.
 
 ### v1.3.17 — Inline panel signature
 
