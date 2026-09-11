@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.5
+// @version      5.3.6
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -973,7 +973,7 @@
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION = '5.3.5';
+    const BAZAAR_VERSION = '5.3.6';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
@@ -1101,6 +1101,7 @@
     }));
 
     function init() {
+        try { localStorage.setItem('SakaLuX_Installed_bazaar', BAZAAR_VERSION); } catch {}
         if (moduleEnabled) {
             startRuntime();
             scheduleHubInstallPrompt();
