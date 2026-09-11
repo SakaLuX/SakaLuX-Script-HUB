@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.3
-// @description  Professional TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
+// @version      1.9.4
+// @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.3';
+    const VERSION = '1.9.4';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -39,6 +39,17 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.4',
+            date: '2026-09-11',
+            changes: [
+                'Redesigned the Hub as a premium SakaLuX Control Center with a cleaner visual hierarchy and stronger TornPDA readability.',
+                'Rebuilt the header, health summary, command bar, category navigation and module cards around a consistent dark control-room design.',
+                'Replaced icon-only management tools with clear labelled actions while keeping the interface compact on mobile.',
+                'Added concise module status chips so installed version, update state, health and category are easier to scan.',
+                'Preserved the existing registry, update, shared API key, module power and native HUB launcher behavior.'
+            ]
+        },
         {
             version: '1.9.1',
             date: '2026-09-10',
@@ -88,14 +99,6 @@
             changes: [
                 'Rebuilt the Hub launcher as a native Torn navigation item before Messages.',
                 'The floating Hub button automatically hides when the native launcher is available.'
-            ]
-        },
-        {
-            version: '1.8.2',
-            date: '2026-08-24',
-            changes: [
-                'Added the first animated skull launcher experiment.',
-                'Added Mission Rewards v1.0.2 to the offline fallback registry.'
             ]
         }
     ];
@@ -481,13 +484,13 @@
 
     function getUpdateState(script) {
         const installed = getInstalledVersion(script);
-        if (installed === '?') return { state: 'unknown', text: 'INSTALLED · VERSION UNKNOWN', data: null };
+        if (installed === '?') return { state: 'unknown', text: 'VERSION UNKNOWN', data: null };
         const data = normalizeCachedUpdate(script);
-        if (!installed) return { state: 'missing', text: '⬇ ADD-ON NOT INSTALLED', data: data || null };
+        if (!installed) return { state: 'missing', text: 'NOT INSTALLED', data: data || null };
         if (!data) return { state: 'unknown', text: 'NOT CHECKED', data: null };
         if (data.error) return { state: 'failed', text: 'CHECK FAILED', data };
-        if (data.available) return { state: 'available', text: '⬆ UPDATE AVAILABLE', data };
-        return { state: 'current', text: '✓ UP TO DATE', data };
+        if (data.available) return { state: 'available', text: 'UPDATE AVAILABLE', data };
+        return { state: 'current', text: 'UP TO DATE', data };
     }
 
     function getUpdateCount() {
@@ -565,28 +568,21 @@
         const style = document.createElement('style');
         style.id = IDS.style;
         style.textContent = `
-#${IDS.button}{position:fixed!important;z-index:2147483646!important;border:2px solid #555!important;border-radius:50%!important;background:#171717!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font-size:24px!important;box-shadow:0 5px 18px rgba(0,0,0,.6)!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important}
-#${IDS.badge}{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#ef4444;color:#fff;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:2px solid #171717}
-#${IDS.topSkull}{position:relative!important;box-sizing:border-box!important}
-#${IDS.topSkull} .slh-native-link{position:relative!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}
-#${IDS.topSkull} .slh-native-skull-icon{animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;transform-origin:center center!important}
-#${IDS.topSkull}.slh-alert .slh-native-skull-icon{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}
-#${IDS.topBadge}{position:absolute;top:0;right:4px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#b53b3b;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}
-@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48}11%,19%,27%{opacity:1}40%,75%{opacity:.72}}
-@keyframes slhNativeSkullAlert{0%,100%{opacity:.38}50%{opacity:1}72%{opacity:.58}}
-#${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.76);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
-#${IDS.panel}{width:min(620px,100%);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;background:#101318;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.7)}
-.slh-header{padding:14px;border-bottom:1px solid #292f38;flex-shrink:0}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.slh-title{font-size:19px;font-weight:900}.slh-sub{margin-top:3px;color:#8b949e;font-size:10px}.slh-close{width:36px;height:36px;border:0;border-radius:9px;background:#252a32;color:#fff;font-size:20px}
-.slh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.slh-stat{background:#181d24;border:1px solid #292f38;border-radius:9px;text-align:center;padding:7px 3px}.slh-stat strong{display:block;font-size:14px}.slh-stat span{display:block;margin-top:2px;color:#8b949e;font-size:8px}
-.slh-tools{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:9px}.slh-search{grid-column:1/-1;min-width:0;background:#181d24;color:#fff;border:1px solid #303640;border-radius:9px;padding:9px}.slh-tool{height:42px;border:0;border-radius:9px;background:#252a32;color:#fff;font-size:16px;font-weight:900}.slh-tool.checking{opacity:.55}.slh-tool.whatsnew{background:#5b3a86}
-.slh-cats{display:flex;gap:5px;margin-top:7px;overflow-x:auto}.slh-cat{flex-shrink:0;background:#181d24;border:1px solid #303640;color:#ddd;border-radius:8px;padding:6px 9px;font-size:9px;font-weight:900}.slh-cat.active{background:#2563eb}
-.slh-list,.slh-view,.slh-settings,.slh-quick{overflow-y:auto;padding:10px;-webkit-overflow-scrolling:touch}.slh-card{display:grid;grid-template-columns:40px 1fr;gap:9px;padding:10px;margin-bottom:8px;background:#181d24;border:1px solid #292f38;border-radius:12px}.slh-card.favorite{box-shadow:0 0 0 1px #fbbf24}.slh-card.update{border-color:#d97706}.slh-card.missing{border-color:#475569}.slh-icon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#252a32;border-radius:10px;font-size:20px}.slh-name{font-size:13px;font-weight:900}.slh-star{border:0;background:transparent;color:#fbbf24;font-size:16px}.slh-meta{margin-top:3px;font-size:9px;color:#8b949e;line-height:1.5}.slh-health,.slh-update-status{font-weight:900}.slh-health.ok,.slh-update-status.current,.slh-check-ok{color:#4ade80}.slh-health.error,.slh-update-status.failed,.slh-check-bad{color:#fb7185}.slh-health.missing,.slh-update-status.available,.slh-check-warn{color:#fbbf24}.slh-update-status.missing,.slh-update-status.unknown{color:#94a3b8}
-.slh-actions{display:none}.slh-action{border:0;border-radius:7px;background:#2563eb;color:#fff;padding:6px 8px;font-size:9px;font-weight:900}.slh-action.secondary{background:#374151}.slh-action.update{background:#d97706}.slh-action.install{background:#16a34a}.slh-bottom{padding:10px;background:#0b1016;border-top:1px solid #253041;flex-shrink:0}.slh-bottom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.slh-bottom-btn{border:1px solid #2c3747;border-radius:10px;padding:10px;background:#17202c;color:#f8fafc;font-size:10px;font-weight:900}.slh-footer{padding:9px;text-align:center;color:#6b7280;font-size:9px;border-top:1px solid #202936;background:#0b1016}.slh-author{color:#60a5fa;font-weight:900;text-decoration:none}
-.slh-list{background:linear-gradient(180deg,#0b1119 0%,#0d131c 100%)}.slh-card{grid-template-columns:44px minmax(0,1fr) 96px;gap:10px;align-items:center;padding:12px;margin-bottom:9px;background:linear-gradient(145deg,#161e29,#111821);border:1px solid #2a3646;border-radius:14px;box-shadow:0 5px 16px rgba(0,0,0,.18)}.slh-card.update{border-color:#a86b19;box-shadow:inset 3px 0 #d97706,0 5px 16px rgba(0,0,0,.18)}.slh-card.missing{border-color:#475569}.slh-card.off .slh-card-copy{opacity:.58}.slh-card-copy{min-width:0}.slh-icon{width:42px;height:42px;background:linear-gradient(145deg,#263142,#1b2431);border:1px solid #334155;border-radius:12px;font-size:21px}.slh-name{display:flex;align-items:center;gap:5px;color:#f8fafc;font-size:14px;line-height:1.25}.slh-favorite-mark{color:#fbbf24;font-size:13px}.slh-description{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:#aab4c3}.slh-module-controls{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:7px}.slh-switch,.slh-primary{width:100%;min-height:36px;border-radius:10px;font-family:Arial,sans-serif;font-size:10px;font-weight:900;touch-action:manipulation}.slh-switch{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:5px;padding:5px 7px;border:1px solid #475569;background:#111827;color:#94a3b8}.slh-switch-track{position:relative;display:block;width:36px;height:20px;border-radius:999px;background:#4b5563;box-shadow:inset 0 1px 3px rgba(0,0,0,.55);transition:.18s ease}.slh-switch-track i{position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#e5e7eb;box-shadow:0 1px 4px #0008;transition:.18s ease}.slh-switch.on{border-color:#16804b;background:#0d2b20;color:#86efac}.slh-switch.on .slh-switch-track{background:#22c55e}.slh-switch.on .slh-switch-track i{transform:translateX(16px);background:#fff}.slh-switch.off{border-color:#60404a;background:#29151b;color:#fda4af}.slh-switch:disabled{opacity:.5}.slh-primary{border:1px solid #3478d4;background:linear-gradient(180deg,#2f80ed,#1d5fc5);color:#fff;padding:7px}.slh-primary:disabled{border-color:#374151;background:#202733;color:#6b7280}.slh-primary.install{border-color:#16804b;background:linear-gradient(180deg,#1e9b5f,#147443)}
-#${IDS.overlay}{background:rgba(2,6,12,.84);backdrop-filter:blur(3px)}#${IDS.panel}{background:#0b1119;border:1px solid #2a3748;box-shadow:0 -16px 55px rgba(0,0,0,.78)}.slh-header{padding:14px;background:linear-gradient(155deg,#151e2a 0%,#0c131d 72%);border-bottom-color:#2a3748}.slh-title{color:#f8fafc;letter-spacing:.01em}.slh-close{border:1px solid #364255;background:#1b2431}.slh-stats{gap:7px}.slh-stat{background:rgba(21,30,42,.88);border-color:#334155}.slh-stat strong{color:#f8fafc}.slh-search{background:#0d1520;border-color:#344258;min-height:42px}.slh-tool{border:1px solid #303c4e;background:#1a2330}.slh-tool.whatsnew{background:linear-gradient(160deg,#67409a,#4c2d77)}.slh-cats{padding-bottom:2px}.slh-cat{background:#101824;border-color:#303d50}.slh-cat.active{background:linear-gradient(180deg,#347ff0,#215fc5);border-color:#4b91f5}.slh-bottom-btn:active,.slh-tool:active,.slh-primary:active,.slh-switch:active{transform:translateY(1px)}
-@media(max-width:520px){.slh-header{padding:11px}.slh-title{font-size:17px}.slh-stats{margin-top:8px}.slh-stat{padding:6px 2px}.slh-tools{margin-top:8px}.slh-card{grid-template-columns:40px minmax(0,1fr) 88px;gap:8px;padding:10px 9px}.slh-icon{width:38px;height:38px}.slh-name{font-size:13px}.slh-meta{font-size:8.5px}.slh-module-controls{gap:5px}.slh-switch,.slh-primary{min-height:34px;font-size:9px}.slh-switch{grid-template-columns:34px 1fr;padding:4px 5px}.slh-switch-track{width:32px;height:18px}.slh-switch-track i{width:12px;height:12px}.slh-switch.on .slh-switch-track i{transform:translateX(14px)}}
-.slh-setting,.slh-note,.slh-check-row{background:#181d24;border:1px solid #292f38;border-radius:10px;padding:10px;margin-bottom:8px;font-size:11px;line-height:1.5}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password]{min-height:40px;padding:9px;border:1px solid #3a4657;border-radius:8px;background:#0d131b;color:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:900}.slh-big-btn.gray{background:#374151}.slh-big-btn.red{background:#8b3030}.slh-big-btn.update{background:#d97706}.slh-big-btn.install{background:#16a34a}.slh-version-title{font-size:13px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#8b949e;font-size:9px;margin-left:5px}
-@media(min-width:700px){#${IDS.overlay}{align-items:center}#${IDS.panel}{border-radius:18px;max-height:88vh}.slh-tools{grid-template-columns:1fr repeat(5,44px)}.slh-search{grid-column:auto}}
+#${IDS.button}{position:fixed!important;z-index:2147483646!important;border:1px solid #3d4f66!important;border-radius:50%!important;background:linear-gradient(145deg,#1d2836,#111923)!important;color:#f8fafc!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font-size:23px!important;box-shadow:0 10px 28px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.04)!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important}
+#${IDS.badge}{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#d84b59;color:#fff;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:2px solid #111923}
+#${IDS.topSkull}{position:relative!important;box-sizing:border-box!important}#${IDS.topSkull} .slh-native-link{position:relative!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}#${IDS.topSkull} .slh-native-skull-icon{animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;transform-origin:center center!important}#${IDS.topSkull}.slh-alert .slh-native-skull-icon{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}#${IDS.topBadge}{position:absolute;top:0;right:4px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#c93f50;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}
+@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48}11%,19%,27%{opacity:1}40%,75%{opacity:.72}}@keyframes slhNativeSkullAlert{0%,100%{opacity:.38}50%{opacity:1}72%{opacity:.58}}
+#${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:rgba(4,8,13,.84);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;font-family:Inter,Arial,sans-serif;color:#e7edf5}
+#${IDS.panel}{--sl-bg:#0f141c;--sl-soft:#151c26;--sl-panel:#18212d;--sl-panel2:#1d2836;--sl-elev:#223041;--sl-border:#314154;--sl-border2:#43566e;--sl-text:#e7edf5;--sl-softtext:#a9b7c8;--sl-muted:#7f90a6;--sl-blue:#4f8fe8;--sl-blue2:#2f6ebf;--sl-green:#18b26b;--sl-red:#cc3d57;--sl-gold:#d7a94a;width:min(680px,100%);max-height:95vh;display:flex;flex-direction:column;overflow:hidden;background:var(--sl-bg);color:var(--sl-text);border:1px solid var(--sl-border);border-radius:22px 22px 0 0;box-shadow:0 -22px 70px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.025)}
+.slh-header{padding:16px 16px 12px;flex-shrink:0;background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 40%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-bottom:1px solid var(--sl-border)}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-brand{display:flex;align-items:center;gap:11px;min-width:0}.slh-brand-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #41536b;border-radius:13px;background:linear-gradient(145deg,#263448,#17212e);box-shadow:inset 0 1px rgba(255,255,255,.05),0 7px 20px rgba(0,0,0,.25);font-size:22px}.slh-brand-copy{min-width:0}.slh-kicker{font-size:8px;line-height:1.2;letter-spacing:.18em;font-weight:900;color:#6fa6ef;text-transform:uppercase}.slh-title{margin-top:2px;font-size:18px;line-height:1.15;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-sub{margin-top:4px;color:var(--sl-muted);font-size:9px;line-height:1.3}.slh-registry-dot{display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#64748b}.slh-registry-dot.online{background:var(--sl-green);box-shadow:0 0 8px rgba(24,178,107,.6)}.slh-close{width:38px;height:38px;flex:0 0 auto;border:1px solid var(--sl-border);border-radius:11px;background:#1b2532;color:#c8d3df;font-size:21px;line-height:1;transition:.15s ease}.slh-close:active{transform:scale(.96)}
+.slh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:13px}.slh-stat{position:relative;overflow:hidden;background:rgba(24,33,45,.86);border:1px solid var(--sl-border);border-radius:11px;padding:9px 7px 8px}.slh-stat:before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#4f8fe8;opacity:.8}.slh-stat.warn:before{background:var(--sl-gold)}.slh-stat.bad:before{background:var(--sl-red)}.slh-stat.good:before{background:var(--sl-green)}.slh-stat strong{display:block;color:#f8fafc;font-size:15px;line-height:1}.slh-stat span{display:block;margin-top:5px;color:var(--sl-muted);font-size:7px;font-weight:800;letter-spacing:.08em}.slh-stat small{display:block;margin-top:3px;color:#64748b;font-size:7px}
+.slh-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:9px}.slh-tool{min-width:0;height:42px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--sl-border);border-radius:10px;background:linear-gradient(180deg,#202c3a,#17212d);color:#d9e3ee;font-size:9px;font-weight:900;white-space:nowrap;touch-action:manipulation}.slh-tool span{font-size:13px}.slh-tool.checking{opacity:.56}.slh-tool.whatsnew{border-color:#54446b;background:linear-gradient(180deg,#3a2b4d,#271d35)}.slh-tool.settings{border-color:#4a5262}.slh-tool:active,.slh-bottom-btn:active,.slh-primary:active,.slh-switch:active,.slh-cat:active{transform:translateY(1px)}
+.slh-cats{display:flex;gap:6px;margin-top:9px;padding-bottom:1px;overflow-x:auto;scrollbar-width:none}.slh-cats::-webkit-scrollbar{display:none}.slh-cat{flex-shrink:0;border:1px solid #2c394b;border-radius:999px;padding:6px 10px;background:#111923;color:#8999ac;font-size:8px;font-weight:900;letter-spacing:.05em}.slh-cat.active{border-color:#4c84cc;background:#1d3b60;color:#dcebff;box-shadow:inset 0 0 0 1px rgba(111,166,239,.08)}
+.slh-list,.slh-view,.slh-settings,.slh-quick{overflow-y:auto;padding:11px;-webkit-overflow-scrolling:touch}.slh-list{background:linear-gradient(180deg,#0d131b 0%,#0f141c 100%)}.slh-section-label{margin:1px 2px 8px;color:#6e8095;font-size:8px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.slh-card{position:relative;display:grid;grid-template-columns:46px minmax(0,1fr) 100px;gap:11px;align-items:center;padding:12px;margin-bottom:9px;background:linear-gradient(145deg,#18212d,#131b25);border:1px solid #2d3c4e;border-radius:15px;box-shadow:0 7px 20px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.018)}.slh-card:before{content:'';position:absolute;left:-1px;top:13px;bottom:13px;width:2px;border-radius:4px;background:#40526a}.slh-card.update:before{background:var(--sl-gold);box-shadow:0 0 8px rgba(215,169,74,.28)}.slh-card.missing:before{background:#64748b}.slh-card.off:before{background:#8a4d59}.slh-card.off .slh-card-copy{opacity:.62}.slh-card-copy{min-width:0}.slh-icon{width:44px;height:44px;display:grid;place-items:center;background:linear-gradient(145deg,#263448,#1a2431);border:1px solid #35475d;border-radius:13px;font-size:21px;box-shadow:inset 0 1px rgba(255,255,255,.04)}.slh-name-line{display:flex;align-items:center;gap:6px;min-width:0}.slh-name{min-width:0;color:#f3f7fb;font-size:13px;font-weight:900;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-category-chip{flex:0 0 auto;border:1px solid #33445a;border-radius:999px;padding:2px 5px;color:#7f94aa;background:#121a24;font-size:6.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}.slh-description{display:-webkit-box;margin-top:4px;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:#91a2b5;font-size:8.5px;line-height:1.35}.slh-chips{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:6px}.slh-chip{display:inline-flex;align-items:center;min-height:17px;padding:2px 6px;border:1px solid #304055;border-radius:999px;background:#111922;color:#8496aa;font-size:6.5px;font-weight:900;line-height:1;letter-spacing:.035em}.slh-chip.good{border-color:#235f46;background:#10271f;color:#72d6a2}.slh-chip.warn{border-color:#68522b;background:#292314;color:#e7c675}.slh-chip.bad{border-color:#693642;background:#2c171d;color:#f09aa8}.slh-chip.info{border-color:#31567e;background:#14263b;color:#8fc0ff}.slh-chip.muted{color:#8290a1}.slh-module-controls{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px}.slh-switch,.slh-primary{width:100%;min-height:35px;border-radius:10px;font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:900;touch-action:manipulation}.slh-switch{display:grid;grid-template-columns:36px 1fr;align-items:center;gap:5px;padding:5px 7px;border:1px solid #475569;background:#111827;color:#94a3b8}.slh-switch-track{position:relative;display:block;width:34px;height:19px;border-radius:999px;background:#4b5563;box-shadow:inset 0 1px 3px rgba(0,0,0,.55);transition:.18s ease}.slh-switch-track i{position:absolute;left:3px;top:3px;width:13px;height:13px;border-radius:50%;background:#e5e7eb;box-shadow:0 1px 4px #0008;transition:.18s ease}.slh-switch.on{border-color:#216b4a;background:#102a21;color:#86efac}.slh-switch.on .slh-switch-track{background:#1eb36a}.slh-switch.on .slh-switch-track i{transform:translateX(15px);background:#fff}.slh-switch.off{border-color:#5d3a43;background:#26151a;color:#f0a0ad}.slh-switch:disabled{opacity:.48}.slh-primary{border:1px solid #3d78bf;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;padding:7px}.slh-primary:disabled{border-color:#374151;background:#202733;color:#6b7280}.slh-primary.install{border-color:#24754f;background:linear-gradient(180deg,#22945f,#176d46)}
+.slh-bottom{padding:9px 11px;background:#0c1219;border-top:1px solid #263547;flex-shrink:0}.slh-bottom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.slh-bottom-btn{border:1px solid #2d3d50;border-radius:10px;padding:9px;background:#151f2a;color:#b9c7d6;font-size:8px;font-weight:900;letter-spacing:.04em}.slh-footer{padding:8px;text-align:center;color:#5f7083;font-size:8px;border-top:1px solid #202d3c;background:#0b1118}.slh-author{color:#78aef2;font-weight:900;text-decoration:none}
+.slh-setting,.slh-note,.slh-check-row{background:#17202b;border:1px solid #2c3b4e;border-radius:11px;padding:11px;margin-bottom:8px;color:#cbd5e1;font-size:10px;line-height:1.5}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password],.slh-setting select{min-height:40px;padding:9px;border:1px solid #3a4b61;border-radius:8px;background:#0d141d;color:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:1px solid #3d78bf;border-radius:9px;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;font-size:10px;font-weight:900}.slh-big-btn.gray{border-color:#394859;background:#1e2936}.slh-big-btn.red{border-color:#743946;background:#51222c}.slh-big-btn.update{border-color:#7a5b25;background:#684b1d}.slh-big-btn.install{border-color:#24754f;background:#176d46}.slh-version-title{font-size:12px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#718197;font-size:8px;margin-left:5px}
+@media(max-width:520px){.slh-header{padding:12px 10px 10px}.slh-brand-icon{width:38px;height:38px;font-size:19px}.slh-title{font-size:15px}.slh-kicker{font-size:7px}.slh-sub{font-size:8px}.slh-close{width:34px;height:34px}.slh-stats{gap:5px;margin-top:10px}.slh-stat{padding:8px 5px 7px}.slh-stat strong{font-size:13px}.slh-stat span{font-size:6.5px}.slh-stat small{display:none}.slh-tools{gap:4px}.slh-tool{height:38px;gap:3px;font-size:7px}.slh-tool span{font-size:11px}.slh-cats{gap:5px}.slh-cat{padding:5px 8px;font-size:7px}.slh-list{padding:8px}.slh-card{grid-template-columns:39px minmax(0,1fr) 84px;gap:8px;padding:9px 8px;margin-bottom:7px;border-radius:13px}.slh-icon{width:37px;height:37px;border-radius:11px;font-size:18px}.slh-name{font-size:11.5px}.slh-category-chip{font-size:5.8px}.slh-description{font-size:7.7px;-webkit-line-clamp:1}.slh-chips{gap:3px;margin-top:5px}.slh-chip{min-height:15px;padding:2px 4px;font-size:5.7px}.slh-module-controls{gap:5px}.slh-switch,.slh-primary{min-height:32px;font-size:8px}.slh-switch{grid-template-columns:31px 1fr;padding:4px}.slh-switch-track{width:30px;height:17px}.slh-switch-track i{width:11px;height:11px}.slh-switch.on .slh-switch-track i{transform:translateX(13px)}}
+@media(min-width:700px){#${IDS.overlay}{align-items:center}#${IDS.panel}{border-radius:22px;max-height:90vh}.slh-tools{grid-template-columns:repeat(5,minmax(0,1fr))}}
         `;
         document.head.appendChild(style);
     }
@@ -656,12 +652,10 @@
     }
 
     function getMobileNavContext() {
-        const swiperWrap = document.querySelector('.swiper-wrapper')
-            || document.querySelector('[class*="swiper___"]');
+        const swiperWrap = document.querySelector('.swiper-wrapper') || document.querySelector('[class*="swiper___"]');
         const areasWrap = document.querySelector('[class*="areasMobile___"]');
         const wrapper = swiperWrap || areasWrap;
         if (!wrapper) return null;
-
         const links = [...wrapper.querySelectorAll('a[class*="mobileLink___"]')];
         const messagesLink = links.find(link => {
             const label = link.querySelector('span[class*="linkName___"]');
@@ -670,18 +664,12 @@
             return text === 'MESSAGES' || href.includes('messages');
         });
         if (!messagesLink) return null;
-
         const messagesArea = messagesLink.closest('[class*="area-mobile___"]');
         if (!messagesArea) return null;
         const messagesSlide = messagesArea.closest('[class*="slide___"]');
         const isSwiper = Boolean(messagesSlide && messagesSlide.parentElement === wrapper);
-
         return {
-            wrapper,
-            isSwiper,
-            messagesLink,
-            messagesArea,
-            messagesSlide,
+            wrapper, isSwiper, messagesLink, messagesArea, messagesSlide,
             nativeRow: messagesArea.querySelector('[class*="areaRow___"], [class*="area-row___"]'),
             nativeIconWrap: messagesLink.querySelector('span[class*="svgIconWrap___"]'),
             nativeDefaultIcon: messagesLink.querySelector('span[class*="defaultIcon___"]'),
@@ -704,7 +692,6 @@
         svg.style.setProperty('filter', 'none', 'important');
         svg.style.setProperty('-webkit-filter', 'none', 'important');
         svg.setAttribute('aria-hidden', 'true');
-
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         g.setAttribute('transform', `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${scale.toFixed(4)})`);
         g.setAttribute('fill', 'none');
@@ -712,13 +699,7 @@
         g.setAttribute('stroke-width', '1.75');
         g.setAttribute('stroke-linecap', 'round');
         g.setAttribute('stroke-linejoin', 'round');
-        g.innerHTML = `
-            <path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-6.4 0-4.4-3.3-7.6-8.1-7.6Z"/>
-            <circle cx="8.8" cy="10.5" r="1.65"/>
-            <circle cx="15.2" cy="10.5" r="1.65"/>
-            <path d="m12 12.7-1 1.8h2l-1-1.8Z"/>
-            <path d="M8.1 16.1h7.8M10.5 16.1v1.3M13.5 16.1v1.3"/>
-        `;
+        g.innerHTML = `<path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-6.4 0-4.4-3.3-7.6-8.1-7.6Z"/><circle cx="8.8" cy="10.5" r="1.65"/><circle cx="15.2" cy="10.5" r="1.65"/><path d="m12 12.7-1 1.8h2l-1-1.8Z"/><path d="M8.1 16.1h7.8M10.5 16.1v1.3M13.5 16.1v1.3"/>`;
         svg.appendChild(g);
         return svg;
     }
@@ -742,19 +723,15 @@
             syncFloatingButtonVisibility();
             return true;
         }
-
         const ctx = getMobileNavContext();
         if (!ctx) {
             syncFloatingButtonVisibility();
             return false;
         }
-
         const area = document.createElement('div');
         area.className = ctx.messagesArea.className;
-
         const row = document.createElement('div');
         if (ctx.nativeRow) row.className = ctx.nativeRow.className;
-
         const link = document.createElement('a');
         link.className = ctx.messagesLink.className;
         link.href = '#';
@@ -762,69 +739,43 @@
         link.classList.add('slh-native-link');
         link.setAttribute('aria-label', 'Open SakaLuX Script Hub');
         link.setAttribute('title', 'SakaLuX Script Hub');
-
         const iconWrap = document.createElement('span');
         if (ctx.nativeIconWrap) iconWrap.className = ctx.nativeIconWrap.className;
-
         const innerIcon = document.createElement('span');
         if (ctx.nativeDefaultIcon) innerIcon.className = ctx.nativeDefaultIcon.className;
         innerIcon.classList.add('slh-native-skull-icon');
         innerIcon.style.setProperty('filter', 'none', 'important');
         innerIcon.style.setProperty('-webkit-filter', 'none', 'important');
-
         const skullSvg = buildSkullSvg(ctx.nativeSvg);
-        if (skullSvg) innerIcon.appendChild(skullSvg);
-        else innerIcon.textContent = '☠︎';
-
+        if (skullSvg) innerIcon.appendChild(skullSvg); else innerIcon.textContent = '☠︎';
         iconWrap.appendChild(innerIcon);
         link.appendChild(iconWrap);
-
         const label = document.createElement('span');
         if (ctx.nativeLabel) label.className = ctx.nativeLabel.className;
         label.textContent = 'HUB';
         link.appendChild(label);
-
         const badge = document.createElement('span');
         badge.id = IDS.topBadge;
         link.appendChild(badge);
-
-        const open = event => {
-            event.preventDefault();
-            event.stopPropagation();
-            openHub();
-        };
+        const open = event => { event.preventDefault(); event.stopPropagation(); openHub(); };
         link.addEventListener('click', open);
-        link.addEventListener('keydown', event => {
-            if (event.key === 'Enter' || event.key === ' ') open(event);
-        });
-
+        link.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') open(event); });
         row.appendChild(link);
         area.appendChild(row);
-
         let mounted;
         if (ctx.isSwiper && ctx.messagesSlide) {
             const slide = document.createElement('div');
-            slide.className = ctx.messagesSlide.className
-                .replace(/swiper-slide-active|swiper-slide-next|swiper-slide-prev|contextMenuActive___\S+/g, '')
-                .trim();
+            slide.className = ctx.messagesSlide.className.replace(/swiper-slide-active|swiper-slide-next|swiper-slide-prev|contextMenuActive___\S+/g, '').trim();
             if (ctx.messagesSlide.style.width) slide.style.width = ctx.messagesSlide.style.width;
             slide.appendChild(area);
             mounted = slide;
-        } else {
-            mounted = area;
-        }
-
+        } else mounted = area;
         mounted.id = IDS.topSkull;
         const reference = ctx.isSwiper ? ctx.messagesSlide : ctx.messagesArea;
         ctx.wrapper.insertBefore(mounted, reference);
-
         if (ctx.isSwiper) {
-            try {
-                const swiper = ctx.wrapper.parentElement?.swiper;
-                swiper?.update?.();
-            } catch {}
+            try { ctx.wrapper.parentElement?.swiper?.update?.(); } catch {}
         }
-
         updateTopbarSkullState();
         syncFloatingButtonVisibility();
         return true;
@@ -882,28 +833,39 @@
         return overlay;
     }
 
+    function headerMarkup(title, subtitle, closeId, icon = '☠️', kicker = 'SAKALUX CONTROL CENTER') {
+        return `<div class="slh-header"><div class="slh-headrow"><div class="slh-brand"><div class="slh-brand-icon">${icon}</div><div class="slh-brand-copy"><div class="slh-kicker">${escapeHtml(kicker)}</div><div class="slh-title">${escapeHtml(title)}</div><div class="slh-sub">${subtitle}</div></div></div><button class="slh-close" id="${closeId}" aria-label="Close">×</button></div></div>`;
+    }
+
     function openHub() {
+        const registryClass = registryStatus === 'online' ? 'online' : '';
         createOverlay(`
             <div class="slh-header">
                 <div class="slh-headrow">
-                    <div><div class="slh-title">☠️ SakaLuX Script Hub</div><div class="slh-sub">v${VERSION} • Registry: ${escapeHtml(registryStatus)} • ${SCRIPTS.length} add-ons</div></div>
-                    <button class="slh-close" id="slh-close">×</button>
+                    <div class="slh-brand">
+                        <div class="slh-brand-icon">☠️</div>
+                        <div class="slh-brand-copy">
+                            <div class="slh-kicker">SAKALUX CONTROL CENTER</div>
+                            <div class="slh-title">Script Hub</div>
+                            <div class="slh-sub"><span class="slh-registry-dot ${registryClass}"></span>v${VERSION} · Registry ${escapeHtml(registryStatus)} · ${SCRIPTS.length} managed add-ons</div>
+                        </div>
+                    </div>
+                    <button class="slh-close" id="slh-close" aria-label="Close">×</button>
                 </div>
                 <div class="slh-stats" id="slh-stats"></div>
                 <div class="slh-tools">
-                    <button class="slh-tool" id="slh-update-check" title="Check updates">⬆️</button>
-                    <button class="slh-tool" id="slh-update-all" title="Update all">⏫</button>
-                    <button class="slh-tool" id="slh-health" title="System check">🩺</button>
-                    <button class="slh-tool whatsnew" id="slh-whats-new" title="What's new">✨</button>
-                    <button class="slh-tool" id="slh-settings" title="Settings">⚙️</button>
+                    <button class="slh-tool" id="slh-update-check" title="Check updates"><span>↻</span>CHECK</button>
+                    <button class="slh-tool" id="slh-update-all" title="Update all"><span>⇧</span>UPDATE</button>
+                    <button class="slh-tool" id="slh-health" title="System check"><span>◉</span>HEALTH</button>
+                    <button class="slh-tool whatsnew" id="slh-whats-new" title="What's new"><span>✦</span>NEW</button>
+                    <button class="slh-tool settings" id="slh-settings" title="Settings"><span>⚙</span>SETTINGS</button>
                 </div>
                 <div class="slh-cats" id="slh-cats"></div>
             </div>
             <div class="slh-list" id="slh-list"></div>
             <div class="slh-bottom"><div class="slh-bottom-grid"><button class="slh-bottom-btn" id="slh-money">💸 SEND MONEY</button><button class="slh-bottom-btn" id="slh-items">🎁 SEND ITEMS</button></div></div>
-            <div class="slh-footer">Made with ❤️ by <a class="slh-author" id="slh-author" href="${PROFILE_URL}">SakaLuX [2380374]</a></div>
+            <div class="slh-footer">Built by <a class="slh-author" id="slh-author" href="${PROFILE_URL}">SakaLuX [2380374]</a></div>
         `);
-
         document.getElementById('slh-close').onclick = closeHub;
         document.getElementById('slh-update-check').onclick = () => checkAllUpdates(true);
         document.getElementById('slh-update-all').onclick = updateAll;
@@ -912,10 +874,7 @@
         document.getElementById('slh-settings').onclick = openSettings;
         document.getElementById('slh-money').onclick = () => location.href = PROFILE_URL;
         document.getElementById('slh-items').onclick = () => location.href = PROFILE_URL;
-        document.getElementById('slh-author').onclick = event => {
-            event.preventDefault();
-            location.href = PROFILE_URL;
-        };
+        document.getElementById('slh-author').onclick = event => { event.preventDefault(); location.href = PROFILE_URL; };
         renderMainStats();
         renderCategories();
         renderList();
@@ -929,13 +888,13 @@
         const rows = getAllHealth();
         const installed = rows.filter(r => r.health.state !== 'missing').length;
         const healthy = rows.filter(r => r.health.state === 'ok').length;
-        const errors = rows.filter(r => r.health.state === 'error').length;
+        const issues = rows.filter(r => r.health.state === 'error').length + getUpdateErrorCount();
+        const updates = getUpdateCount();
         box.innerHTML = `
-            <div class="slh-stat"><strong>${installed}/${SCRIPTS.length}</strong><span>ADD-ONS</span></div>
-            <div class="slh-stat"><strong>${healthy}</strong><span>INSTALLED</span></div>
-            <div class="slh-stat"><strong>${getUpdateCount()}</strong><span>UPDATES</span></div>
-            <div class="slh-stat"><strong>${errors + getUpdateErrorCount()}</strong><span>ISSUES</span></div>
-        `;
+            <div class="slh-stat good"><strong>${installed}/${SCRIPTS.length}</strong><span>INSTALLED</span><small>managed modules</small></div>
+            <div class="slh-stat good"><strong>${healthy}</strong><span>HEALTHY</span><small>reporting OK</small></div>
+            <div class="slh-stat ${updates ? 'warn' : 'good'}"><strong>${updates}</strong><span>UPDATES</span><small>${updates ? 'action available' : 'all current'}</small></div>
+            <div class="slh-stat ${issues ? 'bad' : 'good'}"><strong>${issues}</strong><span>ISSUES</span><small>${issues ? 'needs attention' : 'system clear'}</small></div>`;
     }
 
     function updateCheckButtonState(loading) {
@@ -943,7 +902,7 @@
         if (!button) return;
         button.disabled = Boolean(loading);
         button.classList.toggle('checking', Boolean(loading));
-        button.textContent = loading ? '⏳' : '⬆️';
+        button.innerHTML = loading ? '<span>…</span>CHECKING' : '<span>↻</span>CHECK';
     }
 
     function renderCategories() {
@@ -952,27 +911,15 @@
         const categories = ['ALL', ...new Set(SCRIPTS.map(s => s.category || 'Other'))];
         box.innerHTML = categories.map(value => `<button class="slh-cat ${category === value ? 'active' : ''}" data-category="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join('');
         box.querySelectorAll('[data-category]').forEach(button => {
-            button.onclick = () => {
-                category = button.dataset.category;
-                renderCategories();
-                renderList();
-            };
+            button.onclick = () => { category = button.dataset.category; renderCategories(); renderList(); };
         });
     }
 
     function renderList() {
         const list = document.getElementById('slh-list');
         if (!list) return;
-        let rows = getAllHealth().map(row => ({
-            ...row,
-            favorite: favorites.has(row.script.id),
-            usage: usage[row.script.id] || { count: 0, lastUsed: 0 },
-            update: getUpdateState(row.script)
-        }));
-        rows = rows.filter(row => {
-            const categoryOk = category === 'ALL' || row.script.category === category;
-            return categoryOk;
-        });
+        let rows = getAllHealth().map(row => ({ ...row, favorite: favorites.has(row.script.id), usage: usage[row.script.id] || { count: 0, lastUsed: 0 }, update: getUpdateState(row.script) }));
+        rows = rows.filter(row => category === 'ALL' || row.script.category === category);
         rows.sort((a, b) => {
             if (a.health.state === 'missing' && b.health.state !== 'missing') return -1;
             if (b.health.state === 'missing' && a.health.state !== 'missing') return 1;
@@ -981,7 +928,7 @@
             if (a.favorite !== b.favorite) return a.favorite ? -1 : 1;
             return b.usage.count - a.usage.count;
         });
-        list.innerHTML = rows.map(renderCard).join('') || '<div style="padding:30px;text-align:center;color:#888">No scripts found.</div>';
+        list.innerHTML = `<div class="slh-section-label">${category === 'ALL' ? 'MANAGED MODULES' : escapeHtml(category) + ' MODULES'} · ${rows.length}</div>` + (rows.map(renderCard).join('') || '<div style="padding:30px;text-align:center;color:#78889b">No modules found.</div>');
         bindCards();
     }
 
@@ -993,32 +940,35 @@
         const latest = update.data?.latest || script.expectedVersion || '?';
         const missing = health.state === 'missing';
         let extra = '';
-        if (script.id === 'enhancer' && health.data) extra = ` • Inventory: ${health.data.inventoryEntries ?? 0}`;
-        if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? ` • Buyers: ${health.data.buyers ?? 0}` : ' • Standby on this page';
-        if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? ' • Standby outside Missions' : ` • Rewards: ${health.data.rewardCards ?? 0}`;
+        if (script.id === 'enhancer' && health.data) extra = `Inventory ${health.data.inventoryEntries ?? 0}`;
+        if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? `Buyers ${health.data.buyers ?? 0}` : 'Standby';
+        if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? 'Standby' : `Rewards ${health.data.rewardCards ?? 0}`;
         const enabled = !missing && isModuleEnabled(script);
         const moduleApi = script.api();
         const powerReady = Boolean(moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function');
         const primary = getPrimaryAction(script);
         const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
+        const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'failed' ? 'bad' : 'muted';
+        const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';
         const controls = missing
             ? `<button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
             : `<button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
-        return `
-            <div class="slh-card ${row.favorite ? 'favorite' : ''} ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''} ${!missing && !enabled ? 'off' : ''}">
-                <div class="slh-icon">${script.icon || '🧩'}</div>
-                <div class="slh-card-copy">
-                    <div class="slh-name">${escapeHtml(script.name)}${row.favorite ? ' <span class="slh-favorite-mark">★</span>' : ''}</div>
-                    <div class="slh-meta">
-                        Installed: <b>${installed ? 'v' + escapeHtml(installed) : 'NOT INSTALLED'}</b> • Registry: <b>v${escapeHtml(script.expectedVersion)}</b> • Latest: <b>${latest === '?' ? '?' : 'v' + escapeHtml(latest)}</b><br>
-                        <span class="slh-update-status ${update.state}">${escapeHtml(update.text)}</span>${update.data?.checkedAt ? ' • Checked ' + escapeHtml(formatAgo(update.data.checkedAt)) : ''}<br>
-                        Status: <span class="slh-health ${health.state}">${escapeHtml(health.text)}</span>${extra}<br>
-                        ${script.description ? `<span class="slh-description">${escapeHtml(script.description)}</span>` : ''}
-                    </div>
+        return `<div class="slh-card ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''} ${!missing && !enabled ? 'off' : ''}">
+            <div class="slh-icon">${script.icon || '🧩'}</div>
+            <div class="slh-card-copy">
+                <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
+                ${script.description ? `<div class="slh-description">${escapeHtml(script.description)}</div>` : ''}
+                <div class="slh-chips">
+                    <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
+                    <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
+                    ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
+                    ${latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
+                    ${extra ? `<span class="slh-chip muted">${escapeHtml(extra)}</span>` : ''}
+                    ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
                 </div>
-                <div class="slh-module-controls">${controls}</div>
             </div>
-        `;
+            <div class="slh-module-controls">${controls}</div>
+        </div>`;
     }
 
     function bindCards() {
@@ -1027,41 +977,21 @@
                 const id = button.dataset.moduleToggle;
                 const next = button.getAttribute('aria-checked') !== 'true';
                 button.disabled = true;
-                try {
-                    await setModulePower(id, next);
-                } catch (error) {
-                    console.error('[SakaLuX Hub]', error);
-                    alert('Power control failed: ' + String(error?.message || error));
-                    renderList();
-                }
+                try { await setModulePower(id, next); }
+                catch (error) { console.error('[SakaLuX Hub]', error); alert('Power control failed: ' + String(error?.message || error)); renderList(); }
             };
         });
-        document.querySelectorAll('[data-fav]').forEach(button => {
-            button.onclick = event => {
-                event.stopPropagation();
-                const id = button.dataset.fav;
-                favorites.has(id) ? favorites.delete(id) : favorites.add(id);
-                saveJson(STORAGE.favorites, [...favorites]);
-                renderList();
-            };
+        document.querySelectorAll('[data-install]').forEach(button => button.onclick = () => {
+            const script = SCRIPTS.find(item => item.id === button.dataset.install);
+            const url = script ? getInstallUrl(script) : '';
+            if (url) location.href = url;
         });
-        document.querySelectorAll('[data-install]').forEach(button => {
-            button.onclick = () => {
-                const script = SCRIPTS.find(item => item.id === button.dataset.install);
-                const url = script ? getInstallUrl(script) : '';
-                if (url) location.href = url;
-            };
+        document.querySelectorAll('[data-update]').forEach(button => button.onclick = () => {
+            const script = SCRIPTS.find(item => item.id === button.dataset.update);
+            const url = script ? getInstallUrl(script) : '';
+            if (url) location.href = url;
         });
-        document.querySelectorAll('[data-update]').forEach(button => {
-            button.onclick = () => {
-                const script = SCRIPTS.find(item => item.id === button.dataset.update);
-                const url = script ? getInstallUrl(script) : '';
-                if (url) location.href = url;
-            };
-        });
-        document.querySelectorAll('[data-script][data-action]').forEach(button => {
-            button.onclick = () => runAction(button.dataset.script, button.dataset.action);
-        });
+        document.querySelectorAll('[data-script][data-action]').forEach(button => { button.onclick = () => runAction(button.dataset.script, button.dataset.action); });
     }
 
     async function runAction(id, actionId) {
@@ -1079,24 +1009,12 @@
             if (typeof api[action.method] === 'function') {
                 recordUsage(id);
                 const result = await api[action.method]();
-                if (result === false && action.fallbackUrl) {
-                    location.href = action.fallbackUrl;
-                    return;
-                }
-                if (isPanelAction) closeHub();
-                else setTimeout(openHub, 100);
+                if (result === false && action.fallbackUrl) { location.href = action.fallbackUrl; return; }
+                if (isPanelAction) closeHub(); else setTimeout(openHub, 100);
                 return;
             }
-            if (action.fallbackUrl) {
-                recordUsage(id);
-                location.href = action.fallbackUrl;
-                return;
-            }
-            if (isPanelAction && script.fallbackOpen()) {
-                recordUsage(id);
-                closeHub();
-                return;
-            }
+            if (action.fallbackUrl) { recordUsage(id); location.href = action.fallbackUrl; return; }
+            if (isPanelAction && script.fallbackOpen()) { recordUsage(id); closeHub(); return; }
             alert(script.name + ' is not available on this page.');
         } catch (error) {
             console.error('[SakaLuX Hub]', error);
@@ -1107,106 +1025,70 @@
     async function updateAll() {
         await checkAllUpdates(true);
         const updates = SCRIPTS.filter(script => getUpdateState(script).state === 'available' && getInstallUrl(script));
-        if (!updates.length) {
-            alert('All installed SakaLuX add-ons are up to date.');
-            return;
-        }
+        if (!updates.length) { alert('All installed SakaLuX add-ons are up to date.'); return; }
         if (!confirm('Open ' + updates.length + ' update installer' + (updates.length === 1 ? '' : 's') + ' now?')) return;
         let opened = 0;
         for (const script of updates) {
-            try {
-                const win = window.open(getInstallUrl(script), '_blank');
-                if (win) opened++;
-            } catch {}
+            try { const win = window.open(getInstallUrl(script), '_blank'); if (win) opened++; } catch {}
         }
-        if (opened < updates.length) alert('Some installer tabs were blocked. Use the individual UPDATE buttons for the remaining add-ons.');
+        if (opened < updates.length) alert('Some installer tabs were blocked. Use the individual update installer for the remaining add-ons.');
     }
 
     function openWhatsNew() {
-        createOverlay(`
-            <div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">✨ WHAT'S NEW</div><div class="slh-sub">SakaLuX Script Hub release notes</div></div><button class="slh-close" id="slhn-close">×</button></div></div>
-            <div class="slh-view">
-                ${HUB_CHANGELOG.map(release => `<div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version)} <span class="slh-version-date">${escapeHtml(release.date)}</span></div>${release.changes.map(change => `<div>• ${escapeHtml(change)}</div>`).join('')}</div>`).join('')}
-                <button class="slh-big-btn" id="slhn-back">← BACK</button>
-            </div>
-        `);
+        createOverlay(`${headerMarkup("What's New", 'SakaLuX Script Hub release notes', 'slhn-close', '✦', 'RELEASE CENTER')}<div class="slh-view">${HUB_CHANGELOG.map(release => `<div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version)} <span class="slh-version-date">${escapeHtml(release.date)}</span></div>${release.changes.map(change => `<div>• ${escapeHtml(change)}</div>`).join('')}</div>`).join('')}<button class="slh-big-btn" id="slhn-back">← BACK</button></div>`);
         document.getElementById('slhn-close').onclick = closeHub;
         document.getElementById('slhn-back').onclick = openHub;
     }
 
     async function openSystemCheck() {
-        createOverlay(`<div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">🩺 SYSTEM CHECK</div><div class="slh-sub">Checking registry, Greasy Fork and add-ons...</div></div><button class="slh-close" id="slhc-close">×</button></div></div><div class="slh-view" id="slhc-results"><div class="slh-note">⏳ Running diagnostics...</div></div>`);
+        createOverlay(`${headerMarkup('System Check', 'Registry, update sources and local module health', 'slhc-close', '◉', 'DIAGNOSTICS')}<div class="slh-view" id="slhc-results"><div class="slh-note">⏳ Running diagnostics...</div></div>`);
         document.getElementById('slhc-close').onclick = closeHub;
         const results = [];
         try {
             const data = JSON.parse(await httpGet(REGISTRY_URL + '?check=' + Date.now()));
             results.push({ level: Array.isArray(data?.scripts) ? 'ok' : 'bad', label: 'scripts.json registry', detail: Array.isArray(data?.scripts) ? data.scripts.length + ' add-ons found' : 'Invalid registry' });
-        } catch (error) {
-            results.push({ level: 'bad', label: 'scripts.json registry', detail: String(error?.message || error) });
-        }
+        } catch (error) { results.push({ level: 'bad', label: 'scripts.json registry', detail: String(error?.message || error) }); }
         for (const script of SCRIPTS) {
             try {
                 const published = parseMetaVersion(await httpGet(script.metaUrl));
                 const canonical = canonicalLatestVersion(script, published);
                 const behind = Boolean(published && compareVersions(published, script.expectedVersion) < 0);
-                results.push({
-                    level: behind || !published ? 'warn' : 'ok',
-                    label: script.name + ' update source',
-                    detail: 'Canonical v' + canonical + (published ? ' • Greasy Fork v' + published + (behind ? ' (mirror behind; GitHub source used)' : '') : ' • Greasy Fork unavailable')
-                });
-            } catch (error) {
-                results.push({ level: 'warn', label: script.name + ' update source', detail: 'Canonical Registry v' + script.expectedVersion + ' • ' + String(error?.message || error) });
-            }
+                results.push({ level: behind || !published ? 'warn' : 'ok', label: script.name + ' update source', detail: 'Canonical v' + canonical + (published ? ' • Greasy Fork v' + published + (behind ? ' (mirror behind; GitHub source used)' : '') : ' • Greasy Fork unavailable') });
+            } catch (error) { results.push({ level: 'warn', label: script.name + ' update source', detail: 'Canonical Registry v' + script.expectedVersion + ' • ' + String(error?.message || error) }); }
             const health = getHealth(script);
-            results.push({
-                level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad',
-                label: script.name + ' local status',
-                detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error')
-            });
+            results.push({ level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad', label: script.name + ' local status', detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error') });
         }
         results.push({ level: 'ok', label: 'SakaLuX Script Hub', detail: 'Loaded v' + VERSION + ' • API exposed' });
-        results.push({
-            level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn',
-            label: 'Torn-native HUB launcher',
-            detail: document.getElementById(IDS.topSkull) ? 'Mounted as a native mobile navigation entry before Messages' : 'Torn mobile navigation not detected yet'
-        });
+        results.push({ level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn', label: 'Torn-native HUB launcher', detail: document.getElementById(IDS.topSkull) ? 'Mounted as a native mobile navigation entry before Messages' : 'Torn mobile navigation not detected yet' });
         const box = document.getElementById('slhc-results');
         if (!box) return;
-        box.innerHTML = results.map(result => `<div class="slh-check-row slh-check-${result.level}">${result.level === 'ok' ? '🟢' : result.level === 'warn' ? '🟠' : '🔴'} <b>${escapeHtml(result.label)}</b><br><span style="color:#9ca3af">${escapeHtml(result.detail)}</span></div>`).join('') + '<button class="slh-big-btn" id="slhc-back">← BACK</button>';
+        box.innerHTML = results.map(result => `<div class="slh-check-row slh-check-${result.level}">${result.level === 'ok' ? '🟢' : result.level === 'warn' ? '🟠' : '🔴'} <b>${escapeHtml(result.label)}</b><br><span style="color:#8fa0b3">${escapeHtml(result.detail)}</span></div>`).join('') + '<button class="slh-big-btn" id="slhc-back">← BACK</button>';
         document.getElementById('slhc-back').onclick = openHub;
     }
 
     function openQuickMenu() {
         const rows = getAllHealth();
-        createOverlay(`<div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">☠️ Quick Menu</div><div class="slh-sub">Installed add-ons and one-tap install</div></div><button class="slh-close" id="slhq-close">×</button></div></div><div class="slh-quick">${rows.map(row => {
+        createOverlay(`${headerMarkup('Quick Menu', 'Installed add-ons and one-tap access', 'slhq-close', '☠️', 'QUICK ACCESS')}<div class="slh-quick">${rows.map(row => {
             const update = getUpdateState(row.script);
             if (row.health.state === 'missing') return `<button class="slh-big-btn install" data-quick-install="${row.script.id}">⬇ INSTALL ${row.script.icon || '🧩'} ${escapeHtml(row.script.name)}</button>`;
             return `<button class="slh-big-btn ${update.state === 'available' ? 'update' : ''}" data-quick-open="${row.script.id}">${row.script.icon || '🧩'} ${escapeHtml(row.script.name)} • ${escapeHtml(row.health.text)}</button>${update.state === 'available' ? `<button class="slh-big-btn update" data-quick-update="${row.script.id}">⬆ UPDATE TO v${escapeHtml(update.data.latest)}</button>` : ''}`;
         }).join('')}<button class="slh-big-btn gray" id="slhq-full">☠️ OPEN FULL HUB</button></div>`);
         document.getElementById('slhq-close').onclick = closeHub;
         document.getElementById('slhq-full').onclick = openHub;
-        document.querySelectorAll('[data-quick-install]').forEach(button => button.onclick = () => {
-            const script = SCRIPTS.find(item => item.id === button.dataset.quickInstall);
-            const url = script ? getInstallUrl(script) : '';
-            if (url) location.href = url;
-        });
+        document.querySelectorAll('[data-quick-install]').forEach(button => button.onclick = () => { const script = SCRIPTS.find(item => item.id === button.dataset.quickInstall); const url = script ? getInstallUrl(script) : ''; if (url) location.href = url; });
         document.querySelectorAll('[data-quick-open]').forEach(button => button.onclick = () => runAction(button.dataset.quickOpen, 'open'));
-        document.querySelectorAll('[data-quick-update]').forEach(button => button.onclick = () => {
-            const script = SCRIPTS.find(item => item.id === button.dataset.quickUpdate);
-            const url = script ? getInstallUrl(script) : '';
-            if (url) location.href = url;
-        });
+        document.querySelectorAll('[data-quick-update]').forEach(button => button.onclick = () => { const script = SCRIPTS.find(item => item.id === button.dataset.quickUpdate); const url = script ? getInstallUrl(script) : ''; if (url) location.href = url; });
     }
 
     function openSettings() {
-        createOverlay(`<div class="slh-header"><div class="slh-headrow"><div><div class="slh-title">⚙️ Hub Settings</div><div class="slh-sub">SakaLuX Script Hub v${VERSION}</div></div><button class="slh-close" id="slhs-close">×</button></div></div><div class="slh-settings">
+        createOverlay(`${headerMarkup('Hub Settings', `SakaLuX Script Hub v${VERSION}`, 'slhs-close', '⚙️', 'CONFIGURATION')}<div class="slh-settings">
             <div class="slh-setting"><label><input id="slhs-hide" type="checkbox" ${settings.hideIndividualButtons ? 'checked' : ''}> Hide individual script buttons</label></div>
             <div class="slh-setting"><label><input id="slhs-topbar" type="checkbox" ${settings.showTopbarSkull ? 'checked' : ''}> Show Torn-native blinking skull HUB before Messages</label></div>
             <div class="slh-setting"><label><input id="slhs-long" type="checkbox" ${settings.longPressQuickMenu ? 'checked' : ''}> Long press fallback floating skull opens Quick Menu</label></div>
             <div class="slh-setting"><label><input id="slhs-auto" type="checkbox" ${settings.autoCheckUpdates ? 'checked' : ''}> Automatically check Greasy Fork updates</label></div>
             <div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
-            <div class="slh-setting"><b>🔑 SHARED SAKALUX TORN API KEY</b><div style="margin-top:4px;color:#9ca3af">One key for Enhancer Guard, Mission Rewards, Market Intelligence and Elimination Assistant. Bazaar Thanker does not require a Torn API key.</div><div id="slhs-api-status" style="margin-top:6px;color:${getSharedApiKey() ? '#4ade80' : '#fbbf24'}">${getSharedApiKey() ? '✅ Shared key saved' : '⚠️ No shared key saved'}</div><input id="slhs-api-key" type="password" autocomplete="off" placeholder="Paste the newly created Torn API key"><button class="slh-big-btn update" id="slhs-api-create">🔑 CREATE GENERAL API KEY</button><div class="slh-api-actions"><button class="slh-big-btn" id="slhs-api-save">SAVE & TEST</button><button class="slh-big-btn red" id="slhs-api-clear">CLEAR KEY</button></div></div>
+            <div class="slh-setting"><b>🔑 SHARED SAKALUX TORN API KEY</b><div style="margin-top:4px;color:#8fa0b3">One key for Enhancer Guard, Mission Rewards, Market Intelligence and Elimination Assistant. Bazaar Thanker does not require a Torn API key.</div><div id="slhs-api-status" style="margin-top:6px;color:${getSharedApiKey() ? '#72d6a2' : '#e7c675'}">${getSharedApiKey() ? '✅ Shared key saved' : '⚠️ No shared key saved'}</div><input id="slhs-api-key" type="password" autocomplete="off" placeholder="Paste the newly created Torn API key"><button class="slh-big-btn update" id="slhs-api-create">🔑 CREATE GENERAL API KEY</button><div class="slh-api-actions"><button class="slh-big-btn" id="slhs-api-save">SAVE & TEST</button><button class="slh-big-btn red" id="slhs-api-clear">CLEAR KEY</button></div></div>
             <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-registry">🔄 REFRESH scripts.json</button><button class="slh-big-btn update" id="slhs-check">⬆ CHECK UPDATES NOW</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
         </div>`);
         const position = document.getElementById('slhs-position');
@@ -1220,24 +1102,11 @@
             const input = document.getElementById('slhs-api-key');
             const status = document.getElementById('slhs-api-status');
             const key = input.value.trim() || getSharedApiKey();
-            status.style.color = '#fbbf24';
-            status.textContent = '⏳ Testing shared key...';
-            try {
-                await testSharedApiKey(key);
-                setSharedApiKey(key);
-                input.value = '';
-                status.style.color = '#4ade80';
-                status.textContent = '✅ Shared key valid and saved';
-            } catch (error) {
-                status.style.color = '#fb7185';
-                status.textContent = '❌ ' + String(error?.message || error);
-            }
+            status.style.color = '#e7c675'; status.textContent = '⏳ Testing shared key...';
+            try { await testSharedApiKey(key); setSharedApiKey(key); input.value = ''; status.style.color = '#72d6a2'; status.textContent = '✅ Shared key valid and saved'; }
+            catch (error) { status.style.color = '#f09aa8'; status.textContent = '❌ ' + String(error?.message || error); }
         };
-        document.getElementById('slhs-api-clear').onclick = () => {
-            if (!confirm('Remove the shared SakaLuX Torn API key?')) return;
-            setSharedApiKey('');
-            openSettings();
-        };
+        document.getElementById('slhs-api-clear').onclick = () => { if (!confirm('Remove the shared SakaLuX Torn API key?')) return; setSharedApiKey(''); openSettings(); };
         document.getElementById('slhs-save').onclick = () => {
             settings.hideIndividualButtons = document.getElementById('slhs-hide').checked;
             settings.showTopbarSkull = document.getElementById('slhs-topbar').checked;
@@ -1246,12 +1115,7 @@
             settings.buttonPosition = position.value;
             settings.buttonSize = Number(size.value);
             saveJson(STORAGE.settings, settings);
-            updateHiddenButtons();
-            positionButton();
-            document.getElementById(IDS.topSkull)?.remove();
-            createTopbarSkull();
-            syncFloatingButtonVisibility();
-            openHub();
+            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); openHub();
         };
         document.getElementById('slhs-registry').onclick = async () => { await loadRegistry(true); openSettings(); };
         document.getElementById('slhs-check').onclick = async () => { await checkAllUpdates(true); openHub(); };
@@ -1262,12 +1126,8 @@
 
     async function backupSettings() {
         const text = JSON.stringify({ app: 'SakaLuX Script Hub', version: VERSION, created: Date.now(), settings, favorites: [...favorites], usage });
-        try {
-            await navigator.clipboard.writeText(text);
-            alert('Hub backup copied to clipboard.');
-        } catch {
-            prompt('Copy this backup:', text);
-        }
+        try { await navigator.clipboard.writeText(text); alert('Hub backup copied to clipboard.'); }
+        catch { prompt('Copy this backup:', text); }
     }
 
     function restoreSettings() {
@@ -1279,86 +1139,40 @@
             settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
             favorites = new Set(Array.isArray(data.favorites) ? data.favorites : []);
             usage = data.usage && typeof data.usage === 'object' ? data.usage : {};
-            saveJson(STORAGE.settings, settings);
-            saveJson(STORAGE.favorites, [...favorites]);
-            saveJson(STORAGE.usage, usage);
-            updateHiddenButtons();
-            positionButton();
-            document.getElementById(IDS.topSkull)?.remove();
-            createTopbarSkull();
-            syncFloatingButtonVisibility();
-            alert('Backup restored.');
-            openHub();
-        } catch {
-            alert('Invalid Hub backup.');
-        }
+            saveJson(STORAGE.settings, settings); saveJson(STORAGE.favorites, [...favorites]); saveJson(STORAGE.usage, usage);
+            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); alert('Backup restored.'); openHub();
+        } catch { alert('Invalid Hub backup.'); }
     }
 
     function resetHub() {
         if (!confirm('Reset only SakaLuX Script Hub settings?')) return;
         Object.entries(STORAGE).forEach(([name, key]) => { if (name !== 'apiKey') localStorage.removeItem(key); });
-        settings = { ...DEFAULT_SETTINGS };
-        favorites = new Set();
-        usage = {};
-        updateCache = {};
-        registry = FALLBACK_REGISTRY;
-        SCRIPTS = normalizeRegistry(registry);
-        updateHiddenButtons();
-        positionButton();
-        document.getElementById(IDS.topSkull)?.remove();
-        createTopbarSkull();
-        syncFloatingButtonVisibility();
-        updateBadge();
-        openHub();
+        settings = { ...DEFAULT_SETTINGS }; favorites = new Set(); usage = {}; updateCache = {}; registry = FALLBACK_REGISTRY; SCRIPTS = normalizeRegistry(registry);
+        updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); updateBadge(); openHub();
     }
 
     function ensureEverything() {
-        injectCss();
-        createTopbarSkull();
-        createHubButton();
-        updateHiddenButtons();
-        updateBadge();
-        syncFloatingButtonVisibility();
+        injectCss(); createTopbarSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
     }
 
     function queueEnsure() {
         if (observerTimer) clearTimeout(observerTimer);
-        observerTimer = setTimeout(() => {
-            observerTimer = null;
-            ensureEverything();
-        }, 300);
+        observerTimer = setTimeout(() => { observerTimer = null; ensureEverything(); }, 300);
     }
 
     function startObserver() {
         if (observer) return;
-        observer = new MutationObserver(mutations => {
-            if (mutations.some(mutation => mutation.addedNodes.length || mutation.removedNodes.length)) queueEnsure();
-        });
+        observer = new MutationObserver(mutations => { if (mutations.some(mutation => mutation.addedNodes.length || mutation.removedNodes.length)) queueEnsure(); });
         observer.observe(document.body, { childList: true, subtree: true });
         window.addEventListener('hashchange', () => setTimeout(queueEnsure, 250));
     }
 
     window.SakaLuXScriptHub = {
-        id: 'script-hub',
-        name: 'SakaLuX Script Hub',
-        version: VERSION,
-        ready: true,
-        open: () => { openHub(); return true; },
-        getApiKey: getSharedApiKey,
-        setApiKey: setSharedApiKey,
-        hasApiKey: () => Boolean(getSharedApiKey()),
-        createRequiredTornKey: createSharedApiKey,
+        id: 'script-hub', name: 'SakaLuX Script Hub', version: VERSION, ready: true,
+        open: () => { openHub(); return true; }, getApiKey: getSharedApiKey, setApiKey: setSharedApiKey,
+        hasApiKey: () => Boolean(getSharedApiKey()), createRequiredTornKey: createSharedApiKey,
         refresh: async () => { await loadRegistry(true); await checkAllUpdates(true); return true; },
-        health: () => ({
-            ready: true,
-            version: VERSION,
-            registryStatus,
-            addOns: SCRIPTS.length,
-            installed: SCRIPTS.filter(script => script.api()).length,
-            updates: getUpdateCount(),
-            sharedApiKey: Boolean(getSharedApiKey()),
-            nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull))
-        })
+        health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)) })
     };
 
     window.dispatchEvent(new CustomEvent('SakaLuX:ScriptHubReady', { detail: { version: VERSION } }));
