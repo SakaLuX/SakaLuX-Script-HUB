@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.0.2
+// @version      1.0.3
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,9 +29,9 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.0.2',base:'https://api.torn.com/v2',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.0.3',base:'https://api.torn.com/v2',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
-const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,workstats,job&company=profile,employees,stock';
+const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
 const KEY={
  api:APP.key+':api', mode:APP.key+':mode', compact:APP.key+':compact', enabled:APP.key+':enabled',
@@ -76,12 +76,26 @@ async function api(path){
  return req(`${APP.base}${path}${path.includes('?')?'&':'?'}key=${encodeURIComponent(k)}`);
 }
 const unwrap=(o,...keys)=>{if(!o||typeof o!=='object')return o;for(const k of keys)if(o[k]!=null)return o[k];return o};
-const basic=()=>unwrap(S.data.basic,'basic')||{};
+const basic=()=>unwrap(S.data.basic,'basic','profile')||{};
 const work=()=>{
  const w=unwrap(S.data.workstats,'workstats','working_stats')||{};
  return {manual:num(first(w,['manual_labor','manual','man'],0)),intelligence:num(first(w,['intelligence','int'],0)),endurance:num(first(w,['endurance','end'],0))};
 };
 const job=()=>unwrap(S.data.job,'job')||{};
+const userProfile=()=>unwrap(S.data.userProfile,'profile','user')||{};
+function companyIdFromPage(){
+ for(const a of document.querySelectorAll('a[href*="company"]')){
+  const h=String(a.getAttribute('href')||'');
+  const m=h.match(/(?:companyprofile\.php|companies\.php)[^#]*(?:ID|companyID|company_id)=(\d+)/i);
+  if(m&&num(m[1])>0)return num(m[1]);
+ }
+ const m=location.href.match(/(?:ID|companyID|company_id)=(\d+)/i);return m?num(m[1]):0;
+}
+function detectCompanyId(){
+ const paths=['company_id','companyId','company.id','company.company_id','company.companyId','job.company_id','job.companyId','job.company.id','employment.company_id','employment.company.id'];
+ for(const src of [job(),userProfile(),S.data.job,S.data.userProfile]){const id=num(first(src,paths,0));if(id>0)return id}
+ return companyIdFromPage();
+}
 const profile=()=>unwrap(S.data.profile,'company','profile')||{};
 function employees(){
  const x=unwrap(S.data.employees,'employees');
@@ -116,9 +130,9 @@ function normEmp(e){
 function meta(){
  const p=profile();
  return {
-  id:num(first(p,['id','company_id'],first(job(),['company_id','company.id','company.company_id'],0))),
-  name:first(p,['name','company_name'],first(job(),['company_name'],'Unknown company')),
-  type:first(p,['type.name','type','company_type','type_name'],first(job(),['company_type','type'],'Unknown')),
+  id:num(first(p,['id','company_id'],detectCompanyId())),
+  name:first(p,['name','company_name'],first(job(),['company_name','company.name','job.company_name','job.company.name'],first(userProfile(),['job.company_name','job.company.name'],'Unknown company'))),
+  type:first(p,['type.name','type','company_type','type_name'],first(job(),['company_type','company.type','type'],first(userProfile(),['job.company_type','job.company.type'],'Unknown'))),
   stars:num(first(p,['rating','stars','star_rating'],0)),
   age:num(first(p,['age','days_old','company_age'],0)),
   popularity:num(first(p,['popularity','performance.popularity'],0)),
@@ -184,7 +198,8 @@ async function refresh(){
  const userEndpoints={basic:'/user/basic',workstats:'/user/workstats',job:'/user/job'};
  const userResults=await Promise.allSettled(Object.entries(userEndpoints).map(async([k,p])=>[k,await api(p)]));
  for(const x of userResults)x.status==='fulfilled'?S.data[x.value[0]]=x.value[1]:S.errors.push(x.reason?.message||String(x.reason));
- const companyId=num(first(job(),['company_id','company.id','company.company_id'],0));
+ try{S.data.userProfile=await api('/user/profile')}catch{}
+ const companyId=detectCompanyId();
  delete S.data.profile;delete S.data.employees;delete S.data.stock;
  if(companyId){
   try{S.data.profile=await api(`/company/${companyId}/profile`)}catch(e){S.errors.push(e.code===7?'Company profile access is unavailable for this API key.':e.message||String(e))}
@@ -194,7 +209,7 @@ async function refresh(){
    const directorResults=await Promise.allSettled(Object.entries(directorEndpoints).map(async([k,p])=>[k,await api(p)]));
    for(const x of directorResults){if(x.status==='fulfilled')S.data[x.value[0]]=x.value[1];else S.errors.push(x.reason?.code===7?'Director access required for private company data.':x.reason?.message||String(x.reason))}
   }
- }else S.errors.push('No company ID was returned by Torn user/job data.');
+ }else if(S.mode==='director')S.errors.push('Company ID is unavailable, so private director data cannot be loaded. Employee history remains available.');
  S.loading=false;S.updated=now();saveSnapshot();render();
 }
 const card=(t,b)=>`<section class="ci-card"><div class="ci-title">${t}</div><div class="ci-body">${b}</div></section>`;
@@ -231,7 +246,7 @@ function employeeOffers(){
 }
 function history(){
  const a=arr(KEY.snapshots).slice().sort((x,y)=>y.ts-x.ts);
- return card('Daily Snapshots',a.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Company</th><th>Stars</th><th>Position</th><th>MAN</th><th>INT</th><th>END</th></tr></thead><tbody>${a.slice(0,60).map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.company?.name)}</td><td>${fmt(x.company?.stars)}★</td><td>${esc(x.myPosition)}</td><td>${fmt(x.workstats?.manual)}</td><td>${fmt(x.workstats?.intelligence)}</td><td>${fmt(x.workstats?.endurance)}</td></tr>`).join('')}</tbody></table></div>`:empty('Snapshots are saved automatically on refresh.'));
+ return card('Daily Snapshots',a.length?`<div class="ci-snapshots">${a.slice(0,60).map(x=>`<article class="ci-snapshot"><div class="ci-snapshot-head"><b>${esc(x.date)}</b><span>${esc(x.company?.name||'Unknown company')} · ${fmt(x.company?.stars)}★</span></div><div class="ci-snapshot-position"><span>POSITION</span><b>${esc(x.myPosition||'Unknown')}</b></div><div class="ci-snapshot-stats"><div><span>MAN</span><b>${fmt(x.workstats?.manual)}</b></div><div><span>INT</span><b>${fmt(x.workstats?.intelligence)}</b></div><div><span>END</span><b>${fmt(x.workstats?.endurance)}</b></div></div></article>`).join('')}</div>`:empty('Snapshots are saved automatically on refresh.'));
 }
 function directorOverview(){
  const m=meta(),h=health(),[rl,rc]=risk(h.score),e=employees().map(normEmp),pay=e.reduce((a,x)=>a+x.wage,0);
@@ -262,7 +277,7 @@ function directorStock(){
  const a=stocks();return card('Stock Intelligence',a.length?`<div class="ci-tablewrap"><table><thead><tr><th>Item</th><th>Current</th><th>Cost</th><th>Value</th><th>Status</th></tr></thead><tbody>${a.map(x=>{const q=num(first(x,['quantity','stock','amount'],0)),c=num(first(x,['cost','price','unit_cost'],0)),cap=num(first(x,['capacity','max','maximum'],0)),ratio=cap?q/cap:1;return `<tr><td>${esc(x.name||x.item||x.item_name||'Stock')}</td><td>${fmt(q)}${cap?' / '+fmt(cap):''}</td><td>${money(c)}</td><td>${money(num(first(x,['value','total_value'],q*c)))}</td><td>${ratio<.2?badge('LOW','bad'):ratio<.4?badge('WATCH','warn'):badge('OK','good')}</td></tr>`}).join('')}</tbody></table></div>`:empty('No stock data exposed for this company/API response.'));
 }
 function settings(){
- return `<div class="ci-grid">${card('🔑 API Access',`<div class="ci-api-required"><b>Required Torn access</b><span>User: Basic, Work Stats, Job</span><span>Company: Profile, Employees, Stock</span></div><a class="ci-btn ci-api-create" href="${API_CREATE_URL}" target="_self">CREATE REQUIRED TORN KEY</a><div class="ci-api-source"><span>Active source</span><b>${esc(apiSource())}</b></div>${hubApiKey()?'<p class="ci-note ci-good-note">The shared Hub key is active. A local key is optional and remains available when this script runs separately.</p>':''}<label class="ci-field"><span>Standalone Torn API key</span><input id="ci-api" type="password" value="${esc(get(KEY.api,''))}" placeholder="Paste API key"></label><div class="ci-actions ci-api-actions"><button class="ci-btn primary" data-act="save-key">SAVE KEY</button><button class="ci-btn" data-act="test-key">TEST & REFRESH</button><button class="ci-btn danger" data-act="clear-key">CLEAR LOCAL KEY</button></div><p class="ci-note">The key is stored locally only. Director data is available only when Torn allows the key owner to access that company information.</p>`)}
+ return `<div class="ci-grid">${card('🔑 API Access',`<div class="ci-api-required"><b>Required Torn access</b><span>User: Basic, Profile, Work Stats, Job</span><span>Company: Profile, Employees, Stock</span></div><a class="ci-btn ci-api-create" href="${API_CREATE_URL}" target="_self">CREATE REQUIRED TORN KEY</a><div class="ci-api-source"><span>Active source</span><b>${esc(apiSource())}</b></div>${hubApiKey()?'<p class="ci-note ci-good-note">The shared Hub key is active. A local key is optional and remains available when this script runs separately.</p>':''}<label class="ci-field"><span>Standalone Torn API key</span><input id="ci-api" type="password" value="${esc(get(KEY.api,''))}" placeholder="Paste API key"></label><div class="ci-actions ci-api-actions"><button class="ci-btn primary" data-act="save-key">SAVE KEY</button><button class="ci-btn" data-act="test-key">TEST & REFRESH</button><button class="ci-btn danger" data-act="clear-key">CLEAR LOCAL KEY</button></div><p class="ci-note">The key is stored locally only. Director data is available only when Torn allows the key owner to access that company information.</p>`)}
  ${card('Interface',`<label class="ci-check"><input id="ci-compact" type="checkbox" ${S.compact?'checked':''}> Compact PDA mode</label>`)}
  ${card('Local data',`<div class="ci-actions"><button class="ci-btn" data-act="export">Export</button><button class="ci-btn" data-act="import">Import</button><button class="ci-btn danger" data-act="clear">Clear history</button></div>`)}</div>`;
 }
@@ -293,7 +308,8 @@ function css(){
 .ci-shell{width:min(1180px,100%);background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%);border:1px solid #314154;border-radius:16px;box-shadow:0 22px 80px #000b;overflow:hidden}
 .ci-head{display:flex;gap:8px;align-items:center;padding:11px 12px;background:linear-gradient(155deg,#1b2634,#111923);border-bottom:1px solid #314154;position:sticky;top:0;z-index:3}.ci-brand{flex:1;min-width:0}.ci-brand b{display:block;color:#f8fafc;font-size:16px}.ci-brand small{color:#8fa0b5}.ci-mode{display:flex;border:1px solid #394b61;border-radius:9px;overflow:hidden}.ci-mode button,.ci-icon{border:0;background:#17212d;color:#c5d0dc;padding:8px 9px;cursor:pointer}.ci-mode button.active{background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff}.ci-icon{border:1px solid #3a4a5d;border-radius:8px}.ci-icon.api{border-color:#78621b;background:#29240f;color:#f5d85f}
 .ci-tabs{display:flex;gap:4px;overflow:auto;padding:7px;background:#0c1219;border-bottom:1px solid #2d3c4e}.ci-tabs button{white-space:nowrap;border:0;background:transparent;color:#95a2b1;padding:8px 10px;border-radius:8px;font-weight:800}.ci-tabs button.active{background:#234d7d;color:#fff}.ci-body{padding:10px}.ci-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ci-card{background:linear-gradient(145deg,#18212d,#131b25);border:1px solid #2d3c4e;border-radius:12px;overflow:hidden;margin-bottom:9px;box-shadow:0 6px 18px rgba(0,0,0,.14)}.ci-title{padding:9px 11px;font-weight:900;border-bottom:1px solid #2d3c4e;color:#f1f5f9}.ci-body .ci-body{padding:9px 11px}.ci-kv{display:grid;grid-template-columns:minmax(110px,1fr) auto;gap:4px 9px;padding:5px 0;border-bottom:1px solid #222b35}.ci-kv span{color:#9eabb9}.ci-kv b{text-align:right}.ci-kv small{grid-column:1/-1;color:#768493}.ci-score{display:flex;justify-content:space-between;align-items:center;padding:11px;border-radius:9px;background:#1b2530;margin-bottom:7px}.ci-score b{font-size:24px}.ci-score.good{border-left:4px solid #49c68d}.ci-score.warn{border-left:4px solid #f2bd52}.ci-score.bad{border-left:4px solid #ef7070}.ci-line{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid #222b35}.ci-line small{color:#748190}.pos{color:#59d29a}.neg{color:#f07d7d}.ci-badge{display:inline-block;padding:3px 6px;border-radius:999px;background:#27313e;color:#ccd5df;font-size:10px;font-weight:800}.ci-badge.good{background:#173a2d;color:#6ee0aa}.ci-badge.warn{background:#493a18;color:#f5cf70}.ci-badge.bad{background:#482323;color:#ff9292}.ci-btn{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;border:1px solid #3d78bf;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;border-radius:9px;padding:8px 10px;font-weight:900;cursor:pointer;text-decoration:none}.ci-btn.primary{background:linear-gradient(180deg,#377fcf,#275f9f);border-color:#4b8bd4}.ci-btn.danger{background:linear-gradient(180deg,#733344,#54232f);border-color:#864354;color:#ffd7df}.ci-actions{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}.ci-tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border-bottom:1px solid #28313b;padding:7px 6px;text-align:left;white-space:nowrap}th{color:#91a0af;font-size:10px;text-transform:uppercase}td small{display:block;color:#6f7d8c}.ci-empty{color:#82909e;padding:12px 2px}.ci-note{color:#8391a0;font-size:11px;line-height:1.45}.ci-good-note{color:#78d98b}.ci-field{display:block}.ci-field span{display:block;color:#9ba8b7;font-size:11px;margin-bottom:5px}.ci-field input,.ci-field select{width:100%;box-sizing:border-box;background:#0d141d;color:#f4f7fb;border:1px solid #3a4b61;border-radius:9px;padding:9px}.ci-api-required{display:grid;gap:4px;padding:10px;border:1px solid #66591d;border-radius:9px;background:#211d10;color:#e4c95d;font-size:11px}.ci-api-create{width:100%;margin:9px 0;background:#2a2512;border-color:#7c681e;color:#f5d85f}.ci-api-source{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;padding:8px;border-radius:7px;background:#101720;color:#9ba8b7;font-size:11px}.ci-api-source b{color:#f5d85f}.ci-api-actions .danger{margin-left:auto}.ci-status{padding:7px 10px;color:#81909f;font-size:11px;border-top:1px solid #26303b;background:#0c1117}.ci-footer{padding:10px 8px 9px;border-top:1px solid #2d3c4e;background:rgba(10,15,21,.72);color:#8e99a8;text-align:center;font:700 10px/1.25 Arial}.ci-footer a{color:#d7a94a;text-decoration:none;font-weight:900}.ci-error{background:#421f25;color:#ffb6bf;padding:7px 9px;border-radius:7px;margin-bottom:7px}.ci-dialogback{position:fixed;inset:0;z-index:1000000;background:#000b;display:flex;align-items:center;justify-content:center;padding:14px}.ci-dialog{width:min(460px,100%);background:linear-gradient(155deg,#1b2634,#111923);border:1px solid #3b4654;border-radius:12px;padding:13px}.ci-dialog h3{margin:0 0 10px;color:#f8fafc}.ci-form{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ci-form .wide{grid-column:1/-1}.ci-compact .ci-body{padding:7px}.ci-compact .ci-card .ci-body{padding:7px 8px}.ci-compact .ci-kv{padding:3px 0}
-@media(max-width:720px){#ci-root{padding:0;align-items:stretch}.ci-shell{min-height:100vh;border:0;border-radius:0}.ci-grid{grid-template-columns:1fr}.ci-head{padding:7px}.ci-brand b{font-size:13px}.ci-brand small{font-size:10px}.ci-mode button{font-size:10px;padding:7px}.ci-tabs{padding:5px}.ci-tabs button{font-size:11px;padding:7px 8px}.ci-form{grid-template-columns:1fr}.ci-form .wide{grid-column:auto}#ci-launch{right:8px;bottom:72px}}
+.ci-snapshots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ci-snapshot{background:#0e1620;border:1px solid #304156;border-radius:10px;padding:10px;min-width:0}.ci-snapshot-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:8px;border-bottom:1px solid #283646}.ci-snapshot-head b{color:#f3c85d;font-size:13px;white-space:nowrap}.ci-snapshot-head span{color:#e6edf5;font-weight:800;text-align:right;overflow-wrap:anywhere}.ci-snapshot-position{display:flex;justify-content:space-between;gap:10px;padding:9px 0}.ci-snapshot-position span,.ci-snapshot-stats span{color:#8494a7;font-size:9px;font-weight:900;letter-spacing:.08em}.ci-snapshot-position b{color:#dbe7f4;text-align:right}.ci-snapshot-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.ci-snapshot-stats div{display:flex;flex-direction:column;gap:3px;background:#172230;border-radius:7px;padding:8px;text-align:center}.ci-snapshot-stats b{color:#66d7a1;font-size:14px}
+@media(max-width:720px){#ci-root{padding:0;align-items:stretch}.ci-shell{min-height:100vh;border:0;border-radius:0}.ci-grid,.ci-snapshots{grid-template-columns:1fr}.ci-head{padding:7px}.ci-brand b{font-size:13px}.ci-brand small{font-size:10px}.ci-mode button{font-size:10px;padding:7px}.ci-tabs{padding:5px}.ci-tabs button{font-size:11px;padding:7px 8px}.ci-form{grid-template-columns:1fr}.ci-form .wide{grid-column:auto}#ci-launch{right:8px;bottom:72px}}
 `;document.head.appendChild(st);
 }
 function render(){
