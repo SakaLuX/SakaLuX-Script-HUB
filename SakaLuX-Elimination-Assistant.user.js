@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.7
+// @version      1.3.8
 // @description  Torn Eliminations advisor with rotating 500-player batches, compact actions, availability status, TornPDA export and FF/BS calibration.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -28,7 +28,7 @@
  */
 (() => {
 'use strict';
-const VERSION='1.3.7';
+const VERSION='1.3.8';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -207,6 +207,6 @@ function health(){const batchStart=Number(state.batchOffsets[String(state.teamId
 function goToEliminations(){location.href='https://www.torn.com/page.php?sid=elimination'}
 window.SakaLuXEliminationAssistant={version:VERSION,open,close,openApiSettings:openSettings,refresh:()=>busy(refresh),scanFF:()=>busy(()=>loadFF(true)),exportTargets:()=>busy(exportTargets),calibrate:()=>busy(()=>calibrate(true)),testTornKey:()=>busy(testKey),testFFScouterKey:()=>busy(testFFKey),createRequiredTornKey:createKey,setEnabled,toggleEnabled,isEnabled:()=>state.enabled,goToEliminations,health};
 window.dispatchEvent(new CustomEvent('SakaLuXEliminationAssistantReady',{detail:{version:VERSION,enabled:state.enabled}}));
-function start(){syncHubPower();setInterval(syncHubPower,900);if(state.enabled){inject();syncApiButton();setTimeout(showHubPrompt,1200);if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href))setTimeout(()=>{open();openSettings()},900)}}
+function start(){try{localStorage.setItem('SakaLuX_Installed_elimination',VERSION)}catch{}syncHubPower();setInterval(syncHubPower,900);if(state.enabled){inject();syncApiButton();setTimeout(showHubPrompt,1200);if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href))setTimeout(()=>{open();openSettings()},900)}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
