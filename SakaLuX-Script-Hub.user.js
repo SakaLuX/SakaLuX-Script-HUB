@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.9
+// @version      1.9.10
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.9';
+    const VERSION = '1.9.10';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -39,6 +39,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.10',
+            date: '2026-09-11',
+            changes: [
+                'Fixed false OFF and INSTALL states in Violentmonkey isolated userscript sandboxes on macOS and desktop browsers.',
+                'Installation markers are checked before sandboxed window APIs, with legacy Elimination marker support.',
+                'Added hidden DOM control bridges so ON/OFF and OPEN work across isolated userscript contexts.'
+            ]
+        },
         {
             version: '1.9.9',
             date: '2026-09-11',
@@ -156,7 +165,7 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.17',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.18',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -171,7 +180,7 @@
             },
             {
                 id: 'bazaar', type: 'addon', active: true,
-                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.9',
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.10',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
@@ -186,7 +195,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.7',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.8',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -201,7 +210,7 @@
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.7',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.8',
                 description: 'Market and travel intelligence with clickable Best Travel Run routes, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
@@ -217,7 +226,7 @@
             },
             {
                 id: 'elimination-assistant', type: 'addon', active: true,
-                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.16',
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.17',
                 description: 'Eliminations advisor with rotating target batches, availability status and TornPDA export.',
                 greasyForkId: '594921',
                 metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
@@ -419,15 +428,19 @@
 
     function getInstalledVersion(script) {
         try {
-            const api = script.api();
-            if (!api) return null;
-            if (api.version) return String(api.version);
-            const health = api.health?.();
-            return health?.version ? String(health.version) : null;
+            const marker = localStorage.getItem('SakaLuX_Installed_' + script.id)
+                || (script.id === 'elimination-assistant' ? localStorage.getItem('SakaLuX_Installed_elimination') : '');
+            if (marker) return String(marker);
         } catch {}
         try {
-            const marker = localStorage.getItem('SakaLuX_Installed_' + script.id);
-            if (marker) return String(marker);
+            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+            if (bridge?.dataset?.version) return String(bridge.dataset.version);
+        } catch {}
+        try {
+            const api = script.api();
+            if (api?.version) return String(api.version);
+            const health = api?.health?.();
+            if (health?.version) return String(health.version);
         } catch {}
         try {
             return document.querySelector(script.buttonSelector) ? '?' : null;
@@ -575,6 +588,9 @@
             const health = api && typeof api.health === 'function' ? api.health() : null;
             if (typeof health?.enabled === 'boolean') return health.enabled;
         } catch {}
+        const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+        if (bridge?.dataset?.enabled === 'true') return true;
+        if (bridge?.dataset?.enabled === 'false') return false;
         return Object.prototype.hasOwnProperty.call(modulePower, script.id) ? modulePower[script.id] !== false : true;
     }
 
@@ -582,10 +598,14 @@
         const script = SCRIPTS.find(item => item.id === id);
         if (!script) return false;
         const api = script.api();
-        if (!api || typeof api.setEnabled !== 'function' || typeof api.isEnabled !== 'function') {
-            throw new Error('Update ' + script.name + ' to the latest version to use its ON/OFF switch.');
+        if (api && typeof api.setEnabled === 'function' && typeof api.isEnabled === 'function') {
+            await api.setEnabled(Boolean(enabled));
+        } else {
+            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+            if (!bridge) throw new Error('Update ' + script.name + ' to the latest version to use its Violentmonkey control bridge.');
+            bridge.dataset.action = enabled ? 'on' : 'off';
+            bridge.click();
         }
-        await api.setEnabled(Boolean(enabled));
         modulePower[id] = Boolean(enabled);
         saveJson(STORAGE.modulePower, modulePower);
         updateHiddenButtons();
@@ -1102,7 +1122,7 @@
         if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? 'Standby' : `Rewards ${health.data.rewardCards ?? 0}`;
         const enabled = !missing && isModuleEnabled(script);
         const moduleApi = script.api();
-        const powerReady = Boolean(moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function');
+        const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id));
         const primary = getPrimaryAction(script);
         const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
         const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'failed' ? 'bad' : 'muted';
@@ -1156,6 +1176,23 @@
         if (!script) return;
         const api = script.api();
         if (!api) {
+            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+            if (bridge) {
+                bridge.dataset.action = 'open';
+                bridge.click();
+                recordUsage(id);
+                closeHub();
+                return;
+            }
+            if (script.fallbackOpen()) {
+                recordUsage(id);
+                closeHub();
+                return;
+            }
+            if (getInstalledVersion(script)) {
+                alert(script.name + ' is installed, but this version needs the Violentmonkey bridge update before Hub can open it.');
+                return;
+            }
             const url = getInstallUrl(script);
             if (url) location.href = url;
             return;
