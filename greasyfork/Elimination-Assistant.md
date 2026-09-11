@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.14**
+**v1.3.15**
 
 ## What it does
 
@@ -25,6 +25,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.15 — Compact sliding target switches
+
+- Replaced oversized TARGETS checkboxes with compact sliding ON/OFF switches.
+- Kept ATTACKABLE, SAFE, RISKY and UNOPENED on single clean rows.
+- Reduced TARGETS popup width and vertical footprint for TornPDA.
 
 ### v1.3.14 — Compact TARGETS menu
 

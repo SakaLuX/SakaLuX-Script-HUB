@@ -217,7 +217,7 @@
             },
             {
                 id: 'elimination-assistant', type: 'addon', active: true,
-                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.14',
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.15',
                 description: 'Eliminations advisor with rotating target batches, availability status and TornPDA export.',
                 greasyForkId: '594921',
                 metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
