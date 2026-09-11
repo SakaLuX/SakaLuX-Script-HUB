@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.4
+// @version      1.0.5
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,7 +30,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.0.4';
+    const VERSION = '1.0.5';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -737,4 +737,29 @@
     } else {
         init();
     }
+
+
+    /* SakaLuX Unified Control Center UI — visual layer only. */
+    function installSakaLuXUnifiedTheme_mission_rewards() {
+        if (document.getElementById('sakalux-unified-theme-mission-rewards')) return;
+        const style = document.createElement('style');
+        style.id = 'sakalux-unified-theme-mission-rewards';
+        style.textContent = `
+:where([id^="sl-mr-"],[class*="sl-mr-"],[id^="sl-mri-"],[class*="sl-mri-"]){font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}
+:where([id^="sl-mr-"][id*="panel" i],[id^="sl-mr-"][id*="settings" i],[id^="sl-mr-"][id*="modal" i],[id^="sl-mr-"][id*="details" i],[id^="sl-mri-"][id*="panel" i],[id^="sl-mri-"][id*="settings" i],[id^="sl-mri-"][id*="modal" i],[id^="sl-mri-"][id*="details" i]){background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important}
+:where([class*="sl-mr-"][class*="header" i],[id^="sl-mr-"][id*="header" i],[class*="sl-mri-"][class*="header" i],[id^="sl-mri-"][id*="header" i]){background:linear-gradient(155deg,#1b2634,#111923)!important;border-color:#314154!important;color:#f8fafc!important}
+:where([class*="sl-mr-"][class*="card" i],[class*="sl-mr-"][class*="row" i],[class*="sl-mr-"][class*="section" i],[class*="sl-mr-"][class*="note" i],[class*="sl-mri-"][class*="card" i],[class*="sl-mri-"][class*="row" i],[class*="sl-mri-"][class*="section" i],[class*="sl-mri-"][class*="note" i]){background:linear-gradient(145deg,#18212d,#131b25)!important;border-color:#2d3c4e!important;border-radius:12px!important;color:#dce6f0!important;box-shadow:0 6px 18px rgba(0,0,0,.14)!important}
+:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"]){border:1px solid #3d78bf!important;border-radius:10px!important;background:linear-gradient(180deg,#377fcf,#275f9f)!important;color:#fff!important;font-weight:900!important;box-shadow:none!important;transition:transform .12s ease,filter .12s ease!important}
+:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"]):active{transform:translateY(1px)!important}
+:where(input[id^="sl-mr-"],select[id^="sl-mr-"],textarea[id^="sl-mr-"],[id^="sl-mr-"] input,[id^="sl-mr-"] select,[id^="sl-mr-"] textarea,input[id^="sl-mri-"],select[id^="sl-mri-"],textarea[id^="sl-mri-"],[id^="sl-mri-"] input,[id^="sl-mri-"] select,[id^="sl-mri-"] textarea){background:#0d141d!important;border:1px solid #3a4b61!important;border-radius:9px!important;color:#f4f7fb!important;outline:none!important}
+:where(input[type="checkbox"][id^="sl-mr-"],input[type="checkbox"][id^="sl-mri-"]){appearance:none!important;-webkit-appearance:none!important;width:38px!important;height:21px!important;min-width:38px!important;margin:0 8px 0 0!important;vertical-align:middle!important;border:1px solid #546276!important;border-radius:999px!important;background:radial-gradient(circle at 10px 50%,#e7edf5 0 6px,transparent 6.5px),#465365!important;cursor:pointer!important;transition:.18s ease!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important}
+:where(input[type="checkbox"][id^="sl-mr-"],input[type="checkbox"][id^="sl-mri-"]):checked{border-color:#24754f!important;background:radial-gradient(circle at 27px 50%,#fff 0 6px,transparent 6.5px),#1eb36a!important}
+:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[id*="close" i],:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[class*="close" i],:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[id*="back" i],:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[class*="gray" i],:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[class*="secondary" i]{background:linear-gradient(180deg,#253243,#1a2431)!important;border-color:#3a4a5d!important;color:#d7e1eb!important}
+:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[id*="clear" i],:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[id*="reset" i],:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[id*="delete" i],:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[class*="danger" i],:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"])[class*="red" i]{background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+@media(max-width:520px){:where([id^="sl-mr-"][id*="panel" i],[id^="sl-mr-"][id*="settings" i],[id^="sl-mr-"][id*="modal" i],[id^="sl-mr-"][id*="details" i],[id^="sl-mri-"][id*="panel" i],[id^="sl-mri-"][id*="settings" i],[id^="sl-mri-"][id*="modal" i],[id^="sl-mri-"][id*="details" i]){border-radius:15px!important}:where(button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"]){min-height:34px!important}}
+`;
+        (document.head || document.documentElement).appendChild(style);
+    }
+    installSakaLuXUnifiedTheme_mission_rewards();
+
 })();

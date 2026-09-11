@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.8
+// @version      1.3.9
 // @description  Torn Eliminations advisor with rotating 500-player batches, compact actions, availability status, TornPDA export and FF/BS calibration.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -28,7 +28,7 @@
  */
 (() => {
 'use strict';
-const VERSION='1.3.8';
+const VERSION='1.3.9';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -209,4 +209,29 @@ window.SakaLuXEliminationAssistant={version:VERSION,open,close,openApiSettings:o
 window.dispatchEvent(new CustomEvent('SakaLuXEliminationAssistantReady',{detail:{version:VERSION,enabled:state.enabled}}));
 function start(){try{localStorage.setItem('SakaLuX_Installed_elimination',VERSION)}catch{}syncHubPower();setInterval(syncHubPower,900);if(state.enabled){inject();syncApiButton();setTimeout(showHubPrompt,1200);if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href))setTimeout(()=>{open();openSettings()},900)}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+
+
+    /* SakaLuX Unified Control Center UI — visual layer only. */
+    function installSakaLuXUnifiedTheme_elimination_assistant() {
+        if (document.getElementById('sakalux-unified-theme-elimination-assistant')) return;
+        const style = document.createElement('style');
+        style.id = 'sakalux-unified-theme-elimination-assistant';
+        style.textContent = `
+:where([id^="slx-elim-"],[class*="slx-elim-"]){font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}
+:where([id^="slx-elim-"][id*="panel" i],[id^="slx-elim-"][id*="settings" i],[id^="slx-elim-"][id*="modal" i],[id^="slx-elim-"][id*="details" i]){background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important}
+:where([class*="slx-elim-"][class*="header" i],[id^="slx-elim-"][id*="header" i]){background:linear-gradient(155deg,#1b2634,#111923)!important;border-color:#314154!important;color:#f8fafc!important}
+:where([class*="slx-elim-"][class*="card" i],[class*="slx-elim-"][class*="row" i],[class*="slx-elim-"][class*="section" i],[class*="slx-elim-"][class*="note" i]){background:linear-gradient(145deg,#18212d,#131b25)!important;border-color:#2d3c4e!important;border-radius:12px!important;color:#dce6f0!important;box-shadow:0 6px 18px rgba(0,0,0,.14)!important}
+:where(button[id^="slx-elim-"],button[class*="slx-elim-"]){border:1px solid #3d78bf!important;border-radius:10px!important;background:linear-gradient(180deg,#377fcf,#275f9f)!important;color:#fff!important;font-weight:900!important;box-shadow:none!important;transition:transform .12s ease,filter .12s ease!important}
+:where(button[id^="slx-elim-"],button[class*="slx-elim-"]):active{transform:translateY(1px)!important}
+:where(input[id^="slx-elim-"],select[id^="slx-elim-"],textarea[id^="slx-elim-"],[id^="slx-elim-"] input,[id^="slx-elim-"] select,[id^="slx-elim-"] textarea){background:#0d141d!important;border:1px solid #3a4b61!important;border-radius:9px!important;color:#f4f7fb!important;outline:none!important}
+:where(input[type="checkbox"][id^="slx-elim-"]){appearance:none!important;-webkit-appearance:none!important;width:38px!important;height:21px!important;min-width:38px!important;margin:0 8px 0 0!important;vertical-align:middle!important;border:1px solid #546276!important;border-radius:999px!important;background:radial-gradient(circle at 10px 50%,#e7edf5 0 6px,transparent 6.5px),#465365!important;cursor:pointer!important;transition:.18s ease!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important}
+:where(input[type="checkbox"][id^="slx-elim-"]):checked{border-color:#24754f!important;background:radial-gradient(circle at 27px 50%,#fff 0 6px,transparent 6.5px),#1eb36a!important}
+:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[id*="close" i],:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[class*="close" i],:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[id*="back" i],:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[class*="gray" i],:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[class*="secondary" i]{background:linear-gradient(180deg,#253243,#1a2431)!important;border-color:#3a4a5d!important;color:#d7e1eb!important}
+:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[id*="clear" i],:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[id*="reset" i],:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[id*="delete" i],:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[class*="danger" i],:where(button[id^="slx-elim-"],button[class*="slx-elim-"])[class*="red" i]{background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+@media(max-width:520px){:where([id^="slx-elim-"][id*="panel" i],[id^="slx-elim-"][id*="settings" i],[id^="slx-elim-"][id*="modal" i],[id^="slx-elim-"][id*="details" i]){border-radius:15px!important}:where(button[id^="slx-elim-"],button[class*="slx-elim-"]){min-height:34px!important}}
+`;
+        (document.head || document.documentElement).appendChild(style);
+    }
+    installSakaLuXUnifiedTheme_elimination_assistant();
+
 })();

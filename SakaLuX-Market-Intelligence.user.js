@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.2
+// @version      1.17.3
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -32,7 +32,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.17.2';
+    const VERSION = '1.17.3';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1779,4 +1779,29 @@
 
     function init(){try{localStorage.setItem('SakaLuX_Installed_market-intelligence',VERSION);}catch(_){}injectCss();saveTravelSessions();if(settings.enabled){startRuntime();maybePromptHub();if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href)){setTimeout(()=>openSettings(),900);}}console.log('['+NAME+' v'+VERSION+'] Loaded.');}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+
+
+    /* SakaLuX Unified Control Center UI — visual layer only. */
+    function installSakaLuXUnifiedTheme_market_intelligence() {
+        if (document.getElementById('sakalux-unified-theme-market-intelligence')) return;
+        const style = document.createElement('style');
+        style.id = 'sakalux-unified-theme-market-intelligence';
+        style.textContent = `
+:where([id^="sl-mi-"],[class*="sl-mi-"]){font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}
+:where([id^="sl-mi-"][id*="panel" i],[id^="sl-mi-"][id*="settings" i],[id^="sl-mi-"][id*="modal" i],[id^="sl-mi-"][id*="details" i]){background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important}
+:where([class*="sl-mi-"][class*="header" i],[id^="sl-mi-"][id*="header" i]){background:linear-gradient(155deg,#1b2634,#111923)!important;border-color:#314154!important;color:#f8fafc!important}
+:where([class*="sl-mi-"][class*="card" i],[class*="sl-mi-"][class*="row" i],[class*="sl-mi-"][class*="section" i],[class*="sl-mi-"][class*="note" i]){background:linear-gradient(145deg,#18212d,#131b25)!important;border-color:#2d3c4e!important;border-radius:12px!important;color:#dce6f0!important;box-shadow:0 6px 18px rgba(0,0,0,.14)!important}
+:where(button[id^="sl-mi-"],button[class*="sl-mi-"]){border:1px solid #3d78bf!important;border-radius:10px!important;background:linear-gradient(180deg,#377fcf,#275f9f)!important;color:#fff!important;font-weight:900!important;box-shadow:none!important;transition:transform .12s ease,filter .12s ease!important}
+:where(button[id^="sl-mi-"],button[class*="sl-mi-"]):active{transform:translateY(1px)!important}
+:where(input[id^="sl-mi-"],select[id^="sl-mi-"],textarea[id^="sl-mi-"],[id^="sl-mi-"] input,[id^="sl-mi-"] select,[id^="sl-mi-"] textarea){background:#0d141d!important;border:1px solid #3a4b61!important;border-radius:9px!important;color:#f4f7fb!important;outline:none!important}
+:where(input[type="checkbox"][id^="sl-mi-"]){appearance:none!important;-webkit-appearance:none!important;width:38px!important;height:21px!important;min-width:38px!important;margin:0 8px 0 0!important;vertical-align:middle!important;border:1px solid #546276!important;border-radius:999px!important;background:radial-gradient(circle at 10px 50%,#e7edf5 0 6px,transparent 6.5px),#465365!important;cursor:pointer!important;transition:.18s ease!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important}
+:where(input[type="checkbox"][id^="sl-mi-"]):checked{border-color:#24754f!important;background:radial-gradient(circle at 27px 50%,#fff 0 6px,transparent 6.5px),#1eb36a!important}
+:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="close" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="close" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="back" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="gray" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="secondary" i]{background:linear-gradient(180deg,#253243,#1a2431)!important;border-color:#3a4a5d!important;color:#d7e1eb!important}
+:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="clear" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="reset" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="delete" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="danger" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="red" i]{background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+@media(max-width:520px){:where([id^="sl-mi-"][id*="panel" i],[id^="sl-mi-"][id*="settings" i],[id^="sl-mi-"][id*="modal" i],[id^="sl-mi-"][id*="details" i]){border-radius:15px!important}:where(button[id^="sl-mi-"],button[class*="sl-mi-"]){min-height:34px!important}}
+`;
+        (document.head || document.documentElement).appendChild(style);
+    }
+    installSakaLuXUnifiedTheme_market_intelligence();
+
 })();

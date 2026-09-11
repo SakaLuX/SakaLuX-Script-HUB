@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.6**
+**v1.9.7**
 
 ## What it does
 
@@ -24,6 +24,12 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.7
+
+- Embedded the unified **SakaLuX Control Center** visual theme directly into every current SakaLuX userscript so the look no longer depends on Hub being present.
+- Synchronized the managed add-on patch versions in `scripts.json`, Hub fallback data and the dedicated information pages.
+- Account Auditor and SakaLuX Suite also receive their own embedded copy of the visual layer while remaining standalone and completely absent from the Hub registry.
 
 ### v1.9.6
 
@@ -81,11 +87,11 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 ### Registered complementary add-ons
 
-- 🛡️ SakaLuX Enhancer Guard **v1.3.14**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.6**
-- 🎯 SakaLuX Mission Rewards **v1.0.4**
-- 📈 SakaLuX Market Intelligence **v1.17.2**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.8**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.15**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.7**
+- 🎯 SakaLuX Mission Rewards **v1.0.5**
+- 📈 SakaLuX Market Intelligence **v1.17.3**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.9**
 
 ## Privacy
 

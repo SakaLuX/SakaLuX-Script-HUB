@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.8**
+**v1.3.9**
 
 ## What it does
 
@@ -25,6 +25,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.9
+
+- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
+- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
+- UI-only release: existing features, APIs and saved data remain unchanged.
 
 ### v1.3.8 — PC Hub detection
 

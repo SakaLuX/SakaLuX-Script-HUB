@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.0.4**
+**v1.0.5**
 
 ## What it does
 
@@ -20,6 +20,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Keeps Mission-specific scanning inactive outside the Missions page.
 
 ## Current release notes
+
+### v1.0.5
+
+- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
+- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
+- UI-only release: existing features, APIs and saved data remain unchanged.
 
 ### v1.0.4
 
