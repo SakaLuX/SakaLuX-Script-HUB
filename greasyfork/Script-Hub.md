@@ -4,7 +4,7 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 
 ## Current version
 
-**v1.9.2**
+**v1.9.3**
 
 ## What it does
 
@@ -24,6 +24,10 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 - Designed for Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.3
+
+- Added PC/Tampermonkey-safe installation markers so the Hub can detect scripts even when isolated userscript sandboxes hide their APIs.
 
 ### v1.9.2
 
@@ -82,11 +86,11 @@ SakaLuX Script Hub is the main manager for the SakaLuX Torn script suite.
 
 Complementary add-ons currently registered in the live `scripts.json` registry:
 
-- SakaLuX Enhancer Guard **v1.3.13**
-- SakaLuX Bazaar Thanker - PDA **v5.3.5**
-- SakaLuX Mission Rewards **v1.0.3**
-- SakaLuX Market Intelligence **v1.17.1**
-- SakaLuX Elimination Assistant **v1.3.7**
+- SakaLuX Enhancer Guard **v1.3.14**
+- SakaLuX Bazaar Thanker - PDA **v5.3.6**
+- SakaLuX Mission Rewards **v1.0.4**
+- SakaLuX Market Intelligence **v1.17.2**
+- SakaLuX Elimination Assistant **v1.3.8**
 
 ### Native module power integration
 
