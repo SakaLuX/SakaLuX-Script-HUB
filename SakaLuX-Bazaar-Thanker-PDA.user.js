@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.8
+// @version      5.3.9
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -973,7 +973,7 @@
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION = '5.3.8';
+    const BAZAAR_VERSION = '5.3.9';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
@@ -1139,26 +1139,31 @@
     installSakaLuXUnifiedTheme_bazaar();
 
 })();
-
-// SAKALUX_PERSISTENT_BRAND_FOOTER_V1
+// SAKALUX_INLINE_PANEL_FOOTER_V2
 ;(() => {
-    const ID='sakalux-global-made-with-love';
+    const FOOTER_ID='sakalux-inline-footer-bazaar-thanker';
+    const PANEL_SELECTOR='#sakalux-bt-settings';
     const PROFILE='https://www.torn.com/profiles.php?XID=2380374';
-    function ensureSakaLuXBrandFooter(){
-        if(!document.body)return;
-        let el=document.getElementById(ID);
-        if(!el){
-            el=document.createElement('div');
-            el.id=ID;
-            el.innerHTML='Made with ❤️ by <a href="'+PROFILE+'" target="_self" rel="noopener">SakaLuX [2380374]</a>';
-            document.body.appendChild(el);
+    function ensureInlineSakaLuXFooter(){
+        const panel=document.querySelector(PANEL_SELECTOR);
+        if(!panel)return;
+        let footer=panel.querySelector('#'+FOOTER_ID);
+        if(!footer){
+            footer=document.createElement('div');
+            footer.id=FOOTER_ID;
+            footer.innerHTML='Made with ❤️ by <a href="'+PROFILE+'" target="_self" rel="noopener">SakaLuX [2380374]</a>';
+            footer.style.cssText='flex:0 0 auto;width:100%;box-sizing:border-box;margin-top:10px;padding:10px 8px 9px;border-top:1px solid #2d3c4e;background:rgba(10,15,21,.72);color:#8e99a8;text-align:center;font:700 10px/1.25 Arial,sans-serif';
+            const link=footer.querySelector('a');
+            if(link)link.style.cssText='color:#d7a94a!important;text-decoration:none!important;font-weight:900!important';
         }
-        const mobile=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
-        el.style.cssText='position:fixed;right:8px;bottom:'+(mobile?'76px':'8px')+';z-index:2147483646;padding:5px 8px;border:1px solid rgba(215,169,74,.42);border-radius:999px;background:rgba(12,17,23,.92);box-shadow:0 4px 14px rgba(0,0,0,.35);color:#aeb8c5;font:700 10px/1.2 Arial,sans-serif;white-space:nowrap;pointer-events:auto;backdrop-filter:blur(6px)';
-        const a=el.querySelector('a');if(a)a.style.cssText='color:#d7a94a!important;text-decoration:none!important;font-weight:900!important';
+        if(panel.lastElementChild!==footer)panel.appendChild(footer);
     }
-    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureSakaLuXBrandFooter,{once:true});else ensureSakaLuXBrandFooter();
-    window.addEventListener('resize',ensureSakaLuXBrandFooter,{passive:true});
-    setInterval(ensureSakaLuXBrandFooter,2500);
+    const start=()=>{
+        ensureInlineSakaLuXFooter();
+        if(!document.body)return;
+        const observer=new MutationObserver(ensureInlineSakaLuXFooter);
+        observer.observe(document.body,{childList:true,subtree:true});
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 

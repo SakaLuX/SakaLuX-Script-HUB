@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.8**
+**v1.9.9**
 
 ## What it does
 
@@ -24,6 +24,11 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.9 — Inline panel signature
+
+- Removed the floating author badge from the Torn page.
+- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
 
 ### v1.9.8 — Persistent SakaLuX signature
 
@@ -93,11 +98,11 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 ### Registered complementary add-ons
 
-- 🛡️ SakaLuX Enhancer Guard **v1.3.16**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.8**
-- 🎯 SakaLuX Mission Rewards **v1.0.6**
-- 📈 SakaLuX Market Intelligence **v1.17.5**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.11**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.17**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.9**
+- 🎯 SakaLuX Mission Rewards **v1.0.7**
+- 📈 SakaLuX Market Intelligence **v1.17.6**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.12**
 
 ## Privacy
 

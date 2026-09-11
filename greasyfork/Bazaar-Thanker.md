@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v5.3.8**
+**v5.3.9**
 
 ## What it does
 
@@ -15,6 +15,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Works without a Torn API key.
 
 ## Current release notes
+
+### v5.3.9 — Inline panel signature
+
+- Removed the floating author badge from the Torn page.
+- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
 
 ### v5.3.8 — Persistent SakaLuX signature
 
