@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.1
+// @version      1.17.2
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -32,7 +32,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.17.1';
+    const VERSION = '1.17.2';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1777,6 +1777,6 @@
     };
     window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceReady',{detail:{version:VERSION,enabled:settings.enabled}}));
 
-    function init(){injectCss();saveTravelSessions();if(settings.enabled){startRuntime();maybePromptHub();if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href)){setTimeout(()=>openSettings(),900);}}console.log('['+NAME+' v'+VERSION+'] Loaded.');}
+    function init(){try{localStorage.setItem('SakaLuX_Installed_market-intelligence',VERSION);}catch(_){}injectCss();saveTravelSessions();if(settings.enabled){startRuntime();maybePromptHub();if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href)){setTimeout(()=>openSettings(),900);}}console.log('['+NAME+' v'+VERSION+'] Loaded.');}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
