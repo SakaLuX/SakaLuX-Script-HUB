@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.5
+// @version      1.9.6
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.5';
+    const VERSION = '1.9.6';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -39,6 +39,17 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.6',
+            date: '2026-09-11',
+            changes: [
+                'Added one unified SakaLuX Control Center visual theme for all current SakaLuX script interfaces.',
+                'Standardized dark panels, borders, buttons, fields, cards, overlays and mobile spacing across Hub add-ons.',
+                'Converted compatible prefixed settings checkboxes to the same sliding-switch visual language used by Hub.',
+                'Includes visual support for Account Auditor and Suite when they are installed, without registering either standalone tool in Hub.',
+                'The theme is CSS-only for external module panels and does not change their feature logic or saved data.'
+            ]
+        },
         {
             version: '1.9.5',
             date: '2026-09-11',
@@ -579,6 +590,148 @@
 .slh-setting,.slh-note,.slh-check-row{background:#17202b;border:1px solid #2c3b4e;border-radius:11px;padding:11px;margin-bottom:8px;color:#cbd5e1;font-size:10px;line-height:1.5}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password],.slh-setting select{min-height:40px;padding:9px;border:1px solid #3a4b61;border-radius:8px;background:#0d141d;color:#fff}.slh-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-setting-copy{min-width:0}.slh-setting-title{color:#e7edf5;font-size:10px;font-weight:900}.slh-setting-desc{margin-top:3px;color:#7f90a6;font-size:8px;line-height:1.35}.slh-setting-toggle{position:relative;flex:0 0 auto;width:48px;height:26px;border:1px solid #46566a;border-radius:999px;background:#303a48;padding:0;box-shadow:inset 0 1px 3px rgba(0,0,0,.42);transition:.18s ease}.slh-setting-toggle i{position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:50%;background:#d7dee8;box-shadow:0 2px 5px rgba(0,0,0,.45);transition:.18s ease}.slh-setting-toggle.on{border-color:#237250;background:#168c58}.slh-setting-toggle.on i{transform:translateX(22px);background:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:1px solid #3d78bf;border-radius:9px;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;font-size:10px;font-weight:900}.slh-big-btn.gray{border-color:#394859;background:#1e2936}.slh-big-btn.red{border-color:#743946;background:#51222c}.slh-big-btn.update{border-color:#7a5b25;background:#684b1d}.slh-big-btn.install{border-color:#24754f;background:#176d46}.slh-version-title{font-size:12px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#718197;font-size:8px;margin-left:5px}
 @media(max-width:520px){.slh-header{padding:12px 10px 10px}.slh-brand-icon{width:38px;height:38px;font-size:19px}.slh-title{font-size:15px}.slh-kicker{font-size:7px}.slh-sub{font-size:8px}.slh-close{width:34px;height:34px}.slh-stats{gap:5px;margin-top:10px}.slh-stat{padding:8px 5px 7px}.slh-stat strong{font-size:13px}.slh-stat span{font-size:6.5px}.slh-stat small{display:none}.slh-tools{gap:4px}.slh-tool{height:38px;gap:3px;font-size:7px}.slh-tool span{font-size:11px}.slh-cats{gap:5px}.slh-cat{padding:5px 8px;font-size:7px}.slh-list{padding:8px}.slh-card{grid-template-columns:39px minmax(0,1fr) 84px;gap:8px;padding:9px 8px;margin-bottom:7px;border-radius:13px}.slh-icon{width:37px;height:37px;border-radius:11px;font-size:18px}.slh-name{font-size:11.5px}.slh-category-chip{font-size:5.8px}.slh-description{font-size:7.7px;-webkit-line-clamp:1}.slh-chips{gap:3px;margin-top:5px}.slh-chip{min-height:15px;padding:2px 4px;font-size:5.7px}.slh-module-controls{gap:5px}.slh-switch,.slh-primary{min-height:32px;font-size:8px}.slh-switch{grid-template-columns:31px 1fr;padding:4px}.slh-switch-track{width:30px;height:17px}.slh-switch-track i{width:11px;height:11px}.slh-switch.on .slh-switch-track i{transform:translateX(13px)}}
 @media(min-width:700px){#${IDS.overlay}{align-items:center}#${IDS.panel}{border-radius:22px;max-height:90vh}.slh-tools{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+/* SakaLuX Unified Control Center theme ------------------------------------ */
+/* Visual-only layer for all SakaLuX interfaces. Standalone tools remain
+   standalone: these selectors do not register them in Hub or alter logic. */
+:where(
+ [id^="sl-eg-"],[class*="sl-eg-"],
+ [id^="sakalux-bt-"],[class*="sakalux-bt-"],
+ [id^="sl-mr-"],[class*="sl-mr-"],[id^="sl-mri-"],[class*="sl-mri-"],
+ [id^="sl-mi-"],[class*="sl-mi-"],
+ [id^="slx-elim-"],[class*="slx-elim-"],
+ [id^="sl-aa-"],[class*="sl-aa-"],
+ [id*="sakalux-suite" i],[class*="sakalux-suite" i],
+ [id*="master-control" i],[class*="master-control" i]
+){font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}
+
+/* Main panels, settings windows, modals and detail surfaces */
+:where(
+ [id^="sl-eg-"][id*="panel" i],[id^="sl-eg-"][id*="settings" i],[id^="sl-eg-"][id*="modal" i],[id^="sl-eg-"][id*="details" i],
+ [id^="sakalux-bt-"][id*="panel" i],[id^="sakalux-bt-"][id*="settings" i],[id^="sakalux-bt-"][id*="modal" i],[id^="sakalux-bt-"][id*="details" i],
+ [id^="sl-mr-"][id*="panel" i],[id^="sl-mr-"][id*="settings" i],[id^="sl-mr-"][id*="modal" i],[id^="sl-mri-"][id*="panel" i],
+ [id^="sl-mi-"][id*="panel" i],[id^="sl-mi-"][id*="settings" i],[id^="sl-mi-"][id*="modal" i],[id^="sl-mi-"][id*="details" i],
+ [id^="slx-elim-"][id*="panel" i],[id^="slx-elim-"][id*="settings" i],[id^="slx-elim-"][id*="modal" i],[id^="slx-elim-"][id*="details" i],
+ [id^="sl-aa-"][id*="panel" i],[id^="sl-aa-"][id*="settings" i],[id^="sl-aa-"][id*="modal" i],
+ [id*="sakalux-suite" i][id*="panel" i],[id*="sakalux-suite" i][id*="control" i],[id*="master-control" i]
+){
+ background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;
+ color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;
+ box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important;
+}
+
+/* Backdrops */
+:where(
+ [id^="sl-eg-"][id*="overlay" i],[id^="sakalux-bt-"][id*="overlay" i],
+ [id^="sl-mr-"][id*="overlay" i],[id^="sl-mi-"][id*="overlay" i],
+ [id^="slx-elim-"][id*="overlay" i],[id^="sl-aa-"][id*="overlay" i],
+ [id*="sakalux-suite" i][id*="overlay" i]
+){background:rgba(4,8,13,.84)!important;backdrop-filter:blur(6px)!important}
+
+/* Headers and title bars */
+:where(
+ [class*="sl-eg-"][class*="header" i],[id^="sl-eg-"][id*="header" i],
+ [class*="sakalux-bt-"][class*="header" i],[id^="sakalux-bt-"][id*="header" i],
+ [class*="sl-mr-"][class*="header" i],[id^="sl-mr-"][id*="header" i],
+ [class*="sl-mi-"][class*="header" i],[id^="sl-mi-"][id*="header" i],
+ [class*="slx-elim-"][class*="header" i],[id^="slx-elim-"][id*="header" i],
+ [class*="sl-aa-"][class*="header" i],[id^="sl-aa-"][id*="header" i],
+ [class*="sakalux-suite" i][class*="header" i],[id*="sakalux-suite" i][id*="header" i]
+){background:linear-gradient(155deg,#1b2634,#111923)!important;border-color:#314154!important;color:#f8fafc!important}
+
+/* Cards, rows, sections and information blocks */
+:where(
+ [class*="sl-eg-"][class*="card" i],[class*="sl-eg-"][class*="row" i],[class*="sl-eg-"][class*="section" i],[class*="sl-eg-"][class*="note" i],
+ [class*="sakalux-bt-"][class*="card" i],[class*="sakalux-bt-"][class*="row" i],[class*="sakalux-bt-"][class*="section" i],[class*="sakalux-bt-"][class*="note" i],
+ [class*="sl-mr-"][class*="card" i],[class*="sl-mr-"][class*="row" i],[class*="sl-mr-"][class*="section" i],[class*="sl-mr-"][class*="note" i],
+ [class*="sl-mi-"][class*="card" i],[class*="sl-mi-"][class*="row" i],[class*="sl-mi-"][class*="section" i],[class*="sl-mi-"][class*="note" i],
+ [class*="slx-elim-"][class*="card" i],[class*="slx-elim-"][class*="row" i],[class*="slx-elim-"][class*="section" i],[class*="slx-elim-"][class*="note" i],
+ [class*="sl-aa-"][class*="card" i],[class*="sl-aa-"][class*="row" i],[class*="sl-aa-"][class*="section" i],[class*="sl-aa-"][class*="note" i],
+ [class*="sakalux-suite" i][class*="card" i],[class*="sakalux-suite" i][class*="row" i],[class*="sakalux-suite" i][class*="section" i]
+){background:linear-gradient(145deg,#18212d,#131b25)!important;border-color:#2d3c4e!important;border-radius:12px!important;color:#dce6f0!important;box-shadow:0 6px 18px rgba(0,0,0,.14)!important}
+
+/* Buttons */
+:where(
+ button[id^="sl-eg-"],button[class*="sl-eg-"],
+ button[id^="sakalux-bt-"],button[class*="sakalux-bt-"],
+ button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mri-"],button[class*="sl-mri-"],
+ button[id^="sl-mi-"],button[class*="sl-mi-"],
+ button[id^="slx-elim-"],button[class*="slx-elim-"],
+ button[id^="sl-aa-"],button[class*="sl-aa-"],
+ button[id*="sakalux-suite" i],button[class*="sakalux-suite" i],button[id*="master-control" i]
+){border:1px solid #3d78bf!important;border-radius:10px!important;background:linear-gradient(180deg,#377fcf,#275f9f)!important;color:#fff!important;font-weight:900!important;box-shadow:none!important;transition:transform .12s ease,filter .12s ease!important}
+:where(
+ button[id^="sl-eg-"],button[class*="sl-eg-"],button[id^="sakalux-bt-"],button[class*="sakalux-bt-"],
+ button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mi-"],button[class*="sl-mi-"],
+ button[id^="slx-elim-"],button[class*="slx-elim-"],button[id^="sl-aa-"],button[class*="sl-aa-"]
+):active{transform:translateY(1px)!important}
+:where(
+ button[id*="close" i],button[class*="close" i],button[id*="back" i],button[class*="gray" i],button[class*="secondary" i]
+){background:linear-gradient(180deg,#253243,#1a2431)!important;border-color:#3a4a5d!important;color:#d7e1eb!important}
+:where(
+ button[id*="clear" i],button[id*="reset" i],button[id*="delete" i],button[class*="danger" i],button[class*="red" i]
+){background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+
+/* Inputs and selects */
+:where(
+ [id^="sl-eg-"] input,[id^="sl-eg-"] select,[id^="sl-eg-"] textarea,
+ [id^="sakalux-bt-"] input,[id^="sakalux-bt-"] select,[id^="sakalux-bt-"] textarea,
+ [id^="sl-mr-"] input,[id^="sl-mr-"] select,[id^="sl-mr-"] textarea,
+ [id^="sl-mi-"] input,[id^="sl-mi-"] select,[id^="sl-mi-"] textarea,
+ [id^="slx-elim-"] input,[id^="slx-elim-"] select,[id^="slx-elim-"] textarea,
+ [id^="sl-aa-"] input,[id^="sl-aa-"] select,[id^="sl-aa-"] textarea,
+ [id*="sakalux-suite" i] input,[id*="sakalux-suite" i] select,[id*="sakalux-suite" i] textarea,
+ input[id^="sl-eg-"],select[id^="sl-eg-"],textarea[id^="sl-eg-"],
+ input[id^="sakalux-bt-"],select[id^="sakalux-bt-"],textarea[id^="sakalux-bt-"],
+ input[id^="sl-mr-"],select[id^="sl-mr-"],textarea[id^="sl-mr-"],
+ input[id^="sl-mi-"],select[id^="sl-mi-"],textarea[id^="sl-mi-"],
+ input[id^="slx-elim-"],select[id^="slx-elim-"],textarea[id^="slx-elim-"],
+ input[id^="sl-aa-"],select[id^="sl-aa-"],textarea[id^="sl-aa-"]
+){background:#0d141d!important;border:1px solid #3a4b61!important;border-radius:9px!important;color:#f4f7fb!important;outline:none!important}
+
+/* Sliding toggles for compatible settings checkboxes */
+:where(
+ input[type="checkbox"][id^="sl-eg-"],input[type="checkbox"][id^="sakalux-bt-"],
+ input[type="checkbox"][id^="sl-mr-"],input[type="checkbox"][id^="sl-mri-"],
+ input[type="checkbox"][id^="sl-mi-"],input[type="checkbox"][id^="slx-elim-"],
+ input[type="checkbox"][id^="sl-aa-"],input[type="checkbox"][id*="sakalux-suite" i]
+){appearance:none!important;-webkit-appearance:none!important;width:38px!important;height:21px!important;min-width:38px!important;margin:0 8px 0 0!important;vertical-align:middle!important;border:1px solid #546276!important;border-radius:999px!important;background:radial-gradient(circle at 10px 50%,#e7edf5 0 6px,transparent 6.5px),#465365!important;cursor:pointer!important;transition:.18s ease!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important}
+:where(
+ input[type="checkbox"][id^="sl-eg-"],input[type="checkbox"][id^="sakalux-bt-"],
+ input[type="checkbox"][id^="sl-mr-"],input[type="checkbox"][id^="sl-mri-"],
+ input[type="checkbox"][id^="sl-mi-"],input[type="checkbox"][id^="slx-elim-"],
+ input[type="checkbox"][id^="sl-aa-"],input[type="checkbox"][id*="sakalux-suite" i]
+):checked{border-color:#24754f!important;background:radial-gradient(circle at 27px 50%,#fff 0 6px,transparent 6.5px),#1eb36a!important}
+
+/* Headings and muted copy */
+:where(
+ [class*="sl-eg-"][class*="title" i],[class*="sakalux-bt-"][class*="title" i],
+ [class*="sl-mr-"][class*="title" i],[class*="sl-mi-"][class*="title" i],
+ [class*="slx-elim-"][class*="title" i],[class*="sl-aa-"][class*="title" i],
+ [class*="sakalux-suite" i][class*="title" i]
+){color:#f8fafc!important;font-weight:900!important}
+:where(
+ [class*="sl-eg-"][class*="muted" i],[class*="sakalux-bt-"][class*="muted" i],
+ [class*="sl-mr-"][class*="muted" i],[class*="sl-mi-"][class*="muted" i],
+ [class*="slx-elim-"][class*="muted" i],[class*="sl-aa-"][class*="muted" i],
+ [class*="sakalux-suite" i][class*="muted" i]
+){color:#8799ad!important}
+
+@media(max-width:520px){
+ :where(
+  [id^="sl-eg-"][id*="panel" i],[id^="sakalux-bt-"][id*="settings" i],
+  [id^="sl-mr-"][id*="panel" i],[id^="sl-mi-"][id*="panel" i],
+  [id^="slx-elim-"][id*="panel" i],[id^="sl-aa-"][id*="panel" i],
+  [id*="sakalux-suite" i][id*="panel" i],[id*="master-control" i]
+ ){border-radius:15px 15px 0 0!important}
+ :where(
+  button[id^="sl-eg-"],button[class*="sl-eg-"],button[id^="sakalux-bt-"],button[class*="sakalux-bt-"],
+  button[id^="sl-mr-"],button[class*="sl-mr-"],button[id^="sl-mi-"],button[class*="sl-mi-"],
+  button[id^="slx-elim-"],button[class*="slx-elim-"],button[id^="sl-aa-"],button[class*="sl-aa-"]
+ ){min-height:34px!important;font-size:9px!important}
+}
+/* End unified theme ------------------------------------------------------- */
+
         `;
         document.head.appendChild(style);
     }
