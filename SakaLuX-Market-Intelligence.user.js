@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.6
+// @version      1.17.7
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -32,7 +32,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.17.6';
+    const VERSION = '1.17.7';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -359,6 +359,7 @@
 
     function paintTravelSessionSummary(){
         const existing=document.getElementById('sl-mi-session');
+        if(detectPage()!=='travel'){existing?.remove();return;}
         if(!settings.sessionSummary){existing?.remove();return;}
         const cur=travelSessions.current,history=(travelSessions.history||[]).slice(0,5);
         if(!cur&&!history.length){existing?.remove();return;}
@@ -1094,6 +1095,7 @@
     }
 
     function paintBestTravelRun(top,phase){
+        if(detectPage()!=='travel'){document.getElementById('sl-mi-best-run')?.remove();return;}
         state.bestRunRows=top.length;if(!top.length)return;
         const existing=document.getElementById('sl-mi-best-run');
         const wasOpen=existing?existing.classList.contains('open'):false;
@@ -1668,7 +1670,7 @@
 
     async function scan(force=false){
         if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
-        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-museum-bar,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}if(state.page==='items'||state.page==='profile')document.getElementById('sl-mi-market-bar')?.remove();state.lastScan=Date.now();state.scanCount++;}
+        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());if(state.page!=='travel')document.querySelectorAll('.sl-mi-travel,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}if(state.page==='items'||state.page==='profile')document.getElementById('sl-mi-market-bar')?.remove();state.lastScan=Date.now();state.scanCount++;}
         catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;if(!settings.enabled)cleanupLiveFeature('enabled');}
     }
     function scheduleScan(force=false){if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},450);}
@@ -1905,4 +1907,3 @@
     };
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
-
