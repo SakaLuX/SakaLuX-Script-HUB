@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/brand-footer-migrate.yml'
       - '.migration/brand-footer-v1.py'
+      - '.migration/brand-footer-fix.py'
 
 permissions:
   contents: write
@@ -18,7 +19,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Apply branding migration
-        run: python .migration/brand-footer-v1.py
+        run: |
+          python .migration/brand-footer-v1.py
+          python .migration/brand-footer-fix.py
 
       - name: Validate all userscripts
         shell: bash
