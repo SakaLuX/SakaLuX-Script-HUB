@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.17**
+**v1.3.18**
 
 ## What it does
 
@@ -19,12 +19,23 @@ Complementary add-on for SakaLuX Script Hub.
 - Includes player search, target filters, smart sorting and quick PROFILE / ATTACK actions.
 - Shows target location/availability and includes an **Attackable only** filter.
 - Exports attackable SAFE/RISKY targets to TornPDA Chain Targets import format.
+- Remembers SAFE targets across batches and browser sessions, without duplicates.
+- Copies all remembered SAFE profile links at once or exports the full saved collection to TornPDA Chain Targets.
+- Supports removing individual remembered targets or clearing the complete SAFE list.
 - Includes dedicated Torn API and optional FFScouter API access controls.
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.18 — Persistent SAFE Targets
+
+- Added a persistent **SAFE** list that automatically remembers attackable SAFE targets across every rotating 500-player batch.
+- Added **COPY ALL SAFE** to copy every remembered profile link in one action.
+- Added **EXPORT SAFE** to export the complete remembered collection in TornPDA Chain Targets format.
+- Added duplicate prevention, individual removal and confirmed **CLEAR ALL** controls.
+- Exposed the remembered SAFE count and actions through the standalone integration API.
 
 ### v1.3.17 — Violentmonkey Hub bridge
 
@@ -100,7 +111,7 @@ Install **SakaLuX Script Hub** to manage Elimination Assistant together with the
 
 ## Privacy
 
-Elimination Assistant stores its enabled state, selected team, local learning/history, cached FFScouter results, calibration data and standalone API keys locally in browser/TornPDA storage. Torn requests are sent to `api.torn.com`. When FFScouter is enabled, target IDs and the FFScouter API key are sent to `ffscouter.com` to request Fair Fight / battle-stat estimates. FFScouter is optional and separate from the Torn API.
+Elimination Assistant stores its enabled state, selected team, remembered SAFE targets, local learning/history, cached FFScouter results, calibration data and standalone API keys locally in browser/TornPDA storage. Torn requests are sent to `api.torn.com`. When FFScouter is enabled, target IDs and the FFScouter API key are sent to `ffscouter.com` to request Fair Fight / battle-stat estimates. FFScouter is optional and separate from the Torn API.
 
 ## Important
 
