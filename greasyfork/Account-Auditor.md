@@ -1,76 +1,63 @@
-# SakaLuX Account Auditor
+# 🔎 SakaLuX Account Auditor
 
-**Current version: v1.2.1**
+Standalone SakaLuX account-audit tool. It is intentionally not registered as a SakaLuX Script Hub add-on.
 
-**Distribution:** Greasy Fork / GitHub source sync. The script remains intentionally excluded from `scripts.json`, so SakaLuX Script Hub does not show it as a required/recommended install.
+## Current version
 
-SakaLuX Account Auditor is a private read-only Torn PDA / Tampermonkey tool that builds a structured account snapshot and syncs sanitized data to a user-controlled private GitHub repository.
+**v1.2.1**
 
-## v1.2.1
+## What it does
 
-- Added the same SakaLuX Script Hub install prompt used by the rest of the suite.
-- Uses the shared `SakaLuX_HUB_INSTALL_PROMPT_LAST` localStorage key.
-- The Hub prompt is offered at most once every 24 hours across the SakaLuX scripts on the same Torn origin.
-- The prompt is skipped when `window.SakaLuXScriptHub` or the Hub button is already detected.
-- **LATER** records the shared cooldown; **INSTALL HUB** records the cooldown and opens the official Greasy Fork Hub installer.
+- Builds a structured read-only Torn account snapshot using supported Torn API data.
+- Creates split snapshot files for easier review: `summary.json`, `finance.json`, `combat.json`, `crimes.json`, `messages.json`, `events.json` and `logs.json`.
+- Keeps the complete `SakaLuX-Account-Snapshot.json` audit file.
+- Can sync sanitized snapshot data to a user-controlled private GitHub repository.
+- Uses rate-limit-aware Torn API pacing with retry/backoff behavior.
+- Can explicitly capture the currently visible Torn message only when the user presses **CAPTURE CURRENT MESSAGE**.
+- Never opens private conversations automatically.
+- Does not intentionally export browser cookies, passwords, Torn session tokens, the Torn API key or the GitHub token into snapshot files.
+- Works with Torn PDA and Tampermonkey.
 
-## v1.2.0
+## Current release notes
 
-- Added split snapshots for easier reading and much smaller GitHub payloads: `summary.json`, `finance.json`, `combat.json`, `crimes.json`, `messages.json`, `events.json`, and `logs.json`.
-- Keeps the full `SakaLuX-Account-Snapshot.json` as the complete audit file.
-- Added **CAPTURE CURRENT MESSAGE**. The user must first open a Torn message/conversation and explicitly press the capture button.
-- Captured message text is stored in userscript storage and can be included in `messages.json` during sync.
-- The script never opens private conversations automatically and does not read/export browser cookies, passwords, Torn session tokens, Torn API keys, or the GitHub token.
-- Official Torn API message metadata remains automatic: message ID, sender, timestamp, topic, type, seen/read state.
-- Added deduplication for captured messages and a **CLEAR CAPTURED MESSAGES** control.
-- Increased central Torn API pacing to about 1.1 seconds minimum between requests and retained progressive retry/backoff for code 5 / Too many requests.
-- Snapshot schema upgraded to `sakalux-torn-account-snapshot-v3`.
-- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.2.user.js`.
+### v1.2.1
 
-## Split files
+- Added the shared SakaLuX Script Hub installation prompt used across the SakaLuX tools.
+- Uses the common `SakaLuX_HUB_INSTALL_PROMPT_LAST` local-storage cooldown.
+- The Hub prompt is offered at most once every 24 hours on the same Torn origin.
+- The prompt is skipped when Script Hub is already detected.
+- **LATER** records the cooldown and **INSTALL HUB** opens the official Hub installer.
 
-- `summary.json` — account summary, profile, bars, cooldowns, travel, education, job, merits, refills, notifications and coverage.
-- `finance.json` — money, net worth, stocks, properties, trades and item-market data.
-- `combat.json` — battle stats, attacks, ammo, equipment, revives, weapon experience, work stats and skills.
-- `crimes.json` — criminal record, personal stats, organized crime data and missions.
-- `messages.json` — official Torn message metadata plus message bodies explicitly captured by the user.
-- `events.json` — events, new events and notifications.
-- `logs.json` — account logs when the API key has the required permission, otherwise the API error/unavailable reason.
+### v1.2.0
 
-## Messages
+- Added split snapshot files for smaller and easier-to-read GitHub payloads.
+- Added user-triggered **CAPTURE CURRENT MESSAGE** support.
+- Added deduplication and a **CLEAR CAPTURED MESSAGES** control.
+- Increased Torn API pacing to reduce rate-limit problems.
+- Upgraded the snapshot schema to `sakalux-torn-account-snapshot-v3`.
 
-The official Torn API does not expose message body/content. Account Auditor therefore does not pretend it can retrieve message text from the API.
+## Recommended
 
-For body text, open the message yourself in Torn, open **☠︎ AUDIT**, then press **CAPTURE CURRENT MESSAGE**. If Torn's current page markup cannot be detected automatically, select the visible message text and press the button again. The captured text is stored locally and can be synced to `messages.json` when **Include explicitly captured message bodies** is enabled.
+Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and **Contents: read/write** permission.
 
-## v1.1.2
+SakaLuX Script Hub is optional. Account Auditor may offer its installer, but Auditor remains a standalone tool and is intentionally excluded from `scripts.json`.
 
-- Added centralized API pacing and progressive retry/backoff for Torn code 5 / Too many requests.
-- Prioritized messages, events and logs before the broad audit.
-- Reduced default private pagination to 5 pages for routine syncs.
-- Inventory, contacts and personal stats use the same retry-aware scheduler.
-- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.1.user.js`.
+## Privacy
 
-## v1.1.1
+Account Auditor handles sensitive account information. Snapshot files can contain private Torn account data, financial information, combat/account statistics, events, message metadata and any message text you explicitly choose to capture.
 
-- Fixed v2 category handling for inventory, contact lists and personal stats.
-- Added broad additional read-only account endpoints and `key/info` capability reporting.
-- Treated `user/log` access error 16 as an unavailable capability rather than a broken endpoint.
-- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.1.0.user.js`.
+- Use a private GitHub repository.
+- Git commit history may retain older snapshot contents after files are replaced.
+- Explicitly captured message bodies are stored locally and are included in `messages.json` only when that option is enabled.
+- The official Torn API does not provide private message body text; the script captures body text only after the user manually opens the message and presses the capture control.
+- Do not publish or share the Torn API key or GitHub token.
 
-## v1.1.0
+## Important
 
-- Expanded to broad Torn API v1 + v2 read-only coverage.
-- Added messages, new messages, events, new events and logs through the official API.
-- Added private endpoint pagination and userscript-storage preference for secrets.
-- Added exact backup: `backups/SakaLuX-Account-Auditor-v1.0.0.user.js`.
+Account Auditor is **not a complementary Hub module** and must not be added to the Hub registry unless that product decision is changed intentionally later.
 
-## v1.0.0
+The audit is a snapshot of data available through the configured API permissions and explicit user captures. Missing permissions or unavailable endpoints can result in incomplete sections rather than fabricated data.
 
-- Initial private account snapshot collector.
+## License
 
-## Security / privacy
-
-Use a **private GitHub repository**. Split files and the full snapshot can contain private Torn account data and explicitly captured message text. Git commit history can retain older contents even after files are replaced.
-
-The GitHub fine-grained token should be restricted to **Contents: read/write** only for the chosen private snapshot repository. Do not paste the token or Torn API key into chats.
+**MIT License.** The current Account Auditor userscript declares `@license MIT`; this documentation intentionally matches the license currently present in the script metadata.
