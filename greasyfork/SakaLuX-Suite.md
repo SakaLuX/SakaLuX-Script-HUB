@@ -4,7 +4,7 @@ Standalone experimental SakaLuX toolkit for Torn PDA and desktop userscript mana
 
 ## Current version
 
-**v0.9.909**
+**v0.9.910**
 
 ## What it does
 
@@ -38,6 +38,13 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - `Alt + F` shortcut for opening the control interface.
 
 ## Current release notes
+
+### v0.9.910 — Suite panel layout repair
+
+- Restored the complete Suite module interface on TornPDA and desktop.
+- Moved the author signature inside the Suite window so it can no longer compress or hide the main content.
+- Restored the full-screen overlay as a backdrop and limited the professional panel styling to the actual Suite window.
+- Preserved all module settings and saved states during the UI repair.
 
 ### v0.9.909 — Inline panel signature
 

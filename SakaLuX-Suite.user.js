@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.909
+// @version      0.9.910
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -23,7 +23,7 @@
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = "0.9.909";
+  const VERSION = "0.9.910";
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -44368,6 +44368,8 @@ function scan(){
         style.textContent = `
 :where([id*="sakalux" i],[class*="sakalux" i],[id*="suite" i],[class*="suite" i],[id*="master-control" i],[class*="master-control" i]){font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}
 :where([id*="sakalux" i][id*="panel" i],[id*="sakalux" i][id*="control" i],[id*="suite" i][id*="panel" i],[id*="master-control" i]){background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important}
+#sakalux-master-suite-panel{background:rgba(3,5,8,.76)!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+#sakalux-master-suite-panel>.sakalux-suite-window{min-width:0;background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important}
 :where([class*="sakalux" i][class*="header" i],[class*="suite" i][class*="header" i],[id*="sakalux" i][id*="header" i]){background:linear-gradient(155deg,#1b2634,#111923)!important;border-color:#314154!important;color:#f8fafc!important}
 :where([class*="sakalux" i][class*="card" i],[class*="sakalux" i][class*="row" i],[class*="suite" i][class*="card" i],[class*="suite" i][class*="row" i]){background:linear-gradient(145deg,#18212d,#131b25)!important;border-color:#2d3c4e!important;border-radius:12px!important;color:#dce6f0!important;box-shadow:0 6px 18px rgba(0,0,0,.14)!important}
 :where(button[id*="sakalux" i],button[class*="sakalux" i],button[id*="suite" i],button[class*="suite" i],button[id*="master-control" i]){border:1px solid #3d78bf!important;border-radius:10px!important;background:linear-gradient(180deg,#377fcf,#275f9f)!important;color:#fff!important;font-weight:900!important;box-shadow:none!important;transition:transform .12s ease,filter .12s ease!important}
@@ -44387,7 +44389,7 @@ function scan(){
 // SAKALUX_INLINE_PANEL_FOOTER_V2
 ;(() => {
     const FOOTER_ID='sakalux-inline-footer-suite';
-    const PANEL_SELECTOR='#sakalux-master-suite-panel';
+    const PANEL_SELECTOR='#sakalux-master-suite-panel > .sakalux-suite-window';
     const PROFILE='https://www.torn.com/profiles.php?XID=2380374';
     function ensureInlineSakaLuXFooter(){
         const panel=document.querySelector(PANEL_SELECTOR);
