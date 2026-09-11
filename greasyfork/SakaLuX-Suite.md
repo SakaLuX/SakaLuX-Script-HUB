@@ -1,14 +1,16 @@
-# SakaLuX Suite [EXPERIMENTAL]
+# 🧰 SakaLuX Suite [EXPERIMENTAL]
 
-SakaLuX Suite is a one-install modular toolkit for Torn PDA and desktop userscript managers.
+Standalone experimental SakaLuX toolkit for Torn PDA and desktop userscript managers. It is intentionally not registered as a SakaLuX Script Hub add-on.
 
 ## Current version
 
 **v0.9.905**
 
-## Complete SakaLuX modules
+## What it does
 
-The current **v0.9.905** build includes the established SakaLuX module set:
+SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
+
+### Included modules
 
 - Daily Prayer Bell
 - Recovery Planner
@@ -24,22 +26,16 @@ The current **v0.9.905** build includes the established SakaLuX module set:
 - Odds Scout
 - Target Alerts
 
-Event Lens also includes the TornPDA route and native-row compatibility adapter used by the current release.
-
-## SakaLuX additions
+### Additional SakaLuX tools
 
 - Chain Alarm with persistent thresholds and panel position.
 - Launch bridges for Enhancer Guard, Bazaar Thanker, Market Intelligence, Mission Rewards and Elimination Assistant.
 - Automatic migration of previous SakaLuX Suite module states and its shared Torn API key.
-
-## Master Control
-
-- Sliding ON/OFF controls.
-- Module settings actions where supported.
-- The control window and its scroll position remain in place when a module is toggled.
-- Shared Torn API key storage.
-- Settings import/export excludes the API key.
-- Shortcut: Alt + F.
+- Master Control with sliding ON/OFF switches and module-specific settings where supported.
+- Persistent control-window and scroll position while toggling modules.
+- Shared Torn API-key storage.
+- Settings import/export with the API key excluded.
+- `Alt + F` shortcut for opening the control interface.
 
 ## Current release notes
 
@@ -51,12 +47,29 @@ Event Lens also includes the TornPDA route and native-row compatibility adapter 
 - Retained every Item Signal rule and the working Event Lens TornPDA compatibility fix.
 - Increased TornPDA Event Lens text sizes and changed event names/links to high-contrast gold.
 - Restored clickable Trade continuation links inside expanded Event Lens cards.
-- Preserved the five requested standalone SakaLuX modules and Chain Alarm.
+- Preserved the standalone SakaLuX launch bridges and Chain Alarm.
 - Added automated checks for all 13 principal module/factory pairs.
 
-## Privacy and safety
+## Recommended
 
-The shared Torn API key is stored locally and is excluded from exported Suite settings. The Suite does not automate attacks, crimes, bets, item consumption or race entry.
+Use SakaLuX Suite if you prefer a single experimental all-in-one userscript instead of managing several independent helper scripts.
+
+For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons. Suite remains separate and should not appear in the Hub registry unless that product decision is intentionally changed later.
+
+## Privacy
+
+- The shared Torn API key used by Suite is stored locally.
+- Exported Suite settings intentionally exclude the API key.
+- Module preferences and local runtime state are stored in the userscript/browser environment.
+- Individual modules can access Torn data required for their functions; users should review enabled modules and API permissions before use.
+
+## Important
+
+SakaLuX Suite is marked **EXPERIMENTAL**. Its modules share one large userscript runtime, so a regression in one area can potentially affect other Suite modules more broadly than with standalone add-ons.
+
+The Suite does **not** automate attacks, crimes, bets, item consumption or race entry. Recommendations, alerts and analysis remain advisory or user-triggered.
+
+SakaLuX Suite is intentionally **not registered in `scripts.json`** and therefore must not appear as a required/recommended module inside Script Hub.
 
 ## License
 
