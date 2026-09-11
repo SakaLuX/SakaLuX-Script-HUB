@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.17.3**
+**v1.17.4**
 
 ## What it does
 
@@ -23,6 +23,14 @@ Complementary add-on for SakaLuX Script Hub.
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 
 ## Current release notes
+
+### v1.17.4 — Dedicated API Access panel
+
+- Moved Torn API controls out of the main Market Intelligence settings list.
+- Added a dedicated gold key button next to the close button in the Market Intelligence header.
+- Added an Elimination-style API Access panel customized for Market Intelligence permissions, source/status diagnostics, key creation, Save & Test, Check Access and local-key clearing.
+- Removed the old inline API ACCESS block and bottom CREATE REQUIRED API KEY button from Settings.
+- The dedicated key creator now always requests the exact Market Intelligence read-only permission set.
 
 ### v1.17.3
 
