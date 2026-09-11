@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub, designed for Torn PDA, Tampermonkey
 
 ## Current version
 
-v1.7.0
+v1.7.1
 
 ## What it does
 
@@ -20,6 +20,9 @@ v1.7.0
 
 ## Current release notes
 
+- Fixed Advice, Offers and Trains navigation resetting the panel position on TornPDA.
+- Prevented Company Intelligence buttons from being interpreted as Torn page form actions.
+- Removed the combined Modules card from Employee Overview and kept the module summary in Director Overview.
 - Expanded the complete feature line from v1.1.0 through v1.7.0.
 - Fixed company identity being lost after a successful refresh.
 - Added persistent last-known company data and one valid snapshot per company day.

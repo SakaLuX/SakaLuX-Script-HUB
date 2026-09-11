@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.7.0
+// @version      1.7.1
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.7.0',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.7.1',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -294,7 +294,6 @@ function employeeOverview(){
  ${card('My Work Stats',kv('Manual Labor',fmt(w.manual))+kv('Intelligence',fmt(w.intelligence))+kv('Endurance',fmt(w.endurance))+kv('Total',fmt(w.manual+w.intelligence+w.endurance))+kv('Effectiveness',u?fmt(u.effectiveness):'—'))}
  ${card('Company Risk',h.available?`<div class="ci-score ${rc}"><b>${h.score}/100</b><span>${rl} RISK</span></div>${h.breakdown.slice(0,6).map(x=>`<div class="ci-line"><span>${esc(x.label)} <small>${esc(x.reason)}</small></span><b class="${x.delta>=0?'pos':'neg'}">${x.delta>=0?'+':''}${x.delta}</b></div>`).join('')}`:`<div class="ci-score warn"><b>—</b><span>UNAVAILABLE</span></div><p class="ci-note">Company Profile data is missing. Risk is not calculated from zero or incomplete values.</p>`)}
  ${starOutlook()}
- ${card('Modules',`<div class="ci-module-list"><b>EMPLOYEE</b><span>Growth · Position · Trains · Offers · Advice · History</span><b>DIRECTOR</b><span>Growth · Staff Optimizer · Smart Training · Contracts · Balance · Stock · Benchmark · Timeline · Advice · History</span></div><p class="ci-note">Private roster, finance and training-management modules require Director API access.</p>`)}
  </div>`;
 }
 function employeePosition(){
@@ -325,6 +324,7 @@ function directorOverview(){
  ${card('Performance',kv('Stars',m.stars+'★')+kv('Popularity',m.popularity+'%')+kv('Efficiency',m.efficiency+'%')+kv('Environment',m.environment+'%')+kv('Age',fmt(m.age)+' days'))}
  ${card('Roster',kv('Employees',e.length+(m.maxEmployees?' / '+m.maxEmployees:''))+kv('Low EE',e.filter(x=>x.effectiveness&&x.effectiveness<90).length)+kv('Payroll/day',money(pay))+kv('Trains available',fmt(m.trains)))}
  ${card('Financial Snapshot',kv('Daily income',money(m.dailyIncome))+kv('Weekly income',money(m.weeklyIncome))+kv('Payroll/week',money(pay*7))+kv('Simple margin',money(m.weeklyIncome-pay*7),'before stock/ads/other costs'))}
+ ${card('Director Modules',`<div class="ci-module-list"><b>GROWTH</b><span>Star outlook · trends · review countdown</span><b>STAFF</b><span>Position optimizer · effectiveness · inactivity flags</span><b>OPERATIONS</b><span>Training · contracts · balance · stock</span><b>INTELLIGENCE</b><span>Benchmark · timeline · advice · history</span></div>`)}
  </div>`;
 }
 function directorEmployees(){
@@ -394,9 +394,12 @@ function css(){
 function render(){
  let root=$('#ci-root');if(!S.open){root?.remove();return}
  if(!root){root=document.createElement('div');root.id='ci-root';document.body.appendChild(root)}
- root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button class="ci-icon" data-act="refresh" title="Refresh">↻</button><button class="ci-icon api" data-act="settings" title="API Access">🔑</button><button class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div><div class="ci-status">${S.updated?'Updated '+new Date(S.updated).toLocaleString():'Not refreshed yet'} · ${esc(apiSource())} · no automated company actions</div><div class="ci-footer">Made with ❤️ by <a href="${PROFILE_URL}" target="_self">SakaLuX [2380374]</a></div></div>`;
- $$('[data-mode]',root).forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
- $$('[data-tab]',root).forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;render()});
+ const oldShell=$('.ci-shell',root),oldTabs=$('.ci-tabs',root),scrollTop=oldShell?.scrollTop||0,tabsLeft=oldTabs?.scrollLeft||0;
+ root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button type="button" data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button type="button" data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button type="button" class="ci-icon" data-act="refresh" title="Refresh">↻</button><button type="button" class="ci-icon api" data-act="settings" title="API Access">🔑</button><button type="button" class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button type="button" data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div><div class="ci-status">${S.updated?'Updated '+new Date(S.updated).toLocaleString():'Not refreshed yet'} · ${esc(apiSource())} · no automated company actions</div><div class="ci-footer">Made with ❤️ by <a href="${PROFILE_URL}" target="_self">SakaLuX [2380374]</a></div></div>`;
+ const shell=$('.ci-shell',root),tabBar=$('.ci-tabs',root);if(shell) shell.scrollTop=scrollTop;if(tabBar)tabBar.scrollLeft=tabsLeft;
+ $$('button',root).forEach(b=>{if(!b.type)b.type='button'});
+ $$('[data-mode]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
+ $$('[data-tab]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();if(S.tab===b.dataset.tab)return;S.tab=b.dataset.tab;render()});
  $$('[data-act]',root).forEach(b=>b.onclick=()=>act(b.dataset.act));
  $$('[data-contract-paid]',root).forEach(b=>b.onclick=()=>{const x=arr(KEY.contracts),c=x.find(v=>String(v.id)===b.dataset.contractPaid);if(c)c.paid=!c.paid;set(KEY.contracts,x);render()});
  $$('[data-contract-close]',root).forEach(b=>b.onclick=()=>{const x=arr(KEY.contracts),c=x.find(v=>String(v.id)===b.dataset.contractClose);if(c)c.active=c.active===false;set(KEY.contracts,x);render()});
