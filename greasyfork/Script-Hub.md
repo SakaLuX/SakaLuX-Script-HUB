@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.9**
+**v1.9.10**
 
 ## What it does
 
@@ -24,6 +24,13 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.10 — Violentmonkey/macOS detection
+
+- Fixed installed modules incorrectly appearing as **OFF + INSTALL** when Violentmonkey isolates each userscript's `window` API.
+- Installation markers and DOM bridges are now checked before the sandboxed runtime API.
+- Added cross-context ON/OFF and OPEN support through hidden DOM control bridges.
+- Corrected the Elimination Assistant marker mismatch.
 
 ### v1.9.9 — Inline panel signature
 
@@ -98,11 +105,11 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 ### Registered complementary add-ons
 
-- 🛡️ SakaLuX Enhancer Guard **v1.3.17**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.9**
-- 🎯 SakaLuX Mission Rewards **v1.0.7**
-- 📈 SakaLuX Market Intelligence **v1.17.7**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.16**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.18**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.10**
+- 🎯 SakaLuX Mission Rewards **v1.0.8**
+- 📈 SakaLuX Market Intelligence **v1.17.8**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.17**
 
 ## Privacy
 
