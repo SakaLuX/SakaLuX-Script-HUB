@@ -4,14 +4,15 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.4**
+**v1.9.5**
 
 ## What it does
 
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
 - Detects installed, missing and outdated registered SakaLuX add-ons.
 - Gives installed modules a clean native ON/OFF switch plus one OPEN or SETTINGS action.
-- Provides **UPDATE ALL** for installed add-ons with newer versions available.
+- **CHECK** refreshes the live registry and then verifies available updates.
+- **UPDATE** refreshes the live registry and update state before opening available installers.
 - Revalidates update status against the actually installed version to avoid stale alerts.
 - Provides **SYSTEM CHECK** for registry access, update sources and module health.
 - Provides **WHAT'S NEW**, category navigation, health information and backup / restore.
@@ -24,6 +25,16 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current release notes
 
+### v1.9.5
+
+- Converted boolean Hub Settings controls to professional slide switches.
+- Removed the duplicate **REFRESH scripts.json** button from Settings.
+- Removed the duplicate **CHECK UPDATES NOW** button from Settings.
+- **CHECK** now refreshes `scripts.json` before checking published versions.
+- **UPDATE** now refreshes `scripts.json` and update state before opening update installers.
+- Removed the fallback floating-skull long-press Quick Menu option and its gesture handling.
+- Kept fallback button position and size controls, shared API key management, backup/restore and reset controls.
+
 ### v1.9.4
 
 - Redesigned the Hub as a premium **SakaLuX Control Center** with stronger visual hierarchy and cleaner TornPDA readability.
@@ -31,7 +42,6 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Replaced icon-only management controls with compact labelled actions for **CHECK**, **UPDATE**, **HEALTH**, **NEW** and **SETTINGS**.
 - Added concise module status chips for installed version, update state, active/disabled state and contextual module information.
 - Reduced raw technical text inside module cards while keeping detailed diagnostics available through **SYSTEM CHECK**.
-- Preserved the existing registry, update checking, shared API key, native module power, Quick Menu and Torn-native HUB launcher behavior.
 
 ### v1.9.3
 
