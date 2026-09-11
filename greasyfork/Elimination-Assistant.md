@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.12**
+**v1.3.13**
 
 ## What it does
 
@@ -25,6 +25,13 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.13 — Multi-filter targets
+
+- Replaced the single **All targets** dropdown with combinable checkbox filters: **ATTACKABLE**, **SAFE**, **RISKY**, **SKIP** and **UNOPENED**.
+- No selected filters means all targets are shown.
+- SAFE / RISKY / SKIP combine as OR filters; ATTACKABLE and UNOPENED narrow the result further.
+- **UNOPENED** means the target has not yet been opened through the assistant's ATK button on this device.
 
 ### v1.3.12 — Inline panel signature
 
