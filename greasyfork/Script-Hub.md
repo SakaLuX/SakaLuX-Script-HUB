@@ -68,8 +68,6 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 ## Important
 
-**SakaLuX Account Auditor** and **SakaLuX Suite [EXPERIMENTAL]** are standalone SakaLuX tools and are intentionally **not registered in `scripts.json`**. They must not appear as required or recommended Hub add-ons.
-
 Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
 
 ## License
