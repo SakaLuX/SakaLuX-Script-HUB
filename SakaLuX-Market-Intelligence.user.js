@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.7
+// @version      1.17.8
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -32,7 +32,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.17.7';
+    const VERSION = '1.17.8';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1823,8 +1823,10 @@
         removeNodes('#sl-mi-button,#sl-mi-overlay,#sl-mi-hub-prompt');
     }
     function startRuntime(){if(!settings.enabled)return;injectCss();createButton();startObserver();if(settings.priceNetwork&&networkQueue.length)schedulePriceNetworkFlush(2500);if(getApiKey())checkRequiredApiAccess(false);scheduleScan(true);}
-    function setEnabled(value){settings.enabled=!!value;saveJson(STORAGE.settings,settings);if(settings.enabled)startRuntime();else stopRuntime();window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceStateChanged',{detail:{version:VERSION,enabled:settings.enabled}}));return settings.enabled;}
+    function setEnabled(value){settings.enabled=!!value;saveJson(STORAGE.settings,settings);if(settings.enabled)startRuntime();else stopRuntime();window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceStateChanged',{detail:{version:VERSION,enabled:settings.enabled}}));syncHubBridge('market-intelligence',settings.enabled);return settings.enabled;}
     function toggleEnabled(){return setEnabled(!settings.enabled);}
+    function syncHubBridge(id,value){const bridge=document.getElementById('sakalux-module-bridge-'+id);if(bridge)bridge.dataset.enabled=String(Boolean(value));}
+    function installHubBridge(id,openHandler){let bridge=document.getElementById('sakalux-module-bridge-'+id);if(!bridge){bridge=document.createElement('button');bridge.type='button';bridge.id='sakalux-module-bridge-'+id;bridge.hidden=true;(document.body||document.documentElement).appendChild(bridge);}bridge.dataset.version=VERSION;bridge.dataset.enabled=String(Boolean(settings.enabled));bridge.onclick=()=>{const action=bridge.dataset.action;if(action==='open')openHandler();else if(action==='toggle')toggleEnabled();else if(action==='on'||action==='off')setEnabled(action==='on');bridge.dataset.action='';syncHubBridge(id,settings.enabled);};}
 
     window.SakaLuXMarketIntelligence={
         id:'market-intelligence',name:'Market Intelligence',version:VERSION,
@@ -1852,7 +1854,7 @@
     };
     window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceReady',{detail:{version:VERSION,enabled:settings.enabled}}));
 
-    function init(){try{localStorage.setItem('SakaLuX_Installed_market-intelligence',VERSION);}catch(_){}injectCss();saveTravelSessions();if(settings.enabled){startRuntime();maybePromptHub();if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href)){setTimeout(()=>openSettings(),900);}}console.log('['+NAME+' v'+VERSION+'] Loaded.');}
+    function init(){try{localStorage.setItem('SakaLuX_Installed_market-intelligence',VERSION);}catch(_){}installHubBridge('market-intelligence',()=>window.SakaLuXMarketIntelligence.open());injectCss();saveTravelSessions();if(settings.enabled){startRuntime();maybePromptHub();if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href)){setTimeout(()=>openSettings(),900);}}console.log('['+NAME+' v'+VERSION+'] Loaded.');}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 
 
