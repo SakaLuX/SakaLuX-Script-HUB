@@ -90,7 +90,7 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 - 🛡️ SakaLuX Enhancer Guard **v1.3.15**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.7**
 - 🎯 SakaLuX Mission Rewards **v1.0.5**
-- 📈 SakaLuX Market Intelligence **v1.17.3**
+- 📈 SakaLuX Market Intelligence **v1.17.4**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.10**
 
 ## Privacy
