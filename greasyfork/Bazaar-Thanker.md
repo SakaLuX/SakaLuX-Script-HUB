@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v5.3.5**
+**v5.3.6**
 
 ## What it does
 
@@ -15,7 +15,9 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current release notes
 
-### v5.3.5
+### v5.3.6
+
+- Added a persistent installation marker for reliable Script Hub detection on PC.
 
 - Refreshed the Settings panel and floating Settings button with a cleaner professional TornPDA-style UI.
 - Fixed purchase messages to show the per-item price instead of the full batch total.
