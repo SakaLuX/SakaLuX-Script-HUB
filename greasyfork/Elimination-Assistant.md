@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.9**
+**v1.3.10**
 
 ## What it does
 
@@ -25,6 +25,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.10
+
+- Removes the foreign **Touching Grass Targets** widget if another userscript injects it inside the SakaLuX Elimination Assistant panel.
+- Adds a lightweight mutation guard so the foreign Apply / Target list / Show all card cannot reappear inside the assistant after panel updates.
+- No targeting, API, FFScouter or attack logic was changed.
 
 ### v1.3.9
 
