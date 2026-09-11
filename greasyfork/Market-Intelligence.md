@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.17.7**
+**v1.17.8**
 
 ## What it does
 
@@ -23,6 +23,10 @@ Complementary add-on for SakaLuX Script Hub.
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 
 ## Current release notes
+
+### v1.17.8 — Violentmonkey Hub bridge
+
+- Added an isolated-context DOM bridge so Script Hub can detect, open and switch Market Intelligence ON/OFF in Violentmonkey.
 
 ### v1.17.7 — Travel-only panels
 
