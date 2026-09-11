@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: userscript-validation-${{ github.ref }}
@@ -29,13 +29,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Apply one-time unified UI migration
-        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[ui-migration]')
-        shell: bash
-        run: |
-          set -euo pipefail
-          python .migration/apply-unified-ui-theme.py
 
       - name: Check JavaScript syntax
         shell: bash
@@ -221,18 +214,3 @@ jobs:
             exit 1
           fi
           echo 'Workflow directory clean: only stable validator remains.'
-
-      - name: Commit validated unified UI migration
-        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[ui-migration]')
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md; then
-            echo 'No migration changes to commit.'
-            exit 0
-          fi
-          git config user.name 'SakaLuX UI Migration'
-          git config user.email 'actions@users.noreply.github.com'
-          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md
-          git commit -m 'Unify SakaLuX script interfaces [skip ci]'
-          git push
