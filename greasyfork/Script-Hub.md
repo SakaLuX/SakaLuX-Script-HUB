@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.10**
+**v1.9.11**
 
 ## What it does
 
@@ -24,6 +24,12 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.11 — Company Intelligence integration
+
+- Registered **Company Intelligence v1.7.0** as the sixth managed add-on.
+- Added native Hub ON/OFF and OPEN controls for Company Intelligence.
+- Expanded the shared API-key creator with Company Profile, Employees, Stock, Job, Profile and Work Stats permissions.
 
 ### v1.9.10 — Violentmonkey/macOS detection
 

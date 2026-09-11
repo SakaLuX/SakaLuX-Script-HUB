@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.10
+// @version      1.9.11
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,14 +31,23 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.10';
+    const VERSION = '1.9.11';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
-    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,money,travel,equipment,inventory,battlestats,ammo&torn=items,elimination,eliminationteam&market=itemmarket';
+    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,job,workstats,money,travel,equipment,inventory,battlestats,ammo&company=profile,employees,stock&torn=items,elimination,eliminationteam&market=itemmarket';
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.11',
+            date: '2026-09-12',
+            changes: [
+                'Added Company Intelligence v1.7.0 as the sixth managed Hub add-on.',
+                'Expanded the shared API-key creator with Company Profile, Employees, Stock, Job, Profile and Work Stats selections.',
+                'Added native ON/OFF and OPEN integration for Company Intelligence.'
+            ]
+        },
         {
             version: '1.9.10',
             date: '2026-09-11',
@@ -235,6 +244,19 @@
                 apiGlobal: 'SakaLuXEliminationAssistant', buttonSelector: '#slx-elim-btn',
                 quickActions: [
                     { id: 'open', label: 'OPEN', icon: '⚔️', method: 'open' },
+                    { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' }
+                ]
+            },
+            {
+                id: 'company-intelligence', type: 'addon', active: true,
+                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.7.0',
+                description: 'Employee and Director company intelligence with growth, staff, training, contracts, balance, benchmarks and timeline.',
+                metaUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
+                downloadUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
+                sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
+                apiGlobal: 'SakaLuXCompanyIntelligence', buttonSelector: '#ci-launch',
+                quickActions: [
+                    { id: 'open', label: 'OPEN', icon: '🏢', method: 'open' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' }
                 ]
             }
