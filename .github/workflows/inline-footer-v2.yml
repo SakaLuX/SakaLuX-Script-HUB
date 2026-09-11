@@ -1,0 +1,42 @@
+name: One-time inline panel footer migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inline-footer-v2.yml'
+      - '.migration/inline-footer-v2.py'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply migration
+        run: python .migration/inline-footer-v2.py
+
+      - name: Validate userscripts and registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in SakaLuX-*.user.js; do node --check "$file"; done
+          python -m json.tool scripts.json >/dev/null
+
+      - name: Commit migrated files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-*.user.js scripts.json greasyfork/*.md
+          if git diff --cached --quiet; then
+            echo 'No migration changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Move SakaLuX signature inside script panels [skip ci]'
+          git push
