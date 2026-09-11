@@ -4,7 +4,7 @@ SakaLuX Mission Rewards enhances Torn's Mission Shop with practical reward infor
 
 ## Current version
 
-**v1.0.3**
+**v1.0.4**
 
 ## What it does
 
@@ -27,7 +27,9 @@ If Script Hub is not installed, Mission Rewards can offer the optional Hub insta
 
 ## Current release notes
 
-### v1.0.3
+### v1.0.4
+
+- Added a persistent installation marker for reliable Script Hub detection on PC.
 
 - Added persistent `setEnabled`, `toggleEnabled` and `isEnabled` Hub power controls.
 - OFF disconnects Mission Shop scanning and removes injected badges/panels; ON restores them without a page reload.
