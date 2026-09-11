@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.9
+// @version      5.3.10
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -973,7 +973,7 @@
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION = '5.3.9';
+    const BAZAAR_VERSION = '5.3.10';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
@@ -1022,11 +1022,20 @@
         if (moduleEnabled) startRuntime();
         else stopRuntime();
         window.dispatchEvent(new CustomEvent('SakaLuX:BazaarThankerStateChanged', { detail: { version: BAZAAR_VERSION, enabled: moduleEnabled } }));
+        syncHubBridge('bazaar', moduleEnabled);
         return moduleEnabled;
     }
 
     function toggleEnabled() {
         return setEnabled(!moduleEnabled);
+    }
+
+    function syncHubBridge(id, value) { const bridge = document.getElementById('sakalux-module-bridge-' + id); if (bridge) bridge.dataset.enabled = String(Boolean(value)); }
+    function installHubBridge(id, openHandler) {
+        let bridge = document.getElementById('sakalux-module-bridge-' + id);
+        if (!bridge) { bridge = document.createElement('button'); bridge.type = 'button'; bridge.id = 'sakalux-module-bridge-' + id; bridge.hidden = true; (document.body || document.documentElement).appendChild(bridge); }
+        bridge.dataset.version = BAZAAR_VERSION; bridge.dataset.enabled = String(Boolean(moduleEnabled));
+        bridge.onclick = () => { const action = bridge.dataset.action; if (action === 'open') openHandler(); else if (action === 'toggle') toggleEnabled(); else if (action === 'on' || action === 'off') setEnabled(action === 'on'); bridge.dataset.action = ''; syncHubBridge(id, moduleEnabled); };
     }
 
     window.SakaLuXBazaarThanker = {
@@ -1102,6 +1111,7 @@
 
     function init() {
         try { localStorage.setItem('SakaLuX_Installed_bazaar', BAZAAR_VERSION); } catch {}
+        installHubBridge('bazaar', openSettingsPanel);
         if (moduleEnabled) {
             startRuntime();
             scheduleHubInstallPrompt();
@@ -1166,4 +1176,3 @@
     };
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
-
