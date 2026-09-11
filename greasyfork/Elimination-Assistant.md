@@ -2,6 +2,10 @@
 
 Complementary add-on for SakaLuX Script Hub, built specifically for Torn Eliminations.
 
+## v1.3.8 — PC Hub detection
+
+- Added a persistent installation marker for reliable Script Hub detection on PC.
+
 ## v1.3.7 — Unified Torn + FFScouter API Access
 
 - Replaced the Settings gear with a gold key button in the Elimination header.
@@ -70,7 +74,7 @@ Complementary add-on for SakaLuX Script Hub, built specifically for Torn Elimina
 
 ## Current version
 
-**v1.3.7**
+**v1.3.8**
 
 ## What it does
 
