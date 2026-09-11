@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.4
+// @version      1.9.5
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.4';
+    const VERSION = '1.9.5';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -39,6 +39,17 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.5',
+            date: '2026-09-11',
+            changes: [
+                'Converted Hub Settings boolean options to professional slide switches.',
+                'Removed the duplicate Refresh scripts.json and Check updates now buttons from Settings.',
+                'CHECK now refreshes the live scripts.json registry before checking published add-on versions.',
+                'UPDATE now refreshes the live registry and update state before opening available installers.',
+                'Removed the fallback-skull long-press Quick Menu option and its runtime gesture handling.'
+            ]
+        },
         {
             version: '1.9.4',
             date: '2026-09-11',
@@ -81,25 +92,6 @@
                 'Update cards, counters and HUB alert badge now recalculate availability from Latest versus Installed before rendering.',
                 'Added Market Intelligence v1.1.1 to the offline fallback registry and its ready-event integration.'
             ]
-        },
-        {
-            version: '1.8.4',
-            date: '2026-08-24',
-            changes: [
-                'Rebuilt the mobile HUB entry using Torn mobileLink, area-row and swiper classes like native navigation entries.',
-                'HUB is mounted as its own swiper slide immediately before Messages instead of inside the Messages slot.',
-                'The skull reuses Torn native SVG sizing and colors, replacing only the icon artwork.',
-                'Removed custom layout sizing that made HUB look detached from the Torn navigation row.',
-                'Kept the subtle skull blink and Hub click action without moving the label or surrounding menu.'
-            ]
-        },
-        {
-            version: '1.8.3',
-            date: '2026-08-24',
-            changes: [
-                'Rebuilt the Hub launcher as a native Torn navigation item before Messages.',
-                'The floating Hub button automatically hides when the native launcher is available.'
-            ]
         }
     ];
 
@@ -117,7 +109,6 @@
         hideIndividualButtons: true,
         buttonPosition: 'top-right',
         buttonSize: 48,
-        longPressQuickMenu: true,
         autoCheckUpdates: true,
         showTopbarSkull: true
     };
@@ -215,6 +206,7 @@
     let registry = loadJson(STORAGE.registry, FALLBACK_REGISTRY);
     let SCRIPTS = normalizeRegistry(registry);
     let settings = { ...DEFAULT_SETTINGS, ...loadJson(STORAGE.settings, DEFAULT_SETTINGS) };
+    delete settings.longPressQuickMenu;
     let favorites = new Set(loadJson(STORAGE.favorites, []));
     let usage = loadJson(STORAGE.usage, {});
     let updateCache = loadJson(STORAGE.updates, {});
@@ -224,8 +216,6 @@
     let updateCheckRunning = false;
     let observer = null;
     let observerTimer = null;
-    let longPressTimer = null;
-    let longPressTriggered = false;
 
     function loadJson(key, fallback) {
         try {
@@ -482,6 +472,12 @@
         }
     }
 
+    async function refreshRegistryAndCheck() {
+        if (updateCheckRunning) return;
+        await loadRegistry(true);
+        await checkAllUpdates(true);
+    }
+
     function getUpdateState(script) {
         const installed = getInstalledVersion(script);
         if (installed === '?') return { state: 'unknown', text: 'VERSION UNKNOWN', data: null };
@@ -576,11 +572,11 @@
 #${IDS.panel}{--sl-bg:#0f141c;--sl-soft:#151c26;--sl-panel:#18212d;--sl-panel2:#1d2836;--sl-elev:#223041;--sl-border:#314154;--sl-border2:#43566e;--sl-text:#e7edf5;--sl-softtext:#a9b7c8;--sl-muted:#7f90a6;--sl-blue:#4f8fe8;--sl-blue2:#2f6ebf;--sl-green:#18b26b;--sl-red:#cc3d57;--sl-gold:#d7a94a;width:min(680px,100%);max-height:95vh;display:flex;flex-direction:column;overflow:hidden;background:var(--sl-bg);color:var(--sl-text);border:1px solid var(--sl-border);border-radius:22px 22px 0 0;box-shadow:0 -22px 70px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.025)}
 .slh-header{padding:16px 16px 12px;flex-shrink:0;background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 40%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-bottom:1px solid var(--sl-border)}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-brand{display:flex;align-items:center;gap:11px;min-width:0}.slh-brand-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #41536b;border-radius:13px;background:linear-gradient(145deg,#263448,#17212e);box-shadow:inset 0 1px rgba(255,255,255,.05),0 7px 20px rgba(0,0,0,.25);font-size:22px}.slh-brand-copy{min-width:0}.slh-kicker{font-size:8px;line-height:1.2;letter-spacing:.18em;font-weight:900;color:#6fa6ef;text-transform:uppercase}.slh-title{margin-top:2px;font-size:18px;line-height:1.15;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-sub{margin-top:4px;color:var(--sl-muted);font-size:9px;line-height:1.3}.slh-registry-dot{display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#64748b}.slh-registry-dot.online{background:var(--sl-green);box-shadow:0 0 8px rgba(24,178,107,.6)}.slh-close{width:38px;height:38px;flex:0 0 auto;border:1px solid var(--sl-border);border-radius:11px;background:#1b2532;color:#c8d3df;font-size:21px;line-height:1;transition:.15s ease}.slh-close:active{transform:scale(.96)}
 .slh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:13px}.slh-stat{position:relative;overflow:hidden;background:rgba(24,33,45,.86);border:1px solid var(--sl-border);border-radius:11px;padding:9px 7px 8px}.slh-stat:before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#4f8fe8;opacity:.8}.slh-stat.warn:before{background:var(--sl-gold)}.slh-stat.bad:before{background:var(--sl-red)}.slh-stat.good:before{background:var(--sl-green)}.slh-stat strong{display:block;color:#f8fafc;font-size:15px;line-height:1}.slh-stat span{display:block;margin-top:5px;color:var(--sl-muted);font-size:7px;font-weight:800;letter-spacing:.08em}.slh-stat small{display:block;margin-top:3px;color:#64748b;font-size:7px}
-.slh-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:9px}.slh-tool{min-width:0;height:42px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--sl-border);border-radius:10px;background:linear-gradient(180deg,#202c3a,#17212d);color:#d9e3ee;font-size:9px;font-weight:900;white-space:nowrap;touch-action:manipulation}.slh-tool span{font-size:13px}.slh-tool.checking{opacity:.56}.slh-tool.whatsnew{border-color:#54446b;background:linear-gradient(180deg,#3a2b4d,#271d35)}.slh-tool.settings{border-color:#4a5262}.slh-tool:active,.slh-bottom-btn:active,.slh-primary:active,.slh-switch:active,.slh-cat:active{transform:translateY(1px)}
+.slh-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:9px}.slh-tool{min-width:0;height:42px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--sl-border);border-radius:10px;background:linear-gradient(180deg,#202c3a,#17212d);color:#d9e3ee;font-size:9px;font-weight:900;white-space:nowrap;touch-action:manipulation}.slh-tool span{font-size:13px}.slh-tool.checking{opacity:.56}.slh-tool.whatsnew{border-color:#54446b;background:linear-gradient(180deg,#3a2b4d,#271d35)}.slh-tool.settings{border-color:#4a5262}.slh-tool:active,.slh-bottom-btn:active,.slh-primary:active,.slh-switch:active,.slh-cat:active,.slh-setting-toggle:active{transform:translateY(1px)}
 .slh-cats{display:flex;gap:6px;margin-top:9px;padding-bottom:1px;overflow-x:auto;scrollbar-width:none}.slh-cats::-webkit-scrollbar{display:none}.slh-cat{flex-shrink:0;border:1px solid #2c394b;border-radius:999px;padding:6px 10px;background:#111923;color:#8999ac;font-size:8px;font-weight:900;letter-spacing:.05em}.slh-cat.active{border-color:#4c84cc;background:#1d3b60;color:#dcebff;box-shadow:inset 0 0 0 1px rgba(111,166,239,.08)}
-.slh-list,.slh-view,.slh-settings,.slh-quick{overflow-y:auto;padding:11px;-webkit-overflow-scrolling:touch}.slh-list{background:linear-gradient(180deg,#0d131b 0%,#0f141c 100%)}.slh-section-label{margin:1px 2px 8px;color:#6e8095;font-size:8px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.slh-card{position:relative;display:grid;grid-template-columns:46px minmax(0,1fr) 100px;gap:11px;align-items:center;padding:12px;margin-bottom:9px;background:linear-gradient(145deg,#18212d,#131b25);border:1px solid #2d3c4e;border-radius:15px;box-shadow:0 7px 20px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.018)}.slh-card:before{content:'';position:absolute;left:-1px;top:13px;bottom:13px;width:2px;border-radius:4px;background:#40526a}.slh-card.update:before{background:var(--sl-gold);box-shadow:0 0 8px rgba(215,169,74,.28)}.slh-card.missing:before{background:#64748b}.slh-card.off:before{background:#8a4d59}.slh-card.off .slh-card-copy{opacity:.62}.slh-card-copy{min-width:0}.slh-icon{width:44px;height:44px;display:grid;place-items:center;background:linear-gradient(145deg,#263448,#1a2431);border:1px solid #35475d;border-radius:13px;font-size:21px;box-shadow:inset 0 1px rgba(255,255,255,.04)}.slh-name-line{display:flex;align-items:center;gap:6px;min-width:0}.slh-name{min-width:0;color:#f3f7fb;font-size:13px;font-weight:900;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-category-chip{flex:0 0 auto;border:1px solid #33445a;border-radius:999px;padding:2px 5px;color:#7f94aa;background:#121a24;font-size:6.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}.slh-description{display:-webkit-box;margin-top:4px;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:#91a2b5;font-size:8.5px;line-height:1.35}.slh-chips{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:6px}.slh-chip{display:inline-flex;align-items:center;min-height:17px;padding:2px 6px;border:1px solid #304055;border-radius:999px;background:#111922;color:#8496aa;font-size:6.5px;font-weight:900;line-height:1;letter-spacing:.035em}.slh-chip.good{border-color:#235f46;background:#10271f;color:#72d6a2}.slh-chip.warn{border-color:#68522b;background:#292314;color:#e7c675}.slh-chip.bad{border-color:#693642;background:#2c171d;color:#f09aa8}.slh-chip.info{border-color:#31567e;background:#14263b;color:#8fc0ff}.slh-chip.muted{color:#8290a1}.slh-module-controls{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px}.slh-switch,.slh-primary{width:100%;min-height:35px;border-radius:10px;font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:900;touch-action:manipulation}.slh-switch{display:grid;grid-template-columns:36px 1fr;align-items:center;gap:5px;padding:5px 7px;border:1px solid #475569;background:#111827;color:#94a3b8}.slh-switch-track{position:relative;display:block;width:34px;height:19px;border-radius:999px;background:#4b5563;box-shadow:inset 0 1px 3px rgba(0,0,0,.55);transition:.18s ease}.slh-switch-track i{position:absolute;left:3px;top:3px;width:13px;height:13px;border-radius:50%;background:#e5e7eb;box-shadow:0 1px 4px #0008;transition:.18s ease}.slh-switch.on{border-color:#216b4a;background:#102a21;color:#86efac}.slh-switch.on .slh-switch-track{background:#1eb36a}.slh-switch.on .slh-switch-track i{transform:translateX(15px);background:#fff}.slh-switch.off{border-color:#5d3a43;background:#26151a;color:#f0a0ad}.slh-switch:disabled{opacity:.48}.slh-primary{border:1px solid #3d78bf;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;padding:7px}.slh-primary:disabled{border-color:#374151;background:#202733;color:#6b7280}.slh-primary.install{border-color:#24754f;background:linear-gradient(180deg,#22945f,#176d46)}
+.slh-list,.slh-view,.slh-settings{overflow-y:auto;padding:11px;-webkit-overflow-scrolling:touch}.slh-list{background:linear-gradient(180deg,#0d131b 0%,#0f141c 100%)}.slh-section-label{margin:1px 2px 8px;color:#6e8095;font-size:8px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.slh-card{position:relative;display:grid;grid-template-columns:46px minmax(0,1fr) 100px;gap:11px;align-items:center;padding:12px;margin-bottom:9px;background:linear-gradient(145deg,#18212d,#131b25);border:1px solid #2d3c4e;border-radius:15px;box-shadow:0 7px 20px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.018)}.slh-card:before{content:'';position:absolute;left:-1px;top:13px;bottom:13px;width:2px;border-radius:4px;background:#40526a}.slh-card.update:before{background:var(--sl-gold);box-shadow:0 0 8px rgba(215,169,74,.28)}.slh-card.missing:before{background:#64748b}.slh-card.off:before{background:#8a4d59}.slh-card.off .slh-card-copy{opacity:.62}.slh-card-copy{min-width:0}.slh-icon{width:44px;height:44px;display:grid;place-items:center;background:linear-gradient(145deg,#263448,#1a2431);border:1px solid #35475d;border-radius:13px;font-size:21px;box-shadow:inset 0 1px rgba(255,255,255,.04)}.slh-name-line{display:flex;align-items:center;gap:6px;min-width:0}.slh-name{min-width:0;color:#f3f7fb;font-size:13px;font-weight:900;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-category-chip{flex:0 0 auto;border:1px solid #33445a;border-radius:999px;padding:2px 5px;color:#7f94aa;background:#121a24;font-size:6.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}.slh-description{display:-webkit-box;margin-top:4px;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:#91a2b5;font-size:8.5px;line-height:1.35}.slh-chips{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:6px}.slh-chip{display:inline-flex;align-items:center;min-height:17px;padding:2px 6px;border:1px solid #304055;border-radius:999px;background:#111922;color:#8496aa;font-size:6.5px;font-weight:900;line-height:1;letter-spacing:.035em}.slh-chip.good{border-color:#235f46;background:#10271f;color:#72d6a2}.slh-chip.warn{border-color:#68522b;background:#292314;color:#e7c675}.slh-chip.bad{border-color:#693642;background:#2c171d;color:#f09aa8}.slh-chip.info{border-color:#31567e;background:#14263b;color:#8fc0ff}.slh-chip.muted{color:#8290a1}.slh-module-controls{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px}.slh-switch,.slh-primary{width:100%;min-height:35px;border-radius:10px;font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:900;touch-action:manipulation}.slh-switch{display:grid;grid-template-columns:36px 1fr;align-items:center;gap:5px;padding:5px 7px;border:1px solid #475569;background:#111827;color:#94a3b8}.slh-switch-track{position:relative;display:block;width:34px;height:19px;border-radius:999px;background:#4b5563;box-shadow:inset 0 1px 3px rgba(0,0,0,.55);transition:.18s ease}.slh-switch-track i{position:absolute;left:3px;top:3px;width:13px;height:13px;border-radius:50%;background:#e5e7eb;box-shadow:0 1px 4px #0008;transition:.18s ease}.slh-switch.on{border-color:#216b4a;background:#102a21;color:#86efac}.slh-switch.on .slh-switch-track{background:#1eb36a}.slh-switch.on .slh-switch-track i{transform:translateX(15px);background:#fff}.slh-switch.off{border-color:#5d3a43;background:#26151a;color:#f0a0ad}.slh-switch:disabled{opacity:.48}.slh-primary{border:1px solid #3d78bf;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;padding:7px}.slh-primary:disabled{border-color:#374151;background:#202733;color:#6b7280}.slh-primary.install{border-color:#24754f;background:linear-gradient(180deg,#22945f,#176d46)}
 .slh-bottom{padding:9px 11px;background:#0c1219;border-top:1px solid #263547;flex-shrink:0}.slh-bottom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.slh-bottom-btn{border:1px solid #2d3d50;border-radius:10px;padding:9px;background:#151f2a;color:#b9c7d6;font-size:8px;font-weight:900;letter-spacing:.04em}.slh-footer{padding:8px;text-align:center;color:#5f7083;font-size:8px;border-top:1px solid #202d3c;background:#0b1118}.slh-author{color:#78aef2;font-weight:900;text-decoration:none}
-.slh-setting,.slh-note,.slh-check-row{background:#17202b;border:1px solid #2c3b4e;border-radius:11px;padding:11px;margin-bottom:8px;color:#cbd5e1;font-size:10px;line-height:1.5}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password],.slh-setting select{min-height:40px;padding:9px;border:1px solid #3a4b61;border-radius:8px;background:#0d141d;color:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:1px solid #3d78bf;border-radius:9px;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;font-size:10px;font-weight:900}.slh-big-btn.gray{border-color:#394859;background:#1e2936}.slh-big-btn.red{border-color:#743946;background:#51222c}.slh-big-btn.update{border-color:#7a5b25;background:#684b1d}.slh-big-btn.install{border-color:#24754f;background:#176d46}.slh-version-title{font-size:12px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#718197;font-size:8px;margin-left:5px}
+.slh-setting,.slh-note,.slh-check-row{background:#17202b;border:1px solid #2c3b4e;border-radius:11px;padding:11px;margin-bottom:8px;color:#cbd5e1;font-size:10px;line-height:1.5}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password],.slh-setting select{min-height:40px;padding:9px;border:1px solid #3a4b61;border-radius:8px;background:#0d141d;color:#fff}.slh-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-setting-copy{min-width:0}.slh-setting-title{color:#e7edf5;font-size:10px;font-weight:900}.slh-setting-desc{margin-top:3px;color:#7f90a6;font-size:8px;line-height:1.35}.slh-setting-toggle{position:relative;flex:0 0 auto;width:48px;height:26px;border:1px solid #46566a;border-radius:999px;background:#303a48;padding:0;box-shadow:inset 0 1px 3px rgba(0,0,0,.42);transition:.18s ease}.slh-setting-toggle i{position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:50%;background:#d7dee8;box-shadow:0 2px 5px rgba(0,0,0,.45);transition:.18s ease}.slh-setting-toggle.on{border-color:#237250;background:#168c58}.slh-setting-toggle.on i{transform:translateX(22px);background:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:1px solid #3d78bf;border-radius:9px;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;font-size:10px;font-weight:900}.slh-big-btn.gray{border-color:#394859;background:#1e2936}.slh-big-btn.red{border-color:#743946;background:#51222c}.slh-big-btn.update{border-color:#7a5b25;background:#684b1d}.slh-big-btn.install{border-color:#24754f;background:#176d46}.slh-version-title{font-size:12px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#718197;font-size:8px;margin-left:5px}
 @media(max-width:520px){.slh-header{padding:12px 10px 10px}.slh-brand-icon{width:38px;height:38px;font-size:19px}.slh-title{font-size:15px}.slh-kicker{font-size:7px}.slh-sub{font-size:8px}.slh-close{width:34px;height:34px}.slh-stats{gap:5px;margin-top:10px}.slh-stat{padding:8px 5px 7px}.slh-stat strong{font-size:13px}.slh-stat span{font-size:6.5px}.slh-stat small{display:none}.slh-tools{gap:4px}.slh-tool{height:38px;gap:3px;font-size:7px}.slh-tool span{font-size:11px}.slh-cats{gap:5px}.slh-cat{padding:5px 8px;font-size:7px}.slh-list{padding:8px}.slh-card{grid-template-columns:39px minmax(0,1fr) 84px;gap:8px;padding:9px 8px;margin-bottom:7px;border-radius:13px}.slh-icon{width:37px;height:37px;border-radius:11px;font-size:18px}.slh-name{font-size:11.5px}.slh-category-chip{font-size:5.8px}.slh-description{font-size:7.7px;-webkit-line-clamp:1}.slh-chips{gap:3px;margin-top:5px}.slh-chip{min-height:15px;padding:2px 4px;font-size:5.7px}.slh-module-controls{gap:5px}.slh-switch,.slh-primary{min-height:32px;font-size:8px}.slh-switch{grid-template-columns:31px 1fr;padding:4px}.slh-switch-track{width:30px;height:17px}.slh-switch-track i{width:11px;height:11px}.slh-switch.on .slh-switch-track i{transform:translateX(13px)}}
 @media(min-width:700px){#${IDS.overlay}{align-items:center}#${IDS.panel}{border-radius:22px;max-height:90vh}.slh-tools{grid-template-columns:repeat(5,minmax(0,1fr))}}
         `;
@@ -625,28 +621,8 @@
     }
 
     function bindMainButton(button) {
-        const start = () => {
-            longPressTriggered = false;
-            if (!settings.longPressQuickMenu) return;
-            clearTimeout(longPressTimer);
-            longPressTimer = setTimeout(() => {
-                longPressTriggered = true;
-                openQuickMenu();
-            }, 650);
-        };
-        const end = () => clearTimeout(longPressTimer);
-        button.addEventListener('touchstart', start, { passive: true });
-        button.addEventListener('touchend', end);
-        button.addEventListener('touchcancel', end);
-        button.addEventListener('mousedown', start);
-        button.addEventListener('mouseup', end);
-        button.addEventListener('mouseleave', end);
         button.addEventListener('click', event => {
             event.preventDefault();
-            if (longPressTriggered) {
-                longPressTriggered = false;
-                return;
-            }
             openHub();
         });
     }
@@ -854,8 +830,8 @@
                 </div>
                 <div class="slh-stats" id="slh-stats"></div>
                 <div class="slh-tools">
-                    <button class="slh-tool" id="slh-update-check" title="Check updates"><span>↻</span>CHECK</button>
-                    <button class="slh-tool" id="slh-update-all" title="Update all"><span>⇧</span>UPDATE</button>
+                    <button class="slh-tool" id="slh-update-check" title="Refresh registry and check updates"><span>↻</span>CHECK</button>
+                    <button class="slh-tool" id="slh-update-all" title="Refresh registry and update all"><span>⇧</span>UPDATE</button>
                     <button class="slh-tool" id="slh-health" title="System check"><span>◉</span>HEALTH</button>
                     <button class="slh-tool whatsnew" id="slh-whats-new" title="What's new"><span>✦</span>NEW</button>
                     <button class="slh-tool settings" id="slh-settings" title="Settings"><span>⚙</span>SETTINGS</button>
@@ -867,7 +843,7 @@
             <div class="slh-footer">Built by <a class="slh-author" id="slh-author" href="${PROFILE_URL}">SakaLuX [2380374]</a></div>
         `);
         document.getElementById('slh-close').onclick = closeHub;
-        document.getElementById('slh-update-check').onclick = () => checkAllUpdates(true);
+        document.getElementById('slh-update-check').onclick = refreshRegistryAndCheck;
         document.getElementById('slh-update-all').onclick = updateAll;
         document.getElementById('slh-health').onclick = openSystemCheck;
         document.getElementById('slh-whats-new').onclick = openWhatsNew;
@@ -1023,7 +999,7 @@
     }
 
     async function updateAll() {
-        await checkAllUpdates(true);
+        await refreshRegistryAndCheck();
         const updates = SCRIPTS.filter(script => getUpdateState(script).state === 'available' && getInstallUrl(script));
         if (!updates.length) { alert('All installed SakaLuX add-ons are up to date.'); return; }
         if (!confirm('Open ' + updates.length + ' update installer' + (updates.length === 1 ? '' : 's') + ' now?')) return;
@@ -1066,35 +1042,41 @@
         document.getElementById('slhc-back').onclick = openHub;
     }
 
-    function openQuickMenu() {
-        const rows = getAllHealth();
-        createOverlay(`${headerMarkup('Quick Menu', 'Installed add-ons and one-tap access', 'slhq-close', '☠️', 'QUICK ACCESS')}<div class="slh-quick">${rows.map(row => {
-            const update = getUpdateState(row.script);
-            if (row.health.state === 'missing') return `<button class="slh-big-btn install" data-quick-install="${row.script.id}">⬇ INSTALL ${row.script.icon || '🧩'} ${escapeHtml(row.script.name)}</button>`;
-            return `<button class="slh-big-btn ${update.state === 'available' ? 'update' : ''}" data-quick-open="${row.script.id}">${row.script.icon || '🧩'} ${escapeHtml(row.script.name)} • ${escapeHtml(row.health.text)}</button>${update.state === 'available' ? `<button class="slh-big-btn update" data-quick-update="${row.script.id}">⬆ UPDATE TO v${escapeHtml(update.data.latest)}</button>` : ''}`;
-        }).join('')}<button class="slh-big-btn gray" id="slhq-full">☠️ OPEN FULL HUB</button></div>`);
-        document.getElementById('slhq-close').onclick = closeHub;
-        document.getElementById('slhq-full').onclick = openHub;
-        document.querySelectorAll('[data-quick-install]').forEach(button => button.onclick = () => { const script = SCRIPTS.find(item => item.id === button.dataset.quickInstall); const url = script ? getInstallUrl(script) : ''; if (url) location.href = url; });
-        document.querySelectorAll('[data-quick-open]').forEach(button => button.onclick = () => runAction(button.dataset.quickOpen, 'open'));
-        document.querySelectorAll('[data-quick-update]').forEach(button => button.onclick = () => { const script = SCRIPTS.find(item => item.id === button.dataset.quickUpdate); const url = script ? getInstallUrl(script) : ''; if (url) location.href = url; });
+    function settingSwitch(id, title, description, enabled) {
+        return `<div class="slh-setting"><div class="slh-setting-row"><div class="slh-setting-copy"><div class="slh-setting-title">${escapeHtml(title)}</div><div class="slh-setting-desc">${escapeHtml(description)}</div></div><button class="slh-setting-toggle ${enabled ? 'on' : ''}" id="${id}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}"><i></i></button></div></div>`;
+    }
+
+    function bindSettingToggle(id) {
+        const button = document.getElementById(id);
+        if (!button) return;
+        button.onclick = () => {
+            const next = button.getAttribute('aria-checked') !== 'true';
+            button.setAttribute('aria-checked', next ? 'true' : 'false');
+            button.classList.toggle('on', next);
+        };
+    }
+
+    function settingToggleValue(id) {
+        return document.getElementById(id)?.getAttribute('aria-checked') === 'true';
     }
 
     function openSettings() {
         createOverlay(`${headerMarkup('Hub Settings', `SakaLuX Script Hub v${VERSION}`, 'slhs-close', '⚙️', 'CONFIGURATION')}<div class="slh-settings">
-            <div class="slh-setting"><label><input id="slhs-hide" type="checkbox" ${settings.hideIndividualButtons ? 'checked' : ''}> Hide individual script buttons</label></div>
-            <div class="slh-setting"><label><input id="slhs-topbar" type="checkbox" ${settings.showTopbarSkull ? 'checked' : ''}> Show Torn-native blinking skull HUB before Messages</label></div>
-            <div class="slh-setting"><label><input id="slhs-long" type="checkbox" ${settings.longPressQuickMenu ? 'checked' : ''}> Long press fallback floating skull opens Quick Menu</label></div>
-            <div class="slh-setting"><label><input id="slhs-auto" type="checkbox" ${settings.autoCheckUpdates ? 'checked' : ''}> Automatically check Greasy Fork updates</label></div>
+            ${settingSwitch('slhs-hide', 'Hide individual script buttons', 'Keep each add-on launcher hidden while Hub manages access.', settings.hideIndividualButtons)}
+            ${settingSwitch('slhs-topbar', 'Torn-native HUB launcher', 'Show the blinking skull HUB entry before Messages when Torn navigation is available.', settings.showTopbarSkull)}
+            ${settingSwitch('slhs-auto', 'Automatic update checks', 'Check published add-on versions automatically while the Hub is running.', settings.autoCheckUpdates)}
             <div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
             <div class="slh-setting"><b>🔑 SHARED SAKALUX TORN API KEY</b><div style="margin-top:4px;color:#8fa0b3">One key for Enhancer Guard, Mission Rewards, Market Intelligence and Elimination Assistant. Bazaar Thanker does not require a Torn API key.</div><div id="slhs-api-status" style="margin-top:6px;color:${getSharedApiKey() ? '#72d6a2' : '#e7c675'}">${getSharedApiKey() ? '✅ Shared key saved' : '⚠️ No shared key saved'}</div><input id="slhs-api-key" type="password" autocomplete="off" placeholder="Paste the newly created Torn API key"><button class="slh-big-btn update" id="slhs-api-create">🔑 CREATE GENERAL API KEY</button><div class="slh-api-actions"><button class="slh-big-btn" id="slhs-api-save">SAVE & TEST</button><button class="slh-big-btn red" id="slhs-api-clear">CLEAR KEY</button></div></div>
-            <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-registry">🔄 REFRESH scripts.json</button><button class="slh-big-btn update" id="slhs-check">⬆ CHECK UPDATES NOW</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
+            <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
         </div>`);
         const position = document.getElementById('slhs-position');
         const size = document.getElementById('slhs-size');
         position.value = settings.buttonPosition;
         size.oninput = function () { document.getElementById('slhs-size-label').textContent = this.value + 'px'; };
+        bindSettingToggle('slhs-hide');
+        bindSettingToggle('slhs-topbar');
+        bindSettingToggle('slhs-auto');
         document.getElementById('slhs-close').onclick = closeHub;
         document.getElementById('slhs-back').onclick = openHub;
         document.getElementById('slhs-api-create').onclick = createSharedApiKey;
@@ -1108,17 +1090,15 @@
         };
         document.getElementById('slhs-api-clear').onclick = () => { if (!confirm('Remove the shared SakaLuX Torn API key?')) return; setSharedApiKey(''); openSettings(); };
         document.getElementById('slhs-save').onclick = () => {
-            settings.hideIndividualButtons = document.getElementById('slhs-hide').checked;
-            settings.showTopbarSkull = document.getElementById('slhs-topbar').checked;
-            settings.longPressQuickMenu = document.getElementById('slhs-long').checked;
-            settings.autoCheckUpdates = document.getElementById('slhs-auto').checked;
+            settings.hideIndividualButtons = settingToggleValue('slhs-hide');
+            settings.showTopbarSkull = settingToggleValue('slhs-topbar');
+            settings.autoCheckUpdates = settingToggleValue('slhs-auto');
             settings.buttonPosition = position.value;
             settings.buttonSize = Number(size.value);
+            delete settings.longPressQuickMenu;
             saveJson(STORAGE.settings, settings);
             updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); openHub();
         };
-        document.getElementById('slhs-registry').onclick = async () => { await loadRegistry(true); openSettings(); };
-        document.getElementById('slhs-check').onclick = async () => { await checkAllUpdates(true); openHub(); };
         document.getElementById('slhs-backup').onclick = backupSettings;
         document.getElementById('slhs-restore').onclick = restoreSettings;
         document.getElementById('slhs-reset').onclick = resetHub;
@@ -1137,6 +1117,7 @@
             const data = JSON.parse(raw);
             if (data.app !== 'SakaLuX Script Hub') throw new Error();
             settings = { ...DEFAULT_SETTINGS, ...(data.settings || {}) };
+            delete settings.longPressQuickMenu;
             favorites = new Set(Array.isArray(data.favorites) ? data.favorites : []);
             usage = data.usage && typeof data.usage === 'object' ? data.usage : {};
             saveJson(STORAGE.settings, settings); saveJson(STORAGE.favorites, [...favorites]); saveJson(STORAGE.usage, usage);
@@ -1171,7 +1152,7 @@
         id: 'script-hub', name: 'SakaLuX Script Hub', version: VERSION, ready: true,
         open: () => { openHub(); return true; }, getApiKey: getSharedApiKey, setApiKey: setSharedApiKey,
         hasApiKey: () => Boolean(getSharedApiKey()), createRequiredTornKey: createSharedApiKey,
-        refresh: async () => { await loadRegistry(true); await checkAllUpdates(true); return true; },
+        refresh: async () => { await refreshRegistryAndCheck(); return true; },
         health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)) })
     };
 
