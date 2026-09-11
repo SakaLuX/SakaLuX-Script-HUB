@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.0.1
+// @version      1.0.2
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.0.1',base:'https://api.torn.com/v2',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.0.2',base:'https://api.torn.com/v2',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -64,7 +64,7 @@ function req(url){
  return new Promise((resolve,reject)=>{
   GM_xmlhttpRequest({
    method:'GET',url,timeout:15000,headers:{Accept:'application/json'},
-   onload:r=>{try{const j=JSON.parse(r.responseText);j?.error?reject(new Error(j.error.error||j.error.code||'API error')):resolve(j)}catch(e){reject(e)}},
+   onload:r=>{try{const j=JSON.parse(r.responseText);if(j?.error){const e=new Error(j.error.error||j.error.message||'API error');e.code=num(j.error.code);reject(e)}else resolve(j)}catch(e){reject(e)}},
    onerror:()=>reject(new Error('Network/API request failed')),
    ontimeout:()=>reject(new Error('API timeout'))
   });
@@ -116,7 +116,7 @@ function normEmp(e){
 function meta(){
  const p=profile();
  return {
-  id:num(first(p,['id','company_id'],first(job(),['company_id'],0))),
+  id:num(first(p,['id','company_id'],first(job(),['company_id','company.id','company.company_id'],0))),
   name:first(p,['name','company_name'],first(job(),['company_name'],'Unknown company')),
   type:first(p,['type.name','type','company_type','type_name'],first(job(),['company_type','type'],'Unknown')),
   stars:num(first(p,['rating','stars','star_rating'],0)),
@@ -137,7 +137,7 @@ function me(){
 }
 function isDirector(){
  const id=num(first(basic(),['id','player_id'],0)),m=meta();
- return (id&&m.directorId&&id===m.directorId)||String(first(job(),['position','position_name'],'')).toLowerCase().includes('director');
+ return (id&&m.directorId&&id===m.directorId)||String(first(job(),['position','position_name','company.position','company.position_name'],'')).toLowerCase().includes('director');
 }
 function positions(){
  let x=first(profile(),['positions','company_positions','type.positions'],[]);
@@ -181,10 +181,21 @@ function saveSnapshot(){
 }
 async function refresh(){
  if(S.loading)return;S.loading=true;S.errors=[];render();
- const ep={basic:'/user/basic',workstats:'/user/workstats',job:'/user/job',profile:'/company/profile',employees:'/company/employees',stock:'/company/stock'};
- const r=await Promise.allSettled(Object.entries(ep).map(async([k,p])=>[k,await api(p)]));
- for(const x of r)x.status==='fulfilled'?S.data[x.value[0]]=x.value[1]:S.errors.push(x.reason?.message||String(x.reason));
- S.loading=false;S.updated=now();if(isDirector()&&get(KEY.mode,null)==null)S.mode='director';saveSnapshot();render();
+ const userEndpoints={basic:'/user/basic',workstats:'/user/workstats',job:'/user/job'};
+ const userResults=await Promise.allSettled(Object.entries(userEndpoints).map(async([k,p])=>[k,await api(p)]));
+ for(const x of userResults)x.status==='fulfilled'?S.data[x.value[0]]=x.value[1]:S.errors.push(x.reason?.message||String(x.reason));
+ const companyId=num(first(job(),['company_id','company.id','company.company_id'],0));
+ delete S.data.profile;delete S.data.employees;delete S.data.stock;
+ if(companyId){
+  try{S.data.profile=await api(`/company/${companyId}/profile`)}catch(e){S.errors.push(e.code===7?'Company profile access is unavailable for this API key.':e.message||String(e))}
+  if(isDirector()&&get(KEY.mode,null)==null)S.mode='director';
+  if(S.mode==='director'&&isDirector()){
+   const directorEndpoints={employees:`/company/${companyId}/employees`,stock:`/company/${companyId}/stock`};
+   const directorResults=await Promise.allSettled(Object.entries(directorEndpoints).map(async([k,p])=>[k,await api(p)]));
+   for(const x of directorResults){if(x.status==='fulfilled')S.data[x.value[0]]=x.value[1];else S.errors.push(x.reason?.code===7?'Director access required for private company data.':x.reason?.message||String(x.reason))}
+  }
+ }else S.errors.push('No company ID was returned by Torn user/job data.');
+ S.loading=false;S.updated=now();saveSnapshot();render();
 }
 const card=(t,b)=>`<section class="ci-card"><div class="ci-title">${t}</div><div class="ci-body">${b}</div></section>`;
 const kv=(k,v,h='')=>`<div class="ci-kv"><span>${esc(k)}</span><b>${v}</b>${h?`<small>${esc(h)}</small>`:''}</div>`;
@@ -258,6 +269,7 @@ function settings(){
 function body(){
  if(S.tab==='settings')return settings();
  if(S.mode==='director'){
+  if(S.updated&&!isDirector())return card('Director access required',`<p class="ci-note">Torn only exposes private Employees and Stock data to the company director. Switch to EMPLOYEE mode for your personal company intelligence.</p>`);
   if(S.tab==='employees')return directorEmployees();
   if(S.tab==='trains')return directorTrains();
   if(S.tab==='finance')return directorFinance();
@@ -288,7 +300,7 @@ function render(){
  let root=$('#ci-root');if(!S.open){root?.remove();return}
  if(!root){root=document.createElement('div');root.id='ci-root';document.body.appendChild(root)}
  root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button class="ci-icon" data-act="refresh" title="Refresh">↻</button><button class="ci-icon api" data-act="settings" title="API Access">🔑</button><button class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div><div class="ci-status">${S.updated?'Updated '+new Date(S.updated).toLocaleString():'Not refreshed yet'} · ${esc(apiSource())} · no automated company actions</div><div class="ci-footer">Made with ❤️ by <a href="${PROFILE_URL}" target="_self">SakaLuX [2380374]</a></div></div>`;
- $$('[data-mode]',root).forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);render()});
+ $$('[data-mode]',root).forEach(b=>b.onclick=()=>{S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
  $$('[data-tab]',root).forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;render()});
  $$('[data-act]',root).forEach(b=>b.onclick=()=>act(b.dataset.act));
  const c=$('#ci-compact',root);if(c)c.onchange=()=>{S.compact=c.checked;set(KEY.compact,S.compact);render()};
