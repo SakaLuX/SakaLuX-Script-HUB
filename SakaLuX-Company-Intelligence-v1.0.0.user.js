@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.0.4
+// @version      1.0.5
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.0.4',base:'https://api.torn.com/v2',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.0.5',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -85,6 +85,10 @@ async function api(path){
  const k=apiKey();
  if(!k)throw new Error('Add your Torn API key in API Access or SakaLuX Script Hub.');
  return req(`${APP.base}${path}${path.includes('?')?'&':'?'}key=${encodeURIComponent(k)}`);
+}
+async function legacyApi(section,id,selections){
+ const k=apiKey();if(!k)throw new Error('Add your Torn API key in API Access or SakaLuX Script Hub.');
+ return req(`${APP.legacy}/${section}/${id||''}?selections=${encodeURIComponent(selections)}&key=${encodeURIComponent(k)}`);
 }
 const unwrap=(o,...keys)=>{if(!o||typeof o!=='object')return o;for(const k of keys)if(o[k]!=null)return o[k];return o};
 const basic=()=>unwrap(S.data.basic,'basic','profile')||{};
@@ -188,19 +192,20 @@ function advisor(stats){
 }
 function health(){
  const m=meta(),out=[];let s=50;
+ if(!S.data.profile||!Object.keys(profile()).length)return {available:false,score:null,breakdown:[]};
  const add=(label,delta,reason)=>{s+=delta;out.push({label,delta,reason})};
  if(m.stars>=8)add('Stars',15,`${m.stars}★`);else if(m.stars>=5)add('Stars',10,`${m.stars}★`);else if(m.stars>=1)add('Stars',3,`${m.stars}★`);else add('Stars',-12,'0★');
  if(m.age>=365)add('Age',10,`${m.age}d`);else if(m.age>=90)add('Age',5,`${m.age}d`);else if(m.age<14)add('Age',-10,`${m.age}d / very new`);
  for(const [n,v] of [['Efficiency',m.efficiency],['Environment',m.environment],['Popularity',m.popularity]]){if(v>=95)add(n,5,`${v}%`);else if(v>=75)add(n,2,`${v}%`);else if(v>0&&v<40)add(n,-5,`${v}%`)}
  const e=employees().map(normEmp),inactive=e.filter(x=>x.lastTs&&days(now()-x.lastTs)>=3).length;
  inactive?add('Inactivity',-Math.min(12,inactive*3),`${inactive} inactive 3+d`):e.length&&add('Activity',3,'No 3+d inactivity detected');
- return {score:clamp(Math.round(s),0,100),breakdown:out};
+ return {available:true,score:clamp(Math.round(s),0,100),breakdown:out};
 }
 const arr=k=>get(k,[])||[];
 function saveSnapshot(){
  const m=meta();if(!m.id&&m.name==='Unknown company')return;
  const a=arr(KEY.snapshots),date=new Date().toISOString().slice(0,10),w=work();
- const snap={date,ts:now(),company:m,workstats:w,myPosition:me()?.position||first(job(),['position','position_name'],'')};
+ const snap={date,ts:now(),company:m,workstats:w,myPosition:me()?.position||first(job(),['position','position_name','company.position','company.position_name'],'')};
  const i=a.findIndex(x=>x.date===date&&(x.company?.id||x.company?.name)===(m.id||m.name));i>=0?a[i]=snap:a.push(snap);
  set(KEY.snapshots,a.slice(-120));
 }
@@ -210,10 +215,13 @@ async function refresh(){
  const userResults=await Promise.allSettled(Object.entries(userEndpoints).map(async([k,p])=>[k,await api(p)]));
  for(const x of userResults)x.status==='fulfilled'?S.data[x.value[0]]=x.value[1]:S.errors.push(x.reason?.message||String(x.reason));
  try{S.data.userProfile=await api('/user/profile')}catch{}
+ if(!detectCompanyId()||meta().name==='Unknown company')try{S.data.job=await legacyApi('user','','job')}catch{}
  const companyId=detectCompanyId();
  delete S.data.profile;delete S.data.employees;delete S.data.stock;
  if(companyId){
-  try{S.data.profile=await api(`/company/${companyId}/profile`)}catch(e){S.errors.push(e.code===7?'Company profile access is unavailable for this API key.':e.message||String(e))}
+  try{S.data.profile=await api(`/company/${companyId}/profile`)}catch(e){
+   try{S.data.profile=await legacyApi('company',companyId,'profile')}catch{S.errors.push(e.code===7?'Company profile access is unavailable for this API key.':e.message||String(e))}
+  }
   if(isDirector()&&get(KEY.mode,null)==null)S.mode='director';
   if(S.mode==='director'&&isDirector()){
    const directorEndpoints={employees:`/company/${companyId}/employees`,stock:`/company/${companyId}/stock`};
@@ -230,11 +238,11 @@ const empty=x=>`<div class="ci-empty">${esc(x)}</div>`;
 function risk(s){return s>=80?['LOW','good']:s>=60?['MODERATE','warn']:['HIGH','bad']}
 
 function employeeOverview(){
- const m=meta(),w=work(),u=me(),h=health(),[rl,rc]=risk(h.score),ags=arr(KEY.agreements),a=ags.filter(x=>x.active!==false).slice(-1)[0],got=arr(KEY.trains).filter(x=>now()-x.ts<7*86400000).length;
+ const m=meta(),w=work(),u=me(),h=health(),[rl,rc]=h.available?risk(h.score):['UNAVAILABLE','warn'],ags=arr(KEY.agreements),a=ags.filter(x=>x.active!==false).slice(-1)[0],got=arr(KEY.trains).filter(x=>now()-x.ts<7*86400000).length;
  return `<div class="ci-grid">
- ${card('Company',kv('Name',esc(m.name))+kv('Type',esc(m.type))+kv('Stars',m.stars+'★')+kv('Age',fmt(m.age)+' days')+kv('Position',esc(u?.position||first(job(),['position','position_name'],'Unknown'))))}
+ ${card('Company',kv('Name',esc(m.name))+kv('Type',h.available?esc(m.type):'—')+kv('Stars',h.available?m.stars+'★':'—')+kv('Age',h.available?fmt(m.age)+' days':'—')+kv('Position',esc(u?.position||first(job(),['position','position_name','company.position','company.position_name'],'Unknown'))))}
  ${card('My Work Stats',kv('Manual Labor',fmt(w.manual))+kv('Intelligence',fmt(w.intelligence))+kv('Endurance',fmt(w.endurance))+kv('Total',fmt(w.manual+w.intelligence+w.endurance))+kv('Effectiveness',u?fmt(u.effectiveness):'—'))}
- ${card('Company Risk',`<div class="ci-score ${rc}"><b>${h.score}/100</b><span>${rl} RISK</span></div>${h.breakdown.slice(0,6).map(x=>`<div class="ci-line"><span>${esc(x.label)} <small>${esc(x.reason)}</small></span><b class="${x.delta>=0?'pos':'neg'}">${x.delta>=0?'+':''}${x.delta}</b></div>`).join('')}`)}
+ ${card('Company Risk',h.available?`<div class="ci-score ${rc}"><b>${h.score}/100</b><span>${rl} RISK</span></div>${h.breakdown.slice(0,6).map(x=>`<div class="ci-line"><span>${esc(x.label)} <small>${esc(x.reason)}</small></span><b class="${x.delta>=0?'pos':'neg'}">${x.delta>=0?'+':''}${x.delta}</b></div>`).join('')}`:`<div class="ci-score warn"><b>—</b><span>UNAVAILABLE</span></div><p class="ci-note">Company Profile data is missing. Risk is not calculated from zero or incomplete values.</p>`)}
  ${card('Train Promise',a?kv('Promised',fmt(a.perWeek)+'/week')+kv('Received 7d',got+'/'+fmt(a.perWeek))+kv('Cost',a.cost?money(a.cost)+'/train':'FREE')+kv('Starts',esc(a.startDate||'Now'))+`<button class="ci-btn" data-act="log-train">+ Log train</button>`:empty('No train agreement saved.')+`<button class="ci-btn" data-act="new-agreement">Add agreement</button>`)}
  </div>`;
 }
@@ -260,9 +268,9 @@ function history(){
  return card('Daily Snapshots',a.length?`<div class="ci-snapshots">${a.slice(0,60).map(x=>`<article class="ci-snapshot"><div class="ci-snapshot-head"><b>${esc(x.date)}</b><span>${esc(x.company?.name||'Unknown company')} · ${fmt(x.company?.stars)}★</span></div><div class="ci-snapshot-position"><span>POSITION</span><b>${esc(x.myPosition||'Unknown')}</b></div><div class="ci-snapshot-stats"><div><span>MAN</span><b>${fmt(x.workstats?.manual)}</b></div><div><span>INT</span><b>${fmt(x.workstats?.intelligence)}</b></div><div><span>END</span><b>${fmt(x.workstats?.endurance)}</b></div></div></article>`).join('')}</div>`:empty('Snapshots are saved automatically on refresh.'));
 }
 function directorOverview(){
- const m=meta(),h=health(),[rl,rc]=risk(h.score),e=employees().map(normEmp),pay=e.reduce((a,x)=>a+x.wage,0);
+ const m=meta(),h=health(),[rl,rc]=h.available?risk(h.score):['UNAVAILABLE','warn'],e=employees().map(normEmp),pay=e.reduce((a,x)=>a+x.wage,0);
  return `<div class="ci-grid">
- ${card('Company Health',`<div class="ci-score ${rc}"><b>${h.score}/100</b><span>${rl}</span></div>${h.breakdown.map(x=>`<div class="ci-line"><span>${esc(x.label)} <small>${esc(x.reason)}</small></span><b class="${x.delta>=0?'pos':'neg'}">${x.delta>=0?'+':''}${x.delta}</b></div>`).join('')}`)}
+ ${card('Company Health',h.available?`<div class="ci-score ${rc}"><b>${h.score}/100</b><span>${rl}</span></div>${h.breakdown.map(x=>`<div class="ci-line"><span>${esc(x.label)} <small>${esc(x.reason)}</small></span><b class="${x.delta>=0?'pos':'neg'}">${x.delta>=0?'+':''}${x.delta}</b></div>`).join('')}`:`<div class="ci-score warn"><b>—</b><span>UNAVAILABLE</span></div><p class="ci-note">Company Profile data is required before health can be calculated.</p>`)}
  ${card('Performance',kv('Stars',m.stars+'★')+kv('Popularity',m.popularity+'%')+kv('Efficiency',m.efficiency+'%')+kv('Environment',m.environment+'%')+kv('Age',fmt(m.age)+' days'))}
  ${card('Roster',kv('Employees',e.length+(m.maxEmployees?' / '+m.maxEmployees:''))+kv('Low EE',e.filter(x=>x.effectiveness&&x.effectiveness<90).length)+kv('Payroll/day',money(pay))+kv('Trains available',fmt(m.trains)))}
  ${card('Financial Snapshot',kv('Daily income',money(m.dailyIncome))+kv('Weekly income',money(m.weeklyIncome))+kv('Payroll/week',money(pay*7))+kv('Simple margin',money(m.weeklyIncome-pay*7),'before stock/ads/other costs'))}
