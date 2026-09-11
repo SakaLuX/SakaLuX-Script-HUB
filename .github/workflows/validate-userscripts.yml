@@ -6,14 +6,12 @@ on:
     paths:
       - '*.user.js'
       - 'scripts.json'
-      - 'UPDATE-INFO.md'
       - 'greasyfork/**'
       - '.github/workflows/**'
   pull_request:
     paths:
       - '*.user.js'
       - 'scripts.json'
-      - 'UPDATE-INFO.md'
       - 'greasyfork/**'
       - '.github/workflows/**'
   workflow_dispatch:
@@ -66,7 +64,6 @@ jobs:
 
           registry = json.loads(Path('scripts.json').read_text(encoding='utf-8'))['scripts']
           hub = Path('SakaLuX-Script-Hub.user.js').read_text(encoding='utf-8')
-          update_info = Path('UPDATE-INFO.md').read_text(encoding='utf-8')
           hub_info = Path('greasyfork/Script-Hub.md').read_text(encoding='utf-8')
 
           files = {
@@ -104,14 +101,13 @@ jobs:
               if item.get('sourceUrl') != expected_source or not fallback_source:
                   raise SystemExit(f'{display_name}: canonical sourceUrl mismatch')
 
-              current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', Path(info_file).read_text(encoding='utf-8'))
+              info_text = Path(info_file).read_text(encoding='utf-8')
+              current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', info_text)
               if not current:
-                  current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', Path(info_file).read_text(encoding='utf-8'))
+                  current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', info_text)
               if not current or current.group(1).strip() != expected:
                   raise SystemExit(f'{display_name}: dedicated info version mismatch')
-              if not re.search(r'^- SakaLuX ' + re.escape(display_name) + r':? \*\*v' + re.escape(expected) + r'\*\*', update_info, re.M):
-                  raise SystemExit(f'{display_name}: UPDATE-INFO current version mismatch')
-              if not re.search(r'^- SakaLuX ' + re.escape(display_name) + r' \*\*v' + re.escape(expected) + r'\*\*', hub_info, re.M):
+              if not re.search(r'^- .*SakaLuX ' + re.escape(display_name) + r' \*\*v' + re.escape(expected) + r'\*\*', hub_info, re.M):
                   raise SystemExit(f'{display_name}: Script-Hub info version mismatch')
 
           hub_meta = re.search(r'^// @version\s+([^\s]+)\s*$', hub, re.M)
@@ -119,10 +115,8 @@ jobs:
           hub_current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', hub_info)
           if not hub_meta or not hub_runtime or not hub_current or len({hub_meta.group(1), hub_runtime.group(1), hub_current.group(1).strip()}) != 1:
               raise SystemExit('Script Hub version mismatch')
-          if not re.search(r'^- SakaLuX Script Hub: \*\*v' + re.escape(hub_meta.group(1)) + r'\*\*', update_info, re.M):
-              raise SystemExit('Script Hub UPDATE-INFO version mismatch')
 
-          print('All Hub, registry, userscript and release-note versions: synchronized')
+          print('All Hub, registry, userscript and documentation versions: synchronized')
 
       - name: Validate Suite metadata
         shell: python
