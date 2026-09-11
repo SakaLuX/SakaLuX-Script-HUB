@@ -4,12 +4,12 @@ Last updated: 2026-09-10
 
 ## Current versions
 
-- SakaLuX Script Hub: **v1.9.2**
-- SakaLuX Enhancer Guard: **v1.3.13**
-- SakaLuX Bazaar Thanker - PDA: **v5.3.5**
-- SakaLuX Mission Rewards: **v1.0.3**
-- SakaLuX Market Intelligence: **v1.17.1** — Greasy Fork **592781**
-- SakaLuX Elimination Assistant: **v1.3.7** — Greasy Fork **594921**
+- SakaLuX Script Hub: **v1.9.3**
+- SakaLuX Enhancer Guard: **v1.3.14**
+- SakaLuX Bazaar Thanker - PDA: **v5.3.6**
+- SakaLuX Mission Rewards: **v1.0.4**
+- SakaLuX Market Intelligence: **v1.17.2** — Greasy Fork **592781**
+- SakaLuX Elimination Assistant: **v1.3.8** — Greasy Fork **594921**
 - SakaLuX Suite: **v0.9.906** — Bookie Scout value analysis: implied %, no-vig fair %, external %, Edge, EV and BET/SKIP
 
 ## Private / standalone tools
@@ -20,12 +20,12 @@ Last updated: 2026-09-10
 
 All current scripts were checked against the `@version` in their live `.user.js` file after the licensing migration.
 
-- **Script Hub v1.9.2** — removed the Hub search field.
-- **Enhancer Guard v1.3.13** — removed the unused lock control beside the Enhancer favorite star.
-- **Bazaar Thanker - PDA v5.3.5** — professional Settings UI and per-item purchase prices in buyer messages.
-- **Mission Rewards v1.0.3** — persistent native Hub power API.
-- **Market Intelligence v1.17.1** — no market panel on Items or player profile pages.
-- **Elimination Assistant v1.3.7** — unified Torn + FFScouter API Access panel with exact Torn-key creation and validation.
+- **Script Hub v1.9.3** — PC-safe installed-script detection through persistent installation markers.
+- **Enhancer Guard v1.3.14** — publishes its installation marker for Hub detection.
+- **Bazaar Thanker - PDA v5.3.6** — publishes its installation marker for Hub detection.
+- **Mission Rewards v1.0.4** — publishes its installation marker for Hub detection.
+- **Market Intelligence v1.17.2** — publishes its installation marker for Hub detection.
+- **Elimination Assistant v1.3.8** — publishes its installation marker for Hub detection.
 - **SakaLuX Suite v0.9.906** — complete 13-module implementation, established SakaLuX names, improved TornPDA Event Lens readability, persistent controls and legacy-setting migration; All Rights Reserved metadata and source header present.
 - **Account Auditor v1.2.1** — intentionally left outside this public-script licensing migration.
 
