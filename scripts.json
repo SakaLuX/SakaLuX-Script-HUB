@@ -170,7 +170,7 @@
       "name": "Elimination Assistant",
       "icon": "⚔️",
       "category": "Combat",
-      "version": "1.3.12",
+      "version": "1.3.13",
       "description": "Eliminations advisor with unified Torn + FFScouter API setup, rotating 500-player batches, availability status and TornPDA export.",
       "greasyForkId": "594921",
       "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
