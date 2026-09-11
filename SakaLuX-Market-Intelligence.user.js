@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.4
+// @version      1.17.5
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -32,7 +32,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.17.4';
+    const VERSION = '1.17.5';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1706,6 +1706,7 @@
         if(document.getElementById('sl-mi-api-access-style'))return;
         const s=document.createElement('style');s.id='sl-mi-api-access-style';s.textContent=`
 .sl-mi-head-actions{display:flex;align-items:center;gap:7px}
+#sl-mi-close,#sl-mi-api-close{width:42px!important;height:42px!important;min-width:42px!important;padding:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:11px!important;font-size:22px!important}
 #sl-mi-api-access,#sl-mi-api-close{width:40px;height:40px;min-width:40px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;border-radius:10px!important}
 #sl-mi-api-access{background:linear-gradient(180deg,#322b10,#211c0c)!important;border:1px solid #7c681e!important;color:#f5d85f!important;font-size:18px!important}
 #sl-mi-api-access:hover{filter:brightness(1.08)}
@@ -1775,7 +1776,7 @@
         if(!settings.enabled)setEnabled(true);
         apiAccessCss();
         document.getElementById('sl-mi-overlay')?.remove();const overlay=document.createElement('div');overlay.id='sl-mi-overlay';
-        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · '+esc(state.apiMode||'API idle')+' · page: '+esc(state.page||detectPage())+'</div></div><div class="sl-mi-head-actions"><button id="sl-mi-api-access" title="Market Intelligence API Access" aria-label="Market Intelligence API Access">🔑</button><button id="sl-mi-close">×</button></div></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('arrivalBasket','Arrival Basket Planner while flying')+toggle('smartLandedRefresh','Smart refresh after landing')+toggle('sessionSummary','Travel Session Summary + local history')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('loadoutComparator','Loadout Comparator — compare market gear vs equipped')+toggle('priceNetwork','SakaLuX Price Network — anonymous opt-in')+'<label class="sl-mi-field">Price Network HTTPS endpoint<input id="sl-mi-network-endpoint" inputmode="url" placeholder="https://your-worker.workers.dev" value="'+esc(settings.priceNetworkEndpoint||'')+'"></label><div class="sl-mi-network-privacy">When enabled, only item ID, observed Item Market floor price, timestamp and source are shared. Torn ID, username, API key, device ID and cookies are never sent.</div>'+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label><div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Travel sessions: <b>'+((travelSessions.history||[]).length+(travelSessions.current?1:0))+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE VALUES</button><button class="sl-mi-secondary" id="sl-mi-clear-sessions">CLEAR TRAVEL HISTORY</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
+        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · Market • Bazaar • Travel Intelligence</div></div><div class="sl-mi-head-actions"><button id="sl-mi-api-access" title="Market Intelligence API Access" aria-label="Market Intelligence API Access">🔑</button><button id="sl-mi-close">×</button></div></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('arrivalBasket','Arrival Basket Planner while flying')+toggle('smartLandedRefresh','Smart refresh after landing')+toggle('sessionSummary','Travel Session Summary + local history')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('loadoutComparator','Loadout Comparator — compare market gear vs equipped')+toggle('priceNetwork','SakaLuX Price Network — anonymous opt-in')+'<label class="sl-mi-field">Price Network HTTPS endpoint<input id="sl-mi-network-endpoint" inputmode="url" placeholder="https://your-worker.workers.dev" value="'+esc(settings.priceNetworkEndpoint||'')+'"></label><div class="sl-mi-network-privacy">When enabled, only item ID, observed Item Market floor price, timestamp and source are shared. Torn ID, username, API key, device ID and cookies are never sent.</div>'+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label><div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Travel sessions: <b>'+((travelSessions.history||[]).length+(travelSessions.current?1:0))+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE VALUES</button><button class="sl-mi-secondary" id="sl-mi-clear-sessions">CLEAR TRAVEL HISTORY</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
         document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
         overlay.querySelector('#sl-mi-close').onclick=()=>overlay.remove();
         overlay.querySelector('#sl-mi-api-access').onclick=()=>openApiAccess();
@@ -1877,3 +1878,26 @@
     installSakaLuXUnifiedTheme_market_intelligence();
 
 })();
+
+// SAKALUX_PERSISTENT_BRAND_FOOTER_V1
+;(() => {
+    const ID='sakalux-global-made-with-love';
+    const PROFILE='https://www.torn.com/profiles.php?XID=2380374';
+    function ensureSakaLuXBrandFooter(){
+        if(!document.body)return;
+        let el=document.getElementById(ID);
+        if(!el){
+            el=document.createElement('div');
+            el.id=ID;
+            el.innerHTML='Made with ❤️ by <a href="'+PROFILE+'" target="_self" rel="noopener">SakaLuX [2380374]</a>';
+            document.body.appendChild(el);
+        }
+        const mobile=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
+        el.style.cssText='position:fixed;right:8px;bottom:'+(mobile?'76px':'8px')+';z-index:2147483646;padding:5px 8px;border:1px solid rgba(215,169,74,.42);border-radius:999px;background:rgba(12,17,23,.92);box-shadow:0 4px 14px rgba(0,0,0,.35);color:#aeb8c5;font:700 10px/1.2 Arial,sans-serif;white-space:nowrap;pointer-events:auto;backdrop-filter:blur(6px)';
+        const a=el.querySelector('a');if(a)a.style.cssText='color:#d7a94a!important;text-decoration:none!important;font-weight:900!important';
+    }
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureSakaLuXBrandFooter,{once:true});else ensureSakaLuXBrandFooter();
+    window.addEventListener('resize',ensureSakaLuXBrandFooter,{passive:true});
+    setInterval(ensureSakaLuXBrandFooter,2500);
+})();
+

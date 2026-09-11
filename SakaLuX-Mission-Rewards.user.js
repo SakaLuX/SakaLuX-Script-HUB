@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.5
+// @version      1.0.6
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,7 +30,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.0.5';
+    const VERSION = '1.0.6';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -763,3 +763,26 @@
     installSakaLuXUnifiedTheme_mission_rewards();
 
 })();
+
+// SAKALUX_PERSISTENT_BRAND_FOOTER_V1
+;(() => {
+    const ID='sakalux-global-made-with-love';
+    const PROFILE='https://www.torn.com/profiles.php?XID=2380374';
+    function ensureSakaLuXBrandFooter(){
+        if(!document.body)return;
+        let el=document.getElementById(ID);
+        if(!el){
+            el=document.createElement('div');
+            el.id=ID;
+            el.innerHTML='Made with ❤️ by <a href="'+PROFILE+'" target="_self" rel="noopener">SakaLuX [2380374]</a>';
+            document.body.appendChild(el);
+        }
+        const mobile=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
+        el.style.cssText='position:fixed;right:8px;bottom:'+(mobile?'76px':'8px')+';z-index:2147483646;padding:5px 8px;border:1px solid rgba(215,169,74,.42);border-radius:999px;background:rgba(12,17,23,.92);box-shadow:0 4px 14px rgba(0,0,0,.35);color:#aeb8c5;font:700 10px/1.2 Arial,sans-serif;white-space:nowrap;pointer-events:auto;backdrop-filter:blur(6px)';
+        const a=el.querySelector('a');if(a)a.style.cssText='color:#d7a94a!important;text-decoration:none!important;font-weight:900!important';
+    }
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureSakaLuXBrandFooter,{once:true});else ensureSakaLuXBrandFooter();
+    window.addEventListener('resize',ensureSakaLuXBrandFooter,{passive:true});
+    setInterval(ensureSakaLuXBrandFooter,2500);
+})();
+

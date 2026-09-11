@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.10**
+**v1.3.11**
 
 ## What it does
 
@@ -25,6 +25,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.11 — Persistent SakaLuX signature
+
+- Added the persistent **Made with ❤️ by SakaLuX [2380374]** author footer with the author name and Torn ID linked to the profile.
+- Keeps the SakaLuX identity visible consistently across TornPDA and desktop.
 
 ### v1.3.10
 
