@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.17.6**
+**v1.17.7**
 
 ## What it does
 
@@ -23,6 +23,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 
 ## Current release notes
+
+### v1.17.7 — Travel-only panels
+
+- Travel Session Summary, Best Route Basket and the related travel panels now appear only on Torn Travel pages.
+- Moving to Log, Events, Items, profiles or another page immediately removes stale Travel panels.
+- Added render-time route guards for TornPDA internal navigation.
 
 ### v1.17.6 — Inline panel signature
 
