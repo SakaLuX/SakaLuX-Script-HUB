@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.0.7**
+**v1.0.8**
 
 ## What it does
 
@@ -20,6 +20,10 @@ Complementary add-on for SakaLuX Script Hub.
 - Keeps Mission-specific scanning inactive outside the Missions page.
 
 ## Current release notes
+
+### v1.0.8 — Violentmonkey Hub bridge
+
+- Added an isolated-context DOM bridge so Script Hub can detect, open and switch Mission Rewards ON/OFF in Violentmonkey.
 
 ### v1.0.7 — Inline panel signature
 
