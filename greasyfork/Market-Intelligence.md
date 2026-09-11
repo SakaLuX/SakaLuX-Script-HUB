@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.17.5**
+**v1.17.6**
 
 ## What it does
 
@@ -23,6 +23,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 
 ## Current release notes
+
+### v1.17.6 — Inline panel signature
+
+- Removed the floating author badge from the Torn page.
+- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
 
 ### v1.17.5 — Persistent SakaLuX signature
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.11
+// @version      1.3.12
 // @description  Torn Eliminations advisor with rotating 500-player batches, compact actions, availability status, TornPDA export and FF/BS calibration.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -28,7 +28,7 @@
  */
 (() => {
 'use strict';
-const VERSION='1.3.11';
+const VERSION='1.3.12';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -260,26 +260,31 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     installSakaLuXUnifiedTheme_elimination_assistant();
 
 })();
-
-// SAKALUX_PERSISTENT_BRAND_FOOTER_V1
+// SAKALUX_INLINE_PANEL_FOOTER_V2
 ;(() => {
-    const ID='sakalux-global-made-with-love';
+    const FOOTER_ID='sakalux-inline-footer-elimination-assistant';
+    const PANEL_SELECTOR='#slx-elim';
     const PROFILE='https://www.torn.com/profiles.php?XID=2380374';
-    function ensureSakaLuXBrandFooter(){
-        if(!document.body)return;
-        let el=document.getElementById(ID);
-        if(!el){
-            el=document.createElement('div');
-            el.id=ID;
-            el.innerHTML='Made with ❤️ by <a href="'+PROFILE+'" target="_self" rel="noopener">SakaLuX [2380374]</a>';
-            document.body.appendChild(el);
+    function ensureInlineSakaLuXFooter(){
+        const panel=document.querySelector(PANEL_SELECTOR);
+        if(!panel)return;
+        let footer=panel.querySelector('#'+FOOTER_ID);
+        if(!footer){
+            footer=document.createElement('div');
+            footer.id=FOOTER_ID;
+            footer.innerHTML='Made with ❤️ by <a href="'+PROFILE+'" target="_self" rel="noopener">SakaLuX [2380374]</a>';
+            footer.style.cssText='flex:0 0 auto;width:100%;box-sizing:border-box;margin-top:10px;padding:10px 8px 9px;border-top:1px solid #2d3c4e;background:rgba(10,15,21,.72);color:#8e99a8;text-align:center;font:700 10px/1.25 Arial,sans-serif';
+            const link=footer.querySelector('a');
+            if(link)link.style.cssText='color:#d7a94a!important;text-decoration:none!important;font-weight:900!important';
         }
-        const mobile=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
-        el.style.cssText='position:fixed;right:8px;bottom:'+(mobile?'76px':'8px')+';z-index:2147483646;padding:5px 8px;border:1px solid rgba(215,169,74,.42);border-radius:999px;background:rgba(12,17,23,.92);box-shadow:0 4px 14px rgba(0,0,0,.35);color:#aeb8c5;font:700 10px/1.2 Arial,sans-serif;white-space:nowrap;pointer-events:auto;backdrop-filter:blur(6px)';
-        const a=el.querySelector('a');if(a)a.style.cssText='color:#d7a94a!important;text-decoration:none!important;font-weight:900!important';
+        if(panel.lastElementChild!==footer)panel.appendChild(footer);
     }
-    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureSakaLuXBrandFooter,{once:true});else ensureSakaLuXBrandFooter();
-    window.addEventListener('resize',ensureSakaLuXBrandFooter,{passive:true});
-    setInterval(ensureSakaLuXBrandFooter,2500);
+    const start=()=>{
+        ensureInlineSakaLuXFooter();
+        if(!document.body)return;
+        const observer=new MutationObserver(ensureInlineSakaLuXFooter);
+        observer.observe(document.body,{childList:true,subtree:true});
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 

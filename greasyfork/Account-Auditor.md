@@ -4,7 +4,7 @@ Standalone SakaLuX account-audit tool. It is intentionally not registered as a S
 
 ## Current version
 
-**v1.2.3**
+**v1.2.4**
 
 ## What it does
 
@@ -19,6 +19,11 @@ Standalone SakaLuX account-audit tool. It is intentionally not registered as a S
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.2.4 — Inline panel signature
+
+- Removed the floating author badge from the Torn page.
+- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
 
 ### v1.2.3 — Persistent SakaLuX signature
 

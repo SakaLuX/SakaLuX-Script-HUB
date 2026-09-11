@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.16**
+**v1.3.17**
 
 ## What it does
 
@@ -18,6 +18,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.3.17 — Inline panel signature
+
+- Removed the floating author badge from the Torn page.
+- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
 
 ### v1.3.16 — Persistent SakaLuX signature
 
