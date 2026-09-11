@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.16**
+**v1.3.17**
 
 ## What it does
 
@@ -25,6 +25,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.17 — Violentmonkey Hub bridge
+
+- Added the canonical `elimination-assistant` installation marker while retaining the legacy marker.
+- Added an isolated-context DOM bridge for Script Hub detection, OPEN and ON/OFF control in Violentmonkey.
 
 ### v1.3.16 — Refined professional target switches
 
