@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v5.3.9**
+**v5.3.10**
 
 ## What it does
 
@@ -15,6 +15,10 @@ Complementary add-on for SakaLuX Script Hub.
 - Works without a Torn API key.
 
 ## Current release notes
+
+### v5.3.10 — Violentmonkey Hub bridge
+
+- Added an isolated-context DOM bridge so Script Hub can detect, open and switch Bazaar Thanker ON/OFF in Violentmonkey.
 
 ### v5.3.9 — Inline panel signature
 
