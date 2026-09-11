@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.0.5**
+**v1.0.6**
 
 ## What it does
 
@@ -20,6 +20,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Keeps Mission-specific scanning inactive outside the Missions page.
 
 ## Current release notes
+
+### v1.0.6 — Persistent SakaLuX signature
+
+- Added the persistent **Made with ❤️ by SakaLuX [2380374]** author footer with the author name and Torn ID linked to the profile.
+- Keeps the SakaLuX identity visible consistently across TornPDA and desktop.
 
 ### v1.0.5
 

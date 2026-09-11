@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.17.4**
+**v1.17.5**
 
 ## What it does
 
@@ -23,6 +23,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 
 ## Current release notes
+
+### v1.17.5 — Persistent SakaLuX signature
+
+- Replaced the technical `Manual · page: other` style subtitle with **Market • Bazaar • Travel Intelligence**.
+- Enlarged the close button to the Hub control size.
+- Added the persistent **Made with ❤️ by SakaLuX [2380374]** linked author footer.
 
 ### v1.17.4 — Dedicated API Access panel
 

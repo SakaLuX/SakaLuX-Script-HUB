@@ -4,7 +4,7 @@ Standalone experimental SakaLuX toolkit for Torn PDA and desktop userscript mana
 
 ## Current version
 
-**v0.9.907**
+**v0.9.908**
 
 ## What it does
 
@@ -38,6 +38,11 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - `Alt + F` shortcut for opening the control interface.
 
 ## Current release notes
+
+### v0.9.908 — Persistent SakaLuX signature
+
+- Added the persistent **Made with ❤️ by SakaLuX [2380374]** author footer with the author name and Torn ID linked to the profile.
+- Keeps the SakaLuX identity visible consistently across TornPDA and desktop.
 
 ### v0.9.907
 

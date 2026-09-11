@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.7**
+**v1.9.8**
 
 ## What it does
 
@@ -24,6 +24,12 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.8 — Persistent SakaLuX signature
+
+- Restored **Made with ❤️ by SakaLuX [2380374]** in the Hub footer with the linked Torn profile.
+- Added the persistent shared author footer used by every current SakaLuX userscript.
+- Market Intelligence now uses a cleaner subtitle and a larger Hub-style close button.
 
 ### v1.9.7
 
@@ -87,11 +93,11 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 ### Registered complementary add-ons
 
-- 🛡️ SakaLuX Enhancer Guard **v1.3.15**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.7**
-- 🎯 SakaLuX Mission Rewards **v1.0.5**
-- 📈 SakaLuX Market Intelligence **v1.17.4**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.10**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.16**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.8**
+- 🎯 SakaLuX Mission Rewards **v1.0.6**
+- 📈 SakaLuX Market Intelligence **v1.17.5**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.11**
 
 ## Privacy
 

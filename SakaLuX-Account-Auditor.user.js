@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.2.2
+// @version      1.2.3
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -19,7 +19,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.2.2';
+    const VERSION = '1.2.3';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -248,3 +248,26 @@
     installSakaLuXUnifiedTheme_account_auditor();
 
 })();
+
+// SAKALUX_PERSISTENT_BRAND_FOOTER_V1
+;(() => {
+    const ID='sakalux-global-made-with-love';
+    const PROFILE='https://www.torn.com/profiles.php?XID=2380374';
+    function ensureSakaLuXBrandFooter(){
+        if(!document.body)return;
+        let el=document.getElementById(ID);
+        if(!el){
+            el=document.createElement('div');
+            el.id=ID;
+            el.innerHTML='Made with ❤️ by <a href="'+PROFILE+'" target="_self" rel="noopener">SakaLuX [2380374]</a>';
+            document.body.appendChild(el);
+        }
+        const mobile=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
+        el.style.cssText='position:fixed;right:8px;bottom:'+(mobile?'76px':'8px')+';z-index:2147483646;padding:5px 8px;border:1px solid rgba(215,169,74,.42);border-radius:999px;background:rgba(12,17,23,.92);box-shadow:0 4px 14px rgba(0,0,0,.35);color:#aeb8c5;font:700 10px/1.2 Arial,sans-serif;white-space:nowrap;pointer-events:auto;backdrop-filter:blur(6px)';
+        const a=el.querySelector('a');if(a)a.style.cssText='color:#d7a94a!important;text-decoration:none!important;font-weight:900!important';
+    }
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureSakaLuXBrandFooter,{once:true});else ensureSakaLuXBrandFooter();
+    window.addEventListener('resize',ensureSakaLuXBrandFooter,{passive:true});
+    setInterval(ensureSakaLuXBrandFooter,2500);
+})();
+

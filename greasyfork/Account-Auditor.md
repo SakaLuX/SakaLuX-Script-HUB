@@ -4,7 +4,7 @@ Standalone SakaLuX account-audit tool. It is intentionally not registered as a S
 
 ## Current version
 
-**v1.2.2**
+**v1.2.3**
 
 ## What it does
 
@@ -19,6 +19,11 @@ Standalone SakaLuX account-audit tool. It is intentionally not registered as a S
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.2.3 — Persistent SakaLuX signature
+
+- Added the persistent **Made with ❤️ by SakaLuX [2380374]** author footer with the author name and Torn ID linked to the profile.
+- Keeps the SakaLuX identity visible consistently across TornPDA and desktop.
 
 ### v1.2.2
 
