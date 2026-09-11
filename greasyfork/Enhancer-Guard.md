@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.13**
+**v1.3.14**
 
 ## What it does
 
@@ -17,7 +17,9 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current release notes
 
-### v1.3.13
+### v1.3.14
+
+- Added a persistent installation marker so Script Hub can detect the add-on on PC/Tampermonkey.
 
 - Moved protection badges from the Enhancer panel to the Torn Items inventory, matching Item Protector.
 - Added full, partial-quantity and unlocked lock badge states with long-press quantity editing directly on item icons.
