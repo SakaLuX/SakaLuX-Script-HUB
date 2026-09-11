@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.13**
+**v1.3.14**
 
 ## What it does
 
@@ -25,6 +25,14 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.14 — Compact TARGETS menu
+
+- Replaced the wide inline filter chips with one compact **TARGETS** button beside the player search field.
+- TARGETS opens a dropdown panel with **ATTACKABLE**, **SAFE**, **RISKY** and **UNOPENED** checkboxes.
+- Multiple filters can be combined; a badge on TARGETS shows how many are active.
+- Added **CLEAR** to reset all target filters.
+- Removed **SKIP** from the selectable target menu because it represents targets to avoid rather than preferred targets.
 
 ### v1.3.13 — Multi-filter targets
 
