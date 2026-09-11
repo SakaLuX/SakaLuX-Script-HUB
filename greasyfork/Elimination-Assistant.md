@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.15**
+**v1.3.16**
 
 ## What it does
 
@@ -25,6 +25,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.16 — Refined professional target switches
+
+- Reworked TARGETS toggles into compact 40×22 px switches with correctly centered knobs.
+- Removed heavy full-row active outlines and oversized glow styling.
+- SAFE and RISKY now use restrained color accents while the menu keeps a neutral professional look.
 
 ### v1.3.15 — Compact sliding target switches
 
