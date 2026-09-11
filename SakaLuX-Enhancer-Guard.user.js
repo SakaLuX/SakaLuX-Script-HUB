@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.17
+// @version      1.3.18
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.17';
+    const VERSION = '1.3.18';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -938,11 +938,20 @@
             document.getElementById(HUB_PROMPT_ID)?.remove();
         }
         window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
+        syncHubBridge('enhancer', state.enabled);
         return state.enabled;
     }
 
     function toggleEnabled() {
         return setEnabled(!state.enabled);
+    }
+
+    function syncHubBridge(id, value) { const bridge = document.getElementById('sakalux-module-bridge-' + id); if (bridge) bridge.dataset.enabled = String(Boolean(value)); }
+    function installHubBridge(id, openHandler) {
+        let bridge = document.getElementById('sakalux-module-bridge-' + id);
+        if (!bridge) { bridge = document.createElement('button'); bridge.type = 'button'; bridge.id = 'sakalux-module-bridge-' + id; bridge.hidden = true; (document.body || document.documentElement).appendChild(bridge); }
+        bridge.dataset.version = VERSION; bridge.dataset.enabled = String(Boolean(state.enabled));
+        bridge.onclick = () => { const action = bridge.dataset.action; if (action === 'open') openHandler(); else if (action === 'toggle') toggleEnabled(); else if (action === 'on' || action === 'off') setEnabled(action === 'on'); bridge.dataset.action = ''; syncHubBridge(id, state.enabled); };
     }
 
     function updateApiPanelStatus() {
@@ -1283,6 +1292,7 @@
     function init() {
         try { localStorage.setItem('SakaLuX_Installed_enhancer', VERSION); } catch {}
         state.enabled = getBool(STORAGE.enabled, true);
+        installHubBridge('enhancer', openPanel);
         state.showRelics = getBool(STORAGE.showRelics, true);
         state.compact = getBool(STORAGE.compact, false);
         state.diagnosticsVisible = getBool(STORAGE.diagnostics, false);
@@ -1362,4 +1372,3 @@
     };
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
-
