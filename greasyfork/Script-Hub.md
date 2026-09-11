@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.3**
+**v1.9.4**
 
 ## What it does
 
@@ -15,6 +15,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Revalidates update status against the actually installed version to avoid stale alerts.
 - Provides **SYSTEM CHECK** for registry access, update sources and module health.
 - Provides **WHAT'S NEW**, category navigation, health information and backup / restore.
+- Uses a premium control-center layout optimized for both Torn PDA and desktop userscript managers.
 - Adds a Torn-native **HUB** mobile navigation entry with a floating fallback launcher.
 - Exposes `window.SakaLuXScriptHub` for integration with registered complementary add-ons.
 - Uses the common `setEnabled`, `toggleEnabled` and `isEnabled` integration API.
@@ -22,6 +23,15 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.4
+
+- Redesigned the Hub as a premium **SakaLuX Control Center** with stronger visual hierarchy and cleaner TornPDA readability.
+- Rebuilt the header, health summary, command bar, category navigation and module cards around a consistent dark control-room design.
+- Replaced icon-only management controls with compact labelled actions for **CHECK**, **UPDATE**, **HEALTH**, **NEW** and **SETTINGS**.
+- Added concise module status chips for installed version, update state, active/disabled state and contextual module information.
+- Reduced raw technical text inside module cards while keeping detailed diagnostics available through **SYSTEM CHECK**.
+- Preserved the existing registry, update checking, shared API key, native module power, Quick Menu and Torn-native HUB launcher behavior.
 
 ### v1.9.3
 
