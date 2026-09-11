@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.3
+// @version      1.0.4
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,7 +30,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.0.3';
+    const VERSION = '1.0.4';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -719,6 +719,7 @@
     window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsReady', { detail: { version: VERSION, enabled: state.enabled } }));
 
     async function init() {
+        try { localStorage.setItem('SakaLuX_Installed_mission-rewards', VERSION); } catch {}
         state.enabled = loadJson(STORAGE.enabled, true) !== false;
         if (state.enabled) setTimeout(maybePromptForHub, 3500);
 
