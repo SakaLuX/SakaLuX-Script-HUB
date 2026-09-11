@@ -8,42 +8,209 @@ on:
       - 'scripts.json'
       - 'greasyfork/**'
       - '.github/workflows/**'
+  pull_request:
+    paths:
+      - '*.user.js'
+      - 'scripts.json'
+      - 'greasyfork/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: userscript-validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  migrate:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Apply Elimination cleanup
-        if: contains(github.event.head_commit.message, '[remove-touching-grass]')
-        run: python .migration/remove-touching-grass-widget.py
-
-      - name: Validate patched files
-        if: contains(github.event.head_commit.message, '[remove-touching-grass]')
+      - name: Check JavaScript syntax
+        shell: bash
         run: |
-          node --check SakaLuX-Elimination-Assistant.user.js
-          python -m json.tool scripts.json >/dev/null
-          grep -q "@version      1.3.10" SakaLuX-Elimination-Assistant.user.js
-          grep -q "const VERSION='1.3.10'" SakaLuX-Elimination-Assistant.user.js
-          grep -q "removeTouchingGrassWidget" SakaLuX-Elimination-Assistant.user.js
+          set -euo pipefail
+          shopt -s nullglob
+          files=(SakaLuX-*.user.js)
+          if ((${#files[@]} == 0)); then
+            echo 'No root SakaLuX userscripts found.' >&2
+            exit 1
+          fi
+          printf 'Checking %d userscripts\n' "${#files[@]}"
+          for file in "${files[@]}"; do
+            echo "node --check $file"
+            node --check "$file"
+          done
 
-      - name: Commit migration
-        if: contains(github.event.head_commit.message, '[remove-touching-grass]')
+      - name: Validate scripts.json
+        shell: python
         run: |
-          git config user.name "SakaLuX"
-          git config user.email "sakalutzu92@yahoo.com"
-          git add SakaLuX-Elimination-Assistant.user.js scripts.json SakaLuX-Script-Hub.user.js greasyfork/Elimination-Assistant.md greasyfork/Script-Hub.md
-          git commit -m "Elimination v1.3.10 remove Touching Grass injected widget [skip ci]"
-          git push
+          import json
+          from pathlib import Path
+          p = Path('scripts.json')
+          json.loads(p.read_text(encoding='utf-8'))
+          print('scripts.json: valid JSON')
+
+      - name: Validate cross-file version synchronization
+        shell: python
+        run: |
+          import json
+          import re
+          from pathlib import Path
+
+          registry = json.loads(Path('scripts.json').read_text(encoding='utf-8'))['scripts']
+          hub = Path('SakaLuX-Script-Hub.user.js').read_text(encoding='utf-8')
+          hub_info = Path('greasyfork/Script-Hub.md').read_text(encoding='utf-8')
+
+          files = {
+              'enhancer': ('SakaLuX-Enhancer-Guard.user.js', 'Enhancer Guard', 'greasyfork/Enhancer-Guard.md', 'VERSION'),
+              'bazaar': ('SakaLuX-Bazaar-Thanker-PDA.user.js', 'Bazaar Thanker - PDA', 'greasyfork/Bazaar-Thanker.md', 'BAZAAR_VERSION'),
+              'mission-rewards': ('SakaLuX-Mission-Rewards.user.js', 'Mission Rewards', 'greasyfork/Mission-Rewards.md', 'VERSION'),
+              'market-intelligence': ('SakaLuX-Market-Intelligence.user.js', 'Market Intelligence', 'greasyfork/Market-Intelligence.md', 'VERSION'),
+              'elimination-assistant': ('SakaLuX-Elimination-Assistant.user.js', 'Elimination Assistant', 'greasyfork/Elimination-Assistant.md', 'VERSION'),
+          }
+
+          for item in registry:
+              script_id = item['id']
+              if script_id not in files:
+                  continue
+              filename, display_name, info_file, runtime_name = files[script_id]
+              expected = str(item['version'])
+              source = Path(filename).read_text(encoding='utf-8')
+              meta = re.search(r'^// @version\s+([^\s]+)\s*$', source, re.M)
+              runtime = re.search(r"const " + runtime_name + r"\s*=\s*['\"]([^'\"]+)['\"]", source)
+              if not meta or not runtime or meta.group(1) != expected or runtime.group(1) != expected:
+                  raise SystemExit(f'{display_name}: userscript/registry mismatch ({meta.group(1) if meta else "missing"}, {runtime.group(1) if runtime else "missing"}, {expected})')
+
+              fallback = re.search(
+                  r"id:\s*['\"]" + re.escape(script_id) + r"['\"][\s\S]{0,500}?version:\s*['\"]([^'\"]+)['\"]",
+                  hub,
+              )
+              if not fallback or fallback.group(1) != expected:
+                  raise SystemExit(f'{display_name}: Hub fallback mismatch')
+
+              expected_source = f'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/{filename}'
+              fallback_source = re.search(
+                  r"id:\s*['\"]" + re.escape(script_id) + r"['\"][\s\S]{0,1000}?sourceUrl:\s*['\"]" + re.escape(expected_source) + r"['\"]",
+                  hub,
+              )
+              if item.get('sourceUrl') != expected_source or not fallback_source:
+                  raise SystemExit(f'{display_name}: canonical sourceUrl mismatch')
+
+              info_text = Path(info_file).read_text(encoding='utf-8')
+              current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', info_text)
+              if not current:
+                  current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', info_text)
+              if not current or current.group(1).strip() != expected:
+                  raise SystemExit(f'{display_name}: dedicated info version mismatch')
+              if not re.search(r'^- .*SakaLuX ' + re.escape(display_name) + r' \*\*v' + re.escape(expected) + r'\*\*', hub_info, re.M):
+                  raise SystemExit(f'{display_name}: Script-Hub info version mismatch')
+
+          hub_meta = re.search(r'^// @version\s+([^\s]+)\s*$', hub, re.M)
+          hub_runtime = re.search(r"const VERSION\s*=\s*['\"]([^'\"]+)['\"]", hub)
+          hub_current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', hub_info)
+          if not hub_meta or not hub_runtime or not hub_current or len({hub_meta.group(1), hub_runtime.group(1), hub_current.group(1).strip()}) != 1:
+              raise SystemExit('Script Hub version mismatch')
+
+          print('All Hub, registry, userscript and documentation versions: synchronized')
+
+      - name: Validate Suite metadata
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          p = Path('SakaLuX-Suite.user.js')
+          text = p.read_text(encoding='utf-8')
+
+          meta = re.search(r'^// @version\s+([^\s]+)\s*$', text, re.M)
+          runtime = re.search(r"const VERSION\s*=\s*['\"]([^'\"]+)['\"];", text)
+          if not meta or not runtime:
+              raise SystemExit('Suite version metadata/runtime constant missing')
+          if meta.group(1) != runtime.group(1):
+              raise SystemExit(f"Suite version mismatch: metadata={meta.group(1)} runtime={runtime.group(1)}")
+
+          required = [
+              '// ==UserScript==',
+              '// @match        https://www.torn.com/*',
+              '// @license      All Rights Reserved',
+              '// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
+              '// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
+              '// ==/UserScript=='
+          ]
+          missing = [x for x in required if x not in text]
+          if missing:
+              raise SystemExit('Suite metadata missing: ' + ', '.join(missing))
+
+          print(f'SakaLuX Suite v{meta.group(1)} metadata: OK')
+
+      - name: Validate Suite module parity invariants
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          text = Path('SakaLuX-Suite.user.js').read_text(encoding='utf-8')
+
+          expected_modules = {
+              'prayerReminder': 'createPrayerReminderModule',
+              'medAdvisor': 'createMedAdvisorModule',
+              'itemIntel': 'createItemIntelModule',
+              'eventsDashboard': 'createEventsDashboardModule',
+              'activityIntelligence': 'createActivityIntelligenceModule',
+              'factionMemberView': 'createFactionMemberViewModule',
+              'armoryLoanScanner': 'createArmoryLoanScannerModule',
+              'warLedger': 'createWarLedgerModule',
+              'ocOperations': 'createOcOperationsModule',
+              'companyManagement': 'createCompanyManagementModule',
+              'racingChampionship': 'createRacingChampionshipModule',
+              'casinoEdgeScanner': 'createCasinoEdgeScannerModule',
+              'targetAlerts': 'createTargetAlertsModule',
+          }
+          for module_id, factory in expected_modules.items():
+              entry = re.search(
+                  r'id:\s*["\']' + re.escape(module_id) + r'["\'][\s\S]{0,500}?factory:\s*' + re.escape(factory),
+                  text,
+              )
+              if not entry:
+                  raise SystemExit(f'Module/factory registry mismatch: {module_id} -> {factory}')
+
+          required_runtime = [
+              "function createEventsDashboardModule(context) {",
+              "function createItemIntelModule(context) {",
+              "function createMedAdvisorModule(context) {",
+              "function createPrayerReminderModule(context) {",
+              "function migrateLegacySakaLuXSettings() {",
+              "function createSakaLuXChainAlarmModule() {",
+              "function restoreMessageLinks(element, links) {",
+          ]
+          missing = [x for x in required_runtime if x not in text]
+          if missing:
+              raise SystemExit('Suite runtime invariant missing: ' + ', '.join(missing))
+
+          event_factory = re.search(
+              r'^\s*function createEventsDashboardModule\(context\) \{',
+              text,
+              re.M,
+          )
+          if not event_factory:
+              raise SystemExit('Event Lens factory is not a scoped function declaration')
+
+          print('Suite complete-module invariants: OK')
+
+      - name: Ensure only stable workflow remains
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t workflows < <(find .github/workflows -maxdepth 1 -type f -printf '%f\n' | sort)
+          printf 'Workflow files: %s\n' "${workflows[*]:-none}"
+          if ((${#workflows[@]} != 1)) || [[ "${workflows[0]:-}" != "validate-userscripts.yml" ]]; then
+            echo 'Unexpected workflow file detected. Only validate-userscripts.yml is allowed.' >&2
+            printf '%s\n' "${workflows[@]}" >&2
+            exit 1
+          fi
+          echo 'Workflow directory clean: only stable validator remains.'
