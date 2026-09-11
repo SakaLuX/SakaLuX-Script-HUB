@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v5.3.6**
+**v5.3.7**
 
 ## What it does
 
@@ -15,6 +15,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Works without a Torn API key.
 
 ## Current release notes
+
+### v5.3.7
+
+- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
+- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
+- UI-only release: existing features, APIs and saved data remain unchanged.
 
 ### v5.3.6
 

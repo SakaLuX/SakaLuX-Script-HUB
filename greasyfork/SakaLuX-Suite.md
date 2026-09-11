@@ -4,7 +4,7 @@ Standalone experimental SakaLuX toolkit for Torn PDA and desktop userscript mana
 
 ## Current version
 
-**v0.9.905**
+**v0.9.907**
 
 ## What it does
 
@@ -38,6 +38,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - `Alt + F` shortcut for opening the control interface.
 
 ## Current release notes
+
+### v0.9.907
+
+- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
+- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
+- UI-only release: existing features, APIs and saved data remain unchanged.
 
 ### v0.9.905
 

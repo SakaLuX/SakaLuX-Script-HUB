@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.6
+// @version      5.3.7
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -973,7 +973,7 @@
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION = '5.3.6';
+    const BAZAAR_VERSION = '5.3.7';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
@@ -1113,4 +1113,29 @@
     } else {
         init();
     }
+
+
+    /* SakaLuX Unified Control Center UI — visual layer only. */
+    function installSakaLuXUnifiedTheme_bazaar() {
+        if (document.getElementById('sakalux-unified-theme-bazaar')) return;
+        const style = document.createElement('style');
+        style.id = 'sakalux-unified-theme-bazaar';
+        style.textContent = `
+:where([id^="sakalux-bt-"],[class*="sakalux-bt-"]){font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}
+:where([id^="sakalux-bt-"][id*="panel" i],[id^="sakalux-bt-"][id*="settings" i],[id^="sakalux-bt-"][id*="modal" i],[id^="sakalux-bt-"][id*="details" i]){background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important}
+:where([class*="sakalux-bt-"][class*="header" i],[id^="sakalux-bt-"][id*="header" i]){background:linear-gradient(155deg,#1b2634,#111923)!important;border-color:#314154!important;color:#f8fafc!important}
+:where([class*="sakalux-bt-"][class*="card" i],[class*="sakalux-bt-"][class*="row" i],[class*="sakalux-bt-"][class*="section" i],[class*="sakalux-bt-"][class*="note" i]){background:linear-gradient(145deg,#18212d,#131b25)!important;border-color:#2d3c4e!important;border-radius:12px!important;color:#dce6f0!important;box-shadow:0 6px 18px rgba(0,0,0,.14)!important}
+:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"]){border:1px solid #3d78bf!important;border-radius:10px!important;background:linear-gradient(180deg,#377fcf,#275f9f)!important;color:#fff!important;font-weight:900!important;box-shadow:none!important;transition:transform .12s ease,filter .12s ease!important}
+:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"]):active{transform:translateY(1px)!important}
+:where(input[id^="sakalux-bt-"],select[id^="sakalux-bt-"],textarea[id^="sakalux-bt-"],[id^="sakalux-bt-"] input,[id^="sakalux-bt-"] select,[id^="sakalux-bt-"] textarea){background:#0d141d!important;border:1px solid #3a4b61!important;border-radius:9px!important;color:#f4f7fb!important;outline:none!important}
+:where(input[type="checkbox"][id^="sakalux-bt-"]){appearance:none!important;-webkit-appearance:none!important;width:38px!important;height:21px!important;min-width:38px!important;margin:0 8px 0 0!important;vertical-align:middle!important;border:1px solid #546276!important;border-radius:999px!important;background:radial-gradient(circle at 10px 50%,#e7edf5 0 6px,transparent 6.5px),#465365!important;cursor:pointer!important;transition:.18s ease!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important}
+:where(input[type="checkbox"][id^="sakalux-bt-"]):checked{border-color:#24754f!important;background:radial-gradient(circle at 27px 50%,#fff 0 6px,transparent 6.5px),#1eb36a!important}
+:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="close" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="close" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="back" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="gray" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="secondary" i]{background:linear-gradient(180deg,#253243,#1a2431)!important;border-color:#3a4a5d!important;color:#d7e1eb!important}
+:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="clear" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="reset" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="delete" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="danger" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="red" i]{background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+@media(max-width:520px){:where([id^="sakalux-bt-"][id*="panel" i],[id^="sakalux-bt-"][id*="settings" i],[id^="sakalux-bt-"][id*="modal" i],[id^="sakalux-bt-"][id*="details" i]){border-radius:15px!important}:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"]){min-height:34px!important}}
+`;
+        (document.head || document.documentElement).appendChild(style);
+    }
+    installSakaLuXUnifiedTheme_bazaar();
+
 })();

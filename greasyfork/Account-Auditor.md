@@ -4,7 +4,7 @@ Standalone SakaLuX account-audit tool. It is intentionally not registered as a S
 
 ## Current version
 
-**v1.2.1**
+**v1.2.2**
 
 ## What it does
 
@@ -19,6 +19,12 @@ Standalone SakaLuX account-audit tool. It is intentionally not registered as a S
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.2.2
+
+- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
+- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
+- UI-only release: existing features, APIs and saved data remain unchanged.
 
 ### v1.2.1
 
