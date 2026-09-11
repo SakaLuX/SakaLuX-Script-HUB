@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.7
+// @version      1.0.8
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -30,7 +30,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.0.7';
+    const VERSION = '1.0.8';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -652,11 +652,20 @@
         if (state.enabled) startRuntime();
         else stopRuntime();
         window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
+        syncHubBridge('mission-rewards', state.enabled);
         return state.enabled;
     }
 
     function toggleEnabled() {
         return setEnabled(!state.enabled);
+    }
+
+    function syncHubBridge(id, value) { const bridge = document.getElementById('sakalux-module-bridge-' + id); if (bridge) bridge.dataset.enabled = String(Boolean(value)); }
+    function installHubBridge(id, openHandler) {
+        let bridge = document.getElementById('sakalux-module-bridge-' + id);
+        if (!bridge) { bridge = document.createElement('button'); bridge.type = 'button'; bridge.id = 'sakalux-module-bridge-' + id; bridge.hidden = true; (document.body || document.documentElement).appendChild(bridge); }
+        bridge.dataset.version = VERSION; bridge.dataset.enabled = String(Boolean(state.enabled));
+        bridge.onclick = () => { const action = bridge.dataset.action; if (action === 'open') openHandler(); else if (action === 'toggle') toggleEnabled(); else if (action === 'on' || action === 'off') setEnabled(action === 'on'); bridge.dataset.action = ''; syncHubBridge(id, state.enabled); };
     }
 
     window.SakaLuXMissionRewards = {
@@ -721,6 +730,7 @@
     async function init() {
         try { localStorage.setItem('SakaLuX_Installed_mission-rewards', VERSION); } catch {}
         state.enabled = loadJson(STORAGE.enabled, true) !== false;
+        installHubBridge('mission-rewards', () => window.SakaLuXMissionRewards.open());
         if (state.enabled) setTimeout(maybePromptForHub, 3500);
 
         if (!isMissionsPage()) {
@@ -790,4 +800,3 @@
     };
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
-
