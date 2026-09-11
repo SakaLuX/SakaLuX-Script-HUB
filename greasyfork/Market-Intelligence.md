@@ -1,6 +1,6 @@
 # SakaLuX Market Intelligence
 
-**Current version: v1.17.1**
+**Current version: v1.17.2**
 
 **Greasy Fork:** script **592781**
 
@@ -8,6 +8,10 @@ SakaLuX Market Intelligence is a Torn PDA / Tampermonkey add-on for market and t
 
 
 
+
+## v1.17.2 — PC Hub detection
+
+- Added a persistent installation marker for reliable Script Hub detection on PC.
 
 ## v1.17.1 — Page isolation cleanup
 
