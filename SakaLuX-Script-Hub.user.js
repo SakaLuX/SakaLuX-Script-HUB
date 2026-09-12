@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.31
+// @version      1.9.32
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.31';
+    const VERSION = '1.9.32';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.32',
+            date: '2026-09-12',
+            changes: [
+                'Restores the Hub panel runtime accidentally removed during the bridge-only launcher migration.',
+                'Fixes the S status launcher, Fly-out HUB launcher and floating fallback so all open the Hub panel again.',
+                'Adds runtime validation for openHub, closeHub and createOverlay to prevent this regression.'
+            ]
+        },
         {
             version: '1.9.31',
             date: '2026-09-12',
@@ -1300,6 +1309,270 @@
         }
     }
 
+    function closeHub() {
+        document.getElementById(IDS.overlay)?.remove();
+    }
+
+    function createOverlay(content) {
+        closeHub();
+        const overlay = document.createElement('div');
+        overlay.id = IDS.overlay;
+        overlay.innerHTML = `<div id="${IDS.panel}">${content}</div>`;
+        document.body.appendChild(overlay);
+        overlay.onclick = event => { if (event.target === overlay) closeHub(); };
+        return overlay;
+    }
+
+    function headerMarkup(title, subtitle, closeId, icon = '☠️', kicker = 'SAKALUX CONTROL CENTER') {
+        return `<div class="slh-header"><div class="slh-headrow"><div class="slh-brand"><div class="slh-brand-icon">${icon}</div><div class="slh-brand-copy"><div class="slh-kicker">${escapeHtml(kicker)}</div><div class="slh-title">${escapeHtml(title)}</div><div class="slh-sub">${subtitle}</div></div></div><button class="slh-close" id="${closeId}" aria-label="Close">×</button></div></div>`;
+    }
+
+    function openHub() {
+        const registryClass = registryStatus === 'online' ? 'online' : '';
+        createOverlay(`
+            <div class="slh-header">
+                <div class="slh-headrow">
+                    <div class="slh-brand">
+                        <div class="slh-brand-icon">☠️</div>
+                        <div class="slh-brand-copy">
+                            <div class="slh-kicker">SAKALUX CONTROL CENTER</div>
+                            <div class="slh-title">Script Hub</div>
+                            <div class="slh-sub"><span class="slh-registry-dot ${registryClass}"></span>v${VERSION} · Registry ${escapeHtml(registryStatus)} · ${SCRIPTS.length} managed add-ons</div>
+                        </div>
+                    </div>
+                    <button class="slh-close" id="slh-close" aria-label="Close">×</button>
+                </div>
+                <div class="slh-stats" id="slh-stats"></div>
+                <div class="slh-tools">
+                    <button class="slh-tool" id="slh-update-check" title="Refresh registry and check updates"><span>↻</span>CHECK</button>
+                    <button class="slh-tool" id="slh-update-all" title="Refresh registry and update all"><span>⇧</span>UPDATE</button>
+                    <button class="slh-tool" id="slh-health" title="System check"><span>◉</span>HEALTH</button>
+                    <button class="slh-tool whatsnew" id="slh-whats-new" title="What's new"><span>✦</span>NEW</button>
+                    <button class="slh-tool settings" id="slh-settings" title="Settings"><span>⚙</span>SETTINGS</button>
+                </div>
+                <div class="slh-cats" id="slh-cats"></div>
+            </div>
+            <div class="slh-list" id="slh-list"></div>
+            <div class="slh-bottom"><div class="slh-bottom-grid"><button class="slh-bottom-btn" id="slh-money">💸 SEND MONEY</button><button class="slh-bottom-btn" id="slh-items">🎁 SEND ITEMS</button></div></div>
+            <div class="slh-footer">Made with ❤️ by <a class="slh-author" id="slh-author" href="${PROFILE_URL}">SakaLuX [2380374]</a></div>
+        `);
+        document.getElementById('slh-close').onclick = closeHub;
+        document.getElementById('slh-update-check').onclick = refreshRegistryAndCheck;
+        document.getElementById('slh-update-all').onclick = updateAll;
+        document.getElementById('slh-health').onclick = openSystemCheck;
+        document.getElementById('slh-whats-new').onclick = openWhatsNew;
+        document.getElementById('slh-settings').onclick = openSettings;
+        document.getElementById('slh-money').onclick = () => location.href = PROFILE_URL;
+        document.getElementById('slh-items').onclick = () => location.href = PROFILE_URL;
+        document.getElementById('slh-author').onclick = event => { event.preventDefault(); location.href = PROFILE_URL; };
+        renderMainStats();
+        renderCategories();
+        renderList();
+        updateCheckButtonState(updateCheckRunning);
+        if (settings.autoCheckUpdates) checkAllUpdates(false);
+    }
+
+    function renderMainStats() {
+        const box = document.getElementById('slh-stats');
+        if (!box) return;
+        const rows = getAllHealth();
+        const installed = rows.filter(r => r.health.state !== 'missing').length;
+        const healthy = rows.filter(r => r.health.state === 'ok').length;
+        const issues = rows.filter(r => r.health.state === 'error').length + getUpdateErrorCount();
+        const updates = getUpdateCount();
+        box.innerHTML = `
+            <div class="slh-stat good"><strong>${installed}/${SCRIPTS.length}</strong><span>INSTALLED</span><small>managed modules</small></div>
+            <div class="slh-stat good"><strong>${healthy}</strong><span>HEALTHY</span><small>reporting OK</small></div>
+            <div class="slh-stat ${updates ? 'warn' : 'good'}"><strong>${updates}</strong><span>UPDATES</span><small>${updates ? 'action available' : 'all current'}</small></div>
+            <div class="slh-stat ${issues ? 'bad' : 'good'}"><strong>${issues}</strong><span>ISSUES</span><small>${issues ? 'needs attention' : 'system clear'}</small></div>`;
+    }
+
+    function updateCheckButtonState(loading) {
+        const button = document.getElementById('slh-update-check');
+        if (!button) return;
+        button.disabled = Boolean(loading);
+        button.classList.toggle('checking', Boolean(loading));
+        button.innerHTML = loading ? '<span>…</span>CHECKING' : '<span>↻</span>CHECK';
+    }
+
+    function renderCategories() {
+        const box = document.getElementById('slh-cats');
+        if (!box) return;
+        const categories = ['ALL', ...new Set(SCRIPTS.map(s => s.category || 'Other'))];
+        box.innerHTML = categories.map(value => `<button class="slh-cat ${category === value ? 'active' : ''}" data-category="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join('');
+        box.querySelectorAll('[data-category]').forEach(button => {
+            button.onclick = () => { category = button.dataset.category; renderCategories(); renderList(); };
+        });
+    }
+
+    function renderList() {
+        const list = document.getElementById('slh-list');
+        if (!list) return;
+        let rows = getAllHealth().map(row => ({ ...row, favorite: favorites.has(row.script.id), usage: usage[row.script.id] || { count: 0, lastUsed: 0 }, update: getUpdateState(row.script) }));
+        rows = rows.filter(row => category === 'ALL' || row.script.category === category);
+        rows.sort((a, b) => {
+            if (a.health.state === 'missing' && b.health.state !== 'missing') return -1;
+            if (b.health.state === 'missing' && a.health.state !== 'missing') return 1;
+            if (a.update.state === 'available' && b.update.state !== 'available') return -1;
+            if (b.update.state === 'available' && a.update.state !== 'available') return 1;
+            if (a.favorite !== b.favorite) return a.favorite ? -1 : 1;
+            return b.usage.count - a.usage.count;
+        });
+        list.innerHTML = `<div class="slh-section-label">${category === 'ALL' ? 'MANAGED MODULES' : escapeHtml(category) + ' MODULES'} · ${rows.length}</div>` + (rows.map(renderCard).join('') || '<div style="padding:30px;text-align:center;color:#78889b">No modules found.</div>');
+        bindCards();
+    }
+
+    function renderCard(row) {
+        const script = row.script;
+        const health = row.health;
+        const update = row.update;
+        const installed = getInstalledVersion(script);
+        const latest = update.data?.publishedLatest || update.data?.latest || script.expectedVersion || '?';
+        const missing = health.state === 'missing';
+        let extra = '';
+        if (script.id === 'enhancer' && health.data) extra = `Inventory ${health.data.inventoryEntries ?? 0}`;
+        if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? `Buyers ${health.data.buyers ?? 0}` : 'Standby';
+        if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? 'Standby' : `Rewards ${health.data.rewardCards ?? 0}`;
+        const enabled = !missing && isModuleEnabled(script);
+        const moduleApi = script.api();
+        const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id));
+        const primary = getPrimaryAction(script);
+        const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
+        const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'pending' ? 'info' : update.state === 'failed' ? 'bad' : 'muted';
+        const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';
+        const controls = missing
+            ? `<button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
+            : `<button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
+        return `<div class="slh-card ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''} ${!missing && !enabled ? 'off' : ''}">
+            <div class="slh-icon">${script.icon || '🧩'}</div>
+            <div class="slh-card-copy">
+                <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
+                ${script.description ? `<div class="slh-description">${escapeHtml(script.description)}</div>` : ''}
+                <div class="slh-chips">
+                    <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
+                    <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
+                    ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
+                    ${update.state === 'pending' ? `<span class="slh-chip muted">REGISTRY v${escapeHtml(script.expectedVersion || '?')} PENDING</span>` : latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
+                    ${extra ? `<span class="slh-chip muted">${escapeHtml(extra)}</span>` : ''}
+                    ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
+                </div>
+            </div>
+            <div class="slh-module-controls">${controls}</div>
+        </div>`;
+    }
+
+    function bindCards() {
+        document.querySelectorAll('[data-module-toggle]').forEach(button => {
+            button.onclick = async () => {
+                const id = button.dataset.moduleToggle;
+                const next = button.getAttribute('aria-checked') !== 'true';
+                button.disabled = true;
+                try { await setModulePower(id, next); }
+                catch (error) { console.error('[SakaLuX Hub]', error); alert('Power control failed: ' + String(error?.message || error)); renderList(); }
+            };
+        });
+        document.querySelectorAll('[data-install]').forEach(button => button.onclick = () => {
+            const script = SCRIPTS.find(item => item.id === button.dataset.install);
+            const url = script ? getInstallUrl(script) : '';
+            if (url) location.href = url;
+        });
+        document.querySelectorAll('[data-update]').forEach(button => button.onclick = () => {
+            const script = SCRIPTS.find(item => item.id === button.dataset.update);
+            const url = script ? getInstallUrl(script) : '';
+            if (url) location.href = url;
+        });
+        document.querySelectorAll('[data-script][data-action]').forEach(button => { button.onclick = () => runAction(button.dataset.script, button.dataset.action); });
+    }
+
+    async function runAction(id, actionId) {
+        const script = SCRIPTS.find(item => item.id === id);
+        if (!script) return;
+        const api = script.api();
+        if (!api) {
+            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+            if (bridge) {
+                bridge.dataset.action = 'open';
+                bridge.click();
+                recordUsage(id);
+                closeHub();
+                return;
+            }
+            if (script.fallbackOpen()) {
+                recordUsage(id);
+                closeHub();
+                return;
+            }
+            if (getInstalledVersion(script)) {
+                alert(script.name + ' is installed, but this version needs the Violentmonkey bridge update before Hub can open it.');
+                return;
+            }
+            const url = getInstallUrl(script);
+            if (url) location.href = url;
+            return;
+        }
+        const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
+        const isPanelAction = actionId === getPrimaryAction(script).id || actionId === 'open' || actionId === 'settings';
+        try {
+            if (typeof api[action.method] === 'function') {
+                recordUsage(id);
+                const result = await api[action.method]();
+                if (result === false && action.fallbackUrl) { location.href = action.fallbackUrl; return; }
+                if (isPanelAction) closeHub(); else setTimeout(openHub, 100);
+                return;
+            }
+            if (action.fallbackUrl) { recordUsage(id); location.href = action.fallbackUrl; return; }
+            if (isPanelAction && script.fallbackOpen()) { recordUsage(id); closeHub(); return; }
+            alert(script.name + ' is not available on this page.');
+        } catch (error) {
+            console.error('[SakaLuX Hub]', error);
+            alert('Action failed: ' + String(error?.message || error));
+        }
+    }
+
+    async function updateAll() {
+        await refreshRegistryAndCheck();
+        const updates = SCRIPTS.filter(script => getUpdateState(script).state === 'available' && getInstallUrl(script));
+        if (!updates.length) { alert('All installed SakaLuX add-ons are up to date.'); return; }
+        if (!confirm('Open ' + updates.length + ' update installer' + (updates.length === 1 ? '' : 's') + ' now?')) return;
+        let opened = 0;
+        for (const script of updates) {
+            try { const win = window.open(getInstallUrl(script), '_blank'); if (win) opened++; } catch {}
+        }
+        if (opened < updates.length) alert('Some installer tabs were blocked. Use the individual update installer for the remaining add-ons.');
+    }
+
+    function openWhatsNew() {
+        createOverlay(`${headerMarkup("What's New", 'SakaLuX Script Hub release notes', 'slhn-close', '✦', 'RELEASE CENTER')}<div class="slh-view">${HUB_CHANGELOG.map(release => `<div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version)} <span class="slh-version-date">${escapeHtml(release.date)}</span></div>${release.changes.map(change => `<div>• ${escapeHtml(change)}</div>`).join('')}</div>`).join('')}<button class="slh-big-btn" id="slhn-back">← BACK</button></div>`);
+        document.getElementById('slhn-close').onclick = closeHub;
+        document.getElementById('slhn-back').onclick = openHub;
+    }
+
+    async function openSystemCheck() {
+        createOverlay(`${headerMarkup('System Check', 'Registry, update sources and local module health', 'slhc-close', '◉', 'DIAGNOSTICS')}<div class="slh-view" id="slhc-results"><div class="slh-note">⏳ Running diagnostics...</div></div>`);
+        document.getElementById('slhc-close').onclick = closeHub;
+        const results = [];
+        try {
+            const data = JSON.parse(await httpGet(REGISTRY_URL + '?check=' + Date.now()));
+            results.push({ level: Array.isArray(data?.scripts) ? 'ok' : 'bad', label: 'scripts.json registry', detail: Array.isArray(data?.scripts) ? data.scripts.length + ' add-ons found' : 'Invalid registry' });
+        } catch (error) { results.push({ level: 'bad', label: 'scripts.json registry', detail: String(error?.message || error) }); }
+        for (const script of SCRIPTS) {
+            try {
+                const published = parseMetaVersion(await httpGet(script.metaUrl));
+                const canonical = canonicalLatestVersion(script, published);
+                const behind = Boolean(published && compareVersions(published, script.expectedVersion) < 0);
+                results.push({ level: behind || !published ? 'warn' : 'ok', label: script.name + ' update source', detail: 'Canonical v' + canonical + (published ? ' • Greasy Fork v' + published + (behind ? ' (publish pending)' : '') : ' • Greasy Fork unavailable') });
+            } catch (error) { results.push({ level: 'warn', label: script.name + ' update source', detail: 'Canonical Registry v' + script.expectedVersion + ' • ' + String(error?.message || error) }); }
+            const health = getHealth(script);
+            results.push({ level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad', label: script.name + ' local status', detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error') });
+        }
+        results.push({ level: 'ok', label: 'SakaLuX Script Hub', detail: 'Loaded v' + VERSION + ' • API exposed' });
+        results.push({ level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn', label: 'Torn status-bar HUB launcher', detail: document.getElementById(IDS.topSkull) ? 'Mounted inside Torn statusIcons using native cell classes' : 'Torn statusIcons not detected — floating skull fallback active' });
+        const box = document.getElementById('slhc-results');
+        if (!box) return;
+        box.innerHTML = results.map(result => `<div class="slh-check-row slh-check-${result.level}">${result.level === 'ok' ? '🟢' : result.level === 'warn' ? '🟠' : '🔴'} <b>${escapeHtml(result.label)}</b><br><span style="color:#8fa0b3">${escapeHtml(result.detail)}</span></div>`).join('') + '<button class="slh-big-btn" id="slhc-back">← BACK</button>';
+        document.getElementById('slhc-back').onclick = openHub;
+    }
+
     function settingSwitch(id, title, description, enabled) {
         return `<div class="slh-setting"><div class="slh-setting-row"><div class="slh-setting-copy"><div class="slh-setting-title">${escapeHtml(title)}</div><div class="slh-setting-desc">${escapeHtml(description)}</div></div><button class="slh-setting-toggle ${enabled ? 'on' : ''}" id="${id}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}"><i></i></button></div></div>`;
     }
@@ -1334,7 +1607,6 @@
         languageSelect.value = language();
         languageSelect.onchange = function () { settings.language = LOCALES[this.value] ? this.value : 'en'; saveJson(STORAGE.settings, settings); applyLanguage(); openSettings(); };
         size.oninput = function () { document.getElementById('slhs-size-label').textContent = this.value + 'px'; };
-        bindSettingToggle('slhs-hide');
         bindSettingToggle('slhs-topbar');
         bindSettingToggle('slhs-auto');
         document.getElementById('slhs-close').onclick = closeHub;
