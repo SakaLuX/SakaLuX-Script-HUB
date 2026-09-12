@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-1.17.15
+1.17.16
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.

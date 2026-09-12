@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.17
+// @version      5.3.18
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -15,14 +15,14 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"#sakalux-bt-settings-button","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.17'});
+  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"#sakalux-bt-settings-button","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.18'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant'];
-  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.querySelector('[data-sakalux-hub-installed="1"]'));
+  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
 
   function registerSelf(){
     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-1.0.15
+1.0.16
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
