@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.37
+// @version      1.9.38
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.37';
+    const VERSION = '1.9.38';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.38',
+            date: '2026-09-12',
+            changes: [
+                'Clarifies module version reporting as the currently RUNNING userscript version, not necessarily the version already installed in TornPDA.',
+                'When RUNNING is behind Registry/Latest, OPEN or SETTINGS performs one verification reload before treating it as a real missing update.',
+                'Prevents a freshly updated module from being misclassified as still outdated simply because the old page instance is still injected.'
+            ]
+        },
         {
             version: '1.9.37',
             date: '2026-09-12',
@@ -1474,7 +1483,7 @@
         const installed = getInstalledVersion(script);
         const latest = update.data?.publishedLatest || update.data?.latest || script.expectedVersion || '?';
         const missing = health.state === 'missing';
-        const staleRuntime = Boolean(!missing && installed && installed !== '?' && script.expectedVersion && compareVersions(installed, script.expectedVersion) < 0 && update.state !== 'available');
+        const staleRuntime = Boolean(!missing && installed && installed !== '?' && script.expectedVersion && compareVersions(installed, script.expectedVersion) < 0 && !runtimeReloadAlreadyTried(script));
         let extra = '';
         if (script.id === 'enhancer' && health.data) extra = `Inventory ${health.data.inventoryEntries ?? 0}`;
         if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? `Buyers ${health.data.buyers ?? 0}` : 'Standby';
@@ -1495,7 +1504,7 @@
                 <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
                 ${script.description ? `<div class="slh-description">${escapeHtml(script.description)}</div>` : ''}
                 <div class="slh-chips">
-                    <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
+                    <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'RUNNING v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${staleRuntime ? 'warn' : updateChipClass}">${escapeHtml(staleRuntime ? 'RELOAD REQUIRED' : update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
                     ${update.state === 'pending' ? `<span class="slh-chip muted">REGISTRY v${escapeHtml(script.expectedVersion || '?')} PENDING</span>` : latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
@@ -1585,19 +1594,42 @@
         return false;
     }
 
+    function runtimeReloadKey(script) {
+        return 'SakaLuX_HUB_RUNTIME_RELOAD_' + script.id;
+    }
+
+    function runtimeReloadAlreadyTried(script) {
+        try {
+            const raw = sessionStorage.getItem(runtimeReloadKey(script));
+            if (!raw) return false;
+            const data = JSON.parse(raw);
+            return data && data.expected === script.expectedVersion && Date.now() - Number(data.at || 0) < 120000;
+        } catch { return false; }
+    }
+
+    function markRuntimeReloadTried(script) {
+        try { sessionStorage.setItem(runtimeReloadKey(script), JSON.stringify({ expected: script.expectedVersion, at: Date.now() })); } catch {}
+    }
+
+    function clearRuntimeReloadTried(script) {
+        try { sessionStorage.removeItem(runtimeReloadKey(script)); } catch {}
+    }
+
     async function runAction(id, actionId) {
         const script = SCRIPTS.find(item => item.id === id);
         if (!script) return;
         const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
         const isPanelAction = actionId === getPrimaryAction(script).id || actionId === 'open' || actionId === 'settings';
         const installed = getInstalledVersion(script);
-        const staleRuntime = Boolean(installed && installed !== '?' && script.expectedVersion && compareVersions(installed, script.expectedVersion) < 0 && getUpdateState(script).state !== 'available');
-        if (staleRuntime && isPanelAction) {
+        const runtimeBehind = Boolean(installed && installed !== '?' && script.expectedVersion && compareVersions(installed, script.expectedVersion) < 0);
+        if (runtimeBehind && isPanelAction && !runtimeReloadAlreadyTried(script)) {
+            markRuntimeReloadTried(script);
             savePendingModuleAction(id, actionId);
             closeHub();
             location.reload();
             return;
         }
+        if (!runtimeBehind) clearRuntimeReloadTried(script);
         const api = script.api();
         if (!api) {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
