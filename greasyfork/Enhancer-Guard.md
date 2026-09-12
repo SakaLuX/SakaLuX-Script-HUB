@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.19**
+**v1.3.20**
 
 ## What it does
 
@@ -18,6 +18,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.3.20 — English standalone baseline
+
+- Removed the remaining hardcoded Romanian text from the standalone interface.
+- Enhancer Guard now always starts in English without Script Hub.
+- When Hub is installed, its selected shared language controls the interface.
 
 ### v1.3.19 — Priority star alignment
 
