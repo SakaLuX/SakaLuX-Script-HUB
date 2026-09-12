@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.11**
+**v1.9.12**
 
 ## What it does
 
@@ -24,6 +24,13 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.12 — Extensible shared languages
+
+- English is the guaranteed standalone default for every SakaLuX script.
+- Hub loads the shared `locales.json` registry and applies its selected language to every SakaLuX interface.
+- The selector is generated from the locale registry, allowing additional languages without changing its UI code.
+- Added `getLanguages()` alongside `getLanguage()` and `setLanguage()` for add-on integration.
 
 ### v1.9.11 — English and Romanian interfaces
 
@@ -112,7 +119,7 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 ### Registered complementary add-ons
 
-- 🛡️ SakaLuX Enhancer Guard **v1.3.19**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.20**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.10**
 - 🎯 SakaLuX Mission Rewards **v1.0.8**
 - 📈 SakaLuX Market Intelligence **v1.17.8**
