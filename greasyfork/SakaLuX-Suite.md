@@ -2,13 +2,10 @@
 
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
-Standalone experimental SakaLuX toolkit for Torn PDA and desktop userscript managers. It is intentionally not registered as a SakaLuX Script Hub add-on.
-
 ## Current version
 **v0.9.912**
 
 ## What it does
-
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
 
 ### Included modules
@@ -38,8 +35,31 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Settings import/export with the API key excluded.
 - `Alt + F` shortcut for opening the control interface.
 
-## Current release notes
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
 
+## Recommended
+Use SakaLuX Suite if you prefer a single experimental all-in-one userscript instead of managing several independent helper scripts.
+
+For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons. Suite remains separate and should not appear in the Hub registry unless that product decision is intentionally changed later.
+
+## License
+All Rights Reserved
+
+## Privacy
+- The shared Torn API key used by Suite is stored locally.
+- Exported Suite settings intentionally exclude the API key.
+- Module preferences and local runtime state are stored in the userscript/browser environment.
+- Individual modules can access Torn data required for their functions; users should review enabled modules and API permissions before use.
+
+## Important
+SakaLuX Suite is marked **EXPERIMENTAL**. Its modules share one large userscript runtime, so a regression in one area can potentially affect other Suite modules more broadly than with standalone add-ons.
+
+The Suite does **not** automate attacks, crimes, bets, item consumption or race entry. Recommendations, alerts and analysis remain advisory or user-triggered.
+
+SakaLuX Suite is intentionally **not registered in `scripts.json`** and therefore must not appear as a required/recommended module inside Script Hub.
+
+## Release history
 ### v0.9.910 — Suite panel layout repair
 
 - Restored the complete Suite module interface on TornPDA and desktop.
@@ -73,30 +93,3 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Restored clickable Trade continuation links inside expanded Event Lens cards.
 - Preserved the standalone SakaLuX launch bridges and Chain Alarm.
 - Added automated checks for all 13 principal module/factory pairs.
-
-## Recommended
-
-Use SakaLuX Suite if you prefer a single experimental all-in-one userscript instead of managing several independent helper scripts.
-
-For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons. Suite remains separate and should not appear in the Hub registry unless that product decision is intentionally changed later.
-
-## Privacy
-
-- The shared Torn API key used by Suite is stored locally.
-- Exported Suite settings intentionally exclude the API key.
-- Module preferences and local runtime state are stored in the userscript/browser environment.
-- Individual modules can access Torn data required for their functions; users should review enabled modules and API permissions before use.
-
-## Important
-
-SakaLuX Suite is marked **EXPERIMENTAL**. Its modules share one large userscript runtime, so a regression in one area can potentially affect other Suite modules more broadly than with standalone add-ons.
-
-The Suite does **not** automate attacks, crimes, bets, item consumption or race entry. Recommendations, alerts and analysis remain advisory or user-triggered.
-
-SakaLuX Suite is intentionally **not registered in `scripts.json`** and therefore must not appear as a required/recommended module inside Script Hub.
-
-## License
-All Rights Reserved
-
-## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.

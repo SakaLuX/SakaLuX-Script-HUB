@@ -2,13 +2,10 @@
 
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
-Complementary add-on for SakaLuX Script Hub.
-
 ## Current version
 **v1.3.22**
 
 ## What it does
-
 - Loads Eliminations teams and available target data from Torn API v2.
 - Loads large teams in rotating groups of up to 500 players with **LOAD NEXT**.
 - Ranks targets with **SAFE / RISKY / SKIP** recommendations.
@@ -28,8 +25,24 @@ Complementary add-on for SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 - Never attacks automatically.
 
-## Current release notes
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
 
+## Recommended
+Install **SakaLuX Script Hub** to manage Elimination Assistant together with the rest of the SakaLuX add-ons and to use the shared Hub Torn API key when available.
+
+## License
+All Rights Reserved
+
+## Privacy
+Elimination Assistant stores its enabled state, selected team, remembered SAFE targets, local learning/history, cached FFScouter results, calibration data and standalone API keys locally in browser/TornPDA storage. Torn requests are sent to `api.torn.com`. When FFScouter is enabled, target IDs and the FFScouter API key are sent to `ffscouter.com` to request Fair Fight / battle-stat estimates. FFScouter is optional and separate from the Torn API.
+
+## Important
+FFScouter battle stats and Smart Target Score are estimates and advisory only. Equipment, temporary bonuses, weapon effects, merits and other combat factors can change the actual result of a fight. **SAFE** is not a guarantee of victory.
+
+The script never attacks automatically; ATTACK only opens the Torn attack page and the player remains in control of the fight.
+
+## Release history
 ### v1.3.20 — Team dropdown recovery
 
 - Fixed an empty team dropdown when Torn returns the team list in a nested or keyed response shape.
@@ -117,23 +130,3 @@ Complementary add-on for SakaLuX Script Hub.
 - Added FFScouter below the Torn key with separate save/test, service shortcut and clear controls.
 - Preserved the optional manual total battle-stats fallback.
 - Automatically returns to the API panel after Torn key creation.
-
-## Recommended
-
-Install **SakaLuX Script Hub** to manage Elimination Assistant together with the rest of the SakaLuX add-ons and to use the shared Hub Torn API key when available.
-
-## Privacy
-
-Elimination Assistant stores its enabled state, selected team, remembered SAFE targets, local learning/history, cached FFScouter results, calibration data and standalone API keys locally in browser/TornPDA storage. Torn requests are sent to `api.torn.com`. When FFScouter is enabled, target IDs and the FFScouter API key are sent to `ffscouter.com` to request Fair Fight / battle-stat estimates. FFScouter is optional and separate from the Torn API.
-
-## Important
-
-FFScouter battle stats and Smart Target Score are estimates and advisory only. Equipment, temporary bonuses, weapon effects, merits and other combat factors can change the actual result of a fight. **SAFE** is not a guarantee of victory.
-
-The script never attacks automatically; ATTACK only opens the Torn attack page and the player remains in control of the fight.
-
-## License
-All Rights Reserved
-
-## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.

@@ -1,12 +1,11 @@
 # ☠️ SakaLuX Script Hub
 
-Core manager for the SakaLuX Torn script ecosystem.
+> Central manager for the SakaLuX script ecosystem.
 
 ## Current version
 **v1.9.20**
 
 ## What it does
-
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
 - Detects installed, missing and outdated registered SakaLuX add-ons.
 - Gives installed modules a clean native ON/OFF switch plus one OPEN or SETTINGS action.
@@ -22,8 +21,33 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Can securely store one shared Torn API key locally for registered add-ons that require Torn API access.
 - Works with Torn PDA and Tampermonkey.
 
-## Current release notes
+## Current release note
+Compatibility release for the shared standalone dock and 12-hour global Hub reminder used by SakaLuX add-ons. Hub fallback version references were synchronized with the newly released add-on versions.
 
+## Recommended
+Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
+
+### Registered complementary add-ons
+
+- 🛡️ SakaLuX Enhancer Guard **v1.3.22**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.10**
+- 🎯 SakaLuX Mission Rewards **v1.0.10**
+- 📈 SakaLuX Market Intelligence **v1.17.10**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.22**
+
+## License
+All Rights Reserved
+
+## Privacy
+- The shared Torn API key is stored locally in the userscript/browser environment.
+- Hub does not publish the user's Torn API key to the public SakaLuX registry.
+- Hub contacts the configured update/registry sources to check module metadata and current versions.
+- Individual registered add-ons may use their own external data sources; see each add-on's information page for its specific privacy details.
+
+## Important
+Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
+
+## Release history
 ### v1.9.18 — Floating fallback fix
 
 - Hides the floating skull whenever the native **S** launcher is present in Torn `statusIcons`.
@@ -148,32 +172,3 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Added native runtime power control for registered add-ons.
 - Added shared Torn API-key creation, save/test and clear controls.
 - Registered add-ons automatically prefer the shared Hub key when compatible.
-
-## Recommended
-
-Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
-
-### Registered complementary add-ons
-
-- 🛡️ SakaLuX Enhancer Guard **v1.3.22**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.10**
-- 🎯 SakaLuX Mission Rewards **v1.0.10**
-- 📈 SakaLuX Market Intelligence **v1.17.10**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.22**
-
-## Privacy
-
-- The shared Torn API key is stored locally in the userscript/browser environment.
-- Hub does not publish the user's Torn API key to the public SakaLuX registry.
-- Hub contacts the configured update/registry sources to check module metadata and current versions.
-- Individual registered add-ons may use their own external data sources; see each add-on's information page for its specific privacy details.
-
-## Important
-
-Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
-
-## License
-All Rights Reserved
-
-## Current release note
-Compatibility release for the shared standalone dock and 12-hour global Hub reminder used by SakaLuX add-ons. Hub fallback version references were synchronized with the newly released add-on versions.
