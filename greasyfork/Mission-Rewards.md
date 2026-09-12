@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.20**
+**v1.0.21**
 
 ## What it does
 - Shows the Duke mission task and a practical hint before accepting supported missions.
@@ -20,7 +20,7 @@
 
 ## Current release note
 
-**v1.0.20** keeps the proven v1.0.18 Mission Rewards core and runs Duke Mission Task + Hint guidance as a separate static, runtime-isolated module. The dynamic `Function(...)` loader used in v1.0.19 was removed because TornPDA/WebView can block dynamic code execution. If Mission Hints fails at runtime, Mission Rewards and Hub registration remain active.
+**v1.0.21** keeps the proven v1.0.18 Mission Rewards core and the isolated Mission Hints module, and adds TornPDA mobile-layout detection for the currently selected mission detail panel. Task + Hint can now render when Torn uses the newer mobile mission layout instead of the legacy `.title-black` mission-card structure. The Hub/bootstrap/init core is unchanged.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
