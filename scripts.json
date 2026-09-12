@@ -235,35 +235,6 @@
           "fallbackUrl": "https://www.torn.com/page.php?sid=elimination"
         }
       ]
-    },
-    {
-      "id": "company-intelligence",
-      "type": "addon",
-      "active": true,
-      "name": "Company Intelligence",
-      "icon": "🏢",
-      "category": "Company",
-      "version": "1.8.0",
-      "description": "Employee and Director company intelligence with reliable job fallback, progress tracking, star direction, growth, training, contracts, balance and benchmarks.",
-      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
-      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
-      "apiGlobal": "SakaLuXCompanyIntelligence",
-      "buttonSelector": "#ci-launch",
-      "quickActions": [
-        {
-          "id": "open",
-          "label": "OPEN",
-          "icon": "🏢",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        }
-      ]
     }
   ]
 }
