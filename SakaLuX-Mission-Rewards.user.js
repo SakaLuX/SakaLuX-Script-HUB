@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.1.4
+// @version      1.0.19
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10,14 +10,14 @@
 // @connect      api.torn.com
 // @license      All Rights Reserved
 // @run-at       document-end
-// @downloadURL https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js
-// @updateURL https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js
+// @downloadURL https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
+// @updateURL https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
 // ==/UserScript==
 
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.1.4'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.19'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -26,13 +26,10 @@
   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant'];
   const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
 
-
   function registerSelf(){
     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
     if(!m){m=document.createElement('span');m.setAttribute(REG_ATTR,SELF.id);m.hidden=true;(document.body||document.documentElement).appendChild(m);}
     Object.assign(m.dataset,SELF);
-    try { m.dataset.enabled=String(JSON.parse(localStorage.getItem('SakaLuX_MR_ENABLED') ?? 'true') !== false); }
-    catch { m.dataset.enabled='true'; }
   }
 
   function addStyle(){
@@ -170,14 +167,13 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.1.4';
+    const VERSION = '1.0.19';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
     const HUB_PROMPT_STORAGE = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
     const HUB_PROMPT_INTERVAL = 12 * 60 * 60 * 1000;
     const HUB_PROMPT_ID = 'sakalux-hub-install-prompt';
-    const HUB_COMMAND_KEY = 'SakaLuX_MR_HUB_COMMAND';
     const REQUIRED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Mission%20Rewards&user=ammo&torn=items';
 
     const STORAGE = {
@@ -197,8 +193,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         showItemValue: true,
         showAmmoOwned: true,
         learnModPrices: true,
-        showCardBadges: true,
-        showMissionGuide: true
+        showCardBadges: true
     };
 
     let settings = { ...DEFAULT_SETTINGS, ...loadJson(STORAGE.settings, DEFAULT_SETTINGS) };
@@ -259,170 +254,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
     function saveJson(key, value) {
         try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
-    }
-
-
-    /*
-     * SakaLuX Mission Guide
-     * Independent implementation inspired by the public TornTools Mission Hints feature:
-     * https://github.com/Mephiles/torntools_extension/tree/master/src/common/features/mission-hints
-     * Mission facts are cross-checked against TornTools/community references, while the
-     * implementation and wording here are independently written for the SakaLuX UI.
-     */
-    const MISSION_GUIDE = {
-        a_good_day_to_get_hard:{task:'Build a 3–10 kill streak.',hint:'Buying losses can help.'},
-        a_kimpossible_task:{task:'Defeat the target using melee and temporary weapons only.',hint:'Guns may stay equipped; do not use them.'},
-        a_problem_at_the_tracks:{task:'Defeat 3 targets using only fists or melee weapons.',hint:'Other weapon types may stay equipped, but using them fails the mission.'},
-        a_thor_loser:{task:"Hit 6–14 unique body parts with Duke’s hammer.",hint:'Long fights or stalemates give you more chances to hit different body parts.'},
-        against_the_odds:{task:'Defeat 2 targets.'},
-        an_honorary_degree:{task:'Defeat the target without using guns.',hint:'Guns can remain equipped.'},
-        army_of_one:{task:'Attack the target 3 times while changing masks.',hint:'Use the two masks Duke sends and make one attack with no mask; simply attacking is enough.'},
-        bakeout_breakout:{task:'Combine a fruitcake with the lock pick, then send the special fruitcake to a jailed player.'},
-        bare_knuckle:{task:'Defeat the target with no weapons or armor equipped.',hint:'Unequip everything before the fight.'},
-        batshit_crazy:{task:'Deal the required damage with Penelope.',hint:'Duke supplies Penelope.'},
-        battering_ram:{task:'Attack the target 3 times.'},
-        big_tub_of_muscle:{task:'Defeat the target despite boosted strength.'},
-        birthday_surprise:{task:'Send Duke the requested item as a present.',hint:'Use an empty box and gift wrap to make a parcel.'},
-        bonnie_and_clyde:{task:'Defeat the target and their spouse.'},
-        bountiful:{task:'Successfully claim 2–5 bounties.',hint:'Hospitalize the bounty target for the claim.'},
-        bounty_on_the_mutiny:{task:'Place a bounty on the target and wait for someone to claim it.',hint:'You cannot claim your own bounty.'},
-        bring_it:{task:'Defeat Duke in a group attack.',hint:'Joining a loot fight can count; you do not need the finishing hit.'},
-        candy_from_babies:{task:'Collect the required total bounty value.',hint:'It may be split across multiple bounties.'},
-        charity_work:{task:'Successfully mug 2 targets.',hint:'A small transfer beforehand can guarantee mug cash.'},
-        cracking_up:{task:'Interrogate the target for Duke’s safe code, open the safe, then send Duke its contents.',hint:'It may take several attempts to obtain the code.'},
-        critical_education:{task:'Land 3–9 critical hits.'},
-        cut_them_down_to_size:{task:'Defeat any player at your level or higher.'},
-        dirty_little_secret:{task:'Bounty the target, then attack the player who claims that bounty.',hint:'Anonymous claimers can still expose an ID in the mission panel.'},
-        double_jeopardy:{task:'Place a bounty on a player, then defeat that player.',hint:'The bounty can be any amount and does not need to be claimed.'},
-        drug_problem:{task:'Defeat 4–7 targets.'},
-        emotional_debt:{task:'Hit the target with tear gas or pepper spray.'},
-        estranged:{task:'Injure one of the target’s legs.',hint:'Feet count as leg hits for this mission.'},
-        family_ties:{task:'Hospitalize the target 3 times.'},
-        field_trip:{task:'Win the required amount on 3 casino games.'},
-        fireworks:{task:'Use 250–1,250 rounds of ammunition.'},
-        forgotten_bills:{task:'Defeat the target.'},
-        frenzy:{task:'Defeat 5–15 players.',hint:'You must initiate the attacks yourself; bought losses do not count.'},
-        get_things_jumping:{task:'Deal and receive the required amount of damage.'},
-        graffiti:{task:'Hit the target with pepper spray.',hint:'It still counts even if the pepper spray effect is ineffective.'},
-        guardian:{task:'Defeat the target.'},
-        hammer_time:{task:'Defeat the target with a hammer.',hint:'Dual hammers do not count.'},
-        hands_off:{task:'Defeat 3–5 targets.'},
-        hare_meet_tortoise:{task:'Defeat the target despite boosted speed.',hint:'Flash or smoke can reduce speed.'},
-        hide_and_seek:{task:'Identify the correct player from the listed clues and defeat them.'},
-        hiding_in_plain_view:{task:'Defeat the target while they are in the required foreign country.'},
-        high_fliers:{task:'Defeat 3 targets in the specified foreign countries.'},
-        hobgoblin:{task:'Defeat a player of your choice 5 times.'},
-        immovable_object:{task:'Defeat the target despite boosted defense.'},
-        inside_job:{task:'Attack the target and plant the item Duke gives you.',hint:'The Secrete option appears after you defeat the target.'},
-        introduction_duke:{task:'Complete 10 Duke contracts.'},
-        keeping_up_appearances:{task:'Mug the target, then return the money.',hint:'The mug must be successful.'},
-        kiss_of_death:{task:'Defeat the target and choose the kiss finishing option.'},
-        lack_of_awareness:{task:'Defeat the target.'},
-        lost_and_found:{task:'Hospitalize the target for 12 hours.'},
-        loud_and_clear:{task:'Use 3–11 explosive grenades.',hint:'Use grenades classified as explosive, such as HEG or Grenade; flash-type utility items may not qualify.'},
-        loyal_customer:{task:'Defeat the target.'},
-        make_it_slow:{task:'Defeat the target in no fewer than the required 5–9 turns.',hint:'Keep the fight alive until the required turn count, then finish the target.'},
-        marriage_counseling:{task:'Defeat the target’s spouse.'},
-        massacrist:{task:'Defeat the target.'},
-        meeting_the_challenge:{task:'Mug players until the required total cash has been collected.'},
-        motivator:{task:'Lose or stalemate against the target on your first attempt.',hint:'Lowering your health and unequipping armor can make this easier.'},
-        new_kid_on_the_block:{task:'Defeat 5 players.'},
-        no_man_is_an_island:{task:'Mug 2 of the 3 listed targets.',hint:'Any two different listed targets count.'},
-        no_second_chances:{task:'Defeat the target on the first attempt.'},
-        out_of_the_frying_pan:{task:'Go to jail, use Felovax to move to hospital, then use Zylkene.'},
-        painleth_dentitht:{task:'Defeat the target with a baseball bat.',hint:'Other weapons may stay equipped; the baseball bat must satisfy the mission condition.'},
-        party_tricks:{task:'Defeat the target despite boosted dexterity.'},
-        pass_the_word:{task:'Send the target a message containing the required keyword.',hint:'Copying the relevant mission text into Torn mail is the safest method.'},
-        peak_experience:{task:'Defeat the target.'},
-        proof_of_the_pudding:{task:'Use the requested weapon type on the target, then send that weapon type to them.',hint:'It does not have to be the exact same item instance.'},
-        rabbit_response:{task:'Defeat 3 targets within the mission time window.',hint:'The timer begins after you attack the first target.'},
-        reconstruction:{task:'Equip a kitchen knife and leather gloves, defeat the target, then dump both items.',hint:'The knife only needs to be equipped.'},
-        red_faced:{task:'Land the finishing hit with a trout.'},
-        rising_costs:{task:'Hit the target with a brick.',hint:'The brick must connect.'},
-        rolling_in_it:{task:'Successfully mug the target.',hint:'A small transfer beforehand can guarantee mug cash.'},
-        safari:{task:'Defeat the target with a rifle in South Africa.',hint:'All damaging hits should be made with a rifle; other weapons may remain equipped.'},
-        scammer:{task:'Defeat the target.',hint:'Mugging may be worthwhile if they are carrying cash.'},
-        sellout_slayer:{task:'Buy a gun, use that gun against 2–6 players, then sell it.',hint:'Not every ranged weapon is treated as a gun for this mission.'},
-        sending_a_message:{task:'Defeat the target.'},
-        show_some_muscle:{task:'Attack the target.',hint:'You only need to initiate the attack; a win is not required.'},
-        sleep_aid:{task:'Defeat the target.'},
-        some_people:{task:'Send any item as a parcel to the target.'},
-        standard_routine:{task:'Defeat the target using fists, kicks, or a clubbing weapon.'},
-        stomach_upset:{task:'Injure the target’s stomach.'},
-        swan_step_too_far:{task:'Find an item in the dump, then defeat its previous owner.',hint:'Keep searching until the previous owner is a viable target.'},
-        the_executive_game:{task:'Defeat the target using only fists or kicks.',hint:'Weapons can remain equipped as long as you do not use them.'},
-        the_tattoo_artist:{task:'Defeat the target using only a slashing or piercing weapon.',hint:'Guns can stay equipped, but do not use them.'},
-        three_peat:{task:'Leave one player, mug one player, and hospitalize one player.'},
-        training_day:{task:'Spend 250–1,250 energy in the gym.'},
-        tree_huggers:{task:'Defeat 5–8 targets.'},
-        undercutters:{task:'Defeat 3 targets.'},
-        unwanted_attention:{task:'Hospitalize 4 targets.'},
-        withdrawal:{task:'Injure both of the target’s arms.',hint:'Hands count as arms for this mission.'},
-        wrath_of_duke:{task:'Defeat 4 targets.'}
-    };
-
-    function normalizeMissionKey(title) {
-        return String(title || '')
-            .toLowerCase()
-            .replace(/&nbsp;/g, ' ')
-            .replace(/[’']/g, '')
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/[-\s]+/g, '_')
-            .replace(/_+/g, '_')
-            .replace(/^_+|_+$/g, '');
-    }
-
-    function getMissionTitle(context) {
-        const titleNode = context.querySelector('.title-black');
-        if (!titleNode) return '';
-        const raw = titleNode.childNodes?.[0]?.wholeText || titleNode.textContent || '';
-        return String(raw).replace(/\n/g, ' ').trim();
-    }
-
-    function suppressExternalMissionInfo(context) {
-        for (const node of context.querySelectorAll('.tpda-mission-information,.tt-mission-information,[class*="mission-information"]')) {
-            if (node.classList.contains('sl-mr-mission-guide')) continue;
-            const text = String(node.textContent || '').toLowerCase();
-            if (text.includes('mission information') || text.includes('torntools')) {
-                node.classList.add('sl-mr-external-mission-info');
-                node.style.setProperty('display','none','important');
-            }
-        }
-    }
-
-    function renderMissionGuides() {
-        if (!state.enabled || !isMissionsPage()) return;
-        const contexts = [...document.querySelectorAll('.giver-cont-wrap > div[id^="mission"]')];
-        for (const context of contexts) {
-            suppressExternalMissionInfo(context);
-            const existing = context.querySelector('.sl-mr-mission-guide');
-            if (!settings.showMissionGuide) { existing?.remove(); continue; }
-            const title = getMissionTitle(context);
-            const key = normalizeMissionKey(title);
-            const guide = MISSION_GUIDE[key];
-            const body = context.querySelector('.max-height-fix') || context;
-            let box = existing;
-            if (!box) {
-                box = document.createElement('div');
-                box.className = 'sl-mr-mission-guide';
-                body.appendChild(box);
-            }
-            if (guide) {
-                box.innerHTML = `<div class="sl-mr-guide-title">🎯 SakaLuX Mission Guide</div><div class="sl-mr-guide-row"><b>Task:</b> ${escapeHtml(guide.task)}</div>${guide.hint ? `<div class="sl-mr-guide-row sl-mr-guide-hint"><b>Hint:</b> ${escapeHtml(guide.hint)}</div>` : ''}`;
-                box.classList.remove('unknown');
-            } else {
-                box.classList.add('unknown');
-                box.innerHTML = `<div class="sl-mr-guide-title">🎯 SakaLuX Mission Guide</div><div class="sl-mr-guide-row"><b>Info:</b> No guide entry found for <b>${escapeHtml(title || 'this mission')}</b>.</div><div class="sl-mr-guide-row sl-mr-guide-hint">If another script changes mission titles, disable that title modification and refresh.</div>`;
-            }
-        }
-    }
-
-    function clearMissionGuides() {
-        document.querySelectorAll('.sl-mr-mission-guide').forEach(el => el.remove());
-        document.querySelectorAll('.sl-mr-external-mission-info').forEach(el => {
-            el.classList.remove('sl-mr-external-mission-info');
-            el.style.removeProperty('display');
-        });
     }
 
     function getApiKey() {
@@ -792,7 +623,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
     async function scanRewards(force = false) {
         if (!state.enabled || !isMissionsPage()) return;
-        renderMissionGuides();
         for (const card of getRewardCards()) {
             if (!force && state.processedCards.has(card)) continue;
             state.processedCards.add(card);
@@ -828,7 +658,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
                 <label class="sl-mr-setting"><input id="sl-mr-show-ammo" type="checkbox" ${settings.showAmmoOwned ? 'checked' : ''}> Show owned special ammo</label>
                 <label class="sl-mr-setting"><input id="sl-mr-learn-mods" type="checkbox" ${settings.learnModPrices ? 'checked' : ''}> Learn weapon mod price ranges locally</label>
                 <label class="sl-mr-setting"><input id="sl-mr-show-badges" type="checkbox" ${settings.showCardBadges ? 'checked' : ''}> Show information directly on reward cards</label>
-                <label class="sl-mr-setting"><input id="sl-mr-show-guide" type="checkbox" ${settings.showMissionGuide ? 'checked' : ''}> Show Duke mission Task + Hint guide</label>
                 <div class="sl-mr-api-box"><div>API: <b>${getApiKey() ? '✅ Available' : '⚠️ Missing'}</b></div>${!getApiKey() ? '<input id="sl-mr-api-key" type="password" placeholder="Minimal Torn API key...">' : ''}</div>
                 <button class="sl-mr-settings-btn gray" id="sl-mr-create-key">🔑 ${window.SakaLuXScriptHub ? 'CREATE GENERAL HUB API KEY' : 'CREATE REQUIRED API KEY'}</button>
                 <button class="sl-mr-settings-btn" id="sl-mr-save">💾 SAVE</button>
@@ -844,7 +673,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
             settings.showAmmoOwned = document.getElementById('sl-mr-show-ammo').checked;
             settings.learnModPrices = document.getElementById('sl-mr-learn-mods').checked;
             settings.showCardBadges = document.getElementById('sl-mr-show-badges').checked;
-            settings.showMissionGuide = document.getElementById('sl-mr-show-guide').checked;
             const keyInput = document.getElementById('sl-mr-api-key');
             if (keyInput?.value.trim()) saveApiKey(keyInput.value.trim());
             saveJson(STORAGE.settings, settings);
@@ -879,7 +707,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
             .sl-mr-card-info{position:absolute!important;left:6px!important;right:6px!important;bottom:42px!important;z-index:20!important;padding:5px 6px!important;border-radius:6px!important;background:rgba(17,24,39,.94)!important;color:#fff!important;font-size:9px!important;line-height:1.35!important;pointer-events:none!important;box-sizing:border-box!important;box-shadow:0 2px 6px rgba(0,0,0,.35)!important}
             .sl-mr-line{font-weight:800}.sl-mr-line.good{color:#4ade80}.sl-mr-line.special,.sl-mr-line.special-text{color:#fbbf24}.sl-mr-line.muted{color:#c5cad1;font-weight:600}
             .sl-mr-detail{margin-top:10px;padding:10px;border-radius:9px;background:#111827;border:1px solid #303640;color:#e5e7eb;font-size:11px;line-height:1.6}.sl-mr-detail-title{color:#fbbf24;font-size:12px;font-weight:900;margin-bottom:6px}.sl-mr-highlight{margin-top:5px;color:#4ade80;font-size:12px}.sl-mr-note{margin-top:7px;color:#9ca3af;font-size:9px}
-            .sl-mr-mission-guide{margin-top:14px!important;padding:11px 12px!important;border-top:1px solid rgba(255,255,255,.12)!important;border-radius:10px!important;background:linear-gradient(145deg,rgba(24,33,45,.96),rgba(15,20,28,.96))!important;border:1px solid #314154!important;color:#e7edf5!important;font-size:12px!important;line-height:1.45!important;box-shadow:0 6px 18px rgba(0,0,0,.18)!important}.sl-mr-guide-title{text-align:center!important;margin-bottom:7px!important;color:#6fa6ef!important;font-weight:900!important;font-size:12px!important;letter-spacing:.03em!important}.sl-mr-guide-row{margin-top:4px!important}.sl-mr-guide-row b{color:#f8fafc!important}.sl-mr-guide-hint{color:#cbd5e1!important}.sl-mr-mission-guide.unknown{border-color:#735d2a!important;background:linear-gradient(145deg,rgba(50,41,22,.96),rgba(25,22,17,.96))!important}.sl-mr-external-mission-info{display:none!important}
             #sl-mr-settings-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-mr-settings{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mr-settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.sl-mr-settings-title{font-size:17px;font-weight:900}.sl-mr-settings-sub{margin-top:3px;color:#9ca3af;font-size:9px}#sl-mr-settings-close{width:36px;height:36px;border:0;border-radius:9px;background:#252a32;color:#fff;font-size:20px}.sl-mr-setting{display:block;margin-bottom:7px;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mr-api-box{margin-top:10px;padding:10px;background:#181d24;border:1px solid #292f38;border-radius:9px;font-size:11px}#sl-mr-api-key{width:100%;box-sizing:border-box;margin-top:8px;padding:9px;border:1px solid #303640;border-radius:8px;background:#101318;color:#fff}.sl-mr-settings-btn{width:100%;margin-top:7px;min-height:40px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:900}.sl-mr-settings-btn.gray{background:#374151}
             #${HUB_PROMPT_ID}{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px;font-family:Arial,sans-serif}#${HUB_PROMPT_ID}>div{width:min(420px,100%);background:#101318;color:#fff;border:1px solid #303640;border-radius:14px;padding:16px;box-shadow:0 12px 35px rgba(0,0,0,.55)}#${HUB_PROMPT_ID} h3{margin:0 0 8px;font-size:16px}#${HUB_PROMPT_ID} p{margin:0 0 14px;color:#b8c0cc;font-size:12px;line-height:1.45}#${HUB_PROMPT_ID} .sl-mr-hub-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}#${HUB_PROMPT_ID} button{border:0;border-radius:9px;padding:10px;font-weight:900;color:#fff;background:#374151}#${HUB_PROMPT_ID} .install{background:#16a34a}
             @media(min-width:700px){#sl-mr-settings-overlay{align-items:center}#sl-mr-settings{border-radius:18px}}
@@ -900,15 +727,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     }
 
     function hubInstalled() {
-        return Boolean(
-            window.SakaLuXScriptHub?.ready ||
-            document.getElementById('sakalux-hub-button') ||
-            document.getElementById('sakalux-hub-top-skull') ||
-            document.getElementById('sakalux-hub-nav-skull') ||
-            document.getElementById('sakalux-hub-panel') ||
-            document.querySelector('[data-sakalux-hub-active="1"]') ||
-            document.querySelector('[data-sakalux-hub-installed="1"]')
-        );
+        return Boolean(window.SakaLuXScriptHub?.ready || document.getElementById('sakalux-hub-button'));
     }
 
     function maybePromptForHub() {
@@ -945,7 +764,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         document.getElementById('sl-mr-settings-overlay')?.remove();
         document.getElementById(HUB_PROMPT_ID)?.remove();
         removeDetailPanel();
-        clearMissionGuides();
         document.querySelectorAll('.sl-mr-card-info').forEach(box => {
             const card = box.parentElement;
             box.remove();
@@ -960,6 +778,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if (state.enabled) startRuntime();
         else stopRuntime();
         window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
+        syncHubBridge('mission-rewards', state.enabled);
         return state.enabled;
     }
 
@@ -967,48 +786,12 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         return setEnabled(!state.enabled);
     }
 
-    let hubCommandTimer = null;
-    let hubPowerTimer = null;
-
-    async function consumeHubCommand() {
-        let command = null;
-        try { command = JSON.parse(localStorage.getItem(HUB_COMMAND_KEY) || 'null'); } catch {}
-        if (!command?.action) return false;
-        if (Date.now() - Number(command.at || 0) > 30000) {
-            try { localStorage.removeItem(HUB_COMMAND_KEY); } catch {}
-            return false;
-        }
-        try { localStorage.removeItem(HUB_COMMAND_KEY); } catch {}
-        const action = String(command.action);
-        if (action === 'open' || action === 'settings') {
-            if (!state.enabled) setEnabled(true);
-            if (!isMissionsPage()) { location.href = MISSIONS_URL; return true; }
-            openSettings();
-            return true;
-        }
-        if (action === 'refresh') {
-            if (!isMissionsPage()) { location.href = MISSIONS_URL; return true; }
-            try { await window.SakaLuXMissionRewards?.refresh?.(); } catch {}
-            return true;
-        }
-        if (action === 'missions') { location.href = MISSIONS_URL; return true; }
-        return false;
-    }
-
-    function startHubCommandChannel() {
-        consumeHubCommand();
-        if (hubCommandTimer) clearInterval(hubCommandTimer);
-        hubCommandTimer = setInterval(consumeHubCommand, 500);
-        if (hubPowerTimer) clearInterval(hubPowerTimer);
-        hubPowerTimer = setInterval(() => {
-            const desired = loadJson(STORAGE.enabled, true) !== false;
-            if (desired !== state.enabled) setEnabled(desired);
-            const registration = document.querySelector('[data-slx-standalone-registration="mission-rewards"]');
-            if (registration) {
-                registration.dataset.version = VERSION;
-                registration.dataset.enabled = String(Boolean(state.enabled));
-            }
-        }, 1000);
+    function syncHubBridge(id, value) { const bridge = document.getElementById('sakalux-module-bridge-' + id); if (bridge) bridge.dataset.enabled = String(Boolean(value)); }
+    function installHubBridge(id, openHandler) {
+        let bridge = document.getElementById('sakalux-module-bridge-' + id);
+        if (!bridge) { bridge = document.createElement('button'); bridge.type = 'button'; bridge.id = 'sakalux-module-bridge-' + id; bridge.hidden = true; (document.body || document.documentElement).appendChild(bridge); }
+        bridge.dataset.version = VERSION; bridge.dataset.enabled = String(Boolean(state.enabled));
+        bridge.onclick = () => { const action = bridge.dataset.action; if (action === 'open') openHandler(); else if (action === 'toggle') toggleEnabled(); else if (action === 'on' || action === 'off') setEnabled(action === 'on'); bridge.dataset.action = ''; syncHubBridge(id, state.enabled); };
     }
 
     window.SakaLuXMissionRewards = {
@@ -1058,7 +841,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
                 catalogueItems: state.catalogue.size,
                 ammoEntries: state.ammo.length,
                 rewardCards: isMissionsPage() ? getRewardCards().length : 0,
-                missionGuides: isMissionsPage() ? document.querySelectorAll('.sl-mr-mission-guide').length : 0,
                 lastScan: state.lastScan,
                 learnedMods: Object.keys(getModRanges()).length
             };
@@ -1069,15 +851,12 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         }
     };
 
+    window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsReady', { detail: { version: VERSION, enabled: state.enabled } }));
+
     async function init() {
         try { localStorage.setItem('SakaLuX_Installed_mission-rewards', VERSION); } catch {}
         state.enabled = loadJson(STORAGE.enabled, true) !== false;
-        startHubCommandChannel();
-        try {
-            const registration = document.querySelector('[data-slx-standalone-registration="mission-rewards"]');
-            if (registration) registration.dataset.version = VERSION;
-        } catch {}
-        window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsReady', { detail: { version: VERSION, enabled: state.enabled } }));
+        installHubBridge('mission-rewards', () => window.SakaLuXMissionRewards.open());
         if (state.enabled) setTimeout(maybePromptForHub, 3500);
 
         if (!isMissionsPage()) {
@@ -1146,4 +925,131 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         observer.observe(document.body,{childList:true,subtree:true});
     };
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+
+/* SakaLuX Mission Guide — isolated UI layer
+ * Runs independently from Mission Rewards core/Hub bridge/API/power logic.
+ * Removing this entire IIFE restores the exact v1.0.18 behavior.
+ */
+(() => {
+  'use strict';
+const MISSION_GUIDE = {
+        a_good_day_to_get_hard:{task:'Build a 3–10 kill streak.',hint:'Buying losses can help.'},
+        a_kimpossible_task:{task:'Defeat the target using melee and temporary weapons only.',hint:'Guns may stay equipped; do not use them.'},
+        a_problem_at_the_tracks:{task:'Defeat 3 targets without using guns.',hint:'Other weapons are fine; firing a gun fails it.'},
+        a_thor_loser:{task:"Hit 8–16 unique body parts with Duke’s hammer.",hint:'Long fights/stalemates give more chances.'},
+        against_the_odds:{task:'Defeat 2 targets.'},
+        an_honorary_degree:{task:'Defeat the target without using guns.',hint:'Guns can remain equipped.'},
+        army_of_one:{task:'Attack the target 3 times while changing masks.',hint:'One attack must be with no mask; winning is not required every time.'},
+        bakeout_breakout:{task:'Combine a fruitcake with the lock pick, then send the special fruitcake to a jailed player.'},
+        bare_knuckle:{task:'Defeat the target with no weapons or armor equipped.',hint:'Unequip everything before the fight.'},
+        batshit_crazy:{task:'Deal the required damage with Penelope.',hint:'Duke supplies Penelope.'},
+        battering_ram:{task:'Attack the target 3 times.'},
+        big_tub_of_muscle:{task:'Defeat the target despite boosted strength.'},
+        birthday_surprise:{task:'Send Duke the requested item as a present.',hint:'Use an empty box and gift wrap to make a parcel.'},
+        bonnie_and_clyde:{task:'Defeat the target and their spouse.'},
+        bountiful:{task:'Successfully claim 2–5 bounties.',hint:'Hospitalize the bounty target for the claim.'},
+        bounty_on_the_mutiny:{task:'Place a bounty on the target and wait for someone to claim it.',hint:'You cannot claim your own bounty.'},
+        bring_it:{task:'Defeat Duke in a group attack.',hint:'Joining a loot fight can count; you do not need the finishing hit.'},
+        candy_from_babies:{task:'Collect the required total bounty value.',hint:'It may be split across multiple bounties.'},
+        charity_work:{task:'Successfully mug 2 targets.',hint:'A small transfer beforehand can guarantee mug cash.'},
+        cracking_up:{task:'Interrogate the target for Duke’s safe code, open the safe, then send Duke its contents.',hint:'It may take several attempts to obtain the code.'},
+        critical_education:{task:'Land 3–9 critical hits.'},
+        cut_them_down_to_size:{task:'Defeat any player at your level or higher.'},
+        dirty_little_secret:{task:'Bounty the target, then attack the player who claims that bounty.',hint:'Anonymous claimers can still expose an ID in the mission panel.'},
+        double_jeopardy:{task:'Place a bounty on the target and defeat them.',hint:'The bounty does not need to be claimed.'},
+        drug_problem:{task:'Defeat 4–7 targets.'},
+        emotional_debt:{task:'Hit the target with tear gas or pepper spray.',hint:'The temporary weapon must not be blocked.'},
+        estranged:{task:'Injure one of the target’s legs.'},
+        family_ties:{task:'Hospitalize the target 3 times.'},
+        field_trip:{task:'Win the required amount on 3 casino games.'},
+        fireworks:{task:'Use 250–1,250 rounds of ammunition.'},
+        forgotten_bills:{task:'Defeat the target.'},
+        frenzy:{task:'Defeat 5–15 players.'},
+        get_things_jumping:{task:'Deal and receive the required amount of damage.'},
+        graffiti:{task:'Hit the target with pepper spray.'},
+        guardian:{task:'Defeat the target.'},
+        hammer_time:{task:'Defeat the target with a hammer.',hint:'Dual hammers do not count.'},
+        hands_off:{task:'Defeat 3–5 targets.'},
+        hare_meet_tortoise:{task:'Defeat the target despite boosted speed.',hint:'Flash or smoke can reduce speed.'},
+        hide_and_seek:{task:'Identify the correct player from the listed clues and defeat them.'},
+        hiding_in_plain_view:{task:'Defeat the target while they are in the required foreign country.'},
+        high_fliers:{task:'Defeat 3 targets in the specified foreign countries.'},
+        hobgoblin:{task:'Defeat a player of your choice 5 times.'},
+        immovable_object:{task:'Defeat the target despite boosted defense.'},
+        inside_job:{task:'Attack the target and plant the required item on them.'},
+        introduction_duke:{task:'Complete 10 Duke contracts.'},
+        keeping_up_appearances:{task:'Mug the target, then return the money.',hint:'The mug must be successful.'},
+        kiss_of_death:{task:'Defeat the target and choose the kiss finishing option.'},
+        lack_of_awareness:{task:'Defeat the target.'},
+        lost_and_found:{task:'Hospitalize the target for 12 hours.'},
+        loud_and_clear:{task:'Use 3–11 explosive grenades.',hint:'Use damaging grenade types.'},
+        loyal_customer:{task:'Defeat the target.'},
+        make_it_slow:{task:'Defeat the target only after the required minimum number of turns.',hint:'Keep the fight alive until the turn requirement is met.'},
+        marriage_counseling:{task:'Defeat the target’s spouse.'},
+        massacrist:{task:'Defeat the target.'},
+        meeting_the_challenge:{task:'Mug players until the required total cash has been collected.'},
+        motivator:{task:'Lose or stalemate against the target on your first attempt.',hint:'Do not let the fight time out.'},
+        new_kid_on_the_block:{task:'Defeat 5 players.'},
+        no_man_is_an_island:{task:'Mug 2 of the 3 listed targets.',hint:'Any two different listed targets count.'},
+        no_second_chances:{task:'Defeat the target on the first attempt.'},
+        out_of_the_frying_pan:{task:'Go to jail, use Felovax to move to hospital, then use Zylkene.'},
+        painleth_dentitht:{task:'Defeat the target with a baseball bat.',hint:'Do not use other weapons during the fight.'},
+        party_tricks:{task:'Defeat the target despite boosted dexterity.'},
+        pass_the_word:{task:'Send the target a message containing the required keyword.',hint:'Copying the relevant mission text into Torn mail is the safest method.'},
+        peak_experience:{task:'Defeat the target.'},
+        proof_of_the_pudding:{task:'Use the requested weapon type on the target, then send that weapon type to them.',hint:'It does not have to be the exact same item instance.'},
+        rabbit_response:{task:'Defeat 3 targets within the mission time window.',hint:'The timer begins after you attack the first target.'},
+        reconstruction:{task:'Equip a kitchen knife and leather gloves, defeat the target, then dump both items.',hint:'The knife only needs to be equipped.'},
+        red_faced:{task:'Land the finishing hit with a trout.'},
+        rising_costs:{task:'Hit the target with a brick.',hint:'The brick must connect.'},
+        rolling_in_it:{task:'Successfully mug the target.',hint:'A small transfer beforehand can guarantee mug cash.'},
+        safari:{task:'Defeat the target with a rifle in South Africa.'},
+        scammer:{task:'Defeat the target.',hint:'Mugging may be worthwhile if they are carrying cash.'},
+        sellout_slayer:{task:'Buy a gun, use it against 2–6 players, then sell it.'},
+        sending_a_message:{task:'Defeat the target.'},
+        show_some_muscle:{task:'Attack the target.',hint:'You only need to initiate the attack; a win is not required.'},
+        sleep_aid:{task:'Defeat the target.'},
+        some_people:{task:'Send any item as a parcel to the target.'},
+        standard_routine:{task:'Defeat the target using fists, kicks, or a clubbing weapon.'},
+        stomach_upset:{task:'Injure the target’s stomach.'},
+        swan_step_too_far:{task:'Find an item in the dump, then defeat its previous owner.',hint:'Keep searching until the previous owner is a viable target.'},
+        the_executive_game:{task:'Defeat the target using only fists or kicks.',hint:'Weapons may remain equipped if unused.'},
+        the_tattoo_artist:{task:'Defeat the target using only a slashing or piercing weapon.',hint:'Do not fire equipped guns.'},
+        three_peat:{task:'Leave one player, mug one player, and hospitalize one player.'},
+        training_day:{task:'Spend 250–1,250 energy in the gym.'},
+        tree_huggers:{task:'Defeat 5–8 targets.'},
+        undercutters:{task:'Defeat 3 targets.'},
+        unwanted_attention:{task:'Hospitalize 4 targets.'},
+        withdrawal:{task:'Injure both of the target’s arms.',hint:'Hands count as arm hits.'},
+        wrath_of_duke:{task:'Defeat 4 targets.'}
+    };
+  const STYLE_ID='sl-mr-guide-isolated-style';
+  const BOX_CLASS='sl-mr-mission-guide';
+  function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
+  function key(v){return String(v||'').toLowerCase().replace(/&nbsp;/g,' ').replace(/[’']/g,'').replace(/[^a-z0-9\s-]/g,'').replace(/[-\s]+/g,'_').replace(/_+/g,'_').replace(/^_+|_+$/g,'')}
+  function addStyle(){
+    if(document.getElementById(STYLE_ID))return;
+    const s=document.createElement('style');s.id=STYLE_ID;
+    s.textContent=`.sl-mr-mission-guide{margin:10px 0;padding:10px 12px;border:1px solid rgba(59,130,246,.32);border-radius:10px;background:rgba(15,23,42,.82);color:#dbeafe;font:13px/1.35 Arial,sans-serif}.sl-mr-mission-guide .sl-mr-guide-title{font-weight:900;color:#93c5fd;margin-bottom:6px}.sl-mr-mission-guide .sl-mr-guide-row{margin-top:3px}.sl-mr-mission-guide .sl-mr-guide-hint{color:#cbd5e1}`;
+    (document.head||document.documentElement).appendChild(s);
+  }
+  function missionTitle(ctx){
+    const n=ctx.querySelector('.title-black'); if(!n)return '';
+    return String(n.childNodes?.[0]?.wholeText||n.textContent||'').replace(/\n/g,' ').trim();
+  }
+  function render(){
+    if(!location.href.includes('sid=missions'))return;
+    addStyle();
+    for(const ctx of document.querySelectorAll('.giver-cont-wrap > div[id^="mission"]')){
+      const data=MISSION_GUIDE[key(missionTitle(ctx))];
+      let box=ctx.querySelector(':scope .'+BOX_CLASS);
+      if(!data){box?.remove();continue}
+      if(!box){box=document.createElement('div');box.className=BOX_CLASS;(ctx.querySelector('.max-height-fix')||ctx).appendChild(box)}
+      box.innerHTML=`<div class="sl-mr-guide-title">🎯 SakaLuX Mission Guide</div><div class="sl-mr-guide-row"><b>Task:</b> ${esc(data.task)}</div>${data.hint?`<div class="sl-mr-guide-row sl-mr-guide-hint"><b>Hint:</b> ${esc(data.hint)}</div>`:''}`;
+    }
+  }
+  let t=0; function schedule(){clearTimeout(t);t=setTimeout(render,120)}
+  function start(){render();new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});window.addEventListener('hashchange',schedule);window.addEventListener('popstate',schedule)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
