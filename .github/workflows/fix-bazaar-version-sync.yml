@@ -1,0 +1,49 @@
+name: One-time Bazaar version synchronization fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-bazaar-version-sync.yml'
+      - '.migration/fix-bazaar-version-sync.py'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Apply migration
+        run: python .migration/fix-bazaar-version-sync.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Script-Hub.user.js
+          node --check SakaLuX-Bazaar-Thanker-PDA.user.js
+          python -m json.tool scripts.json >/dev/null
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          reg={x['id']:str(x['version']) for x in json.loads(Path('scripts.json').read_text())['scripts']}
+          b=Path('SakaLuX-Bazaar-Thanker-PDA.user.js').read_text()
+          meta=re.search(r'^// @version\s+([^\s]+)',b,re.M).group(1)
+          runtime=re.search(r"const BAZAAR_VERSION='([^']+)'",b).group(1)
+          selfv=re.search(r"\{version:'([^']+)'\}",b).group(1)
+          assert meta==runtime==selfv==reg['bazaar'], (meta,runtime,selfv,reg['bazaar'])
+          print('Bazaar versions synchronized:', meta)
+          PY
+      - name: Commit changes
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Script-Hub.user.js SakaLuX-Bazaar-Thanker-PDA.user.js scripts.json greasyfork/Script-Hub.md greasyfork/Bazaar-Thanker.md .github/workflows/validate-userscripts.yml
+          if git diff --cached --quiet; then
+            echo 'No changes.'
+            exit 0
+          fi
+          git commit -m 'Fix Bazaar runtime version synchronization [skip ci]'
+          git push
