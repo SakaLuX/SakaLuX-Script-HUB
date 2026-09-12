@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.31**
+**v1.9.32**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v1.9.31** completes bridge/API-only access for all five managed add-ons. No managed add-on creates an individual floating launcher on Torn pages; Hub and Standalone Dock open every module through its internal bridge/API.
+**v1.9.32** restores the Hub panel runtime after the bridge-only migration. The native **S**, Fly-out **HUB** and floating fallback launchers all open Script Hub again, while managed add-ons remain bridge/API-only with no individual floating launch buttons.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
