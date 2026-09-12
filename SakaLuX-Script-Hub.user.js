@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.44
+// @version      1.9.33
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.44';
+    const VERSION = '1.9.33';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,105 +40,6 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
-        {
-            version: '1.9.44',
-            date: '2026-09-13',
-            changes: [
-                'Mission Rewards rolled back completely to the confirmed-working v1.0.18 runtime.',
-                'Removed the experimental Mission Guide integration and all later Mission Rewards changes from the active release.',
-                'Registry, Hub fallback and update metadata are pinned to v1.0.18 so Hub no longer requests the broken 1.1.x line.'
-            ]
-        },
-        {
-            version: '1.9.43',
-            date: '2026-09-13',
-            changes: [
-                'Mission Rewards is rebased on the confirmed-stable v1.0.18 runtime and released as v1.0.19.',
-                'The Mission Guide is now an isolated visual-only layer and no longer touches Mission Rewards init, Hub bridge, API or power logic.',
-                'Mission Rewards update metadata now follows the v1.0.19 GitHub stabilization line instead of the broken Greasy Fork 1.1.x branch.'
-            ]
-        },
-        {
-            version: '1.9.42',
-            date: '2026-09-13',
-            changes: [
-                'Mission Rewards no longer depends on the Violentmonkey-specific hidden control bridge or heartbeat compatibility layer.',
-                'Mission Rewards presence/version comes from the normal standalone registration marker, while OPEN/SETTINGS uses a simple localStorage command channel.',
-                'Mission Rewards ON/OFF now writes its native enabled setting directly and the module synchronizes it at runtime.'
-            ]
-        },
-        {
-            version: '1.9.41',
-            date: '2026-09-13',
-            changes: [
-                'Adds a fresh localStorage heartbeat channel for Mission Rewards so Hub detection no longer depends only on fragile hidden DOM bridges.',
-                'A heartbeat is accepted only while fresh, preventing deleted or disabled scripts from becoming permanent ghost modules.',
-                'Hub now re-renders open module cards and stats when bridge/registration DOM nodes are added or removed.'
-            ]
-        },
-        {
-            version: '1.9.40',
-            date: '2026-09-12',
-            changes: [
-                'Mission Rewards v1.1.2 publishes its DOM bridge and standalone registration immediately at userscript bootstrap.',
-                'Mission Rewards Ready is now emitted only after the full Hub bridge handler is installed, fixing TornPDA/Violentmonkey isolated-context detection.',
-                'Hub fallback registry is synchronized with Mission Rewards v1.1.2.'
-            ]
-        },
-        {
-            version: '1.9.39',
-            date: '2026-09-12',
-            changes: [
-                'Makes live DOM bridge/API presence authoritative for managed-module state.',
-                'Persistent localStorage install markers no longer make disabled or deleted TornPDA scripts appear installed, healthy or active.',
-                'Module cards and switches now represent the runtime actually present in the current Torn page.'
-            ]
-        },
-        {
-            version: '1.9.38',
-            date: '2026-09-12',
-            changes: [
-                'Clarifies module version reporting as the currently RUNNING userscript version, not necessarily the version already installed in TornPDA.',
-                'When RUNNING is behind Registry/Latest, OPEN or SETTINGS performs one verification reload before treating it as a real missing update.',
-                'Prevents a freshly updated module from being misclassified as still outdated simply because the old page instance is still injected.'
-            ]
-        },
-        {
-            version: '1.9.37',
-            date: '2026-09-12',
-            changes: [
-                'Detects stale userscript runtimes after a module update is installed but the current Torn page still runs the previous injected version.',
-                'Shows RELOAD REQUIRED instead of presenting the old runtime version as fully current.',
-                'Module OPEN/SETTINGS automatically reloads the page and retries when the installed runtime is behind the registry version.'
-            ]
-        },
-        {
-            version: '1.9.36',
-            date: '2026-09-12',
-            changes: [
-                'Fixes pending module actions when the fallback destination is already the current Torn page.',
-                'Forces a full reload on same-page fallback so older installed add-ons can recreate their DOM bridge.',
-                'Extends pending-action lifetime and retries automatically after reload.'
-            ]
-        },
-        {
-            version: '1.9.35',
-            date: '2026-09-12',
-            changes: [
-                'Fixes Mission Rewards SETTINGS when its bridge is not yet available in the current userscript context.',
-                'Installed module actions now remember the requested action, navigate to the module fallback page when needed, then retry through the bridge/API.',
-                'Removes the dead-end Violentmonkey bridge alert for modules that provide a valid fallback page.'
-            ]
-        },
-        {
-            version: '1.9.34',
-            date: '2026-09-12',
-            changes: [
-                'Mission Rewards v1.1.0 now includes an integrated Duke Mission Guide with Task and Hint information.',
-                'Mission Guide works inside the managed Mission Rewards module and avoids duplicate TornTools-style information boxes.',
-                'Registry and release information are synchronized with the new Missions feature release.'
-            ]
-        },
         {
             version: '1.9.33',
             date: '2026-09-12',
@@ -767,8 +668,6 @@
     }
 
     function getInstalledVersion(script) {
-        // Runtime authority only. Persistent markers are intentionally NOT used here:
-        // they survive TornPDA disable/delete and create ghost installed/active cards.
         try {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
             if (bridge?.dataset?.version) return String(bridge.dataset.version);
@@ -783,14 +682,13 @@
             const standalone = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
             if (standalone?.dataset?.version) return String(standalone.dataset.version);
         } catch {}
-        return null;
-    }
-
-    function getHistoricalMarkerVersion(script) {
         try {
-            return localStorage.getItem('SakaLuX_Installed_' + script.id)
-                || (script.id === 'elimination-assistant' ? localStorage.getItem('SakaLuX_Installed_elimination') : '')
-                || null;
+            const marker = localStorage.getItem('SakaLuX_Installed_' + script.id)
+                || (script.id === 'elimination-assistant' ? localStorage.getItem('SakaLuX_Installed_elimination') : '');
+            if (marker) return String(marker);
+        } catch {}
+        try {
+            return document.querySelector(script.buttonSelector) ? '?' : null;
         } catch { return null; }
     }
 
@@ -901,26 +799,12 @@
         return SCRIPTS.filter(s => getHealth(s).state === 'missing').length;
     }
 
-    function getLiveEnabledState(script) {
-        try {
-            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-            if (bridge) return bridge.dataset.enabled !== 'false';
-        } catch {}
-        try {
-            const api = script.api();
-            if (api && typeof api.isEnabled === 'function') return api.isEnabled() !== false;
-            const health = api?.health?.();
-            if (health && typeof health.enabled === 'boolean') return health.enabled;
-        } catch {}
-        return false;
-    }
-
     function getHealth(script) {
         const api = script.api();
         if (!api) {
-            const running = getInstalledVersion(script);
-            if (running) return { state: 'ok', text: 'RUNNING', version: running, data: { detection: 'live bridge' } };
-            return { state: 'missing', text: 'NOT RUNNING', version: null, data: { historicalVersion: getHistoricalMarkerVersion(script) } };
+            const installed = getInstalledVersion(script);
+            if (installed) return { state: 'ok', text: 'INSTALLED', version: installed, data: { detection: 'installation marker' } };
+            return { state: 'missing', text: 'NOT INSTALLED', version: null, data: null };
         }
         try {
             const data = typeof api.health === 'function' ? api.health() : null;
@@ -953,9 +837,6 @@
         const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
         if (bridge?.dataset?.enabled === 'true') return true;
         if (bridge?.dataset?.enabled === 'false') return false;
-        const registration = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
-        if (registration?.dataset?.enabled === 'true') return true;
-        if (registration?.dataset?.enabled === 'false') return false;
         return Object.prototype.hasOwnProperty.call(modulePower, script.id) ? modulePower[script.id] !== false : true;
     }
 
@@ -967,7 +848,7 @@
             await api.setEnabled(Boolean(enabled));
         } else {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-            if (!bridge) throw new Error('Module control is unavailable for ' + script.name + '.');
+            if (!bridge) throw new Error('Update ' + script.name + ' to the latest version to use its Violentmonkey control bridge.');
             bridge.dataset.action = enabled ? 'on' : 'off';
             bridge.click();
         }
@@ -1557,7 +1438,6 @@
         const installed = getInstalledVersion(script);
         const latest = update.data?.publishedLatest || update.data?.latest || script.expectedVersion || '?';
         const missing = health.state === 'missing';
-        const staleRuntime = Boolean(!missing && installed && installed !== '?' && script.expectedVersion && compareVersions(installed, script.expectedVersion) < 0 && !runtimeReloadAlreadyTried(script));
         let extra = '';
         if (script.id === 'enhancer' && health.data) extra = `Inventory ${health.data.inventoryEntries ?? 0}`;
         if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? `Buyers ${health.data.buyers ?? 0}` : 'Standby';
@@ -1578,8 +1458,8 @@
                 <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
                 ${script.description ? `<div class="slh-description">${escapeHtml(script.description)}</div>` : ''}
                 <div class="slh-chips">
-                    <span class="slh-chip ${healthChipClass}">${missing ? 'NOT RUNNING' : 'RUNNING v' + escapeHtml(installed || health.version || '?')}</span>
-                    <span class="slh-chip ${staleRuntime ? 'warn' : updateChipClass}">${escapeHtml(staleRuntime ? 'RELOAD REQUIRED' : update.text)}</span>
+                    <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
+                    <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
                     ${update.state === 'pending' ? `<span class="slh-chip muted">REGISTRY v${escapeHtml(script.expectedVersion || '?')} PENDING</span>` : latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
                     ${extra ? `<span class="slh-chip muted">${escapeHtml(extra)}</span>` : ''}
@@ -1613,102 +1493,14 @@
         document.querySelectorAll('[data-script][data-action]').forEach(button => { button.onclick = () => runAction(button.dataset.script, button.dataset.action); });
     }
 
-    function savePendingModuleAction(id, actionId) {
-        try { sessionStorage.setItem('SakaLuX_HUB_PENDING_MODULE_ACTION', JSON.stringify({ id, actionId, at: Date.now() })); } catch {}
-    }
-
-    function clearPendingModuleAction() {
-        try { sessionStorage.removeItem('SakaLuX_HUB_PENDING_MODULE_ACTION'); } catch {}
-    }
-
-    function normalizeUrlForCompare(url) {
-        try {
-            const u = new URL(url, location.href);
-            return u.origin + u.pathname + u.search + u.hash;
-        } catch { return String(url || ''); }
-    }
-
-    function navigateForPendingAction(url) {
-        const target = normalizeUrlForCompare(url);
-        const current = normalizeUrlForCompare(location.href);
-        if (target === current) {
-            location.reload();
-            return;
-        }
-        location.href = url;
-    }
-
-    async function retryPendingModuleAction() {
-        let pending = null;
-        try { pending = JSON.parse(sessionStorage.getItem('SakaLuX_HUB_PENDING_MODULE_ACTION') || 'null'); } catch {}
-        if (!pending?.id || !pending?.actionId || Date.now() - Number(pending.at || 0) > 120000) { clearPendingModuleAction(); return false; }
-        const script = SCRIPTS.find(item => item.id === pending.id);
-        if (!script) { clearPendingModuleAction(); return false; }
-        for (let i = 0; i < 12; i++) {
-            const api = script.api();
-            if (api) {
-                const action = script.quickActions.find(item => item.id === pending.actionId) || { method: pending.actionId };
-                if (typeof api[action.method] === 'function') {
-                    clearPendingModuleAction();
-                    try { await api[action.method](); recordUsage(script.id); } catch (error) { console.error('[SakaLuX Hub pending action]', error); }
-                    return true;
-                }
-            }
-            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-            if (bridge) {
-                clearPendingModuleAction();
-                bridge.dataset.action = pending.actionId === 'open' || pending.actionId === 'settings' ? 'open' : pending.actionId;
-                bridge.click();
-                recordUsage(script.id);
-                return true;
-            }
-            await new Promise(resolve => setTimeout(resolve, 250));
-        }
-        clearPendingModuleAction();
-        return false;
-    }
-
-    function runtimeReloadKey(script) {
-        return 'SakaLuX_HUB_RUNTIME_RELOAD_' + script.id;
-    }
-
-    function runtimeReloadAlreadyTried(script) {
-        try {
-            const raw = sessionStorage.getItem(runtimeReloadKey(script));
-            if (!raw) return false;
-            const data = JSON.parse(raw);
-            return data && data.expected === script.expectedVersion && Date.now() - Number(data.at || 0) < 120000;
-        } catch { return false; }
-    }
-
-    function markRuntimeReloadTried(script) {
-        try { sessionStorage.setItem(runtimeReloadKey(script), JSON.stringify({ expected: script.expectedVersion, at: Date.now() })); } catch {}
-    }
-
-    function clearRuntimeReloadTried(script) {
-        try { sessionStorage.removeItem(runtimeReloadKey(script)); } catch {}
-    }
-
     async function runAction(id, actionId) {
         const script = SCRIPTS.find(item => item.id === id);
         if (!script) return;
-        const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
-        const isPanelAction = actionId === getPrimaryAction(script).id || actionId === 'open' || actionId === 'settings';
-        const installed = getInstalledVersion(script);
-        const runtimeBehind = Boolean(installed && installed !== '?' && script.expectedVersion && compareVersions(installed, script.expectedVersion) < 0);
-        if (runtimeBehind && isPanelAction && !runtimeReloadAlreadyTried(script)) {
-            markRuntimeReloadTried(script);
-            savePendingModuleAction(id, actionId);
-            closeHub();
-            location.reload();
-            return;
-        }
-        if (!runtimeBehind) clearRuntimeReloadTried(script);
         const api = script.api();
         if (!api) {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
             if (bridge) {
-                bridge.dataset.action = isPanelAction ? 'open' : actionId;
+                bridge.dataset.action = 'open';
                 bridge.click();
                 recordUsage(id);
                 closeHub();
@@ -1720,28 +1512,24 @@
                 return;
             }
             if (getInstalledVersion(script)) {
-                if (action.fallbackUrl) {
-                    savePendingModuleAction(id, actionId);
-                    closeHub();
-                    navigateForPendingAction(action.fallbackUrl);
-                    return;
-                }
-                alert(script.name + ' is installed, but its control bridge is not available on this page.');
+                alert(script.name + ' is installed, but this version needs the Violentmonkey bridge update before Hub can open it.');
                 return;
             }
             const url = getInstallUrl(script);
             if (url) location.href = url;
             return;
         }
+        const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
+        const isPanelAction = actionId === getPrimaryAction(script).id || actionId === 'open' || actionId === 'settings';
         try {
             if (typeof api[action.method] === 'function') {
                 recordUsage(id);
                 const result = await api[action.method]();
-                if (result === false && action.fallbackUrl) { savePendingModuleAction(id, actionId); navigateForPendingAction(action.fallbackUrl); return; }
+                if (result === false && action.fallbackUrl) { location.href = action.fallbackUrl; return; }
                 if (isPanelAction) closeHub(); else setTimeout(openHub, 100);
                 return;
             }
-            if (action.fallbackUrl) { savePendingModuleAction(id, actionId); recordUsage(id); navigateForPendingAction(action.fallbackUrl); return; }
+            if (action.fallbackUrl) { recordUsage(id); location.href = action.fallbackUrl; return; }
             if (isPanelAction && script.fallbackOpen()) { recordUsage(id); closeHub(); return; }
             alert(script.name + ' is not available on this page.');
         } catch (error) {
@@ -1902,14 +1690,7 @@
 
     function queueEnsure() {
         if (observerTimer) clearTimeout(observerTimer);
-        observerTimer = setTimeout(() => {
-            observerTimer = null;
-            ensureEverything();
-            if (document.getElementById(IDS.panel)) {
-                renderList();
-                renderMainStats();
-            }
-        }, 300);
+        observerTimer = setTimeout(() => { observerTimer = null; ensureEverything(); }, 300);
     }
 
     function startObserver() {
@@ -1931,7 +1712,7 @@
     window.dispatchEvent(new CustomEvent('SakaLuX:ScriptHubReady', { detail: { version: VERSION } }));
     window.addEventListener('SakaLuX:EnhancerGuardReady', () => { queueEnsure(); renderList(); renderMainStats(); });
     window.addEventListener('SakaLuX:BazaarThankerReady', () => { queueEnsure(); renderList(); renderMainStats(); });
-    window.addEventListener('SakaLuX:MissionRewardsReady', () => { queueEnsure(); renderList(); renderMainStats(); setTimeout(() => retryPendingModuleAction(), 100); });
+    window.addEventListener('SakaLuX:MissionRewardsReady', () => { queueEnsure(); renderList(); renderMainStats(); });
     window.addEventListener('SakaLuX:MarketIntelligenceReady', () => { queueEnsure(); renderList(); renderMainStats(); });
 
     async function init() {
@@ -1939,15 +1720,7 @@
         startLanguageObserver();
         ensureEverything();
         startObserver();
-        setInterval(() => {
-            if (document.getElementById(IDS.panel)) {
-                renderList();
-                renderMainStats();
-                updateBadge();
-            }
-        }, 2500);
         await loadRegistry(false);
-        setTimeout(() => retryPendingModuleAction(), 350);
         setTimeout(ensureEverything, 700);
         setTimeout(ensureEverything, 1800);
         setTimeout(ensureEverything, 4000);
