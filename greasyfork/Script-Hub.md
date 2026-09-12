@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-1.9.27
+1.9.28
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-Update checks now distinguish **registry/source development versions** from versions actually published on Greasy Fork. **UPDATE AVAILABLE** is shown only when the configured Greasy Fork `meta.js` exposes a newer installable version. When `scripts.json` is ahead of Greasy Fork, Hub shows **PUBLISH PENDING** instead of repeatedly asking the user to install an unavailable release.
+Hub v1.9.28 fixes installed-version detection and the Bazaar false-update loop. Live module bridge/API/standalone version data is now preferred over stale localStorage markers. All five offline fallback-registry versions are synchronized with `scripts.json`, and Bazaar Thanker v5.3.19 reports one consistent version everywhere.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -31,7 +31,7 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 ### Registered complementary add-ons
 
 - 🛡️ SakaLuX Enhancer Guard **v1.3.28**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.18**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.19**
 - 🎯 SakaLuX Mission Rewards **v1.0.16**
 - 📈 SakaLuX Market Intelligence **v1.17.16**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.28**
@@ -49,6 +49,12 @@ All Rights Reserved
 Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
 
 ## Release history
+### v1.9.28 — Installed version authority fix
+
+- Prefers live bridge/API/standalone module versions before persistent installation markers.
+- Synchronizes all five Hub fallback versions with `scripts.json`.
+- Fixes Bazaar v5.3.18 internally reporting v5.3.17 by releasing synchronized v5.3.19.
+
 ### v1.9.27 — Published release-aware updates
 
 - Uses the configured Greasy Fork `meta.js` version as the installable update source.
