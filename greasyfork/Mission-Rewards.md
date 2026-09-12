@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.0.18** is restored as the active stable release. This is the confirmed-working Mission Rewards build from before the experimental TornTools-inspired Mission Guide integration.
+**v1.0.18** is the active stable Mission Rewards release restored from before the experimental Mission Guide integration.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.

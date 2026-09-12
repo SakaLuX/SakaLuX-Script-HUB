@@ -27,7 +27,7 @@
 
 ## Current release note
 
-**v1.3.29** removes the standalone floating Elimination launcher. The full panel remains available from Script Hub and Standalone Dock through the module bridge/API.
+**v1.3.30** is the current Elimination Assistant release. Its panel stays above the shared standalone dock and remains accessible through Script Hub / standalone dock without a separate floating launcher.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant together with the rest of the SakaLuX add-ons and to use the shared Hub Torn API key when available.

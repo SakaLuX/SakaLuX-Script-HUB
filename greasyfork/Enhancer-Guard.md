@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.3.29** removes the standalone floating launcher button from Enhancer Guard. The panel remains fully accessible from SakaLuX Script Hub and the standalone SakaLuX dock through the module bridge/API.
+**v1.3.30** is the current Enhancer Guard release. Its panel stays above the shared standalone dock and remains accessible through Script Hub / standalone dock without a separate floating launcher.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard together with the rest of the SakaLuX add-ons and to use shared Hub integration where available.

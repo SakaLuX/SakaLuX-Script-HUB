@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.20** removes the standalone floating settings launcher. Settings remain available from Script Hub and Standalone Dock through the module bridge/API.
+**v5.3.21** is the current Bazaar Thanker release. Its panel stays above the shared standalone dock, while settings remain accessible through Script Hub or the standalone dock without a separate floating launcher.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.
