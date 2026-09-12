@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.11
+// @version      1.9.12
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,14 +31,24 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.11';
+    const VERSION = '1.9.12';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
+    const LOCALES_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/locales.json';
     const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,money,travel,equipment,inventory,battlestats,ammo&torn=items,elimination,eliminationteam&market=itemmarket';
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.12',
+            date: '2026-09-12',
+            changes: [
+                'Made English the guaranteed standalone default for every SakaLuX script.',
+                'Added an extensible locale registry loaded by Hub with bundled English/Romanian fallback.',
+                'Language options are now generated from the registry so future languages require no UI code changes.'
+            ]
+        },
         {
             version: '1.9.11',
             date: '2026-09-12',
@@ -158,6 +168,7 @@
         usage: 'SakaLuX_HUB_USAGE_V16',
         updates: 'SakaLuX_HUB_UPDATES_V16',
         registry: 'SakaLuX_HUB_REGISTRY_V18',
+        locales: 'SakaLuX_HUB_LOCALES_V1',
         modulePower: 'SakaLuX_HUB_MODULE_POWER_V19',
         apiKey: 'SakaLuX_HUB_TORN_API_KEY'
     };
@@ -175,7 +186,7 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.19',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.20',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -309,15 +320,33 @@
         'Employee':'Angajat','Director':'Director','Overview':'Prezentare','Position':'Poziție','Growth':'Creștere','Advice':'Sfaturi',
         'Offers':'Oferte','Trains':'Antrenamente','Company':'Companie','Compact PDA mode':'Mod compact PDA',
         'Mission Rewards':'Recompense misiuni','Item Market':'Piața de obiecte','Travel':'Călătorii','Profile':'Profil',
-        'No data':'Nu există date','Loading':'Se încarcă','Error':'Eroare','Cancel':'Anulează','Delete':'Șterge','Export':'Exportă','Import':'Importă'
+        'No data':'Nu există date','Loading':'Se încarcă','Error':'Eroare','Cancel':'Anulează','Delete':'Șterge','Export':'Exportă','Import':'Importă',
+        'Not Owned':'Nu deții','Add-ons':'Extensii','Check':'Verifică','Update':'Actualizează','Health':'Stare sistem','New':'Noutăți',
+        'Send Money':'Trimite bani','Send Items':'Trimite obiecte','System Check':'Verificare sistem','Diagnostics':'Diagnosticare',
+        'Actions':'Acțiuni','Attack':'Atacă','Calibrate':'Calibrează','Calibrate Me':'Calibrează-mă','Check Access':'Verifică accesul',
+        'Check API Access':'Verifică accesul API','Clear':'Șterge','Clear All':'Șterge tot','Clear All Protections':'Șterge toate protecțiile',
+        'Clear Captured Messages':'Șterge mesajele capturate','Clear Local API Key':'Șterge cheia API locală','Clear Local Key':'Șterge cheia locală',
+        'Clear Local Torn Key':'Șterge cheia Torn locală','Clear Travel History':'Șterge istoricul călătoriilor','Copy All Safe':'Copiază toate țintele sigure',
+        'Details':'Detalii','Export CSV':'Exportă CSV','Export Report CSV':'Exportă raportul CSV','Export Safe':'Exportă țintele sigure',
+        'Export Targets':'Exportă țintele','Fix API Key':'Repară cheia API','Load':'Încarcă','Load Next':'Încarcă următorul','Loaded':'Încărcat',
+        'Loss':'Înfrângere','Not Now':'Nu acum','Open FFScouter':'Deschide FFScouter','Operations':'Operațiuni','Original Event':'Eveniment original',
+        'Refresh Page Data':'Reîmprospătează datele paginii','Remove':'Elimină','Reset Settings':'Resetează setările','Roster...':'Listă membri...',
+        'Safe + Risky':'Sigur + riscant','Save Key':'Salvează cheia','Save Manual BS':'Salvează BS manual','Save New API Key':'Salvează cheia API nouă',
+        'Save Values':'Salvează valorile','Staff':'Personal','Sync Now':'Sincronizează acum','Targets':'Ținte','Test & Refresh':'Testează și reîmprospătează',
+        'Time':'Timp','Torn API Access':'Acces API Torn','Unavailable':'Indisponibil','Unlock':'Deblochează','Volatility':'Volatilitate',
+        'Wait':'Așteaptă','Waiting for Profile':'Se așteaptă profilul','Win':'Victorie','Capture Current Message':'Capturează mesajul curent',
+        'Install Hub':'Instalează Hub-ul','Create Required API Key':'Creează cheia API necesară','Create Market Intelligence API Key':'Creează cheia API Market Intelligence',
+        'You have no protected items.':'Nu ai obiecte protejate.','Clear all protections':'Șterge toate protecțiile'
     };
-    const UI_EN = Object.fromEntries(Object.entries(UI_RO).map(([en, ro]) => [ro, en]));
-    function language(){return settings.language==='ro'?'ro':'en'}
+    let LOCALES={en:{label:'English',translations:{}},ro:{label:'Română',translations:UI_RO}};
+    function language(){return LOCALES[settings.language]?settings.language:'en'}
+    function mergeLocaleRegistry(data){if(!data||!data.locales||!data.locales.en)return false;for(const [code,locale] of Object.entries(data.locales)){if(!locale||typeof locale!=='object'||typeof locale.label!=='string'||!locale.translations||typeof locale.translations!=='object')continue;LOCALES[code]={label:locale.label,translations:locale.translations}}return true}
+    async function loadLocaleRegistry(){const cached=loadJson(STORAGE.locales,null);mergeLocaleRegistry(cached);try{const data=JSON.parse(await httpGet(LOCALES_URL+'?v='+Date.now()));if(mergeLocaleRegistry(data))saveJson(STORAGE.locales,data)}catch(error){console.warn('[SakaLuX Hub] Locale registry fallback:',error?.message||error)}if(!LOCALES[settings.language]){settings.language='en';saveJson(STORAGE.settings,settings)}}
     function translateValue(value, lang=language()){
         const raw=String(value??''),lead=raw.match(/^\s*/)?.[0]||'',trail=raw.match(/\s*$/)?.[0]||'',key=raw.trim();
-        if(!key)return raw;const map=lang==='ro'?UI_RO:UI_EN;let translated=map[key];if(translated===undefined){const hit=Object.entries(map).find(([source])=>source.toLowerCase()===key.toLowerCase());translated=hit?.[1]}if(translated===undefined)return raw;if(key===key.toUpperCase())translated=translated.toUpperCase();return lead+translated+trail;
+        if(!key)return raw;let canonical=key;for(const locale of Object.values(LOCALES)){const hit=Object.entries(locale.translations||{}).find(([,translated])=>String(translated).toLowerCase()===key.toLowerCase());if(hit){canonical=hit[0];break}}const map=LOCALES[lang]?.translations||{};let translated=lang==='en'?canonical:map[canonical];if(translated===undefined){const hit=Object.entries(map).find(([source])=>source.toLowerCase()===canonical.toLowerCase());translated=hit?.[1]}if(translated===undefined)return raw;if(key===key.toUpperCase())translated=String(translated).toUpperCase();return lead+translated+trail;
     }
-    function isSakaLuXNode(node){const el=node?.nodeType===1?node:node?.parentElement;if(!el)return false;return !!el.closest('[id^="sakalux"],[id^="sl-"],[id^="slx-"],[id^="ci-"],[class*="sakalux"],[class^="sl-"],[class*=" sl-"],[class^="slx-"],[class*=" slx-"],[class^="ci-"],[class*=" ci-"]')}
+    function isSakaLuXNode(node){const el=node?.nodeType===1?node:node?.parentElement;if(!el)return false;return !!el.closest('[id^="sakalux"],[id^="sl-"],[id^="slx-"],[id^="ci-"],[id^="apm-"],[class*="sakalux"],[class^="sl-"],[class*=" sl-"],[class^="slx-"],[class*=" slx-"],[class^="ci-"],[class*=" ci-"],[class^="apm-"],[class*=" apm-"]')}
     function translateSakaLuX(root=document){
         const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;
         while((node=walker.nextNode()))if(isSakaLuXNode(node)&&!node.parentElement?.matches('script,style,textarea'))node.nodeValue=translateValue(node.nodeValue);
@@ -1334,7 +1363,7 @@
             ${settingSwitch('slhs-hide', 'Hide individual script buttons', 'Keep each add-on launcher hidden while Hub manages access.', settings.hideIndividualButtons)}
             ${settingSwitch('slhs-topbar', 'Torn-native HUB launcher', 'Show the blinking skull HUB entry before Messages when Torn navigation is available.', settings.showTopbarSkull)}
             ${settingSwitch('slhs-auto', 'Automatic update checks', 'Check published add-on versions automatically while the Hub is running.', settings.autoCheckUpdates)}
-            <div class="slh-settings-pair"><div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div><div class="slh-setting">Language<select id="slhs-language"><option value="en">English</option><option value="ro">Română</option></select></div></div>
+            <div class="slh-settings-pair"><div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div><div class="slh-setting">Language<select id="slhs-language">${Object.entries(LOCALES).map(([code,locale])=>`<option value="${escapeHtml(code)}">${escapeHtml(locale.label)}</option>`).join('')}</select></div></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
             <div class="slh-setting"><b>🔑 SHARED SAKALUX TORN API KEY</b><div style="margin-top:4px;color:#8fa0b3">One key for Enhancer Guard, Mission Rewards, Market Intelligence and Elimination Assistant. Bazaar Thanker does not require a Torn API key.</div><div id="slhs-api-status" style="margin-top:6px;color:${getSharedApiKey() ? '#72d6a2' : '#e7c675'}">${getSharedApiKey() ? '✅ Shared key saved' : '⚠️ No shared key saved'}</div><input id="slhs-api-key" type="password" autocomplete="off" placeholder="Paste the newly created Torn API key"><button class="slh-big-btn update" id="slhs-api-create">🔑 CREATE GENERAL API KEY</button><div class="slh-api-actions"><button class="slh-big-btn" id="slhs-api-save">SAVE & TEST</button><button class="slh-big-btn red" id="slhs-api-clear">CLEAR KEY</button></div></div>
             <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
@@ -1344,7 +1373,7 @@
         const size = document.getElementById('slhs-size');
         position.value = settings.buttonPosition;
         languageSelect.value = language();
-        languageSelect.onchange = function () { settings.language = this.value === 'ro' ? 'ro' : 'en'; saveJson(STORAGE.settings, settings); applyLanguage(); openSettings(); };
+        languageSelect.onchange = function () { settings.language = LOCALES[this.value] ? this.value : 'en'; saveJson(STORAGE.settings, settings); applyLanguage(); openSettings(); };
         size.oninput = function () { document.getElementById('slhs-size-label').textContent = this.value + 'px'; };
         bindSettingToggle('slhs-hide');
         bindSettingToggle('slhs-topbar');
@@ -1366,7 +1395,7 @@
             settings.showTopbarSkull = settingToggleValue('slhs-topbar');
             settings.autoCheckUpdates = settingToggleValue('slhs-auto');
             settings.buttonPosition = position.value;
-            settings.language = languageSelect.value === 'ro' ? 'ro' : 'en';
+            settings.language = LOCALES[languageSelect.value] ? languageSelect.value : 'en';
             settings.buttonSize = Number(size.value);
             delete settings.longPressQuickMenu;
             saveJson(STORAGE.settings, settings);
@@ -1424,7 +1453,7 @@
     window.SakaLuXScriptHub = {
         id: 'script-hub', name: 'SakaLuX Script Hub', version: VERSION, ready: true,
         open: () => { openHub(); return true; }, getApiKey: getSharedApiKey, setApiKey: setSharedApiKey,
-        getLanguage: language, setLanguage: value => { settings.language=value==='ro'?'ro':'en';saveJson(STORAGE.settings,settings);applyLanguage();return settings.language; },
+        getLanguage: language, getLanguages:()=>Object.fromEntries(Object.entries(LOCALES).map(([code,locale])=>[code,locale.label])), setLanguage: value => { settings.language=LOCALES[value]?value:'en';saveJson(STORAGE.settings,settings);applyLanguage();return settings.language; },
         hasApiKey: () => Boolean(getSharedApiKey()), createRequiredTornKey: createSharedApiKey,
         refresh: async () => { await refreshRegistryAndCheck(); return true; },
         health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)) })
@@ -1437,6 +1466,7 @@
     window.addEventListener('SakaLuX:MarketIntelligenceReady', () => { queueEnsure(); renderList(); renderMainStats(); });
 
     async function init() {
+        await loadLocaleRegistry();
         startLanguageObserver();
         ensureEverything();
         startObserver();
