@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.12**
+**v1.17.13**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -21,8 +21,7 @@
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 
 ## Current release note
-Standalone Dock v3 is smaller and cleaner, opens from a native gold S icon mounted after Torn cash, removes the + control, uses a compact fallback S only when the native status bar is unavailable, and keeps the shared Hub reminder limited to once every 12 hours.
-
+Refined standalone dock with centered typography, compact premium styling, balanced icon/name alignment and a subtler Hub install action. The native S launcher remains the only primary dock toggle when available; the shared Hub reminder remains limited to once every 12 hours.
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence together with the rest of the SakaLuX add-ons, use shared Hub integration and access its quick actions from one place.
 

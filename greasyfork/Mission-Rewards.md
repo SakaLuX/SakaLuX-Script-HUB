@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.12**
+**v1.0.13**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -18,8 +18,7 @@
 - Keeps Mission-specific scanning inactive outside the Missions page.
 
 ## Current release note
-Standalone Dock v3 is smaller and cleaner, opens from a native gold S icon mounted after Torn cash, removes the + control, uses a compact fallback S only when the native status bar is unavailable, and keeps the shared Hub reminder limited to once every 12 hours.
-
+Refined standalone dock with centered typography, compact premium styling, balanced icon/name alignment and a subtler Hub install action. The native S launcher remains the only primary dock toggle when available; the shared Hub reminder remains limited to once every 12 hours.
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
 
