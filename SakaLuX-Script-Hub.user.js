@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.17
+// @version      1.9.18
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.17';
+    const VERSION = '1.9.18';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.18',
+            date: '2026-09-12',
+            changes: [
+                'Fixed the floating skull fallback so it is hidden whenever the native S status-bar launcher is mounted.',
+                'The floating skull now appears only when neither the S status-bar launcher nor the Fly-out HUB skull is available.',
+                'Keeps the Fly-out HUB skull before Messages when that navigation bar is present.'
+            ]
+        },
         {
             version: '1.9.17',
             date: '2026-09-12',
@@ -1034,8 +1043,10 @@
     function syncFloatingButtonVisibility() {
         const button = document.getElementById(IDS.button);
         if (!button) return;
+        const statusReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.topSkull));
         const flyoutReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.navSkull));
-        button.style.setProperty('display', flyoutReady ? 'none' : 'flex', 'important');
+        const nativeReady = statusReady || flyoutReady;
+        button.style.setProperty('display', nativeReady ? 'none' : 'flex', 'important');
     }
 
     function createTopbarSkull() {
@@ -1587,7 +1598,7 @@
         getLanguage: language, getLanguages:()=>Object.fromEntries(Object.entries(LOCALES).map(([code,locale])=>[code,locale.label])), setLanguage: value => { settings.language=LOCALES[value]?value:'en';saveJson(STORAGE.settings,settings);applyLanguage();return settings.language; },
         hasApiKey: () => Boolean(getSharedApiKey()), createRequiredTornKey: createSharedApiKey,
         refresh: async () => { await refreshRegistryAndCheck(); return true; },
-        health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)), flyoutHubLauncher: Boolean(document.getElementById(IDS.navSkull)), floatingFallback: !Boolean(document.getElementById(IDS.navSkull)) })
+        health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)), flyoutHubLauncher: Boolean(document.getElementById(IDS.navSkull)), floatingFallback: !Boolean(document.getElementById(IDS.topSkull)) && !Boolean(document.getElementById(IDS.navSkull)) })
     };
 
     window.dispatchEvent(new CustomEvent('SakaLuX:ScriptHubReady', { detail: { version: VERSION } }));

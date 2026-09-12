@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.17**
+**v1.9.18**
 
 ## What it does
 
@@ -24,6 +24,12 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.18 — Floating fallback fix
+
+- Hides the floating skull whenever the native **S** launcher is present in Torn `statusIcons`.
+- Keeps the Fly-out **HUB** skull before Messages when that navigation bar is available.
+- Uses the floating skull only when neither native launcher can be mounted.
 
 ### v1.9.17 — Three-tier Torn launcher behavior
 
