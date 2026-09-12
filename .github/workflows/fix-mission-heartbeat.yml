@@ -1,0 +1,38 @@
+name: One-time Mission Rewards heartbeat fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-mission-heartbeat.yml'
+      - '.migration/fix-mission-heartbeat.py'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply fix
+        run: python .migration/fix-mission-heartbeat.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Script-Hub.user.js
+          python -m json.tool scripts.json >/dev/null
+          grep -q '@version      1.1.3' SakaLuX-Mission-Rewards.user.js
+          grep -q "const VERSION = '1.1.3';" SakaLuX-Mission-Rewards.user.js
+          grep -q 'SakaLuX_HUB_HEARTBEAT_mission-rewards' SakaLuX-Mission-Rewards.user.js
+          grep -q '@version      1.9.41' SakaLuX-Script-Hub.user.js
+          grep -q 'function getFreshHeartbeat' SakaLuX-Script-Hub.user.js
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Mission-Rewards.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/Mission-Rewards.md greasyfork/Script-Hub.md
+          git commit -m 'Fix Mission Rewards live detection [skip ci]'
+          git push
