@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.17.17** removes the standalone floating launcher button from Market Intelligence. The panel remains fully accessible from SakaLuX Script Hub and the standalone SakaLuX dock through the module bridge/API.
+**v1.17.18** is the current Market Intelligence release. Its panel stays above the shared standalone dock and remains accessible through Script Hub / standalone dock without a separate floating launcher.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence together with the rest of the SakaLuX add-ons, use shared Hub integration and access its quick actions from one place.

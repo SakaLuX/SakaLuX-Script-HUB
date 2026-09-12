@@ -1,6 +1,6 @@
 # 🧰 SakaLuX Suite [EXPERIMENTAL]
 
-> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+> Standalone experimental SakaLuX toolkit. Not registered in SakaLuX Script Hub.
 
 ## Current version
 **v0.9.912**
@@ -36,7 +36,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - `Alt + F` shortcut for opening the control interface.
 
 ## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
+
+**v0.9.912** is the current experimental Suite build. Suite remains standalone and intentionally outside the Script Hub registry.
 
 ## Recommended
 Use SakaLuX Suite if you prefer a single experimental all-in-one userscript instead of managing several independent helper scripts.

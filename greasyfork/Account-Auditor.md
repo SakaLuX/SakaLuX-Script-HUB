@@ -1,6 +1,6 @@
 # 🔎 SakaLuX Account Auditor
 
-> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+> Standalone SakaLuX account-auditing tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
 **v1.2.6**
@@ -17,7 +17,8 @@
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
+
+**v1.2.6** is the current standalone Account Auditor release. It keeps the shared standalone SakaLuX dock/install-reminder behavior while remaining outside the Script Hub registry.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and **Contents: read/write** permission.

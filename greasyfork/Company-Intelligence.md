@@ -1,9 +1,9 @@
 # SakaLuX Company Intelligence
 
-> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+> Standalone SakaLuX company-intelligence tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-v1.8.1
+**v1.8.3**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -18,7 +18,8 @@ v1.8.1
 - Company timeline, report export, diagnostics and actionable advice.
 
 ## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
+
+**v1.8.3** is the current Company Intelligence build. The information page is synchronized to the userscript metadata; Company Intelligence remains a standalone tool and is not registered in the Script Hub module registry.
 
 ## Recommended
 - Use the API-key button to create a key with the displayed selections.
