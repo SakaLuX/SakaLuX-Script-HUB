@@ -1,4 +1,4 @@
-name: Apply SakaLuX Standalone Dock
+name: Finalize SakaLuX coordinated release
 
 on:
   workflow_dispatch:
@@ -10,27 +10,48 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: sakalux-coordinated-release
+  cancel-in-progress: true
+
 jobs:
-  apply:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout latest main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
-      - name: Apply standalone dock and 12-hour Hub reminder
+      - name: Sync versions, dock, registry and release information
         run: python3 tools/apply_standalone_dock.py
 
-      - name: Commit changes
+      - name: Remove one-time migration files
         shell: bash
         run: |
-          if git diff --quiet; then
-            echo "No userscript changes required."
-            exit 0
-          fi
+          rm -f tools/apply_standalone_dock.py
+          rm -f .github/workflows/apply-standalone-dock.yml
+
+      - name: Validate JavaScript and JSON before release
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in ./*.user.js; do
+            node --check "$file"
+          done
+          python3 -m json.tool scripts.json >/dev/null
+
+      - name: Commit coordinated release
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- '*.user.js'
-          git commit -m "Unify standalone dock and 12-hour Hub reminder"
-          git push
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No release changes required."
+            exit 0
+          fi
+          git commit -m "Release standalone dock and 12-hour Hub reminders"
+          git push origin HEAD:main
