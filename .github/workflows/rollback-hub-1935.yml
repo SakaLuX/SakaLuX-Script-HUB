@@ -1,0 +1,42 @@
+name: Roll back Hub to 1.9.35
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rollback-hub-1935.yml'
+      - '.migration/rollback-hub-1935-keep-mr120.py'
+
+permissions:
+  contents: write
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Roll back Hub only
+        run: python .migration/rollback-hub-1935-keep-mr120.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Script-Hub.user.js
+          grep -q '^// @version      1.9.35$' SakaLuX-Script-Hub.user.js
+          grep -q "const VERSION = '1.9.35';" SakaLuX-Script-Hub.user.js
+          ! grep -q "version: '1.9.36'" SakaLuX-Script-Hub.user.js
+          python -m json.tool scripts.json >/dev/null
+          python - <<'PY'
+          import json
+          d=json.load(open('scripts.json'))
+          r=next(x for x in d['scripts'] if x['id']=='mission-rewards')
+          assert r['version']=='1.2.0',r
+          print('Mission Rewards stays',r['version'])
+          PY
+      - name: Commit rollback
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Roll back Script Hub to v1.9.35 [skip ci]'
+          git push
