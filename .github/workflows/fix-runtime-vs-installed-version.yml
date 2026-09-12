@@ -1,0 +1,35 @@
+name: One-time runtime vs installed version fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-runtime-vs-installed-version.yml'
+      - '.migration/fix-runtime-vs-installed-version.py'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply fix
+        run: python .migration/fix-runtime-vs-installed-version.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Script-Hub.user.js
+          grep -q '@version      1.9.38' SakaLuX-Script-Hub.user.js
+          grep -q "const VERSION = '1.9.38';" SakaLuX-Script-Hub.user.js
+          grep -q 'RUNNING v' SakaLuX-Script-Hub.user.js
+          grep -q 'runtimeReloadAlreadyTried' SakaLuX-Script-Hub.user.js
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md
+          git commit -m 'Clarify running module versions and verify reload [skip ci]'
+          git push
