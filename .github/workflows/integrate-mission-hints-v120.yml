@@ -1,0 +1,57 @@
+name: Integrate Mission Hints v1.2.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/integrate-mission-hints-v120.yml'
+      - '.migration/integrate-mission-hints-v120.py'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Integrate Mission Hints
+        run: python .migration/integrate-mission-hints-v120.py
+      - name: Validate Mission Rewards and Hub
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Script-Hub.user.js
+          python -m json.tool scripts.json >/dev/null
+          grep -q '^// @version      1.2.0$' SakaLuX-Mission-Rewards.user.js
+          grep -q "const VERSION = '1.2.0';" SakaLuX-Mission-Rewards.user.js
+          grep -q 'SAKALUX_MISSION_HINTS_V120_BEGIN' SakaLuX-Mission-Rewards.user.js
+          grep -q 'window.SakaLuXMissionHints' SakaLuX-Mission-Rewards.user.js
+          grep -q '^// @version      1.9.36$' SakaLuX-Script-Hub.user.js
+          grep -q "const VERSION = '1.9.36';" SakaLuX-Script-Hub.user.js
+          python - <<'PY'
+          import json
+          d=json.load(open('scripts.json'))
+          row=next(x for x in d['scripts'] if x['id']=='mission-rewards')
+          assert row['version']=='1.2.0',row
+          assert 'task and hint' in row['description'].lower(),row
+          print('Mission Rewards registry OK:',row['version'])
+          PY
+          if grep -qi 'violentmonkey' SakaLuX-Mission-Rewards.user.js; then
+            echo 'ERROR: Violentmonkey text found in Mission Rewards'
+            exit 1
+          fi
+      - name: Commit integrated release
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Mission-Rewards.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/Mission-Rewards.md greasyfork/Script-Hub.md
+          if git diff --cached --quiet; then
+            echo 'No changes required.'
+            exit 0
+          fi
+          git commit -m 'Integrate Mission Hints safely into Mission Rewards v1.2.0 [skip ci]'
+          git push
