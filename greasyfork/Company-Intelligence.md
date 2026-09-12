@@ -4,12 +4,13 @@ Complementary add-on for SakaLuX Script Hub, designed for Torn PDA, Tampermonkey
 
 ## Current version
 
-v1.7.1
+v1.8.0
 
 ## What it does
 
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
 - Employee dashboard, work-stat position advisor, train tracking, offer comparison and history.
+- Employee Progress with work-stat changes, train compliance and 30/90-day projections.
 - Company Growth Center with daily snapshots, Sunday rating countdown and honest star outlook.
 - Director staff overview, effectiveness/position optimizer and actionable employee flags.
 - Smart training rotation, training debt and per-employee training history.
@@ -20,6 +21,12 @@ v1.7.1
 
 ## Current release notes
 
+- Added reliable per-selection API v2 to classic API fallback for Basic, Job, Work Stats and Profile.
+- Fixed missing Employee position and stopped the Position tab from surfacing transient backend errors when classic fallback succeeds.
+- Added Employee Progress with observed work-stat pace and promised/received train tracking.
+- Added intraday metric history so Growth Signals no longer remain at a misleading `+0` after same-day refreshes.
+- Added a clear estimated Star Direction: `LIKELY STAR UP`, `STABLE` or `STAR LOSS RISK`.
+- Effectiveness now uses director employee data, job/profile data or the visible Torn page; otherwise it explains that Director data is required.
 - Fixed Advice, Offers and Trains navigation resetting the panel position on TornPDA.
 - Prevented Company Intelligence buttons from being interpreted as Torn page form actions.
 - Removed the combined Modules card from Employee Overview and kept the module summary in Director Overview.
