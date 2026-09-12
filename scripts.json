@@ -7,7 +7,7 @@
       "name": "Enhancer Guard",
       "icon": "🛡️",
       "category": "Inventory",
-      "version": "1.3.18",
+      "version": "1.3.19",
       "description": "Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.",
       "greasyForkId": "592698",
       "metaUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
