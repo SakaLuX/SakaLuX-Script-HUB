@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.16**
+**v1.17.17**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.17.16** fixes Hub/standalone detection for the current SakaLuX launchers. When Script Hub is installed, Market Intelligence recognizes the native **S** status-bar launcher, the Fly-out **HUB** launcher and the Hub-active page marker, so the standalone dock and **Install SakaLuX Hub** prompt do not appear at the same time as Hub.
+**v1.17.17** removes the standalone floating launcher button from Market Intelligence. The panel remains fully accessible from SakaLuX Script Hub and the standalone SakaLuX dock through the module bridge/API.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence together with the rest of the SakaLuX add-ons, use shared Hub integration and access its quick actions from one place.
