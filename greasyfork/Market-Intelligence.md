@@ -2,13 +2,10 @@
 
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
-Complementary add-on for SakaLuX Script Hub.
-
 ## Current version
 **v1.17.10**
 
 ## What it does
-
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
 - Adds Item Market Intelligence with live/cached price information, local price history, trend data and BUY NOW / FAIR / WAIT / LEARNING signals.
 - Includes Bazaar Flip Intelligence with estimated net profit and ROI.
@@ -23,8 +20,33 @@ Complementary add-on for SakaLuX Script Hub.
 - Exposes `window.SakaLuXMarketIntelligence` for SakaLuX Script Hub integration and quick actions.
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 
-## Current release notes
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
 
+## Recommended
+Install **SakaLuX Script Hub** to manage Market Intelligence together with the rest of the SakaLuX add-ons, use shared Hub integration and access its quick actions from one place.
+
+## License
+All Rights Reserved
+
+## Privacy
+Market Intelligence is local-first. Settings, market cache, watchlist, stock history, item catalogue, price history, travel sessions, loadout cache and Price Network queue/consensus data are stored locally in browser/TornPDA storage.
+
+The module can request data from:
+
+- `api.torn.com` for Torn market/player/travel/equipment information required by enabled features.
+- `yata.yt` for public abroad travel stock and buy-price information.
+
+The optional **SakaLuX Price Network** is **disabled by default** and has no default endpoint configured. If a user explicitly enables it and configures an endpoint, the client may submit anonymous market observations containing item ID, observed market price, timestamp and source. It is designed not to include Torn ID, username, API key, device ID or cookies in those observation payloads.
+
+## Important
+All displayed prices, profits, ROI values, arrival-stock estimates, restock predictions, basket recommendations, Museum comparisons and loadout verdicts are decision-support estimates. Market prices, foreign stock and player equipment can change after the latest scan.
+
+The script does **not** automatically purchase, sell, travel, trade or attack. Always verify Torn's final values before committing money or items.
+
+Arrival/restock prediction learns from observations made while the script is active. Until enough history exists, predictions may be labelled **LEARNING** or lower-confidence and should not be treated as guaranteed future stock.
+
+## Release history
 ### v1.17.8 — Violentmonkey Hub bridge
 
 - Added an isolated-context DOM bridge so Script Hub can detect, open and switch Market Intelligence ON/OFF in Violentmonkey.
@@ -74,32 +96,3 @@ Complementary add-on for SakaLuX Script Hub.
 - OFF disconnects the DOM/route observer, cancels scheduled scans and removes injected Market Intelligence panels.
 - ON restores observation, scanning and configured background services without reloading Torn.
 - Automatically prefers the shared Hub key while keeping its standalone required-key creator and local fallback key.
-
-## Recommended
-
-Install **SakaLuX Script Hub** to manage Market Intelligence together with the rest of the SakaLuX add-ons, use shared Hub integration and access its quick actions from one place.
-
-## Privacy
-
-Market Intelligence is local-first. Settings, market cache, watchlist, stock history, item catalogue, price history, travel sessions, loadout cache and Price Network queue/consensus data are stored locally in browser/TornPDA storage.
-
-The module can request data from:
-
-- `api.torn.com` for Torn market/player/travel/equipment information required by enabled features.
-- `yata.yt` for public abroad travel stock and buy-price information.
-
-The optional **SakaLuX Price Network** is **disabled by default** and has no default endpoint configured. If a user explicitly enables it and configures an endpoint, the client may submit anonymous market observations containing item ID, observed market price, timestamp and source. It is designed not to include Torn ID, username, API key, device ID or cookies in those observation payloads.
-
-## Important
-
-All displayed prices, profits, ROI values, arrival-stock estimates, restock predictions, basket recommendations, Museum comparisons and loadout verdicts are decision-support estimates. Market prices, foreign stock and player equipment can change after the latest scan.
-
-The script does **not** automatically purchase, sell, travel, trade or attack. Always verify Torn's final values before committing money or items.
-
-Arrival/restock prediction learns from observations made while the script is active. Until enough history exists, predictions may be labelled **LEARNING** or lower-confidence and should not be treated as guaranteed future stock.
-
-## License
-All Rights Reserved
-
-## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.

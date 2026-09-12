@@ -2,21 +2,32 @@
 
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
-Complementary add-on for SakaLuX Script Hub.
-
 ## Current version
 **v5.3.12**
 
 ## What it does
-
 - Detects Bazaar purchase events and groups purchases by buyer.
 - Generates thank-you messages with customizable Bazaar name and message text.
 - Includes buyer details, copy tools, big-buyer detection, statistics and history.
 - Exposes its status to SakaLuX Script Hub on all Torn pages while its working features remain limited to Events and Messages.
 - Works without a Torn API key.
 
-## Current release notes
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
 
+## Recommended
+Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.
+
+## License
+All Rights Reserved
+
+## Privacy
+Bazaar Thanker reads the Torn Events/Messages page in the browser and stores its settings, processed-event markers, generated-message state, statistics and history locally in browser/TornPDA storage. It does not require a Torn API key.
+
+## Important
+Generated thank-you text should be reviewed before sending. The script assists with preparing and organizing messages; the player remains responsible for the final message sent through Torn.
+
+## Release history
 ### v5.3.10 — Violentmonkey Hub bridge
 
 - Added an isolated-context DOM bridge so Script Hub can detect, open and switch Bazaar Thanker ON/OFF in Violentmonkey.
@@ -42,21 +53,3 @@ Complementary add-on for SakaLuX Script Hub.
 - Added a persistent installation marker for reliable Script Hub detection on PC.
 - Refreshed the Settings panel and floating Settings button with a cleaner professional TornPDA-style UI.
 - Fixed purchase messages to show the per-item price instead of the full batch total.
-
-## Recommended
-
-Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.
-
-## Privacy
-
-Bazaar Thanker reads the Torn Events/Messages page in the browser and stores its settings, processed-event markers, generated-message state, statistics and history locally in browser/TornPDA storage. It does not require a Torn API key.
-
-## Important
-
-Generated thank-you text should be reviewed before sending. The script assists with preparing and organizing messages; the player remains responsible for the final message sent through Torn.
-
-## License
-All Rights Reserved
-
-## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.

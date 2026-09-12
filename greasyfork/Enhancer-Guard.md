@@ -2,13 +2,10 @@
 
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
-Complementary add-on for SakaLuX Script Hub.
-
 ## Current version
 **v1.3.22**
 
 ## What it does
-
 - Tracks Enhancers and Enhancer Relics in Torn.
 - Shows owned/missing status and quantities.
 - Uses Torn API v2.
@@ -18,8 +15,22 @@ Complementary add-on for SakaLuX Script Hub.
 - Supports full, partial-quantity and unlocked protection states.
 - Works with Torn PDA and Tampermonkey.
 
-## Current release notes
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
 
+## Recommended
+Install **SakaLuX Script Hub** to manage Enhancer Guard together with the rest of the SakaLuX add-ons and to use shared Hub integration where available.
+
+## License
+All Rights Reserved
+
+## Privacy
+Enhancer Guard stores its settings, protection state and cached interface data locally in the browser/TornPDA storage. Torn inventory and item information is requested from the Torn API using the active API key. The script does not need write permissions for Torn API access.
+
+## Important
+Item Protector is a client-side safety layer. Always verify Torn's final sell/send/trade screen before confirming a transaction involving valuable items.
+
+## Release history
 ### v1.3.20 — English standalone baseline
 
 - Removed the remaining hardcoded Romanian text from the standalone interface.
@@ -61,21 +72,3 @@ Complementary add-on for SakaLuX Script Hub.
 - Improved item-name detection across dynamically rendered TornPDA inventory layouts.
 - Improved live refresh of inventory badges after settings changes.
 - Removed the unused Enhancer-header lock control.
-
-## Recommended
-
-Install **SakaLuX Script Hub** to manage Enhancer Guard together with the rest of the SakaLuX add-ons and to use shared Hub integration where available.
-
-## Privacy
-
-Enhancer Guard stores its settings, protection state and cached interface data locally in the browser/TornPDA storage. Torn inventory and item information is requested from the Torn API using the active API key. The script does not need write permissions for Torn API access.
-
-## Important
-
-Item Protector is a client-side safety layer. Always verify Torn's final sell/send/trade screen before confirming a transaction involving valuable items.
-
-## License
-All Rights Reserved
-
-## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
