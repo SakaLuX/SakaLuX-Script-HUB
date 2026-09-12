@@ -10,7 +10,6 @@ if n!=1: raise SystemExit('Mission metadata version not found')
 s=s.replace("{version:'1.1.2'}","{version:'1.1.3'}",1)
 s=s.replace("const VERSION = '1.1.2';","const VERSION = '1.1.3';",1)
 
-# Add heartbeat constants near main constants.
 anchor="""    const HUB_PROMPT_ID = 'sakalux-hub-install-prompt';
     const REQUIRED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Mission%20Rewards&user=ammo&torn=items';
 """
@@ -22,7 +21,6 @@ insert="""    const HUB_PROMPT_ID = 'sakalux-hub-install-prompt';
 if anchor not in s: raise SystemExit('Mission constants anchor missing')
 s=s.replace(anchor,insert,1)
 
-# Add heartbeat helpers before isMissionsPage.
 anchor="""    function isMissionsPage() {
 """
 helper="""    let hubHeartbeatTimer = null;
@@ -50,7 +48,6 @@ helper="""    let hubHeartbeatTimer = null;
 if anchor not in s: raise SystemExit('Mission heartbeat anchor missing')
 s=s.replace(anchor,helper,1)
 
-# Keep heartbeat in sync with enabled changes.
 old="""        window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
         syncHubBridge('mission-rewards', state.enabled);
 """
@@ -61,7 +58,6 @@ new="""        window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsState
 if old not in s: raise SystemExit('Mission setEnabled anchor missing')
 s=s.replace(old,new,1)
 
-# Start heartbeat at init before anything page-specific.
 old="""    async function init() {
         try { localStorage.setItem('SakaLuX_Installed_mission-rewards', VERSION); } catch {}
         state.enabled = loadJson(STORAGE.enabled, true) !== false;
@@ -77,23 +73,17 @@ if old not in s: raise SystemExit('Mission init anchor missing')
 s=s.replace(old,new,1)
 p.write_text(s,encoding='utf-8')
 
-# scripts.json Mission version
 pj=ROOT/'scripts.json'; data=json.loads(pj.read_text(encoding='utf-8'))
 for item in data['scripts']:
     if item['id']=='mission-rewards': item['version']='1.1.3'
 pj.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-# Hub v1.9.41: fresh heartbeat fallback + rerender on DOM changes.
 h=ROOT/'SakaLuX-Script-Hub.user.js'; hs=h.read_text(encoding='utf-8')
 hs,n=re.subn(r'(^// @version\s+)1\.9\.40(\s*$)',r'\g<1>1.9.41\2',hs,count=1,flags=re.M)
 if n!=1: raise SystemExit('Hub metadata version missing')
 hs=hs.replace("const VERSION = '1.9.40';","const VERSION = '1.9.41';",1)
 hs=hs.replace("name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.2',","name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.3',",1)
-
-# Add heartbeat TTL constant.
 hs=hs.replace("    const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;","    const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;\n    const MODULE_HEARTBEAT_TTL = 10000;",1)
-
-# Changelog.
 needle='    const HUB_CHANGELOG = [\n'
 entry="""    const HUB_CHANGELOG = [
         {
@@ -107,8 +97,6 @@ entry="""    const HUB_CHANGELOG = [
         },
 """
 if "version: '1.9.41'" not in hs: hs=hs.replace(needle,entry,1)
-
-# Add heartbeat helper before getInstalledVersion.
 anchor='    function getInstalledVersion(script) {\n'
 helper="""    function getFreshHeartbeat(script) {
         try {
@@ -124,8 +112,6 @@ helper="""    function getFreshHeartbeat(script) {
 """
 if anchor not in hs: raise SystemExit('Hub getInstalledVersion anchor missing')
 hs=hs.replace(anchor,helper+anchor,1)
-
-# Add heartbeat fallback before return null in getInstalledVersion only.
 start=hs.index('    function getInstalledVersion(script) {')
 end=hs.index('\n    function ',start+10)
 block=hs[start:end]
@@ -135,8 +121,6 @@ if 'getFreshHeartbeat(script)' not in block:
         return null;
     }""",1)
     hs=hs[:start]+block+hs[end:]
-
-# getLiveEnabledState: add heartbeat before false.
 start=hs.index('    function getLiveEnabledState(script) {')
 end=hs.index('\n    function ',start+10)
 block=hs[start:end]
@@ -146,8 +130,6 @@ if 'getFreshHeartbeat(script)' not in block:
         return false;
     }""",1)
     hs=hs[:start]+block+hs[end:]
-
-# Rerender Hub when DOM modules change.
 old="""    function queueEnsure() {
         if (observerTimer) clearTimeout(observerTimer);
         observerTimer = setTimeout(() => { observerTimer = null; ensureEverything(); }, 300);
@@ -167,13 +149,12 @@ new="""    function queueEnsure() {
 """
 if old not in hs: raise SystemExit('Hub queueEnsure anchor missing')
 hs=hs.replace(old,new,1)
-
-# Poll heartbeat while hub exists/open so stale/fresh state updates without DOM mutations.
-init_anchor="""        startObserver();
-        ensureEverything();
+init_anchor="""        ensureEverything();
+        startObserver();
+        await loadRegistry(false);
 """
-init_new="""        startObserver();
-        ensureEverything();
+init_new="""        ensureEverything();
+        startObserver();
         setInterval(() => {
             if (document.getElementById(IDS.panel)) {
                 renderList();
@@ -181,12 +162,12 @@ init_new="""        startObserver();
                 updateBadge();
             }
         }, 2500);
+        await loadRegistry(false);
 """
 if init_anchor not in hs: raise SystemExit('Hub init polling anchor missing')
 hs=hs.replace(init_anchor,init_new,1)
 h.write_text(hs,encoding='utf-8')
 
-# Docs
 md=ROOT/'greasyfork/Mission-Rewards.md'; d=md.read_text(encoding='utf-8')
 d=d.replace('## Current version\n**v1.1.2**','## Current version\n**v1.1.3**',1)
 d=re.sub(r'## Current release notes\n[\s\S]*?(?=\n## Recommended)',"""## Current release notes
@@ -195,7 +176,6 @@ d=re.sub(r'## Current release notes\n[\s\S]*?(?=\n## Recommended)',"""## Current
 - Heartbeat carries the running version and enabled state and refreshes every two seconds.
 """,d,count=1)
 md.write_text(d,encoding='utf-8')
-
 hd=ROOT/'greasyfork/Script-Hub.md'; d=hd.read_text(encoding='utf-8')
 d=d.replace('## Current version\n**v1.9.40**','## Current version\n**v1.9.41**',1)
 d=re.sub(r'## Current release notes\n[\s\S]*?(?=\n## Recommended)',"""## Current release notes
@@ -204,5 +184,4 @@ d=re.sub(r'## Current release notes\n[\s\S]*?(?=\n## Recommended)',"""## Current
 - Open Hub cards/stats now re-render when module bridge/registration nodes change and while fresh heartbeat state changes.
 """,d,count=1)
 hd.write_text(d,encoding='utf-8')
-
 print('Applied Mission Rewards v1.1.3 + Hub v1.9.41 heartbeat detection fix')
