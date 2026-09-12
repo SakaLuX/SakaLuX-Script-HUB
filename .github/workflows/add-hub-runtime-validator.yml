@@ -1,0 +1,33 @@
+name: One-time add Hub runtime validator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/add-hub-runtime-validator.yml'
+      - '.migration/add-hub-runtime-validator.py'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Patch stable validator
+        run: python .migration/add-hub-runtime-validator.py
+      - name: Validate patched workflow
+        run: |
+          set -euo pipefail
+          grep -q 'Validate Hub runtime entrypoints' .github/workflows/validate-userscripts.yml
+      - name: Commit validator and self-clean
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add .github/workflows/validate-userscripts.yml
+          git rm .github/workflows/add-hub-runtime-validator.yml .migration/add-hub-runtime-validator.py
+          git commit -m 'Add permanent Hub runtime entrypoint validation'
+          git push
