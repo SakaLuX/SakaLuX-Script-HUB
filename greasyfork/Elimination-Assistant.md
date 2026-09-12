@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.18**
+**v1.3.19**
 
 ## What it does
 
@@ -28,6 +28,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.19 — Persistent target controls
+
+- TARGETS selections now survive panel close, page navigation and TornPDA restart.
+- SAFE, RISKY, ATTACKABLE and UNOPENED checkboxes are restored exactly as selected.
+- Player/ID search text and panel open state are also restored.
 
 ### v1.3.18 — Persistent SAFE Targets
 
