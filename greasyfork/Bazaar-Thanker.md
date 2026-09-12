@@ -14,7 +14,7 @@
 
 ## Current release note
 
-Made the S badge inside the standalone dock a real close control. Tapping the header S now closes the panel immediately while the native Torn S launcher continues to toggle the dock. Added button semantics, touch feedback and accessibility labels without changing the ultra-professional dock layout.
+**v5.3.18** fixes Hub/standalone detection for the current SakaLuX launchers. When Script Hub is installed, Bazaar Thanker recognizes the native **S** status-bar launcher, the Fly-out **HUB** launcher and the Hub-active page marker, so the standalone dock and **Install SakaLuX Hub** prompt do not appear at the same time as Hub.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.
@@ -29,6 +29,11 @@ Bazaar Thanker reads the Torn Events/Messages page in the browser and stores its
 Generated thank-you text should be reviewed before sending. The script assists with preparing and organizing messages; the player remains responsible for the final message sent through Torn.
 
 ## Release history
+### v5.3.18 — Hub detection fix
+
+- Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
+- Prevents the standalone dock/install prompt from appearing while Hub is installed.
+
 ### v5.3.14 — Compact native S standalone launcher
 
 - Smaller professional standalone dock.

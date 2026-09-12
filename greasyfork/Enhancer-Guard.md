@@ -17,7 +17,7 @@
 
 ## Current release note
 
-Made the S badge inside the standalone dock a real close control. Tapping the header S now closes the panel immediately while the native Torn S launcher continues to toggle the dock. Added button semantics, touch feedback and accessibility labels without changing the ultra-professional dock layout.
+**v1.3.28** fixes Hub/standalone detection for the current SakaLuX launchers. When Script Hub is installed, Enhancer Guard recognizes the native **S** status-bar launcher, the Fly-out **HUB** launcher and the Hub-active page marker, so the standalone dock and **Install SakaLuX Hub** prompt do not appear at the same time as Hub.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard together with the rest of the SakaLuX add-ons and to use shared Hub integration where available.
@@ -32,6 +32,11 @@ Enhancer Guard stores its settings, protection state and cached interface data l
 Item Protector is a client-side safety layer. Always verify Torn's final sell/send/trade screen before confirming a transaction involving valuable items.
 
 ## Release history
+### v1.3.28 — Hub detection fix
+
+- Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
+- Prevents the standalone dock/install prompt from appearing while Hub is installed.
+
 ### v1.3.24 — Compact native S standalone launcher
 
 - Smaller professional standalone dock.

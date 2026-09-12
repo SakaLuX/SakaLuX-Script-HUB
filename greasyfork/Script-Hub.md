@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-1.9.26
+1.9.27
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,18 +23,18 @@
 
 ## Current release note
 
-Made the S badge inside the standalone dock a real close control. Tapping the header S now closes the panel immediately while the native Torn S launcher continues to toggle the dock. Added button semantics, touch feedback and accessibility labels without changing the ultra-professional dock layout.
+Update checks now distinguish **registry/source development versions** from versions actually published on Greasy Fork. **UPDATE AVAILABLE** is shown only when the configured Greasy Fork `meta.js` exposes a newer installable version. When `scripts.json` is ahead of Greasy Fork, Hub shows **PUBLISH PENDING** instead of repeatedly asking the user to install an unavailable release.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
 
-- 🛡️ SakaLuX Enhancer Guard **v1.3.27**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.17**
-- 🎯 SakaLuX Mission Rewards **v1.0.15**
-- 📈 SakaLuX Market Intelligence **v1.17.15**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.27**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.28**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.18**
+- 🎯 SakaLuX Mission Rewards **v1.0.16**
+- 📈 SakaLuX Market Intelligence **v1.17.16**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.28**
 
 ## License
 All Rights Reserved
@@ -49,6 +49,12 @@ All Rights Reserved
 Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
 
 ## Release history
+### v1.9.27 — Published release-aware updates
+
+- Uses the configured Greasy Fork `meta.js` version as the installable update source.
+- Registry-ahead versions show **PUBLISH PENDING** and do not increase the update counter.
+- Removed the raw-GitHub-source update fallback that could leave TornPDA on the previous installed version.
+
 ### v1.9.22 — Standalone Dock v3 compatibility
 
 - Synced managed add-on versions for the compact standalone dock release.

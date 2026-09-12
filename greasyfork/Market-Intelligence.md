@@ -22,7 +22,7 @@
 
 ## Current release note
 
-Made the S badge inside the standalone dock a real close control. Tapping the header S now closes the panel immediately while the native Torn S launcher continues to toggle the dock. Added button semantics, touch feedback and accessibility labels without changing the ultra-professional dock layout.
+**v1.17.16** fixes Hub/standalone detection for the current SakaLuX launchers. When Script Hub is installed, Market Intelligence recognizes the native **S** status-bar launcher, the Fly-out **HUB** launcher and the Hub-active page marker, so the standalone dock and **Install SakaLuX Hub** prompt do not appear at the same time as Hub.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence together with the rest of the SakaLuX add-ons, use shared Hub integration and access its quick actions from one place.
@@ -48,6 +48,11 @@ The script does **not** automatically purchase, sell, travel, trade or attack. A
 Arrival/restock prediction learns from observations made while the script is active. Until enough history exists, predictions may be labelled **LEARNING** or lower-confidence and should not be treated as guaranteed future stock.
 
 ## Release history
+### v1.17.16 — Hub detection fix
+
+- Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
+- Prevents the standalone dock/install prompt from appearing while Hub is installed.
+
 ### v1.17.12 — Compact native S standalone launcher
 
 - Smaller professional standalone dock.
