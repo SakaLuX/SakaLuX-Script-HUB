@@ -5,14 +5,14 @@ ROOT=Path(__file__).resolve().parents[1]
 # 1) Hub: mark itself active and aggressively remove stale standalone dock UI.
 hub=ROOT/'SakaLuX-Script-Hub.user.js'
 text=hub.read_text(encoding='utf-8')
-text,n=re.subn(r'(^// @version\s+)1\.9\.18(\s*$)',r'\g<1>1.9.19\2',text,count=1,flags=re.M)
+text,n=re.subn(r'(^// @version\s+)1\.9\.25(\s*$)',r'\g<1>1.9.26\2',text,count=1,flags=re.M)
 if n!=1: raise SystemExit('hub metadata version')
-text,n=re.subn(r"const VERSION = '1\.9\.18';","const VERSION = '1.9.19';",text,count=1)
+text,n=re.subn(r"const VERSION\s*=\s*'1\.9\.25';","const VERSION = '1.9.26';",text,count=1)
 if n!=1: raise SystemExit('hub runtime version')
 needle="    const HUB_CHANGELOG = [\n"
 entry="""    const HUB_CHANGELOG = [
         {
-            version: '1.9.19',
+            version: '1.9.26',
             date: '2026-09-12',
             changes: [
                 'Fixes false standalone mode detection when the Hub is already installed.',
@@ -23,8 +23,9 @@ entry="""    const HUB_CHANGELOG = [
 """
 if needle not in text: raise SystemExit('hub changelog anchor')
 text=text.replace(needle,entry,1)
-anchor="    function ensureEverything() {\n"
-helper="""    function suppressStandaloneDock() {
+if 'function suppressStandaloneDock()' not in text:
+    anchor="    function ensureEverything() {\n"
+    helper="""    function suppressStandaloneDock() {
         try {
             document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
             document.body?.setAttribute('data-sakalux-hub-active', '1');
@@ -35,20 +36,13 @@ helper="""    function suppressStandaloneDock() {
     }
 
 """
-if anchor not in text: raise SystemExit('ensureEverything anchor')
-text=text.replace(anchor,helper+anchor,1)
-old="""    function ensureEverything() {
-        injectCss(); createTopbarSkull(); createNavSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
-    }
-"""
-new="""    function ensureEverything() {
-        suppressStandaloneDock();
-        injectCss(); createTopbarSkull(); createNavSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
-        suppressStandaloneDock();
-    }
-"""
-if old not in text: raise SystemExit('ensureEverything block')
-text=text.replace(old,new,1)
+    if anchor not in text: raise SystemExit('ensureEverything anchor')
+    text=text.replace(anchor,helper+anchor,1)
+# Ensure every Hub maintenance pass suppresses stale standalone UI.
+anchor="    function ensureEverything() {\n"
+if anchor not in text: raise SystemExit('ensureEverything function')
+if "    function ensureEverything() {\n        suppressStandaloneDock();\n" not in text:
+    text=text.replace(anchor,anchor+"        suppressStandaloneDock();\n",1)
 hub.write_text(text,encoding='utf-8')
 
 # 2) Add-ons: robust Hub presence detection across isolated userscript worlds.
@@ -68,9 +62,7 @@ for name,(oldv,newv) in files.items():
     s=s.replace(old_detector,new_detector,1)
     s,n=re.subn(rf'(^// @version\s+){re.escape(oldv)}(\s*$)',rf'\g<1>{newv}\2',s,count=1,flags=re.M)
     if n!=1: raise SystemExit(f'metadata version {name}')
-    # Standalone bootstrap SELF version near file start.
     s=s.replace("{version:'"+oldv+"'}","{version:'"+newv+"'}",1)
-    # Common runtime version constants if present.
     s=s.replace("const VERSION = '"+oldv+"';","const VERSION = '"+newv+"';",1)
     s=s.replace("const VERSION='"+oldv+"';","const VERSION='"+newv+"';",1)
     p.write_text(s,encoding='utf-8')
@@ -88,7 +80,7 @@ regp.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-
 
 # 4) Docs current versions + concise release note.
 docs={
- 'greasyfork/Script-Hub.md':('1.9.18','1.9.19','Standalone dock detection fix','Hub now marks Torn as Hub-active and removes stale standalone launcher/install UI from older add-ons.'),
+ 'greasyfork/Script-Hub.md':('1.9.25','1.9.26','Standalone dock detection fix','Hub now marks Torn as Hub-active and removes stale standalone launcher/install UI from older add-ons.'),
  'greasyfork/Enhancer-Guard.md':('1.3.27','1.3.28','Hub detection fix','Recognizes the current Hub S/Fly-out launchers and no longer opens standalone mode when Hub is installed.'),
  'greasyfork/Bazaar-Thanker.md':('5.3.17','5.3.18','Hub detection fix','Recognizes the current Hub S/Fly-out launchers and no longer opens standalone mode when Hub is installed.'),
  'greasyfork/Mission-Rewards.md':('1.0.15','1.0.16','Hub detection fix','Recognizes the current Hub S/Fly-out launchers and no longer opens standalone mode when Hub is installed.'),
