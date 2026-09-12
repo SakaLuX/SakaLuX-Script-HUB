@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.12**
+**v1.9.13**
 
 ## What it does
 
@@ -24,6 +24,13 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.13 — Resource-bar launcher
+
+- Replaced the native navigation skull entry with a compact SakaLuX **S** launcher mounted directly in Torn's resource/status bar.
+- The launcher is inserted immediately before the money resource when Torn exposes the resource bar.
+- The existing floating skull is now strictly an automatic fallback when that native resource-bar anchor cannot be detected.
+- Update/issue badges are preserved on the new compact launcher.
 
 ### v1.9.12 — Extensible shared languages
 
