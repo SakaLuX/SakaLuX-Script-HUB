@@ -35,3 +35,5 @@ jobs:
           git add -A
           git commit -m "Publish centered premium standalone dock"
           git push origin HEAD:main
+
+# trigger
