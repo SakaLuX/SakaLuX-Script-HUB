@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.15**
+**v1.9.16**
 
 ## What it does
 
@@ -24,6 +24,12 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.16 — Launcher before cash
+
+- Places the native Hub launcher as the first `statusIcons` item so it appears directly before the cash resource on the current Torn mobile layout.
+- Removed the unreliable money/cash element detector from v1.9.15.
+- Fortie-style native mounting and skull fallback remain unchanged.
 
 ### v1.9.15 — Launcher before money
 
