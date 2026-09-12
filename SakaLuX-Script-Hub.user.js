@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.36
+// @version      1.9.37
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.36';
+    const VERSION = '1.9.37';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.37',
+            date: '2026-09-12',
+            changes: [
+                'Detects stale userscript runtimes after a module update is installed but the current Torn page still runs the previous injected version.',
+                'Shows RELOAD REQUIRED instead of presenting the old runtime version as fully current.',
+                'Module OPEN/SETTINGS automatically reloads the page and retries when the installed runtime is behind the registry version.'
+            ]
+        },
         {
             version: '1.9.36',
             date: '2026-09-12',
@@ -1465,6 +1474,7 @@
         const installed = getInstalledVersion(script);
         const latest = update.data?.publishedLatest || update.data?.latest || script.expectedVersion || '?';
         const missing = health.state === 'missing';
+        const staleRuntime = Boolean(!missing && installed && installed !== '?' && script.expectedVersion && compareVersions(installed, script.expectedVersion) < 0 && update.state !== 'available');
         let extra = '';
         if (script.id === 'enhancer' && health.data) extra = `Inventory ${health.data.inventoryEntries ?? 0}`;
         if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? `Buyers ${health.data.buyers ?? 0}` : 'Standby';
@@ -1486,7 +1496,7 @@
                 ${script.description ? `<div class="slh-description">${escapeHtml(script.description)}</div>` : ''}
                 <div class="slh-chips">
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
-                    <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
+                    <span class="slh-chip ${staleRuntime ? 'warn' : updateChipClass}">${escapeHtml(staleRuntime ? 'RELOAD REQUIRED' : update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
                     ${update.state === 'pending' ? `<span class="slh-chip muted">REGISTRY v${escapeHtml(script.expectedVersion || '?')} PENDING</span>` : latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
                     ${extra ? `<span class="slh-chip muted">${escapeHtml(extra)}</span>` : ''}
@@ -1580,6 +1590,14 @@
         if (!script) return;
         const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
         const isPanelAction = actionId === getPrimaryAction(script).id || actionId === 'open' || actionId === 'settings';
+        const installed = getInstalledVersion(script);
+        const staleRuntime = Boolean(installed && installed !== '?' && script.expectedVersion && compareVersions(installed, script.expectedVersion) < 0 && getUpdateState(script).state !== 'available');
+        if (staleRuntime && isPanelAction) {
+            savePendingModuleAction(id, actionId);
+            closeHub();
+            location.reload();
+            return;
+        }
         const api = script.api();
         if (!api) {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
