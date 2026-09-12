@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.13
+// @version      1.9.14
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.13';
+    const VERSION = '1.9.14';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.14',
+            date: '2026-09-12',
+            changes: [
+                'Rebuilt the Hub launcher using Torn native statusIcons detection, matching the proven Fortie mounting strategy.',
+                'The launcher now copies native Torn status-cell classes and mounts as a real 17px status icon.',
+                'The floating skull is used only when Torn statusIcons are unavailable.'
+            ]
+        },
         {
             version: '1.9.13',
             date: '2026-09-12',
@@ -714,7 +723,7 @@
         style.textContent = `
 #${IDS.button}{position:fixed!important;z-index:2147483646!important;border:1px solid #3d4f66!important;border-radius:50%!important;background:linear-gradient(145deg,#1d2836,#111923)!important;color:#f8fafc!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font-size:23px!important;box-shadow:0 10px 28px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.04)!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important}
 #${IDS.badge}{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#d84b59;color:#fff;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:2px solid #111923}
-#${IDS.topSkull}{position:relative!important;display:inline-grid!important;place-items:center!important;flex:0 0 30px!important;width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important;min-height:30px!important;max-height:30px!important;margin:0 6px 0 0!important;padding:0!important;box-sizing:border-box!important;border:1px solid #3a4f68!important;border-radius:9px!important;background:linear-gradient(145deg,#26384d,#172332)!important;color:#9cc8ff!important;font:900 13px/1 Inter,Arial,sans-serif!important;letter-spacing:0!important;box-shadow:inset 0 1px rgba(255,255,255,.05),0 2px 7px rgba(0,0,0,.32)!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important;vertical-align:middle!important}#${IDS.topSkull}:active{transform:translateY(1px)!important}#${IDS.topSkull}.slh-alert{border-color:#765926!important;color:#f2c864!important;background:linear-gradient(145deg,#3b321f,#211d16)!important}#${IDS.topSkull} .slh-resource-mark{display:grid!important;place-items:center!important;width:100%!important;height:100%!important;border-radius:8px!important}#${IDS.topBadge}{position:absolute;top:-5px;right:-5px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#c93f50;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3;border:1px solid #111923}
+#${IDS.topSkull}{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;list-style:none!important;vertical-align:top!important;background:none!important;background-image:none!important;box-shadow:none!important;overflow:visible!important}#${IDS.topSkull}::before,#${IDS.topSkull}::after{content:none!important;display:none!important}#${IDS.topSkull} .slh-status-link{position:relative!important;display:block!important;width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;max-width:17px!important;max-height:17px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;background-image:none!important;color:inherit!important;cursor:pointer!important;line-height:0!important;font-size:0!important;text-decoration:none!important;box-shadow:none!important;overflow:visible!important;transform:none!important}#${IDS.topSkull} .slh-status-link svg{display:block!important;width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;max-width:17px!important;max-height:17px!important;margin:0!important;padding:0!important;overflow:visible!important;pointer-events:none!important;filter:drop-shadow(0 1px 1px rgba(0,0,0,.58))!important;transition:filter .15s ease,transform .15s ease!important}#${IDS.topSkull} .slh-status-link:active svg{transform:scale(.92)!important}#${IDS.topSkull}.slh-alert .slh-status-link svg{filter:brightness(1.2) drop-shadow(0 0 4px rgba(242,200,100,.55))!important}#${IDS.topBadge}{position:absolute;top:-7px;right:-7px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#c93f50;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3;border:1px solid #111923}
 #${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:rgba(4,8,13,.84);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;font-family:Inter,Arial,sans-serif;color:#e7edf5}
 #${IDS.panel}{--sl-bg:#0f141c;--sl-soft:#151c26;--sl-panel:#18212d;--sl-panel2:#1d2836;--sl-elev:#223041;--sl-border:#314154;--sl-border2:#43566e;--sl-text:#e7edf5;--sl-softtext:#a9b7c8;--sl-muted:#7f90a6;--sl-blue:#4f8fe8;--sl-blue2:#2f6ebf;--sl-green:#18b26b;--sl-red:#cc3d57;--sl-gold:#d7a94a;width:min(680px,100%);max-height:95vh;display:flex;flex-direction:column;overflow:hidden;background:var(--sl-bg);color:var(--sl-text);border:1px solid var(--sl-border);border-radius:22px 22px 0 0;box-shadow:0 -22px 70px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.025)}
 .slh-header{padding:16px 16px 12px;flex-shrink:0;background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 40%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-bottom:1px solid var(--sl-border)}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-brand{display:flex;align-items:center;gap:11px;min-width:0}.slh-brand-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #41536b;border-radius:13px;background:linear-gradient(145deg,#263448,#17212e);box-shadow:inset 0 1px rgba(255,255,255,.05),0 7px 20px rgba(0,0,0,.25);font-size:22px}.slh-brand-copy{min-width:0}.slh-kicker{font-size:8px;line-height:1.2;letter-spacing:.18em;font-weight:900;color:#6fa6ef;text-transform:uppercase}.slh-title{margin-top:2px;font-size:18px;line-height:1.15;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-sub{margin-top:4px;color:var(--sl-muted);font-size:9px;line-height:1.3}.slh-registry-dot{display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#64748b}.slh-registry-dot.online{background:var(--sl-green);box-shadow:0 0 8px rgba(24,178,107,.6)}.slh-close{width:38px;height:38px;flex:0 0 auto;border:1px solid var(--sl-border);border-radius:11px;background:#1b2532;color:#c8d3df;font-size:21px;line-height:1;transition:.15s ease}.slh-close:active{transform:scale(.96)}
@@ -916,49 +925,27 @@
         });
     }
 
-    function getResourceBarContext() {
-        const visible = el => {
-            if (!(el instanceof Element)) return false;
-            const r = el.getBoundingClientRect();
-            const s = getComputedStyle(el);
-            return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden';
-        };
-        const directItem = (node, row) => {
-            let item = node;
-            while (item && item.parentElement && item.parentElement !== row) item = item.parentElement;
-            return item && item.parentElement === row ? item : null;
-        };
-        const resolve = node => {
-            let cur = node;
-            for (let depth = 0; cur && cur.parentElement && depth < 7; depth++, cur = cur.parentElement) {
-                const row = cur.parentElement;
-                if (!visible(row)) continue;
-                const rect = row.getBoundingClientRect();
-                const kids = [...row.children].filter(visible);
-                if (kids.length < 3 || kids.length > 24 || rect.width < 220 || rect.height < 24 || rect.height > 100) continue;
-                const moneyItem = directItem(node, row);
-                if (!moneyItem) continue;
-                const siblingsWithShortText = kids.filter(x => String(x.textContent || '').trim().length <= 24).length;
-                if (siblingsWithShortText < 3) continue;
-                return { row, moneyItem };
-            }
-            return null;
-        };
-        const exactMoney = [...document.querySelectorAll('span,div,a')].filter(el => {
-            if (!visible(el)) return false;
-            const t = String(el.textContent || '').replace(/\s+/g, ' ').trim();
-            return /^\$\s*[\d.,]+\s*[KMBT]?$/i.test(t) && t.length <= 20;
-        });
-        for (const node of exactMoney) {
-            const ctx = resolve(node);
-            if (ctx) return ctx;
-        }
-        const semantic = [...document.querySelectorAll('[class*="money" i],[class*="cash" i],[data-testid*="money" i],[aria-label*="money" i]')].filter(visible);
-        for (const node of semantic) {
-            const ctx = resolve(node);
-            if (ctx) return ctx;
-        }
-        return null;
+    function findStatusIconList() {
+        const selectors = [
+            'ul[class*="statusIcons"][class*="big"]',
+            'ul[class*="status-icons"][class*="big"]',
+            'ul[class*="statusIcons"]',
+            'ul[class*="status-icons"]'
+        ];
+        const lists = selectors.flatMap(selector => Array.from(document.querySelectorAll(selector)));
+        return lists.find(list => list.isConnected && Array.from(list.children).some(item => item.querySelector?.('a'))) || null;
+    }
+
+    function copyNativeStatusCellLayout(customItem, statusList) {
+        if (!customItem || !statusList) return;
+        const reference = Array.from(statusList.children).find(item =>
+            item !== customItem && item.id !== IDS.topSkull && item.querySelector?.('a')
+        );
+        if (!reference) return;
+        const nativeClasses = Array.from(reference.classList).filter(className => className && !className.startsWith('slh-') && !className.startsWith('sakalux-'));
+        const customClasses = Array.from(customItem.classList).filter(className => className.startsWith('slh-') || className.startsWith('sakalux-'));
+        customItem.className = [...nativeClasses, ...customClasses].join(' ');
+        ['width','height','min-width','min-height','max-width','max-height','margin','flex','align-self'].forEach(prop => customItem.style.removeProperty(prop));
     }
 
     function buildSkullSvg(nativeSvg) {
@@ -1001,24 +988,51 @@
             syncFloatingButtonVisibility();
             return false;
         }
-        if (existing?.isConnected) {
+        const statusList = findStatusIconList();
+        if (!statusList) {
+            existing?.remove();
+            syncFloatingButtonVisibility();
+            return false;
+        }
+        if (existing?.isConnected && existing.parentElement === statusList) {
+            copyNativeStatusCellLayout(existing, statusList);
             updateTopbarSkullState();
             syncFloatingButtonVisibility();
             return true;
         }
-        const ctx = getResourceBarContext();
-        if (!ctx) {
-            syncFloatingButtonVisibility();
-            return false;
-        }
-        const button = document.createElement('button');
-        button.id = IDS.topSkull;
-        button.type = 'button';
-        button.setAttribute('aria-label', 'Open SakaLuX Script Hub');
-        button.setAttribute('title', 'SakaLuX Script Hub');
-        button.innerHTML = `<span class="slh-resource-mark">S</span><span id="${IDS.topBadge}"></span>`;
-        button.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); openHub(); });
-        ctx.row.insertBefore(button, ctx.moneyItem);
+        existing?.remove();
+        const item = document.createElement('li');
+        item.id = IDS.topSkull;
+        item.className = 'slh-master-status-icon';
+        const launcher = document.createElement('a');
+        launcher.href = '#';
+        launcher.className = 'slh-status-link';
+        launcher.setAttribute('aria-label', 'SakaLuX Script Hub');
+        launcher.setAttribute('title', 'SakaLuX Script Hub');
+        launcher.setAttribute('tabindex', '0');
+        launcher.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 17" width="17" height="17" aria-hidden="true" focusable="false">
+                <defs>
+                    <linearGradient id="slh-settings-gold" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#f4d57d"/>
+                        <stop offset=".45" stop-color="#d8b35f"/>
+                        <stop offset="1" stop-color="#9a742c"/>
+                    </linearGradient>
+                    <linearGradient id="slh-settings-inner" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#3a3d44"/>
+                        <stop offset="1" stop-color="#15171b"/>
+                    </linearGradient>
+                </defs>
+                <path fill="url(#slh-settings-gold)" stroke="#6f511a" stroke-width=".45" d="M7.28.8h2.44l.36 1.7c.51.15.99.35 1.43.59l1.49-.9 1.72 1.72-.9 1.49c.24.44.44.92.59 1.43l1.7.36v2.44l-1.7.36c-.15.51-.35.99-.59 1.43l.9 1.49-1.72 1.72-1.49-.9c-.44.24-.92.44-1.43.59l-.36 1.7H7.28l-.36-1.7c-.51-.15-.99-.35-1.43-.59l-1.49.9-1.72-1.72.9-1.49a6.97 6.97 0 0 1-.59-1.43l-1.7-.36V7.19l1.7-.36c.15-.51.35-.99.59-1.43l-.9-1.49L4 2.19l1.49.9c.44-.24.92-.44 1.43-.59L7.28.8Z"/>
+                <circle cx="8.5" cy="8.41" r="3.15" fill="url(#slh-settings-inner)" stroke="#f0cc72" stroke-width=".5"/>
+                <text x="8.5" y="10.65" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.1" font-weight="900" fill="#f0cc72">S</text>
+            </svg>
+            <span id="${IDS.topBadge}"></span>`;
+        launcher.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); openHub(); });
+        launcher.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHub(); } });
+        item.appendChild(launcher);
+        statusList.appendChild(item);
+        copyNativeStatusCellLayout(item, statusList);
         updateTopbarSkullState();
         syncFloatingButtonVisibility();
         return true;
@@ -1319,7 +1333,7 @@
             results.push({ level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad', label: script.name + ' local status', detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error') });
         }
         results.push({ level: 'ok', label: 'SakaLuX Script Hub', detail: 'Loaded v' + VERSION + ' • API exposed' });
-        results.push({ level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn', label: 'Torn resource-bar HUB launcher', detail: document.getElementById(IDS.topSkull) ? 'Mounted before the money resource' : 'Resource bar not detected — floating skull fallback active' });
+        results.push({ level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn', label: 'Torn status-bar HUB launcher', detail: document.getElementById(IDS.topSkull) ? 'Mounted inside Torn statusIcons using native cell classes' : 'Torn statusIcons not detected — floating skull fallback active' });
         const box = document.getElementById('slhc-results');
         if (!box) return;
         box.innerHTML = results.map(result => `<div class="slh-check-row slh-check-${result.level}">${result.level === 'ok' ? '🟢' : result.level === 'warn' ? '🟠' : '🔴'} <b>${escapeHtml(result.label)}</b><br><span style="color:#8fa0b3">${escapeHtml(result.detail)}</span></div>`).join('') + '<button class="slh-big-btn" id="slhc-back">← BACK</button>';
@@ -1347,7 +1361,7 @@
     function openSettings() {
         createOverlay(`${headerMarkup('Hub Settings', `SakaLuX Script Hub v${VERSION}`, 'slhs-close', '⚙️', 'CONFIGURATION')}<div class="slh-settings">
             ${settingSwitch('slhs-hide', 'Hide individual script buttons', 'Keep each add-on launcher hidden while Hub manages access.', settings.hideIndividualButtons)}
-            ${settingSwitch('slhs-topbar', 'Torn resource-bar launcher', 'Show the compact SakaLuX button before the money resource when available. The skull button is used automatically as fallback.', settings.showTopbarSkull)}
+            ${settingSwitch('slhs-topbar', 'Torn status-bar launcher', 'Mount the compact SakaLuX icon directly inside Torn statusIcons. The floating skull is used only when Torn does not expose that native icon list.', settings.showTopbarSkull)}
             ${settingSwitch('slhs-auto', 'Automatic update checks', 'Check published add-on versions automatically while the Hub is running.', settings.autoCheckUpdates)}
             <div class="slh-settings-pair"><div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div><div class="slh-setting">Language<select id="slhs-language">${Object.entries(LOCALES).map(([code,locale])=>`<option value="${escapeHtml(code)}">${escapeHtml(locale.label)}</option>`).join('')}</select></div></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
