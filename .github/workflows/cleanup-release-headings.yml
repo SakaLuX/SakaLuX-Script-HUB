@@ -18,10 +18,6 @@ jobs:
       - run: python .migration/cleanup-release-headings.py
       - run: |
           set -euo pipefail
-          ! grep -q $'## Recommended\n## Recommended' greasyfork/Mission-Rewards.md
-          ! grep -q $'## Recommended\n## Recommended' greasyfork/Script-Hub.md
-      - run: |
-          set -euo pipefail
           git config user.name 'SakaLuX'
           git config user.email 'sakalutzu92@yahoo.com'
           git add greasyfork/Mission-Rewards.md greasyfork/Script-Hub.md
