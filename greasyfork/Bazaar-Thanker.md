@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.15**
+5.3.16
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -13,7 +13,8 @@
 - Works without a Torn API key.
 
 ## Current release note
-Refined standalone dock with centered typography, compact premium styling, balanced icon/name alignment and a subtler Hub install action. The native S launcher remains the only primary dock toggle when available; the shared Hub reminder remains limited to once every 12 hours.
+Ultra-professional standalone dock polish: icon badges now sit inside balanced button geometry, labels are optically centered, spacing and shadows are refined, the Hub action is visually quieter, and the native S launcher remains the only primary toggle. The shared Hub reminder remains limited to once every 12 hours.
+
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.
 
