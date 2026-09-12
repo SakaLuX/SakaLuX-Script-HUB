@@ -1,0 +1,47 @@
+name: One-time Hub v1.9.33 rollback
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rollback-hub-1933.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore exact Hub v1.9.33
+        run: |
+          set -euo pipefail
+          REF=2b0b9aff05e1867c2a9ce03bf4f4ff3bdbce871c
+          git show "$REF:SakaLuX-Script-Hub.user.js" > SakaLuX-Script-Hub.user.js
+          git show "$REF:greasyfork/Script-Hub.md" > greasyfork/Script-Hub.md
+      - name: Validate rollback
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Script-Hub.user.js
+          grep -q '@version      1.9.33' SakaLuX-Script-Hub.user.js
+          grep -q "const VERSION = '1.9.33';" SakaLuX-Script-Hub.user.js
+          grep -q '^\*\*v1.9.33\*\*$' greasyfork/Script-Hub.md
+          grep -q "id: 'mission-rewards'" SakaLuX-Script-Hub.user.js
+          grep -A12 "id: 'mission-rewards'" SakaLuX-Script-Hub.user.js | grep -q "version: '1.0.18'"
+          grep -q '^// @version      1.0.18$' SakaLuX-Mission-Rewards.user.js
+          python -m json.tool scripts.json >/dev/null
+      - name: Commit rollback
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md
+          if git diff --cached --quiet; then
+            echo 'No changes.'
+            exit 0
+          fi
+          git commit -m 'Rollback Script Hub exactly to v1.9.33 [skip ci]'
+          git push
