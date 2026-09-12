@@ -1,0 +1,41 @@
+name: One-time Mission Rewards clean-start fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-mission-clean-start.yml'
+      - '.migration/remove-mission-violentmonkey.py'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply fix
+        run: python .migration/remove-mission-violentmonkey.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Script-Hub.user.js
+          python -m json.tool scripts.json >/dev/null
+          grep -q '@version      1.1.4' SakaLuX-Mission-Rewards.user.js
+          grep -q "const VERSION = '1.1.4';" SakaLuX-Mission-Rewards.user.js
+          ! grep -q 'EARLY_BRIDGE_ID' SakaLuX-Mission-Rewards.user.js
+          ! grep -q 'HUB_HEARTBEAT' SakaLuX-Mission-Rewards.user.js
+          ! grep -q "installHubBridge('mission-rewards'" SakaLuX-Mission-Rewards.user.js
+          grep -q 'SakaLuX_MR_HUB_COMMAND' SakaLuX-Mission-Rewards.user.js
+          grep -q '@version      1.9.42' SakaLuX-Script-Hub.user.js
+          grep -q 'SakaLuX_MR_HUB_COMMAND' SakaLuX-Script-Hub.user.js
+      - name: Commit
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Mission-Rewards.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/Mission-Rewards.md greasyfork/Script-Hub.md
+          git commit -m 'Fix Mission Rewards startup without Violentmonkey bridge [skip ci]'
+          git push
