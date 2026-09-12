@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.15
+// @version      1.9.16
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.15';
+    const VERSION = '1.9.16';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.16',
+            date: '2026-09-12',
+            changes: [
+                'Places the native SakaLuX Hub launcher as the first item in Torn statusIcons so it appears before the cash resource on the current mobile layout.',
+                'Removed the unreliable money-cell detection introduced in v1.9.15.',
+                'Keeps Fortie-style statusIcons mounting, native class inheritance and skull fallback unchanged.'
+            ]
+        },
         {
             version: '1.9.15',
             date: '2026-09-12',
@@ -990,38 +999,6 @@
         button.style.setProperty('display', nativeReady ? 'none' : 'flex', 'important');
     }
 
-    function findMoneyStatusItem(statusList) {
-        if (!statusList) return null;
-        const items = Array.from(statusList.children).filter(item => item.id !== IDS.topSkull);
-        const describe = item => {
-            const anchor = item.querySelector?.('a');
-            const parts = [
-                item.id,
-                item.className,
-                item.getAttribute?.('title'),
-                item.getAttribute?.('aria-label'),
-                item.getAttribute?.('data-type'),
-                item.getAttribute?.('data-testid'),
-                item.textContent,
-                anchor?.id,
-                anchor?.className,
-                anchor?.getAttribute?.('title'),
-                anchor?.getAttribute?.('aria-label'),
-                anchor?.getAttribute?.('href'),
-                anchor?.getAttribute?.('data-type'),
-                anchor?.getAttribute?.('data-testid')
-            ];
-            item.querySelectorAll?.('[class],[id],[title],[aria-label],[data-type],[data-testid]').forEach(node => {
-                parts.push(node.id, node.className, node.getAttribute('title'), node.getAttribute('aria-label'), node.getAttribute('data-type'), node.getAttribute('data-testid'));
-            });
-            return parts.filter(Boolean).join(' ').toLowerCase();
-        };
-        return items.find(item => {
-            const d = describe(item);
-            return d.includes('$') || /(^|[^a-z])(money|cash|wallet|dollar)([^a-z]|$)/i.test(d);
-        }) || null;
-    }
-
     function createTopbarSkull() {
         const existing = document.getElementById(IDS.topSkull);
         if (!settings.showTopbarSkull) {
@@ -1036,8 +1013,7 @@
             return false;
         }
         if (existing?.isConnected && existing.parentElement === statusList) {
-            const moneyItem = findMoneyStatusItem(statusList);
-            if (moneyItem && existing.nextElementSibling !== moneyItem) statusList.insertBefore(existing, moneyItem);
+            if (statusList.firstElementChild !== existing) statusList.insertBefore(existing, statusList.firstElementChild);
             copyNativeStatusCellLayout(existing, statusList);
             updateTopbarSkullState();
             syncFloatingButtonVisibility();
@@ -1074,9 +1050,7 @@
         launcher.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); openHub(); });
         launcher.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHub(); } });
         item.appendChild(launcher);
-        const moneyItem = findMoneyStatusItem(statusList);
-        if (moneyItem) statusList.insertBefore(item, moneyItem);
-        else statusList.appendChild(item);
+        statusList.insertBefore(item, statusList.firstElementChild);
         copyNativeStatusCellLayout(item, statusList);
         updateTopbarSkullState();
         syncFloatingButtonVisibility();
