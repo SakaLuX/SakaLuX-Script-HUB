@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.33
+// @version      1.9.34
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.33';
+    const VERSION = '1.9.34';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.34',
+            date: '2026-09-13',
+            changes: [
+                'Removed userscript-manager-specific compatibility handling from Script Hub.',
+                'Module control now uses only the generic runtime API or DOM bridge integration.',
+                'Removed the obsolete manager-specific compatibility release entry from the active Hub changelog.'
+            ]
+        },
         {
             version: '1.9.33',
             date: '2026-09-12',
@@ -218,15 +227,6 @@
                 'Added a persistent Language selector beside Fallback button position.',
                 'Added shared English and Romanian UI localization for SakaLuX Hub and add-on panels.',
                 'Language changes apply immediately to existing and dynamically rendered SakaLuX interfaces.'
-            ]
-        },
-        {
-            version: '1.9.10',
-            date: '2026-09-11',
-            changes: [
-                'Fixed false OFF and INSTALL states in Violentmonkey isolated userscript sandboxes on macOS and desktop browsers.',
-                'Installation markers are checked before sandboxed window APIs, with legacy Elimination marker support.',
-                'Added hidden DOM control bridges so ON/OFF and OPEN work across isolated userscript contexts.'
             ]
         },
         {
@@ -848,7 +848,7 @@
             await api.setEnabled(Boolean(enabled));
         } else {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-            if (!bridge) throw new Error('Update ' + script.name + ' to the latest version to use its Violentmonkey control bridge.');
+            if (!bridge) throw new Error(script.name + ' control interface is unavailable on this page.');
             bridge.dataset.action = enabled ? 'on' : 'off';
             bridge.click();
         }
@@ -1509,10 +1509,6 @@
             if (script.fallbackOpen()) {
                 recordUsage(id);
                 closeHub();
-                return;
-            }
-            if (getInstalledVersion(script)) {
-                alert(script.name + ' is installed, but this version needs the Violentmonkey bridge update before Hub can open it.');
                 return;
             }
             const url = getInstallUrl(script);
