@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.20**
+**v1.9.21**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release note
-Compatibility release for the shared standalone dock and 12-hour global Hub reminder used by SakaLuX add-ons. Hub fallback version references were synchronized with the newly released add-on versions.
+Standalone Dock v2 compatibility release. Installed add-ons now register into a uniform shared dock without moving their native buttons, eliminating overlap and missing-module issues.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -30,8 +30,8 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 ### Registered complementary add-ons
 
 - 🛡️ SakaLuX Enhancer Guard **v1.3.22**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.12**
-- 🎯 SakaLuX Mission Rewards **v1.0.10**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.13**
+- 🎯 SakaLuX Mission Rewards **v1.0.11**
 - 📈 SakaLuX Market Intelligence **v1.17.10**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.22**
 

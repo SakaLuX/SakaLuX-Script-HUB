@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.22**
+**v1.3.23**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -26,7 +26,7 @@
 - Never attacks automatically.
 
 ## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
+Standalone Dock v2 now uses its own uniform buttons instead of moving script launchers. All installed Hub add-ons register themselves in the shared dock, preventing overlaps and missing entries. The Hub install reminder remains shared and limited to once every 12 hours.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant together with the rest of the SakaLuX add-ons and to use the shared Hub Torn API key when available.
