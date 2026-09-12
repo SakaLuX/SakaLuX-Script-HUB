@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.20
+// @version      1.3.21
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export and FF/BS calibration.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -126,6 +126,7 @@
 })();
 /* SakaLuX Standalone Dock Bootstrap — END */
 
+
 /*
  * Copyright © 2026 SakaLuX [2380374]
  * All Rights Reserved.
@@ -140,7 +141,7 @@
  */
 (() => {
 'use strict';
-const VERSION='1.3.20';
+const VERSION='1.3.21';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';

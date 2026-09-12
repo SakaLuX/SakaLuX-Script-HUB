@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Apocalypse Poker Exit Alert
 // @namespace    apocalypse-poker-exit-alert
-// @version      0.7.2
+// @version      0.7.3
 // @description  Adds a selectable warm target and one PDA-aware attack alert when a player leaves Torn poker.
 // @author       Zagan
 // @match        https://www.torn.com/page.php?sid=holdem*
@@ -121,6 +121,7 @@
   else start();
 })();
 /* SakaLuX Standalone Dock Bootstrap — END */
+
 
 (() => {
     "use strict";

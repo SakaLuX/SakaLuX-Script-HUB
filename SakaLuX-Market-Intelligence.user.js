@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.8
+// @version      1.17.9
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -128,6 +128,7 @@
 })();
 /* SakaLuX Standalone Dock Bootstrap — END */
 
+
 /*
  * Copyright © 2026 SakaLuX [2380374]
  * All Rights Reserved.
@@ -144,7 +145,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.17.8';
+    const VERSION = '1.17.9';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
