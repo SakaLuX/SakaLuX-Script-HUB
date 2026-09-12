@@ -19,7 +19,7 @@
 
 ## Current release note
 
-Made the S badge inside the standalone dock a real close control. Tapping the header S now closes the panel immediately while the native Torn S launcher continues to toggle the dock. Added button semantics, touch feedback and accessibility labels without changing the ultra-professional dock layout.
+**v1.0.16** fixes Hub/standalone detection for the current SakaLuX launchers. When Script Hub is installed, Mission Rewards recognizes the native **S** status-bar launcher, the Fly-out **HUB** launcher and the Hub-active page marker, so the standalone dock and **Install SakaLuX Hub** prompt do not appear at the same time as Hub.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
@@ -34,6 +34,11 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 Displayed market values and value-per-credit calculations are estimates based on available item data. Weapon-mod ranges are learned locally from offers seen by the script and should be treated as guidance rather than guaranteed future Mission Shop prices.
 
 ## Release history
+### v1.0.16 — Hub detection fix
+
+- Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
+- Prevents the standalone dock/install prompt from appearing while Hub is installed.
+
 ### v1.0.12 — Compact native S standalone launcher
 
 - Smaller professional standalone dock.

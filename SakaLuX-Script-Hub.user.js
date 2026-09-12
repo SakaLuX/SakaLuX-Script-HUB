@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.26
+// @version      1.9.27
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.26';
+    const VERSION = '1.9.27';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.27',
+            date: '2026-09-12',
+            changes: [
+                'Update availability now follows the version actually published by the configured Greasy Fork meta source.',
+                'Registry versions ahead of Greasy Fork are shown as PUBLISH PENDING instead of creating an update loop.',
+                'UPDATE no longer redirects to the raw GitHub source when the public distribution is behind.'
+            ]
+        },
         {
             version: '1.9.26',
             date: '2026-09-12',
@@ -520,12 +529,10 @@
     function canonicalLatestVersion(script, publishedVersion) {
         const registryVersion = String(script?.expectedVersion || script?.version || '0');
         const published = publishedVersion ? String(publishedVersion) : null;
-        return published && compareVersions(published, registryVersion) > 0 ? published : registryVersion;
+        return published || registryVersion;
     }
 
     function getInstallUrl(script) {
-        const data = normalizeCachedUpdate(script);
-        if (data?.distributionBehind && script.sourceUrl) return script.sourceUrl;
         return script.downloadUrl || script.sourceUrl || '';
     }
 
@@ -650,10 +657,10 @@
         const data = updateCache[script.id];
         if (!data) return null;
         const installed = getInstalledVersion(script);
-        const publishedLatest = data.publishedLatest ? String(data.publishedLatest) : (data.latest ? String(data.latest) : null);
+        const publishedLatest = data.publishedLatest ? String(data.publishedLatest) : null;
         const latest = canonicalLatestVersion(script, publishedLatest);
         const distributionBehind = Boolean(publishedLatest && compareVersions(publishedLatest, script.expectedVersion) < 0);
-        const available = Boolean(installed && latest && compareVersions(latest, installed) > 0);
+        const available = Boolean(installed && publishedLatest && compareVersions(publishedLatest, installed) > 0);
         if (String(data.installed || '') !== String(installed || '') || String(data.latest || '') !== latest || String(data.expected || '') !== String(script.expectedVersion || '') || Boolean(data.available) !== available || Boolean(data.distributionBehind) !== distributionBehind) {
             updateCache[script.id] = { ...data, installed, expected: script.expectedVersion, publishedLatest, latest, distributionBehind, available };
             saveJson(STORAGE.updates, updateCache);
@@ -680,7 +687,7 @@
             publishedLatest,
             latest,
             distributionBehind,
-            available: Boolean(installed && compareVersions(latest, installed) > 0),
+            available: Boolean(installed && publishedLatest && compareVersions(publishedLatest, installed) > 0),
             checkedAt: Date.now(),
             sourceError,
             error: null
@@ -719,6 +726,7 @@
         if (!data) return { state: 'unknown', text: 'NOT CHECKED', data: null };
         if (data.error) return { state: 'failed', text: 'CHECK FAILED', data };
         if (data.available) return { state: 'available', text: 'UPDATE AVAILABLE', data };
+        if (data.distributionBehind) return { state: 'pending', text: 'PUBLISH PENDING', data };
         return { state: 'current', text: 'UP TO DATE', data };
     }
 
@@ -1381,7 +1389,7 @@
         const health = row.health;
         const update = row.update;
         const installed = getInstalledVersion(script);
-        const latest = update.data?.latest || script.expectedVersion || '?';
+        const latest = update.data?.publishedLatest || update.data?.latest || script.expectedVersion || '?';
         const missing = health.state === 'missing';
         let extra = '';
         if (script.id === 'enhancer' && health.data) extra = `Inventory ${health.data.inventoryEntries ?? 0}`;
@@ -1392,7 +1400,7 @@
         const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id));
         const primary = getPrimaryAction(script);
         const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
-        const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'failed' ? 'bad' : 'muted';
+        const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'pending' ? 'info' : update.state === 'failed' ? 'bad' : 'muted';
         const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';
         const controls = missing
             ? `<button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
@@ -1406,7 +1414,7 @@
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
-                    ${latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
+                    ${update.state === 'pending' ? `<span class="slh-chip muted">REGISTRY v${escapeHtml(script.expectedVersion || '?')} PENDING</span>` : latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
                     ${extra ? `<span class="slh-chip muted">${escapeHtml(extra)}</span>` : ''}
                     ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
                 </div>
@@ -1514,7 +1522,7 @@
                 const published = parseMetaVersion(await httpGet(script.metaUrl));
                 const canonical = canonicalLatestVersion(script, published);
                 const behind = Boolean(published && compareVersions(published, script.expectedVersion) < 0);
-                results.push({ level: behind || !published ? 'warn' : 'ok', label: script.name + ' update source', detail: 'Canonical v' + canonical + (published ? ' • Greasy Fork v' + published + (behind ? ' (mirror behind; GitHub source used)' : '') : ' • Greasy Fork unavailable') });
+                results.push({ level: behind || !published ? 'warn' : 'ok', label: script.name + ' update source', detail: 'Canonical v' + canonical + (published ? ' • Greasy Fork v' + published + (behind ? ' (publish pending)' : '') : ' • Greasy Fork unavailable') });
             } catch (error) { results.push({ level: 'warn', label: script.name + ' update source', detail: 'Canonical Registry v' + script.expectedVersion + ' • ' + String(error?.message || error) }); }
             const health = getHealth(script);
             results.push({ level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad', label: script.name + ' local status', detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error') });
