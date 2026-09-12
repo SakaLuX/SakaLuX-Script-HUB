@@ -3,9 +3,10 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.18**
+**v1.2.0**
 
 ## What it does
+- Shows the Duke mission task and a practical hint before accepting supported missions.
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
 - Shows estimated market value for item rewards.
 - Calculates estimated value per mission credit.
@@ -19,7 +20,7 @@
 
 ## Current release note
 
-**v1.0.18** is the active stable Mission Rewards release restored from before the experimental Mission Guide integration.
+**v1.2.0** integrates Duke Mission Task + Hint guidance directly into Mission Rewards on top of the stable v1.0.18 base. The guide is local and isolated from the Mission Shop/API runtime, with no userscript-manager-specific bridge and no external runtime dependency.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
@@ -34,6 +35,13 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 Displayed market values and value-per-credit calculations are estimates based on available item data. Weapon-mod ranges are learned locally from offers seen by the script and should be treated as guidance rather than guaranteed future Mission Shop prices.
 
 ## Release history
+### v1.2.0 — Integrated Mission Hints
+
+- Added locally integrated Duke mission Task + Hint guidance.
+- Uses the stable v1.0.18 Mission Rewards runtime as the base.
+- Kept the Mission Hints renderer isolated so Mission Shop/API startup remains unchanged.
+- No userscript-manager-specific compatibility layer or external runtime dependency.
+
 ### v1.0.16 — Hub detection fix
 
 - Recognizes the current Hub S/Fly-out launchers and Hub-active marker.

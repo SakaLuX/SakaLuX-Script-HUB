@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.35**
+**v1.9.36**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v1.9.35** is the current Script Hub release. Installation detection uses live runtime presence only, preventing persistent installation markers from keeping deleted or disabled add-ons visible as ghost modules.
+**v1.9.36** synchronizes Mission Rewards v1.2.0 after the safe integrated Duke Mission Task + Hint release and keeps the offline fallback registry aligned with `scripts.json`.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -32,7 +32,7 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 - 🛡️ SakaLuX Enhancer Guard **v1.3.30**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.21**
-- 🎯 SakaLuX Mission Rewards **v1.0.18**
+- 🎯 SakaLuX Mission Rewards **v1.2.0**
 - 📈 SakaLuX Market Intelligence **v1.17.18**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.30**
 
