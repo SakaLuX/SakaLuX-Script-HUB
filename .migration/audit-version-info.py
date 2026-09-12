@@ -46,14 +46,11 @@ for script,doc_rel in SCRIPT_DOCS.items():
     p=ROOT/doc_rel
     d=p.read_text(encoding='utf-8')
     v=versions[script]
-    # Normalize current version block.
     d,n=re.subn(r'(## Current version\s*\n)(?:\s*\n)?(?:\*\*)?v?[^\n*]+(?:\*\*)?',lambda m:m.group(1)+f'**v{v}**',d,count=1)
     if n!=1: raise SystemExit(f'Current version block missing: {doc_rel}')
-    # Normalize current release note(s) section without touching history.
     replacement=f'## Current release note\n\n{notes[script](v)}\n\n## Recommended'
     d,n=re.subn(r'## Current release notes?\s*\n.*?\n## Recommended',replacement,d,count=1,flags=re.S|re.I)
     if n!=1: raise SystemExit(f'Current release note block missing: {doc_rel}')
-    # Correct standalone identities for tools intentionally outside scripts.json.
     if script in {'SakaLuX-Account-Auditor.user.js','SakaLuX-Company-Intelligence-v1.0.0.user.js','SakaLuX-Suite.user.js'}:
         lines=d.splitlines()
         for i,line in enumerate(lines[:8]):
@@ -65,7 +62,6 @@ for script,doc_rel in SCRIPT_DOCS.items():
                 break
     p.write_text(d,encoding='utf-8')
 
-# scripts.json is canonical only for the five Hub-managed add-ons.
 sp=ROOT/'scripts.json'
 data=json.loads(sp.read_text(encoding='utf-8'))
 seen=set()
@@ -78,19 +74,16 @@ missing=set(MANAGED)-seen
 if missing: raise SystemExit('Managed scripts missing from scripts.json: '+', '.join(sorted(missing)))
 sp.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
-# Synchronize Hub offline fallback registry versions with live userscript headers.
+# Hub fallback registry is JavaScript object syntax (single quotes / bare keys).
 hp=ROOT/'SakaLuX-Script-Hub.user.js'
 h=hp.read_text(encoding='utf-8')
 for sid,script in MANAGED.items():
     v=versions[script]
-    pat=rf'("id"\s*:\s*"{re.escape(sid)}".*?"version"\s*:\s*")[^"]+(" )'
-    # Most fallback rows are formatted JSON without a trailing space before closing quote; handle robustly below.
-    m=re.search(rf'("id"\s*:\s*"{re.escape(sid)}".*?"version"\s*:\s*")([^"]+)(")',h,re.S)
+    m=re.search(rf"(id\s*:\s*'{re.escape(sid)}'.*?version\s*:\s*')([^']+)(')",h,re.S)
     if not m: raise SystemExit(f'Fallback registry row not found for {sid}')
     h=h[:m.start(2)]+v+h[m.end(2):]
 hp.write_text(h,encoding='utf-8')
 
-# Synchronize registered-version list on Hub info page from scripts.json.
 hdoc=ROOT/'greasyfork/Script-Hub.md'
 d=hdoc.read_text(encoding='utf-8')
 name_map={r['id']:r['name'] for r in data['scripts'] if r.get('id') in MANAGED}
@@ -100,7 +93,6 @@ for sid,script in MANAGED.items():
     d=re.sub(rf'({re.escape(name)}\s+\*\*v)[^*]+(\*\*)',rf'\g<1>{v}\2',d)
 hdoc.write_text(d,encoding='utf-8')
 
-# Print authoritative matrix for CI logs.
 print('AUTHORITATIVE VERSION MATRIX')
 for script in SCRIPT_DOCS:
     print(f'{script}: {versions[script]}')
