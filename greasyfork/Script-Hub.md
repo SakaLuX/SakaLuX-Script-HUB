@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.28**
+**v1.9.29**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-Hub v1.9.28 fixes installed-version detection and the Bazaar false-update loop. Live module bridge/API/standalone version data is now preferred over stale localStorage markers. All five offline fallback-registry versions are synchronized with `scripts.json`, and Bazaar Thanker v5.3.19 reports one consistent version everywhere.
+**v1.9.29** removes the floating **Market** and **Enhancers** launch buttons whenever Script Hub is active. Both controls remain in the DOM so Hub can still open their panels normally.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -49,6 +49,12 @@ All Rights Reserved
 Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
 
 ## Release history
+### v1.9.29 — Hide floating module launchers
+
+- Market and Enhancers floating buttons are always hidden while Script Hub is active.
+- Their DOM controls remain available so Hub can still open both modules.
+- The fix ignores stale local launcher-visibility settings for these two buttons.
+
 ### v1.9.28 — Installed version authority fix
 
 - Prefers live bridge/API/standalone module versions before persistent installation markers.
