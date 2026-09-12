@@ -44,6 +44,15 @@
             version: '1.9.37',
             date: '2026-09-13',
             changes: [
+                'Actually invalidates stale scripts.json registry cache by moving registry storage to V20.',
+                'Actually invalidates stale update-state cache by moving update storage to V18.',
+                'Removes obsolete Mission Rewards REGISTRY v1.0.21 PENDING state after the rollback to v1.0.18.'
+            ]
+        },
+        {
+            version: '1.9.37',
+            date: '2026-09-13',
+            changes: [
                 'Rotates the persistent registry and update cache keys so stale rolled-back add-on versions cannot survive a Hub update.',
                 'Mission Rewards now starts from registry v1.0.18 instead of cached v1.0.21 PUBLISH PENDING state.',
                 'Keeps scripts.json and the offline fallback registry as the authoritative current version sources.'
