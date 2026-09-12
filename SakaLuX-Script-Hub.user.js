@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.34
+// @version      1.9.35
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.34';
+    const VERSION = '1.9.35';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.35',
+            date: '2026-09-12',
+            changes: [
+                'Fixes Mission Rewards SETTINGS when its bridge is not yet available in the current userscript context.',
+                'Installed module actions now remember the requested action, navigate to the module fallback page when needed, then retry through the bridge/API.',
+                'Removes the dead-end Violentmonkey bridge alert for modules that provide a valid fallback page.'
+            ]
+        },
         {
             version: '1.9.34',
             date: '2026-09-12',
@@ -1502,14 +1511,54 @@
         document.querySelectorAll('[data-script][data-action]').forEach(button => { button.onclick = () => runAction(button.dataset.script, button.dataset.action); });
     }
 
+    function savePendingModuleAction(id, actionId) {
+        try { sessionStorage.setItem('SakaLuX_HUB_PENDING_MODULE_ACTION', JSON.stringify({ id, actionId, at: Date.now() })); } catch {}
+    }
+
+    function clearPendingModuleAction() {
+        try { sessionStorage.removeItem('SakaLuX_HUB_PENDING_MODULE_ACTION'); } catch {}
+    }
+
+    async function retryPendingModuleAction() {
+        let pending = null;
+        try { pending = JSON.parse(sessionStorage.getItem('SakaLuX_HUB_PENDING_MODULE_ACTION') || 'null'); } catch {}
+        if (!pending?.id || !pending?.actionId || Date.now() - Number(pending.at || 0) > 30000) { clearPendingModuleAction(); return false; }
+        const script = SCRIPTS.find(item => item.id === pending.id);
+        if (!script) { clearPendingModuleAction(); return false; }
+        for (let i = 0; i < 12; i++) {
+            const api = script.api();
+            if (api) {
+                const action = script.quickActions.find(item => item.id === pending.actionId) || { method: pending.actionId };
+                if (typeof api[action.method] === 'function') {
+                    clearPendingModuleAction();
+                    try { await api[action.method](); recordUsage(script.id); } catch (error) { console.error('[SakaLuX Hub pending action]', error); }
+                    return true;
+                }
+            }
+            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+            if (bridge) {
+                clearPendingModuleAction();
+                bridge.dataset.action = pending.actionId === 'open' || pending.actionId === 'settings' ? 'open' : pending.actionId;
+                bridge.click();
+                recordUsage(script.id);
+                return true;
+            }
+            await new Promise(resolve => setTimeout(resolve, 250));
+        }
+        clearPendingModuleAction();
+        return false;
+    }
+
     async function runAction(id, actionId) {
         const script = SCRIPTS.find(item => item.id === id);
         if (!script) return;
+        const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
+        const isPanelAction = actionId === getPrimaryAction(script).id || actionId === 'open' || actionId === 'settings';
         const api = script.api();
         if (!api) {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
             if (bridge) {
-                bridge.dataset.action = 'open';
+                bridge.dataset.action = isPanelAction ? 'open' : actionId;
                 bridge.click();
                 recordUsage(id);
                 closeHub();
@@ -1521,24 +1570,28 @@
                 return;
             }
             if (getInstalledVersion(script)) {
-                alert(script.name + ' is installed, but this version needs the Violentmonkey bridge update before Hub can open it.');
+                if (action.fallbackUrl) {
+                    savePendingModuleAction(id, actionId);
+                    closeHub();
+                    location.href = action.fallbackUrl;
+                    return;
+                }
+                alert(script.name + ' is installed, but its control bridge is not available on this page.');
                 return;
             }
             const url = getInstallUrl(script);
             if (url) location.href = url;
             return;
         }
-        const action = script.quickActions.find(item => item.id === actionId) || { method: actionId };
-        const isPanelAction = actionId === getPrimaryAction(script).id || actionId === 'open' || actionId === 'settings';
         try {
             if (typeof api[action.method] === 'function') {
                 recordUsage(id);
                 const result = await api[action.method]();
-                if (result === false && action.fallbackUrl) { location.href = action.fallbackUrl; return; }
+                if (result === false && action.fallbackUrl) { savePendingModuleAction(id, actionId); location.href = action.fallbackUrl; return; }
                 if (isPanelAction) closeHub(); else setTimeout(openHub, 100);
                 return;
             }
-            if (action.fallbackUrl) { recordUsage(id); location.href = action.fallbackUrl; return; }
+            if (action.fallbackUrl) { savePendingModuleAction(id, actionId); recordUsage(id); location.href = action.fallbackUrl; return; }
             if (isPanelAction && script.fallbackOpen()) { recordUsage(id); closeHub(); return; }
             alert(script.name + ' is not available on this page.');
         } catch (error) {
@@ -1730,6 +1783,7 @@
         ensureEverything();
         startObserver();
         await loadRegistry(false);
+        setTimeout(() => retryPendingModuleAction(), 350);
         setTimeout(ensureEverything, 700);
         setTimeout(ensureEverything, 1800);
         setTimeout(ensureEverything, 4000);
