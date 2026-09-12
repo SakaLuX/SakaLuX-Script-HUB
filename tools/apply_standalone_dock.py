@@ -1,9 +1,14 @@
 from pathlib import Path
+import json
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
 MARK_START = '/* SakaLuX Standalone Dock Bootstrap — BEGIN */'
 MARK_END = '/* SakaLuX Standalone Dock Bootstrap — END */'
+RELEASE_NOTE = (
+    'Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. '
+    'The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.'
+)
 
 BOOTSTRAP = r'''/* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
@@ -117,6 +122,42 @@ BOOTSTRAP = r'''/* SakaLuX Standalone Dock Bootstrap — BEGIN */
 })();
 /* SakaLuX Standalone Dock Bootstrap — END */'''
 
+DOC_MAP = {
+    'SakaLuX-Account-Auditor.user.js': 'greasyfork/Account-Auditor.md',
+    'SakaLuX-Bazaar-Thanker-PDA.user.js': 'greasyfork/Bazaar-Thanker.md',
+    'SakaLuX-Company-Intelligence-v1.0.0.user.js': 'greasyfork/Company-Intelligence.md',
+    'SakaLuX-Elimination-Assistant.user.js': 'greasyfork/Elimination-Assistant.md',
+    'SakaLuX-Enhancer-Guard.user.js': 'greasyfork/Enhancer-Guard.md',
+    'SakaLuX-Market-Intelligence.user.js': 'greasyfork/Market-Intelligence.md',
+    'SakaLuX-Mission-Rewards.user.js': 'greasyfork/Mission-Rewards.md',
+    'SakaLuX-Script-Hub.user.js': 'greasyfork/Script-Hub.md',
+    'SakaLuX-Suite.user.js': 'greasyfork/SakaLuX-Suite.md',
+}
+
+DESCRIPTIONS = {
+    'SakaLuX-Account-Auditor.user.js': 'Private read-only Torn account auditor with safe API collection, snapshots and account diagnostics.',
+    'SakaLuX-Bazaar-Thanker-PDA.user.js': 'Groups bazaar buyers, prepares thank-you messages and keeps useful sales history and statistics.',
+    'SakaLuX-Company-Intelligence-v1.0.0.user.js': 'Company intelligence tools for employees and directors, including performance and management views.',
+    'SakaLuX-Elimination-Assistant.user.js': 'Eliminations target advisor with Torn and FFScouter support, safe-target memory, filtering and export.',
+    'SakaLuX-Enhancer-Guard.user.js': 'Tracks enhancers and relics, inventory ownership and item protection helpers.',
+    'SakaLuX-Market-Intelligence.user.js': 'Market and travel intelligence with pricing, item-market tools, loadout comparison and travel helpers.',
+    'SakaLuX-Mission-Rewards.user.js': 'Adds mission reward values, value-per-credit guidance and related inventory information.',
+    'SakaLuX-Script-Hub.user.js': 'Central manager, launcher, language/settings bridge and health monitor for SakaLuX Torn scripts.',
+    'SakaLuX-Suite.user.js': 'Unified SakaLuX suite containing the complete set of integrated Torn helper modules.',
+}
+
+
+def bump_patch(v: str) -> str:
+    m = re.fullmatch(r'(\d+)\.(\d+)\.(\d+)', v.strip())
+    if not m:
+        raise ValueError(f'Unsupported version: {v}')
+    return f'{m.group(1)}.{m.group(2)}.{int(m.group(3)) + 1}'
+
+
+def metadata(text: str, key: str) -> str:
+    m = re.search(r'^// @' + re.escape(key) + r'\s+(.+?)\s*$', text, re.M)
+    return m.group(1).strip() if m else ''
+
 
 def strip_old_bootstrap(text: str) -> str:
     pattern = re.compile(re.escape(MARK_START) + r'.*?' + re.escape(MARK_END) + r'\n?', re.S)
@@ -129,27 +170,122 @@ def normalize_12h(text: str) -> str:
     return text
 
 
-def inject(text: str) -> str:
+def inject_bootstrap(text: str) -> str:
     text = strip_old_bootstrap(text)
     text = normalize_12h(text)
     marker = '// ==/UserScript=='
     idx = text.find(marker)
     if idx < 0:
-        return text
+        raise ValueError('Missing userscript metadata terminator')
     end = idx + len(marker)
     return text[:end] + '\n\n' + BOOTSTRAP + text[end:]
 
 
-changed = []
-for path in ROOT.glob('*.user.js'):
-    if path.name == 'SakaLuX-Script-Hub.user.js':
-        continue
-    original = path.read_text(encoding='utf-8')
-    updated = inject(original)
-    if updated != original:
-        path.write_text(updated, encoding='utf-8')
-        changed.append(path.name)
+def bump_script(path: Path, add_bootstrap: bool) -> tuple[str, str, str]:
+    text = path.read_text(encoding='utf-8')
+    old = metadata(text, 'version')
+    if not old:
+        raise ValueError(f'{path.name}: missing @version')
+    new = bump_patch(old)
+    text = re.sub(r'(^// @version\s+)' + re.escape(old) + r'(\s*$)', rf'\g<1>{new}\g<2>', text, count=1, flags=re.M)
+    text = re.sub(
+        r"(const\s+[A-Z0-9_]*VERSION[A-Z0-9_]*\s*=\s*['\"])" + re.escape(old) + r"(['\"])",
+        rf'\g<1>{new}\g<2>', text,
+    )
+    text = normalize_12h(text)
+    if add_bootstrap:
+        text = inject_bootstrap(text)
+    path.write_text(text, encoding='utf-8')
+    return old, new, metadata(text, 'name') or path.stem
 
-print('Updated', len(changed), 'userscripts')
-for name in changed:
-    print(' -', name)
+
+def ensure_section(text: str, heading: str, body: str) -> str:
+    pattern = re.compile(r'^## ' + re.escape(heading) + r'\s*\n.*?(?=^## |\Z)', re.M | re.S)
+    replacement = f'## {heading}\n{body.strip()}\n\n'
+    if pattern.search(text):
+        return pattern.sub(replacement, text, count=1)
+    return text.rstrip() + '\n\n' + replacement
+
+
+def update_doc(path: Path, script_file: str, version: str, display_name: str, license_name: str):
+    text = path.read_text(encoding='utf-8') if path.exists() else f'# {display_name}\n\n'
+    if not re.search(r'^#\s+', text, re.M):
+        text = f'# {display_name}\n\n' + text
+    if script_file != 'SakaLuX-Script-Hub.user.js' and 'Complementary add-on for **SakaLuX Script Hub**' not in text:
+        first_nl = text.find('\n')
+        text = text[:first_nl+1] + '\n> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.\n' + text[first_nl+1:]
+    text = re.sub(r'## Current version\s+\*\*v[^*]+\*\*', f'## Current version\n**v{version}**', text)
+    text = re.sub(r'\*\*Current version:\s*v[^*]+\*\*', f'## Current version\n**v{version}**', text)
+    if not re.search(r'^## Current version\s*$', text, re.M):
+        text = ensure_section(text, 'Current version', f'**v{version}**')
+    text = ensure_section(text, 'Current release note', RELEASE_NOTE if script_file != 'SakaLuX-Script-Hub.user.js' else (
+        'Compatibility release for the shared standalone dock and 12-hour global Hub reminder used by SakaLuX add-ons. '
+        'Hub fallback version references were synchronized with the newly released add-on versions.'
+    ))
+    if not re.search(r'^## What it does\s*$', text, re.M):
+        text = ensure_section(text, 'What it does', DESCRIPTIONS.get(script_file, metadata((ROOT / script_file).read_text(encoding='utf-8'), 'description')))
+    if not re.search(r'^## Recommended\s*$', text, re.M):
+        recommendation = ('Use this as the central manager for SakaLuX scripts.' if script_file == 'SakaLuX-Script-Hub.user.js'
+                          else 'Install **SakaLuX Script Hub** for centralized launch controls, language/settings sharing and easier management.')
+        text = ensure_section(text, 'Recommended', recommendation)
+    text = ensure_section(text, 'License', license_name or 'All Rights Reserved')
+    if script_file in {'SakaLuX-Account-Auditor.user.js','SakaLuX-Elimination-Assistant.user.js','SakaLuX-Enhancer-Guard.user.js','SakaLuX-Market-Intelligence.user.js'}:
+        if not re.search(r'^## Privacy\s*$', text, re.M):
+            text = ensure_section(text, 'Privacy', 'API keys and script settings are handled locally by the userscript unless a feature explicitly states that it communicates with an external service.')
+    path.write_text(text.rstrip() + '\n', encoding='utf-8')
+
+
+versions = {}
+names = {}
+licenses = {}
+for path in sorted(ROOT.glob('*.user.js')):
+    # The Hub itself should not inject a dock that advertises installing the Hub.
+    old, new, name = bump_script(path, add_bootstrap=(path.name != 'SakaLuX-Script-Hub.user.js'))
+    versions[path.name] = new
+    names[path.name] = name
+    licenses[path.name] = metadata(path.read_text(encoding='utf-8'), 'license')
+    print(f'{path.name}: {old} -> {new}')
+
+# Synchronize the canonical registry with the bumped source versions.
+registry_path = ROOT / 'scripts.json'
+registry = json.loads(registry_path.read_text(encoding='utf-8'))
+for item in registry.get('scripts', []):
+    source = str(item.get('sourceUrl', ''))
+    filename = source.rsplit('/', 1)[-1]
+    if filename in versions:
+        item['version'] = versions[filename]
+registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+# Synchronize Hub fallback entries for every registered script.
+hub_path = ROOT / 'SakaLuX-Script-Hub.user.js'
+hub = hub_path.read_text(encoding='utf-8')
+for item in registry.get('scripts', []):
+    sid = str(item.get('id', ''))
+    version = str(item.get('version', ''))
+    if not sid or not version:
+        continue
+    pattern = re.compile(r"(id:\s*['\"]" + re.escape(sid) + r"['\"][\s\S]{0,500}?version:\s*['\"])([^'\"]+)(['\"])")
+    hub, count = pattern.subn(rf'\g<1>{version}\g<3>', hub, count=1)
+    if count == 0:
+        print(f'WARNING: Hub fallback not found for {sid}')
+hub_path.write_text(hub, encoding='utf-8')
+
+# Update dedicated GreasyFork/info pages.
+for script_file, doc_file in DOC_MAP.items():
+    if script_file not in versions:
+        continue
+    update_doc(ROOT / doc_file, script_file, versions[script_file], names[script_file], licenses[script_file])
+
+# Keep Script Hub info list versions synchronized for registered add-ons.
+hub_info = ROOT / 'greasyfork/Script-Hub.md'
+text = hub_info.read_text(encoding='utf-8')
+for item in registry.get('scripts', []):
+    name = str(item.get('name', '')).strip()
+    version = str(item.get('version', '')).strip()
+    if not name or not version:
+        continue
+    line_pat = re.compile(r'^(- .*SakaLuX ' + re.escape(name) + r' )\*\*v[^*]+\*\*', re.M)
+    text = line_pat.sub(rf'\g<1>**v{version}**', text)
+hub_info.write_text(text, encoding='utf-8')
+
+print('Release synchronization complete.')
