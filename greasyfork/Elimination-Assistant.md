@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.29**
+**v1.3.30**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
