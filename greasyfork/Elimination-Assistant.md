@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.23**
+**v1.3.24**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -26,7 +26,7 @@
 - Never attacks automatically.
 
 ## Current release note
-Standalone Dock v2 now uses its own uniform buttons instead of moving script launchers. All installed Hub add-ons register themselves in the shared dock, preventing overlaps and missing entries. The Hub install reminder remains shared and limited to once every 12 hours.
+Standalone Dock v3 is smaller and cleaner, opens from a native gold S icon mounted after Torn cash, removes the + control, uses a compact fallback S only when the native status bar is unavailable, and keeps the shared Hub reminder limited to once every 12 hours.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant together with the rest of the SakaLuX add-ons and to use the shared Hub Torn API key when available.
@@ -43,6 +43,14 @@ FFScouter battle stats and Smart Target Score are estimates and advisory only. E
 The script never attacks automatically; ATTACK only opens the Torn attack page and the player remains in control of the fight.
 
 ## Release history
+### v1.3.24 — Compact native S standalone launcher
+
+- Smaller professional standalone dock.
+- Native gold **S** launcher mounts after Torn cash and opens/closes the dock.
+- Removed the dock **+** control.
+- Compact fallback **S** appears only when Torn status icons are unavailable.
+- Shared Hub reminder remains limited to once every 12 hours.
+
 ### v1.3.20 — Team dropdown recovery
 
 - Fixed an empty team dropdown when Torn returns the team list in a nested or keyed response shape.

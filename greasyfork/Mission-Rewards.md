@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.11**
+**v1.0.12**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -18,7 +18,7 @@
 - Keeps Mission-specific scanning inactive outside the Missions page.
 
 ## Current release note
-Standalone Dock v2 now uses its own uniform buttons instead of moving script launchers. All installed Hub add-ons register themselves in the shared dock, preventing overlaps and missing entries. The Hub install reminder remains shared and limited to once every 12 hours.
+Standalone Dock v3 is smaller and cleaner, opens from a native gold S icon mounted after Torn cash, removes the + control, uses a compact fallback S only when the native status bar is unavailable, and keeps the shared Hub reminder limited to once every 12 hours.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
@@ -33,6 +33,14 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 Displayed market values and value-per-credit calculations are estimates based on available item data. Weapon-mod ranges are learned locally from offers seen by the script and should be treated as guidance rather than guaranteed future Mission Shop prices.
 
 ## Release history
+### v1.0.12 — Compact native S standalone launcher
+
+- Smaller professional standalone dock.
+- Native gold **S** launcher mounts after Torn cash and opens/closes the dock.
+- Removed the dock **+** control.
+- Compact fallback **S** appears only when Torn status icons are unavailable.
+- Shared Hub reminder remains limited to once every 12 hours.
+
 ### v1.0.8 — Violentmonkey Hub bridge
 
 - Added an isolated-context DOM bridge so Script Hub can detect, open and switch Mission Rewards ON/OFF in Violentmonkey.

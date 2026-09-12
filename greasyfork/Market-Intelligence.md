@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.11**
+**v1.17.12**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -21,7 +21,7 @@
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
 
 ## Current release note
-Standalone Dock v2 now uses its own uniform buttons instead of moving script launchers. All installed Hub add-ons register themselves in the shared dock, preventing overlaps and missing entries. The Hub install reminder remains shared and limited to once every 12 hours.
+Standalone Dock v3 is smaller and cleaner, opens from a native gold S icon mounted after Torn cash, removes the + control, uses a compact fallback S only when the native status bar is unavailable, and keeps the shared Hub reminder limited to once every 12 hours.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence together with the rest of the SakaLuX add-ons, use shared Hub integration and access its quick actions from one place.
@@ -47,6 +47,14 @@ The script does **not** automatically purchase, sell, travel, trade or attack. A
 Arrival/restock prediction learns from observations made while the script is active. Until enough history exists, predictions may be labelled **LEARNING** or lower-confidence and should not be treated as guaranteed future stock.
 
 ## Release history
+### v1.17.12 — Compact native S standalone launcher
+
+- Smaller professional standalone dock.
+- Native gold **S** launcher mounts after Torn cash and opens/closes the dock.
+- Removed the dock **+** control.
+- Compact fallback **S** appears only when Torn status icons are unavailable.
+- Shared Hub reminder remains limited to once every 12 hours.
+
 ### v1.17.8 — Violentmonkey Hub bridge
 
 - Added an isolated-context DOM bridge so Script Hub can detect, open and switch Market Intelligence ON/OFF in Violentmonkey.
