@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.0
+// @version      1.8.1
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,12 +29,12 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.0',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.1',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
 const KEY={
- api:APP.key+':api', mode:APP.key+':mode', compact:APP.key+':compact', enabled:APP.key+':enabled',
+ api:APP.key+':api', mode:APP.key+':mode', tab:APP.key+':tab', compact:APP.key+':compact', enabled:APP.key+':enabled',
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
@@ -424,8 +424,8 @@ function render(){
  root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button type="button" data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button type="button" data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button type="button" class="ci-icon" data-act="refresh" title="Refresh">↻</button><button type="button" class="ci-icon api" data-act="settings" title="API Access">🔑</button><button type="button" class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button type="button" data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div><div class="ci-status">${S.updated?'Updated '+new Date(S.updated).toLocaleString():'Not refreshed yet'} · ${esc(apiSource())} · no automated company actions</div><div class="ci-footer">Made with ❤️ by <a href="${PROFILE_URL}" target="_self">SakaLuX [2380374]</a></div></div>`;
  const shell=$('.ci-shell',root),tabBar=$('.ci-tabs',root);if(shell) shell.scrollTop=scrollTop;if(tabBar)tabBar.scrollLeft=tabsLeft;
  $$('button',root).forEach(b=>{if(!b.type)b.type='button'});
- $$('[data-mode]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
- $$('[data-tab]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();if(S.tab===b.dataset.tab)return;S.tab=b.dataset.tab;render()});
+ $$('[data-mode]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
+ $$('[data-tab]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();if(S.tab===b.dataset.tab)return;S.tab=b.dataset.tab;set(KEY.tab,S.tab);render()});
  $$('[data-act]',root).forEach(b=>b.onclick=()=>act(b.dataset.act));
  $$('[data-contract-paid]',root).forEach(b=>b.onclick=()=>{const x=arr(KEY.contracts),c=x.find(v=>String(v.id)===b.dataset.contractPaid);if(c)c.paid=!c.paid;set(KEY.contracts,x);render()});
  $$('[data-contract-close]',root).forEach(b=>b.onclick=()=>{const x=arr(KEY.contracts),c=x.find(v=>String(v.id)===b.dataset.contractClose);if(c)c.active=c.active===false;set(KEY.contracts,x);render()});
@@ -439,10 +439,10 @@ function dialog(title,fields,onSave){
 function downloadCsv(name,rows){const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n'),blob=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function act(a){
  if(a==='close'){S.open=false;render();return}
- if(a==='settings'){S.tab='settings';render();return}
+ if(a==='settings'){S.tab='settings';set(KEY.tab,S.tab);render();return}
  if(a==='refresh'){refresh();return}
  if(a==='save-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');alert('API key saved locally.');return}
- if(a==='test-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');S.tab='overview';refresh();return}
+ if(a==='test-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');S.tab='overview';set(KEY.tab,S.tab);refresh();return}
  if(a==='clear-key'){del(KEY.api);alert(hubApiKey()?'Local key cleared. The SakaLuX Hub key remains active.':'Local API key cleared.');render();return}
  if(a==='new-agreement')return dialog('Train Agreement',[{name:'company',label:'Company / employee',value:meta().name},{name:'perWeek',label:'Trains promised/week',type:'number',value:10},{name:'cost',label:'Cost/train (0 = free)',type:'number',value:0},{name:'startDate',label:'Starts / wait note',value:'Immediately'},{name:'note',label:'Notes',wide:true}],d=>{let x=arr(KEY.agreements);x.push({...d,perWeek:num(d.perWeek),cost:num(d.cost),ts:now(),active:true});set(KEY.agreements,x)});
  if(a==='log-train')return dialog('Log Train',[{name:'employee',label:'Employee / buyer',value:me()?.name||''},{name:'primary',label:'Primary stat',type:'select',options:['Intelligence','Endurance','Manual Labor','Unknown']},{name:'secondary',label:'Secondary stat',type:'select',options:['Endurance','Intelligence','Manual Labor','Unknown']},{name:'price',label:'Price received/paid',type:'number',value:0},{name:'note',label:'Note',wide:true}],d=>{let x=arr(KEY.trains);x.push({...d,price:num(d.price),ts:now()});set(KEY.trains,x)});
@@ -456,17 +456,17 @@ function act(a){
  if(a==='clear'&&confirm('Clear local train, contract, benchmark, offer and snapshot history?')){[KEY.agreements,KEY.trains,KEY.contracts,KEY.benchmarks,KEY.offers,KEY.snapshots,KEY.metrics].forEach(del);render()}
 }
 function syncHubBridge(){const b=$('#sakalux-module-bridge-company-intelligence');if(b)b.dataset.enabled=String(S.enabled)}
-function installHubBridge(){let b=$('#sakalux-module-bridge-company-intelligence');if(!b){b=document.createElement('button');b.type='button';b.id='sakalux-module-bridge-company-intelligence';b.hidden=true;(document.body||document.documentElement).appendChild(b)}b.dataset.version=APP.version;b.dataset.enabled=String(S.enabled);b.onclick=()=>{const a=b.dataset.action;if(a==='open'){if(!S.enabled)setEnabled(true);S.open=true;S.tab='overview';render()}else if(a==='toggle')setEnabled(!S.enabled);else if(a==='on'||a==='off')setEnabled(a==='on');b.dataset.action='';syncHubBridge()}}
+function installHubBridge(){let b=$('#sakalux-module-bridge-company-intelligence');if(!b){b=document.createElement('button');b.type='button';b.id='sakalux-module-bridge-company-intelligence';b.hidden=true;(document.body||document.documentElement).appendChild(b)}b.dataset.version=APP.version;b.dataset.enabled=String(S.enabled);b.onclick=()=>{const a=b.dataset.action;if(a==='open'){if(!S.enabled)setEnabled(true);S.open=true;render()}else if(a==='toggle')setEnabled(!S.enabled);else if(a==='on'||a==='off')setEnabled(a==='on');b.dataset.action='';syncHubBridge()}}
 function setEnabled(value){S.enabled=!!value;set(KEY.enabled,S.enabled);if(!S.enabled){S.open=false;$('#ci-root')?.remove();$('#ci-launch')?.remove()}else init();syncHubBridge();try{window.dispatchEvent(new CustomEvent('SakaLuXCompanyIntelligenceStateChanged',{detail:{enabled:S.enabled,version:APP.version}}))}catch{}return S.enabled}
 function init(){
- css();S.enabled=get(KEY.enabled,true)!==false;S.compact=get(KEY.compact,true)!==false;S.mode=get(KEY.mode,'employee')||'employee';
+ css();S.enabled=get(KEY.enabled,true)!==false;S.compact=get(KEY.compact,true)!==false;S.mode=get(KEY.mode,'employee')||'employee';S.tab=get(KEY.tab,'overview')||'overview';
  if(!S.data.profile){const cached=get(KEY.company,null),last=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>b.ts-a.ts)[0]?.company;if(cached||last)S.data.profile=cached||last}
  installHubBridge();syncHubBridge();
  try{localStorage.setItem('SakaLuX_Installed_company-intelligence',APP.version)}catch{}
- if(S.enabled&&!$('#ci-launch')){const b=document.createElement('button');b.id='ci-launch';b.textContent='🏢 Company Intel';b.onclick=()=>{S.open=true;S.tab='overview';render();if(!S.updated&&apiKey())refresh()};document.body.appendChild(b)}
+ if(S.enabled&&!$('#ci-launch')){const b=document.createElement('button');b.id='ci-launch';b.textContent='🏢 Company Intel';b.onclick=()=>{S.open=true;render();if(!S.updated&&apiKey())refresh()};document.body.appendChild(b)}
  try{
   window.SakaLuX=window.SakaLuX||{};
-  window.SakaLuX.companyIntelligence={name:APP.name,version:APP.version,open:()=>{if(!S.enabled)setEnabled(true);S.open=true;render()},refresh,mode:m=>{if(['employee','director'].includes(m)){S.mode=m;S.tab='overview';set(KEY.mode,m);render()}},getApiKey:apiKey,setEnabled,toggleEnabled:()=>setEnabled(!S.enabled),isEnabled:()=>S.enabled};
+  window.SakaLuX.companyIntelligence={name:APP.name,version:APP.version,open:()=>{if(!S.enabled)setEnabled(true);S.open=true;render()},refresh,mode:m=>{if(['employee','director'].includes(m)){S.mode=m;S.tab='overview';set(KEY.mode,m);set(KEY.tab,S.tab);render()}},getApiKey:apiKey,setEnabled,toggleEnabled:()=>setEnabled(!S.enabled),isEnabled:()=>S.enabled};
   window.SakaLuXCompanyIntelligence=window.SakaLuX.companyIntelligence;
   window.dispatchEvent(new CustomEvent('SakaLuX:ModuleReady',{detail:{id:'company-intelligence',name:APP.name,version:APP.version,actions:['OPEN','REFRESH','EMPLOYEE','DIRECTOR']}}));
  }catch{}
