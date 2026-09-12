@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.7.1
+// @version      1.8.0
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.7.1',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.0',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -37,7 +37,8 @@ const KEY={
  api:APP.key+':api', mode:APP.key+':mode', compact:APP.key+':compact', enabled:APP.key+':enabled',
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
- contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes'
+ contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
+ metrics:APP.key+':metrics'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -168,6 +169,18 @@ function me(){
  const id=num(first(basic(),['id','player_id'],0));
  return employees().map(normEmp).find(e=>e.id===id)||null;
 }
+function currentPosition(){
+ const cached=knownSnapshots().at(-1)?.myPosition;
+ return String(first(job(),['position','position_name','company.position','company.position_name','job.position','job.position_name'],first(userProfile(),['job.position','job.position_name','position'],me()?.position||cached||''))||'').trim();
+}
+function currentEffectiveness(){
+ const own=me()?.effectiveness;if(Number.isFinite(own)&&own>0)return own;
+ const value=first(job(),['effectiveness','company.effectiveness','job.effectiveness'],first(userProfile(),['job.effectiveness','company.effectiveness'],null));
+ if(value!=null&&Number.isFinite(Number(value)))return num(value);
+ const el=document.querySelector('[data-effectiveness],.effectiveness-value,p.effectiveness-value');
+ const dom=el?.getAttribute?.('data-effectiveness')||el?.textContent||'';
+ const match=String(dom).match(/-?\d+(?:\.\d+)?/);return match?num(match[0]):null;
+}
 function isDirector(){
  const id=num(first(basic(),['id','player_id'],0)),m=meta();
  return (id&&m.directorId&&id===m.directorId)||String(first(job(),['position','position_name','company.position','company.position_name'],'')).toLowerCase().includes('director');
@@ -209,16 +222,20 @@ const arr=k=>get(k,[])||[];
 function saveSnapshot(){
  const m=meta();if(!m.id&&m.name==='Unknown company')return;
  const a=arr(KEY.snapshots),date=new Date().toISOString().slice(0,10),w=work();
- const snap={date,ts:now(),company:m,workstats:w,myPosition:me()?.position||first(job(),['position','position_name','company.position','company.position_name'],'')};
+ const snap={date,ts:now(),company:m,workstats:w,myPosition:currentPosition(),effectiveness:currentEffectiveness()};
  const i=a.findIndex(x=>x.date===date);if(i>=0)a[i]=snap;else a.push(snap);
  set(KEY.snapshots,a.slice(-120));
+ const samples=arr(KEY.metrics),sample={ts:now(),company:m,workstats:w,position:currentPosition(),effectiveness:currentEffectiveness()};
+ const last=samples.at(-1),changed=!last||['weeklyIncome','weeklyCustomers','popularity','efficiency','environment','stars'].some(k=>num(last.company?.[k])!==num(m[k]))||['manual','intelligence','endurance'].some(k=>num(last.workstats?.[k])!==num(w[k]));
+ if(!last||changed||now()-num(last.ts)>6*3600000)samples.push(sample);else samples[samples.length-1]=sample;
+ set(KEY.metrics,samples.slice(-500));
 }
 async function refresh(){
  if(S.loading)return;S.loading=true;S.errors=[];render();
- const userEndpoints={basic:'/user/basic',workstats:'/user/workstats',job:'/user/job'};
- const userResults=await Promise.allSettled(Object.entries(userEndpoints).map(async([k,p])=>[k,await api(p)]));
+ const userEndpoints={basic:['/user/basic','basic'],workstats:['/user/workstats','workstats'],job:['/user/job','job']};
+ const userResults=await Promise.allSettled(Object.entries(userEndpoints).map(async([k,[p,selection]])=>{try{return[k,await api(p)]}catch(v2Error){try{return[k,await legacyApi('user','',selection)]}catch{throw v2Error}}}));
  for(const x of userResults)x.status==='fulfilled'?S.data[x.value[0]]=x.value[1]:S.errors.push(x.reason?.message||String(x.reason));
- try{S.data.userProfile=await api('/user/profile')}catch{}
+ try{S.data.userProfile=await api('/user/profile')}catch{try{S.data.userProfile=await legacyApi('user','','profile,job,workstats')}catch{}}
  if(!detectCompanyId()||jobCompanyName()==='Unknown company')try{S.data.job=await legacyApi('user','','job')}catch{}
  const companyId=detectCompanyId();
  delete S.data.employees;delete S.data.stock;
@@ -243,18 +260,19 @@ const badge=(x,c='')=>`<span class="ci-badge ${c}">${esc(x)}</span>`;
 const empty=x=>`<div class="ci-empty">${esc(x)}</div>`;
 function risk(s){return s>=80?['LOW','good']:s>=60?['MODERATE','warn']:['HIGH','bad']}
 function starOutlook(){
- const m=meta(),rows=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>a.ts-b.ts),latest=rows.at(-1),older=rows.length>1?rows[0]:null;
+ const m=meta(),rows=metricSamples(),latest=rows.at(-1),older=rows.length>1?rows[0]:null;
  const d=new Date(),until=(7-d.getUTCDay())%7||7,next=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+until));
  if(!health().available)return card('Star Outlook',`<div class="ci-score warn"><b>—</b><span>WAITING FOR PROFILE</span></div><p class="ci-note">A real Company Profile snapshot is required. No star probability is invented from missing data.</p>`);
- let state='BUILDING HISTORY',cls='warn',detail='At least two daily snapshots are needed for a trend.';
- if(older&&latest){const income=num(latest.company?.weeklyIncome)-num(older.company?.weeklyIncome),perf=[m.popularity,m.efficiency,m.environment].filter(v=>v>0),avg=perf.length?perf.reduce((a,v)=>a+v,0)/perf.length:0;if(income>0&&avg>=80){state='POSITIVE TREND';cls='good'}else if(income<0||avg&&avg<55){state='RISK TREND';cls='bad'}else state='STABLE TREND';detail=`Weekly income change: ${money(income)} · ${rows.length} saved days.`}
- return card('Star Outlook',`<div class="ci-score ${cls}"><b>${m.stars}★</b><span>${state}</span></div>${kv('Next rating review',next.toLocaleDateString())}${kv('Snapshots',rows.length)}<p class="ci-note">${esc(detail)} Torn ranks companies against others of the same type, so this is a trend indicator—not a guaranteed percentage.</p>`);
+ let state='BUILDING HISTORY',cls='warn',detail='At least two different metric samples are needed.';
+ if(older&&latest){const keys=['weeklyIncome','weeklyCustomers','popularity','efficiency','environment'],changes=keys.map(k=>num(latest.company?.[k])-num(older.company?.[k])),positive=changes.filter(x=>x>0).length,negative=changes.filter(x=>x<0).length,perf=[m.popularity,m.efficiency,m.environment].filter(v=>v>0),avg=perf.length?perf.reduce((a,v)=>a+v,0)/perf.length:0,income=changes[0];if(negative>=3||avg&&avg<55||income<0&&negative>=2){state='STAR LOSS RISK';cls='bad'}else if(positive>=3&&avg>=80&&income>=0){state='LIKELY STAR UP';cls='good'}else{state='STABLE';cls='warn'}detail=`${positive} improving · ${negative} declining · weekly income ${income>=0?'+':''}${money(income)}.`}
+ return card('Star Direction',`<div class="ci-score ${cls}"><b>${m.stars}★</b><span>${state}</span></div>${kv('Next rating review',next.toLocaleDateString())}${kv('Metric samples',rows.length)}<p class="ci-note">${esc(detail)} This is an evidence-based direction indicator. Torn compares companies of the same type, so it cannot guarantee the next rating.</p>`);
 }
 function knownSnapshots(){const map=new Map();for(const x of arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>a.ts-b.ts))map.set(x.date,x);return [...map.values()]}
+function metricSamples(){const a=arr(KEY.metrics).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>a.ts-b.ts);return a.length?a:knownSnapshots()}
 function trendMetric(rows,key){if(rows.length<2)return null;const a=num(first(rows[0].company,[key],0)),b=num(first(rows.at(-1).company,[key],0));return {from:a,to:b,change:b-a,pct:a?Math.round((b-a)/a*1000)/10:null}}
 function growthCenter(){
- const rows=knownSnapshots(),m=meta(),income=trendMetric(rows,'weeklyIncome'),customers=trendMetric(rows,'weeklyCustomers'),pop=trendMetric(rows,'popularity'),eff=trendMetric(rows,'efficiency'),env=trendMetric(rows,'environment'),d=new Date(),daysToSunday=(7-d.getUTCDay())%7||7;
- const metric=(name,t,suffix='')=>kv(name,t?`${t.change>=0?'+':''}${fmt(t.change)}${suffix}`:'Waiting for history',t?.pct==null?'':`${t.pct>=0?'+':''}${t.pct}% from first saved day`);
+ const rows=metricSamples(),m=meta(),income=trendMetric(rows,'weeklyIncome'),customers=trendMetric(rows,'weeklyCustomers'),pop=trendMetric(rows,'popularity'),eff=trendMetric(rows,'efficiency'),env=trendMetric(rows,'environment'),d=new Date(),daysToSunday=(7-d.getUTCDay())%7||7;
+ const metric=(name,t,suffix='')=>kv(name,t?(t.change===0?'Stable':`${t.change>0?'+':''}${fmt(t.change)}${suffix}`):'Waiting for a changed sample',t?.pct==null?'':`${t.pct>0?'+':''}${t.pct}% from first saved sample`);
  return `<div class="ci-grid">${starOutlook()}${card('Growth Signals',metric('Weekly income',income)+metric('Weekly customers',customers)+metric('Popularity',pop,'%')+metric('Efficiency',eff,'%')+metric('Environment',env,'%'))}${card('Rating Readiness',kv('Current rating',health().available?m.stars+'★':'—')+kv('Review cycle',`${daysToSunday} day${daysToSunday===1?'':'s'} to Sunday`)+kv('History coverage',rows.length+' day'+(rows.length===1?'':'s'))+`<p class="ci-note">A promotion depends on gross performance and comparison with companies of the same type. Confidence improves as daily history and benchmarks accumulate.</p>`)}${card('Growth Goals',health().available?`${m.efficiency<90?badge('Raise efficiency above 90%','warn'):badge('Efficiency healthy','good')} ${m.environment<90?badge('Improve environment','warn'):badge('Environment healthy','good')} ${m.popularity<70?badge('Grow popularity','warn'):badge('Popularity healthy','good')}<p class="ci-note">Track income and customers after the daily company report, then compare with the next-star benchmark.</p>`:empty('Sync Company Profile to generate goals.'))}</div>`;
 }
 function employeeOptimizer(){
@@ -288,17 +306,24 @@ function advice(){
 function timeline(){const events=[];for(const x of knownSnapshots())events.push({ts:x.ts,title:`Company snapshot · ${x.company.name}`,detail:`${x.company.stars}★ · ${money(x.company.weeklyIncome)}`});for(const x of arr(KEY.trains))events.push({ts:x.ts,title:`Train · ${x.employee||'Unassigned'}`,detail:`${x.primary||'Unknown'} · ${money(x.price)}`});for(const x of arr(KEY.contracts))events.push({ts:x.ts,title:`Contract · ${x.employee}`,detail:`${x.totalTrains} trains · ${money(num(x.totalTrains)*num(x.pricePerTrain))}`});events.sort((a,b)=>b.ts-a.ts);return `<div class="ci-actions"><button class="ci-btn" data-act="export-report">EXPORT REPORT CSV</button></div>${card('Company Timeline',events.length?events.slice(0,100).map(x=>`<div class="ci-timeline"><time>${new Date(x.ts).toLocaleString()}</time><b>${esc(x.title)}</b><span>${esc(x.detail)}</span></div>`).join(''):empty('No company events saved yet.'))}`}
 
 function employeeOverview(){
- const m=meta(),w=work(),u=me(),h=health(),[rl,rc]=h.available?risk(h.score):['UNAVAILABLE','warn'];
+ const m=meta(),w=work(),u=me(),h=health(),position=currentPosition(),effectiveness=currentEffectiveness(),[rl,rc]=h.available?risk(h.score):['UNAVAILABLE','warn'];
  return `<div class="ci-grid">
- ${card('Company',kv('Name',esc(m.name))+kv('Type',h.available?esc(m.type):'—')+kv('Stars',h.available?m.stars+'★':'—')+kv('Age',h.available?fmt(m.age)+' days':'—')+kv('Position',esc(u?.position||first(job(),['position','position_name','company.position','company.position_name'],'Unknown'))))}
- ${card('My Work Stats',kv('Manual Labor',fmt(w.manual))+kv('Intelligence',fmt(w.intelligence))+kv('Endurance',fmt(w.endurance))+kv('Total',fmt(w.manual+w.intelligence+w.endurance))+kv('Effectiveness',u?fmt(u.effectiveness):'—'))}
+ ${card('Company',kv('Name',esc(m.name))+kv('Type',h.available?esc(m.type):'—')+kv('Stars',h.available?m.stars+'★':'—')+kv('Age',h.available?fmt(m.age)+' days':'—')+kv('Position',position?esc(position):'Not returned by Torn API'))}
+ ${card('My Work Stats',kv('Manual Labor',fmt(w.manual))+kv('Intelligence',fmt(w.intelligence))+kv('Endurance',fmt(w.endurance))+kv('Total',fmt(w.manual+w.intelligence+w.endurance))+kv('Effectiveness',effectiveness==null?'Director data required':fmt(effectiveness)))}
  ${card('Company Risk',h.available?`<div class="ci-score ${rc}"><b>${h.score}/100</b><span>${rl} RISK</span></div>${h.breakdown.slice(0,6).map(x=>`<div class="ci-line"><span>${esc(x.label)} <small>${esc(x.reason)}</small></span><b class="${x.delta>=0?'pos':'neg'}">${x.delta>=0?'+':''}${x.delta}</b></div>`).join('')}`:`<div class="ci-score warn"><b>—</b><span>UNAVAILABLE</span></div><p class="ci-note">Company Profile data is missing. Risk is not calculated from zero or incomplete values.</p>`)}
  ${starOutlook()}
  </div>`;
 }
+function employeeProgress(){
+ const samples=metricSamples(),latest=samples.at(-1),previous=samples.length>1?samples[0]:null,w=work(),position=currentPosition(),effectiveness=currentEffectiveness(),logs=arr(KEY.trains),agreement=arr(KEY.agreements).filter(x=>x.active!==false).at(-1),received7=logs.filter(x=>now()-num(x.ts)<7*86400000).length;
+ const delta=k=>previous&&latest?num(latest.workstats?.[k])-num(previous.workstats?.[k]):null;
+ const row=(label,value)=>kv(label,value==null?'Waiting for history':`${value>0?'+':''}${fmt(value)}`);
+ const weeklyGain=['manual','intelligence','endurance'].reduce((a,k)=>a+Math.max(0,num(delta(k))),0),covered=previous&&latest?Math.max(1,days(num(latest.ts)-num(previous.ts))):0,perDay=covered?weeklyGain/covered:0;
+ return `<div class="ci-grid">${card('Current Employment',kv('Position',position?esc(position):'Not returned by Torn API')+kv('Effectiveness',effectiveness==null?'Director data required':fmt(effectiveness))+kv('Tracked samples',samples.length))}${card('Work Stats Progress',row('Manual Labor',delta('manual'))+row('Intelligence',delta('intelligence'))+row('Endurance',delta('endurance'))+kv('Observed daily pace',covered?fmt(Math.round(perDay)):'Waiting for history'))}${card('Train Compliance',agreement?kv('Promised / week',fmt(agreement.perWeek))+kv('Received last 7 days',`${received7} / ${fmt(agreement.perWeek)}`)+kv('Status',received7>=num(agreement.perWeek)?badge('ON TRACK','good'):badge(`${Math.max(0,num(agreement.perWeek)-received7)} DUE`,'warn')):empty('Add a train agreement from Trains to monitor compliance.'))}${card('Projection',covered&&perDay>0?kv('Next 30 days','~+'+fmt(Math.round(perDay*30))+' total work stats')+kv('Next 90 days','~+'+fmt(Math.round(perDay*90))+' total work stats')+`<p class="ci-note">Projection uses your observed saved history and is not a guarantee.</p>`:empty('Refresh after your stats change to create a usable projection.'))}</div>`;
+}
 function employeePosition(){
  const w=work(),a=advisor(w);
- if(!a.length)return card('Best Position Advisor',empty('The current company profile did not expose position requirements. Company Intelligence will not invent them.')+`<p class="ci-note">Current: MAN ${fmt(w.manual)} · INT ${fmt(w.intelligence)} · END ${fmt(w.endurance)}</p>`);
+ if(!a.length)return `<div class="ci-grid">${card('Current Position',kv('Position',currentPosition()?esc(currentPosition()):'Not returned by Torn API')+kv('Effectiveness',currentEffectiveness()==null?'Director data required':fmt(currentEffectiveness())))}${card('Best Position Advisor',empty('The current Company Profile did not expose position requirements. No backend request is made from this tab and the script will not invent requirements.')+`<p class="ci-note">Current stats: MAN ${fmt(w.manual)} · INT ${fmt(w.intelligence)} · END ${fmt(w.endurance)}</p>`)}</div>`;
  return card('Best Position Advisor',`<div class="ci-tablewrap"><table><thead><tr><th>Position</th><th>Fit</th><th>MAN</th><th>INT</th><th>END</th><th>Status</th></tr></thead><tbody>${a.map(p=>`<tr><td>${esc(p.name)}</td><td>${p.fit}%</td><td>${fmt(p.req.manual)}</td><td>${fmt(p.req.intelligence)}</td><td>${fmt(p.req.endurance)}</td><td>${badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div>`);
 }
 function employeeTrains(){
@@ -368,6 +393,7 @@ function body(){
   return directorOverview();
  }
  if(S.tab==='growth')return growthCenter();
+ if(S.tab==='progress')return employeeProgress();
  if(S.tab==='position')return employeePosition();
  if(S.tab==='trains')return employeeTrains();
  if(S.tab==='offers')return employeeOffers();
@@ -375,7 +401,7 @@ function body(){
  if(S.tab==='history')return history();
  return employeeOverview();
 }
-const tabs=()=>S.mode==='director'?[['overview','Overview'],['growth','Growth'],['employees','Staff'],['training','Training'],['contracts','Contracts'],['finance','Balance'],['stock','Stock'],['benchmark','Benchmark'],['timeline','Timeline'],['advice','Advice'],['history','History']]:[['overview','Overview'],['growth','Growth'],['position','Position'],['trains','Trains'],['offers','Offers'],['advice','Advice'],['history','History']];
+const tabs=()=>S.mode==='director'?[['overview','Overview'],['growth','Growth'],['employees','Staff'],['training','Training'],['contracts','Contracts'],['finance','Balance'],['stock','Stock'],['benchmark','Benchmark'],['timeline','Timeline'],['advice','Advice'],['history','History']]:[['overview','Overview'],['progress','Progress'],['growth','Growth'],['position','Position'],['trains','Trains'],['offers','Offers'],['advice','Advice'],['history','History']];
 
 function css(){
  if($('#ci-style'))return;
@@ -425,9 +451,9 @@ function act(a){
  if(a==='export-contracts'){const logs=arr(KEY.trains);return downloadCsv('SakaLuX-train-contracts.csv',[['Employee','Total trains','Delivered','Remaining','Price/train','Paid','Active'],...arr(KEY.contracts).map(c=>{const delivered=logs.filter(x=>String(x.employee||'').toLowerCase()===String(c.employee||'').toLowerCase()&&x.ts>=(c.ts||0)).length;return[c.employee,c.totalTrains,delivered,Math.max(0,num(c.totalTrains)-delivered),c.pricePerTrain,c.paid?'Yes':'No',c.active===false?'No':'Yes']})])}
  if(a==='export-report'){const events=[...knownSnapshots().map(x=>[new Date(x.ts).toISOString(),'Snapshot',x.company.name,`${x.company.stars} stars`,x.company.weeklyIncome]),...arr(KEY.trains).map(x=>[new Date(x.ts).toISOString(),'Train',x.employee||'',x.primary||'',x.price||0]),...arr(KEY.contracts).map(x=>[new Date(x.ts).toISOString(),'Contract',x.employee||'',x.totalTrains||0,num(x.totalTrains)*num(x.pricePerTrain)])].sort((a,b)=>String(b[0]).localeCompare(String(a[0])));return downloadCsv('SakaLuX-company-report.csv',[['Date','Type','Subject','Detail','Value'],...events])}
  if(a==='new-offer')return dialog('Add Company Offer',[{name:'company',label:'Company name'},{name:'type',label:'Company type'},{name:'stars',label:'Stars',type:'number',value:0},{name:'dailySalary',label:'Salary/day',type:'number',value:0},{name:'trainsPerWeek',label:'Trains/week',type:'number',value:0},{name:'trainCost',label:'Cost/train',type:'number',value:0},{name:'trainValue',label:'Your value/train',type:'number',value:500000}],d=>{let x=arr(KEY.offers);x.push({...d,stars:num(d.stars),dailySalary:num(d.dailySalary),trainsPerWeek:num(d.trainsPerWeek),trainCost:num(d.trainCost),trainValue:num(d.trainValue),ts:now()});set(KEY.offers,x)});
- if(a==='export'){const data={version:APP.version,agreements:arr(KEY.agreements),trains:arr(KEY.trains),contracts:arr(KEY.contracts),offers:arr(KEY.offers),benchmarks:arr(KEY.benchmarks),snapshots:arr(KEY.snapshots)};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),ln=document.createElement('a');ln.href=u;ln.download=`SakaLuX-Company-Intelligence-${new Date().toISOString().slice(0,10)}.json`;ln.click();setTimeout(()=>URL.revokeObjectURL(u),1000);return}
- if(a==='import'){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async()=>{try{const d=JSON.parse(await i.files[0].text());for(const k of ['agreements','trains','contracts','offers','benchmarks','snapshots'])if(d[k])set(KEY[k],d[k]);alert('Import complete.');render()}catch(e){alert('Import failed: '+e.message)}};i.click();return}
- if(a==='clear'&&confirm('Clear local train, contract, benchmark, offer and snapshot history?')){[KEY.agreements,KEY.trains,KEY.contracts,KEY.benchmarks,KEY.offers,KEY.snapshots].forEach(del);render()}
+ if(a==='export'){const data={version:APP.version,agreements:arr(KEY.agreements),trains:arr(KEY.trains),contracts:arr(KEY.contracts),offers:arr(KEY.offers),benchmarks:arr(KEY.benchmarks),snapshots:arr(KEY.snapshots),metrics:arr(KEY.metrics)};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),ln=document.createElement('a');ln.href=u;ln.download=`SakaLuX-Company-Intelligence-${new Date().toISOString().slice(0,10)}.json`;ln.click();setTimeout(()=>URL.revokeObjectURL(u),1000);return}
+ if(a==='import'){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async()=>{try{const d=JSON.parse(await i.files[0].text());for(const k of ['agreements','trains','contracts','offers','benchmarks','snapshots','metrics'])if(d[k])set(KEY[k],d[k]);alert('Import complete.');render()}catch(e){alert('Import failed: '+e.message)}};i.click();return}
+ if(a==='clear'&&confirm('Clear local train, contract, benchmark, offer and snapshot history?')){[KEY.agreements,KEY.trains,KEY.contracts,KEY.benchmarks,KEY.offers,KEY.snapshots,KEY.metrics].forEach(del);render()}
 }
 function syncHubBridge(){const b=$('#sakalux-module-bridge-company-intelligence');if(b)b.dataset.enabled=String(S.enabled)}
 function installHubBridge(){let b=$('#sakalux-module-bridge-company-intelligence');if(!b){b=document.createElement('button');b.type='button';b.id='sakalux-module-bridge-company-intelligence';b.hidden=true;(document.body||document.documentElement).appendChild(b)}b.dataset.version=APP.version;b.dataset.enabled=String(S.enabled);b.onclick=()=>{const a=b.dataset.action;if(a==='open'){if(!S.enabled)setEnabled(true);S.open=true;S.tab='overview';render()}else if(a==='toggle')setEnabled(!S.enabled);else if(a==='on'||a==='off')setEnabled(a==='on');b.dataset.action='';syncHubBridge()}}
