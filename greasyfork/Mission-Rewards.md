@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.2.0**
+**v1.0.19**
 
 ## What it does
 - Shows the Duke mission task and a practical hint before accepting supported missions.
@@ -20,7 +20,7 @@
 
 ## Current release note
 
-**v1.2.0** integrates Duke Mission Task + Hint guidance directly into Mission Rewards on top of the stable v1.0.18 base. The guide is local and isolated from the Mission Shop/API runtime, with no userscript-manager-specific bridge and no external runtime dependency.
+**v1.0.19** keeps the proven v1.0.18 Mission Rewards core, Hub registration, ON/OFF control, API logic and initialization unchanged. Duke Mission Task + Hint guidance is loaded only after the stable core starts, inside a fail-safe isolated module. If Mission Hints fails, base Mission Rewards and Hub detection continue to work.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
