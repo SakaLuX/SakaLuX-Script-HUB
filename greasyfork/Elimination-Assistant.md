@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.19**
+**v1.3.20**
 
 ## What it does
 
@@ -28,6 +28,12 @@ Complementary add-on for SakaLuX Script Hub.
 - Never attacks automatically.
 
 ## Current release notes
+
+### v1.3.20 — Team dropdown recovery
+
+- Fixed an empty team dropdown when Torn returns the team list in a nested or keyed response shape.
+- Caches the last valid team list so the selector remains usable during a temporary empty API response.
+- Validates the saved team against the current list and prevents silently loading an obsolete team ID.
 
 ### v1.3.19 — Persistent target controls
 
