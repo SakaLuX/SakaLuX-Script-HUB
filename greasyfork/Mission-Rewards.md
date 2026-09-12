@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-1.0.14
+1.0.15
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -18,7 +18,8 @@
 - Keeps Mission-specific scanning inactive outside the Missions page.
 
 ## Current release note
-Ultra-professional standalone dock polish: icon badges now sit inside balanced button geometry, labels are optically centered, spacing and shadows are refined, the Hub action is visually quieter, and the native S launcher remains the only primary toggle. The shared Hub reminder remains limited to once every 12 hours.
+
+Made the S badge inside the standalone dock a real close control. Tapping the header S now closes the panel immediately while the native Torn S launcher continues to toggle the dock. Added button semantics, touch feedback and accessibility labels without changing the ultra-professional dock layout.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.26
+// @version      1.3.27
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -16,7 +16,7 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"#sl-eg-button","fallback":"https://www.torn.com/item.php"},{version:'1.3.26'});
+  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"#sl-eg-button","fallback":"https://www.torn.com/item.php"},{version:'1.3.27'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -39,7 +39,7 @@
 #${DOCK_ID}{position:fixed;right:10px;bottom:74px;z-index:2147483000;width:min(198px,calc(100vw - 20px));max-height:min(58vh,390px);overflow:hidden;padding:9px;background:linear-gradient(180deg,rgba(10,14,20,.988),rgba(7,10,15,.988));border:1px solid rgba(255,255,255,.07);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.03);backdrop-filter:blur(12px);font-family:Inter,Arial,sans-serif;display:none}
 #${DOCK_ID}[data-open="1"]{display:block}
 #${DOCK_ID} .slx-dock-head{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;padding:4px 6px 10px;margin-bottom:7px;border-bottom:1px solid rgba(255,255,255,.055)}
-#${DOCK_ID} .slx-dock-mark{width:30px;height:30px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(180deg,#293545,#1a2430);border:1px solid rgba(223,189,97,.38);color:#dfbd61;font:900 16px/30px Arial,sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 10px rgba(0,0,0,.2)}
+#${DOCK_ID} .slx-dock-mark{width:30px;height:30px;display:grid;place-items:center;padding:0;margin:0;border-radius:10px;background:linear-gradient(180deg,#293545,#1a2430);border:1px solid rgba(223,189,97,.38);color:#dfbd61;font:900 16px/30px Arial,sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 10px rgba(0,0,0,.2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}#${DOCK_ID} .slx-dock-mark:active{transform:scale(.92);background:linear-gradient(180deg,#344256,#202b39)}
 #${DOCK_ID} .slx-dock-title{color:#f4f7fb;font-size:11px;font-weight:900;line-height:1.15;letter-spacing:.01em;text-align:center}
 #${DOCK_ID} .slx-dock-sub{color:#8693a3;font-size:8px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;text-align:center}
 #${DOCK_ID} .slx-dock-items{display:flex;flex-direction:column;gap:6px;max-height:calc(min(58vh,390px) - 116px);overflow:auto;padding-top:2px}
@@ -96,8 +96,8 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     document.body?.removeAttribute('data-sakalux-hub-active'); addStyle();
     let d=document.getElementById(DOCK_ID); if(d) return d;
     d=document.createElement('div'); d.id=DOCK_ID; d.dataset.open=localStorage.getItem(OPEN_KEY)==='1'?'1':'0';
-    d.innerHTML=`<div class="slx-dock-head"><span class="slx-dock-mark">S</span><div class="slx-dock-title">SakaLuX Scripts</div><div class="slx-dock-sub">Standalone</div></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">Install SakaLuX Hub</a>`;
-    (document.body||document.documentElement).appendChild(d); return d;
+    d.innerHTML=`<div class="slx-dock-head"><button type="button" class="slx-dock-mark" aria-label="Close SakaLuX Scripts" title="Close SakaLuX Scripts">S</button><div class="slx-dock-title">SakaLuX Scripts</div><div class="slx-dock-sub">Standalone</div></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">Install SakaLuX Hub</a>`;
+    (document.body||document.documentElement).appendChild(d); const close=d.querySelector('.slx-dock-mark'); if(close) close.onclick=e=>{e.preventDefault();e.stopPropagation();toggleDock(false);}; return d;
   }
   function openEntry(data){const el=data.selector?document.querySelector(data.selector):null;if(el){el.click();return;}if(data.fallback)location.href=data.fallback;}
   function render(){
@@ -146,7 +146,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION='1.3.26';
+    const VERSION='1.3.27';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
