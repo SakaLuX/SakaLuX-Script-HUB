@@ -2,7 +2,6 @@ from pathlib import Path
 import json,re
 ROOT=Path(__file__).resolve().parents[1]
 
-# 1) Hub: mark itself active and aggressively remove stale standalone dock UI.
 hub=ROOT/'SakaLuX-Script-Hub.user.js'
 text=hub.read_text(encoding='utf-8')
 text,n=re.subn(r'(^// @version\s+)1\.9\.25(\s*$)',r'\g<1>1.9.26\2',text,count=1,flags=re.M)
@@ -38,14 +37,12 @@ if 'function suppressStandaloneDock()' not in text:
 """
     if anchor not in text: raise SystemExit('ensureEverything anchor')
     text=text.replace(anchor,helper+anchor,1)
-# Ensure every Hub maintenance pass suppresses stale standalone UI.
 anchor="    function ensureEverything() {\n"
 if anchor not in text: raise SystemExit('ensureEverything function')
 if "    function ensureEverything() {\n        suppressStandaloneDock();\n" not in text:
     text=text.replace(anchor,anchor+"        suppressStandaloneDock();\n",1)
 hub.write_text(text,encoding='utf-8')
 
-# 2) Add-ons: robust Hub presence detection across isolated userscript worlds.
 files={
  'SakaLuX-Enhancer-Guard.user.js':('1.3.27','1.3.28'),
  'SakaLuX-Bazaar-Thanker-PDA.user.js':('5.3.17','5.3.18'),
@@ -67,18 +64,13 @@ for name,(oldv,newv) in files.items():
     s=s.replace("const VERSION='"+oldv+"';","const VERSION='"+newv+"';",1)
     p.write_text(s,encoding='utf-8')
 
-# 3) Registry versions.
 regp=ROOT/'scripts.json'
 data=json.loads(regp.read_text(encoding='utf-8'))
-versions={
- 'enhancer':'1.3.28','bazaar':'5.3.18','mission-rewards':'1.0.16',
- 'market-intelligence':'1.17.16','elimination-assistant':'1.3.28'
-}
+versions={'enhancer':'1.3.28','bazaar':'5.3.18','mission-rewards':'1.0.16','market-intelligence':'1.17.16','elimination-assistant':'1.3.28'}
 for item in data['scripts']:
     if item['id'] in versions: item['version']=versions[item['id']]
 regp.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
 
-# 4) Docs current versions + concise release note.
 docs={
  'greasyfork/Script-Hub.md':('1.9.25','1.9.26','Standalone dock detection fix','Hub now marks Torn as Hub-active and removes stale standalone launcher/install UI from older add-ons.'),
  'greasyfork/Enhancer-Guard.md':('1.3.27','1.3.28','Hub detection fix','Recognizes the current Hub S/Fly-out launchers and no longer opens standalone mode when Hub is installed.'),
@@ -90,8 +82,16 @@ docs={
 for path,(oldv,newv,title,note) in docs.items():
     p=ROOT/path
     d=p.read_text(encoding='utf-8')
-    d,n=re.subn(rf'(## Current version\s+\*\*v){re.escape(oldv)}(\*\*)',rf'\g<1>{newv}\2',d,count=1)
-    if n!=1: raise SystemExit(f'doc version {path}')
+    patterns=[
+        (f'## Current version\n{oldv}',f'## Current version\n{newv}'),
+        (f'## Current version\n**v{oldv}**',f'## Current version\n**v{newv}**'),
+        (f'## Current version\n**{oldv}**',f'## Current version\n**{newv}**'),
+    ]
+    changed=False
+    for old,new in patterns:
+        if old in d:
+            d=d.replace(old,new,1); changed=True; break
+    if not changed: raise SystemExit(f'doc version {path}')
     heading=f'### v{newv}'
     if heading not in d:
         d=d.replace('## Current release notes\n',f'## Current release notes\n\n### v{newv} — {title}\n\n- {note}\n',1)
