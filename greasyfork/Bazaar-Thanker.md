@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-5.3.18
+5.3.19
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.18** fixes Hub/standalone detection for the current SakaLuX launchers. When Script Hub is installed, Bazaar Thanker recognizes the native **S** status-bar launcher, the Fly-out **HUB** launcher and the Hub-active page marker, so the standalone dock and **Install SakaLuX Hub** prompt do not appear at the same time as Hub.
+**v5.3.19** fixes the internal version-reporting mismatch from v5.3.18. The userscript metadata, standalone registration, Hub bridge, health API and installed-version marker now all report the same version, preventing Script Hub from repeatedly showing a false Bazaar update.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.
@@ -29,6 +29,11 @@ Bazaar Thanker reads the Torn Events/Messages page in the browser and stores its
 Generated thank-you text should be reviewed before sending. The script assists with preparing and organizing messages; the player remains responsible for the final message sent through Torn.
 
 ## Release history
+### v5.3.19 — Runtime version synchronization
+
+- Synchronized `@version`, `BAZAAR_VERSION`, standalone registration and Hub bridge version.
+- Fixes the persistent false `UPDATE AVAILABLE` state caused by v5.3.18 reporting itself internally as v5.3.17.
+
 ### v5.3.18 — Hub detection fix
 
 - Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
