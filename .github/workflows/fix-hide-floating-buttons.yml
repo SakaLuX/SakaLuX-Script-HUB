@@ -1,0 +1,40 @@
+name: One-time hide Market and Enhancers buttons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-hide-floating-buttons.yml'
+      - '.migration/hide-market-enhancer-buttons.py'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Apply migration
+        run: python .migration/hide-market-enhancer-buttons.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Script-Hub.user.js
+          grep -q '@version      1.9.29' SakaLuX-Script-Hub.user.js
+          grep -q "const VERSION = '1.9.29';" SakaLuX-Script-Hub.user.js
+          grep -q 'data-sakalux-hub-active="1".*#sl-eg-button' SakaLuX-Script-Hub.user.js || true
+          grep -q '#sl-mi-button' SakaLuX-Script-Hub.user.js
+      - name: Commit changes
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md
+          if git diff --cached --quiet; then
+            echo 'No changes.'
+            exit 0
+          fi
+          git commit -m 'Hide Market and Enhancers floating buttons [skip ci]'
+          git push
