@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.38
+// @version      1.9.39
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.38';
+    const VERSION = '1.9.39';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.39',
+            date: '2026-09-12',
+            changes: [
+                'Makes live DOM bridge/API presence authoritative for managed-module state.',
+                'Persistent localStorage install markers no longer make disabled or deleted TornPDA scripts appear installed, healthy or active.',
+                'Module cards and switches now represent the runtime actually present in the current Torn page.'
+            ]
+        },
         {
             version: '1.9.38',
             date: '2026-09-12',
@@ -713,6 +722,8 @@
     }
 
     function getInstalledVersion(script) {
+        // Runtime authority only. Persistent markers are intentionally NOT used here:
+        // they survive TornPDA disable/delete and create ghost installed/active cards.
         try {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
             if (bridge?.dataset?.version) return String(bridge.dataset.version);
@@ -727,13 +738,14 @@
             const standalone = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
             if (standalone?.dataset?.version) return String(standalone.dataset.version);
         } catch {}
+        return null;
+    }
+
+    function getHistoricalMarkerVersion(script) {
         try {
-            const marker = localStorage.getItem('SakaLuX_Installed_' + script.id)
-                || (script.id === 'elimination-assistant' ? localStorage.getItem('SakaLuX_Installed_elimination') : '');
-            if (marker) return String(marker);
-        } catch {}
-        try {
-            return document.querySelector(script.buttonSelector) ? '?' : null;
+            return localStorage.getItem('SakaLuX_Installed_' + script.id)
+                || (script.id === 'elimination-assistant' ? localStorage.getItem('SakaLuX_Installed_elimination') : '')
+                || null;
         } catch { return null; }
     }
 
@@ -844,12 +856,26 @@
         return SCRIPTS.filter(s => getHealth(s).state === 'missing').length;
     }
 
+    function getLiveEnabledState(script) {
+        try {
+            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+            if (bridge) return bridge.dataset.enabled !== 'false';
+        } catch {}
+        try {
+            const api = script.api();
+            if (api && typeof api.isEnabled === 'function') return api.isEnabled() !== false;
+            const health = api?.health?.();
+            if (health && typeof health.enabled === 'boolean') return health.enabled;
+        } catch {}
+        return false;
+    }
+
     function getHealth(script) {
         const api = script.api();
         if (!api) {
-            const installed = getInstalledVersion(script);
-            if (installed) return { state: 'ok', text: 'INSTALLED', version: installed, data: { detection: 'installation marker' } };
-            return { state: 'missing', text: 'NOT INSTALLED', version: null, data: null };
+            const running = getInstalledVersion(script);
+            if (running) return { state: 'ok', text: 'RUNNING', version: running, data: { detection: 'live bridge' } };
+            return { state: 'missing', text: 'NOT RUNNING', version: null, data: { historicalVersion: getHistoricalMarkerVersion(script) } };
         }
         try {
             const data = typeof api.health === 'function' ? api.health() : null;
@@ -1504,7 +1530,7 @@
                 <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
                 ${script.description ? `<div class="slh-description">${escapeHtml(script.description)}</div>` : ''}
                 <div class="slh-chips">
-                    <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'RUNNING v' + escapeHtml(installed || health.version || '?')}</span>
+                    <span class="slh-chip ${healthChipClass}">${missing ? 'NOT RUNNING' : 'RUNNING v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${staleRuntime ? 'warn' : updateChipClass}">${escapeHtml(staleRuntime ? 'RELOAD REQUIRED' : update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
                     ${update.state === 'pending' ? `<span class="slh-chip muted">REGISTRY v${escapeHtml(script.expectedVersion || '?')} PENDING</span>` : latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
