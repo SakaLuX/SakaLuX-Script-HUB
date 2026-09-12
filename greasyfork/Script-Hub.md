@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.33**
+**v1.9.34**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v1.9.32** restores the Hub panel runtime after the bridge-only migration. The native **S**, Fly-out **HUB** and floating fallback launchers all open Script Hub again, while managed add-ons remain bridge/API-only with no individual floating launch buttons.
+**v1.9.34** is based on the stable v1.9.33 Hub and removes userscript-manager-specific compatibility handling. Module controls use only the generic runtime API / DOM bridge integration.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -123,12 +123,6 @@ Every future complementary SakaLuX add-on intended for Hub management should be 
 - Language changes apply immediately and also translate UI elements created later by TornPDA navigation.
 - Exposed `getLanguage()` and `setLanguage()` for native localization in every add-on.
 
-### v1.9.10 — Violentmonkey/macOS detection
-
-- Fixed installed modules incorrectly appearing as **OFF + INSTALL** when Violentmonkey isolates each userscript's `window` API.
-- Installation markers and DOM bridges are now checked before the sandboxed runtime API.
-- Added cross-context ON/OFF and OPEN support through hidden DOM control bridges.
-- Corrected the Elimination Assistant marker mismatch.
 
 ### v1.9.9 — Inline panel signature
 
