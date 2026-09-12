@@ -1,0 +1,53 @@
+name: One-time integrate Mission Guide
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/integrate-mission-guide.yml'
+      - '.migration/integrate-mission-guide.py'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Integrate Mission Guide
+        run: python .migration/integrate-mission-guide.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Script-Hub.user.js
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          m=Path('SakaLuX-Mission-Rewards.user.js').read_text()
+          h=Path('SakaLuX-Script-Hub.user.js').read_text()
+          data=json.loads(Path('scripts.json').read_text())
+          assert '@version      1.1.0' in m
+          assert "const VERSION = '1.1.0'" in m
+          assert 'const MISSION_GUIDE = {' in m
+          assert 'function renderMissionGuides()' in m
+          assert 'showMissionGuide: true' in m
+          assert "id=\"sl-mr-show-guide\"" in m
+          assert 'sl-mr-mission-guide' in m
+          assert any(x.get('id')=='mission-rewards' and x.get('version')=='1.1.0' for x in data['scripts'])
+          assert '@version      1.9.34' in h
+          assert "const VERSION = '1.9.34'" in h
+          print('Mission Guide integration invariants OK')
+          PY
+      - name: Commit changes
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Mission-Rewards.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/Mission-Rewards.md greasyfork/Script-Hub.md
+          git commit -m 'Integrate Duke Mission Guide into Mission Rewards [skip ci]'
+          git push
