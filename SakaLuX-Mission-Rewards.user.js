@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.20
+// @version      1.0.21
 // @description  Stable Mission Rewards with TornPDA-safe isolated Duke mission task and hint guidance for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -17,7 +17,7 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.20'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.21'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -167,7 +167,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.0.20';
+    const VERSION = '1.0.21';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1064,16 +1064,55 @@ const MISSION_GUIDE = {
     }
 
     function missionTitle(card) {
-        const node = card.querySelector('.title-black, [class*="title-black"]');
+        const stored = card?.dataset?.slxMissionTitle || '';
+        if (stored) return stored;
+        const node = card?.querySelector?.('.title-black, [class*="title-black"], h1, h2, h3, h4, [class*="title"], [class*="name"]');
         if (!node) return '';
         const raw = node.childNodes?.[0]?.wholeText || node.textContent || '';
         return String(raw).replace(/\s+/g, ' ').trim();
     }
 
+    function isVisibleElement(el) {
+        if (!el || !el.isConnected) return false;
+        const r=el.getBoundingClientRect?.();
+        if (!r || r.width < 2 || r.height < 2) return false;
+        const cs=getComputedStyle(el);
+        return cs.display !== 'none' && cs.visibility !== 'hidden' && Number(cs.opacity || 1) !== 0;
+    }
+
+    function findMobileActiveMissionHost() {
+        const root=document.getElementById('missionsMainContainer') || document.body;
+        if (!root) return null;
+        const candidates=[];
+        for (const el of root.querySelectorAll('h1,h2,h3,h4,h5,strong,b,span,div')) {
+            if (!isVisibleElement(el)) continue;
+            if (el.children.length > 3) continue;
+            const text=String(el.textContent||'').replace(/\s+/g,' ').trim();
+            if (!text || text.length > 80) continue;
+            const key=normalizeMissionKey(text);
+            if (!MISSION_GUIDE[key]) continue;
+            candidates.push({el,text,key});
+        }
+        if (!candidates.length) return null;
+        // TornPDA renders the selected mission detail after the mission list. Prefer
+        // the last visible matching title and a compact parent host around it.
+        const chosen=candidates[candidates.length-1];
+        let host=chosen.el.parentElement || chosen.el;
+        for (let i=0;i<3 && host?.parentElement;i++) {
+            const txt=String(host.textContent||'').trim();
+            if (txt.length >= 90 && txt.length <= 1800) break;
+            host=host.parentElement;
+        }
+        if (!host) return null;
+        host.dataset.slxMissionTitle=chosen.text;
+        return host;
+    }
+
     function missionCards() {
-        const exact = [...document.querySelectorAll('.giver-cont-wrap > div[id^="mission"]')];
-        if (exact.length) return exact;
-        return [...document.querySelectorAll('#missionsMainContainer div[id^="mission"], [id^="mission"][class*="mission"]')];
+        const exact = [...document.querySelectorAll('.giver-cont-wrap > div[id^="mission"], #missionsMainContainer div[id^="mission"], [id^="mission"][class*="mission"]')];
+        const mobile=findMobileActiveMissionHost();
+        if (mobile && !exact.includes(mobile)) exact.push(mobile);
+        return exact;
     }
 
     function ensureStyle() {
