@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.34
+// @version      1.9.35
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.34';
+    const VERSION = '1.9.35';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.35',
+            date: '2026-09-13',
+            changes: [
+                'Installation status now uses live module presence only.',
+                'Removed persistent local installation markers from installed/active detection.',
+                'Deleted modules can no longer remain as installed ghost entries in Hub.'
+            ]
+        },
         {
             version: '1.9.34',
             date: '2026-09-13',
@@ -682,14 +691,7 @@
             const standalone = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
             if (standalone?.dataset?.version) return String(standalone.dataset.version);
         } catch {}
-        try {
-            const marker = localStorage.getItem('SakaLuX_Installed_' + script.id)
-                || (script.id === 'elimination-assistant' ? localStorage.getItem('SakaLuX_Installed_elimination') : '');
-            if (marker) return String(marker);
-        } catch {}
-        try {
-            return document.querySelector(script.buttonSelector) ? '?' : null;
-        } catch { return null; }
+        return null;
     }
 
     function recordUsage(id) {
@@ -803,7 +805,7 @@
         const api = script.api();
         if (!api) {
             const installed = getInstalledVersion(script);
-            if (installed) return { state: 'ok', text: 'INSTALLED', version: installed, data: { detection: 'installation marker' } };
+            if (installed) return { state: 'ok', text: 'INSTALLED', version: installed, data: { detection: 'live runtime' } };
             return { state: 'missing', text: 'NOT INSTALLED', version: null, data: null };
         }
         try {
