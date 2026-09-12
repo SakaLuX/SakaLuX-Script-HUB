@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub, designed for Torn PDA, Tampermonkey
 
 ## Current version
 
-v1.8.0
+v1.8.1
 
 ## What it does
 
@@ -21,6 +21,7 @@ v1.8.0
 
 ## Current release notes
 
+- v1.8.1: The selected Employee/Director mode and active section now remain saved and are restored when Company Intelligence is reopened.
 - Added reliable per-selection API v2 to classic API fallback for Basic, Job, Work Stats and Profile.
 - Fixed missing Employee position and stopped the Position tab from surfacing transient backend errors when classic fallback succeeds.
 - Added Employee Progress with observed work-stat pace and promised/received train tracking.
