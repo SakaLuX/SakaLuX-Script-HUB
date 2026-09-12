@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.39
+// @version      1.9.40
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.39';
+    const VERSION = '1.9.40';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.40',
+            date: '2026-09-12',
+            changes: [
+                'Mission Rewards v1.1.2 publishes its DOM bridge and standalone registration immediately at userscript bootstrap.',
+                'Mission Rewards Ready is now emitted only after the full Hub bridge handler is installed, fixing TornPDA/Violentmonkey isolated-context detection.',
+                'Hub fallback registry is synchronized with Mission Rewards v1.1.2.'
+            ]
+        },
         {
             version: '1.9.39',
             date: '2026-09-12',
@@ -431,7 +440,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.1',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.2',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
