@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.33
+// @version      1.9.34
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.33';
+    const VERSION = '1.9.34';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.34',
+            date: '2026-09-12',
+            changes: [
+                'Mission Rewards v1.1.0 now includes an integrated Duke Mission Guide with Task and Hint information.',
+                'Mission Guide works inside the managed Mission Rewards module and avoids duplicate TornTools-style information boxes.',
+                'Registry and release information are synchronized with the new Missions feature release.'
+            ]
+        },
         {
             version: '1.9.33',
             date: '2026-09-12',
@@ -377,7 +386,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.18',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.0',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',

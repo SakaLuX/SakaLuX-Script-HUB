@@ -3,9 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.18**
+**v1.1.0**
 
 ## What it does
+- Adds a **Duke Mission Guide** directly to mission cards with a concise **Task** and optional **Hint**.
+- Recognizes the standard Duke mission catalogue locally and does not require API access for mission hints.
+- Suppresses duplicate TornTools/TornPDA mission-information boxes when the integrated guide is active.
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
 - Shows estimated market value for item rewards.
 - Calculates estimated value per mission credit.
