@@ -4,7 +4,7 @@ Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
 
-**v1.3.18**
+**v1.3.19**
 
 ## What it does
 
@@ -18,6 +18,11 @@ Complementary add-on for SakaLuX Script Hub.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.3.19 — Priority star alignment
+
+- Fixed the priority star being stretched into a tall blue button by shared Hub button styling.
+- Priority stars now remain compact, transparent and aligned directly after the Enhancer name.
 
 ### v1.3.18 — Violentmonkey Hub bridge
 
