@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.19
+// @version      1.3.20
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -29,7 +29,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.19';
+    const VERSION = '1.3.20';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -874,7 +874,7 @@
                     </div>
                     <div id="sl-eg-stats"></div>
                     <div id="sl-eg-controls">
-                        <input id="sl-eg-search" type="search" placeholder="🔎 Caută...">
+                        <input id="sl-eg-search" type="search" placeholder="🔎 Search...">
                         <button class="sl-eg-control" id="sl-eg-relics" title="Relics">⭐</button>
                         <button class="sl-eg-control" id="sl-eg-refresh" title="Refresh">🔄</button>
                     </div>
@@ -1054,7 +1054,7 @@
         const overlay = document.createElement('div');
         overlay.id = 'sl-eg-protection-overlay';
         overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif;';
-        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><button class="sl-eg-close" data-close="1">×</button></div><div class="sl-eg-protection-note">Lacătul este afișat direct peste iconița itemului în pagina Items, ca în Item Protector: verde = deblocat, roșu = protejat, portocaliu = cantitate rezervată. Apăsare scurtă schimbă protecția, iar apăsarea lungă setează cantitatea rezervată.</div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">Nu ai iteme protejate.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">ȘTERGE TOATE PROTECȚIILE</button></div>`;
+        overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><button class="sl-eg-close" data-close="1">×</button></div><div class="sl-eg-protection-note">The lock is shown directly over the item icon on the Items page, as in Item Protector: green = unlocked, red = protected, orange = reserved quantity. Short press toggles protection and long press sets the reserved quantity.</div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">You have no protected items.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">CLEAR ALL PROTECTIONS</button></div>`;
         document.body.appendChild(overlay);
         overlay.onclick = event => { if (event.target === overlay || event.target.closest('[data-close]')) overlay.remove(); };
         overlay.querySelectorAll('.sl-eg-unlock').forEach(button => {
@@ -1128,7 +1128,7 @@
         for (const item of items) {
             const rowClass = item.owned ? 'owned' : 'not-owned';
             const icon = item.owned ? '🟢' : '🔴';
-            const status = item.owned ? 'AI ×' + formatNumber(item.quantity) : 'NU AI';
+            const status = item.owned ? 'OWNED ×' + formatNumber(item.quantity) : 'NOT OWNED';
             const total = !item.isRelic && item.owned && item.marketValue ? item.marketValue * item.quantity : null;
             const protection = protectionFor(item);
             const marketHref = itemMarketUrl(item);
