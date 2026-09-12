@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.20
+// @version      5.3.21
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -15,7 +15,7 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.20'});
+  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.21'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -125,6 +125,26 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
   function start(){registerSelf();render();setTimeout(maybePrompt,1200);let t=0;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(()=>{registerSelf();render();},80);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(()=>{registerSelf();render();maybePrompt();},60000);}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
 })();
+(() => {
+  const id='sakalux-standalone-layer-style';
+  if(!document.getElementById(id)){
+    const style=document.createElement('style');
+    style.id=id;
+    style.textContent=`/* Keep managed add-on panels above the shared standalone dock. */
+:where(
+  [id^="sl-eg-"][id*="panel" i],
+  [id^="sakalux-bt-"][id*="settings" i],
+  [id^="sl-mr-"][id*="panel" i],
+  [id^="sl-mri-"][id*="panel" i],
+  [id^="sl-mi-"][id*="panel" i],
+  #slx-elim,
+  [id^="slx-elim-"][id*="panel" i]
+){z-index:2147483646!important;}
+#sakalux-standalone-dock{z-index:2147483500!important;}`;
+    (document.head||document.documentElement).appendChild(style);
+  }
+})();
+
 /* SakaLuX Standalone Dock Bootstrap — END */
 
 
@@ -1080,7 +1100,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.20';
+    const BAZAAR_VERSION='5.3.21';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
