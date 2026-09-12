@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.16
+// @version      1.9.17
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.16';
+    const VERSION = '1.9.17';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.17',
+            date: '2026-09-12',
+            changes: [
+                'Keeps the S launcher as the first Torn statusIcons item before cash.',
+                'Restores the native skull launcher before Messages when Touchscreen Navigation exposes the Fly-out sidebar.',
+                'Uses the on-screen floating skull only when the Fly-out sidebar navigation is unavailable.'
+            ]
+        },
         {
             version: '1.9.16',
             date: '2026-09-12',
@@ -303,6 +312,8 @@
         badge: 'sakalux-hub-badge',
         topSkull: 'sakalux-hub-top-skull',
         topBadge: 'sakalux-hub-top-badge',
+        navSkull: 'sakalux-hub-nav-skull',
+        navBadge: 'sakalux-hub-nav-badge',
         overlay: 'sakalux-hub-overlay',
         panel: 'sakalux-hub-panel',
         style: 'sakalux-hub-style'
@@ -742,6 +753,7 @@
 #${IDS.button}{position:fixed!important;z-index:2147483646!important;border:1px solid #3d4f66!important;border-radius:50%!important;background:linear-gradient(145deg,#1d2836,#111923)!important;color:#f8fafc!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font-size:23px!important;box-shadow:0 10px 28px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.04)!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important}
 #${IDS.badge}{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#d84b59;color:#fff;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:2px solid #111923}
 #${IDS.topSkull}{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;list-style:none!important;vertical-align:top!important;background:none!important;background-image:none!important;box-shadow:none!important;overflow:visible!important}#${IDS.topSkull}::before,#${IDS.topSkull}::after{content:none!important;display:none!important}#${IDS.topSkull} .slh-status-link{position:relative!important;display:block!important;width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;max-width:17px!important;max-height:17px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;background-image:none!important;color:inherit!important;cursor:pointer!important;line-height:0!important;font-size:0!important;text-decoration:none!important;box-shadow:none!important;overflow:visible!important;transform:none!important}#${IDS.topSkull} .slh-status-link svg{display:block!important;width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;max-width:17px!important;max-height:17px!important;margin:0!important;padding:0!important;overflow:visible!important;pointer-events:none!important;filter:drop-shadow(0 1px 1px rgba(0,0,0,.58))!important;transition:filter .15s ease,transform .15s ease!important}#${IDS.topSkull} .slh-status-link:active svg{transform:scale(.92)!important}#${IDS.topSkull}.slh-alert .slh-status-link svg{filter:brightness(1.2) drop-shadow(0 0 4px rgba(242,200,100,.55))!important}#${IDS.topBadge}{position:absolute;top:-7px;right:-7px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#c93f50;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3;border:1px solid #111923}
+#${IDS.navSkull}{position:relative!important;box-sizing:border-box!important}#${IDS.navSkull} .slh-native-link{position:relative!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}#${IDS.navSkull} .slh-native-skull-icon{animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;transform-origin:center center!important}#${IDS.navSkull}.slh-alert .slh-native-skull-icon{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}#${IDS.navBadge}{position:absolute;top:0;right:4px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#c93f50;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48}11%,19%,27%{opacity:1}40%,75%{opacity:.72}}@keyframes slhNativeSkullAlert{0%,100%{opacity:.38}50%{opacity:1}72%{opacity:.58}}
 #${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:rgba(4,8,13,.84);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;font-family:Inter,Arial,sans-serif;color:#e7edf5}
 #${IDS.panel}{--sl-bg:#0f141c;--sl-soft:#151c26;--sl-panel:#18212d;--sl-panel2:#1d2836;--sl-elev:#223041;--sl-border:#314154;--sl-border2:#43566e;--sl-text:#e7edf5;--sl-softtext:#a9b7c8;--sl-muted:#7f90a6;--sl-blue:#4f8fe8;--sl-blue2:#2f6ebf;--sl-green:#18b26b;--sl-red:#cc3d57;--sl-gold:#d7a94a;width:min(680px,100%);max-height:95vh;display:flex;flex-direction:column;overflow:hidden;background:var(--sl-bg);color:var(--sl-text);border:1px solid var(--sl-border);border-radius:22px 22px 0 0;box-shadow:0 -22px 70px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.025)}
 .slh-header{padding:16px 16px 12px;flex-shrink:0;background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 40%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-bottom:1px solid var(--sl-border)}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-brand{display:flex;align-items:center;gap:11px;min-width:0}.slh-brand-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #41536b;border-radius:13px;background:linear-gradient(145deg,#263448,#17212e);box-shadow:inset 0 1px rgba(255,255,255,.05),0 7px 20px rgba(0,0,0,.25);font-size:22px}.slh-brand-copy{min-width:0}.slh-kicker{font-size:8px;line-height:1.2;letter-spacing:.18em;font-weight:900;color:#6fa6ef;text-transform:uppercase}.slh-title{margin-top:2px;font-size:18px;line-height:1.15;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-sub{margin-top:4px;color:var(--sl-muted);font-size:9px;line-height:1.3}.slh-registry-dot{display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#64748b}.slh-registry-dot.online{background:var(--sl-green);box-shadow:0 0 8px rgba(24,178,107,.6)}.slh-close{width:38px;height:38px;flex:0 0 auto;border:1px solid var(--sl-border);border-radius:11px;background:#1b2532;color:#c8d3df;font-size:21px;line-height:1;transition:.15s ease}.slh-close:active{transform:scale(.96)}
@@ -943,6 +955,33 @@
         });
     }
 
+    function getMobileNavContext() {
+        const swiperWrap = document.querySelector('.swiper-wrapper') || document.querySelector('[class*="swiper___"]');
+        const areasWrap = document.querySelector('[class*="areasMobile___"]');
+        const wrapper = swiperWrap || areasWrap;
+        if (!wrapper) return null;
+        const links = [...wrapper.querySelectorAll('a[class*="mobileLink___"]')];
+        const messagesLink = links.find(link => {
+            const label = link.querySelector('span[class*="linkName___"]');
+            const text = String(label?.textContent || link.textContent || '').trim().toUpperCase();
+            const href = String(link.getAttribute('href') || '').toLowerCase();
+            return text === 'MESSAGES' || href.includes('messages');
+        });
+        if (!messagesLink) return null;
+        const messagesArea = messagesLink.closest('[class*="area-mobile___"]');
+        if (!messagesArea) return null;
+        const messagesSlide = messagesArea.closest('[class*="slide___"]');
+        const isSwiper = Boolean(messagesSlide && messagesSlide.parentElement === wrapper);
+        return {
+            wrapper, isSwiper, messagesLink, messagesArea, messagesSlide,
+            nativeRow: messagesArea.querySelector('[class*="areaRow___"], [class*="area-row___"]'),
+            nativeIconWrap: messagesLink.querySelector('span[class*="svgIconWrap___"]'),
+            nativeDefaultIcon: messagesLink.querySelector('span[class*="defaultIcon___"]'),
+            nativeLabel: messagesLink.querySelector('span[class*="linkName___"]'),
+            nativeSvg: messagesLink.querySelector('svg')
+        };
+    }
+
     function findStatusIconList() {
         const selectors = [
             'ul[class*="statusIcons"][class*="big"]',
@@ -995,8 +1034,8 @@
     function syncFloatingButtonVisibility() {
         const button = document.getElementById(IDS.button);
         if (!button) return;
-        const nativeReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.topSkull));
-        button.style.setProperty('display', nativeReady ? 'none' : 'flex', 'important');
+        const flyoutReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.navSkull));
+        button.style.setProperty('display', flyoutReady ? 'none' : 'flex', 'important');
     }
 
     function createTopbarSkull() {
@@ -1057,15 +1096,88 @@
         return true;
     }
 
+    function createNavSkull() {
+        const existing = document.getElementById(IDS.navSkull);
+        if (!settings.showTopbarSkull) {
+            existing?.remove();
+            syncFloatingButtonVisibility();
+            return false;
+        }
+        const ctx = getMobileNavContext();
+        if (!ctx) {
+            existing?.remove();
+            syncFloatingButtonVisibility();
+            return false;
+        }
+        if (existing?.isConnected) {
+            updateTopbarSkullState();
+            syncFloatingButtonVisibility();
+            return true;
+        }
+        const area = document.createElement('div');
+        area.className = ctx.messagesArea.className;
+        const row = document.createElement('div');
+        if (ctx.nativeRow) row.className = ctx.nativeRow.className;
+        const link = document.createElement('a');
+        link.className = ctx.messagesLink.className;
+        link.href = '#';
+        link.tabIndex = 0;
+        link.classList.add('slh-native-link');
+        link.setAttribute('aria-label', 'Open SakaLuX Script Hub');
+        link.setAttribute('title', 'SakaLuX Script Hub');
+        const iconWrap = document.createElement('span');
+        if (ctx.nativeIconWrap) iconWrap.className = ctx.nativeIconWrap.className;
+        const innerIcon = document.createElement('span');
+        if (ctx.nativeDefaultIcon) innerIcon.className = ctx.nativeDefaultIcon.className;
+        innerIcon.classList.add('slh-native-skull-icon');
+        innerIcon.style.setProperty('filter', 'none', 'important');
+        innerIcon.style.setProperty('-webkit-filter', 'none', 'important');
+        const skullSvg = buildSkullSvg(ctx.nativeSvg);
+        if (skullSvg) innerIcon.appendChild(skullSvg); else innerIcon.textContent = '☠︎';
+        iconWrap.appendChild(innerIcon);
+        link.appendChild(iconWrap);
+        const label = document.createElement('span');
+        if (ctx.nativeLabel) label.className = ctx.nativeLabel.className;
+        label.textContent = 'HUB';
+        link.appendChild(label);
+        const badge = document.createElement('span');
+        badge.id = IDS.navBadge;
+        link.appendChild(badge);
+        const open = event => { event.preventDefault(); event.stopPropagation(); openHub(); };
+        link.addEventListener('click', open);
+        link.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') open(event); });
+        row.appendChild(link);
+        area.appendChild(row);
+        let mounted;
+        if (ctx.isSwiper && ctx.messagesSlide) {
+            const slide = document.createElement('div');
+            slide.className = ctx.messagesSlide.className.replace(/swiper-slide-active|swiper-slide-next|swiper-slide-prev|contextMenuActive___\S+/g, '').trim();
+            if (ctx.messagesSlide.style.width) slide.style.width = ctx.messagesSlide.style.width;
+            slide.appendChild(area);
+            mounted = slide;
+        } else mounted = area;
+        mounted.id = IDS.navSkull;
+        const reference = ctx.isSwiper ? ctx.messagesSlide : ctx.messagesArea;
+        ctx.wrapper.insertBefore(mounted, reference);
+        if (ctx.isSwiper) {
+            try { ctx.wrapper.parentElement?.swiper?.update?.(); } catch {}
+        }
+        updateTopbarSkullState();
+        syncFloatingButtonVisibility();
+        return true;
+    }
+
     function updateTopbarSkullState() {
-        const skull = document.getElementById(IDS.topSkull);
-        const badge = document.getElementById(IDS.topBadge);
-        if (!skull) return;
         const total = getIssueCount();
-        skull.classList.toggle('slh-alert', total > 0);
-        if (badge) {
-            badge.style.display = total > 0 ? 'flex' : 'none';
-            badge.textContent = total > 99 ? '99+' : String(total);
+        for (const [skullId, badgeId] of [[IDS.topSkull, IDS.topBadge], [IDS.navSkull, IDS.navBadge]]) {
+            const skull = document.getElementById(skullId);
+            const badge = document.getElementById(badgeId);
+            if (!skull) continue;
+            skull.classList.toggle('slh-alert', total > 0);
+            if (badge) {
+                badge.style.display = total > 0 ? 'flex' : 'none';
+                badge.textContent = total > 99 ? '99+' : String(total);
+            }
         }
     }
 
@@ -1380,7 +1492,7 @@
     function openSettings() {
         createOverlay(`${headerMarkup('Hub Settings', `SakaLuX Script Hub v${VERSION}`, 'slhs-close', '⚙️', 'CONFIGURATION')}<div class="slh-settings">
             ${settingSwitch('slhs-hide', 'Hide individual script buttons', 'Keep each add-on launcher hidden while Hub manages access.', settings.hideIndividualButtons)}
-            ${settingSwitch('slhs-topbar', 'Torn status-bar launcher', 'Mount the compact SakaLuX icon directly inside Torn statusIcons. The floating skull is used only when Torn does not expose that native icon list.', settings.showTopbarSkull)}
+            ${settingSwitch('slhs-topbar', 'Torn launchers', 'Show S before cash and, when Touchscreen Navigation uses Fly-out sidebar, show the skull before Messages. Otherwise use the floating skull fallback.', settings.showTopbarSkull)}
             ${settingSwitch('slhs-auto', 'Automatic update checks', 'Check published add-on versions automatically while the Hub is running.', settings.autoCheckUpdates)}
             <div class="slh-settings-pair"><div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div><div class="slh-setting">Language<select id="slhs-language">${Object.entries(LOCALES).map(([code,locale])=>`<option value="${escapeHtml(code)}">${escapeHtml(locale.label)}</option>`).join('')}</select></div></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
@@ -1418,7 +1530,7 @@
             settings.buttonSize = Number(size.value);
             delete settings.longPressQuickMenu;
             saveJson(STORAGE.settings, settings);
-            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); openHub();
+            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); openHub();
         };
         document.getElementById('slhs-backup').onclick = backupSettings;
         document.getElementById('slhs-restore').onclick = restoreSettings;
@@ -1442,7 +1554,7 @@
             favorites = new Set(Array.isArray(data.favorites) ? data.favorites : []);
             usage = data.usage && typeof data.usage === 'object' ? data.usage : {};
             saveJson(STORAGE.settings, settings); saveJson(STORAGE.favorites, [...favorites]); saveJson(STORAGE.usage, usage);
-            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); alert('Backup restored.'); openHub();
+            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); alert('Backup restored.'); openHub();
         } catch { alert('Invalid Hub backup.'); }
     }
 
@@ -1450,11 +1562,11 @@
         if (!confirm('Reset only SakaLuX Script Hub settings?')) return;
         Object.entries(STORAGE).forEach(([name, key]) => { if (name !== 'apiKey') localStorage.removeItem(key); });
         settings = { ...DEFAULT_SETTINGS }; favorites = new Set(); usage = {}; updateCache = {}; registry = FALLBACK_REGISTRY; SCRIPTS = normalizeRegistry(registry);
-        updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); updateBadge(); openHub();
+        updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); updateBadge(); openHub();
     }
 
     function ensureEverything() {
-        injectCss(); createTopbarSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
+        injectCss(); createTopbarSkull(); createNavSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
     }
 
     function queueEnsure() {
@@ -1475,7 +1587,7 @@
         getLanguage: language, getLanguages:()=>Object.fromEntries(Object.entries(LOCALES).map(([code,locale])=>[code,locale.label])), setLanguage: value => { settings.language=LOCALES[value]?value:'en';saveJson(STORAGE.settings,settings);applyLanguage();return settings.language; },
         hasApiKey: () => Boolean(getSharedApiKey()), createRequiredTornKey: createSharedApiKey,
         refresh: async () => { await refreshRegistryAndCheck(); return true; },
-        health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)) })
+        health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)), flyoutHubLauncher: Boolean(document.getElementById(IDS.navSkull)), floatingFallback: !Boolean(document.getElementById(IDS.navSkull)) })
     };
 
     window.dispatchEvent(new CustomEvent('SakaLuX:ScriptHubReady', { detail: { version: VERSION } }));
