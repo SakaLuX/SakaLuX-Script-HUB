@@ -1,0 +1,39 @@
+name: Publish dock header S close control
+
+on:
+  push:
+    paths:
+      - 'tools/publish_dock_close_v6.py'
+      - '.github/workflows/publish-dock-close-v6.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply S close control release
+        run: python3 tools/publish_dock_close_v6.py
+      - name: Remove one-time publisher
+        run: |
+          rm -f tools/publish_dock_close_v6.py
+          rm -f .github/workflows/publish-dock-close-v6.yml
+      - name: Validate JavaScript syntax
+        run: |
+          set -e
+          for f in SakaLuX-*.user.js; do node --check "$f"; done
+      - name: Validate registry JSON
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Commit release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Make standalone dock header S close the panel"
+          git push origin HEAD:main
