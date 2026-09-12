@@ -40,7 +40,7 @@ jobs:
           set -euo pipefail
           git config user.name 'SakaLuX'
           git config user.email 'sakalutzu92@yahoo.com'
-          git add SakaLuX-Script-Hub.user.js SakaLuX-Bazaar-Thanker-PDA.user.js scripts.json greasyfork/Script-Hub.md greasyfork/Bazaar-Thanker.md .github/workflows/validate-userscripts.yml
+          git add SakaLuX-Script-Hub.user.js SakaLuX-Bazaar-Thanker-PDA.user.js scripts.json greasyfork/Script-Hub.md greasyfork/Bazaar-Thanker.md
           if git diff --cached --quiet; then
             echo 'No changes.'
             exit 0
