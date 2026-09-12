@@ -18,8 +18,19 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - name: Apply centered dock release
-        run: python3 tools/publish_dock_v4.py
+      - name: Fix generator escaping and apply centered dock release
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tools/publish_dock_v4.py')
+          t=p.read_text()
+          old="block=TPL.replace('{CFG}',cfg).replace('{VER}',v)"
+          new="block=TPL.replace('{CFG}',cfg).replace('{VER}',v).replace('{{','{').replace('}}','}')"
+          if old not in t:
+              raise SystemExit('generator target not found')
+          p.write_text(t.replace(old,new,1))
+          PY
+          python3 tools/publish_dock_v4.py
       - name: Remove one-time publisher
         run: |
           rm -f tools/publish_dock_v4.py
@@ -35,5 +46,3 @@ jobs:
           git add -A
           git commit -m "Publish centered premium standalone dock"
           git push origin HEAD:main
-
-# trigger
