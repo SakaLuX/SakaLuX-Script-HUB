@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.19**
+**v5.3.20**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.19** fixes the internal version-reporting mismatch from v5.3.18. The userscript metadata, standalone registration, Hub bridge, health API and installed-version marker now all report the same version, preventing Script Hub from repeatedly showing a false Bazaar update.
+**v5.3.20** removes the standalone floating settings launcher. Settings remain available from Script Hub and Standalone Dock through the module bridge/API.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.

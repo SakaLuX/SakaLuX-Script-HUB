@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.19
+// @version      5.3.20
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -15,7 +15,7 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"#sakalux-bt-settings-button","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.19'});
+  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.20'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -98,7 +98,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     d.innerHTML=`<div class="slx-dock-head"><button type="button" class="slx-dock-mark" aria-label="Close SakaLuX Scripts" title="Close SakaLuX Scripts">S</button><div class="slx-dock-title">SakaLuX Scripts</div><div class="slx-dock-sub">Standalone</div></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">Install SakaLuX Hub</a>`;
     (document.body||document.documentElement).appendChild(d); const close=d.querySelector('.slx-dock-mark'); if(close) close.onclick=e=>{e.preventDefault();e.stopPropagation();toggleDock(false);}; return d;
   }
-  function openEntry(data){const el=data.selector?document.querySelector(data.selector):null;if(el){el.click();return;}if(data.fallback)location.href=data.fallback;}
+  function openEntry(data){const el=data.selector?document.querySelector(data.selector):null;if(el){el.click();return;}const bridge=document.getElementById('sakalux-module-bridge-'+data.id);if(bridge){bridge.dataset.action='open';bridge.click();return;}if(data.fallback)location.href=data.fallback;}
   function render(){
     const d=ensureDock(); if(!d) return;
     const box=d.querySelector('.slx-dock-items');
@@ -904,16 +904,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
         document.body.appendChild(panel);
 
-        const settingsButton = document.createElement('button');
-        settingsButton.id = 'sakalux-bt-settings-button';
-        settingsButton.textContent = '⚙️';
-        settingsButton.style.cssText = 'position:fixed;z-index:999998;right:14px;bottom:88px;width:52px;height:52px;border-radius:15px;border:1px solid #41607f;background:linear-gradient(145deg,#243b55,#172235);color:#dbeafe;font-size:22px;box-shadow:0 7px 22px rgba(0,0,0,.5);cursor:pointer;';
-        settingsButton.onclick = function () {
-            const open = panel.style.display === 'none';
-            panel.style.display = open ? 'block' : 'none';
-            if (open) updateStats();
-        };
-        document.body.appendChild(settingsButton);
 
         document.getElementById('sbtClose').onclick = () => { panel.style.display = 'none'; };
 
@@ -1090,7 +1080,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.19';
+    const BAZAAR_VERSION='5.3.20';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
@@ -1129,7 +1119,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         document.querySelectorAll('.sakalux-bt-ui').forEach(element => element.remove());
         document.getElementById('sakalux-bt-details')?.remove();
         document.getElementById('sakalux-bt-settings')?.remove();
-        document.getElementById('sakalux-bt-settings-button')?.remove();
         document.getElementById(HUB_PROMPT_ID)?.remove();
     }
 

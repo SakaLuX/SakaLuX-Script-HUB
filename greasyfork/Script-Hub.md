@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.30**
+**v1.9.31**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v1.9.30** removes the Market Intelligence and Enhancer Guard floating launchers at source level. Hub and standalone access now use their module bridge/API directly, so no Market or Enhancers button is created on Torn pages.
+**v1.9.31** completes bridge/API-only access for all five managed add-ons. No managed add-on creates an individual floating launcher on Torn pages; Hub and Standalone Dock open every module through its internal bridge/API.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -32,9 +32,9 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 - 🛡️ SakaLuX Enhancer Guard **v1.3.29**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.19**
-- 🎯 SakaLuX Mission Rewards **v1.0.16**
+- 🎯 SakaLuX Mission Rewards **v1.0.17**
 - 📈 SakaLuX Market Intelligence **v1.17.17**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.28**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.29**
 
 ## License
 All Rights Reserved
