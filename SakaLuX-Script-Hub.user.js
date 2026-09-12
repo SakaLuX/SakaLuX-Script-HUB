@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.35
+// @version      1.9.36
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.35';
+    const VERSION = '1.9.36';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.36',
+            date: '2026-09-12',
+            changes: [
+                'Fixes pending module actions when the fallback destination is already the current Torn page.',
+                'Forces a full reload on same-page fallback so older installed add-ons can recreate their DOM bridge.',
+                'Extends pending-action lifetime and retries automatically after reload.'
+            ]
+        },
         {
             version: '1.9.35',
             date: '2026-09-12',
@@ -1519,10 +1528,27 @@
         try { sessionStorage.removeItem('SakaLuX_HUB_PENDING_MODULE_ACTION'); } catch {}
     }
 
+    function normalizeUrlForCompare(url) {
+        try {
+            const u = new URL(url, location.href);
+            return u.origin + u.pathname + u.search + u.hash;
+        } catch { return String(url || ''); }
+    }
+
+    function navigateForPendingAction(url) {
+        const target = normalizeUrlForCompare(url);
+        const current = normalizeUrlForCompare(location.href);
+        if (target === current) {
+            location.reload();
+            return;
+        }
+        location.href = url;
+    }
+
     async function retryPendingModuleAction() {
         let pending = null;
         try { pending = JSON.parse(sessionStorage.getItem('SakaLuX_HUB_PENDING_MODULE_ACTION') || 'null'); } catch {}
-        if (!pending?.id || !pending?.actionId || Date.now() - Number(pending.at || 0) > 30000) { clearPendingModuleAction(); return false; }
+        if (!pending?.id || !pending?.actionId || Date.now() - Number(pending.at || 0) > 120000) { clearPendingModuleAction(); return false; }
         const script = SCRIPTS.find(item => item.id === pending.id);
         if (!script) { clearPendingModuleAction(); return false; }
         for (let i = 0; i < 12; i++) {
@@ -1573,7 +1599,7 @@
                 if (action.fallbackUrl) {
                     savePendingModuleAction(id, actionId);
                     closeHub();
-                    location.href = action.fallbackUrl;
+                    navigateForPendingAction(action.fallbackUrl);
                     return;
                 }
                 alert(script.name + ' is installed, but its control bridge is not available on this page.');
@@ -1587,11 +1613,11 @@
             if (typeof api[action.method] === 'function') {
                 recordUsage(id);
                 const result = await api[action.method]();
-                if (result === false && action.fallbackUrl) { savePendingModuleAction(id, actionId); location.href = action.fallbackUrl; return; }
+                if (result === false && action.fallbackUrl) { savePendingModuleAction(id, actionId); navigateForPendingAction(action.fallbackUrl); return; }
                 if (isPanelAction) closeHub(); else setTimeout(openHub, 100);
                 return;
             }
-            if (action.fallbackUrl) { savePendingModuleAction(id, actionId); recordUsage(id); location.href = action.fallbackUrl; return; }
+            if (action.fallbackUrl) { savePendingModuleAction(id, actionId); recordUsage(id); navigateForPendingAction(action.fallbackUrl); return; }
             if (isPanelAction && script.fallbackOpen()) { recordUsage(id); closeHub(); return; }
             alert(script.name + ' is not available on this page.');
         } catch (error) {
@@ -1774,7 +1800,7 @@
     window.dispatchEvent(new CustomEvent('SakaLuX:ScriptHubReady', { detail: { version: VERSION } }));
     window.addEventListener('SakaLuX:EnhancerGuardReady', () => { queueEnsure(); renderList(); renderMainStats(); });
     window.addEventListener('SakaLuX:BazaarThankerReady', () => { queueEnsure(); renderList(); renderMainStats(); });
-    window.addEventListener('SakaLuX:MissionRewardsReady', () => { queueEnsure(); renderList(); renderMainStats(); });
+    window.addEventListener('SakaLuX:MissionRewardsReady', () => { queueEnsure(); renderList(); renderMainStats(); setTimeout(() => retryPendingModuleAction(), 100); });
     window.addEventListener('SakaLuX:MarketIntelligenceReady', () => { queueEnsure(); renderList(); renderMainStats(); });
 
     async function init() {
