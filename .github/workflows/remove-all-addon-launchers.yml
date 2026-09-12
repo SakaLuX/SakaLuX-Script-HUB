@@ -32,7 +32,8 @@ jobs:
           ! grep -q "button.id = 'sl-mri-button'" SakaLuX-Mission-Rewards.user.js
           ! grep -q "b.id=IDS.button" SakaLuX-Elimination-Assistant.user.js
           ! grep -q '"buttonSelector"' scripts.json
-          ! grep -q "Hide individual script buttons" SakaLuX-Script-Hub.user.js
+          ! grep -q "settingSwitch('slhs-hide'" SakaLuX-Script-Hub.user.js
+          ! grep -q "settings.hideIndividualButtons =" SakaLuX-Script-Hub.user.js
       - name: Commit changes
         run: |
           set -euo pipefail
