@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.36
+// @version      1.9.35
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.36';
+    const VERSION = '1.9.35';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,15 +40,6 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
-        {
-            version: '1.9.36',
-            date: '2026-09-13',
-            changes: [
-                'Registers Mission Rewards v1.2.0 with the integrated Duke Mission Task + Hint guide.',
-                'Keeps Mission Hints fully local with no userscript-manager-specific bridge or external runtime dependency.',
-                'Synchronizes the Mission Rewards fallback registry with scripts.json.'
-            ]
-        },
         {
             version: '1.9.35',
             date: '2026-09-13',
