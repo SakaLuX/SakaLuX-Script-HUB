@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.42
+// @version      1.9.43
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.42';
+    const VERSION = '1.9.43';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.43',
+            date: '2026-09-13',
+            changes: [
+                'Mission Rewards is rebased on the confirmed-stable v1.0.18 runtime and released as v1.0.19.',
+                'The Mission Guide is now an isolated visual-only layer and no longer touches Mission Rewards init, Hub bridge, API or power logic.',
+                'Mission Rewards update metadata now follows the v1.0.19 GitHub stabilization line instead of the broken Greasy Fork 1.1.x branch.'
+            ]
+        },
         {
             version: '1.9.42',
             date: '2026-09-13',
@@ -458,7 +467,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.4',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.19',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -948,16 +957,10 @@
         if (api && typeof api.setEnabled === 'function' && typeof api.isEnabled === 'function') {
             await api.setEnabled(Boolean(enabled));
         } else {
-            if (script.id === 'mission-rewards') {
-                localStorage.setItem('SakaLuX_MR_ENABLED', JSON.stringify(Boolean(enabled)));
-                const registration = document.querySelector('[data-slx-standalone-registration="mission-rewards"]');
-                if (registration) registration.dataset.enabled = String(Boolean(enabled));
-            } else {
-                const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-                if (!bridge) throw new Error('Module control is unavailable for ' + script.name + '.');
-                bridge.dataset.action = enabled ? 'on' : 'off';
-                bridge.click();
-            }
+            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+            if (!bridge) throw new Error('Module control is unavailable for ' + script.name + '.');
+            bridge.dataset.action = enabled ? 'on' : 'off';
+            bridge.click();
         }
         modulePower[id] = Boolean(enabled);
         saveJson(STORAGE.modulePower, modulePower);
@@ -1552,7 +1555,7 @@
         if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? 'Standby' : `Rewards ${health.data.rewardCards ?? 0}`;
         const enabled = !missing && isModuleEnabled(script);
         const moduleApi = script.api();
-        const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id) || (script.id === 'mission-rewards' && document.querySelector('[data-slx-standalone-registration="mission-rewards"]')));
+        const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id));
         const primary = getPrimaryAction(script);
         const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
         const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'pending' ? 'info' : update.state === 'failed' ? 'bad' : 'muted';
@@ -1694,12 +1697,6 @@
         if (!runtimeBehind) clearRuntimeReloadTried(script);
         const api = script.api();
         if (!api) {
-            if (script.id === 'mission-rewards') {
-                try { localStorage.setItem('SakaLuX_MR_HUB_COMMAND', JSON.stringify({ action: isPanelAction ? 'open' : actionId, at: Date.now() })); } catch {}
-                recordUsage(id);
-                closeHub();
-                return;
-            }
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
             if (bridge) {
                 bridge.dataset.action = isPanelAction ? 'open' : actionId;

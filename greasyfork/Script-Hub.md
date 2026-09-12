@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.42**
+**v1.9.43**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -32,7 +32,7 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 - 🛡️ SakaLuX Enhancer Guard **v1.3.30**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.21**
-- 🎯 SakaLuX Mission Rewards **v1.1.1**
+- 🎯 SakaLuX Mission Rewards **v1.0.19**
 - 📈 SakaLuX Market Intelligence **v1.17.18**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.30**
 
