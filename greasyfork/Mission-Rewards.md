@@ -3,11 +3,9 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.19**
+**v1.0.18**
 
 ## What it does
-- Adds a **Duke Mission Guide** directly to mission cards with a concise **Task** and optional **Hint**.
-- Recognizes the standard Duke mission catalogue locally and does not require API access for mission hints.
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
 - Shows estimated market value for item rewards.
 - Calculates estimated value per mission credit.
@@ -21,7 +19,7 @@
 
 ## Current release note
 
-**v1.0.19** is rebuilt directly from the confirmed-working **v1.0.18** runtime. The Task + Hint Mission Guide is now a completely isolated visual layer and does not alter Mission Rewards initialization, Hub bridge, ON/OFF state, API access, reward scanning or Standalone Dock behavior. The stabilization line is distributed from GitHub so the old broken `1.1.x` Greasy Fork branch is no longer used as the desired Hub update.
+**v1.0.18** is restored as the active stable release. This is the confirmed-working Mission Rewards build from before the experimental TornTools-inspired Mission Guide integration.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.

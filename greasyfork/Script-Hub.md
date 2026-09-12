@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.43**
+**v1.9.44**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v1.9.43** pins Mission Rewards to the stable **v1.0.19** line, rebuilt from the confirmed-working v1.0.18 runtime. Hub now follows the GitHub stabilization source for Mission Rewards instead of the broken `1.1.x` Greasy Fork branch, and Mission Rewards uses its normal generic bridge/API integration again.
+**v1.9.44** rolls Mission Rewards back completely to the confirmed-working **v1.0.18** release and pins Hub update metadata to that stable version. The experimental Mission Guide / 1.1.x line is no longer treated as the desired Mission Rewards release.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -32,7 +32,7 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 - 🛡️ SakaLuX Enhancer Guard **v1.3.30**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.21**
-- 🎯 SakaLuX Mission Rewards **v1.0.19**
+- 🎯 SakaLuX Mission Rewards **v1.0.18**
 - 📈 SakaLuX Market Intelligence **v1.17.18**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.30**
 
