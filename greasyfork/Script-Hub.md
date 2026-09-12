@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.14**
+**v1.9.15**
 
 ## What it does
 
@@ -24,6 +24,12 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.15 — Launcher before money
+
+- Keeps the native Fortie-style `statusIcons` mounting introduced in v1.9.14.
+- Positions the SakaLuX Hub icon immediately before Torn money/cash when that status cell is identifiable.
+- Falls back safely to the end of the native status row if Torn changes the money cell internals.
 
 ### v1.9.14 — Native Torn status launcher
 
