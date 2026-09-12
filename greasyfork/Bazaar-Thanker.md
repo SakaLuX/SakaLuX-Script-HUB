@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.13**
+**v5.3.14**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -13,7 +13,7 @@
 - Works without a Torn API key.
 
 ## Current release note
-Standalone Dock v2 now uses its own uniform buttons instead of moving script launchers. All installed Hub add-ons register themselves in the shared dock, preventing overlaps and missing entries. The Hub install reminder remains shared and limited to once every 12 hours.
+Standalone Dock v3 is smaller and cleaner, opens from a native gold S icon mounted after Torn cash, removes the + control, uses a compact fallback S only when the native status bar is unavailable, and keeps the shared Hub reminder limited to once every 12 hours.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.
@@ -28,6 +28,14 @@ Bazaar Thanker reads the Torn Events/Messages page in the browser and stores its
 Generated thank-you text should be reviewed before sending. The script assists with preparing and organizing messages; the player remains responsible for the final message sent through Torn.
 
 ## Release history
+### v5.3.14 — Compact native S standalone launcher
+
+- Smaller professional standalone dock.
+- Native gold **S** launcher mounts after Torn cash and opens/closes the dock.
+- Removed the dock **+** control.
+- Compact fallback **S** appears only when Torn status icons are unavailable.
+- Shared Hub reminder remains limited to once every 12 hours.
+
 ### v5.3.10 — Violentmonkey Hub bridge
 
 - Added an isolated-context DOM bridge so Script Hub can detect, open and switch Bazaar Thanker ON/OFF in Violentmonkey.

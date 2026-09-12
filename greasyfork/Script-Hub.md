@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.21**
+**v1.9.22**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,18 +22,18 @@
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release note
-Standalone Dock v2 compatibility release. Installed add-ons now register into a uniform shared dock without moving their native buttons, eliminating overlap and missing-module issues.
+Compatibility release synchronized with Standalone Dock v3: compact professional dock and native gold S launcher after Torn cash.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
 
-- 🛡️ SakaLuX Enhancer Guard **v1.3.22**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.13**
-- 🎯 SakaLuX Mission Rewards **v1.0.11**
-- 📈 SakaLuX Market Intelligence **v1.17.10**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.22**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.24**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.14**
+- 🎯 SakaLuX Mission Rewards **v1.0.12**
+- 📈 SakaLuX Market Intelligence **v1.17.12**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.24**
 
 ## License
 All Rights Reserved
@@ -48,6 +48,11 @@ All Rights Reserved
 Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
 
 ## Release history
+### v1.9.22 — Standalone Dock v3 compatibility
+
+- Synced managed add-on versions for the compact standalone dock release.
+- Standalone add-ons now use a native gold **S** launcher after cash instead of the dock **+** control.
+
 ### v1.9.18 — Floating fallback fix
 
 - Hides the floating skull whenever the native **S** launcher is present in Torn `statusIcons`.
