@@ -4,7 +4,7 @@ Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
 
-**v1.9.16**
+**v1.9.17**
 
 ## What it does
 
@@ -24,6 +24,12 @@ Core manager for the SakaLuX Torn script ecosystem.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release notes
+
+### v1.9.17 — Three-tier Torn launcher behavior
+
+- Keeps the compact **S** as the first native `statusIcons` item before cash.
+- Restores the skull launcher before **Messages** when Touchscreen Navigation exposes the **Fly-out sidebar**.
+- Shows the floating skull only when the Fly-out sidebar navigation is unavailable.
 
 ### v1.9.16 — Launcher before cash
 
