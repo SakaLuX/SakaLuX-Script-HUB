@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.28**
+**v1.3.29**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -27,7 +27,7 @@
 
 ## Current release note
 
-**v1.3.28** fixes Hub/standalone detection for the current SakaLuX launchers. When Script Hub is installed, Elimination Assistant recognizes the native **S** status-bar launcher, the Fly-out **HUB** launcher and the Hub-active page marker, so the standalone dock and **Install SakaLuX Hub** prompt do not appear at the same time as Hub.
+**v1.3.29** removes the standalone floating Elimination launcher. The full panel remains available from Script Hub and Standalone Dock through the module bridge/API.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant together with the rest of the SakaLuX add-ons and to use the shared Hub Torn API key when available.
