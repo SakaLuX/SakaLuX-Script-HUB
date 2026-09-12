@@ -1,0 +1,47 @@
+name: One-time remove all managed add-on launchers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/remove-all-addon-launchers.yml'
+      - '.migration/remove-all-addon-launchers.py'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Apply migration
+        run: python .migration/remove-all-addon-launchers.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Script-Hub.user.js
+          node --check SakaLuX-Bazaar-Thanker-PDA.user.js
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Elimination-Assistant.user.js
+          node --check SakaLuX-Enhancer-Guard.user.js
+          node --check SakaLuX-Market-Intelligence.user.js
+          python -m json.tool scripts.json >/dev/null
+          ! grep -q "settingsButton.id = 'sakalux-bt-settings-button'" SakaLuX-Bazaar-Thanker-PDA.user.js
+          ! grep -q "button.id = 'sl-mri-button'" SakaLuX-Mission-Rewards.user.js
+          ! grep -q "b.id=IDS.button" SakaLuX-Elimination-Assistant.user.js
+          ! grep -q '"buttonSelector"' scripts.json
+          ! grep -q "Hide individual script buttons" SakaLuX-Script-Hub.user.js
+      - name: Commit changes
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Script-Hub.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Elimination-Assistant.user.js scripts.json greasyfork/Script-Hub.md greasyfork/Bazaar-Thanker.md greasyfork/Mission-Rewards.md greasyfork/Elimination-Assistant.md
+          if git diff --cached --quiet; then
+            echo 'No changes.'
+            exit 0
+          fi
+          git commit -m 'Use bridge-only access for all managed add-ons [skip ci]'
+          git push
