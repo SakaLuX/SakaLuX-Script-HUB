@@ -6,7 +6,6 @@
 **v1.0.18**
 
 ## What it does
-- Shows the Duke mission task and a practical hint before accepting supported missions.
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
 - Shows estimated market value for item rewards.
 - Calculates estimated value per mission credit.
@@ -16,11 +15,11 @@
 - Adds a detailed reward information panel.
 - Includes refresh controls, local caching and API-key support.
 - Exposes `window.SakaLuXMissionRewards` for integration with SakaLuX Script Hub on every Torn page.
-- Keeps Mission-specific scanning inactive outside the Missions page.
+- Keeps Mission Shop-specific scanning inactive outside the Missions page.
 
 ## Current release note
 
-**v1.0.18** is the restored stable Mission Rewards release. The experimental integrated Mission Hints code has been removed from the Mission Rewards userscript so its startup, Hub registration, ON/OFF and Mission Shop features remain isolated and reliable.
+**v1.0.18** is the restored stable Mission Rewards release. The experimental integrated Mission Hints/TornTools code is not part of the current userscript, preserving its proven startup, Hub registration, ON/OFF controls and Mission Shop reward intelligence.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
@@ -35,12 +34,11 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 Displayed market values and value-per-credit calculations are estimates based on available item data. Weapon-mod ranges are learned locally from offers seen by the script and should be treated as guidance rather than guaranteed future Mission Shop prices.
 
 ## Release history
-### v1.2.0 — Integrated Mission Hints
+### v1.2.0 — Experimental Mission Hints integration (rolled back)
 
-- Added locally integrated Duke mission Task + Hint guidance.
-- Uses the stable v1.0.18 Mission Rewards runtime as the base.
-- Kept the Mission Hints renderer isolated so Mission Shop/API startup remains unchanged.
-- No userscript-manager-specific compatibility layer or external runtime dependency.
+- Experimented with locally integrated Duke mission Task + Hint guidance.
+- The integration was later rolled back after it interfered with reliable Mission Rewards startup/detection in TornPDA.
+- The active stable release is v1.0.18 and does not contain this experimental Mission Hints code.
 
 ### v1.0.16 — Hub detection fix
 
@@ -54,10 +52,6 @@ Displayed market values and value-per-credit calculations are estimates based on
 - Removed the dock **+** control.
 - Compact fallback **S** appears only when Torn status icons are unavailable.
 - Shared Hub reminder remains limited to once every 12 hours.
-
-### v1.0.8 — Violentmonkey Hub bridge
-
-- Added an isolated-context DOM bridge so Script Hub can detect, open and switch Mission Rewards ON/OFF in Violentmonkey.
 
 ### v1.0.7 — Inline panel signature
 
