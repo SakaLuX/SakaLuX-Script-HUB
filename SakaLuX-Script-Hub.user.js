@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.40
+// @version      1.9.41
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,15 +31,25 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.40';
+    const VERSION = '1.9.41';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
     const LOCALES_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/locales.json';
     const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,money,travel,equipment,inventory,battlestats,ammo&torn=items,elimination,eliminationteam&market=itemmarket';
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
+    const MODULE_HEARTBEAT_TTL = 10000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.41',
+            date: '2026-09-13',
+            changes: [
+                'Adds a fresh localStorage heartbeat channel for Mission Rewards so Hub detection no longer depends only on fragile hidden DOM bridges.',
+                'A heartbeat is accepted only while fresh, preventing deleted or disabled scripts from becoming permanent ghost modules.',
+                'Hub now re-renders open module cards and stats when bridge/registration DOM nodes are added or removed.'
+            ]
+        },
         {
             version: '1.9.40',
             date: '2026-09-12',
@@ -440,7 +450,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.2',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.3',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -730,6 +740,17 @@
         return match ? match[1].trim() : null;
     }
 
+    function getFreshHeartbeat(script) {
+        try {
+            const raw = localStorage.getItem('SakaLuX_HUB_HEARTBEAT_' + script.id);
+            if (!raw) return null;
+            const data = JSON.parse(raw);
+            if (!data || data.id !== script.id || !data.at) return null;
+            if (Date.now() - Number(data.at) > MODULE_HEARTBEAT_TTL) return null;
+            return data;
+        } catch { return null; }
+    }
+
     function getInstalledVersion(script) {
         // Runtime authority only. Persistent markers are intentionally NOT used here:
         // they survive TornPDA disable/delete and create ghost installed/active cards.
@@ -747,6 +768,8 @@
             const standalone = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
             if (standalone?.dataset?.version) return String(standalone.dataset.version);
         } catch {}
+        const heartbeat = getFreshHeartbeat(script);
+        if (heartbeat?.version) return String(heartbeat.version);
         return null;
     }
 
@@ -876,6 +899,8 @@
             const health = api?.health?.();
             if (health && typeof health.enabled === 'boolean') return health.enabled;
         } catch {}
+        const heartbeat = getFreshHeartbeat(script);
+        if (heartbeat) return heartbeat.enabled !== false;
         return false;
     }
 
@@ -1863,7 +1888,14 @@
 
     function queueEnsure() {
         if (observerTimer) clearTimeout(observerTimer);
-        observerTimer = setTimeout(() => { observerTimer = null; ensureEverything(); }, 300);
+        observerTimer = setTimeout(() => {
+            observerTimer = null;
+            ensureEverything();
+            if (document.getElementById(IDS.panel)) {
+                renderList();
+                renderMainStats();
+            }
+        }, 300);
     }
 
     function startObserver() {
@@ -1893,6 +1925,13 @@
         startLanguageObserver();
         ensureEverything();
         startObserver();
+        setInterval(() => {
+            if (document.getElementById(IDS.panel)) {
+                renderList();
+                renderMainStats();
+                updateBadge();
+            }
+        }, 2500);
         await loadRegistry(false);
         setTimeout(() => retryPendingModuleAction(), 350);
         setTimeout(ensureEverything, 700);
