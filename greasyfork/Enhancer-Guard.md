@@ -1,10 +1,11 @@
 # 🛡️ SakaLuX Enhancer Guard
 
+> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+
 Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-
-**v1.3.20**
+**v1.3.22**
 
 ## What it does
 
@@ -74,5 +75,7 @@ Enhancer Guard stores its settings, protection state and cached interface data l
 Item Protector is a client-side safety layer. Always verify Torn's final sell/send/trade screen before confirming a transaction involving valuable items.
 
 ## License
+All Rights Reserved
 
-**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.

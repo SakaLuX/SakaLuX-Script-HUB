@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.2
+// @version      1.8.3
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -128,6 +128,7 @@
   else start();
 })();
 /* SakaLuX Standalone Dock Bootstrap — END */
+
 
 
 /*

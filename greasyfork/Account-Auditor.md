@@ -1,10 +1,11 @@
 # 🔎 SakaLuX Account Auditor
 
+> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+
 Standalone SakaLuX account-audit tool. It is intentionally not registered as a SakaLuX Script Hub add-on.
 
 ## Current version
-
-**v1.2.4**
+**v1.2.6**
 
 ## What it does
 
@@ -75,5 +76,7 @@ Account Auditor is **not a complementary Hub module** and must not be added to t
 The audit is a snapshot of data available through the configured API permissions and explicit user captures. Missing permissions or unavailable endpoints can result in incomplete sections rather than fabricated data.
 
 ## License
+MIT
 
-**MIT License.** The current Account Auditor userscript declares `@license MIT`; this documentation intentionally matches the license currently present in the script metadata.
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.

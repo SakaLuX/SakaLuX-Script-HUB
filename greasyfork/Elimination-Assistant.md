@@ -1,10 +1,11 @@
 # ⚔️ SakaLuX Elimination Assistant
 
+> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+
 Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-
-**v1.3.20**
+**v1.3.22**
 
 ## What it does
 
@@ -132,5 +133,7 @@ FFScouter battle stats and Smart Target Score are estimates and advisory only. E
 The script never attacks automatically; ATTACK only opens the Torn attack page and the player remains in control of the fight.
 
 ## License
+All Rights Reserved
 
-**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.

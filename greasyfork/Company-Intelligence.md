@@ -1,5 +1,7 @@
 # SakaLuX Company Intelligence
 
+> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+
 Complementary add-on for SakaLuX Script Hub, designed for Torn PDA, Tampermonkey and Violentmonkey.
 
 ## Current version
@@ -54,5 +56,7 @@ v1.8.1
 - Company rating is comparative and evaluated by Torn. Star Outlook is decision support, not a guarantee.
 
 ## License
+All Rights Reserved
 
-All Rights Reserved © 2026 SakaLuX [2380374].
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
