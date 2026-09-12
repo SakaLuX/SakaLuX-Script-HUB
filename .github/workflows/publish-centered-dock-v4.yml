@@ -1,0 +1,37 @@
+name: Publish centered premium standalone dock
+
+on:
+  push:
+    paths:
+      - 'tools/publish_dock_v4.py'
+      - '.github/workflows/publish-centered-dock-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply centered dock release
+        run: python3 tools/publish_dock_v4.py
+      - name: Remove one-time publisher
+        run: |
+          rm -f tools/publish_dock_v4.py
+          rm -f .github/workflows/publish-centered-dock-v4.yml
+      - name: Validate syntax
+        run: |
+          set -e
+          for f in SakaLuX-*.user.js; do node --check "$f"; done
+      - name: Commit release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish centered premium standalone dock"
+          git push origin HEAD:main
