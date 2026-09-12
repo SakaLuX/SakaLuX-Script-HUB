@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.22**
+**v1.3.23**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -16,7 +16,7 @@
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release note
-Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.
+Standalone Dock v2 now uses its own uniform buttons instead of moving script launchers. All installed Hub add-ons register themselves in the shared dock, preventing overlaps and missing entries. The Hub install reminder remains shared and limited to once every 12 hours.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard together with the rest of the SakaLuX add-ons and to use shared Hub integration where available.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.22
+// @version      1.3.23
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -16,112 +16,33 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
-  const LAST_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
-  const INTERVAL = 12 * 60 * 60 * 1000;
-  const DOCK_ID = 'sakalux-standalone-dock';
-  const PROMPT_ID = 'sakalux-hub-install-prompt';
-  const STYLE_ID = 'sakalux-standalone-dock-style';
-
-  const hubInstalled = () => !!(window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button'));
-
-  function addStyle() {
-    if (document.getElementById(STYLE_ID)) return;
-    const s = document.createElement('style');
-    s.id = STYLE_ID;
-    s.textContent = `
-#${DOCK_ID}{position:fixed;right:10px;bottom:72px;z-index:2147483000;display:flex;flex-direction:column;gap:6px;max-width:min(260px,calc(100vw - 20px));padding:8px;background:rgba(13,17,23,.96);border:1px solid #3b4654;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.45);font:12px Arial,sans-serif}
-#${DOCK_ID}[data-collapsed="1"] .slx-dock-items{display:none}
-#${DOCK_ID} .slx-dock-head{display:flex;align-items:center;gap:6px}
-#${DOCK_ID} .slx-dock-title{flex:1;color:#facc15;font-weight:900}
-#${DOCK_ID} button,#${DOCK_ID} a{box-sizing:border-box!important;position:static!important;inset:auto!important;transform:none!important;float:none!important;margin:0!important;min-width:0!important;max-width:none!important;width:100%!important;height:auto!important;min-height:34px!important;padding:7px 9px!important;border-radius:8px!important;font:700 12px/1.2 Arial,sans-serif!important;white-space:normal!important}
-#${DOCK_ID} .slx-dock-head button{width:auto!important;min-height:28px!important;padding:4px 7px!important}
-#${DOCK_ID} .slx-dock-install{background:#8a5a00!important;border:1px solid #f59e0b!important;color:#fff!important;text-decoration:none!important;text-align:center!important;display:block!important}
-#${DOCK_ID} .slx-dock-items{display:flex;flex-direction:column;gap:5px}
-`;
-    (document.head || document.documentElement).appendChild(s);
+  const SELF={id:'enhancer',name:'Enhancers',icon:'🛡️',selector:'#sl-eg-button',fallback:'https://www.torn.com/item.php',version:'1.3.23'};
+  const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+  const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
+  const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
+  const REG_ATTR='data-slx-standalone-registration';
+  const ORDER=["enhancer", "bazaar", "mission-rewards", "market-intelligence", "elimination-assistant"];
+  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.querySelector('[data-sakalux-hub-installed="1"]'));
+  function registerSelf(){
+    let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
+    if(!m){m=document.createElement('span');m.setAttribute(REG_ATTR,SELF.id);m.hidden=true;(document.body||document.documentElement).appendChild(m);}
+    Object.assign(m.dataset,{id:SELF.id,name:SELF.name,icon:SELF.icon,selector:SELF.selector,fallback:SELF.fallback,version:SELF.version});
   }
-
-  function ensureDock() {
-    if (hubInstalled()) {
-      document.getElementById(DOCK_ID)?.remove();
-      document.getElementById(PROMPT_ID)?.remove();
-      return null;
-    }
-    addStyle();
-    let dock = document.getElementById(DOCK_ID);
-    if (dock) return dock;
-    dock = document.createElement('div');
-    dock.id = DOCK_ID;
-    dock.innerHTML = `<div class="slx-dock-head"><span class="slx-dock-title">SakaLuX Scripts</span><button type="button" data-slx-collapse>−</button></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">⬇ Install SakaLuX Hub</a>`;
-    (document.body || document.documentElement).appendChild(dock);
-    dock.querySelector('[data-slx-collapse]').addEventListener('click', () => {
-      const collapsed = dock.dataset.collapsed === '1';
-      dock.dataset.collapsed = collapsed ? '0' : '1';
-      dock.querySelector('[data-slx-collapse]').textContent = collapsed ? '−' : '+';
-    });
-    return dock;
-  }
-
-  function eligible(el) {
-    if (!el || el.nodeType !== 1 || el.closest('#' + DOCK_ID) || el.id === 'sakalux-hub-button') return false;
-    if (!['BUTTON','A','DIV'].includes(el.tagName)) return false;
-    const ident = `${el.id || ''} ${el.className || ''}`.toLowerCase();
-    if (!/(slx|sakalux)/.test(ident)) return false;
-    const cs = getComputedStyle(el);
-    if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden') return false;
-    const r = el.getBoundingClientRect();
-    if (!r.width || !r.height || r.width > 320 || r.height > 100) return false;
-    if (/panel|modal|prompt|toast|style|overlay|dock/i.test(ident)) return false;
-    return true;
-  }
-
-  function collectLaunchers() {
-    const dock = ensureDock();
-    if (!dock) return;
-    const items = dock.querySelector('.slx-dock-items');
-    document.querySelectorAll('button,a,div').forEach(el => {
-      if (!eligible(el)) return;
-      el.dataset.slxDocked = '1';
-      items.appendChild(el);
-    });
-  }
-
-  function maybePrompt() {
-    if (hubInstalled() || document.getElementById(PROMPT_ID)) return;
-    let last = 0;
-    try { last = Number(localStorage.getItem(LAST_KEY) || 0); } catch {}
-    if (last && Date.now() - last < INTERVAL) return;
-    try { localStorage.setItem(LAST_KEY, String(Date.now())); } catch {}
-    const p = document.createElement('div');
-    p.id = PROMPT_ID;
-    p.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px';
-    p.innerHTML = `<div style="width:min(380px,100%);background:#111820;color:#fff;border:1px solid #465365;border-radius:14px;padding:18px;font:14px Arial,sans-serif;box-shadow:0 16px 50px #0008"><b style="font-size:17px">Install SakaLuX Script Hub?</b><div style="margin-top:8px;color:#cbd5e1;line-height:1.45">Keep all SakaLuX scripts together, with shared settings and controls.</div><div style="display:flex;gap:8px;margin-top:14px"><button type="button" data-slx-later style="flex:1;padding:10px;border-radius:8px;background:#202a36;color:#fff;border:1px solid #526174">Later</button><button type="button" data-slx-install style="flex:1;padding:10px;border-radius:8px;background:#8a5a00;color:#fff;border:1px solid #f59e0b;font-weight:900">Install Hub</button></div></div>`;
-    (document.body || document.documentElement).appendChild(p);
-    p.querySelector('[data-slx-later]').addEventListener('click', () => p.remove());
-    p.querySelector('[data-slx-install]').addEventListener('click', () => { location.href = HUB_URL; });
-  }
-
-  function start() {
-    if (hubInstalled()) return;
-    ensureDock();
-    collectLaunchers();
-    setTimeout(maybePrompt, 1200);
-    let timer = 0;
-    new MutationObserver(() => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (hubInstalled()) {
-          document.getElementById(DOCK_ID)?.remove();
-          document.getElementById(PROMPT_ID)?.remove();
-        } else collectLaunchers();
-      }, 80);
-    }).observe(document.documentElement, {childList:true, subtree:true});
-    setInterval(() => { if (!hubInstalled()) { collectLaunchers(); maybePrompt(); } }, 60000);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
-  else start();
+  function addStyle(){if(document.getElementById(STYLE_ID))return;const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
+#${DOCK_ID}{position:fixed;right:10px;bottom:72px;z-index:2147483000;width:min(238px,calc(100vw - 20px));max-height:calc(100vh - 150px);overflow:hidden;padding:8px;background:rgba(13,17,23,.97);border:1px solid #3b4654;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.45);font:12px Arial,sans-serif}
+#${DOCK_ID} .slx-dock-head{display:flex;align-items:center;gap:6px;margin-bottom:6px}#${DOCK_ID} .slx-dock-title{flex:1;color:#facc15;font-weight:900;font-size:14px}
+#${DOCK_ID} .slx-dock-collapse{width:30px!important;height:30px!important;min-height:30px!important;padding:0!important;background:#202a36!important;border:1px solid #526174!important;color:#fff!important;border-radius:8px!important}
+#${DOCK_ID} .slx-dock-items{display:flex;flex-direction:column;gap:5px;max-height:calc(100vh - 250px);overflow:auto}#${DOCK_ID}[data-collapsed="1"] .slx-dock-items,#${DOCK_ID}[data-collapsed="1"] .slx-dock-install{display:none!important}
+#${DOCK_ID} .slx-dock-row{display:flex!important;align-items:center!important;gap:8px!important;width:100%!important;min-height:38px!important;margin:0!important;padding:8px 10px!important;box-sizing:border-box!important;position:static!important;transform:none!important;border:1px solid #3b4654!important;border-radius:8px!important;background:#17202b!important;color:#fff!important;font:800 12px/1.15 Arial,sans-serif!important;text-align:left!important;white-space:nowrap!important;overflow:hidden!important}
+#${DOCK_ID} .slx-dock-row .i{width:20px;flex:0 0 20px;text-align:center}#${DOCK_ID} .slx-dock-row .n{overflow:hidden;text-overflow:ellipsis}#${DOCK_ID} .slx-dock-install{display:block!important;width:100%!important;box-sizing:border-box!important;margin-top:6px!important;padding:9px!important;border-radius:8px!important;background:#8a5a00!important;border:1px solid #f59e0b!important;color:#fff!important;text-align:center!important;text-decoration:none!important;font-weight:900!important}
+body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-button,#sl-mri-button,#sl-mi-button,#slx-elim-btn){display:none!important}
+`; (document.head||document.documentElement).appendChild(s);}
+  function ensureDock(){if(hubInstalled()){document.body?.setAttribute('data-sakalux-hub-active','1');document.getElementById(DOCK_ID)?.remove();document.getElementById(PROMPT_ID)?.remove();return null;}document.body?.removeAttribute('data-sakalux-hub-active');addStyle();let d=document.getElementById(DOCK_ID);if(d)return d;d=document.createElement('div');d.id=DOCK_ID;d.dataset.collapsed=localStorage.getItem('SakaLuX_STANDALONE_DOCK_COLLAPSED')==='1'?'1':'0';d.innerHTML=`<div class="slx-dock-head"><span class="slx-dock-title">SakaLuX Scripts</span><button type="button" class="slx-dock-collapse">${d.dataset.collapsed==='1'?'+':'−'}</button></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">⬇ Install SakaLuX Hub</a>`;(document.body||document.documentElement).appendChild(d);d.querySelector('.slx-dock-collapse').onclick=()=>{d.dataset.collapsed=d.dataset.collapsed==='1'?'0':'1';localStorage.setItem('SakaLuX_STANDALONE_DOCK_COLLAPSED',d.dataset.collapsed);d.querySelector('.slx-dock-collapse').textContent=d.dataset.collapsed==='1'?'+':'−';};return d;}
+  function openEntry(data){const el=data.selector?document.querySelector(data.selector):null;if(el){el.click();return;}if(data.fallback)location.href=data.fallback;}
+  function render(){const d=ensureDock();if(!d)return;const box=d.querySelector('.slx-dock-items');const regs=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id);regs.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));box.replaceChildren();for(const r of regs){const b=document.createElement('button');b.type='button';b.className='slx-dock-row';b.dataset.scriptId=r.id;b.innerHTML=`<span class="i">${r.icon||'•'}</span><span class="n">${r.name||r.id}</span>`;b.onclick=()=>openEntry(r);box.appendChild(b);}}
+  function maybePrompt(){if(hubInstalled()||document.getElementById(PROMPT_ID))return;let last=0;try{last=Number(localStorage.getItem(LAST_KEY)||0)}catch{}if(last&&Date.now()-last<INTERVAL)return;try{localStorage.setItem(LAST_KEY,String(Date.now()))}catch{}const p=document.createElement('div');p.id=PROMPT_ID;p.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px';p.innerHTML=`<div style="width:min(380px,100%);background:#111820;color:#fff;border:1px solid #465365;border-radius:14px;padding:18px;font:14px Arial,sans-serif"><b style="font-size:17px">Install SakaLuX Script Hub?</b><div style="margin-top:8px;color:#cbd5e1;line-height:1.45">Keep all SakaLuX scripts together with shared settings and controls.</div><div style="display:flex;gap:8px;margin-top:14px"><button type="button" data-later style="flex:1;padding:10px">Later</button><button type="button" data-install style="flex:1;padding:10px">Install Hub</button></div></div>`;(document.body||document.documentElement).appendChild(p);p.querySelector('[data-later]').onclick=()=>p.remove();p.querySelector('[data-install]').onclick=()=>location.href=HUB_URL;}
+  function start(){registerSelf();render();setTimeout(maybePrompt,1200);let t=0;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(()=>{registerSelf();render();},60);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(()=>{registerSelf();render();maybePrompt();},60000);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 /* SakaLuX Standalone Dock Bootstrap — END */
 
@@ -143,7 +64,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.22';
+    const VERSION = '1.3.23';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
