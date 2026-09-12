@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.35**
+**v1.9.36**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -21,9 +21,9 @@
 - Can securely store one shared Torn API key locally for registered add-ons that require Torn API access.
 - Works with Torn PDA and Tampermonkey.
 
-## Current release note
+## Current release notes
 
-**v1.9.35** uses live runtime presence only for installation detection. Persistent `SakaLuX_Installed_*` markers and old launcher-button fallbacks do not count as proof that an add-on is currently installed, preventing deleted or disabled scripts from remaining as ghost modules.
+**v1.9.36** fixes stale registry/update cache after an add-on version rollback. Cached Mission Rewards v1.0.21 state is invalidated so the Hub immediately uses the restored registry version v1.0.18 instead of showing `REGISTRY v1.0.21 PENDING`.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
