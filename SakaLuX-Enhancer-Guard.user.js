@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.28
+// @version      1.3.29
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -16,7 +16,7 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"#sl-eg-button","fallback":"https://www.torn.com/item.php"},{version:'1.3.28'});
+  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.29'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -99,7 +99,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     d.innerHTML=`<div class="slx-dock-head"><button type="button" class="slx-dock-mark" aria-label="Close SakaLuX Scripts" title="Close SakaLuX Scripts">S</button><div class="slx-dock-title">SakaLuX Scripts</div><div class="slx-dock-sub">Standalone</div></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">Install SakaLuX Hub</a>`;
     (document.body||document.documentElement).appendChild(d); const close=d.querySelector('.slx-dock-mark'); if(close) close.onclick=e=>{e.preventDefault();e.stopPropagation();toggleDock(false);}; return d;
   }
-  function openEntry(data){const el=data.selector?document.querySelector(data.selector):null;if(el){el.click();return;}if(data.fallback)location.href=data.fallback;}
+  function openEntry(data){const el=data.selector?document.querySelector(data.selector):null;if(el){el.click();return;}const bridge=document.getElementById('sakalux-module-bridge-'+data.id);if(bridge){bridge.dataset.action='open';bridge.click();return;}if(data.fallback)location.href=data.fallback;}
   function render(){
     const d=ensureDock(); if(!d) return;
     const box=d.querySelector('.slx-dock-items');
@@ -146,7 +146,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION='1.3.28';
+    const VERSION = '1.3.29';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -930,7 +930,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         const style = document.createElement('style');
         style.id = 'sl-eg-style';
         style.textContent = `
-            #sl-eg-button{position:fixed;right:12px;bottom:82px;z-index:2147483646;border:0;border-radius:999px;padding:10px 14px;background:#111827;color:#fff;font-size:13px;font-weight:800;box-shadow:0 5px 18px rgba(0,0,0,.35)}
             #sl-eg-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
             #sl-eg-panel{width:min(700px,100%);max-height:94vh;overflow:hidden;background:#101318;color:#f3f4f6;border-radius:18px 18px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.5);display:flex;flex-direction:column}
             #sl-eg-header{padding:14px;border-bottom:1px solid #272c34;flex-shrink:0}
@@ -968,14 +967,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         document.head.appendChild(style);
     }
 
-    function createButton() {
-        if (!state.enabled || document.getElementById('sl-eg-button')) return;
-        const button = document.createElement('button');
-        button.id = 'sl-eg-button';
-        button.textContent = '🛡️ Enhancers';
-        button.onclick = openPanel;
-        document.body.appendChild(button);
-    }
 
     function openPanel() {
         if (!state.enabled) setEnabled(true);
@@ -1043,7 +1034,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setBool(STORAGE.enabled, state.enabled);
         if (state.enabled) {
             injectCss();
-            createButton();
             configureAutoRefresh();
         } else {
             if (state.autoRefreshTimer) clearInterval(state.autoRefreshTimer);
@@ -1051,7 +1041,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
             if (saleObserver) { saleObserver.disconnect(); saleObserver = null; }
             document.getElementById('sl-eg-overlay')?.remove();
             document.getElementById('sl-eg-api-overlay')?.remove();
-            document.getElementById('sl-eg-button')?.remove();
             document.getElementById(HUB_PROMPT_ID)?.remove();
         }
         window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
@@ -1422,7 +1411,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if (state.enabled) {
             injectCss();
             configureAutoRefresh();
-            createButton();
             installSaleProtectionFallback();
             installInventoryProtection();
             scheduleHubInstallPrompt();

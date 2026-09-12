@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.28**
+**v1.3.29**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.3.28** fixes Hub/standalone detection for the current SakaLuX launchers. When Script Hub is installed, Enhancer Guard recognizes the native **S** status-bar launcher, the Fly-out **HUB** launcher and the Hub-active page marker, so the standalone dock and **Install SakaLuX Hub** prompt do not appear at the same time as Hub.
+**v1.3.29** removes the standalone floating launcher button from Enhancer Guard. The panel remains fully accessible from SakaLuX Script Hub and the standalone SakaLuX dock through the module bridge/API.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard together with the rest of the SakaLuX add-ons and to use shared Hub integration where available.
