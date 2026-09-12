@@ -3,7 +3,7 @@
 > Central manager for the SakaLuX script ecosystem.
 
 ## Current version
-**v1.9.36**
+**v1.9.37**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -23,7 +23,7 @@
 
 ## Current release notes
 
-**v1.9.36** fixes stale registry/update cache after an add-on version rollback. Cached Mission Rewards v1.0.21 state is invalidated so the Hub immediately uses the restored registry version v1.0.18 instead of showing `REGISTRY v1.0.21 PENDING`.
+**v1.9.37** hard-invalidates the old persistent Hub registry/update caches by rotating their storage keys. This removes stale Mission Rewards `REGISTRY v1.0.21 PENDING` state after the rollback and forces Hub to start from the current `scripts.json` / fallback registry value **v1.0.18**.
 
 ## Recommended
 Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
