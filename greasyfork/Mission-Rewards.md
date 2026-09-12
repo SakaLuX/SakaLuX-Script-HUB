@@ -24,7 +24,6 @@
 **v1.0.19** is rebuilt directly from the confirmed-working **v1.0.18** runtime. The Task + Hint Mission Guide is now a completely isolated visual layer and does not alter Mission Rewards initialization, Hub bridge, ON/OFF state, API access, reward scanning or Standalone Dock behavior. The stabilization line is distributed from GitHub so the old broken `1.1.x` Greasy Fork branch is no longer used as the desired Hub update.
 
 ## Recommended
-## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
 
 ## License
