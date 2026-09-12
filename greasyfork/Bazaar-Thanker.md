@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-5.3.17
+5.3.18
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.

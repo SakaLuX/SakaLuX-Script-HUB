@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.25
+// @version      1.9.26
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.25';
+    const VERSION = '1.9.26';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.26',
+            date: '2026-09-12',
+            changes: [
+                'Fixes false standalone mode detection when the Hub is already installed.',
+                'Marks the page as Hub-active and removes stale standalone dock/install prompts from older add-ons.',
+                'Keeps native S and Fly-out HUB launchers as authoritative Hub-presence signals.'
+            ]
+        },
         {
             version: '1.9.25',
             date: '2026-09-12',
@@ -1612,7 +1621,18 @@
         updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); updateBadge(); openHub();
     }
 
+    function suppressStandaloneDock() {
+        try {
+            document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
+            document.body?.setAttribute('data-sakalux-hub-active', '1');
+            for (const id of ['sakalux-standalone-dock','sakalux-hub-install-prompt','sakalux-standalone-native-s','sakalux-standalone-fallback-s']) {
+                document.getElementById(id)?.remove();
+            }
+        } catch {}
+    }
+
     function ensureEverything() {
+        suppressStandaloneDock();
         injectCss(); createTopbarSkull(); createNavSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
     }
 
