@@ -6,12 +6,14 @@ on:
     paths:
       - '*.user.js'
       - 'scripts.json'
+      - 'locales.json'
       - 'greasyfork/**'
       - '.github/workflows/**'
   pull_request:
     paths:
       - '*.user.js'
       - 'scripts.json'
+      - 'locales.json'
       - 'greasyfork/**'
       - '.github/workflows/**'
   workflow_dispatch:
@@ -54,6 +56,20 @@ jobs:
           p = Path('scripts.json')
           json.loads(p.read_text(encoding='utf-8'))
           print('scripts.json: valid JSON')
+
+      - name: Validate locale registry
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          data = json.loads(Path('locales.json').read_text(encoding='utf-8'))
+          locales = data.get('locales', {})
+          if data.get('defaultLanguage') != 'en' or 'en' not in locales or 'ro' not in locales:
+              raise SystemExit('locales.json must contain default English plus English and Romanian locales')
+          for code, locale in locales.items():
+              if not isinstance(locale.get('label'), str) or not isinstance(locale.get('translations'), dict):
+                  raise SystemExit(f'Invalid locale: {code}')
+          print('locales.json: valid extensible locale registry')
 
       - name: Validate cross-file version synchronization
         shell: python
