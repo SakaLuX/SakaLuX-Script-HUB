@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.1.3
+// @version      1.1.4
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -17,47 +17,22 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.1.3'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.1.4'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant'];
-  const EARLY_BRIDGE_ID='sakalux-module-bridge-mission-rewards';
   const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
 
-  function publishEarlyPresence(){
-    let registration=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
-    if(!registration){
-      registration=document.createElement('span');
-      registration.setAttribute(REG_ATTR,SELF.id);
-      registration.hidden=true;
-      (document.body||document.documentElement).appendChild(registration);
-    }
-    Object.assign(registration.dataset,SELF);
-
-    let bridge=document.getElementById(EARLY_BRIDGE_ID);
-    if(!bridge){
-      bridge=document.createElement('button');
-      bridge.type='button';
-      bridge.id=EARLY_BRIDGE_ID;
-      bridge.hidden=true;
-      (document.body||document.documentElement).appendChild(bridge);
-    }
-    let enabled=true;
-    try { enabled=JSON.parse(localStorage.getItem('SakaLuX_MR_ENABLED') ?? 'true') !== false; } catch {}
-    bridge.dataset.version=SELF.version;
-    bridge.dataset.enabled=String(enabled);
-    bridge.dataset.ready='bootstrap';
-    bridge.dataset.module='mission-rewards';
-  }
-  publishEarlyPresence();
 
   function registerSelf(){
     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
     if(!m){m=document.createElement('span');m.setAttribute(REG_ATTR,SELF.id);m.hidden=true;(document.body||document.documentElement).appendChild(m);}
     Object.assign(m.dataset,SELF);
+    try { m.dataset.enabled=String(JSON.parse(localStorage.getItem('SakaLuX_MR_ENABLED') ?? 'true') !== false); }
+    catch { m.dataset.enabled='true'; }
   }
 
   function addStyle(){
@@ -152,7 +127,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     p.querySelector('[data-later]').onclick=()=>p.remove();
     p.querySelector('[data-install]').onclick=()=>location.href=HUB_URL;
   }
-  function start(){publishEarlyPresence();registerSelf();render();setTimeout(maybePrompt,1200);let t=0;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(()=>{registerSelf();render();},80);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(()=>{registerSelf();render();maybePrompt();},60000);}
+  function start(){registerSelf();render();setTimeout(maybePrompt,1200);let t=0;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(()=>{registerSelf();render();},80);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(()=>{registerSelf();render();maybePrompt();},60000);}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
 })();
 (() => {
@@ -195,16 +170,15 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.1.3';
+    const VERSION = '1.1.4';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
     const HUB_PROMPT_STORAGE = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
     const HUB_PROMPT_INTERVAL = 12 * 60 * 60 * 1000;
     const HUB_PROMPT_ID = 'sakalux-hub-install-prompt';
+    const HUB_COMMAND_KEY = 'SakaLuX_MR_HUB_COMMAND';
     const REQUIRED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Mission%20Rewards&user=ammo&torn=items';
-    const HUB_HEARTBEAT_KEY = 'SakaLuX_HUB_HEARTBEAT_mission-rewards';
-    const HUB_HEARTBEAT_INTERVAL = 2000;
 
     const STORAGE = {
         apiKey: 'SakaLuX_MR_API_KEY',
@@ -241,26 +215,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         processedCards: new WeakSet(),
         enabled: loadJson(STORAGE.enabled, true) !== false
     };
-
-    let hubHeartbeatTimer = null;
-
-    function publishHubHeartbeat() {
-        try {
-            localStorage.setItem(HUB_HEARTBEAT_KEY, JSON.stringify({
-                id: 'mission-rewards',
-                version: VERSION,
-                enabled: Boolean(state.enabled),
-                ready: true,
-                at: Date.now()
-            }));
-        } catch {}
-    }
-
-    function startHubHeartbeat() {
-        publishHubHeartbeat();
-        if (hubHeartbeatTimer) clearInterval(hubHeartbeatTimer);
-        hubHeartbeatTimer = setInterval(publishHubHeartbeat, HUB_HEARTBEAT_INTERVAL);
-    }
 
     function isMissionsPage() {
         return location.href.includes('sid=missions');
@@ -1006,8 +960,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if (state.enabled) startRuntime();
         else stopRuntime();
         window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
-        syncHubBridge('mission-rewards', state.enabled);
-        publishHubHeartbeat();
         return state.enabled;
     }
 
@@ -1015,12 +967,48 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         return setEnabled(!state.enabled);
     }
 
-    function syncHubBridge(id, value) { const bridge = document.getElementById('sakalux-module-bridge-' + id); if (bridge) bridge.dataset.enabled = String(Boolean(value)); }
-    function installHubBridge(id, openHandler) {
-        let bridge = document.getElementById('sakalux-module-bridge-' + id);
-        if (!bridge) { bridge = document.createElement('button'); bridge.type = 'button'; bridge.id = 'sakalux-module-bridge-' + id; bridge.hidden = true; (document.body || document.documentElement).appendChild(bridge); }
-        bridge.dataset.version = VERSION; bridge.dataset.enabled = String(Boolean(state.enabled)); bridge.dataset.ready = '1'; bridge.dataset.module = id;
-        bridge.onclick = () => { const action = bridge.dataset.action; if (action === 'open') openHandler(); else if (action === 'toggle') toggleEnabled(); else if (action === 'on' || action === 'off') setEnabled(action === 'on'); bridge.dataset.action = ''; syncHubBridge(id, state.enabled); };
+    let hubCommandTimer = null;
+    let hubPowerTimer = null;
+
+    async function consumeHubCommand() {
+        let command = null;
+        try { command = JSON.parse(localStorage.getItem(HUB_COMMAND_KEY) || 'null'); } catch {}
+        if (!command?.action) return false;
+        if (Date.now() - Number(command.at || 0) > 30000) {
+            try { localStorage.removeItem(HUB_COMMAND_KEY); } catch {}
+            return false;
+        }
+        try { localStorage.removeItem(HUB_COMMAND_KEY); } catch {}
+        const action = String(command.action);
+        if (action === 'open' || action === 'settings') {
+            if (!state.enabled) setEnabled(true);
+            if (!isMissionsPage()) { location.href = MISSIONS_URL; return true; }
+            openSettings();
+            return true;
+        }
+        if (action === 'refresh') {
+            if (!isMissionsPage()) { location.href = MISSIONS_URL; return true; }
+            try { await window.SakaLuXMissionRewards?.refresh?.(); } catch {}
+            return true;
+        }
+        if (action === 'missions') { location.href = MISSIONS_URL; return true; }
+        return false;
+    }
+
+    function startHubCommandChannel() {
+        consumeHubCommand();
+        if (hubCommandTimer) clearInterval(hubCommandTimer);
+        hubCommandTimer = setInterval(consumeHubCommand, 500);
+        if (hubPowerTimer) clearInterval(hubPowerTimer);
+        hubPowerTimer = setInterval(() => {
+            const desired = loadJson(STORAGE.enabled, true) !== false;
+            if (desired !== state.enabled) setEnabled(desired);
+            const registration = document.querySelector('[data-slx-standalone-registration="mission-rewards"]');
+            if (registration) {
+                registration.dataset.version = VERSION;
+                registration.dataset.enabled = String(Boolean(state.enabled));
+            }
+        }, 1000);
     }
 
     window.SakaLuXMissionRewards = {
@@ -1084,13 +1072,12 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     async function init() {
         try { localStorage.setItem('SakaLuX_Installed_mission-rewards', VERSION); } catch {}
         state.enabled = loadJson(STORAGE.enabled, true) !== false;
-        startHubHeartbeat();
-        installHubBridge('mission-rewards', () => window.SakaLuXMissionRewards.open());
+        startHubCommandChannel();
         try {
             const registration = document.querySelector('[data-slx-standalone-registration="mission-rewards"]');
             if (registration) registration.dataset.version = VERSION;
         } catch {}
-        window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsReady', { detail: { version: VERSION, enabled: state.enabled, bridgeReady: true } }));
+        window.dispatchEvent(new CustomEvent('SakaLuX:MissionRewardsReady', { detail: { version: VERSION, enabled: state.enabled } }));
         if (state.enabled) setTimeout(maybePromptForHub, 3500);
 
         if (!isMissionsPage()) {

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.41
+// @version      1.9.42
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,16 +31,24 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.41';
+    const VERSION = '1.9.42';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
     const LOCALES_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/locales.json';
     const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,money,travel,equipment,inventory,battlestats,ammo&torn=items,elimination,eliminationteam&market=itemmarket';
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
-    const MODULE_HEARTBEAT_TTL = 10000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.42',
+            date: '2026-09-13',
+            changes: [
+                'Mission Rewards no longer depends on the Violentmonkey-specific hidden control bridge or heartbeat compatibility layer.',
+                'Mission Rewards presence/version comes from the normal standalone registration marker, while OPEN/SETTINGS uses a simple localStorage command channel.',
+                'Mission Rewards ON/OFF now writes its native enabled setting directly and the module synchronizes it at runtime.'
+            ]
+        },
         {
             version: '1.9.41',
             date: '2026-09-13',
@@ -450,7 +458,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.3',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.1.4',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -740,17 +748,6 @@
         return match ? match[1].trim() : null;
     }
 
-    function getFreshHeartbeat(script) {
-        try {
-            const raw = localStorage.getItem('SakaLuX_HUB_HEARTBEAT_' + script.id);
-            if (!raw) return null;
-            const data = JSON.parse(raw);
-            if (!data || data.id !== script.id || !data.at) return null;
-            if (Date.now() - Number(data.at) > MODULE_HEARTBEAT_TTL) return null;
-            return data;
-        } catch { return null; }
-    }
-
     function getInstalledVersion(script) {
         // Runtime authority only. Persistent markers are intentionally NOT used here:
         // they survive TornPDA disable/delete and create ghost installed/active cards.
@@ -768,8 +765,6 @@
             const standalone = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
             if (standalone?.dataset?.version) return String(standalone.dataset.version);
         } catch {}
-        const heartbeat = getFreshHeartbeat(script);
-        if (heartbeat?.version) return String(heartbeat.version);
         return null;
     }
 
@@ -899,8 +894,6 @@
             const health = api?.health?.();
             if (health && typeof health.enabled === 'boolean') return health.enabled;
         } catch {}
-        const heartbeat = getFreshHeartbeat(script);
-        if (heartbeat) return heartbeat.enabled !== false;
         return false;
     }
 
@@ -942,6 +935,9 @@
         const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
         if (bridge?.dataset?.enabled === 'true') return true;
         if (bridge?.dataset?.enabled === 'false') return false;
+        const registration = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
+        if (registration?.dataset?.enabled === 'true') return true;
+        if (registration?.dataset?.enabled === 'false') return false;
         return Object.prototype.hasOwnProperty.call(modulePower, script.id) ? modulePower[script.id] !== false : true;
     }
 
@@ -952,10 +948,16 @@
         if (api && typeof api.setEnabled === 'function' && typeof api.isEnabled === 'function') {
             await api.setEnabled(Boolean(enabled));
         } else {
-            const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-            if (!bridge) throw new Error('Update ' + script.name + ' to the latest version to use its Violentmonkey control bridge.');
-            bridge.dataset.action = enabled ? 'on' : 'off';
-            bridge.click();
+            if (script.id === 'mission-rewards') {
+                localStorage.setItem('SakaLuX_MR_ENABLED', JSON.stringify(Boolean(enabled)));
+                const registration = document.querySelector('[data-slx-standalone-registration="mission-rewards"]');
+                if (registration) registration.dataset.enabled = String(Boolean(enabled));
+            } else {
+                const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+                if (!bridge) throw new Error('Module control is unavailable for ' + script.name + '.');
+                bridge.dataset.action = enabled ? 'on' : 'off';
+                bridge.click();
+            }
         }
         modulePower[id] = Boolean(enabled);
         saveJson(STORAGE.modulePower, modulePower);
@@ -1550,7 +1552,7 @@
         if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? 'Standby' : `Rewards ${health.data.rewardCards ?? 0}`;
         const enabled = !missing && isModuleEnabled(script);
         const moduleApi = script.api();
-        const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id));
+        const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id) || (script.id === 'mission-rewards' && document.querySelector('[data-slx-standalone-registration="mission-rewards"]')));
         const primary = getPrimaryAction(script);
         const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
         const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'pending' ? 'info' : update.state === 'failed' ? 'bad' : 'muted';
@@ -1692,6 +1694,12 @@
         if (!runtimeBehind) clearRuntimeReloadTried(script);
         const api = script.api();
         if (!api) {
+            if (script.id === 'mission-rewards') {
+                try { localStorage.setItem('SakaLuX_MR_HUB_COMMAND', JSON.stringify({ action: isPanelAction ? 'open' : actionId, at: Date.now() })); } catch {}
+                recordUsage(id);
+                closeHub();
+                return;
+            }
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
             if (bridge) {
                 bridge.dataset.action = isPanelAction ? 'open' : actionId;

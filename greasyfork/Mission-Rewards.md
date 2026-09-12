@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.1.3**
+**v1.1.4**
 
 ## What it does
 - Adds a **Duke Mission Guide** directly to mission cards with a concise **Task** and optional **Hint**.
