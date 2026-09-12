@@ -1,10 +1,11 @@
 # 🧰 SakaLuX Suite [EXPERIMENTAL]
 
+> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+
 Standalone experimental SakaLuX toolkit for Torn PDA and desktop userscript managers. It is intentionally not registered as a SakaLuX Script Hub add-on.
 
 ## Current version
-
-**v0.9.910**
+**v0.9.912**
 
 ## What it does
 
@@ -95,5 +96,7 @@ The Suite does **not** automate attacks, crimes, bets, item consumption or race 
 SakaLuX Suite is intentionally **not registered in `scripts.json`** and therefore must not appear as a required/recommended module inside Script Hub.
 
 ## License
+All Rights Reserved
 
-**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.
+## Current release note
+Standalone mode now groups SakaLuX launch buttons in one shared dock when Script Hub is not installed. The Hub install reminder is shared by all scripts and can appear at most once every 12 hours, preventing stacked or repeated prompts.

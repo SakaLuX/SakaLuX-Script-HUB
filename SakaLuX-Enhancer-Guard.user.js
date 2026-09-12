@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.21
+// @version      1.3.22
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -126,6 +126,7 @@
 /* SakaLuX Standalone Dock Bootstrap — END */
 
 
+
 /*
  * Copyright © 2026 SakaLuX [2380374]
  * All Rights Reserved.
@@ -142,7 +143,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.21';
+    const VERSION = '1.3.22';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';

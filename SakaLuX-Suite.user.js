@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.911
+// @version      0.9.912
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -131,12 +131,13 @@
 })();
 /* SakaLuX Standalone Dock Bootstrap — END */
 
+
 /* Copyright © 2026 SakaLuX [2380374]. All Rights Reserved.
  * Complete module implementations with SakaLuX naming,
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = "0.9.911";
+  const VERSION = "0.9.912";
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,

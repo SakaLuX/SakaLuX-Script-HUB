@@ -3,8 +3,7 @@
 Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-
-**v1.9.18**
+**v1.9.20**
 
 ## What it does
 
@@ -156,11 +155,11 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 
 ### Registered complementary add-ons
 
-- 🛡️ SakaLuX Enhancer Guard **v1.3.20**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.22**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.10**
-- 🎯 SakaLuX Mission Rewards **v1.0.8**
-- 📈 SakaLuX Market Intelligence **v1.17.8**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.20**
+- 🎯 SakaLuX Mission Rewards **v1.0.10**
+- 📈 SakaLuX Market Intelligence **v1.17.10**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.22**
 
 ## Privacy
 
@@ -174,5 +173,7 @@ Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It pr
 Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
 
 ## License
+All Rights Reserved
 
-**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.
+## Current release note
+Compatibility release for the shared standalone dock and 12-hour global Hub reminder used by SakaLuX add-ons. Hub fallback version references were synchronized with the newly released add-on versions.
