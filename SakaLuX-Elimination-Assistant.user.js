@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.18
+// @version      1.3.19
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export and FF/BS calibration.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -28,19 +28,19 @@
  */
 (() => {
 'use strict';
-const VERSION='1.3.18';
+const VERSION='1.3.19';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
 const HUB_PROMPT_INTERVAL=86400000;
 const TORN_KEY_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Elimination_Assistant&user=battlestats&torn=elimination,eliminationteam';
 const IDS={button:'slx-elim-btn',panel:'slx-elim',style:'slx-elim-style'};
-const K={torn:'slx_elim_torn_key',ff:'slx_elim_ff_key',team:'slx_elim_team',enabled:'slx_elim_enabled',hist:'slx_elim_history_v4',learn:'slx_elim_learning_v1',cache:'slx_elim_ff_cache_v2',my:'slx_elim_my_stats_v1',batches:'slx_elim_batches_v1',safe:'slx_elim_safe_targets_v1'};
+const K={torn:'slx_elim_torn_key',ff:'slx_elim_ff_key',team:'slx_elim_team',enabled:'slx_elim_enabled',hist:'slx_elim_history_v4',learn:'slx_elim_learning_v1',cache:'slx_elim_ff_cache_v2',my:'slx_elim_my_stats_v1',batches:'slx_elim_batches_v1',safe:'slx_elim_safe_targets_v1',ui:'slx_elim_ui_v1'};
 const load=(k,f)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??f}catch{return f}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-const state={enabled:localStorage.getItem(K.enabled)!=='0',tornKey:localStorage.getItem(K.torn)||'',ffKey:localStorage.getItem(K.ff)||'',teamId:Number(localStorage.getItem(K.team)||0),teams:[],players:[],view:[],history:load(K.hist,[]),learning:load(K.learn,{}),cache:load(K.cache,{}),my:load(K.my,{total:null,at:0,source:''}),batchOffsets:load(K.batches,{}),safeTargets:load(K.safe,[]),batchRawCount:0,busy:false,keyBusy:false,lastRefresh:0,tornKeySource:'None',tornAccessStatus:'unknown',tornAccessMessage:'Not checked yet',tornAccessCheckedAt:0,ffAccessStatus:'unknown',ffAccessMessage:'Optional · not checked'};
+const state={enabled:localStorage.getItem(K.enabled)!=='0',tornKey:localStorage.getItem(K.torn)||'',ffKey:localStorage.getItem(K.ff)||'',teamId:Number(localStorage.getItem(K.team)||0),teams:[],players:[],view:[],history:load(K.hist,[]),learning:load(K.learn,{}),cache:load(K.cache,{}),my:load(K.my,{total:null,at:0,source:''}),batchOffsets:load(K.batches,{}),safeTargets:load(K.safe,[]),ui:Object.assign({filters:[],query:'',panelOpen:false},load(K.ui,{})),batchRawCount:0,busy:false,keyBusy:false,lastRefresh:0,tornKeySource:'None',tornAccessStatus:'unknown',tornAccessMessage:'Not checked yet',tornAccessCheckedAt:0,ffAccessStatus:'unknown',ffAccessMessage:'Optional · not checked'};
 function getTornKey(){try{const k=window.SakaLuXScriptHub?.getApiKey?.()||'';if(k){state.tornKeySource='SakaLuX Hub';return k}if(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')){const stored=localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'';if(stored){state.tornKeySource='SakaLuX Hub';return stored}}}catch{}if(state.tornKey){state.tornKeySource='Local standalone';return state.tornKey}state.tornKeySource='None';return''}
 const fmtBS=n=>{n=Number(n||0);if(!n)return'—';if(n>=1e12)return(n/1e12).toFixed(2)+'T';if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(Math.round(n))};
 const age=ts=>{if(!ts)return'—';const s=Math.max(0,Math.floor(Date.now()/1000)-Number(ts));return s<60?s+'s':s<3600?Math.floor(s/60)+'m':s<86400?Math.floor(s/3600)+'h':Math.floor(s/86400)+'d'};
@@ -248,7 +248,10 @@ function goToEliminations(){location.href='https://www.torn.com/page.php?sid=eli
 window.SakaLuXEliminationAssistant={version:VERSION,open,close,openApiSettings:openSettings,openSafeTargets,refresh:()=>busy(refresh),scanFF:()=>busy(()=>loadFF(true)),exportTargets:()=>busy(exportTargets),copyAllSafe:()=>busy(copyAllSafe),exportSafeTargets:()=>busy(exportSafeTargets),calibrate:()=>busy(()=>calibrate(true)),testTornKey:()=>busy(testKey),testFFScouterKey:()=>busy(testFFKey),createRequiredTornKey:createKey,setEnabled,toggleEnabled,isEnabled:()=>state.enabled,goToEliminations,health};
 window.dispatchEvent(new CustomEvent('SakaLuXEliminationAssistantReady',{detail:{version:VERSION,enabled:state.enabled}}));
 watchSafeTargetsUi();
-function start(){try{localStorage.setItem('SakaLuX_Installed_elimination-assistant',VERSION);localStorage.setItem('SakaLuX_Installed_elimination',VERSION)}catch{}installHubBridge('elimination-assistant',open);syncHubPower();setInterval(syncHubPower,900);if(state.enabled){inject();syncApiButton();setTimeout(showHubPrompt,1200);if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href))setTimeout(()=>{open();openSettings()},900)}}
+function persistTargetUI(){const panel=$('#'+IDS.panel);if(!panel)return;state.ui.query=$('#slx-q',panel)?.value||'';state.ui.filters=$$('#slx-targets-menu input[data-filter]:checked',panel).map(x=>x.dataset.filter);state.ui.panelOpen=panel.classList.contains('open');save(K.ui,state.ui)}
+function restoreTargetUI(){const panel=$('#'+IDS.panel);if(!panel||panel.dataset.slxUiRestored==='1')return;panel.dataset.slxUiRestored='1';const q=$('#slx-q',panel);if(q)q.value=String(state.ui.query||'');const selected=new Set(Array.isArray(state.ui.filters)?state.ui.filters:[]);$$('#slx-targets-menu input[data-filter]',panel).forEach(x=>x.checked=selected.has(x.dataset.filter));panel.classList.toggle('open',!!state.ui.panelOpen);apply()}
+function installUIPersistence(){document.addEventListener('input',e=>{if(e.target?.id==='slx-q')persistTargetUI()});document.addEventListener('change',e=>{if(e.target?.matches?.('#slx-targets-menu input[data-filter]'))persistTargetUI()});document.addEventListener('click',e=>{if(e.target?.id==='slx-targets-clear')setTimeout(persistTargetUI,0);if(e.target?.id==='slx-elim-btn'||e.target?.id==='slx-close')setTimeout(persistTargetUI,0)});new MutationObserver(restoreTargetUI).observe(document.documentElement,{childList:true,subtree:true});restoreTargetUI()}
+function start(){installUIPersistence();try{localStorage.setItem('SakaLuX_Installed_elimination-assistant',VERSION);localStorage.setItem('SakaLuX_Installed_elimination',VERSION)}catch{}installHubBridge('elimination-assistant',open);syncHubPower();setInterval(syncHubPower,900);if(state.enabled){inject();syncApiButton();setTimeout(showHubPrompt,1200);if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href))setTimeout(()=>{open();openSettings()},900)}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
 
