@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.10
+// @version      1.9.11
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.10';
+    const VERSION = '1.9.11';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -39,6 +39,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.11',
+            date: '2026-09-12',
+            changes: [
+                'Added a persistent Language selector beside Fallback button position.',
+                'Added shared English and Romanian UI localization for SakaLuX Hub and add-on panels.',
+                'Language changes apply immediately to existing and dynamically rendered SakaLuX interfaces.'
+            ]
+        },
         {
             version: '1.9.10',
             date: '2026-09-11',
@@ -157,6 +166,7 @@
         hideIndividualButtons: true,
         buttonPosition: 'top-right',
         buttonSize: 48,
+        language: 'en',
         autoCheckUpdates: true,
         showTopbarSkull: true
     };
@@ -165,7 +175,7 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.18',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.19',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -277,6 +287,47 @@
     function saveJson(key, value) {
         try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
     }
+
+    const UI_RO = {
+        'Settings':'Setări','Hub Settings':'Setări Hub','Configuration':'Configurare','Language':'Limbă','English':'English','Romanian':'Română',
+        'Fallback button position':'Poziția butonului de rezervă','Fallback button size':'Dimensiunea butonului de rezervă',
+        'Top right':'Dreapta sus','Middle right':'Dreapta mijloc','Bottom right':'Dreapta jos','Top left':'Stânga sus',
+        'Save':'Salvează','Save Settings':'Salvează setările','Close':'Închide','Back':'Înapoi','Refresh':'Reîmprospătează',
+        'Hard Refresh':'Reîmprospătare completă','Search':'Caută','Search...':'Caută...','🔎 Search...':'🔎 Caută...','All':'Toate','Owned':'Deținute','Missing':'Lipsă',
+        'Enhancers':'Enhancere','Relics':'Relicve','Owned Value':'Valoare deținută','Missing Cost':'Cost lipsă',
+        'Market Value':'Valoare de piață','Total':'Total','Priority':'Prioritate','Unlock item':'Deblochează obiectul',
+        'Edit reserved quantity':'Modifică cantitatea rezervată','Protect item':'Protejează obiectul','Read-only':'Doar citire',
+        'API Access':'Acces API','Create General API Key':'Creează cheia API generală','Save & Test':'Salvează și testează',
+        'Clear Key':'Șterge cheia','Backup':'Copie de siguranță','Restore':'Restaurează','Reset Hub':'Resetează Hub-ul',
+        'Hide individual script buttons':'Ascunde butoanele individuale ale scripturilor',
+        'Torn-native HUB launcher':'Lansator HUB integrat în Torn','Automatic update checks':'Verificări automate de actualizare',
+        'Updates':'Actualizări','Installed':'Instalat','Not installed':'Neinstalat','Update available':'Actualizare disponibilă',
+        'Open':'Deschide','Install':'Instalează','Power':'Pornire','On':'Pornit','Off':'Oprit','Tools':'Instrumente',
+        'History':'Istoric','Clear history':'Șterge istoricul','Clear cache':'Șterge cache-ul','Target filters':'Filtre ținte',
+        'Safe':'Sigur','Risky':'Riscant','Unopened':'Nedeschis','Attackable':'Atacabil',
+        'Team':'Echipă','Player':'Jucător','Status':'Stare','Actions':'Acțiuni','Level':'Nivel','Current version':'Versiunea curentă',
+        'Employee':'Angajat','Director':'Director','Overview':'Prezentare','Position':'Poziție','Growth':'Creștere','Advice':'Sfaturi',
+        'Offers':'Oferte','Trains':'Antrenamente','Company':'Companie','Compact PDA mode':'Mod compact PDA',
+        'Mission Rewards':'Recompense misiuni','Item Market':'Piața de obiecte','Travel':'Călătorii','Profile':'Profil',
+        'No data':'Nu există date','Loading':'Se încarcă','Error':'Eroare','Cancel':'Anulează','Delete':'Șterge','Export':'Exportă','Import':'Importă'
+    };
+    const UI_EN = Object.fromEntries(Object.entries(UI_RO).map(([en, ro]) => [ro, en]));
+    function language(){return settings.language==='ro'?'ro':'en'}
+    function translateValue(value, lang=language()){
+        const raw=String(value??''),lead=raw.match(/^\s*/)?.[0]||'',trail=raw.match(/\s*$/)?.[0]||'',key=raw.trim();
+        if(!key)return raw;const map=lang==='ro'?UI_RO:UI_EN;let translated=map[key];if(translated===undefined){const hit=Object.entries(map).find(([source])=>source.toLowerCase()===key.toLowerCase());translated=hit?.[1]}if(translated===undefined)return raw;if(key===key.toUpperCase())translated=translated.toUpperCase();return lead+translated+trail;
+    }
+    function isSakaLuXNode(node){const el=node?.nodeType===1?node:node?.parentElement;if(!el)return false;return !!el.closest('[id^="sakalux"],[id^="sl-"],[id^="slx-"],[id^="ci-"],[class*="sakalux"],[class^="sl-"],[class*=" sl-"],[class^="slx-"],[class*=" slx-"],[class^="ci-"],[class*=" ci-"]')}
+    function translateSakaLuX(root=document){
+        const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let node;
+        while((node=walker.nextNode()))if(isSakaLuXNode(node)&&!node.parentElement?.matches('script,style,textarea'))node.nodeValue=translateValue(node.nodeValue);
+        const scope=root.querySelectorAll?root:document;
+        scope.querySelectorAll('input[placeholder],textarea[placeholder],[title],[aria-label]').forEach(el=>{if(!isSakaLuXNode(el))return;for(const attr of ['placeholder','title','aria-label'])if(el.hasAttribute(attr))el.setAttribute(attr,translateValue(el.getAttribute(attr)))});
+        document.documentElement.lang=language()==='ro'?'ro':'en';
+    }
+    let languageObserver;
+    function applyLanguage(){translateSakaLuX(document);window.dispatchEvent(new CustomEvent('SakaLuX:LanguageChanged',{detail:{language:language()}}))}
+    function startLanguageObserver(){if(languageObserver)return;languageObserver=new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)if(node.nodeType===1||node.nodeType===3)translateSakaLuX(node.nodeType===1?node:node.parentElement)});languageObserver.observe(document.documentElement,{childList:true,subtree:true});applyLanguage()}
 
     function getSharedApiKey() {
         try { return (localStorage.getItem(STORAGE.apiKey) || '').trim(); }
@@ -635,7 +686,7 @@
 .slh-cats{display:flex;gap:6px;margin-top:9px;padding-bottom:1px;overflow-x:auto;scrollbar-width:none}.slh-cats::-webkit-scrollbar{display:none}.slh-cat{flex-shrink:0;border:1px solid #2c394b;border-radius:999px;padding:6px 10px;background:#111923;color:#8999ac;font-size:8px;font-weight:900;letter-spacing:.05em}.slh-cat.active{border-color:#4c84cc;background:#1d3b60;color:#dcebff;box-shadow:inset 0 0 0 1px rgba(111,166,239,.08)}
 .slh-list,.slh-view,.slh-settings{overflow-y:auto;padding:11px;-webkit-overflow-scrolling:touch}.slh-list{background:linear-gradient(180deg,#0d131b 0%,#0f141c 100%)}.slh-section-label{margin:1px 2px 8px;color:#6e8095;font-size:8px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.slh-card{position:relative;display:grid;grid-template-columns:46px minmax(0,1fr) 100px;gap:11px;align-items:center;padding:12px;margin-bottom:9px;background:linear-gradient(145deg,#18212d,#131b25);border:1px solid #2d3c4e;border-radius:15px;box-shadow:0 7px 20px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.018)}.slh-card:before{content:'';position:absolute;left:-1px;top:13px;bottom:13px;width:2px;border-radius:4px;background:#40526a}.slh-card.update:before{background:var(--sl-gold);box-shadow:0 0 8px rgba(215,169,74,.28)}.slh-card.missing:before{background:#64748b}.slh-card.off:before{background:#8a4d59}.slh-card.off .slh-card-copy{opacity:.62}.slh-card-copy{min-width:0}.slh-icon{width:44px;height:44px;display:grid;place-items:center;background:linear-gradient(145deg,#263448,#1a2431);border:1px solid #35475d;border-radius:13px;font-size:21px;box-shadow:inset 0 1px rgba(255,255,255,.04)}.slh-name-line{display:flex;align-items:center;gap:6px;min-width:0}.slh-name{min-width:0;color:#f3f7fb;font-size:13px;font-weight:900;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-category-chip{flex:0 0 auto;border:1px solid #33445a;border-radius:999px;padding:2px 5px;color:#7f94aa;background:#121a24;font-size:6.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}.slh-description{display:-webkit-box;margin-top:4px;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:#91a2b5;font-size:8.5px;line-height:1.35}.slh-chips{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:6px}.slh-chip{display:inline-flex;align-items:center;min-height:17px;padding:2px 6px;border:1px solid #304055;border-radius:999px;background:#111922;color:#8496aa;font-size:6.5px;font-weight:900;line-height:1;letter-spacing:.035em}.slh-chip.good{border-color:#235f46;background:#10271f;color:#72d6a2}.slh-chip.warn{border-color:#68522b;background:#292314;color:#e7c675}.slh-chip.bad{border-color:#693642;background:#2c171d;color:#f09aa8}.slh-chip.info{border-color:#31567e;background:#14263b;color:#8fc0ff}.slh-chip.muted{color:#8290a1}.slh-module-controls{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px}.slh-switch,.slh-primary{width:100%;min-height:35px;border-radius:10px;font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:900;touch-action:manipulation}.slh-switch{display:grid;grid-template-columns:36px 1fr;align-items:center;gap:5px;padding:5px 7px;border:1px solid #475569;background:#111827;color:#94a3b8}.slh-switch-track{position:relative;display:block;width:34px;height:19px;border-radius:999px;background:#4b5563;box-shadow:inset 0 1px 3px rgba(0,0,0,.55);transition:.18s ease}.slh-switch-track i{position:absolute;left:3px;top:3px;width:13px;height:13px;border-radius:50%;background:#e5e7eb;box-shadow:0 1px 4px #0008;transition:.18s ease}.slh-switch.on{border-color:#216b4a;background:#102a21;color:#86efac}.slh-switch.on .slh-switch-track{background:#1eb36a}.slh-switch.on .slh-switch-track i{transform:translateX(15px);background:#fff}.slh-switch.off{border-color:#5d3a43;background:#26151a;color:#f0a0ad}.slh-switch:disabled{opacity:.48}.slh-primary{border:1px solid #3d78bf;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;padding:7px}.slh-primary:disabled{border-color:#374151;background:#202733;color:#6b7280}.slh-primary.install{border-color:#24754f;background:linear-gradient(180deg,#22945f,#176d46)}
 .slh-bottom{padding:9px 11px;background:#0c1219;border-top:1px solid #263547;flex-shrink:0}.slh-bottom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.slh-bottom-btn{border:1px solid #2d3d50;border-radius:10px;padding:9px;background:#151f2a;color:#b9c7d6;font-size:8px;font-weight:900;letter-spacing:.04em}.slh-footer{padding:8px;text-align:center;color:#5f7083;font-size:8px;border-top:1px solid #202d3c;background:#0b1118}.slh-author{color:#78aef2;font-weight:900;text-decoration:none}
-.slh-setting,.slh-note,.slh-check-row{background:#17202b;border:1px solid #2c3b4e;border-radius:11px;padding:11px;margin-bottom:8px;color:#cbd5e1;font-size:10px;line-height:1.5}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password],.slh-setting select{min-height:40px;padding:9px;border:1px solid #3a4b61;border-radius:8px;background:#0d141d;color:#fff}.slh-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-setting-copy{min-width:0}.slh-setting-title{color:#e7edf5;font-size:10px;font-weight:900}.slh-setting-desc{margin-top:3px;color:#7f90a6;font-size:8px;line-height:1.35}.slh-setting-toggle{position:relative;flex:0 0 auto;width:48px;height:26px;border:1px solid #46566a;border-radius:999px;background:#303a48;padding:0;box-shadow:inset 0 1px 3px rgba(0,0,0,.42);transition:.18s ease}.slh-setting-toggle i{position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:50%;background:#d7dee8;box-shadow:0 2px 5px rgba(0,0,0,.45);transition:.18s ease}.slh-setting-toggle.on{border-color:#237250;background:#168c58}.slh-setting-toggle.on i{transform:translateX(22px);background:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:1px solid #3d78bf;border-radius:9px;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;font-size:10px;font-weight:900}.slh-big-btn.gray{border-color:#394859;background:#1e2936}.slh-big-btn.red{border-color:#743946;background:#51222c}.slh-big-btn.update{border-color:#7a5b25;background:#684b1d}.slh-big-btn.install{border-color:#24754f;background:#176d46}.slh-version-title{font-size:12px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#718197;font-size:8px;margin-left:5px}
+.slh-setting,.slh-note,.slh-check-row{background:#17202b;border:1px solid #2c3b4e;border-radius:11px;padding:11px;margin-bottom:8px;color:#cbd5e1;font-size:10px;line-height:1.5}.slh-settings-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}.slh-settings-pair .slh-setting{min-width:0}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password],.slh-setting select{min-height:40px;padding:9px;border:1px solid #3a4b61;border-radius:8px;background:#0d141d;color:#fff}.slh-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-setting-copy{min-width:0}.slh-setting-title{color:#e7edf5;font-size:10px;font-weight:900}.slh-setting-desc{margin-top:3px;color:#7f90a6;font-size:8px;line-height:1.35}.slh-setting-toggle{position:relative;flex:0 0 auto;width:48px;height:26px;border:1px solid #46566a;border-radius:999px;background:#303a48;padding:0;box-shadow:inset 0 1px 3px rgba(0,0,0,.42);transition:.18s ease}.slh-setting-toggle i{position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:50%;background:#d7dee8;box-shadow:0 2px 5px rgba(0,0,0,.45);transition:.18s ease}.slh-setting-toggle.on{border-color:#237250;background:#168c58}.slh-setting-toggle.on i{transform:translateX(22px);background:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:1px solid #3d78bf;border-radius:9px;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;font-size:10px;font-weight:900}.slh-big-btn.gray{border-color:#394859;background:#1e2936}.slh-big-btn.red{border-color:#743946;background:#51222c}.slh-big-btn.update{border-color:#7a5b25;background:#684b1d}.slh-big-btn.install{border-color:#24754f;background:#176d46}.slh-version-title{font-size:12px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#718197;font-size:8px;margin-left:5px}
 @media(max-width:520px){.slh-header{padding:12px 10px 10px}.slh-brand-icon{width:38px;height:38px;font-size:19px}.slh-title{font-size:15px}.slh-kicker{font-size:7px}.slh-sub{font-size:8px}.slh-close{width:34px;height:34px}.slh-stats{gap:5px;margin-top:10px}.slh-stat{padding:8px 5px 7px}.slh-stat strong{font-size:13px}.slh-stat span{font-size:6.5px}.slh-stat small{display:none}.slh-tools{gap:4px}.slh-tool{height:38px;gap:3px;font-size:7px}.slh-tool span{font-size:11px}.slh-cats{gap:5px}.slh-cat{padding:5px 8px;font-size:7px}.slh-list{padding:8px}.slh-card{grid-template-columns:39px minmax(0,1fr) 84px;gap:8px;padding:9px 8px;margin-bottom:7px;border-radius:13px}.slh-icon{width:37px;height:37px;border-radius:11px;font-size:18px}.slh-name{font-size:11.5px}.slh-category-chip{font-size:5.8px}.slh-description{font-size:7.7px;-webkit-line-clamp:1}.slh-chips{gap:3px;margin-top:5px}.slh-chip{min-height:15px;padding:2px 4px;font-size:5.7px}.slh-module-controls{gap:5px}.slh-switch,.slh-primary{min-height:32px;font-size:8px}.slh-switch{grid-template-columns:31px 1fr;padding:4px}.slh-switch-track{width:30px;height:17px}.slh-switch-track i{width:11px;height:11px}.slh-switch.on .slh-switch-track i{transform:translateX(13px)}}
 @media(min-width:700px){#${IDS.overlay}{align-items:center}#${IDS.panel}{border-radius:22px;max-height:90vh}.slh-tools{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
@@ -1283,14 +1334,17 @@
             ${settingSwitch('slhs-hide', 'Hide individual script buttons', 'Keep each add-on launcher hidden while Hub manages access.', settings.hideIndividualButtons)}
             ${settingSwitch('slhs-topbar', 'Torn-native HUB launcher', 'Show the blinking skull HUB entry before Messages when Torn navigation is available.', settings.showTopbarSkull)}
             ${settingSwitch('slhs-auto', 'Automatic update checks', 'Check published add-on versions automatically while the Hub is running.', settings.autoCheckUpdates)}
-            <div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div>
+            <div class="slh-settings-pair"><div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div><div class="slh-setting">Language<select id="slhs-language"><option value="en">English</option><option value="ro">Română</option></select></div></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
             <div class="slh-setting"><b>🔑 SHARED SAKALUX TORN API KEY</b><div style="margin-top:4px;color:#8fa0b3">One key for Enhancer Guard, Mission Rewards, Market Intelligence and Elimination Assistant. Bazaar Thanker does not require a Torn API key.</div><div id="slhs-api-status" style="margin-top:6px;color:${getSharedApiKey() ? '#72d6a2' : '#e7c675'}">${getSharedApiKey() ? '✅ Shared key saved' : '⚠️ No shared key saved'}</div><input id="slhs-api-key" type="password" autocomplete="off" placeholder="Paste the newly created Torn API key"><button class="slh-big-btn update" id="slhs-api-create">🔑 CREATE GENERAL API KEY</button><div class="slh-api-actions"><button class="slh-big-btn" id="slhs-api-save">SAVE & TEST</button><button class="slh-big-btn red" id="slhs-api-clear">CLEAR KEY</button></div></div>
             <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
         </div>`);
         const position = document.getElementById('slhs-position');
+        const languageSelect = document.getElementById('slhs-language');
         const size = document.getElementById('slhs-size');
         position.value = settings.buttonPosition;
+        languageSelect.value = language();
+        languageSelect.onchange = function () { settings.language = this.value === 'ro' ? 'ro' : 'en'; saveJson(STORAGE.settings, settings); applyLanguage(); openSettings(); };
         size.oninput = function () { document.getElementById('slhs-size-label').textContent = this.value + 'px'; };
         bindSettingToggle('slhs-hide');
         bindSettingToggle('slhs-topbar');
@@ -1312,6 +1366,7 @@
             settings.showTopbarSkull = settingToggleValue('slhs-topbar');
             settings.autoCheckUpdates = settingToggleValue('slhs-auto');
             settings.buttonPosition = position.value;
+            settings.language = languageSelect.value === 'ro' ? 'ro' : 'en';
             settings.buttonSize = Number(size.value);
             delete settings.longPressQuickMenu;
             saveJson(STORAGE.settings, settings);
@@ -1369,6 +1424,7 @@
     window.SakaLuXScriptHub = {
         id: 'script-hub', name: 'SakaLuX Script Hub', version: VERSION, ready: true,
         open: () => { openHub(); return true; }, getApiKey: getSharedApiKey, setApiKey: setSharedApiKey,
+        getLanguage: language, setLanguage: value => { settings.language=value==='ro'?'ro':'en';saveJson(STORAGE.settings,settings);applyLanguage();return settings.language; },
         hasApiKey: () => Boolean(getSharedApiKey()), createRequiredTornKey: createSharedApiKey,
         refresh: async () => { await refreshRegistryAndCheck(); return true; },
         health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)) })
@@ -1381,6 +1437,7 @@
     window.addEventListener('SakaLuX:MarketIntelligenceReady', () => { queueEnsure(); renderList(); renderMainStats(); });
 
     async function init() {
+        startLanguageObserver();
         ensureEverything();
         startObserver();
         await loadRegistry(false);
