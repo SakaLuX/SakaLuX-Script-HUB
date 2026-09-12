@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.35
+// @version      1.9.36
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.35';
+    const VERSION = '1.9.36';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +40,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.36',
+            date: '2026-09-13',
+            changes: [
+                'Invalidates stale registry and update caches after an add-on registry rollback.',
+                'Prevents rolled-back modules from showing an obsolete REGISTRY version as PUBLISH PENDING.',
+                'Mission Rewards registry state now resolves cleanly to the restored stable v1.0.18.'
+            ]
+        },
         {
             version: '1.9.35',
             date: '2026-09-13',
@@ -337,8 +346,8 @@
         settings: 'SakaLuX_HUB_SETTINGS_V16',
         favorites: 'SakaLuX_HUB_FAVORITES_V16',
         usage: 'SakaLuX_HUB_USAGE_V16',
-        updates: 'SakaLuX_HUB_UPDATES_V16',
-        registry: 'SakaLuX_HUB_REGISTRY_V18',
+        updates: 'SakaLuX_HUB_UPDATES_V17',
+        registry: 'SakaLuX_HUB_REGISTRY_V19',
         locales: 'SakaLuX_HUB_LOCALES_V1',
         modulePower: 'SakaLuX_HUB_MODULE_POWER_V19',
         apiKey: 'SakaLuX_HUB_TORN_API_KEY'
