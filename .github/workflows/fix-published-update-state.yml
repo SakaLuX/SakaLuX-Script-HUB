@@ -1,0 +1,37 @@
+name: One-time published update-state fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-published-update-state.yml'
+      - '.migration/fix-published-update-state.py'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Apply migration
+        run: python .migration/fix-published-update-state.py
+      - name: Validate
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Script-Hub.user.js
+          python -m json.tool scripts.json >/dev/null
+      - name: Commit changes
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md greasyfork/Enhancer-Guard.md greasyfork/Bazaar-Thanker.md greasyfork/Mission-Rewards.md greasyfork/Market-Intelligence.md greasyfork/Elimination-Assistant.md
+          if git diff --cached --quiet; then
+            echo 'No changes.'
+            exit 0
+          fi
+          git commit -m 'Hub v1.9.27 published update-state fix [skip ci]'
+          git push
