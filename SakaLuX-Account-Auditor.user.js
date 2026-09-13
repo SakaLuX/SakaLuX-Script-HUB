@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.2.6
+// @version      1.3.0
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -133,7 +133,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.2.6';
+    const VERSION = '1.3.0';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -149,23 +149,19 @@
     };
     const DEFAULT_SETTINGS = {
         repo:'SakaLuX/SakaLuX-Torn-Account-Data', branch:'main', path:'SakaLuX-Account-Snapshot.json',
-        autoSync:false, autoSyncMinutes:30, showButton:true, includePrivateData:true, maxPrivatePages:5,
+        autoSync:false, autoSyncMinutes:30, showButton:true, includePrivateData:true, maxPrivatePages:200,
         splitSnapshots:true, includeCapturedMessages:true
     };
-    const V1_SELECTIONS = [
-        'profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','money',
-        'stocks','properties','discord','personalstats','weaponexp','workstats','skills','battlestats','networth',
-        'inventory','display','icons','criminalrecord'
-    ];
     const V2_ENDPOINTS = [
-        'ammo','attacks','attacksfull','bars','basic','battlestats','bounties','calendar','casino','competition',
-        'cooldowns','discord','education','enlistedcars','equipment','faction','forumfeed','forumfriends','forumposts',
-        'forumsubscribedthreads','forumthreads','gym','honors','icons','itemmarket','itemmods','job','jobpoints',
-        'jobranks','medals','merits','missions','money','networth','notifications','organizedcrime','organizedcrimes',
-        'perks','profile','properties','property','races','racingrecords','refills','reports','revives','revivesFull',
-        'skills','stocks','trades','travel','virus','weaponexp','workstats'
+        'profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','money',
+        'stocks','properties','discord','weaponexp','workstats','skills','battlestats','networth','display','icons',
+        'criminalrecord','bazaar','crimes','hof','ammo','attacksfull','bounties','calendar','casino','competition',
+        'enlistedcars','equipment','faction','forumfeed','forumfriends','forumposts','forumsubscribedthreads',
+        'forumthreads','gym','honors','itemmarket','itemmods','job','jobranks','medals','missions','organizedcrime',
+        'organizedcrimes','perks','property','races','racingrecords','reports','revivesfull','trade','trades','virus','snapshot'
     ];
-    const V2_PRIVATE_ENDPOINTS = ['messages','newmessages','events','newevents'];
+    // newmessages/newevents are subsets of messages/events and are intentionally omitted to prevent duplicate records.
+    const V2_PRIVATE_ENDPOINTS = ['messages','events'];
     const CONTACT_LISTS = ['Friends','Enemies','Targets'];
     const INVENTORY_CATEGORIES = [
         'Collectible','Clothing','Other','Tool','Melee','Defensive','Material','Car','Primary','Secondary','Book',
@@ -226,53 +222,98 @@
         const out={}; for(const[k,v]of Object.entries(value)){const kk=String(k).toLowerCase();if(['key','apikey','api_key','token','authorization','cookie','cookies','session','sessionid','password','secret'].includes(kk))continue;out[k]=sanitizeDeep(v,depth+1);}return out;
     }
     function nextLink(data){const n=data?._metadata?.links?.next??data?.metadata?.links?.next??data?._metadata?.next??null;return typeof n==='string'&&n?n:null;}
-    async function collectPagedV2(endpoint,key,query=''){
-        const pages=[];let url='';const maxPages=Math.max(1,Math.min(20,Number(settings.maxPrivatePages)||5));
-        for(let page=0;page<maxPages;page++){const result=await tornV2(endpoint,key,url?'':query,url);if(!result.ok)return{ok:false,error:result.error,code:result.code??null,httpStatus:result.httpStatus??null,pages};pages.push(sanitizeDeep(result.data));const next=nextLink(result.data);if(!next)break;url=next.startsWith('http')?next:'https://api.torn.com'+next;}
-        const last=pages[pages.length-1];return{ok:true,data:{pages,pageCount:pages.length,truncated:Boolean(last&&nextLink(last)&&pages.length>=maxPages)}};
+    async function collectPagedV2(endpoint,key,query='',maxPages=200){
+        const pages=[];let url='';const seenUrls=new Set();const limit=Math.max(1,Math.min(500,Number(maxPages)||200));
+        for(let page=0;page<limit;page++){
+            if(url&&seenUrls.has(url))break;
+            if(url)seenUrls.add(url);
+            const result=await tornV2(endpoint,key,url?'':query,url);
+            if(!result.ok)return{ok:false,error:result.error,code:result.code??null,httpStatus:result.httpStatus??null,pages};
+            const clean=sanitizeDeep(result.data);pages.push(clean);
+            const next=nextLink(clean);if(!next)break;
+            url=next.startsWith('http')?next:'https://api.torn.com'+next;
+        }
+        const last=pages[pages.length-1];const truncated=Boolean(last&&nextLink(last)&&pages.length>=limit);
+        return{ok:true,data:pages.length===1?pages[0]:{pages,pageCount:pages.length,truncated},pages,truncated};
     }
-    async function collectContacts(key){const out={},errors={};for(const cat of CONTACT_LISTS){const r=await collectPagedV2('list',key,'cat='+encodeURIComponent(cat)+'&limit=50');if(r.ok)out[cat.toLowerCase()]=r.data;else errors[cat]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}return{data:out,errors};}
+    async function collectContacts(key){const out={},errors={};for(const cat of CONTACT_LISTS){const r=await collectPagedV2('list',key,'cat='+encodeURIComponent(cat)+'&limit=50',200);if(r.ok)out[cat.toLowerCase()]=r.data;else errors[cat]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}return{data:out,errors};}
     async function collectInventory(key){const categories={},errors={};let itemCount=0;for(const cat of INVENTORY_CATEGORIES){const r=await tornV2('inventory',key,'cat='+encodeURIComponent(cat)+'&limit=250&offset=0');if(r.ok){const clean=sanitizeDeep(r.data);categories[cat]=clean;const items=Array.isArray(clean?.inventory)?clean.inventory:[];itemCount+=items.length;}else errors[cat]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}return{data:{categories,itemCount,categoryCount:Object.keys(categories).length},errors};}
 
     async function collectSnapshot(){
         const key=getTornApiKey(); if(!key)throw new Error('Torn API key missing. Open AUDIT settings and add a key, or use Torn PDA API injection.');
-        const data={keyInfo:null,v1:{},v2:{},special:{},private:{}},errors={},unavailable={};let requested=0,successful=0;
+        const data={keyInfo:null,v2:{},special:{},private:{}},errors={},unavailable={};let requested=0,successful=0;
         requested++;setStatus('Checking API key…');const ki=await keyInfo(key);if(ki.ok){data.keyInfo=sanitizeDeep(ki.data);successful++;}else errors['key:info']={error:ki.error,code:ki.code??null,httpStatus:ki.httpStatus??null};
         if(settings.includePrivateData){
-            for(let i=0;i<V2_PRIVATE_ENDPOINTS.length;i++){const endpoint=V2_PRIVATE_ENDPOINTS[i];requested++;setStatus('PRIVATE '+endpoint+' '+(i+1)+'/'+V2_PRIVATE_ENDPOINTS.length);const r=await collectPagedV2(endpoint,key,endpoint.includes('events')?'limit=100':'limit=100&sort=desc');if(r.ok){data.private[endpoint]=r.data;successful++;}else{if(r.pages?.length)data.private[endpoint]={pages:r.pages,pageCount:r.pages.length,partial:true};errors['private:'+endpoint]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}}
-            requested++;setStatus('PRIVATE logs');const logs=await collectPagedV2('log',key,'limit=100&sort=desc');if(logs.ok){data.private.log=logs.data;successful++;}else if(logs.code===16)unavailable['private:log']={reason:'Torn requires a Full access API key for user/log.',code:16};else errors['private:log']={error:logs.error,code:logs.code??null,httpStatus:logs.httpStatus??null};
+            const privatePages=Math.max(1,Math.min(500,Number(settings.maxPrivatePages)||200));
+            for(let i=0;i<V2_PRIVATE_ENDPOINTS.length;i++){
+                const endpoint=V2_PRIVATE_ENDPOINTS[i];requested++;setStatus('PRIVATE '+endpoint+' '+(i+1)+'/'+V2_PRIVATE_ENDPOINTS.length);
+                const q=endpoint==='events'?'limit=100':'limit=100&sort=desc';
+                const r=await collectPagedV2(endpoint,key,q,privatePages);
+                if(r.ok){data.private[endpoint]=r.data;successful++;}
+                else{if(r.pages?.length)data.private[endpoint]={pages:r.pages,pageCount:r.pages.length,partial:true};errors['private:'+endpoint]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}
+            }
+            requested++;setStatus('PRIVATE logs');const logs=await collectPagedV2('log',key,'limit=100&sort=desc',privatePages);
+            if(logs.ok){data.private.log=logs.data;successful++;}
+            else if(logs.code===16)unavailable['private:log']={reason:'Torn requires a Full access API key for user/log.',code:16};
+            else errors['private:log']={error:logs.error,code:logs.code??null,httpStatus:logs.httpStatus??null};
         }
-        for(let i=0;i<V1_SELECTIONS.length;i++){const selection=V1_SELECTIONS[i];requested++;setStatus('v1 '+selection+' '+(i+1)+'/'+V1_SELECTIONS.length);const r=await tornV1(selection,key);if(r.ok){data.v1[selection]=sanitizeDeep(r.data);successful++;}else errors['v1:'+selection]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}
-        for(let i=0;i<V2_ENDPOINTS.length;i++){const endpoint=V2_ENDPOINTS[i];requested++;setStatus('v2 '+endpoint+' '+(i+1)+'/'+V2_ENDPOINTS.length);const r=await tornV2(endpoint,key);if(r.ok){data.v2[endpoint]=sanitizeDeep(r.data);successful++;}else errors['v2:'+endpoint]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}
-        requested++;const ps=await tornV2('personalstats',key,'cat=all');if(ps.ok){data.special.personalstats=sanitizeDeep(ps.data);successful++;}else errors['v2:personalstats']={error:ps.error,code:ps.code??null,httpStatus:ps.httpStatus??null};
+        for(let i=0;i<V2_ENDPOINTS.length;i++){
+            const endpoint=V2_ENDPOINTS[i];requested++;setStatus('v2 '+endpoint+' '+(i+1)+'/'+V2_ENDPOINTS.length);
+            const r=await collectPagedV2(endpoint,key,'',200);
+            if(r.ok){data.v2[endpoint]=r.data;successful++;}
+            else errors['v2:'+endpoint]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};
+        }
+        requested++;const ps=await collectPagedV2('personalstats',key,'cat=all',200);if(ps.ok){data.special.personalstats=ps.data;successful++;}else errors['v2:personalstats']={error:ps.error,code:ps.code??null,httpStatus:ps.httpStatus??null};
         requested++;const contacts=await collectContacts(key);data.special.contacts=contacts.data;if(Object.keys(contacts.data).length)successful++;if(Object.keys(contacts.errors).length)errors['v2:list']=contacts.errors;
         requested++;const inv=await collectInventory(key);data.special.inventory=inv.data;if(inv.data.categoryCount)successful++;if(Object.keys(inv.errors).length)errors['v2:inventory']=inv.errors;
-        const profile=data.v1.profile||data.v2.profile||data.v2.basic||{};
-        return{schema:'sakalux-torn-account-snapshot-v3',generatedAt:new Date().toISOString(),generatedAtUnix:Date.now(),script:{name:NAME,version:VERSION,mode:'read-only'},privacy:{containsTornApiKey:false,containsGitHubToken:false,containsBrowserCookies:false,containsPassword:false,privateDataIncluded:Boolean(settings.includePrivateData),capturedMessageBodiesRequireExplicitUserAction:true,note:'Official Torn API data plus only message text explicitly captured by the user from a visible Torn message page.'},capabilities:{messageList:true,messageBodyViaOfficialApi:false,messageBodyViaUserCapture:true,logsRequireFullAccess:true,splitSnapshots:Boolean(settings.splitSnapshots)},account:{playerId:profile.player_id??profile.playerID??profile.user_id??profile.id??null,name:profile.name??null,level:profile.level??null,rank:profile.rank??null,status:profile.status??null,faction:profile.faction??null,job:profile.job??null,lastAction:profile.last_action??profile.lastAction??null,age:profile.age??null},coverage:{requested,successful,failed:Object.keys(errors).length,unavailable:Object.keys(unavailable).length,v1Selections:V1_SELECTIONS.slice(),v2Endpoints:V2_ENDPOINTS.slice(),privateEndpoints:settings.includePrivateData?V2_PRIVATE_ENDPOINTS.concat(['log']):[],privateDataEnabled:Boolean(settings.includePrivateData)},data,errors,unavailable};
+        const profile=data.v2.profile||{};
+        return{schema:'sakalux-torn-account-snapshot-v4',generatedAt:new Date().toISOString(),generatedAtUnix:Date.now(),script:{name:NAME,version:VERSION,mode:'read-only'},privacy:{containsTornApiKey:false,containsGitHubToken:false,containsBrowserCookies:false,containsPassword:false,privateDataIncluded:Boolean(settings.includePrivateData),capturedMessageBodiesRequireExplicitUserAction:true,note:'Official Torn API data plus only message text explicitly captured by the user from a visible Torn message page.'},capabilities:{canonicalApi:'v2',legacyV1Duplicates:false,messageList:true,messageBodyViaOfficialApi:false,messageBodyViaUserCapture:true,logsRequireFullAccess:true,splitSnapshots:Boolean(settings.splitSnapshots)},account:{playerId:profile.player_id??profile.playerID??profile.user_id??profile.id??null,name:profile.name??null,level:profile.level??null,rank:profile.rank??null,status:profile.status??null,faction:profile.faction??null,job:profile.job??null,lastAction:profile.last_action??profile.lastAction??null,age:profile.age??null},coverage:{requested,successful,failed:Object.keys(errors).length,unavailable:Object.keys(unavailable).length,v2Endpoints:V2_ENDPOINTS.slice(),privateEndpoints:settings.includePrivateData?V2_PRIVATE_ENDPOINTS.concat(['log']):[],privateDataEnabled:Boolean(settings.includePrivateData),deduplication:'v2 canonical; no v1 mirror; no newmessages/newevents subsets; attacksfull/revivesfull replace reduced variants'},data,errors,unavailable};
     }
 
     function parseRepo(){const m=String(settings.repo||'').trim().match(/^([^/\s]+)\/([^/\s]+)$/);if(!m)throw new Error('GitHub repo must be owner/repository.');return{owner:m[1],repo:m[2]};}
     function utf8ToBase64(text){const bytes=new TextEncoder().encode(text);let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(binary);}
     async function githubJson(url,options={}){const token=rawGet(STORAGE.githubToken);if(!token)throw new Error('GitHub token missing.');const headers={'Accept':'application/vnd.github+json','Authorization':'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'};const r=await request(url,{method:options.method||'GET',headers,body:options.body?JSON.stringify(options.body):undefined});let data={};try{data=JSON.parse(r.text||'{}');}catch(_){}if(r.status<200||r.status>=300)throw new Error('GitHub '+r.status+': '+(data?.message||'request failed'));return data;}
-    async function syncJsonFile(path,value,message){const{owner,repo}=parseRepo(),branch=String(settings.branch||'main').trim()||'main';path=String(path).replace(/^\/+/, '');const api='https://api.github.com/repos/'+encodeURIComponent(owner)+'/'+encodeURIComponent(repo)+'/contents/'+path.split('/').map(encodeURIComponent).join('/');let sha=null;try{sha=(await githubJson(api+'?ref='+encodeURIComponent(branch)))?.sha||null;}catch(e){if(!/GitHub 404:/.test(String(e?.message||e)))throw e;}const body={message,content:utf8ToBase64(JSON.stringify(value,null,2)+'\n'),branch};if(sha)body.sha=sha;return githubJson(api,{method:'PUT',body});}
+    async function syncJsonFile(path,value,message){
+        const{owner,repo}=parseRepo(),branch=String(settings.branch||'main').trim()||'main';path=String(path).replace(/^\/+/, '');
+        const api='https://api.github.com/repos/'+encodeURIComponent(owner)+'/'+encodeURIComponent(repo)+'/contents/'+path.split('/').map(encodeURIComponent).join('/');
+        const json=JSON.stringify(value,null,2)+'\n', encoded=utf8ToBase64(json);let current=null;
+        try{current=await githubJson(api+'?ref='+encodeURIComponent(branch));}catch(e){if(!/GitHub 404:/.test(String(e?.message||e)))throw e;}
+        if(current?.content&&String(current.content).replace(/\s/g,'')===encoded)return{unchanged:true,sha:current.sha,commit:null};
+        const body={message,content:encoded,branch};if(current?.sha)body.sha=current.sha;
+        return githubJson(api,{method:'PUT',body});
+    }
 
-    function baseMeta(snapshot){return{schema:'sakalux-account-split-v1',generatedAt:snapshot.generatedAt,script:snapshot.script,account:snapshot.account};}
+    function pickFields(source,names,assigned){const out={};for(const name of names){if(Object.prototype.hasOwnProperty.call(source,name)){out[name]=source[name];assigned.add(name);}}return out;}
     function buildSplitSnapshots(snapshot){
-        const v1=snapshot.data?.v1||{},v2=snapshot.data?.v2||{},sp=snapshot.data?.special||{},pv=snapshot.data?.private||{},meta=baseMeta(snapshot),captures=settings.includeCapturedMessages?loadJson(STORAGE.captures,[]):[];
-        return{
-            'summary.json':{...meta,coverage:snapshot.coverage,keyInfo:snapshot.data?.keyInfo||null,profile:v1.profile||v2.profile||v2.basic||null,bars:v1.bars||v2.bars||null,cooldowns:v1.cooldowns||v2.cooldowns||null,travel:v1.travel||v2.travel||null,education:v1.education||v2.education||null,job:v2.job||v1.profile?.job||null,jobpoints:v1.jobpoints||v2.jobpoints||null,merits:v1.merits||v2.merits||null,refills:v1.refills||v2.refills||null,notifications:v1.notifications||v2.notifications||null},
-            'finance.json':{...meta,money:v1.money||v2.money||null,networth:v1.networth||v2.networth||null,stocks:v1.stocks||v2.stocks||null,properties:v1.properties||v2.properties||null,property:v2.property||null,trades:v2.trades||null,itemmarket:v2.itemmarket||null},
-            'combat.json':{...meta,battlestats:v1.battlestats||v2.battlestats||null,attacks:v2.attacks||null,attacksfull:v2.attacksfull||null,ammo:v2.ammo||null,equipment:v2.equipment||null,weaponexp:v1.weaponexp||v2.weaponexp||null,workstats:v1.workstats||v2.workstats||null,skills:v1.skills||v2.skills||null,revives:v2.revives||null,revivesFull:v2.revivesFull||null},
-            'crimes.json':{...meta,criminalrecord:v1.criminalrecord||null,personalstats:sp.personalstats||v1.personalstats||null,organizedcrime:v2.organizedcrime||null,organizedcrimes:v2.organizedcrimes||null,missions:v2.missions||null},
-            'messages.json':{...meta,source:'Official Torn API metadata plus user-triggered visible-message captures.',api:{messages:pv.messages||null,newmessages:pv.newmessages||null,error:snapshot.errors?.['private:messages']||null},captured:captures},
-            'events.json':{...meta,events:pv.events||null,newevents:pv.newevents||null,notifications:v2.notifications||v1.notifications||null,errors:{events:snapshot.errors?.['private:events']||null,newevents:snapshot.errors?.['private:newevents']||null}},
-            'logs.json':{...meta,logs:pv.log||null,error:snapshot.errors?.['private:log']||null,unavailable:snapshot.unavailable?.['private:log']||null}
-        };
+        const v2=snapshot.data?.v2||{},sp=snapshot.data?.special||{},pv=snapshot.data?.private||{},assigned=new Set(),captures=settings.includeCapturedMessages?loadJson(STORAGE.captures,[]):[];
+        const parts={};
+        parts['summary.json']=pickFields(v2,['profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','discord','display','icons','calendar','competition','faction','gym','honors','job','jobranks','medals','perks','virus','hof'],assigned);
+        parts['finance.json']=pickFields(v2,['money','networth','stocks','properties','property','bazaar','itemmarket','trade','trades'],assigned);
+        parts['combat.json']=pickFields(v2,['battlestats','attacksfull','ammo','bounties','equipment','itemmods','weaponexp','workstats','skills','revivesfull'],assigned);
+        parts['crimes.json']={...pickFields(v2,['criminalrecord','crimes','missions','organizedcrime','organizedcrimes'],assigned),personalstats:sp.personalstats||null};
+        parts['racing.json']=pickFields(v2,['enlistedcars','races','racingrecords'],assigned);
+        parts['forum.json']=pickFields(v2,['forumfeed','forumfriends','forumposts','forumsubscribedthreads','forumthreads'],assigned);
+        parts['activity.json']=pickFields(v2,['reports','snapshot'],assigned);
+        parts['inventory.json']={inventory:sp.inventory||null};
+        parts['contacts.json']={contacts:sp.contacts||null};
+        parts['messages.json']={api:pv.messages||null,captured:captures};
+        parts['events.json']={events:pv.events||null};
+        parts['logs.json']={logs:pv.log||null};
+        const other={};for(const[k,v]of Object.entries(v2))if(!assigned.has(k))other[k]=v;if(Object.keys(other).length)parts['other.json']=other;
+        const manifest={schema:'sakalux-account-split-v2',generatedAt:snapshot.generatedAt,script:snapshot.script,account:snapshot.account,privacy:snapshot.privacy,capabilities:snapshot.capabilities,coverage:snapshot.coverage,errors:snapshot.errors,unavailable:snapshot.unavailable,files:Object.keys(parts)};
+        return{'manifest.json':manifest,...parts};
     }
     async function syncSnapshot(snapshot){
-        const fullPath=String(settings.path||'SakaLuX-Account-Snapshot.json').replace(/^\/+/, '');setStatus('Uploading full snapshot…');const full=await syncJsonFile(fullPath,snapshot,'Sync Torn account snapshot '+new Date().toISOString());
-        const files=[];if(settings.splitSnapshots){const parts=buildSplitSnapshots(snapshot);for(const[path,value]of Object.entries(parts)){setStatus('Uploading '+path+'…');await syncJsonFile(path,value,'Sync Torn split snapshot '+path+' '+new Date().toISOString());files.push(path);}}
-        const meta={at:Date.now(),atIso:new Date().toISOString(),repo:settings.repo,branch:settings.branch,path:fullPath,splitFiles:files,commitSha:full?.commit?.sha||null};saveJson(STORAGE.lastSync,meta);return meta;
+        const fullPath=String(settings.path||'SakaLuX-Account-Snapshot.json').replace(/^\/+/, '');const files=[];let primary=null;
+        if(settings.splitSnapshots){
+            const parts=buildSplitSnapshots(snapshot);
+            for(const[path,value]of Object.entries(parts)){setStatus('Uploading '+path+'…');await syncJsonFile(path,value,'Sync Torn split snapshot '+path+' '+new Date().toISOString());files.push(path);}
+            const pointer={schema:'sakalux-account-split-pointer-v1',generatedAt:snapshot.generatedAt,manifest:'manifest.json',note:'Data is split across the manifest files to avoid duplicating the full account payload.'};
+            setStatus('Updating snapshot pointer…');primary=await syncJsonFile(fullPath,pointer,'Update Torn account snapshot pointer '+new Date().toISOString());
+        }else{
+            setStatus('Uploading full snapshot…');primary=await syncJsonFile(fullPath,snapshot,'Sync Torn account snapshot '+new Date().toISOString());
+        }
+        const meta={at:Date.now(),atIso:new Date().toISOString(),repo:settings.repo,branch:settings.branch,path:fullPath,splitFiles:files,commitSha:primary?.commit?.sha||null};saveJson(STORAGE.lastSync,meta);return meta;
     }
 
     function isVisible(el){if(!el||el.closest('#sl-aa-overlay'))return false;const r=el.getBoundingClientRect();const s=getComputedStyle(el);return r.width>20&&r.height>20&&s.display!=='none'&&s.visibility!=='hidden';}
@@ -321,12 +362,12 @@
         '<div class="sl-aa-note"><b>Messages:</b> Torn API supplies metadata only. To save body text, open a message yourself and press <b>CAPTURE CURRENT MESSAGE</b>. The script never opens private conversations automatically.</div>'+
         '<label>GitHub repository <input id="sl-aa-repo" value="'+esc(settings.repo)+'"></label><label>Branch <input id="sl-aa-branch" value="'+esc(settings.branch)+'"></label><label>Full snapshot path <input id="sl-aa-path" value="'+esc(settings.path)+'"></label>'+
         '<label>GitHub fine-grained token <input id="sl-aa-gh" type="password" placeholder="Stored in userscript storage"></label>'+(!getTornApiKey()?'<label>Torn API key <input id="sl-aa-torn" type="password" placeholder="Use the least access you need"></label>':'')+
-        '<label class="sl-aa-check"><input id="sl-aa-private" type="checkbox" '+(settings.includePrivateData?'checked':'')+'> Include messages/events/logs API data</label><label class="sl-aa-check"><input id="sl-aa-split" type="checkbox" '+(settings.splitSnapshots?'checked':'')+'> Sync summary/finance/combat/crimes/messages/events/logs JSON files</label><label class="sl-aa-check"><input id="sl-aa-captured" type="checkbox" '+(settings.includeCapturedMessages?'checked':'')+'> Include explicitly captured message bodies in messages.json</label><label class="sl-aa-check"><input id="sl-aa-auto" type="checkbox" '+(settings.autoSync?'checked':'')+'> Auto-sync while Torn is open</label>'+
-        '<label>Auto-sync interval (minutes) <input id="sl-aa-minutes" type="number" min="15" max="1440" value="'+esc(settings.autoSyncMinutes)+'"></label><label>Max private pages <input id="sl-aa-pages" type="number" min="1" max="20" value="'+esc(settings.maxPrivatePages)+'"></label>'+
+        '<label class="sl-aa-check"><input id="sl-aa-private" type="checkbox" '+(settings.includePrivateData?'checked':'')+'> Include messages/events/logs API data</label><label class="sl-aa-check"><input id="sl-aa-split" type="checkbox" '+(settings.splitSnapshots?'checked':'')+'> Sync deduplicated split JSON files (recommended)</label><label class="sl-aa-check"><input id="sl-aa-captured" type="checkbox" '+(settings.includeCapturedMessages?'checked':'')+'> Include explicitly captured message bodies in messages.json</label><label class="sl-aa-check"><input id="sl-aa-auto" type="checkbox" '+(settings.autoSync?'checked':'')+'> Auto-sync while Torn is open</label>'+
+        '<label>Auto-sync interval (minutes) <input id="sl-aa-minutes" type="number" min="15" max="1440" value="'+esc(settings.autoSyncMinutes)+'"></label><label>Max paged history pages <input id="sl-aa-pages" type="number" min="1" max="500" value="'+esc(settings.maxPrivatePages)+'"></label>'+
         '<div class="sl-aa-info">Captured messages: <strong id="sl-aa-captures">'+loadJson(STORAGE.captures,[]).length+'</strong> · Last sync: <strong id="sl-aa-last-sync">'+esc(lastSyncText())+'</strong></div><div id="sl-aa-status">'+esc(lastStatus||'Ready')+'</div>'+
         '<button id="sl-aa-capture">CAPTURE CURRENT MESSAGE</button><button id="sl-aa-clear">CLEAR CAPTURED MESSAGES</button><button id="sl-aa-save">SAVE SETTINGS</button><button id="sl-aa-sync">SYNC NOW</button></div>';
         document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};overlay.querySelector('#sl-aa-close').onclick=()=>overlay.remove();overlay.querySelector('#sl-aa-capture').onclick=()=>captureCurrentMessage();overlay.querySelector('#sl-aa-clear').onclick=()=>clearCapturedMessages();
-        overlay.querySelector('#sl-aa-save').onclick=()=>{settings.repo=overlay.querySelector('#sl-aa-repo').value.trim();settings.branch=overlay.querySelector('#sl-aa-branch').value.trim()||'main';settings.path=overlay.querySelector('#sl-aa-path').value.trim()||'SakaLuX-Account-Snapshot.json';settings.includePrivateData=!!overlay.querySelector('#sl-aa-private').checked;settings.splitSnapshots=!!overlay.querySelector('#sl-aa-split').checked;settings.includeCapturedMessages=!!overlay.querySelector('#sl-aa-captured').checked;settings.autoSync=!!overlay.querySelector('#sl-aa-auto').checked;settings.autoSyncMinutes=Math.max(15,Math.min(1440,Number(overlay.querySelector('#sl-aa-minutes').value)||30));settings.maxPrivatePages=Math.max(1,Math.min(20,Number(overlay.querySelector('#sl-aa-pages').value)||5));const gh=overlay.querySelector('#sl-aa-gh').value.trim();if(gh)rawSet(STORAGE.githubToken,gh);const tk=overlay.querySelector('#sl-aa-torn')?.value.trim();if(tk)rawSet(STORAGE.apiKey,tk);saveJson(STORAGE.settings,settings);scheduleAutoSync();setStatus('Settings saved');updatePanelStatus();};overlay.querySelector('#sl-aa-sync').onclick=async()=>{await syncNow();};
+        overlay.querySelector('#sl-aa-save').onclick=()=>{settings.repo=overlay.querySelector('#sl-aa-repo').value.trim();settings.branch=overlay.querySelector('#sl-aa-branch').value.trim()||'main';settings.path=overlay.querySelector('#sl-aa-path').value.trim()||'SakaLuX-Account-Snapshot.json';settings.includePrivateData=!!overlay.querySelector('#sl-aa-private').checked;settings.splitSnapshots=!!overlay.querySelector('#sl-aa-split').checked;settings.includeCapturedMessages=!!overlay.querySelector('#sl-aa-captured').checked;settings.autoSync=!!overlay.querySelector('#sl-aa-auto').checked;settings.autoSyncMinutes=Math.max(15,Math.min(1440,Number(overlay.querySelector('#sl-aa-minutes').value)||30));settings.maxPrivatePages=Math.max(1,Math.min(500,Number(overlay.querySelector('#sl-aa-pages').value)||200));const gh=overlay.querySelector('#sl-aa-gh').value.trim();if(gh)rawSet(STORAGE.githubToken,gh);const tk=overlay.querySelector('#sl-aa-torn')?.value.trim();if(tk)rawSet(STORAGE.apiKey,tk);saveJson(STORAGE.settings,settings);scheduleAutoSync();setStatus('Settings saved');updatePanelStatus();};overlay.querySelector('#sl-aa-sync').onclick=async()=>{await syncNow();};
     }
     function injectCss(){if(document.getElementById('sl-aa-style'))return;const s=document.createElement('style');s.id='sl-aa-style';s.textContent=`#sl-aa-button{position:fixed;right:10px;bottom:150px;z-index:2147483643;border:0;border-radius:999px;padding:9px 11px;background:#16191f;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font:900 12px Arial}#sl-aa-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}#sl-aa-panel{width:min(640px,100%);max-height:92vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-aa-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.sl-aa-head>div{display:flex;flex-direction:column;gap:3px}.sl-aa-head small{color:#8e96a3}#sl-aa-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}#sl-aa-panel label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}#sl-aa-panel label input{width:54%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:8px}.sl-aa-check input{width:auto!important}.sl-aa-warning,.sl-aa-note{margin:8px 0;padding:10px;border-radius:9px;font-size:10px;line-height:1.45}.sl-aa-warning{background:#2a2010;border:1px solid #6a5420;color:#f2dc8c}.sl-aa-note{background:#122033;border:1px solid #29456b;color:#cfe3ff}.sl-aa-info,#sl-aa-status{margin:9px 0;padding:9px;background:#12171e;border:1px solid #29313a;border-radius:8px;font-size:10px}#sl-aa-panel>button{width:100%;min-height:42px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900;background:#374151}#sl-aa-sync{background:#2563eb!important}#sl-aa-capture{background:#166534!important}#sl-aa-clear{background:#7f1d1d!important}@media(min-width:700px){#sl-aa-overlay{align-items:center}#sl-aa-panel{border-radius:18px}}`;document.head.appendChild(s);}
     function createButton(){if(!settings.showButton||document.getElementById('sl-aa-button'))return;const b=document.createElement('button');b.id='sl-aa-button';b.textContent='☠︎ AUDIT';b.onclick=openSettings;document.body.appendChild(b);}
