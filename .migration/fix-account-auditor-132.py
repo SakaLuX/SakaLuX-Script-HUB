@@ -5,32 +5,26 @@ ROOT=Path(__file__).resolve().parents[1]
 p=ROOT/'SakaLuX-Account-Auditor.user.js'
 s=p.read_text(encoding='utf-8')
 
-# Version
 s=s.replace('// @version      1.3.1','// @version      1.3.2',1)
 s=s.replace("const VERSION = '1.3.1';","const VERSION = '1.3.2';",1)
 
-# Prefer the explicit Auditor key over TornPDA's injected key. This is important for Full/log access.
 old="function getTornApiKey(){return PDA_KEY && PDA_KEY!=='###PDA-APIKEY###' ? PDA_KEY : rawGet(STORAGE.apiKey);}"
 new="function getTornApiKey(){const saved=rawGet(STORAGE.apiKey);if(saved)return saved;return PDA_KEY && PDA_KEY!=='###PDA-APIKEY###' ? PDA_KEY : ''; }"
 if old not in s: raise SystemExit('getTornApiKey block not found')
 s=s.replace(old,new,1)
 
-# trade is an ID-specific detail endpoint. trades already gives the account trade list.
 s=s.replace("'revivesfull','trade','trades','virus','snapshot'","'revivesfull','trades','virus','snapshot'",1)
 
-# Generic v2 user-selection fallback for endpoints that reject /v2/user/<selection> without an ID.
 old="async function tornV2(endpoint,key,query='',absoluteUrl=''){let url=absoluteUrl||('https://api.torn.com/v2/user/'+encodeURIComponent(endpoint)+(query?(query.startsWith('?')?query:'?'+query):''));return apiJsonWithRetry(withKey(url,key));}\n    async function keyInfo(key){return apiJsonWithRetry(withKey('https://api.torn.com/v2/key/info',key));}"
 new="async function tornV2(endpoint,key,query='',absoluteUrl=''){let url=absoluteUrl||('https://api.torn.com/v2/user/'+encodeURIComponent(endpoint)+(query?(query.startsWith('?')?query:'?'+query):''));return apiJsonWithRetry(withKey(url,key));}\n    async function tornV2Selection(endpoint,key,query=''){const q='selections='+encodeURIComponent(endpoint)+(query?'&'+String(query).replace(/^\\?/,''):'');return apiJsonWithRetry(withKey('https://api.torn.com/v2/user?'+q,key));}\n    async function tornGlobalV2(endpoint,key,query=''){let url='https://api.torn.com/v2/torn/'+encodeURIComponent(endpoint)+(query?(query.startsWith('?')?query:'?'+query):'');return apiJsonWithRetry(withKey(url,key));}\n    async function keyInfo(key){return apiJsonWithRetry(withKey('https://api.torn.com/v2/key/info',key));}"
 if old not in s: raise SystemExit('tornV2/keyInfo block not found')
 s=s.replace(old,new,1)
 
-# Fallback on Incorrect ID / ID-entity relation for top-level selection calls.
-old="const result=await tornV2(endpoint,key,url?'':query,url);\n            if(!result.ok)return{...result,pages};"
-new="let result=await tornV2(endpoint,key,url?'':query,url);\n            if(!url && !result.ok && (result.code===6 || result.code===7)) result=await tornV2Selection(endpoint,key,query);\n            if(!result.ok)return{...result,pages};"
+old="const result=await tornV2(endpoint,key,url?'':query,url);\n            if(!result.ok)return{ok:false,error:result.error,code:result.code??null,httpStatus:result.httpStatus??null,pages};"
+new="let result=await tornV2(endpoint,key,url?'':query,url);\n            if(!url && !result.ok && (result.code===6 || result.code===7)) result=await tornV2Selection(endpoint,key,query);\n            if(!result.ok)return{ok:false,error:result.error,code:result.code??null,httpStatus:result.httpStatus??null,pages};"
 if old not in s: raise SystemExit('collectPagedV2 request block not found')
 s=s.replace(old,new,1)
 
-# Helpers to make merit and education IDs human-readable.
 anchor="    async function collectSnapshot(){\n"
 helpers=r'''    function flattenCatalog(value,out=[],depth=0){
         if(depth>10||value==null)return out;
@@ -56,25 +50,21 @@ helpers=r'''    function flattenCatalog(value,out=[],depth=0){
 if anchor not in s: raise SystemExit('collectSnapshot anchor not found')
 s=s.replace(anchor,helpers+anchor,1)
 
-# Fetch global merit/education catalogs right after key info, but don't turn catalog problems into account failures.
 old="requested++;setStatus('Checking API key…');const ki=await keyInfo(key);if(ki.ok){data.keyInfo=sanitizeDeep(ki.data);successful++;}else errors['key:info']={error:ki.error,code:ki.code??null,httpStatus:ki.httpStatus??null};\n        if(settings.includePrivateData){"
 new="requested++;setStatus('Checking API key…');const ki=await keyInfo(key);if(ki.ok){data.keyInfo=sanitizeDeep(ki.data);successful++;}else errors['key:info']={error:ki.error,code:ki.code??null,httpStatus:ki.httpStatus??null};\n        setStatus('Loading Torn merit / education catalogs…');\n        const meritCatalog=await tornGlobalV2('merits',key), educationCatalog=await tornGlobalV2('education',key);\n        data.special.reference={merits:meritCatalog.ok?sanitizeDeep(meritCatalog.data):null,education:educationCatalog.ok?sanitizeDeep(educationCatalog.data):null};\n        if(settings.includePrivateData){"
 if old not in s: raise SystemExit('keyInfo snapshot block not found')
 s=s.replace(old,new,1)
 
-# Add decoded merit/education view and fix nested v2 profile extraction before returning snapshot.
 old="const profile=data.v2.profile||{};\n        return{schema:'sakalux-torn-account-snapshot-v4'"
 new="data.special.decoded={merits:decodeMerits(data.v2.merits,data.special.reference?.merits),education:decodeEducation(data.v2.education,data.special.reference?.education)};\n        const profileRoot=data.v2.profile||{},profile=profileRoot.profile||profileRoot;\n        return{schema:'sakalux-torn-account-snapshot-v5'"
 if old not in s: raise SystemExit('profile return block not found')
 s=s.replace(old,new,1)
 
-# Manifest: preserve sanitized key-info diagnostics and decoded readable data.
 old="const manifest={schema:'sakalux-account-split-v2',generatedAt:snapshot.generatedAt,script:snapshot.script,account:snapshot.account,privacy:snapshot.privacy,capabilities:snapshot.capabilities,coverage:snapshot.coverage,errors:snapshot.errors,unavailable:snapshot.unavailable,files:Object.keys(parts)};"
 new="const manifest={schema:'sakalux-account-split-v3',generatedAt:snapshot.generatedAt,script:snapshot.script,account:snapshot.account,privacy:snapshot.privacy,capabilities:snapshot.capabilities,apiKeyInfo:snapshot.data?.keyInfo||null,decoded:snapshot.data?.special?.decoded||null,coverage:snapshot.coverage,errors:snapshot.errors,unavailable:snapshot.unavailable,files:Object.keys(parts)};"
 if old not in s: raise SystemExit('manifest block not found')
 s=s.replace(old,new,1)
 
-# Also include reference/decoded data in summary split output for easy reading.
 old="parts['summary.json']=pickFields(v2,['profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','discord','display','icons','calendar','competition','faction','gym','honors','job','jobranks','medals','perks','virus','hof'],assigned);"
 new="parts['summary.json']={...pickFields(v2,['profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','discord','display','icons','calendar','competition','faction','gym','honors','job','jobranks','medals','perks','virus','hof'],assigned),decoded:sp.decoded||null,reference:sp.reference||null};"
 if old not in s: raise SystemExit('summary split block not found')
@@ -82,7 +72,6 @@ s=s.replace(old,new,1)
 
 p.write_text(s,encoding='utf-8')
 
-# Info / release page
 md=ROOT/'greasyfork/Account-Auditor.md'
 d=md.read_text(encoding='utf-8')
 d=d.replace('**v1.3.1**','**v1.3.2**',1)
