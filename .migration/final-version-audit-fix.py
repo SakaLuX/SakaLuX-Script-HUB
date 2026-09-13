@@ -100,3 +100,4 @@ v=v.replace(old2,new2,1)
 vp.write_text(v,encoding='utf-8')
 
 print('Applied Hub v1.9.38 fallback URL consistency and strengthened full-repo audit validator.')
+# trigger
