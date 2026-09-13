@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.0
+// @version      1.3.1
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -133,7 +133,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.0';
+    const VERSION = '1.3.1';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -237,7 +237,21 @@
         return{ok:true,data:pages.length===1?pages[0]:{pages,pageCount:pages.length,truncated},pages,truncated};
     }
     async function collectContacts(key){const out={},errors={};for(const cat of CONTACT_LISTS){const r=await collectPagedV2('list',key,'cat='+encodeURIComponent(cat)+'&limit=50',200);if(r.ok)out[cat.toLowerCase()]=r.data;else errors[cat]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}return{data:out,errors};}
-    async function collectInventory(key){const categories={},errors={};let itemCount=0;for(const cat of INVENTORY_CATEGORIES){const r=await tornV2('inventory',key,'cat='+encodeURIComponent(cat)+'&limit=250&offset=0');if(r.ok){const clean=sanitizeDeep(r.data);categories[cat]=clean;const items=Array.isArray(clean?.inventory)?clean.inventory:[];itemCount+=items.length;}else errors[cat]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};}return{data:{categories,itemCount,categoryCount:Object.keys(categories).length},errors};}
+    function countInventoryItems(payload){
+        if(!payload)return 0;
+        if(Array.isArray(payload?.inventory))return payload.inventory.length;
+        if(Array.isArray(payload?.pages))return payload.pages.reduce((sum,page)=>sum+countInventoryItems(page),0);
+        return 0;
+    }
+    async function collectInventory(key){
+        const categories={},errors={};let itemCount=0;
+        for(const cat of INVENTORY_CATEGORIES){
+            const r=await collectPagedV2('inventory',key,'cat='+encodeURIComponent(cat)+'&limit=250',200);
+            if(r.ok){categories[cat]=r.data;itemCount+=countInventoryItems(r.data);}
+            else errors[cat]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};
+        }
+        return{data:{categories,itemCount,categoryCount:Object.keys(categories).length},errors};
+    }
 
     async function collectSnapshot(){
         const key=getTornApiKey(); if(!key)throw new Error('Torn API key missing. Open AUDIT settings and add a key, or use Torn PDA API injection.');

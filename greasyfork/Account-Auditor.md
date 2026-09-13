@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.3.0**
+**v1.3.1**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,7 +18,7 @@
 
 ## Current release note
 
-**v1.3.0** is the current standalone Account Auditor release. It uses Torn API v2 as the canonical source, removes overlapping duplicate selections, follows paginated account history, and stores split snapshot data only once while remaining outside the Script Hub registry.
+**v1.3.1** is the current standalone Account Auditor release. It uses Torn API v2 as the canonical source, removes overlapping duplicate selections, follows paginated account history, and stores split snapshot data only once while remaining outside the Script Hub registry.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and **Contents: read/write** permission.
@@ -43,6 +43,12 @@ Account Auditor is **not a complementary Hub module** and must not be added to t
 The audit is a snapshot of data available through the configured API permissions and explicit user captures. Missing permissions or unavailable endpoints can result in incomplete sections rather than fabricated data.
 
 ## Release history
+
+### v1.3.1 — Complete inventory pagination
+
+- Inventory categories now follow Torn API pagination instead of stopping at the first 250 items.
+- Inventory item totals include every retrieved page while retaining the v1.3.0 deduplicated v2-first snapshot architecture.
+
 
 ### v1.3.0 — Deduplicated full-account collection
 
