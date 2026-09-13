@@ -1,11 +1,13 @@
 # ☠️ SakaLuX Script Hub
 
-> Central manager for the SakaLuX script ecosystem.
+Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.37**
+
+**v1.9.12**
 
 ## What it does
+
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
 - Detects installed, missing and outdated registered SakaLuX add-ons.
 - Gives installed modules a clean native ON/OFF switch plus one OPEN or SETTINGS action.
@@ -23,92 +25,6 @@
 
 ## Current release notes
 
-**v1.9.37** hard-invalidates the old persistent Hub registry/update caches by rotating their storage keys. This removes stale Mission Rewards `REGISTRY v1.0.21 PENDING` state after the rollback and forces Hub to start from the current `scripts.json` / fallback registry value **v1.0.18**.
-
-## Recommended
-Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
-
-### Registered complementary add-ons
-
-- 🛡️ SakaLuX Enhancer Guard **v1.3.30**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.21**
-- 🎯 SakaLuX Mission Rewards **v1.0.18**
-- 📈 SakaLuX Market Intelligence **v1.17.18**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.30**
-
-## License
-All Rights Reserved
-
-## Privacy
-- The shared Torn API key is stored locally in the userscript/browser environment.
-- Hub does not publish the user's Torn API key to the public SakaLuX registry.
-- Hub contacts the configured update/registry sources to check module metadata and current versions.
-- Individual registered add-ons may use their own external data sources; see each add-on's information page for its specific privacy details.
-
-## Important
-Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
-
-## Release history
-### v1.9.29 — Hide floating module launchers
-
-- Market and Enhancers floating buttons are always hidden while Script Hub is active.
-- Their DOM controls remain available so Hub can still open both modules.
-- The fix ignores stale local launcher-visibility settings for these two buttons.
-
-### v1.9.28 — Installed version authority fix
-
-- Prefers live bridge/API/standalone module versions before persistent installation markers.
-- Synchronizes all five Hub fallback versions with `scripts.json`.
-- Fixes Bazaar v5.3.18 internally reporting v5.3.17 by releasing synchronized v5.3.19.
-
-### v1.9.27 — Published release-aware updates
-
-- Uses the configured Greasy Fork `meta.js` version as the installable update source.
-- Registry-ahead versions show **PUBLISH PENDING** and do not increase the update counter.
-- Removed the raw-GitHub-source update fallback that could leave TornPDA on the previous installed version.
-
-### v1.9.22 — Standalone Dock v3 compatibility
-
-- Synced managed add-on versions for the compact standalone dock release.
-- Standalone add-ons now use a native gold **S** launcher after cash instead of the dock **+** control.
-
-### v1.9.18 — Floating fallback fix
-
-- Hides the floating skull whenever the native **S** launcher is present in Torn `statusIcons`.
-- Keeps the Fly-out **HUB** skull before Messages when that navigation bar is available.
-- Uses the floating skull only when neither native launcher can be mounted.
-
-### v1.9.17 — Three-tier Torn launcher behavior
-
-- Keeps the compact **S** as the first native `statusIcons` item before cash.
-- Restores the skull launcher before **Messages** when Touchscreen Navigation exposes the **Fly-out sidebar**.
-- Shows the floating skull only when the Fly-out sidebar navigation is unavailable.
-
-### v1.9.16 — Launcher before cash
-
-- Places the native Hub launcher as the first `statusIcons` item so it appears directly before the cash resource on the current Torn mobile layout.
-- Removed the unreliable money/cash element detector from v1.9.15.
-- Fortie-style native mounting and skull fallback remain unchanged.
-
-### v1.9.15 — Launcher before money
-
-- Keeps the native Fortie-style `statusIcons` mounting introduced in v1.9.14.
-- Positions the SakaLuX Hub icon immediately before Torn money/cash when that status cell is identifiable.
-- Falls back safely to the end of the native status row if Torn changes the money cell internals.
-
-### v1.9.14 — Native Torn status launcher
-
-- Replaced the guessed money-resource detector with Torn's native `statusIcons` list detection used by the Fortie launcher strategy.
-- The Hub launcher is now a real 17px Torn status icon and inherits native cell classes from adjacent Torn icons.
-- The floating skull remains only as fallback when the native status icon list is unavailable.
-
-### v1.9.13 — Resource-bar launcher
-
-- Replaced the native navigation skull entry with a compact SakaLuX **S** launcher mounted directly in Torn's resource/status bar.
-- The launcher is inserted immediately before the money resource when Torn exposes the resource bar.
-- The existing floating skull is now strictly an automatic fallback when that native resource-bar anchor cannot be detected.
-- Update/issue badges are preserved on the new compact launcher.
-
 ### v1.9.12 — Extensible shared languages
 
 - English is the guaranteed standalone default for every SakaLuX script.
@@ -123,6 +39,12 @@ Every future complementary SakaLuX add-on intended for Hub management should be 
 - Language changes apply immediately and also translate UI elements created later by TornPDA navigation.
 - Exposed `getLanguage()` and `setLanguage()` for native localization in every add-on.
 
+### v1.9.10 — Violentmonkey/macOS detection
+
+- Fixed installed modules incorrectly appearing as **OFF + INSTALL** when Violentmonkey isolates each userscript's `window` API.
+- Installation markers and DOM bridges are now checked before the sandboxed runtime API.
+- Added cross-context ON/OFF and OPEN support through hidden DOM control bridges.
+- Corrected the Elimination Assistant marker mismatch.
 
 ### v1.9.9 — Inline panel signature
 
@@ -190,3 +112,30 @@ Every future complementary SakaLuX add-on intended for Hub management should be 
 - Added native runtime power control for registered add-ons.
 - Added shared Torn API-key creation, save/test and clear controls.
 - Registered add-ons automatically prefer the shared Hub key when compatible.
+
+## Recommended
+
+Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
+
+### Registered complementary add-ons
+
+- 🛡️ SakaLuX Enhancer Guard **v1.3.21**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.10**
+- 🎯 SakaLuX Mission Rewards **v1.0.8**
+- 📈 SakaLuX Market Intelligence **v1.17.8**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.20**
+
+## Privacy
+
+- The shared Torn API key is stored locally in the userscript/browser environment.
+- Hub does not publish the user's Torn API key to the public SakaLuX registry.
+- Hub contacts the configured update/registry sources to check module metadata and current versions.
+- Individual registered add-ons may use their own external data sources; see each add-on's information page for its specific privacy details.
+
+## Important
+
+Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
+
+## License
+
+**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.
