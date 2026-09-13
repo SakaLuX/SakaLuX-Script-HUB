@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/account-auditor-v130.yml'
-      - '.migration/account-auditor-v130.py'
+      - '.migration/account-auditor-v130b.py'
 
 permissions:
   contents: write
@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Apply migration
-        run: python .migration/account-auditor-v130.py
+        run: python .migration/account-auditor-v130b.py
       - name: Validate
         shell: bash
         run: |
