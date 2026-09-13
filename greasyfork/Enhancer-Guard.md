@@ -28,6 +28,16 @@
 - Blocks the add control before a protected item can enter the Bazaar selection.
 
 
+### v1.3.30 — Panel layering above standalone dock
+
+- Keeps the Enhancer Guard panels above the shared standalone dock.
+- Preserves access to settings and protection controls when the standalone launcher is open.
+
+### v1.3.29 — Standalone launcher cleanup
+
+- Removed the separate Enhancer floating launcher.
+- Keeps the panel accessible through Script Hub or the shared standalone dock.
+
 ### v1.3.28 — Hub detection fix
 
 - Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
