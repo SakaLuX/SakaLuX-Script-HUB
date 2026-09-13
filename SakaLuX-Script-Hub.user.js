@@ -216,7 +216,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.8',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.18',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -231,7 +231,7 @@
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.8',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.18',
                 description: 'Market and travel intelligence with clickable Best Travel Run routes, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
@@ -247,7 +247,7 @@
             },
             {
                 id: 'elimination-assistant', type: 'addon', active: true,
-                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.20',
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.30',
                 description: 'Eliminations advisor with rotating target batches, availability status and TornPDA export.',
                 greasyForkId: '594921',
                 metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
