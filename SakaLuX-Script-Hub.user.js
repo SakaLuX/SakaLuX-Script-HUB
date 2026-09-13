@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.37
+// @version      1.9.12
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.37';
+    const VERSION = '1.9.12';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,204 +40,6 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
-        {
-            version: '1.9.37',
-            date: '2026-09-13',
-            changes: [
-                'Rotates the persistent registry and update cache keys so stale rolled-back add-on versions cannot survive a Hub update.',
-                'Mission Rewards now starts from registry v1.0.18 instead of cached v1.0.21 PUBLISH PENDING state.',
-                'Keeps scripts.json and the offline fallback registry as the authoritative current version sources.'
-            ]
-        },
-        {
-            version: '1.9.36',
-            date: '2026-09-13',
-            changes: [
-                'Invalidates stale registry and update caches after an add-on registry rollback.',
-                'Prevents rolled-back modules from showing an obsolete REGISTRY version as PUBLISH PENDING.',
-                'Mission Rewards registry state now resolves cleanly to the restored stable v1.0.18.'
-            ]
-        },
-        {
-            version: '1.9.35',
-            date: '2026-09-13',
-            changes: [
-                'Installation status now uses live module presence only.',
-                'Removed persistent local installation markers from installed/active detection.',
-                'Deleted modules can no longer remain as installed ghost entries in Hub.'
-            ]
-        },
-        {
-            version: '1.9.34',
-            date: '2026-09-13',
-            changes: [
-                'Removed userscript-manager-specific compatibility handling from Script Hub.',
-                'Module control now uses only the generic runtime API or DOM bridge integration.',
-                'Removed the obsolete manager-specific compatibility release entry from the active Hub changelog.'
-            ]
-        },
-        {
-            version: '1.9.33',
-            date: '2026-09-12',
-            changes: [
-                'Places every managed add-on panel above the shared standalone dock.',
-                'Keeps the standalone SakaLuX Scripts dock below active module panels so it never covers controls or content.',
-                'Synchronizes all five managed add-on patch versions after the stacking fix.'
-            ]
-        },
-        {
-            version: '1.9.32',
-            date: '2026-09-12',
-            changes: [
-                'Restores the Hub panel runtime accidentally removed during the bridge-only launcher migration.',
-                'Fixes the S status launcher, Fly-out HUB launcher and floating fallback so all open the Hub panel again.',
-                'Adds runtime validation for openHub, closeHub and createOverlay to prevent this regression.'
-            ]
-        },
-        {
-            version: '1.9.31',
-            date: '2026-09-12',
-            changes: [
-                'All five managed add-ons now use bridge/API-only access with no individual floating launcher buttons.',
-                'Bazaar Thanker, Mission Rewards and Elimination Assistant no longer create their own page launchers.',
-                'Removed the obsolete Hide individual script buttons setting and cleans up legacy launchers from older loaded versions.'
-            ]
-        },
-        {
-            version: '1.9.30',
-            date: '2026-09-12',
-            changes: [
-                'Removes the Market Intelligence and Enhancer Guard floating launch buttons from their source scripts entirely.',
-                'Hub and standalone access now open those panels through their hidden module bridge/API instead of visible page buttons.',
-                'Removes obsolete Market/Enhancer button selectors and the temporary forced-hide CSS.'
-            ]
-        },
-        {
-            version: '1.9.29',
-            date: '2026-09-12',
-            changes: [
-                'Always hides the floating Market and Enhancers launch buttons while Script Hub is active.',
-                'Keeps both module buttons in the DOM so Hub OPEN actions continue to work.',
-                'Prevents stale local Hide individual script buttons settings from making these two launchers reappear.'
-            ]
-        },
-        {
-            version: '1.9.28',
-            date: '2026-09-12',
-            changes: [
-                'Fixes Bazaar Thanker runtime version reporting mismatch that caused a permanent false update badge.',
-                'Installed-version detection now prefers live bridge/API/standalone registration data before localStorage markers.',
-                'Synchronizes all five Hub fallback registry versions with scripts.json.'
-            ]
-        },
-        {
-            version: '1.9.27',
-            date: '2026-09-12',
-            changes: [
-                'Update availability now follows the version actually published by the configured Greasy Fork meta source.',
-                'Registry versions ahead of Greasy Fork are shown as PUBLISH PENDING instead of creating an update loop.',
-                'UPDATE no longer redirects to the raw GitHub source when the public distribution is behind.'
-            ]
-        },
-        {
-            version: '1.9.26',
-            date: '2026-09-12',
-            changes: [
-                'Fixes false standalone mode detection when the Hub is already installed.',
-                'Marks the page as Hub-active and removes stale standalone dock/install prompts from older add-ons.',
-                'Keeps native S and Fly-out HUB launchers as authoritative Hub-presence signals.'
-            ]
-        },
-        {
-            version: '1.9.25',
-            date: '2026-09-12',
-            changes: [
-                'The S badge inside the standalone dock now closes the dock when tapped.',
-                'Kept the native Torn S status launcher as the primary open/close toggle.',
-                'Added accessible button semantics and touch feedback without changing the final dock layout.'
-            ]
-        },
-        {
-            version: '1.9.24',
-            date: '2026-09-12',
-            changes: [
-                'Final standalone dock polish with icon badges and true optical centering.',
-                'Refined compact spacing, borders, shadows and Hub install action for a more professional mobile presentation.',
-                'Keeps the native S launcher after cash and the shared 12-hour Hub reminder behavior.'
-            ]
-        },
-        {
-            version: '1.9.23',
-            date: '2026-09-12',
-            changes: [
-                'Refined the standalone SakaLuX dock into a smaller centered premium layout.',
-                'Centered module names visually while preserving dedicated icons and native S launcher control.',
-                'Kept the shared Hub install reminder limited to once every 12 hours.'
-            ]
-        },
-        {
-            version: '1.9.22',
-            date: '2026-09-12',
-            changes: [
-                'Refined standalone add-on launcher into a smaller professional dock.',
-                'Replaced the dock + control with a native gold S status-bar launcher mounted after cash.',
-                'Added compact fallback S launcher only when Torn statusIcons are unavailable.'
-            ]
-        },
-        {
-            version: '1.9.18',
-            date: '2026-09-12',
-            changes: [
-                'Fixed the floating skull fallback so it is hidden whenever the native S status-bar launcher is mounted.',
-                'The floating skull now appears only when neither the S status-bar launcher nor the Fly-out HUB skull is available.',
-                'Keeps the Fly-out HUB skull before Messages when that navigation bar is present.'
-            ]
-        },
-        {
-            version: '1.9.17',
-            date: '2026-09-12',
-            changes: [
-                'Keeps the S launcher as the first Torn statusIcons item before cash.',
-                'Restores the native skull launcher before Messages when Touchscreen Navigation exposes the Fly-out sidebar.',
-                'Uses the on-screen floating skull only when the Fly-out sidebar navigation is unavailable.'
-            ]
-        },
-        {
-            version: '1.9.16',
-            date: '2026-09-12',
-            changes: [
-                'Places the native SakaLuX Hub launcher as the first item in Torn statusIcons so it appears before the cash resource on the current mobile layout.',
-                'Removed the unreliable money-cell detection introduced in v1.9.15.',
-                'Keeps Fortie-style statusIcons mounting, native class inheritance and skull fallback unchanged.'
-            ]
-        },
-        {
-            version: '1.9.15',
-            date: '2026-09-12',
-            changes: [
-                'Positions the native SakaLuX Hub status icon immediately before Torn money/cash when that native cell is identifiable.',
-                'Keeps the Fortie-style statusIcons mounting and native class inheritance unchanged.',
-                'Falls back to the end of the native status row only if Torn money/cash cannot be identified.'
-            ]
-        },
-        {
-            version: '1.9.14',
-            date: '2026-09-12',
-            changes: [
-                'Rebuilt the Hub launcher using Torn native statusIcons detection, matching the proven Fortie mounting strategy.',
-                'The launcher now copies native Torn status-cell classes and mounts as a real 17px status icon.',
-                'The floating skull is used only when Torn statusIcons are unavailable.'
-            ]
-        },
-        {
-            version: '1.9.13',
-            date: '2026-09-12',
-            changes: [
-                'Moved the primary Hub launcher into Torn resource/status bar before the money resource when available.',
-                'Replaced the native navigation skull entry with a compact SakaLuX S launcher.',
-                'The floating skull now appears only as an automatic fallback when the resource bar cannot be detected.'
-            ]
-        },
         {
             version: '1.9.12',
             date: '2026-09-12',
@@ -254,6 +56,15 @@
                 'Added a persistent Language selector beside Fallback button position.',
                 'Added shared English and Romanian UI localization for SakaLuX Hub and add-on panels.',
                 'Language changes apply immediately to existing and dynamically rendered SakaLuX interfaces.'
+            ]
+        },
+        {
+            version: '1.9.10',
+            date: '2026-09-11',
+            changes: [
+                'Fixed false OFF and INSTALL states in Violentmonkey isolated userscript sandboxes on macOS and desktop browsers.',
+                'Installation markers are checked before sandboxed window APIs, with legacy Elimination marker support.',
+                'Added hidden DOM control bridges so ON/OFF and OPEN work across isolated userscript contexts.'
             ]
         },
         {
@@ -355,14 +166,15 @@
         settings: 'SakaLuX_HUB_SETTINGS_V16',
         favorites: 'SakaLuX_HUB_FAVORITES_V16',
         usage: 'SakaLuX_HUB_USAGE_V16',
-        updates: 'SakaLuX_HUB_UPDATES_V18',
-        registry: 'SakaLuX_HUB_REGISTRY_V20',
+        updates: 'SakaLuX_HUB_UPDATES_V16',
+        registry: 'SakaLuX_HUB_REGISTRY_V18',
         locales: 'SakaLuX_HUB_LOCALES_V1',
         modulePower: 'SakaLuX_HUB_MODULE_POWER_V19',
         apiKey: 'SakaLuX_HUB_TORN_API_KEY'
     };
 
     const DEFAULT_SETTINGS = {
+        hideIndividualButtons: true,
         buttonPosition: 'top-right',
         buttonSize: 48,
         language: 'en',
@@ -374,13 +186,13 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.30',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.21',
                 description: 'Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js',
-                apiGlobal: 'SakaLuXEnhancerGuard',
+                apiGlobal: 'SakaLuXEnhancerGuard', buttonSelector: '#sl-eg-button',
                 quickActions: [
                     { id: 'open', label: 'OPEN', icon: '🛡️', method: 'open' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' },
@@ -389,13 +201,13 @@
             },
             {
                 id: 'bazaar', type: 'addon', active: true,
-                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.21',
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.10',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js',
-                apiGlobal: 'SakaLuXBazaarThanker',
+                apiGlobal: 'SakaLuXBazaarThanker', buttonSelector: '#sakalux-bt-settings-button',
                 quickActions: [
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' },
@@ -404,13 +216,13 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.18',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.8',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js',
-                apiGlobal: 'SakaLuXMissionRewards',
+                apiGlobal: 'SakaLuXMissionRewards', buttonSelector: '#sl-mri-button',
                 quickActions: [
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open', fallbackUrl: 'https://www.torn.com/page.php?sid=missions' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh', fallbackUrl: 'https://www.torn.com/page.php?sid=missions' },
@@ -419,13 +231,13 @@
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.18',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.8',
                 description: 'Market and travel intelligence with clickable Best Travel Run routes, stock/restock ETA, Bazaar deals, Item Market watchlist, Items, Museum and Points Market support.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js',
-                apiGlobal: 'SakaLuXMarketIntelligence',
+                apiGlobal: 'SakaLuXMarketIntelligence', buttonSelector: '#sl-mi-button',
                 quickActions: [
                     { id: 'open', label: 'SETTINGS', icon: '⚙️', method: 'open' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' },
@@ -435,13 +247,13 @@
             },
             {
                 id: 'elimination-assistant', type: 'addon', active: true,
-                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.30',
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.20',
                 description: 'Eliminations advisor with rotating target batches, availability status and TornPDA export.',
                 greasyForkId: '594921',
                 metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
                 downloadUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js',
-                apiGlobal: 'SakaLuXEliminationAssistant',
+                apiGlobal: 'SakaLuXEliminationAssistant', buttonSelector: '#slx-elim-btn',
                 quickActions: [
                     { id: 'open', label: 'OPEN', icon: '⚔️', method: 'open' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' }
@@ -455,8 +267,6 @@
         badge: 'sakalux-hub-badge',
         topSkull: 'sakalux-hub-top-skull',
         topBadge: 'sakalux-hub-top-badge',
-        navSkull: 'sakalux-hub-nav-skull',
-        navBadge: 'sakalux-hub-nav-badge',
         overlay: 'sakalux-hub-overlay',
         panel: 'sakalux-hub-panel',
         style: 'sakalux-hub-style'
@@ -609,10 +419,12 @@
     function canonicalLatestVersion(script, publishedVersion) {
         const registryVersion = String(script?.expectedVersion || script?.version || '0');
         const published = publishedVersion ? String(publishedVersion) : null;
-        return published || registryVersion;
+        return published && compareVersions(published, registryVersion) > 0 ? published : registryVersion;
     }
 
     function getInstallUrl(script) {
+        const data = normalizeCachedUpdate(script);
+        if (data?.distributionBehind && script.sourceUrl) return script.sourceUrl;
         return script.downloadUrl || script.sourceUrl || '';
     }
 
@@ -696,6 +508,11 @@
 
     function getInstalledVersion(script) {
         try {
+            const marker = localStorage.getItem('SakaLuX_Installed_' + script.id)
+                || (script.id === 'elimination-assistant' ? localStorage.getItem('SakaLuX_Installed_elimination') : '');
+            if (marker) return String(marker);
+        } catch {}
+        try {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
             if (bridge?.dataset?.version) return String(bridge.dataset.version);
         } catch {}
@@ -706,10 +523,8 @@
             if (health?.version) return String(health.version);
         } catch {}
         try {
-            const standalone = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
-            if (standalone?.dataset?.version) return String(standalone.dataset.version);
-        } catch {}
-        return null;
+            return document.querySelector(script.buttonSelector) ? '?' : null;
+        } catch { return null; }
     }
 
     function recordUsage(id) {
@@ -734,10 +549,10 @@
         const data = updateCache[script.id];
         if (!data) return null;
         const installed = getInstalledVersion(script);
-        const publishedLatest = data.publishedLatest ? String(data.publishedLatest) : null;
+        const publishedLatest = data.publishedLatest ? String(data.publishedLatest) : (data.latest ? String(data.latest) : null);
         const latest = canonicalLatestVersion(script, publishedLatest);
         const distributionBehind = Boolean(publishedLatest && compareVersions(publishedLatest, script.expectedVersion) < 0);
-        const available = Boolean(installed && publishedLatest && compareVersions(publishedLatest, installed) > 0);
+        const available = Boolean(installed && latest && compareVersions(latest, installed) > 0);
         if (String(data.installed || '') !== String(installed || '') || String(data.latest || '') !== latest || String(data.expected || '') !== String(script.expectedVersion || '') || Boolean(data.available) !== available || Boolean(data.distributionBehind) !== distributionBehind) {
             updateCache[script.id] = { ...data, installed, expected: script.expectedVersion, publishedLatest, latest, distributionBehind, available };
             saveJson(STORAGE.updates, updateCache);
@@ -764,7 +579,7 @@
             publishedLatest,
             latest,
             distributionBehind,
-            available: Boolean(installed && publishedLatest && compareVersions(publishedLatest, installed) > 0),
+            available: Boolean(installed && compareVersions(latest, installed) > 0),
             checkedAt: Date.now(),
             sourceError,
             error: null
@@ -803,7 +618,6 @@
         if (!data) return { state: 'unknown', text: 'NOT CHECKED', data: null };
         if (data.error) return { state: 'failed', text: 'CHECK FAILED', data };
         if (data.available) return { state: 'available', text: 'UPDATE AVAILABLE', data };
-        if (data.distributionBehind) return { state: 'pending', text: 'PUBLISH PENDING', data };
         return { state: 'current', text: 'UP TO DATE', data };
     }
 
@@ -823,7 +637,7 @@
         const api = script.api();
         if (!api) {
             const installed = getInstalledVersion(script);
-            if (installed) return { state: 'ok', text: 'INSTALLED', version: installed, data: { detection: 'live runtime' } };
+            if (installed) return { state: 'ok', text: 'INSTALLED', version: installed, data: { detection: 'installation marker' } };
             return { state: 'missing', text: 'NOT INSTALLED', version: null, data: null };
         }
         try {
@@ -868,7 +682,7 @@
             await api.setEnabled(Boolean(enabled));
         } else {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-            if (!bridge) throw new Error(script.name + ' control interface is unavailable on this page.');
+            if (!bridge) throw new Error('Update ' + script.name + ' to the latest version to use its Violentmonkey control bridge.');
             bridge.dataset.action = enabled ? 'on' : 'off';
             bridge.click();
         }
@@ -891,8 +705,8 @@
         style.textContent = `
 #${IDS.button}{position:fixed!important;z-index:2147483646!important;border:1px solid #3d4f66!important;border-radius:50%!important;background:linear-gradient(145deg,#1d2836,#111923)!important;color:#f8fafc!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;font-size:23px!important;box-shadow:0 10px 28px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.04)!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;touch-action:manipulation!important}
 #${IDS.badge}{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:999px;background:#d84b59;color:#fff;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:900;border:2px solid #111923}
-#${IDS.topSkull}{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;list-style:none!important;vertical-align:top!important;background:none!important;background-image:none!important;box-shadow:none!important;overflow:visible!important}#${IDS.topSkull}::before,#${IDS.topSkull}::after{content:none!important;display:none!important}#${IDS.topSkull} .slh-status-link{position:relative!important;display:block!important;width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;max-width:17px!important;max-height:17px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;background-image:none!important;color:inherit!important;cursor:pointer!important;line-height:0!important;font-size:0!important;text-decoration:none!important;box-shadow:none!important;overflow:visible!important;transform:none!important}#${IDS.topSkull} .slh-status-link svg{display:block!important;width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;max-width:17px!important;max-height:17px!important;margin:0!important;padding:0!important;overflow:visible!important;pointer-events:none!important;filter:drop-shadow(0 1px 1px rgba(0,0,0,.58))!important;transition:filter .15s ease,transform .15s ease!important}#${IDS.topSkull} .slh-status-link:active svg{transform:scale(.92)!important}#${IDS.topSkull}.slh-alert .slh-status-link svg{filter:brightness(1.2) drop-shadow(0 0 4px rgba(242,200,100,.55))!important}#${IDS.topBadge}{position:absolute;top:-7px;right:-7px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#c93f50;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3;border:1px solid #111923}
-#${IDS.navSkull}{position:relative!important;box-sizing:border-box!important}#${IDS.navSkull} .slh-native-link{position:relative!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}#${IDS.navSkull} .slh-native-skull-icon{animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;transform-origin:center center!important}#${IDS.navSkull}.slh-alert .slh-native-skull-icon{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}#${IDS.navBadge}{position:absolute;top:0;right:4px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#c93f50;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48}11%,19%,27%{opacity:1}40%,75%{opacity:.72}}@keyframes slhNativeSkullAlert{0%,100%{opacity:.38}50%{opacity:1}72%{opacity:.58}}
+#${IDS.topSkull}{position:relative!important;box-sizing:border-box!important}#${IDS.topSkull} .slh-native-link{position:relative!important;cursor:pointer!important;-webkit-tap-highlight-color:transparent!important}#${IDS.topSkull} .slh-native-skull-icon{animation:slhNativeSkullBlink 2.45s ease-in-out infinite!important;transform-origin:center center!important}#${IDS.topSkull}.slh-alert .slh-native-skull-icon{animation:slhNativeSkullAlert .92s ease-in-out infinite!important}#${IDS.topBadge}{position:absolute;top:0;right:4px;min-width:14px;height:14px;padding:0 3px;box-sizing:border-box;border-radius:999px;background:#c93f50;color:#fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:900;line-height:1;z-index:3}
+@keyframes slhNativeSkullBlink{0%,8%,16%,24%,32%,100%{opacity:.48}11%,19%,27%{opacity:1}40%,75%{opacity:.72}}@keyframes slhNativeSkullAlert{0%,100%{opacity:.38}50%{opacity:1}72%{opacity:.58}}
 #${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:rgba(4,8,13,.84);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;font-family:Inter,Arial,sans-serif;color:#e7edf5}
 #${IDS.panel}{--sl-bg:#0f141c;--sl-soft:#151c26;--sl-panel:#18212d;--sl-panel2:#1d2836;--sl-elev:#223041;--sl-border:#314154;--sl-border2:#43566e;--sl-text:#e7edf5;--sl-softtext:#a9b7c8;--sl-muted:#7f90a6;--sl-blue:#4f8fe8;--sl-blue2:#2f6ebf;--sl-green:#18b26b;--sl-red:#cc3d57;--sl-gold:#d7a94a;width:min(680px,100%);max-height:95vh;display:flex;flex-direction:column;overflow:hidden;background:var(--sl-bg);color:var(--sl-text);border:1px solid var(--sl-border);border-radius:22px 22px 0 0;box-shadow:0 -22px 70px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.025)}
 .slh-header{padding:16px 16px 12px;flex-shrink:0;background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 40%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-bottom:1px solid var(--sl-border)}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-brand{display:flex;align-items:center;gap:11px;min-width:0}.slh-brand-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #41536b;border-radius:13px;background:linear-gradient(145deg,#263448,#17212e);box-shadow:inset 0 1px rgba(255,255,255,.05),0 7px 20px rgba(0,0,0,.25);font-size:22px}.slh-brand-copy{min-width:0}.slh-kicker{font-size:8px;line-height:1.2;letter-spacing:.18em;font-weight:900;color:#6fa6ef;text-transform:uppercase}.slh-title{margin-top:2px;font-size:18px;line-height:1.15;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-sub{margin-top:4px;color:var(--sl-muted);font-size:9px;line-height:1.3}.slh-registry-dot{display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#64748b}.slh-registry-dot.online{background:var(--sl-green);box-shadow:0 0 8px rgba(24,178,107,.6)}.slh-close{width:38px;height:38px;flex:0 0 auto;border:1px solid var(--sl-border);border-radius:11px;background:#1b2532;color:#c8d3df;font-size:21px;line-height:1;transition:.15s ease}.slh-close:active{transform:scale(.96)}
@@ -1121,29 +935,6 @@
         };
     }
 
-    function findStatusIconList() {
-        const selectors = [
-            'ul[class*="statusIcons"][class*="big"]',
-            'ul[class*="status-icons"][class*="big"]',
-            'ul[class*="statusIcons"]',
-            'ul[class*="status-icons"]'
-        ];
-        const lists = selectors.flatMap(selector => Array.from(document.querySelectorAll(selector)));
-        return lists.find(list => list.isConnected && Array.from(list.children).some(item => item.querySelector?.('a'))) || null;
-    }
-
-    function copyNativeStatusCellLayout(customItem, statusList) {
-        if (!customItem || !statusList) return;
-        const reference = Array.from(statusList.children).find(item =>
-            item !== customItem && item.id !== IDS.topSkull && item.querySelector?.('a')
-        );
-        if (!reference) return;
-        const nativeClasses = Array.from(reference.classList).filter(className => className && !className.startsWith('slh-') && !className.startsWith('sakalux-'));
-        const customClasses = Array.from(customItem.classList).filter(className => className.startsWith('slh-') || className.startsWith('sakalux-'));
-        customItem.className = [...nativeClasses, ...customClasses].join(' ');
-        ['width','height','min-width','min-height','max-width','max-height','margin','flex','align-self'].forEach(prop => customItem.style.removeProperty(prop));
-    }
-
     function buildSkullSvg(nativeSvg) {
         if (!nativeSvg) return null;
         const svg = nativeSvg.cloneNode(false);
@@ -1173,9 +964,7 @@
     function syncFloatingButtonVisibility() {
         const button = document.getElementById(IDS.button);
         if (!button) return;
-        const statusReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.topSkull));
-        const flyoutReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.navSkull));
-        const nativeReady = statusReady || flyoutReady;
+        const nativeReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.topSkull));
         button.style.setProperty('display', nativeReady ? 'none' : 'flex', 'important');
     }
 
@@ -1186,74 +975,15 @@
             syncFloatingButtonVisibility();
             return false;
         }
-        const statusList = findStatusIconList();
-        if (!statusList) {
-            existing?.remove();
-            syncFloatingButtonVisibility();
-            return false;
-        }
-        if (existing?.isConnected && existing.parentElement === statusList) {
-            if (statusList.firstElementChild !== existing) statusList.insertBefore(existing, statusList.firstElementChild);
-            copyNativeStatusCellLayout(existing, statusList);
-            updateTopbarSkullState();
-            syncFloatingButtonVisibility();
-            return true;
-        }
-        existing?.remove();
-        const item = document.createElement('li');
-        item.id = IDS.topSkull;
-        item.className = 'slh-master-status-icon';
-        const launcher = document.createElement('a');
-        launcher.href = '#';
-        launcher.className = 'slh-status-link';
-        launcher.setAttribute('aria-label', 'SakaLuX Script Hub');
-        launcher.setAttribute('title', 'SakaLuX Script Hub');
-        launcher.setAttribute('tabindex', '0');
-        launcher.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 17" width="17" height="17" aria-hidden="true" focusable="false">
-                <defs>
-                    <linearGradient id="slh-settings-gold" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0" stop-color="#f4d57d"/>
-                        <stop offset=".45" stop-color="#d8b35f"/>
-                        <stop offset="1" stop-color="#9a742c"/>
-                    </linearGradient>
-                    <linearGradient id="slh-settings-inner" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0" stop-color="#3a3d44"/>
-                        <stop offset="1" stop-color="#15171b"/>
-                    </linearGradient>
-                </defs>
-                <path fill="url(#slh-settings-gold)" stroke="#6f511a" stroke-width=".45" d="M7.28.8h2.44l.36 1.7c.51.15.99.35 1.43.59l1.49-.9 1.72 1.72-.9 1.49c.24.44.44.92.59 1.43l1.7.36v2.44l-1.7.36c-.15.51-.35.99-.59 1.43l.9 1.49-1.72 1.72-1.49-.9c-.44.24-.92.44-1.43.59l-.36 1.7H7.28l-.36-1.7c-.51-.15-.99-.35-1.43-.59l-1.49.9-1.72-1.72.9-1.49a6.97 6.97 0 0 1-.59-1.43l-1.7-.36V7.19l1.7-.36c.15-.51.35-.99.59-1.43l-.9-1.49L4 2.19l1.49.9c.44-.24.92-.44 1.43-.59L7.28.8Z"/>
-                <circle cx="8.5" cy="8.41" r="3.15" fill="url(#slh-settings-inner)" stroke="#f0cc72" stroke-width=".5"/>
-                <text x="8.5" y="10.65" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.1" font-weight="900" fill="#f0cc72">S</text>
-            </svg>
-            <span id="${IDS.topBadge}"></span>`;
-        launcher.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); openHub(); });
-        launcher.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHub(); } });
-        item.appendChild(launcher);
-        statusList.insertBefore(item, statusList.firstElementChild);
-        copyNativeStatusCellLayout(item, statusList);
-        updateTopbarSkullState();
-        syncFloatingButtonVisibility();
-        return true;
-    }
-
-    function createNavSkull() {
-        const existing = document.getElementById(IDS.navSkull);
-        if (!settings.showTopbarSkull) {
-            existing?.remove();
-            syncFloatingButtonVisibility();
-            return false;
-        }
-        const ctx = getMobileNavContext();
-        if (!ctx) {
-            existing?.remove();
-            syncFloatingButtonVisibility();
-            return false;
-        }
         if (existing?.isConnected) {
             updateTopbarSkullState();
             syncFloatingButtonVisibility();
             return true;
+        }
+        const ctx = getMobileNavContext();
+        if (!ctx) {
+            syncFloatingButtonVisibility();
+            return false;
         }
         const area = document.createElement('div');
         area.className = ctx.messagesArea.className;
@@ -1282,7 +1012,7 @@
         label.textContent = 'HUB';
         link.appendChild(label);
         const badge = document.createElement('span');
-        badge.id = IDS.navBadge;
+        badge.id = IDS.topBadge;
         link.appendChild(badge);
         const open = event => { event.preventDefault(); event.stopPropagation(); openHub(); };
         link.addEventListener('click', open);
@@ -1297,7 +1027,7 @@
             slide.appendChild(area);
             mounted = slide;
         } else mounted = area;
-        mounted.id = IDS.navSkull;
+        mounted.id = IDS.topSkull;
         const reference = ctx.isSwiper ? ctx.messagesSlide : ctx.messagesArea;
         ctx.wrapper.insertBefore(mounted, reference);
         if (ctx.isSwiper) {
@@ -1309,16 +1039,14 @@
     }
 
     function updateTopbarSkullState() {
+        const skull = document.getElementById(IDS.topSkull);
+        const badge = document.getElementById(IDS.topBadge);
+        if (!skull) return;
         const total = getIssueCount();
-        for (const [skullId, badgeId] of [[IDS.topSkull, IDS.topBadge], [IDS.navSkull, IDS.navBadge]]) {
-            const skull = document.getElementById(skullId);
-            const badge = document.getElementById(badgeId);
-            if (!skull) continue;
-            skull.classList.toggle('slh-alert', total > 0);
-            if (badge) {
-                badge.style.display = total > 0 ? 'flex' : 'none';
-                badge.textContent = total > 99 ? '99+' : String(total);
-            }
+        skull.classList.toggle('slh-alert', total > 0);
+        if (badge) {
+            badge.style.display = total > 0 ? 'flex' : 'none';
+            badge.textContent = total > 99 ? '99+' : String(total);
         }
     }
 
@@ -1333,8 +1061,18 @@
     }
 
     function updateHiddenButtons() {
-        for (const selector of ['#sl-eg-button','#sakalux-bt-settings-button','#sl-mri-button','#sl-mi-button','#slx-elim-btn']) {
-            document.querySelectorAll(selector).forEach(element => element.remove());
+        for (const script of SCRIPTS) {
+            if (!script.buttonSelector) continue;
+            const moduleEnabled = isModuleEnabled(script);
+            document.querySelectorAll(script.buttonSelector).forEach(element => {
+                if (!moduleEnabled || settings.hideIndividualButtons) {
+                    element.style.setProperty('display', 'none', 'important');
+                    element.style.setProperty('visibility', 'hidden', 'important');
+                } else {
+                    element.style.removeProperty('display');
+                    element.style.removeProperty('visibility');
+                }
+            });
         }
     }
 
@@ -1456,7 +1194,7 @@
         const health = row.health;
         const update = row.update;
         const installed = getInstalledVersion(script);
-        const latest = update.data?.publishedLatest || update.data?.latest || script.expectedVersion || '?';
+        const latest = update.data?.latest || script.expectedVersion || '?';
         const missing = health.state === 'missing';
         let extra = '';
         if (script.id === 'enhancer' && health.data) extra = `Inventory ${health.data.inventoryEntries ?? 0}`;
@@ -1467,7 +1205,7 @@
         const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id));
         const primary = getPrimaryAction(script);
         const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
-        const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'pending' ? 'info' : update.state === 'failed' ? 'bad' : 'muted';
+        const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'failed' ? 'bad' : 'muted';
         const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';
         const controls = missing
             ? `<button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
@@ -1481,7 +1219,7 @@
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
-                    ${update.state === 'pending' ? `<span class="slh-chip muted">REGISTRY v${escapeHtml(script.expectedVersion || '?')} PENDING</span>` : latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
+                    ${latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
                     ${extra ? `<span class="slh-chip muted">${escapeHtml(extra)}</span>` : ''}
                     ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
                 </div>
@@ -1529,6 +1267,10 @@
             if (script.fallbackOpen()) {
                 recordUsage(id);
                 closeHub();
+                return;
+            }
+            if (getInstalledVersion(script)) {
+                alert(script.name + ' is installed, but this version needs the Violentmonkey bridge update before Hub can open it.');
                 return;
             }
             const url = getInstallUrl(script);
@@ -1585,13 +1327,13 @@
                 const published = parseMetaVersion(await httpGet(script.metaUrl));
                 const canonical = canonicalLatestVersion(script, published);
                 const behind = Boolean(published && compareVersions(published, script.expectedVersion) < 0);
-                results.push({ level: behind || !published ? 'warn' : 'ok', label: script.name + ' update source', detail: 'Canonical v' + canonical + (published ? ' • Greasy Fork v' + published + (behind ? ' (publish pending)' : '') : ' • Greasy Fork unavailable') });
+                results.push({ level: behind || !published ? 'warn' : 'ok', label: script.name + ' update source', detail: 'Canonical v' + canonical + (published ? ' • Greasy Fork v' + published + (behind ? ' (mirror behind; GitHub source used)' : '') : ' • Greasy Fork unavailable') });
             } catch (error) { results.push({ level: 'warn', label: script.name + ' update source', detail: 'Canonical Registry v' + script.expectedVersion + ' • ' + String(error?.message || error) }); }
             const health = getHealth(script);
             results.push({ level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad', label: script.name + ' local status', detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error') });
         }
         results.push({ level: 'ok', label: 'SakaLuX Script Hub', detail: 'Loaded v' + VERSION + ' • API exposed' });
-        results.push({ level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn', label: 'Torn status-bar HUB launcher', detail: document.getElementById(IDS.topSkull) ? 'Mounted inside Torn statusIcons using native cell classes' : 'Torn statusIcons not detected — floating skull fallback active' });
+        results.push({ level: document.getElementById(IDS.topSkull) ? 'ok' : 'warn', label: 'Torn-native HUB launcher', detail: document.getElementById(IDS.topSkull) ? 'Mounted as a native mobile navigation entry before Messages' : 'Torn mobile navigation not detected yet' });
         const box = document.getElementById('slhc-results');
         if (!box) return;
         box.innerHTML = results.map(result => `<div class="slh-check-row slh-check-${result.level}">${result.level === 'ok' ? '🟢' : result.level === 'warn' ? '🟠' : '🔴'} <b>${escapeHtml(result.label)}</b><br><span style="color:#8fa0b3">${escapeHtml(result.detail)}</span></div>`).join('') + '<button class="slh-big-btn" id="slhc-back">← BACK</button>';
@@ -1618,7 +1360,8 @@
 
     function openSettings() {
         createOverlay(`${headerMarkup('Hub Settings', `SakaLuX Script Hub v${VERSION}`, 'slhs-close', '⚙️', 'CONFIGURATION')}<div class="slh-settings">
-            ${settingSwitch('slhs-topbar', 'Torn launchers', 'Show S before cash and, when Touchscreen Navigation uses Fly-out sidebar, show the skull before Messages. Otherwise use the floating skull fallback.', settings.showTopbarSkull)}
+            ${settingSwitch('slhs-hide', 'Hide individual script buttons', 'Keep each add-on launcher hidden while Hub manages access.', settings.hideIndividualButtons)}
+            ${settingSwitch('slhs-topbar', 'Torn-native HUB launcher', 'Show the blinking skull HUB entry before Messages when Torn navigation is available.', settings.showTopbarSkull)}
             ${settingSwitch('slhs-auto', 'Automatic update checks', 'Check published add-on versions automatically while the Hub is running.', settings.autoCheckUpdates)}
             <div class="slh-settings-pair"><div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div><div class="slh-setting">Language<select id="slhs-language">${Object.entries(LOCALES).map(([code,locale])=>`<option value="${escapeHtml(code)}">${escapeHtml(locale.label)}</option>`).join('')}</select></div></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
@@ -1632,6 +1375,7 @@
         languageSelect.value = language();
         languageSelect.onchange = function () { settings.language = LOCALES[this.value] ? this.value : 'en'; saveJson(STORAGE.settings, settings); applyLanguage(); openSettings(); };
         size.oninput = function () { document.getElementById('slhs-size-label').textContent = this.value + 'px'; };
+        bindSettingToggle('slhs-hide');
         bindSettingToggle('slhs-topbar');
         bindSettingToggle('slhs-auto');
         document.getElementById('slhs-close').onclick = closeHub;
@@ -1647,6 +1391,7 @@
         };
         document.getElementById('slhs-api-clear').onclick = () => { if (!confirm('Remove the shared SakaLuX Torn API key?')) return; setSharedApiKey(''); openSettings(); };
         document.getElementById('slhs-save').onclick = () => {
+            settings.hideIndividualButtons = settingToggleValue('slhs-hide');
             settings.showTopbarSkull = settingToggleValue('slhs-topbar');
             settings.autoCheckUpdates = settingToggleValue('slhs-auto');
             settings.buttonPosition = position.value;
@@ -1654,7 +1399,7 @@
             settings.buttonSize = Number(size.value);
             delete settings.longPressQuickMenu;
             saveJson(STORAGE.settings, settings);
-            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); openHub();
+            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); openHub();
         };
         document.getElementById('slhs-backup').onclick = backupSettings;
         document.getElementById('slhs-restore').onclick = restoreSettings;
@@ -1678,7 +1423,7 @@
             favorites = new Set(Array.isArray(data.favorites) ? data.favorites : []);
             usage = data.usage && typeof data.usage === 'object' ? data.usage : {};
             saveJson(STORAGE.settings, settings); saveJson(STORAGE.favorites, [...favorites]); saveJson(STORAGE.usage, usage);
-            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); alert('Backup restored.'); openHub();
+            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); alert('Backup restored.'); openHub();
         } catch { alert('Invalid Hub backup.'); }
     }
 
@@ -1686,22 +1431,11 @@
         if (!confirm('Reset only SakaLuX Script Hub settings?')) return;
         Object.entries(STORAGE).forEach(([name, key]) => { if (name !== 'apiKey') localStorage.removeItem(key); });
         settings = { ...DEFAULT_SETTINGS }; favorites = new Set(); usage = {}; updateCache = {}; registry = FALLBACK_REGISTRY; SCRIPTS = normalizeRegistry(registry);
-        updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); updateBadge(); openHub();
-    }
-
-    function suppressStandaloneDock() {
-        try {
-            document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
-            document.body?.setAttribute('data-sakalux-hub-active', '1');
-            for (const id of ['sakalux-standalone-dock','sakalux-hub-install-prompt','sakalux-standalone-native-s','sakalux-standalone-fallback-s']) {
-                document.getElementById(id)?.remove();
-            }
-        } catch {}
+        updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); createTopbarSkull(); syncFloatingButtonVisibility(); updateBadge(); openHub();
     }
 
     function ensureEverything() {
-        suppressStandaloneDock();
-        injectCss(); createTopbarSkull(); createNavSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
+        injectCss(); createTopbarSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
     }
 
     function queueEnsure() {
@@ -1722,7 +1456,7 @@
         getLanguage: language, getLanguages:()=>Object.fromEntries(Object.entries(LOCALES).map(([code,locale])=>[code,locale.label])), setLanguage: value => { settings.language=LOCALES[value]?value:'en';saveJson(STORAGE.settings,settings);applyLanguage();return settings.language; },
         hasApiKey: () => Boolean(getSharedApiKey()), createRequiredTornKey: createSharedApiKey,
         refresh: async () => { await refreshRegistryAndCheck(); return true; },
-        health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)), flyoutHubLauncher: Boolean(document.getElementById(IDS.navSkull)), floatingFallback: !Boolean(document.getElementById(IDS.topSkull)) && !Boolean(document.getElementById(IDS.navSkull)) })
+        health: () => ({ ready: true, version: VERSION, registryStatus, addOns: SCRIPTS.length, installed: SCRIPTS.filter(script => script.api()).length, updates: getUpdateCount(), sharedApiKey: Boolean(getSharedApiKey()), nativeHubLauncher: Boolean(document.getElementById(IDS.topSkull)) })
     };
 
     window.dispatchEvent(new CustomEvent('SakaLuX:ScriptHubReady', { detail: { version: VERSION } }));
