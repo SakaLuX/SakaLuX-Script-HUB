@@ -1,0 +1,41 @@
+name: One-time Account Auditor v1.3.0 migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/account-auditor-v130.yml'
+      - '.migration/account-auditor-v130.py'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Apply migration
+        run: python .migration/account-auditor-v130.py
+      - name: Validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Account-Auditor.user.js
+          grep -q "@version      1.3.0" SakaLuX-Account-Auditor.user.js
+          grep -q "sakalux-torn-account-snapshot-v4" SakaLuX-Account-Auditor.user.js
+          grep -q "v1.3.0" greasyfork/Account-Auditor.md
+      - name: Commit changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Account-Auditor.user.js greasyfork/Account-Auditor.md
+          if git diff --cached --quiet; then
+            echo 'No migration changes.'
+            exit 0
+          fi
+          git commit -m 'Account Auditor v1.3.0 deduplicated full account coverage [skip ci]'
+          git push
