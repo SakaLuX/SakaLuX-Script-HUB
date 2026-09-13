@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.2.6**
+**v1.3.0**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,7 +18,7 @@
 
 ## Current release note
 
-**v1.2.6** is the current standalone Account Auditor release. It keeps the shared standalone SakaLuX dock/install-reminder behavior while remaining outside the Script Hub registry.
+**v1.3.0** is the current standalone Account Auditor release. It uses Torn API v2 as the canonical source, removes overlapping duplicate selections, follows paginated account history, and stores split snapshot data only once while remaining outside the Script Hub registry.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and **Contents: read/write** permission.
@@ -43,6 +43,18 @@ Account Auditor is **not a complementary Hub module** and must not be added to t
 The audit is a snapshot of data available through the configured API permissions and explicit user captures. Missing permissions or unavailable endpoints can result in incomplete sections rather than fabricated data.
 
 ## Release history
+
+### v1.3.0 — Deduplicated full-account collection
+
+- Switched the audit payload to **Torn API v2 as the canonical source** instead of storing matching v1 and v2 data twice.
+- Removed redundant subset pairs: `basic/profile`, `attacks/attacksfull`, `revives/revivesfull`, `newmessages/messages` and `newevents/events`.
+- Added missing account selections including Bazaar, crimes, criminal record, display, Hall of Fame, trade and snapshot data where API permissions allow them.
+- Follows API pagination with loop protection so multi-page history is not silently limited to the first page.
+- Split mode no longer uploads a second full copy of the same account data. The main snapshot path becomes a small pointer to `manifest.json`.
+- Added dedicated racing, forum, inventory, contacts and activity split files plus `other.json` fallback so newly returned unmapped fields are not discarded.
+- Identical GitHub file content is not rewritten unnecessarily.
+- Snapshot schema upgraded to `sakalux-torn-account-snapshot-v4`.
+
 ### v1.2.4 — Inline panel signature
 
 - Removed the floating author badge from the Torn page.
