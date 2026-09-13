@@ -24,6 +24,7 @@ Complementary add-on for SakaLuX Script Hub.
 - Protected items are now removed from Torn's current dynamic Bazaar add-items list.
 - Removed the incorrect dependency on the legacy Item Protector sale-page filter.
 - Added a capture-phase guard that blocks the add control before a protected item can enter the Bazaar selection.
+- Covers both legacy sale rows and Torn's current mobile/PDA Bazaar layout.
 
 ### v1.3.20 — English standalone baseline
 
