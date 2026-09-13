@@ -1,11 +1,13 @@
 # 🛡️ SakaLuX Enhancer Guard
 
-> Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.3.30**
+
+**v1.3.21**
 
 ## What it does
+
 - Tracks Enhancers and Enhancer Relics in Torn.
 - Shows owned/missing status and quantities.
 - Uses Torn API v2.
@@ -15,35 +17,13 @@
 - Supports full, partial-quantity and unlocked protection states.
 - Works with Torn PDA and Tampermonkey.
 
-## Current release note
+## Current release notes
 
-**v1.3.30** is the current Enhancer Guard release. Its panel stays above the shared standalone dock and remains accessible through Script Hub / standalone dock without a separate floating launcher.
+### v1.3.21 — Bazaar protection for the current layout
 
-## Recommended
-Install **SakaLuX Script Hub** to manage Enhancer Guard together with the rest of the SakaLuX add-ons and to use shared Hub integration where available.
-
-## License
-All Rights Reserved
-
-## Privacy
-Enhancer Guard stores its settings, protection state and cached interface data locally in the browser/TornPDA storage. Torn inventory and item information is requested from the Torn API using the active API key. The script does not need write permissions for Torn API access.
-
-## Important
-Item Protector is a client-side safety layer. Always verify Torn's final sell/send/trade screen before confirming a transaction involving valuable items.
-
-## Release history
-### v1.3.28 — Hub detection fix
-
-- Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
-- Prevents the standalone dock/install prompt from appearing while Hub is installed.
-
-### v1.3.24 — Compact native S standalone launcher
-
-- Smaller professional standalone dock.
-- Native gold **S** launcher mounts after Torn cash and opens/closes the dock.
-- Removed the dock **+** control.
-- Compact fallback **S** appears only when Torn status icons are unavailable.
-- Shared Hub reminder remains limited to once every 12 hours.
+- Protected items are now removed from Torn's current dynamic Bazaar add-items list.
+- Removed the incorrect dependency on the legacy Item Protector sale-page filter.
+- Added a capture-phase guard that blocks the add control before a protected item can enter the Bazaar selection.
 
 ### v1.3.20 — English standalone baseline
 
@@ -86,3 +66,19 @@ Item Protector is a client-side safety layer. Always verify Torn's final sell/se
 - Improved item-name detection across dynamically rendered TornPDA inventory layouts.
 - Improved live refresh of inventory badges after settings changes.
 - Removed the unused Enhancer-header lock control.
+
+## Recommended
+
+Install **SakaLuX Script Hub** to manage Enhancer Guard together with the rest of the SakaLuX add-ons and to use shared Hub integration where available.
+
+## Privacy
+
+Enhancer Guard stores its settings, protection state and cached interface data locally in the browser/TornPDA storage. Torn inventory and item information is requested from the Torn API using the active API key. The script does not need write permissions for Torn API access.
+
+## Important
+
+Item Protector is a client-side safety layer. Always verify Torn's final sell/send/trade screen before confirming a transaction involving valuable items.
+
+## License
+
+**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.
