@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.1
+// @version      1.3.2
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -133,7 +133,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.1';
+    const VERSION = '1.3.2';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -158,7 +158,7 @@
         'criminalrecord','bazaar','crimes','hof','ammo','attacksfull','bounties','calendar','casino','competition',
         'enlistedcars','equipment','faction','forumfeed','forumfriends','forumposts','forumsubscribedthreads',
         'forumthreads','gym','honors','itemmarket','itemmods','job','jobranks','medals','missions','organizedcrime',
-        'organizedcrimes','perks','property','races','racingrecords','reports','revivesfull','trade','trades','virus','snapshot'
+        'organizedcrimes','perks','property','races','racingrecords','reports','revivesfull','trades','virus','snapshot'
     ];
     // newmessages/newevents are subsets of messages/events and are intentionally omitted to prevent duplicate records.
     const V2_PRIVATE_ENDPOINTS = ['messages','events'];
@@ -181,7 +181,7 @@
     function saveJson(key,value){ try{rawSet(key,JSON.stringify(value));}catch(_){} }
     function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;');}
     function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-    function getTornApiKey(){return PDA_KEY && PDA_KEY!=='###PDA-APIKEY###' ? PDA_KEY : rawGet(STORAGE.apiKey);}
+    function getTornApiKey(){const saved=rawGet(STORAGE.apiKey);if(saved)return saved;return PDA_KEY && PDA_KEY!=='###PDA-APIKEY###' ? PDA_KEY : ''; }
 
     const RATE={minGapMs:1100,retryDelays:[3000,6000,12000],lastAt:0};
     async function rateGate(){const wait=Math.max(0,RATE.minGapMs-(Date.now()-RATE.lastAt));if(wait)await sleep(wait);RATE.lastAt=Date.now();}
@@ -215,6 +215,8 @@
     function withKey(url,key){const sep=url.includes('?')?'&':'?';return /[?&]key=/.test(url)?url:url+sep+'key='+encodeURIComponent(key);}
     async function tornV1(selection,key){return apiJsonWithRetry('https://api.torn.com/user/?selections='+encodeURIComponent(selection)+'&key='+encodeURIComponent(key));}
     async function tornV2(endpoint,key,query='',absoluteUrl=''){let url=absoluteUrl||('https://api.torn.com/v2/user/'+encodeURIComponent(endpoint)+(query?(query.startsWith('?')?query:'?'+query):''));return apiJsonWithRetry(withKey(url,key));}
+    async function tornV2Selection(endpoint,key,query=''){const q='selections='+encodeURIComponent(endpoint)+(query?'&'+String(query).replace(/^\?/,''):'');return apiJsonWithRetry(withKey('https://api.torn.com/v2/user?'+q,key));}
+    async function tornGlobalV2(endpoint,key,query=''){let url='https://api.torn.com/v2/torn/'+encodeURIComponent(endpoint)+(query?(query.startsWith('?')?query:'?'+query):'');return apiJsonWithRetry(withKey(url,key));}
     async function keyInfo(key){return apiJsonWithRetry(withKey('https://api.torn.com/v2/key/info',key));}
 
     function sanitizeDeep(value,depth=0){
@@ -227,7 +229,8 @@
         for(let page=0;page<limit;page++){
             if(url&&seenUrls.has(url))break;
             if(url)seenUrls.add(url);
-            const result=await tornV2(endpoint,key,url?'':query,url);
+            let result=await tornV2(endpoint,key,url?'':query,url);
+            if(!url && !result.ok && (result.code===6 || result.code===7)) result=await tornV2Selection(endpoint,key,query);
             if(!result.ok)return{ok:false,error:result.error,code:result.code??null,httpStatus:result.httpStatus??null,pages};
             const clean=sanitizeDeep(result.data);pages.push(clean);
             const next=nextLink(clean);if(!next)break;
@@ -253,10 +256,33 @@
         return{data:{categories,itemCount,categoryCount:Object.keys(categories).length},errors};
     }
 
+    function flattenCatalog(value,out=[],depth=0){
+        if(depth>10||value==null)return out;
+        if(Array.isArray(value)){for(const v of value)flattenCatalog(v,out,depth+1);return out;}
+        if(typeof value!=='object')return out;
+        const id=value.id??value.merit_id??value.education_id??value.course_id;
+        const name=value.name??value.title??value.description??null;
+        if(id!=null&&name)out.push({id:Number(id),name:String(name),raw:value});
+        for(const v of Object.values(value))if(v&&typeof v==='object')flattenCatalog(v,out,depth+1);
+        return out;
+    }
+    function catalogNameMap(value){const map={};for(const row of flattenCatalog(value)){if(Number.isFinite(row.id)&&!map[row.id])map[row.id]=row.name;}return map;}
+    function decodeMerits(userMerits,catalog){
+        const root=userMerits?.merits??userMerits??{}, upgrades=Array.isArray(root?.upgrades)?root.upgrades:[], names=catalogNameMap(catalog);
+        return upgrades.map(u=>({id:u?.id??null,name:names[Number(u?.id)]||null,level:u?.level??null}));
+    }
+    function decodeEducation(userEducation,catalog){
+        const root=userEducation?.education??userEducation??{}, names=catalogNameMap(catalog), complete=Array.isArray(root?.complete)?root.complete:[];
+        return {complete:complete.map(id=>({id,name:names[Number(id)]||null})),current:root?.current?.id!=null?{...root.current,name:names[Number(root.current.id)]||null}:root?.current??null};
+    }
+
     async function collectSnapshot(){
         const key=getTornApiKey(); if(!key)throw new Error('Torn API key missing. Open AUDIT settings and add a key, or use Torn PDA API injection.');
         const data={keyInfo:null,v2:{},special:{},private:{}},errors={},unavailable={};let requested=0,successful=0;
         requested++;setStatus('Checking API key…');const ki=await keyInfo(key);if(ki.ok){data.keyInfo=sanitizeDeep(ki.data);successful++;}else errors['key:info']={error:ki.error,code:ki.code??null,httpStatus:ki.httpStatus??null};
+        setStatus('Loading Torn merit / education catalogs…');
+        const meritCatalog=await tornGlobalV2('merits',key), educationCatalog=await tornGlobalV2('education',key);
+        data.special.reference={merits:meritCatalog.ok?sanitizeDeep(meritCatalog.data):null,education:educationCatalog.ok?sanitizeDeep(educationCatalog.data):null};
         if(settings.includePrivateData){
             const privatePages=Math.max(1,Math.min(500,Number(settings.maxPrivatePages)||200));
             for(let i=0;i<V2_PRIVATE_ENDPOINTS.length;i++){
@@ -280,8 +306,9 @@
         requested++;const ps=await collectPagedV2('personalstats',key,'cat=all',200);if(ps.ok){data.special.personalstats=ps.data;successful++;}else errors['v2:personalstats']={error:ps.error,code:ps.code??null,httpStatus:ps.httpStatus??null};
         requested++;const contacts=await collectContacts(key);data.special.contacts=contacts.data;if(Object.keys(contacts.data).length)successful++;if(Object.keys(contacts.errors).length)errors['v2:list']=contacts.errors;
         requested++;const inv=await collectInventory(key);data.special.inventory=inv.data;if(inv.data.categoryCount)successful++;if(Object.keys(inv.errors).length)errors['v2:inventory']=inv.errors;
-        const profile=data.v2.profile||{};
-        return{schema:'sakalux-torn-account-snapshot-v4',generatedAt:new Date().toISOString(),generatedAtUnix:Date.now(),script:{name:NAME,version:VERSION,mode:'read-only'},privacy:{containsTornApiKey:false,containsGitHubToken:false,containsBrowserCookies:false,containsPassword:false,privateDataIncluded:Boolean(settings.includePrivateData),capturedMessageBodiesRequireExplicitUserAction:true,note:'Official Torn API data plus only message text explicitly captured by the user from a visible Torn message page.'},capabilities:{canonicalApi:'v2',legacyV1Duplicates:false,messageList:true,messageBodyViaOfficialApi:false,messageBodyViaUserCapture:true,logsRequireFullAccess:true,splitSnapshots:Boolean(settings.splitSnapshots)},account:{playerId:profile.player_id??profile.playerID??profile.user_id??profile.id??null,name:profile.name??null,level:profile.level??null,rank:profile.rank??null,status:profile.status??null,faction:profile.faction??null,job:profile.job??null,lastAction:profile.last_action??profile.lastAction??null,age:profile.age??null},coverage:{requested,successful,failed:Object.keys(errors).length,unavailable:Object.keys(unavailable).length,v2Endpoints:V2_ENDPOINTS.slice(),privateEndpoints:settings.includePrivateData?V2_PRIVATE_ENDPOINTS.concat(['log']):[],privateDataEnabled:Boolean(settings.includePrivateData),deduplication:'v2 canonical; no v1 mirror; no newmessages/newevents subsets; attacksfull/revivesfull replace reduced variants'},data,errors,unavailable};
+        data.special.decoded={merits:decodeMerits(data.v2.merits,data.special.reference?.merits),education:decodeEducation(data.v2.education,data.special.reference?.education)};
+        const profileRoot=data.v2.profile||{},profile=profileRoot.profile||profileRoot;
+        return{schema:'sakalux-torn-account-snapshot-v5',generatedAt:new Date().toISOString(),generatedAtUnix:Date.now(),script:{name:NAME,version:VERSION,mode:'read-only'},privacy:{containsTornApiKey:false,containsGitHubToken:false,containsBrowserCookies:false,containsPassword:false,privateDataIncluded:Boolean(settings.includePrivateData),capturedMessageBodiesRequireExplicitUserAction:true,note:'Official Torn API data plus only message text explicitly captured by the user from a visible Torn message page.'},capabilities:{canonicalApi:'v2',legacyV1Duplicates:false,messageList:true,messageBodyViaOfficialApi:false,messageBodyViaUserCapture:true,logsRequireFullAccess:true,splitSnapshots:Boolean(settings.splitSnapshots)},account:{playerId:profile.player_id??profile.playerID??profile.user_id??profile.id??null,name:profile.name??null,level:profile.level??null,rank:profile.rank??null,status:profile.status??null,faction:profile.faction??null,job:profile.job??null,lastAction:profile.last_action??profile.lastAction??null,age:profile.age??null},coverage:{requested,successful,failed:Object.keys(errors).length,unavailable:Object.keys(unavailable).length,v2Endpoints:V2_ENDPOINTS.slice(),privateEndpoints:settings.includePrivateData?V2_PRIVATE_ENDPOINTS.concat(['log']):[],privateDataEnabled:Boolean(settings.includePrivateData),deduplication:'v2 canonical; no v1 mirror; no newmessages/newevents subsets; attacksfull/revivesfull replace reduced variants'},data,errors,unavailable};
     }
 
     function parseRepo(){const m=String(settings.repo||'').trim().match(/^([^/\s]+)\/([^/\s]+)$/);if(!m)throw new Error('GitHub repo must be owner/repository.');return{owner:m[1],repo:m[2]};}
@@ -301,7 +328,7 @@
     function buildSplitSnapshots(snapshot){
         const v2=snapshot.data?.v2||{},sp=snapshot.data?.special||{},pv=snapshot.data?.private||{},assigned=new Set(),captures=settings.includeCapturedMessages?loadJson(STORAGE.captures,[]):[];
         const parts={};
-        parts['summary.json']=pickFields(v2,['profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','discord','display','icons','calendar','competition','faction','gym','honors','job','jobranks','medals','perks','virus','hof'],assigned);
+        parts['summary.json']={...pickFields(v2,['profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','discord','display','icons','calendar','competition','faction','gym','honors','job','jobranks','medals','perks','virus','hof'],assigned),decoded:sp.decoded||null,reference:sp.reference||null};
         parts['finance.json']=pickFields(v2,['money','networth','stocks','properties','property','bazaar','itemmarket','trade','trades'],assigned);
         parts['combat.json']=pickFields(v2,['battlestats','attacksfull','ammo','bounties','equipment','itemmods','weaponexp','workstats','skills','revivesfull'],assigned);
         parts['crimes.json']={...pickFields(v2,['criminalrecord','crimes','missions','organizedcrime','organizedcrimes'],assigned),personalstats:sp.personalstats||null};
@@ -314,7 +341,7 @@
         parts['events.json']={events:pv.events||null};
         parts['logs.json']={logs:pv.log||null};
         const other={};for(const[k,v]of Object.entries(v2))if(!assigned.has(k))other[k]=v;if(Object.keys(other).length)parts['other.json']=other;
-        const manifest={schema:'sakalux-account-split-v2',generatedAt:snapshot.generatedAt,script:snapshot.script,account:snapshot.account,privacy:snapshot.privacy,capabilities:snapshot.capabilities,coverage:snapshot.coverage,errors:snapshot.errors,unavailable:snapshot.unavailable,files:Object.keys(parts)};
+        const manifest={schema:'sakalux-account-split-v3',generatedAt:snapshot.generatedAt,script:snapshot.script,account:snapshot.account,privacy:snapshot.privacy,capabilities:snapshot.capabilities,apiKeyInfo:snapshot.data?.keyInfo||null,decoded:snapshot.data?.special?.decoded||null,coverage:snapshot.coverage,errors:snapshot.errors,unavailable:snapshot.unavailable,files:Object.keys(parts)};
         return{'manifest.json':manifest,...parts};
     }
     async function syncSnapshot(snapshot){
