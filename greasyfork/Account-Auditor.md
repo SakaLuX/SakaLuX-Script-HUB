@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.3.1**
+**v1.3.2**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,7 +18,7 @@
 
 ## Current release note
 
-**v1.3.1** is the current standalone Account Auditor release. It uses Torn API v2 as the canonical source, removes overlapping duplicate selections, follows paginated account history, and stores split snapshot data only once while remaining outside the Script Hub registry.
+**v1.3.2** fixes account-audit accuracy and diagnostics: an explicitly saved Auditor API key now overrides the TornPDA-injected key, ID-sensitive v2 selections retry through the canonical `selections=` route, the single-trade detail endpoint is no longer incorrectly polled without a trade ID, nested v2 profile data populates `manifest.json`, and Torn merit/education catalogs are stored with decoded human-readable IDs (for example merit 15 = Education Length). The split manifest now includes sanitized API-key capability information to make Full-access/log failures diagnosable without storing the key itself.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and **Contents: read/write** permission.
@@ -43,6 +43,17 @@ Account Auditor is **not a complementary Hub module** and must not be added to t
 The audit is a snapshot of data available through the configured API permissions and explicit user captures. Missing permissions or unavailable endpoints can result in incomplete sections rather than fabricated data.
 
 ## Release history
+
+### v1.3.2 — API diagnostics and readable merits
+
+- Saved Auditor API key now takes priority over TornPDA injection so a manually configured Full key is actually used.
+- Added canonical v2 `selections=` fallback for selections that reject the path form with code 6/7.
+- Removed invalid bare `trade` detail polling; `trades` remains collected.
+- Fixed nested v2 profile extraction so manifest account fields are populated.
+- Added Torn merit and education reference catalogs plus decoded readable entries.
+- Added sanitized key capability information to the split manifest for log-access diagnostics.
+- Snapshot schema is now `sakalux-torn-account-snapshot-v5`; split manifest schema is `sakalux-account-split-v3`.
+
 
 ### v1.3.1 — Complete inventory pagination
 
