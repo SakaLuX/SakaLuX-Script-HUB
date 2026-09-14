@@ -1,0 +1,64 @@
+name: Patch Company Intelligence v1.8.4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/patch-company-v1.8.4.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch Company Intelligence
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('SakaLuX-Company-Intelligence-v1.0.0.user.js')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('// @version      1.8.3','// @version      1.8.4',1)
+          s = s.replace("const APP={name:'SakaLuX Company Intelligence',version:'1.8.1'","const APP={name:'SakaLuX Company Intelligence',version:'1.8.4'",1)
+          old = "stars:num(first(p,['rating','stars','star_rating'],0)),"
+          new = "stars:num(first(p,['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(job(),['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(userProfile(),['job.rating','job.stars','job.star_rating','job.company_rating','job.company_stars','job.company.rating','job.company.stars','job.company.star_rating'],0)))),"
+          if old not in s:
+              raise SystemExit('Expected stars line not found')
+          s = s.replace(old,new,1)
+          old_age = "age:num(first(p,['age','days_old','company_age'],0)),"
+          new_age = "age:num(first(p,['age','days_old','company_age','company.age','company.days_old','company.company_age'],first(job(),['company_age','company.age','age'],0))),"
+          if old_age in s:
+              s = s.replace(old_age,new_age,1)
+          p.write_text(s, encoding='utf-8')
+
+          md=Path('greasyfork/Company-Intelligence.md')
+          m=md.read_text(encoding='utf-8')
+          m=m.replace('**v1.8.3**','**v1.8.4**',1)
+          marker='## Current release note\n'
+          if marker in m:
+              st=m.index(marker)+len(marker); en=m.find('\n## ',st)
+              if en==-1: en=len(m)
+              note='\n**v1.8.4** fixes company star detection for employees. Star rating now falls back to Torn API v2 `user -> job` company rating fields when the company profile response is partial or uses a different shape. It also synchronizes the internal app version with the userscript header.\n'
+              m=m[:st]+note+m[en:]
+          hist='## Release history\n'
+          if hist in m and '### v1.8.4 — Company star detection fix' not in m:
+              m=m.replace(hist,hist+'### v1.8.4 — Company star detection fix\n\n- Uses company profile rating when available.\n- Falls back to `user -> job` company star rating for employee mode.\n- Supports multiple current/legacy field names and nested company objects.\n- Fixes internal version display mismatch (1.8.1 shown while header was newer).\n\n',1)
+          md.write_text(m,encoding='utf-8')
+          PY
+      - name: Validate
+        run: |
+          grep -q '@version      1.8.4' SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q "version:'1.8.4'" SakaLuX-Company-Intelligence-v1.0.0.user.js
+          node --check SakaLuX-Company-Intelligence-v1.0.0.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Company-Intelligence-v1.0.0.user.js greasyfork/Company-Intelligence.md
+          git commit -m 'Company Intelligence v1.8.4: fix company star detection'
+          git push
