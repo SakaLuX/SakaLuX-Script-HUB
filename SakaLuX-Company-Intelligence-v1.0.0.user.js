@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.8
+// @version      1.8.9
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -143,7 +143,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.8',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.9',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -152,7 +152,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -320,7 +320,42 @@ function isDirector(){
  const id=num(first(basic(),['id','player_id'],0)),m=meta();
  return (id&&m.directorId&&id===m.directorId)||String(first(job(),['position','position_name','company.position','company.position_name'],'')).toLowerCase().includes('director');
 }
+const PUB_POSITIONS=[
+ {name:'Bartender',primary:{stat:'endurance',value:3000},secondary:{stat:'manual',value:1500}},
+ {name:'Bouncer',primary:{stat:'manual',value:6000},secondary:{stat:'endurance',value:3000}},
+ {name:'Waiter',primary:{stat:'endurance',value:3000},secondary:{stat:'manual',value:1500}},
+ {name:'Cleaner',primary:{stat:'manual',value:1500},secondary:{stat:'endurance',value:750}},
+ {name:'Manager',primary:{stat:'endurance',value:6000},secondary:{stat:'intelligence',value:3000}},
+ {name:'Bookkeeper',primary:{stat:'endurance',value:4500},secondary:{stat:'intelligence',value:2250}},
+ {name:'Trainer',primary:{stat:'intelligence',value:9000},secondary:{stat:'endurance',value:4500}},
+ {name:'Promoter',primary:{stat:'intelligence',value:6000},secondary:{stat:'endurance',value:3000}}
+];
+function statKey(label){const t=String(label||'').toUpperCase();if(/\bMAN\b|MANUAL/.test(t))return'manual';if(/\bINT\b|INTELLIGENCE/.test(t))return'intelligence';if(/\bEND\b|ENDURANCE/.test(t))return'endurance';return''}
+function reqObj(primary,secondary){const r={manual:0,intelligence:0,endurance:0};for(const x of [primary,secondary])if(x?.stat&&x?.value)r[x.stat]=num(x.value);return r}
+function seededCompanyPositions(){const type=String(meta().type||'').toLowerCase();return type.includes('pub')?PUB_POSITIONS:[]}
+function positionReqCache(){const all=get(KEY.positionReqs,{})||{},key=String(detectCompanyId()||meta().name||'unknown');return {all,key,rows:all[key]||{}}}
+function savePositionReqRows(rows){if(!rows?.length)return;const c=positionReqCache();for(const row of rows){if(!row?.name)continue;const old=c.rows[row.name]||{};c.rows[row.name]={...old,...row,primary:row.primary||old.primary,secondary:row.secondary||old.secondary,updated:now()}}c.all[c.key]=c.rows;set(KEY.positionReqs,c.all)}
+function scrapePositionRequirements(){
+ const text=document.body?.innerText||'';if(!/Company Positions/i.test(text))return [];
+ const isPrimary=/Primary Stat/i.test(text)&&!/Secondary Stat/i.test(text),isSecondary=/Secondary Stat/i.test(text)&&!/Primary Stat/i.test(text);
+ const mode=isPrimary?'primary':isSecondary?'secondary':null;if(!mode)return [];
+ const names=['Bartender','Bouncer','Waiter','Cleaner','Manager','Bookkeeper','Trainer','Promoter'];
+ const out=[];
+ for(const name of names){
+  const nodes=[...document.querySelectorAll('tr,li,div')].filter(el=>{const t=(el.innerText||'').trim();return t.startsWith(name)&&/\b(?:MAN|INT|END)\b/i.test(t)&&/[\d,]+/.test(t)});
+  const el=nodes.sort((a,b)=>(a.innerText||'').length-(b.innerText||'').length)[0];if(!el)continue;
+  const t=(el.innerText||'').replace(/\s+/g,' ').trim(),m=t.match(/([\d,]+)\s*(MAN|INT|END)\b/i);if(!m)continue;
+  out.push({name,[mode]:{stat:statKey(m[2]),value:num(m[1].replace(/,/g,''))}})
+ }
+ savePositionReqRows(out);return out
+}
+function cachedOfficialPositions(){
+ scrapePositionRequirements();const c=positionReqCache().rows,seed=seededCompanyPositions(),names=new Set([...Object.keys(c),...seed.map(x=>x.name)]),out=[];
+ for(const name of names){const base=seed.find(x=>x.name===name)||{},row=c[name]||{},primary=row.primary||base.primary,secondary=row.secondary||base.secondary;if(!primary&&!secondary)continue;out.push({name,primary,secondary,req:reqObj(primary,secondary),official:true,source:(row.primary||row.secondary)?'Company Positions':'Pub requirements'})}
+ return out
+}
 function positions(){
+ const official=cachedOfficialPositions();if(official.length)return official.map((p,i)=>({id:i,name:p.name,req:p.req,gains:{manual:0,intelligence:0,endurance:0},primary:p.primary,secondary:p.secondary,official:true,source:p.source}));
  let x=first(profile(),['positions','company_positions','type.positions'],[]);
  if(!Array.isArray(x)&&x&&typeof x==='object')x=Object.entries(x).map(([name,v])=>({name,...v}));
  if(!Array.isArray(x))return[];
@@ -329,7 +364,7 @@ function positions(){
   return {
    id:p.id||p.position_id||i,name:positionLabel(p.name||p.position)||`Position ${i+1}`,
    req:{manual:num(first(r,['manual_labor','manual','man'],first(p,['manual_labor_required'],0))),intelligence:num(first(r,['intelligence','int'],first(p,['intelligence_required'],0))),endurance:num(first(r,['endurance','end'],first(p,['endurance_required'],0)))},
-   gains:{manual:num(first(g,['manual_labor','manual','man'],0)),intelligence:num(first(g,['intelligence','int'],0)),endurance:num(first(g,['endurance','end'],0))}
+   gains:{manual:num(first(g,['manual_labor','manual','man'],0)),intelligence:num(first(g,['intelligence','int'],0)),endurance:num(first(g,['endurance','end'],0))},official:true,source:'API requirements'
   };
  });
 }
@@ -353,8 +388,8 @@ function observedPositionAdvisor(stats){
  }).sort((a,b)=>(Number(b.qualified)-Number(a.qualified))||b.fit-a.fit||b.sample-a.sample);
 }
 function advisor(stats){
- return positions().map(p=>({...p,fit:fit(stats,p),qualified:stats.manual>=p.req.manual&&stats.intelligence>=p.req.intelligence&&stats.endurance>=p.req.endurance}))
- .sort((a,b)=>(Number(b.qualified)-Number(a.qualified))||b.fit-a.fit);
+ return positions().map(p=>{const qualified=stats.manual>=p.req.manual&&stats.intelligence>=p.req.intelligence&&stats.endurance>=p.req.endurance;const primaryValue=num(p.primary?.value),secondaryValue=num(p.secondary?.value),demand=primaryValue+secondaryValue*.5||Object.values(p.req).reduce((a,v)=>a+num(v),0);return {...p,fit:fit(stats,p),qualified,demand}})
+ .sort((a,b)=>(Number(b.qualified)-Number(a.qualified))||(b.qualified?b.demand-a.demand:b.fit-a.fit)||b.fit-a.fit);
 }
 function health(){
  const m=meta(),out=[];let s=50;
@@ -481,9 +516,9 @@ function employeePosition(){
  const w=work(),a=advisor(w),observed=!a.length?observedPositionAdvisor(w):[],rows=a.length?a:observed,best=rows[0],current=currentPosition(),eff=currentEffectiveness(),daysHere=ownDaysInCompany();
  const currentCard=card('Current Position',kv('Position',current?esc(current):'Not returned by Torn API')+kv('Effectiveness',eff==null?'Not exposed yet':fmt(eff))+kv('Days in company',daysHere||'Not returned'));
  if(!rows.length)return `<div class="ci-grid">${currentCard}${card('Best Position Advisor',empty('Position requirements are not exposed by your current API response and no coworker work-stat samples are available yet.')+`<p class="ci-note">Refresh Company Intelligence. The script will use real company employee data when Torn exposes it; it will not invent requirements.</p><p class="ci-note">Current stats: MAN ${fmt(w.manual)} · INT ${fmt(w.intelligence)} · END ${fmt(w.endurance)}</p>`)}</div>`;
- const source=a.length?'Official company position requirements':'Estimated from real coworkers in each position';
+ const source=a.length?(a[0]?.source||'Official company position requirements'):'Estimated from real coworkers in each position';
  const recommendation=best?card('Recommended Position',kv('Best match',esc(best.name))+kv('Fit',best.fit+'%')+kv('Status',badge(best.qualified?'QUALIFIED':'BUILD STATS',best.qualified?'good':'warn'))+`<p class="ci-note">${esc(source)}${best.estimated?` · ${best.sample} employee sample${best.sample===1?'':'s'}`:''}.</p>`):'';
- const table=card('Best Position Advisor',`<div class="ci-tablewrap"><table><thead><tr><th>Position</th><th>Fit</th><th>MAN</th><th>INT</th><th>END</th><th>Status</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.name)}${p.name===current?' · CURRENT':''}</td><td>${p.fit}%</td><td>${fmt(p.req.manual)}</td><td>${fmt(p.req.intelligence)}</td><td>${fmt(p.req.endurance)}</td><td>${badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">${esc(source)}. Estimated rows use median work stats of coworkers already assigned to that position; they are guidance, not Torn's hidden official requirement.</p>`);
+ const table=card('Best Position Advisor',`<div class="ci-tablewrap"><table><thead><tr><th>Position</th><th>Fit</th><th>Primary</th><th>Secondary</th><th>Status</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.name)}${p.name===current?' · CURRENT':''}</td><td>${p.fit}%</td><td>${p.primary?fmt(p.primary.value)+' '+p.primary.stat.slice(0,3).toUpperCase():'—'}</td><td>${p.secondary?fmt(p.secondary.value)+' '+p.secondary.stat.slice(0,3).toUpperCase():'—'}</td><td>${badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">${esc(source)}. Official Company Positions requirements are preferred. Coworker medians are used only when Torn does not expose requirements.</p>`);
  return `<div class="ci-grid">${currentCard}${recommendation}${table}</div>`;
 }
 function employeeTrains(){
@@ -631,5 +666,7 @@ function init(){
   window.dispatchEvent(new CustomEvent('SakaLuX:ModuleReady',{detail:{id:'company-intelligence',name:APP.name,version:APP.version,actions:['OPEN','REFRESH','EMPLOYEE','DIRECTOR']}}));
  }catch{}
 }
+let ciPosTimer=0;new MutationObserver(()=>{clearTimeout(ciPosTimer);ciPosTimer=setTimeout(()=>{try{scrapePositionRequirements()}catch{}},300)}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+setTimeout(()=>{try{scrapePositionRequirements()}catch{}},800);
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
 })();

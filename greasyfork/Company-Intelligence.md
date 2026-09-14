@@ -3,7 +3,7 @@
 > Standalone SakaLuX company-intelligence tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.8.8**
+**v1.8.9**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.8** fixes position objects showing as `[object Object]`, normalizes current and recommended position names across API shapes, and clarifies Star Direction so History samples are clearly separated from improving/declining trend signals.
+**v1.8.9** fixes Best Position Advisor ranking. It now prefers official Company Positions primary/secondary requirements, caches requirements seen in Torn, includes empty positions such as Promoter even when no coworker currently occupies them, and ranks fully-qualified roles by the highest meaningful requirement rather than simply rewarding overqualification in low-level roles. Pub requirements are seeded from the official in-game table and DOM observations override the cache.
 
 ## Recommended
 - Use the API-key button to create a key with the displayed selections.
@@ -31,6 +31,14 @@
 All Rights Reserved
 
 ## Release history
+### v1.8.9 — Official position requirements
+
+- Uses Company Positions primary/secondary requirements before coworker estimates.
+- Includes unoccupied roles such as Promoter.
+- Caches requirements observed in Torn.
+- Fixes recommendation ranking so overqualification for easy roles does not beat a higher qualified role.
+- Shows Primary and Secondary requirement columns directly.
+
 ### v1.8.8 — Position labels and star-direction clarity
 
 - Normalizes nested position objects into readable names.
