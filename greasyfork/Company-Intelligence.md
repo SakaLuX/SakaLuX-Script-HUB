@@ -3,7 +3,7 @@
 > Standalone SakaLuX company-intelligence tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.8.7**
+**v1.8.8**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.7** fixes Employee mode intelligence. It loads the employee feed for ordinary company members when Torn exposes it, caches your own effectiveness, reads your real position and days-in-company from your employee record, removes the misleading Director-only diagnostic, and adds an evidence-based Best Position Advisor fallback using median coworker work stats when official position requirements are unavailable.
+**v1.8.8** fixes position objects showing as `[object Object]`, normalizes current and recommended position names across API shapes, and clarifies Star Direction so History samples are clearly separated from improving/declining trend signals.
 
 ## Recommended
 - Use the API-key button to create a key with the displayed selections.
@@ -31,6 +31,14 @@
 All Rights Reserved
 
 ## Release history
+### v1.8.8 — Position labels and star-direction clarity
+
+- Normalizes nested position objects into readable names.
+- Fixes Current Position and Best Position Advisor labels.
+- Renames Metric samples to History samples.
+- Shows improving, declining and unchanged tracked metrics separately.
+- Explains that sample count is history depth, not a star-up/star-down score.
+
 ### v1.8.7 — Employee intelligence fix
 
 - Loads employee data in Employee mode when the API permits it.
