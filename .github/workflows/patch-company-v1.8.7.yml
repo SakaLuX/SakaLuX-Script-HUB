@@ -1,0 +1,101 @@
+name: Patch Company Intelligence v1.8.7
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/patch-company-v1.8.7.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch Company Intelligence
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('SakaLuX-Company-Intelligence-v1.0.0.user.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('// @version      1.8.6','// @version      1.8.7',1)
+          s=s.replace("version:'1.8.6'","version:'1.8.7'",1)
+
+          # persist own effectiveness discovered from API/DOM
+          s=s.replace("metrics:APP.key+':metrics'", "metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness'", 1)
+
+          # add own employee helpers before currentPosition
+          marker="function currentPosition(){"
+          helper="""function ownEmployee(){\n const id=num(first(basic(),['id','player_id'],0));\n return id?employees().map(normEmp).find(e=>e.id===id)||null:null;\n}\nfunction ownDaysInCompany(){\n const id=num(first(basic(),['id','player_id'],0)),raw=employees().find(e=>num(e?.id||e?.player_id||e?.user_id)===id)||{};\n return num(first(raw,['days_in_company','days','company_days'],0));\n}\nfunction cacheOwnEffectiveness(v){\n if(v!=null&&Number.isFinite(Number(v))&&Number(v)>=0){set(KEY.ownEffectiveness,Number(v));return Number(v)}\n return null;\n}\n"""
+          if helper not in s:
+              s=s.replace(marker,helper+marker,1)
+
+          # replace current position/effectiveness block
+          pat=r"function currentPosition\(\)\{.*?\n\}\nfunction currentEffectiveness\(\)\{.*?\n\}\nfunction isDirector\(\)\{"
+          repl="""function currentPosition(){\n const cached=knownSnapshots().at(-1)?.myPosition,own=ownEmployee()?.position;\n return String(own||first(job(),['position','position_name','company.position','company.position_name','job.position','job.position_name'],first(userProfile(),['job.position','job.position_name','position'],cached||''))||'').trim();\n}\nfunction currentEffectiveness(){\n const own=ownEmployee()?.effectiveness;if(Number.isFinite(own)&&own>=0)return cacheOwnEffectiveness(own);\n const value=first(job(),['effectiveness','company.effectiveness','job.effectiveness'],first(userProfile(),['job.effectiveness','company.effectiveness'],null));\n if(value!=null&&Number.isFinite(Number(value)))return cacheOwnEffectiveness(num(value));\n const nodes=[...document.querySelectorAll('[data-effectiveness],.effectiveness-value,p.effectiveness-value,[class*=effectiveness]')];\n for(const el of nodes){const raw=el?.getAttribute?.('data-effectiveness')||el?.textContent||'';const m=String(raw).match(/(?:effectiveness[^0-9-]*)?(-?\\d+(?:\\.\\d+)?)/i);if(m)return cacheOwnEffectiveness(num(m[1]));}\n const body=(document.body?.innerText||'').match(/Effectiveness\\s*[:+-]?\\s*(\\d+(?:\\.\\d+)?)/i);if(body)return cacheOwnEffectiveness(num(body[1]));\n const cached=num(get(KEY.ownEffectiveness,-1),-1);return cached>=0?cached:null;\n}\nfunction isDirector(){"""
+          s,n=re.subn(pat,repl,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit('currentPosition/currentEffectiveness block not found')
+
+          # observed advisor based on real coworkers when official position requirements are absent
+          marker="function advisor(stats){"
+          helper2="""function observedPositionAdvisor(stats){\n const groups=new Map();\n for(const e of employees().map(normEmp)){\n  if(!e.position||(!e.manual&&!e.intelligence&&!e.endurance))continue;\n  if(!groups.has(e.position))groups.set(e.position,[]);groups.get(e.position).push(e);\n }\n const median=a=>{const x=a.filter(Number.isFinite).sort((a,b)=>a-b);if(!x.length)return 0;const m=Math.floor(x.length/2);return x.length%2?x[m]:(x[m-1]+x[m])/2};\n return [...groups.entries()].map(([name,list])=>{\n  const req={manual:median(list.map(x=>x.manual)),intelligence:median(list.map(x=>x.intelligence)),endurance:median(list.map(x=>x.endurance))};\n  const active=[['manual',req.manual],['intelligence',req.intelligence],['endurance',req.endurance]].filter(x=>x[1]>0);\n  const score=active.length?Math.round(active.reduce((a,[k,r])=>a+clamp(stats[k]/r,0,1.25),0)/active.length*100):0;\n  return {name,req,fit:score,qualified:active.every(([k,r])=>stats[k]>=r),sample:list.length,estimated:true};\n }).sort((a,b)=>(Number(b.qualified)-Number(a.qualified))||b.fit-a.fit||b.sample-a.sample);\n}\n"""
+          if helper2 not in s:s=s.replace(marker,helper2+marker,1)
+
+          # replace employeePosition to include observed recommendation
+          pat=r"function employeePosition\(\)\{.*?\n\}\nfunction employeeTrains\(\)\{"
+          repl="""function employeePosition(){\n const w=work(),a=advisor(w),observed=!a.length?observedPositionAdvisor(w):[],rows=a.length?a:observed,best=rows[0],current=currentPosition(),eff=currentEffectiveness(),daysHere=ownDaysInCompany();\n const currentCard=card('Current Position',kv('Position',current?esc(current):'Not returned by Torn API')+kv('Effectiveness',eff==null?'Not exposed yet':fmt(eff))+kv('Days in company',daysHere||'Not returned'));\n if(!rows.length)return `<div class=\"ci-grid\">${currentCard}${card('Best Position Advisor',empty('Position requirements are not exposed by your current API response and no coworker work-stat samples are available yet.')+`<p class=\"ci-note\">Open Employees once or refresh Company Intelligence. The script will use real company employee data when Torn exposes it; it will not invent requirements.</p><p class=\"ci-note\">Current stats: MAN ${fmt(w.manual)} · INT ${fmt(w.intelligence)} · END ${fmt(w.endurance)}</p>`)}</div>`;\n const source=a.length?'Official company position requirements':'Estimated from real coworkers in each position';\n const recommendation=best?card('Recommended Position',kv('Best match',esc(best.name))+kv('Fit',best.fit+'%')+kv('Status',badge(best.qualified?'QUALIFIED':'BUILD STATS',best.qualified?'good':'warn'))+`<p class=\"ci-note\">${esc(source)}${best.estimated?` · ${best.sample} employee sample${best.sample===1?'':'s'}`:''}.</p>`):'';\n const table=card('Best Position Advisor',`<div class=\"ci-tablewrap\"><table><thead><tr><th>Position</th><th>Fit</th><th>MAN</th><th>INT</th><th>END</th><th>Status</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.name)}${p.name===current?' · CURRENT':''}</td><td>${p.fit}%</td><td>${fmt(p.req.manual)}</td><td>${fmt(p.req.intelligence)}</td><td>${fmt(p.req.endurance)}</td><td>${badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div><p class=\"ci-note\">${esc(source)}. Estimated rows use median work stats of coworkers already assigned to that position; they are guidance, not Torn's hidden official requirement.</p>`);\n return `<div class=\"ci-grid\">${currentCard}${recommendation}${table}</div>`;\n}\nfunction employeeTrains(){"""
+          s,n=re.subn(pat,repl,s,count=1,flags=re.S)
+          if n!=1: raise SystemExit('employeePosition block not found')
+
+          # replace misleading text in progress card
+          s=s.replace("effectiveness==null?'Director data required':fmt(effectiveness)","effectiveness==null?'Not exposed yet':fmt(effectiveness)")
+
+          # diagnostics should report real availability, not director-only blanket text
+          s=s.replace("kv('Employees',employees().length||(isDirector()?'Not loaded':'Director only'))", "kv('Employees',employees().length?employees().length+' loaded':'Not exposed by API')+kv('My effectiveness',currentEffectiveness()==null?'Not exposed yet':fmt(currentEffectiveness()))+kv('Days in company',ownDaysInCompany()||'Not returned')",1)
+
+          # Always attempt company employees for members. Prefer v1 owner-company feed; fallback to v2 public employees.
+          old=""" const companyId=detectCompanyId();\n delete S.data.employees;delete S.data.stock;\n if(companyId){"""
+          new=""" let companyId=detectCompanyId();\n delete S.data.employees;delete S.data.stock;\n try{const ownCompany=await legacyApi('company','','profile,employees');if(ownCompany){if(ownCompany.company)S.data.profile=ownCompany.company;else if(ownCompany.company_id||ownCompany.rating||ownCompany.employees)S.data.profile=ownCompany;if(ownCompany.employees)S.data.employees=ownCompany.employees;else{const numeric=Object.fromEntries(Object.entries(ownCompany).filter(([k,v])=>/^\\d+$/.test(k)&&v&&typeof v==='object'));if(Object.keys(numeric).length)S.data.employees=numeric;}set(KEY.company,S.data.profile||ownCompany);}}catch{}\n companyId=detectCompanyId();\n if(companyId&&!employees().length){try{S.data.employees=await api(`/company/${companyId}/employees`)}catch{}}\n if(companyId){"""
+          if old not in s: raise SystemExit('refresh company block marker not found')
+          s=s.replace(old,new,1)
+
+          # do not delete public employees before director stock loading, and only fetch director employee data as enrichment
+          s=s.replace("const directorEndpoints={employees:`/company/${companyId}/employees`,stock:`/company/${companyId}/stock`};", "const directorEndpoints={stock:`/company/${companyId}/stock`};",1)
+
+          p.write_text(s,encoding='utf-8')
+
+          md=Path('greasyfork/Company-Intelligence.md')
+          if md.exists():
+              m=md.read_text(encoding='utf-8')
+              m=m.replace('**v1.8.6**','**v1.8.7**',1)
+              marker='## Current release note\n'
+              if marker in m:
+                  st=m.index(marker)+len(marker);en=m.find('\n## ',st)
+                  if en<0:en=len(m)
+                  note='\n**v1.8.7** fixes Employee mode intelligence. It now loads the company employee feed for ordinary members when Torn exposes it, caches your own effectiveness, reads your real position and days-in-company from the employee record, removes the misleading Director-only diagnostic, and adds an evidence-based Best Position Advisor fallback using median work stats of coworkers in each observed position when official requirements are unavailable.\n'
+                  m=m[:st]+note+m[en:]
+              hist='## Release history\n'
+              if hist in m and '### v1.8.7 — Employee intelligence fix' not in m:
+                  m=m.replace(hist,hist+'### v1.8.7 — Employee intelligence fix\n\n- Loads company employees for Employee mode when available.\n- Persists own effectiveness across Torn pages.\n- Uses own employee record for exact position and days in company.\n- Replaces misleading Director-only diagnostics.\n- Adds observed-position recommendations when official requirements are unavailable.\n\n',1)
+              md.write_text(m,encoding='utf-8')
+          PY
+      - name: Validate
+        run: |
+          grep -q '@version      1.8.7' SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q "version:'1.8.7'" SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q 'function observedPositionAdvisor' SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q "profile,employees" SakaLuX-Company-Intelligence-v1.0.0.user.js
+          node --check SakaLuX-Company-Intelligence-v1.0.0.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Company-Intelligence-v1.0.0.user.js greasyfork/Company-Intelligence.md
+          git commit -m 'Company Intelligence v1.8.7: fix employee effectiveness and position advisor'
+          git push
