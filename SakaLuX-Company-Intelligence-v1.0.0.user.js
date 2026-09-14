@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.7
+// @version      1.8.8
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -143,7 +143,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.7',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.8',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -242,14 +242,20 @@ function stocks(){
  if(x&&typeof x==='object')return Object.entries(x).map(([name,v])=>({name,...v}));
  return [];
 }
+function positionLabel(v){
+ if(v==null)return '';
+ if(typeof v==='string'||typeof v==='number')return String(v).trim();
+ if(typeof v==='object')return String(first(v,['name','position','title','label','role.name','role'],'')||'').trim();
+ return '';
+}
 function normEmp(e){
  const ws=e.working_stats||e.work_stats||e.stats||{};
  const ef=e.effectiveness||e.efficiency||{};
- const last=first(e,['last_action.timestamp','last_action','last_action_timestamp'],null);
+ const last=first(e,['last_action.timestamp','last_action','last_action_timestamp'],null),posRaw=first(e,['position','position_name','role'],'');
  let lastTs=null;if(typeof last==='number')lastTs=last*(last<1e12?1000:1);else if(typeof last==='string'&&!isNaN(Date.parse(last)))lastTs=Date.parse(last);
  return {
   id:num(e.id||e.player_id||e.user_id),name:first(e,['name','player_name'],'Unknown'),
-  position:first(e,['position','position_name','role'],''),
+  position:positionLabel(posRaw),
   wage:num(first(e,['wage','salary'],0)),
   manual:num(first(ws,['manual_labor','manual','man'],first(e,['manual_labor'],0))),
   intelligence:num(first(ws,['intelligence','int'],first(e,['intelligence'],0))),
@@ -298,7 +304,8 @@ function cacheOwnEffectiveness(v){
 }
 function currentPosition(){
  const cached=knownSnapshots().at(-1)?.myPosition,own=ownEmployee()?.position;
- return String(own||first(job(),['position','position_name','company.position','company.position_name','job.position','job.position_name'],first(userProfile(),['job.position','job.position_name','position'],cached||''))||'').trim();
+ const raw=own||first(job(),['position','position_name','company.position','company.position_name','job.position','job.position_name'],first(userProfile(),['job.position','job.position_name','position'],cached||''));
+ return positionLabel(raw);
 }
 function currentEffectiveness(){
  const own=ownEmployee()?.effectiveness;if(Number.isFinite(own)&&own>=0)return cacheOwnEffectiveness(own);
@@ -320,7 +327,7 @@ function positions(){
  return x.map((p,i)=>{
   const r=p.requirements||p.required_stats||p.stats||{},g=p.stat_gains||p.gains||p.daily_gains||{};
   return {
-   id:p.id||p.position_id||i,name:p.name||p.position||`Position ${i+1}`,
+   id:p.id||p.position_id||i,name:positionLabel(p.name||p.position)||`Position ${i+1}`,
    req:{manual:num(first(r,['manual_labor','manual','man'],first(p,['manual_labor_required'],0))),intelligence:num(first(r,['intelligence','int'],first(p,['intelligence_required'],0))),endurance:num(first(r,['endurance','end'],first(p,['endurance_required'],0)))},
    gains:{manual:num(first(g,['manual_labor','manual','man'],0)),intelligence:num(first(g,['intelligence','int'],0)),endurance:num(first(g,['endurance','end'],0))}
   };
@@ -413,8 +420,8 @@ function starOutlook(){
  const d=new Date(),until=(7-d.getUTCDay())%7||7,next=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()+until));
  if(!health().available)return card('Star Outlook',`<div class="ci-score warn"><b>—</b><span>WAITING FOR PROFILE</span></div><p class="ci-note">A real Company Profile snapshot is required. No star probability is invented from missing data.</p>`);
  let state='BUILDING HISTORY',cls='warn',detail='At least two different metric samples are needed.';
- if(older&&latest){const keys=['weeklyIncome','weeklyCustomers','popularity','efficiency','environment'],changes=keys.map(k=>num(latest.company?.[k])-num(older.company?.[k])),positive=changes.filter(x=>x>0).length,negative=changes.filter(x=>x<0).length,perf=[m.popularity,m.efficiency,m.environment].filter(v=>v>0),avg=perf.length?perf.reduce((a,v)=>a+v,0)/perf.length:0,income=changes[0];if(negative>=3||avg&&avg<55||income<0&&negative>=2){state='STAR LOSS RISK';cls='bad'}else if(positive>=3&&avg>=80&&income>=0){state='LIKELY STAR UP';cls='good'}else{state='STABLE';cls='warn'}detail=`${positive} improving · ${negative} declining · weekly income ${income>=0?'+':''}${money(income)}.`}
- return card('Star Direction',`<div class="ci-score ${cls}"><b>${m.stars}★</b><span>${state}</span></div>${kv('Next rating review',next.toLocaleDateString())}${kv('Metric samples',rows.length)}<p class="ci-note">${esc(detail)} This is an evidence-based direction indicator. Torn compares companies of the same type, so it cannot guarantee the next rating.</p>`);
+ if(older&&latest){const keys=['weeklyIncome','weeklyCustomers','popularity','efficiency','environment'],changes=keys.map(k=>num(latest.company?.[k])-num(older.company?.[k])),positive=changes.filter(x=>x>0).length,negative=changes.filter(x=>x<0).length,perf=[m.popularity,m.efficiency,m.environment].filter(v=>v>0),avg=perf.length?perf.reduce((a,v)=>a+v,0)/perf.length:0,income=changes[0];if(negative>=3||avg&&avg<55||income<0&&negative>=2){state='STAR LOSS RISK';cls='bad'}else if(positive>=3&&avg>=80&&income>=0){state='LIKELY STAR UP';cls='good'}else{state='STABLE';cls='warn'}const unchanged=Math.max(0,keys.length-positive-negative);detail=`${positive} improving · ${negative} declining · ${unchanged} unchanged · weekly income ${income>=0?'+':''}${money(income)}.`}
+ return card('Star Direction',`<div class="ci-score ${cls}"><b>${m.stars}★</b><span>${state}</span></div>${kv('Next rating review',next.toLocaleDateString())}${kv('History samples',rows.length)}<p class="ci-note">${esc(detail)} History samples are saved measurements used for comparison, not a star score. Improving/declining counts refer to the five tracked metrics: weekly income, weekly customers, popularity, efficiency and environment. This indicator does not mean 2 = star up or 0 = star loss.</p>`);
 }
 function knownSnapshots(){const map=new Map();for(const x of arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>a.ts-b.ts))map.set(x.date,x);return [...map.values()]}
 function metricSamples(){const a=arr(KEY.metrics).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>a.ts-b.ts);return a.length?a:knownSnapshots()}
