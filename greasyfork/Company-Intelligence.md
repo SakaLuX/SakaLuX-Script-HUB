@@ -3,7 +3,7 @@
 > Standalone SakaLuX company-intelligence tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.8.4**
+**v1.8.5**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.4** fixes company star detection for employees. Star rating now falls back to Torn API v2 `user -> job` company rating fields when the company profile response is partial or uses a different shape. It also synchronizes the internal app version with the userscript header.
+**v1.8.5** fixes missing company ID in employee mode by always fetching the legacy `user -> job` selection as a compatibility source. Company ID and star rating now fall back to that proven response shape before loading the company profile. Sync Diagnostics also labels employee data as Director only when appropriate.
 
 ## Recommended
 - Use the API-key button to create a key with the displayed selections.
@@ -31,6 +31,13 @@
 All Rights Reserved
 
 ## Release history
+### v1.8.5 — Company ID compatibility fix
+
+- Always fetches legacy `user -> job` as a compatibility fallback.
+- Resolves `company_id` from v2 job, legacy job, user profile, or page URL.
+- Uses legacy job star rating as an additional fallback.
+- Sync Diagnostics now shows `Director only` for employee-list data in employee mode.
+
 ### v1.8.4 — Company star detection fix
 
 - Uses company profile rating when available.
