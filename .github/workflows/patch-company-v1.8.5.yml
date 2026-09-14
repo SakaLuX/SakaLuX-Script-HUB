@@ -1,0 +1,81 @@
+name: Patch Company Intelligence v1.8.5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/patch-company-v1.8.5.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch Company Intelligence
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('SakaLuX-Company-Intelligence-v1.0.0.user.js')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('// @version      1.8.4','// @version      1.8.5',1)
+          s = s.replace("const APP={name:'SakaLuX Company Intelligence',version:'1.8.4'","const APP={name:'SakaLuX Company Intelligence',version:'1.8.5'",1)
+
+          old = "const job=()=>unwrap(S.data.job,'job')||{};\nconst userProfile=()=>unwrap(S.data.userProfile,'profile','user')||{};"
+          new = "const job=()=>unwrap(S.data.job,'job')||{};\nconst legacyJob=()=>unwrap(S.data.legacyJob,'job')||{};\nconst userProfile=()=>unwrap(S.data.userProfile,'profile','user')||{};"
+          if old not in s: raise SystemExit('job helper anchor missing')
+          s = s.replace(old,new,1)
+
+          old = "for(const src of [job(),userProfile(),S.data.job,S.data.userProfile]){const id=num(first(src,paths,0));if(id>0)return id}"
+          new = "for(const src of [job(),legacyJob(),userProfile(),S.data.job,S.data.legacyJob,S.data.userProfile]){const id=num(first(src,paths,0));if(id>0)return id}"
+          if old not in s: raise SystemExit('detectCompanyId source anchor missing')
+          s = s.replace(old,new,1)
+
+          old = "stars:num(first(p,['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(job(),['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(userProfile(),['job.rating','job.stars','job.star_rating','job.company_rating','job.company_stars','job.company.rating','job.company.stars','job.company.star_rating'],0)))),"
+          new = "stars:num(first(p,['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(job(),['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(legacyJob(),['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(userProfile(),['job.rating','job.stars','job.star_rating','job.company_rating','job.company_stars','job.company.rating','job.company.stars','job.company.star_rating'],0))))),"
+          if old not in s: raise SystemExit('stars anchor missing')
+          s = s.replace(old,new,1)
+
+          anchor = "try{S.data.userProfile=await api('/user/profile')}catch{try{S.data.userProfile=await legacyApi('user','','profile,job,workstats')}catch{}}"
+          repl = anchor + "\n try{S.data.legacyJob=await legacyApi('user','','job')}catch{}"
+          if anchor not in s: raise SystemExit('refresh profile anchor missing')
+          s = s.replace(anchor,repl,1)
+
+          old_diag = "kv('Employees',employees().length||'Not loaded')"
+          new_diag = "kv('Employees',employees().length||(isDirector()?'Not loaded':'Director only'))"
+          if old_diag in s: s = s.replace(old_diag,new_diag,1)
+
+          p.write_text(s,encoding='utf-8')
+
+          md=Path('greasyfork/Company-Intelligence.md')
+          m=md.read_text(encoding='utf-8')
+          m=m.replace('**v1.8.4**','**v1.8.5**',1)
+          marker='## Current release note\n'
+          if marker in m:
+              st=m.index(marker)+len(marker); en=m.find('\n## ',st)
+              if en==-1: en=len(m)
+              note='\n**v1.8.5** fixes missing company ID in employee mode by always fetching the legacy `user -> job` selection as a compatibility source. Company ID and star rating now fall back to that proven response shape before loading the company profile. Sync Diagnostics also labels employee data as Director only when appropriate.\n'
+              m=m[:st]+note+m[en:]
+          hist='## Release history\n'
+          if hist in m and '### v1.8.5 — Company ID compatibility fix' not in m:
+              m=m.replace(hist,hist+'### v1.8.5 — Company ID compatibility fix\n\n- Always fetches legacy `user -> job` as a compatibility fallback.\n- Resolves `company_id` from v2 job, legacy job, user profile, or page URL.\n- Uses legacy job star rating as an additional fallback.\n- Sync Diagnostics now shows `Director only` for employee-list data in employee mode.\n\n',1)
+          md.write_text(m,encoding='utf-8')
+          PY
+      - name: Validate
+        run: |
+          grep -q '@version      1.8.5' SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q "version:'1.8.5'" SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q "legacyJob" SakaLuX-Company-Intelligence-v1.0.0.user.js
+          node --check SakaLuX-Company-Intelligence-v1.0.0.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Company-Intelligence-v1.0.0.user.js greasyfork/Company-Intelligence.md
+          git commit -m 'Company Intelligence v1.8.5: fix company ID compatibility'
+          git push
