@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.6
+// @version      1.8.7
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -143,7 +143,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.6',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.7',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -152,7 +152,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -284,17 +284,30 @@ function me(){
  const id=num(first(basic(),['id','player_id'],0));
  return employees().map(normEmp).find(e=>e.id===id)||null;
 }
+function ownEmployee(){
+ const id=num(first(basic(),['id','player_id'],0));
+ return id?employees().map(normEmp).find(e=>e.id===id)||null:null;
+}
+function ownDaysInCompany(){
+ const id=num(first(basic(),['id','player_id'],0)),raw=employees().find(e=>num(e?.id||e?.player_id||e?.user_id)===id)||{};
+ return num(first(raw,['days_in_company','days','company_days'],0));
+}
+function cacheOwnEffectiveness(v){
+ if(v!=null&&Number.isFinite(Number(v))&&Number(v)>=0){set(KEY.ownEffectiveness,Number(v));return Number(v)}
+ return null;
+}
 function currentPosition(){
- const cached=knownSnapshots().at(-1)?.myPosition;
- return String(first(job(),['position','position_name','company.position','company.position_name','job.position','job.position_name'],first(userProfile(),['job.position','job.position_name','position'],me()?.position||cached||''))||'').trim();
+ const cached=knownSnapshots().at(-1)?.myPosition,own=ownEmployee()?.position;
+ return String(own||first(job(),['position','position_name','company.position','company.position_name','job.position','job.position_name'],first(userProfile(),['job.position','job.position_name','position'],cached||''))||'').trim();
 }
 function currentEffectiveness(){
- const own=me()?.effectiveness;if(Number.isFinite(own)&&own>0)return own;
+ const own=ownEmployee()?.effectiveness;if(Number.isFinite(own)&&own>=0)return cacheOwnEffectiveness(own);
  const value=first(job(),['effectiveness','company.effectiveness','job.effectiveness'],first(userProfile(),['job.effectiveness','company.effectiveness'],null));
- if(value!=null&&Number.isFinite(Number(value)))return num(value);
- const el=document.querySelector('[data-effectiveness],.effectiveness-value,p.effectiveness-value');
- const dom=el?.getAttribute?.('data-effectiveness')||el?.textContent||'';
- const match=String(dom).match(/-?\d+(?:\.\d+)?/);return match?num(match[0]):null;
+ if(value!=null&&Number.isFinite(Number(value)))return cacheOwnEffectiveness(num(value));
+ const nodes=[...document.querySelectorAll('[data-effectiveness],.effectiveness-value,p.effectiveness-value,[class*=effectiveness]')];
+ for(const el of nodes){const raw=el?.getAttribute?.('data-effectiveness')||el?.textContent||'';const m=String(raw).match(/(?:effectiveness[^0-9-]*)?(-?\d+(?:\.\d+)?)/i);if(m)return cacheOwnEffectiveness(num(m[1]));}
+ const body=(document.body?.innerText||'').match(/Effectiveness\s*[:+-]?\s*(\d+(?:\.\d+)?)/i);if(body)return cacheOwnEffectiveness(num(body[1]));
+ const cached=num(get(KEY.ownEffectiveness,-1),-1);return cached>=0?cached:null;
 }
 function isDirector(){
  const id=num(first(basic(),['id','player_id'],0)),m=meta();
@@ -317,6 +330,20 @@ function fit(stats,p){
  const rs=[['manual',p.req.manual],['intelligence',p.req.intelligence],['endurance',p.req.endurance]].filter(x=>x[1]>0);
  if(!rs.length)return 0;
  return Math.round(rs.reduce((a,[k,r])=>a+clamp(stats[k]/r,0,1.25),0)/rs.length*100);
+}
+function observedPositionAdvisor(stats){
+ const groups=new Map();
+ for(const e of employees().map(normEmp)){
+  if(!e.position||(!e.manual&&!e.intelligence&&!e.endurance))continue;
+  if(!groups.has(e.position))groups.set(e.position,[]);groups.get(e.position).push(e);
+ }
+ const median=a=>{const x=a.filter(Number.isFinite).sort((a,b)=>a-b);if(!x.length)return 0;const m=Math.floor(x.length/2);return x.length%2?x[m]:(x[m-1]+x[m])/2};
+ return [...groups.entries()].map(([name,list])=>{
+  const req={manual:median(list.map(x=>x.manual)),intelligence:median(list.map(x=>x.intelligence)),endurance:median(list.map(x=>x.endurance))};
+  const active=[['manual',req.manual],['intelligence',req.intelligence],['endurance',req.endurance]].filter(x=>x[1]>0);
+  const score=active.length?Math.round(active.reduce((a,[k,r])=>a+clamp(stats[k]/r,0,1.25),0)/active.length*100):0;
+  return {name,req,fit:score,qualified:active.every(([k,r])=>stats[k]>=r),sample:list.length,estimated:true};
+ }).sort((a,b)=>(Number(b.qualified)-Number(a.qualified))||b.fit-a.fit||b.sample-a.sample);
 }
 function advisor(stats){
  return positions().map(p=>({...p,fit:fit(stats,p),qualified:stats.manual>=p.req.manual&&stats.intelligence>=p.req.intelligence&&stats.endurance>=p.req.endurance}))
@@ -356,8 +383,11 @@ async function refresh(){
  let selfProfile=null;
  try{selfProfile=await legacyApi('company','','profile')}catch{}
  if(selfProfile){S.data.profile=selfProfile;set(KEY.company,selfProfile)}
- const companyId=detectCompanyId();
+ let companyId=detectCompanyId();
  delete S.data.employees;delete S.data.stock;
+ try{const ownCompany=await legacyApi('company','','profile,employees');if(ownCompany){if(ownCompany.company)S.data.profile=ownCompany.company;else if(ownCompany.company_id||ownCompany.rating||ownCompany.employees)S.data.profile=ownCompany;if(ownCompany.employees)S.data.employees=ownCompany.employees;else{const numeric=Object.fromEntries(Object.entries(ownCompany).filter(([k,v])=>/^\d+$/.test(k)&&v&&typeof v==='object'));if(Object.keys(numeric).length)S.data.employees=numeric;}set(KEY.company,S.data.profile||ownCompany);}}catch{}
+ companyId=detectCompanyId();
+ if(companyId&&!employees().length){try{S.data.employees=await api(`/company/${companyId}/employees`)}catch{}}
  if(companyId){
   let freshProfile=null;
   try{freshProfile=await api(`/company/${companyId}/profile`)}catch(e){
@@ -366,7 +396,7 @@ async function refresh(){
   if(freshProfile){S.data.profile=freshProfile;set(KEY.company,freshProfile)}
   if(isDirector()&&get(KEY.mode,null)==null)S.mode='director';
   if(S.mode==='director'&&isDirector()){
-   const directorEndpoints={employees:`/company/${companyId}/employees`,stock:`/company/${companyId}/stock`};
+   const directorEndpoints={stock:`/company/${companyId}/stock`};
    const directorResults=await Promise.allSettled(Object.entries(directorEndpoints).map(async([k,p])=>[k,await api(p)]));
    for(const x of directorResults){if(x.status==='fulfilled')S.data[x.value[0]]=x.value[1];else S.errors.push(x.reason?.code===7?'Director access required for private company data.':x.reason?.message||String(x.reason))}
   }
@@ -420,7 +450,7 @@ function benchmarks(){
  return `<div class="ci-actions"><button class="ci-btn primary" data-act="new-benchmark">+ ADD COMPANY</button></div><div class="ci-grid">${card('Next-star Benchmark',threshold?kv('Target rating',next+'★')+kv('Lowest saved income',money(threshold))+kv('Your weekly income',money(m.weeklyIncome))+kv('Gap',money(m.weeklyIncome-threshold)):empty(`Add at least one ${next}★ company of the same type.`))}${card('Confidence',kv('Comparable companies',candidates.length)+kv('Company type',esc(m.type))+`<p class="ci-note">Use several companies near the lower or middle range. One competitor is not enough for a reliable promotion forecast.</p>`)}</div>${card('Saved Competitors',rows.length?`<div class="ci-tablewrap"><table><thead><tr><th>Company</th><th>Type</th><th>Stars</th><th>Weekly income</th><th>Customers</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${fmt(x.stars)}★</td><td>${money(x.weeklyIncome)}</td><td>${fmt(x.customers)}</td></tr>`).join('')}</tbody></table></div>`:empty('No competitor benchmarks saved.'))}`;
 }
 function advice(){
- const m=meta(),e=employees().map(normEmp),tips=[];if(!health().available)tips.push(['Sync company profile','Company growth and risk need a valid profile.','bad']);if(m.efficiency&&m.efficiency<90)tips.push(['Improve efficiency',`${m.efficiency}% is below the 90% target.`,'warn']);if(m.environment&&m.environment<90)tips.push(['Improve environment',`${m.environment}% can reduce performance.`,'warn']);if(m.popularity&&m.popularity<70)tips.push(['Grow popularity','Review pricing, advertising and customer flow.','warn']);const inactive=e.filter(x=>x.lastTs&&days(now()-x.lastTs)>=3);if(inactive.length)tips.push(['Inactive employees',`${inactive.length} employee(s) inactive for 3+ days.`,'bad']);if(e.length&&meta().maxEmployees&&e.length<meta().maxEmployees)tips.push(['Open employee slots',`${meta().maxEmployees-e.length} position(s) available.`,'warn']);if(!tips.length)tips.push(['No urgent flags','Current exposed metrics are healthy.','good']);return `<div class="ci-grid">${card('Actionable Advice',tips.map(([t,d,c])=>`<div class="ci-advice ${c}"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join(''))}${card('Sync Diagnostics',kv('API source',esc(apiSource()))+kv('Company ID',detectCompanyId()||'Missing')+kv('Company profile',health().available?'Loaded':'Missing')+kv('Employees',employees().length||(isDirector()?'Not loaded':'Director only'))+kv('Snapshots',knownSnapshots().length))}</div>`;
+ const m=meta(),e=employees().map(normEmp),tips=[];if(!health().available)tips.push(['Sync company profile','Company growth and risk need a valid profile.','bad']);if(m.efficiency&&m.efficiency<90)tips.push(['Improve efficiency',`${m.efficiency}% is below the 90% target.`,'warn']);if(m.environment&&m.environment<90)tips.push(['Improve environment',`${m.environment}% can reduce performance.`,'warn']);if(m.popularity&&m.popularity<70)tips.push(['Grow popularity','Review pricing, advertising and customer flow.','warn']);const inactive=e.filter(x=>x.lastTs&&days(now()-x.lastTs)>=3);if(inactive.length)tips.push(['Inactive employees',`${inactive.length} employee(s) inactive for 3+ days.`,'bad']);if(e.length&&meta().maxEmployees&&e.length<meta().maxEmployees)tips.push(['Open employee slots',`${meta().maxEmployees-e.length} position(s) available.`,'warn']);if(!tips.length)tips.push(['No urgent flags','Current exposed metrics are healthy.','good']);return `<div class="ci-grid">${card('Actionable Advice',tips.map(([t,d,c])=>`<div class="ci-advice ${c}"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join(''))}${card('Sync Diagnostics',kv('API source',esc(apiSource()))+kv('Company ID',detectCompanyId()||'Missing')+kv('Company profile',health().available?'Loaded':'Missing')+kv('Employees',employees().length?employees().length+' loaded':'Not exposed by API')+kv('My effectiveness',currentEffectiveness()==null?'Not exposed yet':fmt(currentEffectiveness()))+kv('Days in company',ownDaysInCompany()||'Not returned')+kv('Snapshots',knownSnapshots().length))}</div>`;
 }
 function timeline(){const events=[];for(const x of knownSnapshots())events.push({ts:x.ts,title:`Company snapshot · ${x.company.name}`,detail:`${x.company.stars}★ · ${money(x.company.weeklyIncome)}`});for(const x of arr(KEY.trains))events.push({ts:x.ts,title:`Train · ${x.employee||'Unassigned'}`,detail:`${x.primary||'Unknown'} · ${money(x.price)}`});for(const x of arr(KEY.contracts))events.push({ts:x.ts,title:`Contract · ${x.employee}`,detail:`${x.totalTrains} trains · ${money(num(x.totalTrains)*num(x.pricePerTrain))}`});events.sort((a,b)=>b.ts-a.ts);return `<div class="ci-actions"><button class="ci-btn" data-act="export-report">EXPORT REPORT CSV</button></div>${card('Company Timeline',events.length?events.slice(0,100).map(x=>`<div class="ci-timeline"><time>${new Date(x.ts).toLocaleString()}</time><b>${esc(x.title)}</b><span>${esc(x.detail)}</span></div>`).join(''):empty('No company events saved yet.'))}`}
 
@@ -428,7 +458,7 @@ function employeeOverview(){
  const m=meta(),w=work(),u=me(),h=health(),position=currentPosition(),effectiveness=currentEffectiveness(),[rl,rc]=h.available?risk(h.score):['UNAVAILABLE','warn'];
  return `<div class="ci-grid">
  ${card('Company',kv('Name',esc(m.name))+kv('Type',h.available?esc(m.type):'—')+kv('Stars',h.available?m.stars+'★':'—')+kv('Age',h.available?fmt(m.age)+' days':'—')+kv('Position',position?esc(position):'Not returned by Torn API'))}
- ${card('My Work Stats',kv('Manual Labor',fmt(w.manual))+kv('Intelligence',fmt(w.intelligence))+kv('Endurance',fmt(w.endurance))+kv('Total',fmt(w.manual+w.intelligence+w.endurance))+kv('Effectiveness',effectiveness==null?'Director data required':fmt(effectiveness)))}
+ ${card('My Work Stats',kv('Manual Labor',fmt(w.manual))+kv('Intelligence',fmt(w.intelligence))+kv('Endurance',fmt(w.endurance))+kv('Total',fmt(w.manual+w.intelligence+w.endurance))+kv('Effectiveness',effectiveness==null?'Not exposed yet':fmt(effectiveness)))}
  ${card('Company Risk',h.available?`<div class="ci-score ${rc}"><b>${h.score}/100</b><span>${rl} RISK</span></div>${h.breakdown.slice(0,6).map(x=>`<div class="ci-line"><span>${esc(x.label)} <small>${esc(x.reason)}</small></span><b class="${x.delta>=0?'pos':'neg'}">${x.delta>=0?'+':''}${x.delta}</b></div>`).join('')}`:`<div class="ci-score warn"><b>—</b><span>UNAVAILABLE</span></div><p class="ci-note">Company Profile data is missing. Risk is not calculated from zero or incomplete values.</p>`)}
  ${starOutlook()}
  </div>`;
@@ -438,12 +468,16 @@ function employeeProgress(){
  const delta=k=>previous&&latest?num(latest.workstats?.[k])-num(previous.workstats?.[k]):null;
  const row=(label,value)=>kv(label,value==null?'Waiting for history':`${value>0?'+':''}${fmt(value)}`);
  const weeklyGain=['manual','intelligence','endurance'].reduce((a,k)=>a+Math.max(0,num(delta(k))),0),covered=previous&&latest?Math.max(1,days(num(latest.ts)-num(previous.ts))):0,perDay=covered?weeklyGain/covered:0;
- return `<div class="ci-grid">${card('Current Employment',kv('Position',position?esc(position):'Not returned by Torn API')+kv('Effectiveness',effectiveness==null?'Director data required':fmt(effectiveness))+kv('Tracked samples',samples.length))}${card('Work Stats Progress',row('Manual Labor',delta('manual'))+row('Intelligence',delta('intelligence'))+row('Endurance',delta('endurance'))+kv('Observed daily pace',covered?fmt(Math.round(perDay)):'Waiting for history'))}${card('Train Compliance',agreement?kv('Promised / week',fmt(agreement.perWeek))+kv('Received last 7 days',`${received7} / ${fmt(agreement.perWeek)}`)+kv('Status',received7>=num(agreement.perWeek)?badge('ON TRACK','good'):badge(`${Math.max(0,num(agreement.perWeek)-received7)} DUE`,'warn')):empty('Add a train agreement from Trains to monitor compliance.'))}${card('Projection',covered&&perDay>0?kv('Next 30 days','~+'+fmt(Math.round(perDay*30))+' total work stats')+kv('Next 90 days','~+'+fmt(Math.round(perDay*90))+' total work stats')+`<p class="ci-note">Projection uses your observed saved history and is not a guarantee.</p>`:empty('Refresh after your stats change to create a usable projection.'))}</div>`;
+ return `<div class="ci-grid">${card('Current Employment',kv('Position',position?esc(position):'Not returned by Torn API')+kv('Effectiveness',effectiveness==null?'Not exposed yet':fmt(effectiveness))+kv('Tracked samples',samples.length))}${card('Work Stats Progress',row('Manual Labor',delta('manual'))+row('Intelligence',delta('intelligence'))+row('Endurance',delta('endurance'))+kv('Observed daily pace',covered?fmt(Math.round(perDay)):'Waiting for history'))}${card('Train Compliance',agreement?kv('Promised / week',fmt(agreement.perWeek))+kv('Received last 7 days',`${received7} / ${fmt(agreement.perWeek)}`)+kv('Status',received7>=num(agreement.perWeek)?badge('ON TRACK','good'):badge(`${Math.max(0,num(agreement.perWeek)-received7)} DUE`,'warn')):empty('Add a train agreement from Trains to monitor compliance.'))}${card('Projection',covered&&perDay>0?kv('Next 30 days','~+'+fmt(Math.round(perDay*30))+' total work stats')+kv('Next 90 days','~+'+fmt(Math.round(perDay*90))+' total work stats')+`<p class="ci-note">Projection uses your observed saved history and is not a guarantee.</p>`:empty('Refresh after your stats change to create a usable projection.'))}</div>`;
 }
 function employeePosition(){
- const w=work(),a=advisor(w);
- if(!a.length)return `<div class="ci-grid">${card('Current Position',kv('Position',currentPosition()?esc(currentPosition()):'Not returned by Torn API')+kv('Effectiveness',currentEffectiveness()==null?'Director data required':fmt(currentEffectiveness())))}${card('Best Position Advisor',empty('The current Company Profile did not expose position requirements. No backend request is made from this tab and the script will not invent requirements.')+`<p class="ci-note">Current stats: MAN ${fmt(w.manual)} · INT ${fmt(w.intelligence)} · END ${fmt(w.endurance)}</p>`)}</div>`;
- return card('Best Position Advisor',`<div class="ci-tablewrap"><table><thead><tr><th>Position</th><th>Fit</th><th>MAN</th><th>INT</th><th>END</th><th>Status</th></tr></thead><tbody>${a.map(p=>`<tr><td>${esc(p.name)}</td><td>${p.fit}%</td><td>${fmt(p.req.manual)}</td><td>${fmt(p.req.intelligence)}</td><td>${fmt(p.req.endurance)}</td><td>${badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div>`);
+ const w=work(),a=advisor(w),observed=!a.length?observedPositionAdvisor(w):[],rows=a.length?a:observed,best=rows[0],current=currentPosition(),eff=currentEffectiveness(),daysHere=ownDaysInCompany();
+ const currentCard=card('Current Position',kv('Position',current?esc(current):'Not returned by Torn API')+kv('Effectiveness',eff==null?'Not exposed yet':fmt(eff))+kv('Days in company',daysHere||'Not returned'));
+ if(!rows.length)return `<div class="ci-grid">${currentCard}${card('Best Position Advisor',empty('Position requirements are not exposed by your current API response and no coworker work-stat samples are available yet.')+`<p class="ci-note">Refresh Company Intelligence. The script will use real company employee data when Torn exposes it; it will not invent requirements.</p><p class="ci-note">Current stats: MAN ${fmt(w.manual)} · INT ${fmt(w.intelligence)} · END ${fmt(w.endurance)}</p>`)}</div>`;
+ const source=a.length?'Official company position requirements':'Estimated from real coworkers in each position';
+ const recommendation=best?card('Recommended Position',kv('Best match',esc(best.name))+kv('Fit',best.fit+'%')+kv('Status',badge(best.qualified?'QUALIFIED':'BUILD STATS',best.qualified?'good':'warn'))+`<p class="ci-note">${esc(source)}${best.estimated?` · ${best.sample} employee sample${best.sample===1?'':'s'}`:''}.</p>`):'';
+ const table=card('Best Position Advisor',`<div class="ci-tablewrap"><table><thead><tr><th>Position</th><th>Fit</th><th>MAN</th><th>INT</th><th>END</th><th>Status</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.name)}${p.name===current?' · CURRENT':''}</td><td>${p.fit}%</td><td>${fmt(p.req.manual)}</td><td>${fmt(p.req.intelligence)}</td><td>${fmt(p.req.endurance)}</td><td>${badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">${esc(source)}. Estimated rows use median work stats of coworkers already assigned to that position; they are guidance, not Torn's hidden official requirement.</p>`);
+ return `<div class="ci-grid">${currentCard}${recommendation}${table}</div>`;
 }
 function employeeTrains(){
  const ag=arr(KEY.agreements).filter(x=>x.active!==false).slice(-1)[0],logs=arr(KEY.trains).slice().sort((a,b)=>b.ts-a.ts),got=logs.filter(x=>now()-x.ts<7*86400000).length,weekly=ag?num(ag.perWeek)*75:0;

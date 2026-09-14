@@ -3,7 +3,7 @@
 > Standalone SakaLuX company-intelligence tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.8.6**
+**v1.8.7**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.6** fixes employee-mode company discovery by loading the API key owner company profile directly through API v1 without requiring a company ID first. This restores the actual company ID, star rating and age, then lets the script continue with current company API calls.
+**v1.8.7** fixes Employee mode intelligence. It loads the employee feed for ordinary company members when Torn exposes it, caches your own effectiveness, reads your real position and days-in-company from your employee record, removes the misleading Director-only diagnostic, and adds an evidence-based Best Position Advisor fallback using median coworker work stats when official position requirements are unavailable.
 
 ## Recommended
 - Use the API-key button to create a key with the displayed selections.
@@ -31,6 +31,14 @@
 All Rights Reserved
 
 ## Release history
+### v1.8.7 — Employee intelligence fix
+
+- Loads employee data in Employee mode when the API permits it.
+- Persists own effectiveness across Torn pages.
+- Uses own employee record for exact position and days in company.
+- Replaces misleading Director-only diagnostics.
+- Adds observed-position recommendations when official requirements are unavailable.
+
 ### v1.8.6 — Self-company discovery fix
 
 - Loads the API key owner company profile without requiring a company ID first.
