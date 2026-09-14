@@ -112,24 +112,6 @@
         {"id":"create-key","label":"API KEY","icon":"🔑","method":"createRequiredTornKey"},
         {"id":"event","label":"ELIMS","icon":"🏆","method":"goToEliminations","fallbackUrl":"https://www.torn.com/page.php?sid=elimination"}
       ]
-    },
-    {
-      "id": "chat-intelligence",
-      "type": "addon",
-      "active": true,
-      "name": "Chat Intelligence",
-      "icon": "💬",
-      "category": "Chat",
-      "version": "1.2.2",
-      "description": "Professional native-style Torn chat controls with segmented composer actions, stable search that survives keyboard/scroll events, direct export, true maximize, favorites, local mute, aliases, notifications and @mention autocomplete.",
-      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js",
-      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js",
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js",
-      "apiGlobal": "SakaLuXChatIntelligence",
-      "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"}
-      ]
     }
   ]
 }
