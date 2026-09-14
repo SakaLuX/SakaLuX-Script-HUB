@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.4
+// @version      1.8.5
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -143,7 +143,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.4',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.5',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -213,6 +213,7 @@ const work=()=>{
  return {manual:num(first(w,['manual_labor','manual','man'],0)),intelligence:num(first(w,['intelligence','int'],0)),endurance:num(first(w,['endurance','end'],0))};
 };
 const job=()=>unwrap(S.data.job,'job')||{};
+const legacyJob=()=>unwrap(S.data.legacyJob,'job')||{};
 const userProfile=()=>unwrap(S.data.userProfile,'profile','user')||{};
 const jobCompanyName=()=>first(job(),['company_name','company.name','job.company_name','job.company.name'],first(userProfile(),['job.company_name','job.company.name'],'Unknown company'));
 function companyIdFromPage(){
@@ -225,7 +226,7 @@ function companyIdFromPage(){
 }
 function detectCompanyId(){
  const paths=['company_id','companyId','company.id','company.company_id','company.companyId','job.company_id','job.companyId','job.company.id','employment.company_id','employment.company.id'];
- for(const src of [job(),userProfile(),S.data.job,S.data.userProfile]){const id=num(first(src,paths,0));if(id>0)return id}
+ for(const src of [job(),legacyJob(),userProfile(),S.data.job,S.data.legacyJob,S.data.userProfile]){const id=num(first(src,paths,0));if(id>0)return id}
  return companyIdFromPage();
 }
 const profile=()=>unwrap(S.data.profile,'company','profile')||{};
@@ -265,7 +266,7 @@ function meta(){
   id:num(first(p,['id','company_id'],detectCompanyId())),
   name:first(p,['name','company_name'],first(job(),['company_name','company.name','job.company_name','job.company.name'],first(userProfile(),['job.company_name','job.company.name'],'Unknown company'))),
   type:first(p,['type.name','type','company_type','type_name'],first(job(),['company_type','company.type','type'],first(userProfile(),['job.company_type','job.company.type'],'Unknown'))),
-  stars:num(first(p,['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(job(),['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(userProfile(),['job.rating','job.stars','job.star_rating','job.company_rating','job.company_stars','job.company.rating','job.company.stars','job.company.star_rating'],0)))),
+  stars:num(first(p,['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(job(),['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(legacyJob(),['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(userProfile(),['job.rating','job.stars','job.star_rating','job.company_rating','job.company_stars','job.company.rating','job.company.stars','job.company.star_rating'],0))))),
   age:num(first(p,['age','days_old','company_age','company.age','company.days_old','company.company_age'],first(job(),['company_age','company.age','age'],0))),
   popularity:num(first(p,['popularity','performance.popularity'],0)),
   efficiency:num(first(p,['efficiency','performance.efficiency'],0)),
@@ -350,6 +351,7 @@ async function refresh(){
  const userResults=await Promise.allSettled(Object.entries(userEndpoints).map(async([k,[p,selection]])=>{try{return[k,await api(p)]}catch(v2Error){try{return[k,await legacyApi('user','',selection)]}catch{throw v2Error}}}));
  for(const x of userResults)x.status==='fulfilled'?S.data[x.value[0]]=x.value[1]:S.errors.push(x.reason?.message||String(x.reason));
  try{S.data.userProfile=await api('/user/profile')}catch{try{S.data.userProfile=await legacyApi('user','','profile,job,workstats')}catch{}}
+ try{S.data.legacyJob=await legacyApi('user','','job')}catch{}
  if(!detectCompanyId()||jobCompanyName()==='Unknown company')try{S.data.job=await legacyApi('user','','job')}catch{}
  const companyId=detectCompanyId();
  delete S.data.employees;delete S.data.stock;
@@ -415,7 +417,7 @@ function benchmarks(){
  return `<div class="ci-actions"><button class="ci-btn primary" data-act="new-benchmark">+ ADD COMPANY</button></div><div class="ci-grid">${card('Next-star Benchmark',threshold?kv('Target rating',next+'★')+kv('Lowest saved income',money(threshold))+kv('Your weekly income',money(m.weeklyIncome))+kv('Gap',money(m.weeklyIncome-threshold)):empty(`Add at least one ${next}★ company of the same type.`))}${card('Confidence',kv('Comparable companies',candidates.length)+kv('Company type',esc(m.type))+`<p class="ci-note">Use several companies near the lower or middle range. One competitor is not enough for a reliable promotion forecast.</p>`)}</div>${card('Saved Competitors',rows.length?`<div class="ci-tablewrap"><table><thead><tr><th>Company</th><th>Type</th><th>Stars</th><th>Weekly income</th><th>Customers</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.type)}</td><td>${fmt(x.stars)}★</td><td>${money(x.weeklyIncome)}</td><td>${fmt(x.customers)}</td></tr>`).join('')}</tbody></table></div>`:empty('No competitor benchmarks saved.'))}`;
 }
 function advice(){
- const m=meta(),e=employees().map(normEmp),tips=[];if(!health().available)tips.push(['Sync company profile','Company growth and risk need a valid profile.','bad']);if(m.efficiency&&m.efficiency<90)tips.push(['Improve efficiency',`${m.efficiency}% is below the 90% target.`,'warn']);if(m.environment&&m.environment<90)tips.push(['Improve environment',`${m.environment}% can reduce performance.`,'warn']);if(m.popularity&&m.popularity<70)tips.push(['Grow popularity','Review pricing, advertising and customer flow.','warn']);const inactive=e.filter(x=>x.lastTs&&days(now()-x.lastTs)>=3);if(inactive.length)tips.push(['Inactive employees',`${inactive.length} employee(s) inactive for 3+ days.`,'bad']);if(e.length&&meta().maxEmployees&&e.length<meta().maxEmployees)tips.push(['Open employee slots',`${meta().maxEmployees-e.length} position(s) available.`,'warn']);if(!tips.length)tips.push(['No urgent flags','Current exposed metrics are healthy.','good']);return `<div class="ci-grid">${card('Actionable Advice',tips.map(([t,d,c])=>`<div class="ci-advice ${c}"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join(''))}${card('Sync Diagnostics',kv('API source',esc(apiSource()))+kv('Company ID',detectCompanyId()||'Missing')+kv('Company profile',health().available?'Loaded':'Missing')+kv('Employees',employees().length||'Not loaded')+kv('Snapshots',knownSnapshots().length))}</div>`;
+ const m=meta(),e=employees().map(normEmp),tips=[];if(!health().available)tips.push(['Sync company profile','Company growth and risk need a valid profile.','bad']);if(m.efficiency&&m.efficiency<90)tips.push(['Improve efficiency',`${m.efficiency}% is below the 90% target.`,'warn']);if(m.environment&&m.environment<90)tips.push(['Improve environment',`${m.environment}% can reduce performance.`,'warn']);if(m.popularity&&m.popularity<70)tips.push(['Grow popularity','Review pricing, advertising and customer flow.','warn']);const inactive=e.filter(x=>x.lastTs&&days(now()-x.lastTs)>=3);if(inactive.length)tips.push(['Inactive employees',`${inactive.length} employee(s) inactive for 3+ days.`,'bad']);if(e.length&&meta().maxEmployees&&e.length<meta().maxEmployees)tips.push(['Open employee slots',`${meta().maxEmployees-e.length} position(s) available.`,'warn']);if(!tips.length)tips.push(['No urgent flags','Current exposed metrics are healthy.','good']);return `<div class="ci-grid">${card('Actionable Advice',tips.map(([t,d,c])=>`<div class="ci-advice ${c}"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join(''))}${card('Sync Diagnostics',kv('API source',esc(apiSource()))+kv('Company ID',detectCompanyId()||'Missing')+kv('Company profile',health().available?'Loaded':'Missing')+kv('Employees',employees().length||(isDirector()?'Not loaded':'Director only'))+kv('Snapshots',knownSnapshots().length))}</div>`;
 }
 function timeline(){const events=[];for(const x of knownSnapshots())events.push({ts:x.ts,title:`Company snapshot · ${x.company.name}`,detail:`${x.company.stars}★ · ${money(x.company.weeklyIncome)}`});for(const x of arr(KEY.trains))events.push({ts:x.ts,title:`Train · ${x.employee||'Unassigned'}`,detail:`${x.primary||'Unknown'} · ${money(x.price)}`});for(const x of arr(KEY.contracts))events.push({ts:x.ts,title:`Contract · ${x.employee}`,detail:`${x.totalTrains} trains · ${money(num(x.totalTrains)*num(x.pricePerTrain))}`});events.sort((a,b)=>b.ts-a.ts);return `<div class="ci-actions"><button class="ci-btn" data-act="export-report">EXPORT REPORT CSV</button></div>${card('Company Timeline',events.length?events.slice(0,100).map(x=>`<div class="ci-timeline"><time>${new Date(x.ts).toLocaleString()}</time><b>${esc(x.title)}</b><span>${esc(x.detail)}</span></div>`).join(''):empty('No company events saved yet.'))}`}
 
