@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.30**
+**v1.3.31**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -22,12 +22,13 @@
 - Supports removing individual remembered targets or clearing the complete SAFE list.
 - Includes dedicated Torn API and optional FFScouter API access controls.
 - Supports persistent ON/OFF control from SakaLuX Script Hub.
+- Uses Torn's current `/page.php?sid=attack` route for desktop-safe ATTACK links while retaining TornPDA compatibility.
 - Works with Torn PDA and Tampermonkey.
 - Never attacks automatically.
 
 ## Current release note
 
-**v1.3.30** is the current Elimination Assistant release. Its panel stays above the shared standalone dock and remains accessible through Script Hub / standalone dock without a separate floating launcher.
+**v1.3.31** fixes the ATTACK action on desktop/Tampermonkey by replacing the legacy `/loader.php?sid=attack` target route with Torn's current `/page.php?sid=attack` route. TornPDA behavior remains supported, and the player still controls every attack manually.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant together with the rest of the SakaLuX add-ons and to use the shared Hub Torn API key when available.
@@ -44,6 +45,12 @@ FFScouter battle stats and Smart Target Score are estimates and advisory only. E
 The script never attacks automatically; ATTACK only opens the Torn attack page and the player remains in control of the fight.
 
 ## Release history
+### v1.3.31 — Desktop ATTACK route fix
+
+- Fixed ATTACK links on PC/Tampermonkey using Torn's current `/page.php?sid=attack&user2ID=...` route.
+- Removed dependence on the legacy `/loader.php?sid=attack` route for assistant-generated attack links.
+- Preserved TornPDA compatibility and manual player control over every fight.
+
 ### v1.3.28 — Hub detection fix
 
 - Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
