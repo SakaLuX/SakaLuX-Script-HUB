@@ -16,9 +16,24 @@
       "apiGlobal": "SakaLuXEnhancerGuard",
       "buttonSelector": "#sl-eg-button",
       "quickActions": [
-        {"id":"open","label":"OPEN","icon":"🛡️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"hardRefresh","label":"HARD","icon":"⚡","method":"hardRefresh"}
+        {
+          "id": "open",
+          "label": "OPEN",
+          "icon": "🛡️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "hardRefresh",
+          "label": "HARD",
+          "icon": "⚡",
+          "method": "hardRefresh"
+        }
       ]
     },
     {
@@ -37,9 +52,25 @@
       "apiGlobal": "SakaLuXBazaarThanker",
       "buttonSelector": "#sakalux-bt-settings-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"events","label":"EVENTS","icon":"📋","method":"goToEvents","fallbackUrl":"https://www.torn.com/page.php?sid=events"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "events",
+          "label": "EVENTS",
+          "icon": "📋",
+          "method": "goToEvents",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=events"
+        }
       ]
     },
     {
@@ -58,9 +89,27 @@
       "apiGlobal": "SakaLuXMissionRewards",
       "buttonSelector": "#sl-mri-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
-        {"id":"missions","label":"MISSIONS","icon":"🎯","method":"goToMissions","fallbackUrl":"https://www.torn.com/page.php?sid=missions"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        },
+        {
+          "id": "missions",
+          "label": "MISSIONS",
+          "icon": "🎯",
+          "method": "goToMissions",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        }
       ]
     },
     {
@@ -79,11 +128,39 @@
       "apiGlobal": "SakaLuXMarketIntelligence",
       "buttonSelector": "#sl-mi-button",
       "quickActions": [
-        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"best-run","label":"BEST RUN","icon":"✈️","method":"goToBestRun","fallbackUrl":"https://www.torn.com/page.php?sid=travel"},
-        {"id":"market","label":"MARKET","icon":"📈","method":"goToMarket","fallbackUrl":"https://www.torn.com/page.php?sid=ItemMarket"},
-        {"id":"museum","label":"MUSEUM","icon":"🏛️","method":"goToMuseum","fallbackUrl":"https://www.torn.com/museum.php"}
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "best-run",
+          "label": "BEST RUN",
+          "icon": "✈️",
+          "method": "goToBestRun",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=travel"
+        },
+        {
+          "id": "market",
+          "label": "MARKET",
+          "icon": "📈",
+          "method": "goToMarket",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket"
+        },
+        {
+          "id": "museum",
+          "label": "MUSEUM",
+          "icon": "🏛️",
+          "method": "goToMuseum",
+          "fallbackUrl": "https://www.torn.com/museum.php"
+        }
       ]
     },
     {
@@ -96,21 +173,67 @@
       "version": "1.3.31",
       "description": "Eliminations advisor with unified Torn + FFScouter API setup, rotating 500-player batches, availability status, TornPDA export and PC-safe attack routing.",
       "greasyForkId": "594921",
-      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant-v1.3.31.user.js",
-      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant-v1.3.31.user.js",
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant-v1.3.31.user.js",
+      "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js",
+      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "apiGlobal": "SakaLuXEliminationAssistant",
       "buttonSelector": "#slx-elim-btn",
       "quickActions": [
-        {"id":"toggle","label":"POWER","icon":"⏻","method":"toggleEnabled"},
-        {"id":"open","label":"OPEN","icon":"⚔️","method":"open"},
-        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
-        {"id":"ffscan","label":"FF SCAN","icon":"📊","method":"scanFF"},
-        {"id":"export-targets","label":"EXPORT TARGETS","icon":"📤","method":"exportTargets"},
-        {"id":"calibrate","label":"CALIBRATE","icon":"🎯","method":"calibrate"},
-        {"id":"test-key","label":"TEST KEY","icon":"🧪","method":"testTornKey"},
-        {"id":"create-key","label":"API KEY","icon":"🔑","method":"createRequiredTornKey"},
-        {"id":"event","label":"ELIMS","icon":"🏆","method":"goToEliminations","fallbackUrl":"https://www.torn.com/page.php?sid=elimination"}
+        {
+          "id": "toggle",
+          "label": "POWER",
+          "icon": "⏻",
+          "method": "toggleEnabled"
+        },
+        {
+          "id": "open",
+          "label": "OPEN",
+          "icon": "⚔️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "ffscan",
+          "label": "FF SCAN",
+          "icon": "📊",
+          "method": "scanFF"
+        },
+        {
+          "id": "export-targets",
+          "label": "EXPORT TARGETS",
+          "icon": "📤",
+          "method": "exportTargets"
+        },
+        {
+          "id": "calibrate",
+          "label": "CALIBRATE",
+          "icon": "🎯",
+          "method": "calibrate"
+        },
+        {
+          "id": "test-key",
+          "label": "TEST KEY",
+          "icon": "🧪",
+          "method": "testTornKey"
+        },
+        {
+          "id": "create-key",
+          "label": "API KEY",
+          "icon": "🔑",
+          "method": "createRequiredTornKey"
+        },
+        {
+          "id": "event",
+          "label": "ELIMS",
+          "icon": "🏆",
+          "method": "goToEliminations",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=elimination"
+        }
       ]
     }
   ]

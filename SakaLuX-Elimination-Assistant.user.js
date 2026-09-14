@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.30
-// @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export and FF/BS calibration.
+// @version      1.3.31
+// @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @license      All Rights Reserved
@@ -17,7 +17,7 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.30'});
+  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.31'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -165,7 +165,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  */
 (() => {
 'use strict';
-const VERSION = '1.3.30';
+const VERSION = '1.3.31';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -375,7 +375,7 @@ async function exportTargets(){if(!state.view.length)throw new Error('Load and f
 async function loadFF(force=false){if(!state.players.length)throw new Error('Load a team first');if(!state.ffKey)throw new Error('Set FFScouter API key');const ids=state.players.filter(p=>force||!state.cache[String(p.id)]||Date.now()-Number(state.cache[String(p.id)].at||0)>=1800000).map(p=>p.id),all=[];for(let i=0;i<ids.length;i+=205)all.push(...normFF(await ffReq(ids.slice(i,i+205))));for(const x of all)state.cache[String(x.id)]={...x,at:Date.now()};save(K.cache,state.cache);applyCache();apply();setStatus('FF scan ready')}
 function updateTargetFilterCount(){const n=$$('#slx-targets-menu input[data-filter]:checked').length,c=$('#slx-targets-count');if(c){c.textContent=n?String(n):'';c.classList.toggle('on',n>0)}}
 function apply(){const q=($('#slx-q')?.value||'').toLowerCase();const filters=new Set($$('#slx-targets-menu input[data-filter]:checked').map(x=>x.dataset.filter));let a=state.players.filter(p=>!q||p.name.toLowerCase().includes(q)||String(p.id).includes(q));a=a.filter(p=>{const r=risk(p);if(filters.has('attackable')&&!attackable(p))return false;if(filters.has('unopened')&&state.history.some(h=>Number(h.id)===p.id))return false;const riskFilters=['safe','risky'].filter(x=>filters.has(x));if(riskFilters.length){const key=String(r.label||'').toLowerCase();if(!riskFilters.includes(key))return false}return true});a.sort((x,y)=>smart(y)-smart(x));state.view=a;updateTargetFilterCount();rememberSafeTargets();render()}
-function render(){const e=$('#slx-rows');if(!e)return;e.innerHTML=state.view.map(p=>{const r=risk(p),c=r.label==='SAFE'?'safe':r.label==='RISKY'?'risky':'skip',l=learn(p.id),st=presence(p),action=unavailable(p)?`<span class="slx-wait">WAIT</span>`:`<a class="slx-a atk" data-id="${p.id}" href="https://www.torn.com/loader.php?sid=attack&user2ID=${p.id}" target="_blank" rel="noopener noreferrer">ATK</a>`;return`<tr><td class="${c}">${esc(signal(p))}</td><td><a class="slx-a slx-player" href="https://www.torn.com/profiles.php?XID=${p.id}" target="_blank">${esc(p.name)}</a><small> ${l.wins}W/${l.losses}L</small><span class="slx-presence ${st.key}" title="${esc(st.detail)}">${st.icon} ${esc(st.label)}</span></td><td>${p.level||'—'}</td><td>${age(p.last)}</td><td class="slx-actions"><div class="slx-action-grid">${action}<button class="slx-a win" data-id="${p.id}">W</button><button class="slx-a loss" data-id="${p.id}">L</button></div></td></tr>`}).join('');$$('.atk',e).forEach(a=>a.onclick=()=>{const p=state.players.find(x=>x.id===Number(a.dataset.id));if(p){state.history.unshift({id:p.id,name:p.name,action:'opened',at:Date.now()});save(K.hist,state.history.slice(0,1000))}});$$('.win',e).forEach(b=>b.onclick=()=>record(state.players.find(x=>x.id===Number(b.dataset.id)),'win'));$$('.loss',e).forEach(b=>b.onclick=()=>record(state.players.find(x=>x.id===Number(b.dataset.id)),'loss'));const safe=state.players.filter(p=>!unavailable(p)&&risk(p).label==='SAFE').length,tornCount=state.players.filter(attackable).length;$('#slx-summary').textContent=`TORN ${tornCount} · SAFE ${safe}`}
+function render(){const e=$('#slx-rows');if(!e)return;e.innerHTML=state.view.map(p=>{const r=risk(p),c=r.label==='SAFE'?'safe':r.label==='RISKY'?'risky':'skip',l=learn(p.id),st=presence(p),action=unavailable(p)?`<span class="slx-wait">WAIT</span>`:`<a class="slx-a atk" data-id="${p.id}" href="https://www.torn.com/page.php?sid=attack&user2ID=${p.id}" target="_blank" rel="noopener noreferrer">ATK</a>`;return`<tr><td class="${c}">${esc(signal(p))}</td><td><a class="slx-a slx-player" href="https://www.torn.com/profiles.php?XID=${p.id}" target="_blank">${esc(p.name)}</a><small> ${l.wins}W/${l.losses}L</small><span class="slx-presence ${st.key}" title="${esc(st.detail)}">${st.icon} ${esc(st.label)}</span></td><td>${p.level||'—'}</td><td>${age(p.last)}</td><td class="slx-actions"><div class="slx-action-grid">${action}<button class="slx-a win" data-id="${p.id}">W</button><button class="slx-a loss" data-id="${p.id}">L</button></div></td></tr>`}).join('');$$('.atk',e).forEach(a=>a.onclick=()=>{const p=state.players.find(x=>x.id===Number(a.dataset.id));if(p){state.history.unshift({id:p.id,name:p.name,action:'opened',at:Date.now()});save(K.hist,state.history.slice(0,1000))}});$$('.win',e).forEach(b=>b.onclick=()=>record(state.players.find(x=>x.id===Number(b.dataset.id)),'win'));$$('.loss',e).forEach(b=>b.onclick=()=>record(state.players.find(x=>x.id===Number(b.dataset.id)),'loss'));const safe=state.players.filter(p=>!unavailable(p)&&risk(p).label==='SAFE').length,tornCount=state.players.filter(attackable).length;$('#slx-summary').textContent=`TORN ${tornCount} · SAFE ${safe}`}
 function record(p,res){if(!p)return;const l=learn(p.id);res==='win'?l.wins++:l.losses++;state.learning[String(p.id)]=l;save(K.learn,state.learning);apply()}
 async function refresh(){if(!state.enabled)return false;await loadTeams();if(state.teamId)await loadTeam();state.lastRefresh=Date.now();return true}
 async function busy(fn){if(!state.enabled||state.busy)return false;state.busy=true;try{await fn();return true}catch(e){console.error('[SakaLuX Elimination]',e);setStatus('Error: '+e.message);return false}finally{state.busy=false}}
