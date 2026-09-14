@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.5
+// @version      1.8.6
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -143,7 +143,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.5',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.6',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -226,7 +226,7 @@ function companyIdFromPage(){
 }
 function detectCompanyId(){
  const paths=['company_id','companyId','company.id','company.company_id','company.companyId','job.company_id','job.companyId','job.company.id','employment.company_id','employment.company.id'];
- for(const src of [job(),legacyJob(),userProfile(),S.data.job,S.data.legacyJob,S.data.userProfile]){const id=num(first(src,paths,0));if(id>0)return id}
+ for(const src of [profile(),S.data.profile,job(),legacyJob(),userProfile(),S.data.job,S.data.legacyJob,S.data.userProfile]){const id=num(first(src,['id','ID','company_id','companyId','company.id','company.ID','company.company_id','company.companyId','job.company_id','job.companyId','job.company.id','employment.company_id','employment.company.id'],0));if(id>0)return id}
  return companyIdFromPage();
 }
 const profile=()=>unwrap(S.data.profile,'company','profile')||{};
@@ -353,6 +353,9 @@ async function refresh(){
  try{S.data.userProfile=await api('/user/profile')}catch{try{S.data.userProfile=await legacyApi('user','','profile,job,workstats')}catch{}}
  try{S.data.legacyJob=await legacyApi('user','','job')}catch{}
  if(!detectCompanyId()||jobCompanyName()==='Unknown company')try{S.data.job=await legacyApi('user','','job')}catch{}
+ let selfProfile=null;
+ try{selfProfile=await legacyApi('company','','profile')}catch{}
+ if(selfProfile){S.data.profile=selfProfile;set(KEY.company,selfProfile)}
  const companyId=detectCompanyId();
  delete S.data.employees;delete S.data.stock;
  if(companyId){
