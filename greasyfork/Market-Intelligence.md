@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.18**
+**v1.17.19**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.17.18** is the current Market Intelligence release. Its panel stays above the shared standalone dock and remains accessible through Script Hub / standalone dock without a separate floating launcher.
+**v1.17.19** fixes Item Market Intelligence page scoping. The Item Market card now renders only while the URL is actually on `sid=ItemMarket`, and it is removed when navigating to Home, Profile, Eliminations, or any other Torn page. This prevents stale market cards from remaining visible after Torn SPA navigation.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence together with the rest of the SakaLuX add-ons, use shared Hub integration and access its quick actions from one place.
@@ -48,6 +48,12 @@ The script does **not** automatically purchase, sell, travel, trade or attack. A
 Arrival/restock prediction learns from observations made while the script is active. Until enough history exists, predictions may be labelled **LEARNING** or lower-confidence and should not be treated as guaranteed future stock.
 
 ## Release history
+### v1.17.19 — Item Market page-scope fix
+
+- Restricted Item Market Intelligence to the actual `sid=ItemMarket` route.
+- Removes the market card immediately when navigating to Home, Profile, Eliminations, or another Torn page.
+- Prevents stale cached Item Market UI from being mounted on unrelated pages during SPA navigation.
+
 ### v1.17.16 — Hub detection fix
 
 - Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
