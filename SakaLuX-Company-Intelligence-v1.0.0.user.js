@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.3
+// @version      1.8.4
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -143,7 +143,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.1',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.4',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -265,8 +265,8 @@ function meta(){
   id:num(first(p,['id','company_id'],detectCompanyId())),
   name:first(p,['name','company_name'],first(job(),['company_name','company.name','job.company_name','job.company.name'],first(userProfile(),['job.company_name','job.company.name'],'Unknown company'))),
   type:first(p,['type.name','type','company_type','type_name'],first(job(),['company_type','company.type','type'],first(userProfile(),['job.company_type','job.company.type'],'Unknown'))),
-  stars:num(first(p,['rating','stars','star_rating'],0)),
-  age:num(first(p,['age','days_old','company_age'],0)),
+  stars:num(first(p,['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(job(),['rating','stars','star_rating','company_rating','company_stars','company.rating','company.stars','company.star_rating'],first(userProfile(),['job.rating','job.stars','job.star_rating','job.company_rating','job.company_stars','job.company.rating','job.company.stars','job.company.star_rating'],0)))),
+  age:num(first(p,['age','days_old','company_age','company.age','company.days_old','company.company_age'],first(job(),['company_age','company.age','age'],0))),
   popularity:num(first(p,['popularity','performance.popularity'],0)),
   efficiency:num(first(p,['efficiency','performance.efficiency'],0)),
   environment:num(first(p,['environment','performance.environment'],0)),
