@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.10
+// @version      1.8.11
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -143,7 +143,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.10',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.11',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -296,7 +296,14 @@ function ownEmployee(){
 }
 function ownDaysInCompany(){
  const id=num(first(basic(),['id','player_id'],0)),raw=employees().find(e=>num(e?.id||e?.player_id||e?.user_id)===id)||{};
- return num(first(raw,['days_in_company','days','company_days'],0));
+ let v=first(raw,['days_in_company','days','company_days','employment.days','company.days'],null);
+ if(v==null)v=first(job(),['days_in_company','company_days','company.days_in_company','company.days','job.days_in_company','employment.days'],null);
+ if(v==null)v=first(legacyJob(),['days_in_company','company_days','company.days_in_company','company.days','job.days_in_company','employment.days'],null);
+ if(v==null)v=first(userProfile(),['days_in_company','company_days','job.days_in_company','job.company_days','job.company.days_in_company','employment.days'],null);
+ if(v!=null&&Number.isFinite(Number(v))&&Number(v)>=0)return num(v);
+ const txt=document.body?.innerText||'';
+ const m=txt.match(/(?:Days\s+in\s+company|Company\s+days|Days\s+employed)\s*[:\-]?\s*(\d+)/i);
+ return m?num(m[1]):0;
 }
 function cacheOwnEffectiveness(v){
  if(v!=null&&Number.isFinite(Number(v))&&Number(v)>=0){set(KEY.ownEffectiveness,Number(v));return Number(v)}
@@ -518,7 +525,7 @@ function employeePosition(){
  if(!rows.length)return `<div class="ci-grid">${currentCard}${card('Best Position Advisor',empty('Position requirements are not exposed by your current API response and no coworker work-stat samples are available yet.')+`<p class="ci-note">Refresh Company Intelligence. The script will use real company employee data when Torn exposes it; it will not invent requirements.</p><p class="ci-note">Current stats: MAN ${fmt(w.manual)} · INT ${fmt(w.intelligence)} · END ${fmt(w.endurance)}</p>`)}</div>`;
  const source=a.length?(a[0]?.source||'Official company position requirements'):'Estimated from real coworkers in each position';
  const recommendation=best?card('Recommended Position',kv('Best match',esc(best.name))+kv('Fit',best.fit+'%')+kv('Status',badge(best.qualified?'QUALIFIED':'BUILD STATS',best.qualified?'good':'warn'))+`<p class="ci-note">${esc(source)}${best.estimated?` · ${best.sample} employee sample${best.sample===1?'':'s'}`:''}.</p>`):'';
- const table=card('Best Position Advisor',`<div class="ci-tablewrap"><table><thead><tr><th>Position</th><th>Fit</th><th>Primary</th><th>Secondary</th><th>Status</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.name)}${p.name===current?' · CURRENT':''}</td><td>${p.fit}%</td><td>${p.primary?fmt(p.primary.value)+' '+p.primary.stat.slice(0,3).toUpperCase():'—'}</td><td>${p.secondary?fmt(p.secondary.value)+' '+p.secondary.stat.slice(0,3).toUpperCase():'—'}</td><td>${badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">${esc(source)}. Official Company Positions requirements are preferred. Coworker medians are used only when Torn does not expose requirements.</p>`);
+ const table=card('Best Position Advisor',`<div class="ci-tablewrap ci-mobile-cards ci-position-table"><table><thead><tr><th>Position</th><th>Fit</th><th>Primary</th><th>Secondary</th><th>Status</th></tr></thead><tbody>${rows.map(p=>`<tr><td class="ci-person-cell" data-label="Position"><b>${esc(p.name)}${p.name===current?' · CURRENT':''}</b></td><td data-label="Fit">${p.fit}%</td><td data-label="Primary">${p.primary?fmt(p.primary.value)+' '+p.primary.stat.slice(0,3).toUpperCase():'—'}</td><td data-label="Secondary">${p.secondary?fmt(p.secondary.value)+' '+p.secondary.stat.slice(0,3).toUpperCase():'—'}</td><td data-label="Status">${badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">${esc(source)}. Official Company Positions requirements are preferred. Coworker medians are used only when Torn does not expose requirements.</p>`);
  return `<div class="ci-grid">${currentCard}${recommendation}${table}</div>`;
 }
 function employeeTrains(){
@@ -609,6 +616,11 @@ function css(){
 .ci-snapshots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ci-snapshot{background:#0e1620;border:1px solid #304156;border-radius:10px;padding:10px;min-width:0}.ci-snapshot-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:8px;border-bottom:1px solid #283646}.ci-snapshot-head b{color:#f3c85d;font-size:13px;white-space:nowrap}.ci-snapshot-head span{color:#e6edf5;font-weight:800;text-align:right;overflow-wrap:anywhere}.ci-snapshot-position{display:flex;justify-content:space-between;gap:10px;padding:9px 0}.ci-snapshot-position span,.ci-snapshot-stats span{color:#8494a7;font-size:9px;font-weight:900;letter-spacing:.08em}.ci-snapshot-position b{color:#dbe7f4;text-align:right}.ci-snapshot-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.ci-snapshot-stats div{display:flex;flex-direction:column;gap:3px;background:#172230;border-radius:7px;padding:8px;text-align:center}.ci-snapshot-stats b{color:#66d7a1;font-size:14px}
 .ci-contract{padding:11px;border-bottom:1px solid #2a3542}.ci-contract>div:first-child{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px}.ci-contract small{color:#f2bd52;font-weight:900}.ci-contract-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;margin-bottom:8px}.ci-advice{display:flex;flex-direction:column;gap:3px;border-left:4px solid #5b6a7b;background:#111a24;padding:9px 10px;margin-bottom:7px;border-radius:7px}.ci-advice span{color:#9aa8b7;font-size:11px}.ci-advice.good{border-color:#49c68d}.ci-advice.warn{border-color:#f2bd52}.ci-advice.bad{border-color:#ef7070}.ci-timeline{display:grid;grid-template-columns:130px minmax(0,1fr);gap:3px 10px;padding:9px 0;border-bottom:1px solid #28313b}.ci-timeline time{grid-row:1/3;color:#8190a0;font-size:10px}.ci-timeline b{color:#e8eef6}.ci-timeline span{color:#91a0af;font-size:11px}
 .ci-module-list{display:grid;grid-template-columns:auto 1fr;gap:8px 12px}.ci-module-list b{color:#f2bd52;font-size:10px}.ci-module-list span{color:#cbd5df;font-size:11px;line-height:1.45}
+#ci-root .ci-card,#ci-root .ci-card table,#ci-root .ci-card tr,#ci-root .ci-card td{color:#e8eef6!important}
+#ci-root .ci-card td b,#ci-root .ci-kv b,#ci-root .ci-line b{color:#f8fafc!important}
+#ci-root .ci-card th,#ci-root .ci-mobile-cards td::before{color:#9fb0c3!important}
+#ci-root .ci-note,#ci-root .ci-empty,#ci-root .ci-kv span{color:#aab7c6!important}
+#ci-root .ci-badge.good{color:#83f0bc!important}#ci-root .ci-badge.warn{color:#ffe08a!important}#ci-root .ci-badge.bad{color:#ffaaaa!important}
 
 @media(max-width:720px){
  .ci-mobile-cards{overflow:visible!important}
@@ -616,6 +628,9 @@ function css(){
  .ci-mobile-cards thead{display:none!important}
  .ci-mobile-cards tr{margin:0 0 10px!important;padding:8px 10px!important;border:1px solid #304156!important;border-radius:10px!important;background:#0f1721!important;box-shadow:0 3px 10px rgba(0,0,0,.18)!important}
  .ci-mobile-cards td{display:grid!important;grid-template-columns:minmax(92px,42%) minmax(0,1fr)!important;align-items:center!important;gap:8px!important;padding:5px 0!important;border:0!important;border-bottom:1px solid #222d39!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:right!important;font-size:12px!important}
+ .ci-mobile-cards td{color:#e8eef6!important;text-shadow:none!important}
+ .ci-mobile-cards td>*,.ci-mobile-cards td b,.ci-mobile-cards td span{color:inherit}
+ .ci-position-table .ci-person-cell b{color:#f8fafc!important}
  .ci-mobile-cards td:last-child{border-bottom:0!important}
  .ci-mobile-cards td::before{content:attr(data-label);color:#8291a2;font-size:10px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;text-align:left!important}
  .ci-mobile-cards .ci-person-cell{display:block!important;text-align:left!important;padding:2px 0 8px!important;margin-bottom:2px!important;border-bottom:1px solid #334152!important}

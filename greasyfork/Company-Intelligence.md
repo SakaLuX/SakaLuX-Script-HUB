@@ -3,7 +3,7 @@
 > Standalone SakaLuX company-intelligence tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.8.10**
+**v1.8.11**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.10** redesigns the Director Staff view for phones. Smart Roster and Position Optimizer now switch from squeezed desktop tables to readable employee cards on mobile, with labeled rows for position, work stats, effectiveness, wage, flags and recommendation data. Desktop tables remain unchanged.
+**v1.8.11** fixes dark-theme readability across Staff and Position views, converts the Employee Best Position Advisor into mobile cards, and expands Days in company detection across employee records, job/profile payloads and the visible Torn page.
 
 ## Recommended
 - Use the API-key button to create a key with the displayed selections.
@@ -31,6 +31,13 @@
 All Rights Reserved
 
 ## Release history
+### v1.8.11 — Contrast, Position cards and tenure fallback
+
+- Forces readable foreground colors inside Company Intelligence regardless of Torn dark-theme CSS.
+- Makes Employee Position Advisor mobile-friendly.
+- Improves badge and value contrast.
+- Expands Days in company fallbacks for Director/Employee modes.
+
 ### v1.8.10 — Mobile Staff readability
 
 - Converts Smart Roster to stacked employee cards on mobile.
