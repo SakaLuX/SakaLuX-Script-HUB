@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.39**
+**v1.9.40**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -21,7 +21,8 @@
 - Uses live module presence/bridges rather than stale installation markers for current status.
 
 ## Current release note
-**v1.9.39** publishes the Hub-active marker immediately at startup, before add-ons initialize. This prevents managed add-ons from incorrectly entering standalone mode while Hub is installed. The current registry is synchronized with Company Intelligence **v1.8.14**, which is now Hub-managed without its own standalone launcher.
+
+**v1.9.40** fixes installed-version detection in the Hub. The Hub now compares all live version signals (module bridge, API/health and standalone registration) and uses the newest valid version, so a stale runtime constant can no longer make an up-to-date script appear outdated. Runtime constants for Enhancer, Bazaar, Missions and Market are synchronized with their userscript headers.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -53,6 +54,12 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.40 — Installed version reporting fix
+
+- Uses the newest valid live version signal instead of trusting the first bridge value.
+- Synchronizes runtime version constants with userscript headers.
+- Updates the Hub offline fallback registry to current add-on versions.
+
 ### v1.9.39 — Reliable Hub presence handshake
 - Marks Hub as installed/active immediately when the userscript starts.
 - Prevents managed add-ons from showing the standalone dock while Hub is running.

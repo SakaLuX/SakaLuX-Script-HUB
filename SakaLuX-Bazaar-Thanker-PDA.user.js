@@ -1100,7 +1100,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.21';
+    const BAZAAR_VERSION='5.3.23';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);

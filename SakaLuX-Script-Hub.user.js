@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.39
+// @version      1.9.40
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -37,7 +37,7 @@
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.39';
+    const VERSION = '1.9.40';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -46,6 +46,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.40',
+            date: '2026-09-15',
+            changes: [
+                'Fixes installed-version reporting when an add-on header was updated but its runtime bridge constant was still stale.',
+                'Installed version detection now compares bridge, API/health and standalone registration signals and uses the newest valid version.',
+                'Synchronizes runtime version constants for Enhancer, Bazaar, Missions and Market with their current userscript headers.'
+            ]
+        },
         {
             version: '1.9.39',
             date: '2026-09-15',
@@ -400,7 +409,7 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.31',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.33',
                 description: 'Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -416,7 +425,7 @@
             },
             {
                 id: 'bazaar', type: 'addon', active: true,
-                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.21',
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.23',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
@@ -432,7 +441,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.18',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.20',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -448,7 +457,7 @@
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.19',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.21',
                 description: 'Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
@@ -488,7 +497,7 @@
             },
             {
                 id: 'company-intelligence', type: 'addon', active: true,
-                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.13',
+                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.17',
                 description: 'Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
                 metaUrl: 'https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js',
@@ -749,21 +758,26 @@
     }
 
     function getInstalledVersion(script) {
+        const versions = [];
+        const add = value => {
+            const v = String(value || '').trim();
+            if (/^\d+(?:\.\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?$/.test(v)) versions.push(v);
+        };
         try {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-            if (bridge?.dataset?.version) return String(bridge.dataset.version);
+            add(bridge?.dataset?.version);
         } catch {}
         try {
             const api = script.api();
-            if (api?.version) return String(api.version);
-            const health = api?.health?.();
-            if (health?.version) return String(health.version);
+            add(api?.version);
+            add(api?.health?.()?.version);
         } catch {}
         try {
             const standalone = document.querySelector(`[data-slx-standalone-registration="${script.id}"]`);
-            if (standalone?.dataset?.version) return String(standalone.dataset.version);
+            add(standalone?.dataset?.version);
         } catch {}
-        return null;
+        if (!versions.length) return null;
+        return versions.reduce((best, v) => compareVersions(v, best) > 0 ? v : best, versions[0]);
     }
 
     function recordUsage(id) {
