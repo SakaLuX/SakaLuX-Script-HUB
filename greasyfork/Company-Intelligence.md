@@ -27,11 +27,6 @@
 - Director-only modules require the key owner to be the company director.
 - Add several same-type companies at the next star level before trusting Benchmark direction.
 
-## Links
-- GreasyFork: https://greasyfork.org/scripts/595873-sakalux-company-intelligence
-- Source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
-- Info / release: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
-
 ## License
 All Rights Reserved
 
