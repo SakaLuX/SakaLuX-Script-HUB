@@ -3,7 +3,7 @@
 > Complementary add-on for SakaLuX Script Hub. Also works standalone on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.11**
+**v1.8.12**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.11** fixes dark-theme readability across Staff and Position views, converts the Employee Best Position Advisor into mobile cards, and expands Days in company detection across employee records, job/profile payloads and the visible Torn page.
+**v1.8.12** removes the standalone floating Company Intel button whenever SakaLuX Script Hub is installed. The launcher remains available only for true standalone use.
 
 ## Recommended
 - Use the API-key button to create a key with the displayed selections.
@@ -31,6 +31,11 @@
 All Rights Reserved
 
 ## Release history
+### v1.8.12 — Hub launcher cleanup
+
+- Hides/removes the bottom-right Company Intel floating button when SakaLuX Script Hub is active.
+- Keeps the standalone launcher only when the script is used without the Hub.
+
 ### v1.8.11 — Contrast, Position cards and tenure fallback
 
 - Forces readable foreground colors inside Company Intelligence regardless of Torn dark-theme CSS.
