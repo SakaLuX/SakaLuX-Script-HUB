@@ -1,0 +1,36 @@
+name: Patch version reporting consistency
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/patch-version-reporting.trigger'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python .github/scripts/patch_version_reporting_consistency.py
+      - name: Validate
+        run: |
+          grep -q "const VERSION = '1.3.33';" SakaLuX-Enhancer-Guard.user.js
+          grep -q "const BAZAAR_VERSION='5.3.23';" SakaLuX-Bazaar-Thanker-PDA.user.js
+          grep -q "const VERSION = '1.0.20';" SakaLuX-Mission-Rewards.user.js
+          grep -q "const VERSION = '1.17.21';" SakaLuX-Market-Intelligence.user.js
+          grep -q '@version      1.9.40' SakaLuX-Script-Hub.user.js
+          grep -q "version: '1.9.40'" SakaLuX-Script-Hub.user.js
+          grep -q 'const versions = \[\]' SakaLuX-Script-Hub.user.js
+          node --check SakaLuX-Enhancer-Guard.user.js
+          node --check SakaLuX-Bazaar-Thanker-PDA.user.js
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Market-Intelligence.user.js
+          node --check SakaLuX-Script-Hub.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Enhancer-Guard.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Market-Intelligence.user.js SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md
+          git commit -m 'Fix Hub installed version reporting'
+          git push
