@@ -16,79 +16,59 @@
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release note
+**v1.3.31** preserves the complete v1.3.30 standalone-dock/panel behavior while removing fully protected items from Torn's current mobile/PDA Bazaar add-items list.
 
-**v1.3.31** preserves the complete v1.3.30 standalone dock and panel behavior, while removing fully protected items from Torn's current mobile/PDA Bazaar add-items list.
+## Recommended
+Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
+
+## Privacy
+- Enhancer settings, protection preferences, favorites and local cache/state are stored locally in the userscript/browser environment.
+- Torn API requests are sent to `api.torn.com` using the active key required for inventory/item information.
+- Enhancer Guard does not require Torn API write permissions for its inventory intelligence/protection display.
+
+## Important
+- Bazaar protection is a client-side safety guard. Always verify the final Torn sale list before confirming a sale.
+- Inventory/API values can briefly lag behind Torn after item changes until the next refresh.
+- Partial protection quantities are local preferences and should be reviewed after major inventory changes.
+
+## License
+**All Rights Reserved**
 
 ## Release history
-
 ### v1.3.31 — Protected Bazaar items
-
-- Restores and preserves every change included in v1.3.30.
-- Hides fully protected items from legacy and current mobile/PDA Bazaar sale lists.
-- Blocks the add control before a protected item can enter the Bazaar selection.
-
+- Preserves every v1.3.30 behavior.
+- Hides fully protected items from legacy/current mobile/PDA Bazaar sale lists.
+- Blocks the add control before a protected item enters Bazaar selection.
 
 ### v1.3.30 — Panel layering above standalone dock
-
-- Keeps the Enhancer Guard panels above the shared standalone dock.
-- Preserves access to settings and protection controls when the standalone launcher is open.
+- Keeps Enhancer Guard panels above the shared standalone dock.
 
 ### v1.3.29 — Standalone launcher cleanup
-
-- Removed the separate Enhancer floating launcher.
-- Keeps the panel accessible through Script Hub or the shared standalone dock.
+- Removed the separate Enhancer floating launcher while preserving Hub/shared-dock access.
 
 ### v1.3.28 — Hub detection fix
-
-- Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
-- Prevents the standalone dock/install prompt from appearing while Hub is installed.
+- Recognizes current Hub launchers/active marker and prevents standalone prompts while Hub is installed.
 
 ### v1.3.24 — Compact native S standalone launcher
-
-- Smaller professional standalone dock.
-- Native gold **S** launcher mounts after Torn cash and opens/closes the dock.
-- Removed the dock **+** control.
-- Compact fallback **S** appears only when Torn status icons are unavailable.
-- Shared Hub reminder remains limited to once every 12 hours.
+- Added the compact native S/shared standalone dock behavior.
 
 ### v1.3.20 — English standalone baseline
-
-- Removed the remaining hardcoded Romanian text from the standalone interface.
-- Enhancer Guard now always starts in English without Script Hub.
-- When Hub is installed, its selected shared language controls the interface.
+- Made English the standalone default while allowing Hub-selected language integration.
 
 ### v1.3.19 — Priority star alignment
-
-- Fixed the priority star being stretched into a tall blue button by shared Hub button styling.
-- Priority stars now remain compact, transparent and aligned directly after the Enhancer name.
+- Corrected priority-star sizing/alignment under shared styling.
 
 ### v1.3.18 — Violentmonkey Hub bridge
-
-- Added an isolated-context DOM bridge so Script Hub can detect, open and switch Enhancer Guard ON/OFF in Violentmonkey on macOS and desktop browsers.
+- Added isolated-context detection, OPEN and ON/OFF bridge support.
 
 ### v1.3.17 — Inline panel signature
-
-- Removed the floating author badge from the Torn page.
-- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
+- Moved the SakaLuX signature inside the module panel.
 
 ### v1.3.16 — Persistent SakaLuX signature
+- Added the persistent linked author footer.
 
-- Added the persistent **Made with ❤️ by SakaLuX [2380374]** author footer with the author name and Torn ID linked to the profile.
-- Keeps the SakaLuX identity visible consistently across TornPDA and desktop.
+### v1.3.15 — Unified Control Center visual system
+- Adopted the shared SakaLuX interface style.
 
-### v1.3.15
-
-- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
-- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
-- UI-only release: existing features, APIs and saved data remain unchanged.
-
-### v1.3.14
-
-- Added a persistent installation marker so Script Hub can detect the add-on reliably on PC/Tampermonkey.
-- Moved protection badges from the Enhancer panel to the Torn Items inventory, matching Item Protector.
-- Added full, partial-quantity and unlocked lock badge states with long-press quantity editing directly on item icons.
-- The Enhancer header lock now cycles Item Protector badge size: small → medium → large → small.
-- Removed the extra injected resize button and separate protection panel so Torn Items remains the single lock interface.
-- Improved item-name detection across dynamically rendered TornPDA inventory layouts.
-- Improved live refresh of inventory badges after settings changes.
-- Removed the unused Enhancer-header lock control.
+### v1.3.14 — Item Protector integration
+- Added reliable installation detection and full/partial/unlocked lock badges directly on Torn Items with local quantity editing.
