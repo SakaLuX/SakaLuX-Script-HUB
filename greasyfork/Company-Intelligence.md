@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.14**
+**v1.8.15**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -18,7 +18,8 @@
 - Company timeline, report export, diagnostics and actionable advice.
 
 ## Current release note
-**v1.8.14** removes Company Intelligence from the shared standalone dock and removes its floating Company Intel launcher. The module is opened through **SakaLuX Script Hub** using its runtime API/hidden bridge, so it no longer changes the standalone dock layout used by the other add-ons.
+
+**v1.8.15** restores Company Intelligence to the shared SakaLuX standalone menu, but no longer injects or restyles that menu. The shared dock keeps its normal compact design, while Company appears as a regular entry and opens through the hidden module bridge. The separate floating Company Intel button remains removed.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -43,6 +44,13 @@
 **All Rights Reserved**
 
 ## Release history
+### v1.8.15 — Restore clean standalone entry
+
+- Restores Company Intelligence as an entry in the shared standalone SakaLuX Scripts menu.
+- Does not inject standalone dock CSS or create a second dock.
+- Keeps the floating Company Intel button removed.
+- Opens from the shared menu through the hidden Company module bridge.
+
 ### v1.8.14 — Remove standalone Company launcher
 - Removes the Company entry from the shared standalone SakaLuX Scripts dock.
 - Removes the floating Company Intel page button completely.
