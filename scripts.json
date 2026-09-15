@@ -16,24 +16,9 @@
       "apiGlobal": "SakaLuXEnhancerGuard",
       "buttonSelector": "#sl-eg-button",
       "quickActions": [
-        {
-          "id": "open",
-          "label": "OPEN",
-          "icon": "🛡️",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        },
-        {
-          "id": "hardRefresh",
-          "label": "HARD",
-          "icon": "⚡",
-          "method": "hardRefresh"
-        }
+        {"id":"open","label":"OPEN","icon":"🛡️","method":"open"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
+        {"id":"hardRefresh","label":"HARD","icon":"⚡","method":"hardRefresh"}
       ]
     },
     {
@@ -52,25 +37,9 @@
       "apiGlobal": "SakaLuXBazaarThanker",
       "buttonSelector": "#sakalux-bt-settings-button",
       "quickActions": [
-        {
-          "id": "open",
-          "label": "SETTINGS",
-          "icon": "⚙️",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        },
-        {
-          "id": "events",
-          "label": "EVENTS",
-          "icon": "📋",
-          "method": "goToEvents",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=events"
-        }
+        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
+        {"id":"events","label":"EVENTS","icon":"📋","method":"goToEvents","fallbackUrl":"https://www.torn.com/page.php?sid=events"}
       ]
     },
     {
@@ -89,27 +58,9 @@
       "apiGlobal": "SakaLuXMissionRewards",
       "buttonSelector": "#sl-mri-button",
       "quickActions": [
-        {
-          "id": "open",
-          "label": "SETTINGS",
-          "icon": "⚙️",
-          "method": "open",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
-        },
-        {
-          "id": "missions",
-          "label": "MISSIONS",
-          "icon": "🎯",
-          "method": "goToMissions",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
-        }
+        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh","fallbackUrl":"https://www.torn.com/page.php?sid=missions"},
+        {"id":"missions","label":"MISSIONS","icon":"🎯","method":"goToMissions","fallbackUrl":"https://www.torn.com/page.php?sid=missions"}
       ]
     },
     {
@@ -128,39 +79,11 @@
       "apiGlobal": "SakaLuXMarketIntelligence",
       "buttonSelector": "#sl-mi-button",
       "quickActions": [
-        {
-          "id": "open",
-          "label": "SETTINGS",
-          "icon": "⚙️",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        },
-        {
-          "id": "best-run",
-          "label": "BEST RUN",
-          "icon": "✈️",
-          "method": "goToBestRun",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=travel"
-        },
-        {
-          "id": "market",
-          "label": "MARKET",
-          "icon": "📈",
-          "method": "goToMarket",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket"
-        },
-        {
-          "id": "museum",
-          "label": "MUSEUM",
-          "icon": "🏛️",
-          "method": "goToMuseum",
-          "fallbackUrl": "https://www.torn.com/museum.php"
-        }
+        {"id":"open","label":"SETTINGS","icon":"⚙️","method":"open"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
+        {"id":"best-run","label":"BEST RUN","icon":"✈️","method":"goToBestRun","fallbackUrl":"https://www.torn.com/page.php?sid=travel"},
+        {"id":"market","label":"MARKET","icon":"📈","method":"goToMarket","fallbackUrl":"https://www.torn.com/page.php?sid=ItemMarket"},
+        {"id":"museum","label":"MUSEUM","icon":"🏛️","method":"goToMuseum","fallbackUrl":"https://www.torn.com/museum.php"}
       ]
     },
     {
@@ -179,61 +102,15 @@
       "apiGlobal": "SakaLuXEliminationAssistant",
       "buttonSelector": "#slx-elim-btn",
       "quickActions": [
-        {
-          "id": "toggle",
-          "label": "POWER",
-          "icon": "⏻",
-          "method": "toggleEnabled"
-        },
-        {
-          "id": "open",
-          "label": "OPEN",
-          "icon": "⚔️",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        },
-        {
-          "id": "ffscan",
-          "label": "FF SCAN",
-          "icon": "📊",
-          "method": "scanFF"
-        },
-        {
-          "id": "export-targets",
-          "label": "EXPORT TARGETS",
-          "icon": "📤",
-          "method": "exportTargets"
-        },
-        {
-          "id": "calibrate",
-          "label": "CALIBRATE",
-          "icon": "🎯",
-          "method": "calibrate"
-        },
-        {
-          "id": "test-key",
-          "label": "TEST KEY",
-          "icon": "🧪",
-          "method": "testTornKey"
-        },
-        {
-          "id": "create-key",
-          "label": "API KEY",
-          "icon": "🔑",
-          "method": "createRequiredTornKey"
-        },
-        {
-          "id": "event",
-          "label": "ELIMS",
-          "icon": "🏆",
-          "method": "goToEliminations",
-          "fallbackUrl": "https://www.torn.com/page.php?sid=elimination"
-        }
+        {"id":"toggle","label":"POWER","icon":"⏻","method":"toggleEnabled"},
+        {"id":"open","label":"OPEN","icon":"⚔️","method":"open"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"},
+        {"id":"ffscan","label":"FF SCAN","icon":"📊","method":"scanFF"},
+        {"id":"export-targets","label":"EXPORT TARGETS","icon":"📤","method":"exportTargets"},
+        {"id":"calibrate","label":"CALIBRATE","icon":"🎯","method":"calibrate"},
+        {"id":"test-key","label":"TEST KEY","icon":"🧪","method":"testTornKey"},
+        {"id":"create-key","label":"API KEY","icon":"🔑","method":"createRequiredTornKey"},
+        {"id":"event","label":"ELIMS","icon":"🏆","method":"goToEliminations","fallbackUrl":"https://www.torn.com/page.php?sid=elimination"}
       ]
     },
     {
@@ -245,31 +122,15 @@
       "category": "Company",
       "version": "1.8.12",
       "description": "Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.",
-      "greasyForkId": "595873",
-      "metaUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
-      "downloadUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js",
+      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
+      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "apiGlobal": "SakaLuXCompanyIntelligence",
       "buttonSelector": "#ci-launch",
       "quickActions": [
-        {
-          "id": "toggle",
-          "label": "POWER",
-          "icon": "⏻",
-          "method": "toggleEnabled"
-        },
-        {
-          "id": "open",
-          "label": "OPEN",
-          "icon": "🏢",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "icon": "🔄",
-          "method": "refresh"
-        }
+        {"id":"toggle","label":"POWER","icon":"⏻","method":"toggleEnabled"},
+        {"id":"open","label":"OPEN","icon":"🏢","method":"open"},
+        {"id":"refresh","label":"REFRESH","icon":"🔄","method":"refresh"}
       ]
     }
   ]
