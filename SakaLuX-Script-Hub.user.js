@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.38
+// @version      1.9.39
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,7 +31,13 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.9.38';
+    // Publish Hub presence immediately so add-ons never enter standalone mode while Hub is running.
+    try {
+        document.documentElement?.setAttribute('data-sakalux-hub-installed', '1');
+        document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
+    } catch {}
+
+    const VERSION = '1.9.39';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -40,6 +46,15 @@
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.39',
+            date: '2026-09-15',
+            changes: [
+                'Publishes Hub presence immediately at script startup so add-ons cannot fall into standalone mode when Hub is installed.',
+                'Company Intelligence v1.8.13 now uses the same Hub-presence signals as the other managed add-ons and registers itself with the standalone dock only when Hub is genuinely absent.',
+                'Company Intelligence public update metadata now follows its published Greasy Fork script 595873.'
+            ]
+        },
         {
             version: '1.9.38',
             date: '2026-09-15',
@@ -473,11 +488,11 @@
             },
             {
                 id: 'company-intelligence', type: 'addon', active: true,
-                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.12',
+                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.13',
                 description: 'Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
-                metaUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
-                downloadUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
+                metaUrl: 'https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js',
+                downloadUrl: 'https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js',
                 apiGlobal: 'SakaLuXCompanyIntelligence',
                 buttonSelector: '#ci-launch',
                 quickActions: [

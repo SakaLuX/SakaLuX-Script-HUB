@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.12**
+**v1.8.13**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -18,7 +18,8 @@
 - Company timeline, report export, diagnostics and actionable advice.
 
 ## Current release note
-**v1.8.12** removes the standalone floating Company Intel button whenever SakaLuX Script Hub is installed. The launcher remains available only for true standalone use. The current userscript distribution/update source is the GitHub raw userscript, which is also the source used by Hub v1.9.38.
+
+**v1.8.13** fixes Hub/standalone detection. When Script Hub is running, Company Intelligence removes its floating launcher and does not open the standalone SakaLuX dock. Without Hub, it registers cleanly as a standalone Company entry.
 
 ## Recommended
 - Install **SakaLuX Script Hub** when using Company Intelligence with the modular SakaLuX ecosystem.
@@ -42,6 +43,13 @@
 **All Rights Reserved**
 
 ## Release history
+### v1.8.13 — Hub integration detection
+
+- Uses all current Script Hub DOM presence signals.
+- Removes the Company Intel floating button as soon as Hub is detected.
+- Registers Company Intelligence in the shared standalone dock only when Hub is truly absent.
+- Keeps standalone operation intact.
+
 ### v1.8.12 — Hub launcher cleanup
 - Hides/removes the bottom-right Company Intel floating button when SakaLuX Script Hub is active.
 - Keeps the standalone launcher only when the script is used without the Hub.
