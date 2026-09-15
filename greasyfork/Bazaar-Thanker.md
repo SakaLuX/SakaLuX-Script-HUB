@@ -9,66 +9,50 @@
 - Detects Bazaar purchase events and groups purchases by buyer.
 - Generates thank-you messages with customizable Bazaar name and message text.
 - Includes buyer details, copy tools, big-buyer detection, statistics and history.
-- Exposes its status to SakaLuX Script Hub on all Torn pages while its working features remain limited to Events and Messages.
+- Exposes its status to Script Hub on all Torn pages while working features remain limited to Events and Messages.
 - Works without a Torn API key.
 
 ## Current release note
-
-**v5.3.21** is the current Bazaar Thanker release. Its panel stays above the shared standalone dock, while settings remain accessible through Script Hub or the standalone dock without a separate floating launcher.
+**v5.3.21** keeps the Bazaar Thanker panel above the shared standalone dock while settings remain accessible through Script Hub or the standalone dock without a separate floating launcher.
 
 ## Recommended
-Install **SakaLuX Script Hub** to manage Bazaar Thanker together with the rest of the SakaLuX add-ons.
-
-## License
-All Rights Reserved
+Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
 
 ## Privacy
-Bazaar Thanker reads the Torn Events/Messages page in the browser and stores its settings, processed-event markers, generated-message state, statistics and history locally in browser/TornPDA storage. It does not require a Torn API key.
+Bazaar Thanker reads the Torn Events/Messages page in the browser and stores settings, processed-event markers, generated-message state, statistics and history locally in browser/TornPDA storage. It does not require a Torn API key.
 
 ## Important
 Generated thank-you text should be reviewed before sending. The script assists with preparing and organizing messages; the player remains responsible for the final message sent through Torn.
 
-## Release history
-### v5.3.19 — Runtime version synchronization
+## License
+**All Rights Reserved**
 
-- Synchronized `@version`, `BAZAAR_VERSION`, standalone registration and Hub bridge version.
-- Fixes the persistent false `UPDATE AVAILABLE` state caused by v5.3.18 reporting itself internally as v5.3.17.
+## Release history
+### v5.3.21 — Panel layering and launcher cleanup
+- Keeps the panel above the shared standalone dock.
+- Preserves Settings access through Hub/shared dock without a separate floating launcher.
+
+### v5.3.19 — Runtime version synchronization
+- Synchronized `@version`, runtime version, standalone registration and Hub bridge version.
+- Fixed the false UPDATE AVAILABLE state caused by an internal version mismatch.
 
 ### v5.3.18 — Hub detection fix
-
-- Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
-- Prevents the standalone dock/install prompt from appearing while Hub is installed.
+- Recognizes current Hub launchers/active marker and suppresses standalone prompts while Hub is installed.
 
 ### v5.3.14 — Compact native S standalone launcher
-
-- Smaller professional standalone dock.
-- Native gold **S** launcher mounts after Torn cash and opens/closes the dock.
-- Removed the dock **+** control.
-- Compact fallback **S** appears only when Torn status icons are unavailable.
-- Shared Hub reminder remains limited to once every 12 hours.
+- Added the compact native S/shared standalone dock behavior.
 
 ### v5.3.10 — Violentmonkey Hub bridge
-
-- Added an isolated-context DOM bridge so Script Hub can detect, open and switch Bazaar Thanker ON/OFF in Violentmonkey.
+- Added isolated-context detection, OPEN and ON/OFF bridge support.
 
 ### v5.3.9 — Inline panel signature
-
-- Removed the floating author badge from the Torn page.
-- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
+- Moved the SakaLuX signature inside the module panel.
 
 ### v5.3.8 — Persistent SakaLuX signature
+- Added the persistent linked author footer.
 
-- Added the persistent **Made with ❤️ by SakaLuX [2380374]** author footer with the author name and Torn ID linked to the profile.
-- Keeps the SakaLuX identity visible consistently across TornPDA and desktop.
+### v5.3.7 — Unified Control Center visual system
+- Adopted the shared SakaLuX interface style.
 
-### v5.3.7
-
-- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
-- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
-- UI-only release: existing features, APIs and saved data remain unchanged.
-
-### v5.3.6
-
-- Added a persistent installation marker for reliable Script Hub detection on PC.
-- Refreshed the Settings panel and floating Settings button with a cleaner professional TornPDA-style UI.
-- Fixed purchase messages to show the per-item price instead of the full batch total.
+### v5.3.6 — PC detection and message-price fix
+- Added reliable installation detection, refreshed the Settings UI and corrected per-item price display in generated purchase messages.
