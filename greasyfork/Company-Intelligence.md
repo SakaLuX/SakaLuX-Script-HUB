@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.15**
+**v1.8.16**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.15** restores Company Intelligence to the shared SakaLuX standalone menu, but no longer injects or restyles that menu. The shared dock keeps its normal compact design, while Company appears as a regular entry and opens through the hidden module bridge. The separate floating Company Intel button remains removed.
+**v1.8.16** keeps Company Intelligence inside the shared Standalone menu but forces its row to stay with the script list instead of appearing directly under the Standalone header. This remains compatible with older installed dock providers that do not yet know the Company module order.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -37,13 +37,19 @@
 - Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
 - Company rating is comparative and evaluated by Torn.
 - Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
-- The active userscript, Hub registry entry and this information page are synchronized at **v1.8.14**.
+- The active userscript, Hub registry entry and this information page are synchronized at **v1.8.16**.
 - The Hub registry uses Greasy Fork script **595873** for public version checks, while the userscript retains its own raw-GitHub `@downloadURL` / `@updateURL` metadata.
 
 ## License
 **All Rights Reserved**
 
 ## Release history
+### v1.8.16 — Standalone ordering fix
+
+- Keeps Company in the shared Standalone menu.
+- Forces the Company row to the end of the script list instead of directly under the Standalone subtitle.
+- Works even when another installed SakaLuX add-on still uses an older dock ordering table.
+
 ### v1.8.15 — Restore clean standalone entry
 
 - Restores Company Intelligence as an entry in the shared standalone SakaLuX Scripts menu.

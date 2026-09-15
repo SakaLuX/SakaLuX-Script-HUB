@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.15
+// @version      1.8.16
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -33,7 +33,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.15',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.16',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -52,6 +52,16 @@ function registerStandaloneEntry(){
   let m=document.querySelector(`[${STANDALONE_REG_ATTR}="company-intelligence"]`);
   if(!m){m=document.createElement('span');m.setAttribute(STANDALONE_REG_ATTR,'company-intelligence');m.hidden=true;(document.body||document.documentElement).appendChild(m)}
   Object.assign(m.dataset,{id:'company-intelligence',name:'Company',icon:'🏢',selector:'',fallback:'https://www.torn.com/joblist.php',version:APP.version});
+ }catch{}
+}
+
+function normalizeStandaloneCompanyPlacement(){
+ try{
+  const box=document.querySelector('#sakalux-standalone-dock .slx-dock-items');
+  if(!box) return;
+  const rows=[...box.querySelectorAll('.slx-dock-row')];
+  const company=rows.find(row=>String(row.querySelector('.slx-title')?.textContent||row.textContent||'').trim().toLowerCase()==='company');
+  if(company&&company!==box.lastElementChild) box.appendChild(company);
  }catch{}
 }
 
@@ -586,6 +596,9 @@ function installHubBridge(){let b=$('#sakalux-module-bridge-company-intelligence
 function setEnabled(value){S.enabled=!!value;set(KEY.enabled,S.enabled);if(!S.enabled){S.open=false;$('#ci-root')?.remove();$('#ci-launch')?.remove()}else init();syncHubBridge();try{window.dispatchEvent(new CustomEvent('SakaLuXCompanyIntelligenceStateChanged',{detail:{enabled:S.enabled,version:APP.version}}))}catch{}return S.enabled}
 function init(){
  registerStandaloneEntry();
+ setTimeout(normalizeStandaloneCompanyPlacement,250);
+ setTimeout(normalizeStandaloneCompanyPlacement,900);
+ setInterval(normalizeStandaloneCompanyPlacement,2000);
  css();S.enabled=get(KEY.enabled,true)!==false;S.compact=get(KEY.compact,true)!==false;S.mode=get(KEY.mode,'employee')||'employee';S.tab=get(KEY.tab,'overview')||'overview';
  if(!S.data.profile){const cached=get(KEY.company,null),last=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>b.ts-a.ts)[0]?.company;if(cached||last)S.data.profile=cached||last}
  installHubBridge();syncHubBridge();
