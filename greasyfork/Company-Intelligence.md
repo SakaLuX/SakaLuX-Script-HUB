@@ -1,6 +1,6 @@
-# SakaLuX Company Intelligence
+# 🏢 SakaLuX Company Intelligence
 
-> Complementary add-on for SakaLuX Script Hub. Also works standalone on TornPDA / Tampermonkey.
+> Complementary add-on for **SakaLuX Script Hub**. It also works standalone on TornPDA / Tampermonkey.
 
 ## Current version
 **v1.8.12**
@@ -18,104 +18,67 @@
 - Company timeline, report export, diagnostics and actionable advice.
 
 ## Current release note
-
-**v1.8.12** removes the standalone floating Company Intel button whenever SakaLuX Script Hub is installed. The launcher remains available only for true standalone use.
+**v1.8.12** removes the standalone floating Company Intel button whenever SakaLuX Script Hub is installed. The launcher remains available only for true standalone use. The current userscript distribution/update source is the GitHub raw userscript, which is also the source used by Hub v1.9.38.
 
 ## Recommended
+- Install **SakaLuX Script Hub** when using Company Intelligence with the modular SakaLuX ecosystem.
 - Use the API-key button to create a key with the displayed selections.
 - Refresh after Torn's daily company report to build useful history.
 - Director-only modules require the key owner to be the company director.
 - Add several same-type companies at the next star level before trusting Benchmark direction.
 
+## Privacy
+- The API key, company notes, contracts, benchmarks, snapshots and history are stored locally in the script manager/browser.
+- Company Intelligence requests Torn data required by the enabled employee/director features.
+- No hidden gameplay action is performed by the information and planning modules.
+
+## Important
+- Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
+- Company rating is comparative and evaluated by Torn.
+- Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
+- Company Intelligence v1.8.12 is currently updated from its GitHub userscript source. A Greasy Fork metadata entry must not be used as the canonical update source unless the userscript is intentionally republished there later.
+
 ## License
-All Rights Reserved
+**All Rights Reserved**
 
 ## Release history
 ### v1.8.12 — Hub launcher cleanup
-
 - Hides/removes the bottom-right Company Intel floating button when SakaLuX Script Hub is active.
 - Keeps the standalone launcher only when the script is used without the Hub.
 
 ### v1.8.11 — Contrast, Position cards and tenure fallback
-
 - Forces readable foreground colors inside Company Intelligence regardless of Torn dark-theme CSS.
 - Makes Employee Position Advisor mobile-friendly.
-- Improves badge and value contrast.
-- Expands Days in company fallbacks for Director/Employee modes.
+- Improves badge/value contrast and Days in company fallbacks.
 
 ### v1.8.10 — Mobile Staff readability
-
-- Converts Smart Roster to stacked employee cards on mobile.
-- Converts Employee Effectiveness & Position Optimizer to stacked cards on mobile.
-- Adds explicit field labels so values no longer run together.
-- Keeps desktop table layout unchanged.
-- Improves spacing, wrapping and badge readability on TornPDA.
+- Converts Smart Roster and Employee Effectiveness/Position Optimizer to stacked mobile cards.
+- Adds explicit field labels and preserves the desktop table layout.
 
 ### v1.8.9 — Official position requirements
-
 - Uses Company Positions primary/secondary requirements before coworker estimates.
-- Includes unoccupied roles such as Promoter.
-- Caches requirements observed in Torn.
-- Fixes recommendation ranking so overqualification for easy roles does not beat a higher qualified role.
-- Shows Primary and Secondary requirement columns directly.
+- Includes unoccupied roles, caches observed requirements and improves role ranking.
 
 ### v1.8.8 — Position labels and star-direction clarity
-
-- Normalizes nested position objects into readable names.
-- Fixes Current Position and Best Position Advisor labels.
-- Renames Metric samples to History samples.
-- Shows improving, declining and unchanged tracked metrics separately.
-- Explains that sample count is history depth, not a star-up/star-down score.
+- Normalizes position labels and separates improving, declining and unchanged tracked metrics.
+- Clarifies that history sample count is not a star-up/star-down score.
 
 ### v1.8.7 — Employee intelligence fix
-
-- Loads employee data in Employee mode when the API permits it.
-- Persists own effectiveness across Torn pages.
-- Uses own employee record for exact position and days in company.
-- Replaces misleading Director-only diagnostics.
-- Adds observed-position recommendations when official requirements are unavailable.
+- Restores employee-mode data, own effectiveness/position/tenure and observed-position recommendations.
 
 ### v1.8.6 — Self-company discovery fix
-
-- Loads the API key owner company profile without requiring a company ID first.
-- Restores company ID, stars and company age in Employee mode.
-- Uses the recovered company ID for subsequent company requests.
-- Sync Diagnostics labels employee details as Director only while in Employee mode.
+- Loads the API-key owner's company profile without requiring a company ID first.
+- Recovers company ID, stars and age in Employee mode.
 
 ### v1.8.5 — Company ID compatibility fix
-
-- Always fetches legacy `user -> job` as a compatibility fallback.
-- Resolves `company_id` from v2 job, legacy job, user profile, or page URL.
-- Uses legacy job star rating as an additional fallback.
-- Sync Diagnostics now shows `Director only` for employee-list data in employee mode.
+- Adds legacy `user -> job` compatibility and multiple company-ID/star fallbacks.
 
 ### v1.8.4 — Company star detection fix
+- Improves company rating/star extraction across current and legacy response shapes.
+- Fixes the internal displayed-version mismatch.
 
-- Uses company profile rating when available.
-- Falls back to `user -> job` company star rating for employee mode.
-- Supports multiple current/legacy field names and nested company objects.
-- Fixes internal version display mismatch (1.8.1 shown while header was newer).
-
-- v1.8.1: The selected Employee/Director mode and active section now remain saved and are restored when Company Intelligence is reopened.
-- Added reliable per-selection API v2 to classic API fallback for Basic, Job, Work Stats and Profile.
-- Fixed missing Employee position and stopped the Position tab from surfacing transient backend errors when classic fallback succeeds.
-- Added Employee Progress with observed work-stat pace and promised/received train tracking.
-- Added intraday metric history so Growth Signals no longer remain at a misleading `+0` after same-day refreshes.
-- Added a clear estimated Star Direction: `LIKELY STAR UP`, `STABLE` or `STAR LOSS RISK`.
-- Effectiveness now uses director employee data, job/profile data or the visible Torn page; otherwise it explains that Director data is required.
-- Fixed Advice, Offers and Trains navigation resetting the panel position on TornPDA.
-- Prevented Company Intelligence buttons from being interpreted as Torn page form actions.
-- Removed the combined Modules card from Employee Overview and kept the module summary in Director Overview.
-- Expanded the complete feature line from v1.1.0 through v1.7.0.
-- Fixed company identity being lost after a successful refresh.
-- Added persistent last-known company data and one valid snapshot per company day.
-- Removed the duplicate Train Promise card from Overview.
-- Added Growth, Staff Optimizer, Smart Training, Contracts, Balance, Benchmark, Timeline and Advice modules.
-- Added CSV contract/report exports and complete JSON backup/restore support.
+### v1.8.1 — Persistent modes and expanded intelligence
+- Persists Employee/Director mode and active section.
+- Added reliable API v2/classic fallbacks, Employee Progress, Growth, Staff Optimizer, Smart Training, Contracts, Balance, Benchmark, Timeline and Advice.
+- Added CSV/report exports and complete JSON backup/restore.
 - Star predictions remain confidence-based and never invent an exact probability without comparison data.
-
-## Privacy and important information
-- The API key and all company notes, contracts, benchmarks and history are stored locally in the script manager/browser.
-- No hidden gameplay actions are performed.
-- Financial totals exclude costs that Torn does not expose; missing values are not silently treated as real zeroes.
-- Company rating is comparative and evaluated by Torn. Star Outlook is decision support, not a guarantee.
