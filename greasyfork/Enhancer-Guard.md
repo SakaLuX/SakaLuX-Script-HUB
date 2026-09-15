@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.31**
+**v1.3.33**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -16,7 +16,8 @@
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release note
-**v1.3.31** preserves the complete v1.3.30 standalone-dock/panel behavior while removing fully protected items from Torn's current mobile/PDA Bazaar add-items list.
+
+**v1.3.33** standardizes the shared Standalone menu ordering. Known modules now use one canonical order, and any unknown/new module is placed after known modules instead of jumping directly below the STANDALONE subtitle. This prevents Company Intelligence from appearing at the top when another add-on renders the dock.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -35,6 +36,12 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history
+### v1.3.33 — Shared Standalone ordering fix
+
+- Uses the canonical SakaLuX standalone order including Company Intelligence.
+- Unknown/new modules sort after known modules instead of before them.
+- Keeps the mobile dock layout and Install SakaLuX Hub button readable.
+
 ### v1.3.31 — Protected Bazaar items
 - Preserves every v1.3.30 behavior.
 - Hides fully protected items from legacy/current mobile/PDA Bazaar sale lists.

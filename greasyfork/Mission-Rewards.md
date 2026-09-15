@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.18**
+**v1.0.20**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -16,7 +16,8 @@
 - Keeps Mission Shop-specific scanning inactive outside Missions.
 
 ## Current release note
-**v1.0.18** is the restored stable Mission Rewards release. Experimental Mission Hints/TornTools integration is not part of the current userscript, preserving reliable startup, Hub registration, ON/OFF controls and reward intelligence.
+
+**v1.0.20** standardizes the shared Standalone menu ordering. Known modules now use one canonical order, and any unknown/new module is placed after known modules instead of jumping directly below the STANDALONE subtitle. This prevents Company Intelligence from appearing at the top when another add-on renders the dock.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -33,6 +34,12 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history
+### v1.0.20 — Shared Standalone ordering fix
+
+- Uses the canonical SakaLuX standalone order including Company Intelligence.
+- Unknown/new modules sort after known modules instead of before them.
+- Keeps the mobile dock layout and Install SakaLuX Hub button readable.
+
 ### v1.0.18 — Restored stable release
 - Restored the proven Mission Rewards code path after the experimental Mission Hints integration was rolled back.
 - Preserves reliable Hub detection/power controls and Mission Shop intelligence.

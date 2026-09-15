@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.3
+// @version      1.3.4
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -22,9 +22,9 @@
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
   const INTERVAL = 12 * 60 * 60 * 1000;
-  const DOCK_ID = 'sakalux-standalone-dock';
-  const PROMPT_ID = 'sakalux-hub-install-prompt';
-  const STYLE_ID = 'sakalux-standalone-dock-style';
+  const DOCK_ID = 'sakalux-account-auditor-standalone-dock';
+  const PROMPT_ID = 'sakalux-account-auditor-hub-install-prompt';
+  const STYLE_ID = 'sakalux-account-auditor-standalone-style';
 
   const hubInstalled = () => !!(window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button'));
 

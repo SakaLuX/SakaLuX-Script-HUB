@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.21**
+**v5.3.23**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -13,7 +13,8 @@
 - Works without a Torn API key.
 
 ## Current release note
-**v5.3.21** keeps the Bazaar Thanker panel above the shared standalone dock while settings remain accessible through Script Hub or the standalone dock without a separate floating launcher.
+
+**v5.3.23** standardizes the shared Standalone menu ordering. Known modules now use one canonical order, and any unknown/new module is placed after known modules instead of jumping directly below the STANDALONE subtitle. This prevents Company Intelligence from appearing at the top when another add-on renders the dock.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -28,6 +29,12 @@ Generated thank-you text should be reviewed before sending. The script assists w
 **All Rights Reserved**
 
 ## Release history
+### v5.3.23 — Shared Standalone ordering fix
+
+- Uses the canonical SakaLuX standalone order including Company Intelligence.
+- Unknown/new modules sort after known modules instead of before them.
+- Keeps the mobile dock layout and Install SakaLuX Hub button readable.
+
 ### v5.3.21 — Panel layering and launcher cleanup
 - Keeps the panel above the shared standalone dock.
 - Preserves Settings access through Hub/shared dock without a separate floating launcher.
