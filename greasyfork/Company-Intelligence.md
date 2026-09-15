@@ -3,7 +3,7 @@
 > Standalone SakaLuX company-intelligence tool. Not registered in SakaLuX Script Hub.
 
 ## Current version
-**v1.8.9**
+**v1.8.10**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.9** fixes Best Position Advisor ranking. It now prefers official Company Positions primary/secondary requirements, caches requirements seen in Torn, includes empty positions such as Promoter even when no coworker currently occupies them, and ranks fully-qualified roles by the highest meaningful requirement rather than simply rewarding overqualification in low-level roles. Pub requirements are seeded from the official in-game table and DOM observations override the cache.
+**v1.8.10** redesigns the Director Staff view for phones. Smart Roster and Position Optimizer now switch from squeezed desktop tables to readable employee cards on mobile, with labeled rows for position, work stats, effectiveness, wage, flags and recommendation data. Desktop tables remain unchanged.
 
 ## Recommended
 - Use the API-key button to create a key with the displayed selections.
@@ -31,6 +31,14 @@
 All Rights Reserved
 
 ## Release history
+### v1.8.10 — Mobile Staff readability
+
+- Converts Smart Roster to stacked employee cards on mobile.
+- Converts Employee Effectiveness & Position Optimizer to stacked cards on mobile.
+- Adds explicit field labels so values no longer run together.
+- Keeps desktop table layout unchanged.
+- Improves spacing, wrapping and badge readability on TornPDA.
+
 ### v1.8.9 — Official position requirements
 
 - Uses Company Positions primary/secondary requirements before coworker estimates.

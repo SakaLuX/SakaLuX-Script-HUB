@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.9
+// @version      1.8.10
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -143,7 +143,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.9',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.10',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -468,9 +468,9 @@ function growthCenter(){
 }
 function employeeOptimizer(){
  const list=employees().map(normEmp),pos=positions();
- if(!list.length)return card('Position Optimizer',empty('Employee data is available only to the company director with the required API access.'));
- const rows=list.map(e=>{const stats={manual:e.manual,intelligence:e.intelligence,endurance:e.endurance},ranked=pos.map(p=>({...p,score:fit(stats,p)})).sort((a,b)=>b.score-a.score),best=ranked[0],current=ranked.find(p=>p.name===e.position),gain=best?Math.max(0,best.score-(current?.score||0)):0;return {...e,best:best?.name||'No requirements',fit:best?.score||0,gain}}).sort((a,b)=>b.gain-a.gain||a.effectiveness-b.effectiveness);
- return card('Employee Effectiveness & Position Optimizer',`<div class="ci-tablewrap"><table><thead><tr><th>Employee</th><th>Current</th><th>EE</th><th>Suggested</th><th>Fit</th><th>Potential</th></tr></thead><tbody>${rows.map(e=>`<tr><td><b>${esc(e.name)}</b></td><td>${esc(e.position||'—')}</td><td>${fmt(e.effectiveness)}</td><td>${esc(e.best)}</td><td>${e.fit}%</td><td>${e.gain?badge('+'+e.gain+' fit','good'):badge('KEEP')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">Suggestions use exposed position requirements and work stats. Torn's real effectiveness value remains authoritative.</p>`);
+ if(!list.length)return card('Position Optimizer',empty('Employee data is unavailable for this API response.'));
+ const rows=list.map(e=>{const stats={manual:e.manual,intelligence:e.intelligence,endurance:e.endurance},ranked=pos.map(p=>({...p,score:fit(stats,p)})).sort((a,b)=>(Number(b.qualified)-Number(a.qualified))||(b.demand||0)-(a.demand||0)||b.score-a.score),best=ranked[0],current=ranked.find(p=>p.name===e.position),gain=best?Math.max(0,best.score-(current?.score||0)):0;return {...e,best:best?.name||'No requirements',fit:best?.score||0,gain}}).sort((a,b)=>b.gain-a.gain||a.effectiveness-b.effectiveness);
+ return card('Employee Effectiveness & Position Optimizer',`<div class="ci-tablewrap ci-mobile-cards ci-optimizer-table"><table><thead><tr><th>Employee</th><th>Current</th><th>EE</th><th>Suggested</th><th>Fit</th><th>Potential</th></tr></thead><tbody>${rows.map(e=>`<tr><td class="ci-person-cell" data-label="Employee"><b>${esc(e.name)}</b><small>#${e.id||''}</small></td><td data-label="Current">${esc(e.position||'Unassigned')}</td><td data-label="Effectiveness">${fmt(e.effectiveness)}</td><td data-label="Suggested"><b>${esc(e.best)}</b></td><td data-label="Fit">${e.fit}%</td><td data-label="Potential">${e.gain?badge('+'+e.gain+' fit','good'):badge('KEEP')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">Suggestions use official position requirements when available. Torn's effectiveness value remains authoritative.</p>`);
 }
 function trainingManager(){
  const list=employees().map(normEmp),logs=arr(KEY.trains),contracts=arr(KEY.contracts).filter(x=>x.active!==false),week=logs.filter(x=>now()-x.ts<7*86400000),counts=new Map();
@@ -549,7 +549,7 @@ function directorOverview(){
 }
 function directorEmployees(){
  const e=employees().map(normEmp).sort((a,b)=>b.effectiveness-a.effectiveness);
- return card('Smart Roster',e.length?`<div class="ci-tablewrap"><table><thead><tr><th>Employee</th><th>Position</th><th>MAN</th><th>INT</th><th>END</th><th>EE</th><th>Wage</th><th>Flags</th></tr></thead><tbody>${e.map(x=>{let f=[];if(x.effectiveness&&x.effectiveness<90)f.push(badge('LOW EE','bad'));if(x.lastTs&&days(now()-x.lastTs)>=3)f.push(badge('INACTIVE','bad'));return `<tr><td><b>${esc(x.name)}</b><small>#${x.id||''}</small></td><td>${esc(x.position)}</td><td>${fmt(x.manual)}</td><td>${fmt(x.intelligence)}</td><td>${fmt(x.endurance)}</td><td>${fmt(x.effectiveness)}</td><td>${money(x.wage)}</td><td>${f.join(' ')||badge('OK','good')}</td></tr>`}).join('')}</tbody></table></div>`:empty('No employee data available.'));
+ return card('Smart Roster',e.length?`<div class="ci-tablewrap ci-mobile-cards ci-roster-table"><table><thead><tr><th>Employee</th><th>Position</th><th>MAN</th><th>INT</th><th>END</th><th>EE</th><th>Wage</th><th>Flags</th></tr></thead><tbody>${e.map(x=>{let f=[];if(x.effectiveness&&x.effectiveness<90)f.push(badge('LOW EE','bad'));if(x.lastTs&&days(now()-x.lastTs)>=3)f.push(badge('INACTIVE','bad'));return `<tr><td class="ci-person-cell" data-label="Employee"><b>${esc(x.name)}</b><small>#${x.id||''}</small></td><td data-label="Position">${esc(x.position||'Unassigned')}</td><td data-label="MAN">${fmt(x.manual)}</td><td data-label="INT">${fmt(x.intelligence)}</td><td data-label="END">${fmt(x.endurance)}</td><td data-label="Effectiveness">${fmt(x.effectiveness)}</td><td data-label="Wage">${money(x.wage)}</td><td data-label="Flags">${f.join(' ')||badge('OK','good')}</td></tr>`}).join('')}</tbody></table></div>`:empty('No employee data available.'));
 }
 function directorTrains(){
  const a=arr(KEY.agreements).filter(x=>x.active!==false),l=arr(KEY.trains);
@@ -609,6 +609,23 @@ function css(){
 .ci-snapshots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ci-snapshot{background:#0e1620;border:1px solid #304156;border-radius:10px;padding:10px;min-width:0}.ci-snapshot-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:8px;border-bottom:1px solid #283646}.ci-snapshot-head b{color:#f3c85d;font-size:13px;white-space:nowrap}.ci-snapshot-head span{color:#e6edf5;font-weight:800;text-align:right;overflow-wrap:anywhere}.ci-snapshot-position{display:flex;justify-content:space-between;gap:10px;padding:9px 0}.ci-snapshot-position span,.ci-snapshot-stats span{color:#8494a7;font-size:9px;font-weight:900;letter-spacing:.08em}.ci-snapshot-position b{color:#dbe7f4;text-align:right}.ci-snapshot-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.ci-snapshot-stats div{display:flex;flex-direction:column;gap:3px;background:#172230;border-radius:7px;padding:8px;text-align:center}.ci-snapshot-stats b{color:#66d7a1;font-size:14px}
 .ci-contract{padding:11px;border-bottom:1px solid #2a3542}.ci-contract>div:first-child{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px}.ci-contract small{color:#f2bd52;font-weight:900}.ci-contract-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;margin-bottom:8px}.ci-advice{display:flex;flex-direction:column;gap:3px;border-left:4px solid #5b6a7b;background:#111a24;padding:9px 10px;margin-bottom:7px;border-radius:7px}.ci-advice span{color:#9aa8b7;font-size:11px}.ci-advice.good{border-color:#49c68d}.ci-advice.warn{border-color:#f2bd52}.ci-advice.bad{border-color:#ef7070}.ci-timeline{display:grid;grid-template-columns:130px minmax(0,1fr);gap:3px 10px;padding:9px 0;border-bottom:1px solid #28313b}.ci-timeline time{grid-row:1/3;color:#8190a0;font-size:10px}.ci-timeline b{color:#e8eef6}.ci-timeline span{color:#91a0af;font-size:11px}
 .ci-module-list{display:grid;grid-template-columns:auto 1fr;gap:8px 12px}.ci-module-list b{color:#f2bd52;font-size:10px}.ci-module-list span{color:#cbd5df;font-size:11px;line-height:1.45}
+
+@media(max-width:720px){
+ .ci-mobile-cards{overflow:visible!important}
+ .ci-mobile-cards table,.ci-mobile-cards tbody,.ci-mobile-cards tr,.ci-mobile-cards td{display:block!important;width:100%!important;box-sizing:border-box!important}
+ .ci-mobile-cards thead{display:none!important}
+ .ci-mobile-cards tr{margin:0 0 10px!important;padding:8px 10px!important;border:1px solid #304156!important;border-radius:10px!important;background:#0f1721!important;box-shadow:0 3px 10px rgba(0,0,0,.18)!important}
+ .ci-mobile-cards td{display:grid!important;grid-template-columns:minmax(92px,42%) minmax(0,1fr)!important;align-items:center!important;gap:8px!important;padding:5px 0!important;border:0!important;border-bottom:1px solid #222d39!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:right!important;font-size:12px!important}
+ .ci-mobile-cards td:last-child{border-bottom:0!important}
+ .ci-mobile-cards td::before{content:attr(data-label);color:#8291a2;font-size:10px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;text-align:left!important}
+ .ci-mobile-cards .ci-person-cell{display:block!important;text-align:left!important;padding:2px 0 8px!important;margin-bottom:2px!important;border-bottom:1px solid #334152!important}
+ .ci-mobile-cards .ci-person-cell::before{display:none!important}
+ .ci-mobile-cards .ci-person-cell b{display:block!important;color:#f2f6fa!important;font-size:14px!important;line-height:1.2!important}
+ .ci-mobile-cards .ci-person-cell small{display:block!important;margin-top:2px!important;color:#7f8da0!important;font-size:10px!important}
+ .ci-mobile-cards .ci-badge{font-size:10px!important;padding:4px 7px!important}
+ .ci-roster-table td[data-label="MAN"],.ci-roster-table td[data-label="INT"],.ci-roster-table td[data-label="END"]{font-variant-numeric:tabular-nums!important}
+ .ci-optimizer-table td[data-label="Suggested"] b{color:#7dd3fc!important}
+}
 @media(max-width:720px){#ci-root{inset:0 0 72px;padding:0;display:block;overflow:hidden;touch-action:pan-y;overscroll-behavior:contain}.ci-shell{width:100%;height:100%;min-height:0;border:0;border-radius:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:24px;box-sizing:border-box}.ci-grid,.ci-snapshots{grid-template-columns:1fr}.ci-head{padding:7px}.ci-brand b{font-size:13px}.ci-brand small{font-size:10px}.ci-mode button{font-size:10px;padding:7px}.ci-tabs{position:sticky;top:58px;z-index:2;padding:5px}.ci-tabs button{font-size:11px;padding:7px 8px}.ci-form{grid-template-columns:1fr}.ci-form .wide{grid-column:auto}#ci-launch{right:8px;bottom:72px}}
 `;document.head.appendChild(st);
 }
