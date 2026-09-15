@@ -1,0 +1,30 @@
+name: Patch Company Intelligence v1.8.16
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/patch-company-v1.8.16.trigger'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python .github/scripts/patch_company_1_8_16_standalone_order.py
+      - name: Validate
+        run: |
+          grep -q '@version      1.8.16' SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q "version:'1.8.16'" SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q 'normalizeStandaloneCompanyPlacement' SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q '"version": "1.8.16"' scripts.json
+          python -m json.tool scripts.json >/dev/null
+          node --check SakaLuX-Company-Intelligence-v1.0.0.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Company-Intelligence-v1.0.0.user.js scripts.json greasyfork/Company-Intelligence.md
+          git commit -m 'Company Intelligence v1.8.16: fix standalone ordering'
+          git push
