@@ -1,141 +1,121 @@
 # ☠️ SakaLuX Script Hub
 
-Core manager for the SakaLuX Torn script ecosystem.
+> Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-
-**v1.9.12**
+**v1.9.38**
 
 ## What it does
-
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
 - Detects installed, missing and outdated registered SakaLuX add-ons.
-- Gives installed modules a clean native ON/OFF switch plus one OPEN or SETTINGS action.
-- **CHECK** refreshes the live registry and then verifies available updates.
-- **UPDATE** refreshes the live registry and update state before opening available installers.
+- Gives installed modules a native ON/OFF switch plus one OPEN or SETTINGS action.
+- **CHECK** refreshes the live registry and verifies available updates.
+- **UPDATE** refreshes the registry/update state before opening installers.
 - Revalidates update status against the actually installed version to avoid stale alerts.
-- Provides **SYSTEM CHECK** for registry access, update sources and module health.
-- Provides **WHAT'S NEW**, category navigation, health information and backup / restore.
-- Uses a premium control-center layout optimized for both Torn PDA and desktop userscript managers.
-- Adds a Torn-native **HUB** mobile navigation entry with a floating fallback launcher.
-- Exposes `window.SakaLuXScriptHub` for integration with registered complementary add-ons.
-- Uses the common `setEnabled`, `toggleEnabled` and `isEnabled` integration API.
-- Can securely store one shared Torn API key locally for registered add-ons that require Torn API access.
-- Works with Torn PDA and Tampermonkey.
+- Provides SYSTEM CHECK, WHAT'S NEW, category navigation, health information and backup/restore.
+- Uses a TornPDA-first control-center layout with desktop userscript-manager support.
+- Adds a Torn-native HUB mobile launcher with a fallback launcher when required.
+- Exposes `window.SakaLuXScriptHub` for registered complementary add-ons.
+- Supports the shared `setEnabled`, `toggleEnabled` and `isEnabled` integration API.
+- Can store one shared Torn API key locally for compatible registered add-ons.
+- Uses live module presence/bridges rather than stale installation markers for current status.
 
-## Current release notes
-
-### v1.9.12 — Extensible shared languages
-
-- English is the guaranteed standalone default for every SakaLuX script.
-- Hub loads the shared `locales.json` registry and applies its selected language to every SakaLuX interface.
-- The selector is generated from the locale registry, allowing additional languages without changing its UI code.
-- Added `getLanguages()` alongside `getLanguage()` and `setLanguage()` for add-on integration.
-
-### v1.9.11 — English and Romanian interfaces
-
-- Added a persistent **Language** selector beside **Fallback button position** in a balanced two-column row.
-- Added shared **English / Română** localization for Script Hub and all SakaLuX add-on interfaces managed by it.
-- Language changes apply immediately and also translate UI elements created later by TornPDA navigation.
-- Exposed `getLanguage()` and `setLanguage()` for native localization in every add-on.
-
-### v1.9.10 — Violentmonkey/macOS detection
-
-- Fixed installed modules incorrectly appearing as **OFF + INSTALL** when Violentmonkey isolates each userscript's `window` API.
-- Installation markers and DOM bridges are now checked before the sandboxed runtime API.
-- Added cross-context ON/OFF and OPEN support through hidden DOM control bridges.
-- Corrected the Elimination Assistant marker mismatch.
-
-### v1.9.9 — Inline panel signature
-
-- Removed the floating author badge from the Torn page.
-- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
-
-### v1.9.8 — Persistent SakaLuX signature
-
-- Restored **Made with ❤️ by SakaLuX [2380374]** in the Hub footer with the linked Torn profile.
-- Added the persistent shared author footer used by every current SakaLuX userscript.
-- Market Intelligence now uses a cleaner subtitle and a larger Hub-style close button.
-
-### v1.9.7
-
-- Embedded the unified **SakaLuX Control Center** visual theme directly into every current SakaLuX userscript so the look no longer depends on Hub being present.
-- Synchronized the managed add-on patch versions in `scripts.json`, Hub fallback data and the dedicated information pages.
-- Account Auditor and SakaLuX Suite also receive their own embedded copy of the visual layer while remaining standalone and completely absent from the Hub registry.
-
-### v1.9.6
-
-- Added a unified **SakaLuX Control Center** visual layer across current SakaLuX interfaces.
-- Standardized dark surfaces, borders, cards, buttons, fields and responsive spacing for Enhancer Guard, Bazaar Thanker, Mission Rewards, Market Intelligence and Elimination Assistant.
-- Compatible prefixed settings checkboxes now use the same sliding-switch visual language as Hub.
-- The same visual layer also recognizes **Account Auditor** and **SakaLuX Suite** when installed, while both remain completely standalone and absent from the Hub registry.
-- This release changes presentation only for external module panels; module logic, APIs and saved data are unchanged.
-
-### v1.9.5
-
-- Converted boolean Hub Settings controls to professional slide switches.
-- Removed the duplicate **REFRESH scripts.json** button from Settings.
-- Removed the duplicate **CHECK UPDATES NOW** button from Settings.
-- **CHECK** now refreshes `scripts.json` before checking published versions.
-- **UPDATE** now refreshes `scripts.json` and update state before opening update installers.
-- Removed the fallback floating-skull long-press Quick Menu option and its gesture handling.
-- Kept fallback button position and size controls, shared API key management, backup/restore and reset controls.
-
-### v1.9.4
-
-- Redesigned the Hub as a premium **SakaLuX Control Center** with stronger visual hierarchy and cleaner TornPDA readability.
-- Rebuilt the header, health summary, command bar, category navigation and module cards around a consistent dark control-room design.
-- Replaced icon-only management controls with compact labelled actions for **CHECK**, **UPDATE**, **HEALTH**, **NEW** and **SETTINGS**.
-- Added concise module status chips for installed version, update state, active/disabled state and contextual module information.
-- Reduced raw technical text inside module cards while keeping detailed diagnostics available through **SYSTEM CHECK**.
-
-### v1.9.3
-
-- Added PC/Tampermonkey-safe persistent installation markers so Hub can detect registered scripts even when isolated userscript sandboxes hide their runtime APIs.
-
-### v1.9.2
-
-- Removed the Hub search field; registered modules remain available through the category tabs.
-
-### v1.9.1
-
-- Made the live `scripts.json` registry the canonical minimum for **Latest**.
-- Update caches now expire immediately when a registry version changes.
-- When the Greasy Fork mirror is behind, install/update actions can use the current GitHub userscript source to prevent downgrades.
-- Synchronized the offline fallback registry with the current module versions.
-- Added automated cross-file version validation.
-
-### v1.9.0
-
-- Redesigned the Hub with a cleaner TornPDA-first card layout.
-- Reduced every registered module card to a persistent ON/OFF slider and one OPEN or SETTINGS action.
-- Added native runtime power control for registered add-ons.
-- Added shared Torn API-key creation, save/test and clear controls.
-- Registered add-ons automatically prefer the shared Hub key when compatible.
+## Current release note
+**v1.9.38** is built from the known-good v1.9.37 Hub baseline. It synchronizes the offline fallback registry with the current live registry, adds Company Intelligence v1.8.12, updates Market Intelligence to v1.17.19 and Elimination Assistant to v1.3.31, and makes published-version discrepancies clearer. Company Intelligence now uses its actual GitHub distribution source instead of a Greasy Fork source that did not match the installed userscript.
 
 ## Recommended
-
-Install SakaLuX Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
+Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-
 - 🛡️ SakaLuX Enhancer Guard **v1.3.31**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.21**
 - 🎯 SakaLuX Mission Rewards **v1.0.18**
 - 📈 SakaLuX Market Intelligence **v1.17.19**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.30**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.31**
+- 🏢 SakaLuX Company Intelligence **v1.8.12**
+
+Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
 ## Privacy
-
 - The shared Torn API key is stored locally in the userscript/browser environment.
-- Hub does not publish the user's Torn API key to the public SakaLuX registry.
-- Hub contacts the configured update/registry sources to check module metadata and current versions.
-- Individual registered add-ons may use their own external data sources; see each add-on's information page for its specific privacy details.
+- Hub does not publish the user's Torn API key to the public registry.
+- Hub contacts configured registry/update sources to check metadata and versions.
+- Individual add-ons may use their own external data sources; see each add-on's information page.
 
 ## Important
-
-Every future complementary SakaLuX add-on intended for Hub management should be added to `scripts.json` and should keep its dedicated `greasyfork/*.md` information file synchronized with the current script version.
+- `scripts.json` is the canonical registry/minimum version source used by Hub.
+- A **PUBLISHED / REGISTRY** mismatch means the configured public distribution source has not yet caught up with the registry; it does not automatically mean the installed script is broken.
+- Market Intelligence is distributed through Greasy Fork, so a registry version newer than its Greasy Fork meta version legitimately appears as publish pending until that Greasy Fork release is published.
+- Company Intelligence v1.8.12 is currently distributed from the GitHub userscript source; Hub v1.9.38 no longer checks it against the unrelated Greasy Fork metadata that caused a false publish-pending state.
+- Future complementary modules intended for Hub management must be added to `scripts.json` and keep their dedicated information page synchronized.
 
 ## License
+**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
-**All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding, or publication of modified versions requires prior written permission.
+## Release history
+### v1.9.38 — Registry and distribution synchronization
+- Built from the stable v1.9.37 baseline.
+- Synchronized fallback registry versions with the live registry.
+- Added Company Intelligence v1.8.12 to the Hub fallback registry and runtime integration.
+- Updated Market Intelligence to v1.17.19 and Elimination Assistant to v1.3.31.
+- Corrected Company Intelligence update metadata to use its GitHub distribution source.
+- Improved pending-version labels to show the published and registry versions explicitly.
+- Rotated Hub update/registry cache keys so old rollback-era cache data cannot mask the new registry.
+
+### v1.9.37 — Stable registry/cache baseline
+- Kept live module presence as the source of truth for installed status.
+- Restored Mission Rewards v1.0.18 as the stable registered release.
+- Rotated registry/update caches after rollback so stale cached versions no longer survive.
+
+### v1.9.36 — Rollback cache invalidation
+- Invalidated cached registry/update data after reverting experimental module versions.
+- Preserved the stable module-presence detection model.
+
+### v1.9.35 — Live installation status
+- Removed ghost installation state derived from local installation markers.
+- Installed status is based on current live module presence, bridge/API registration or standalone registration.
+
+### v1.9.34 — Generic runtime compatibility
+- Removed userscript-manager-specific compatibility handling.
+- Kept generic runtime API and DOM bridge integration across supported managers.
+
+### v1.9.33 — Panel stacking
+- Corrected Hub panel stacking relative to the shared standalone dock.
+
+### v1.9.32 — Hub panel runtime restoration
+- Restored Hub panel runtime after the bridge-only launcher migration.
+
+### v1.9.29–v1.9.31 — Managed launcher cleanup
+- Removed managed add-on floating launchers while Hub is active.
+- Managed modules are opened through Hub bridges/APIs instead of duplicate page buttons.
+
+### v1.9.27–v1.9.28 — Published/registry version handling
+- Distinguished published Greasy Fork version from registry version without creating an update loop.
+- Added live bridge/API/standalone version detection and synchronized fallback data.
+
+### v1.9.22–v1.9.26 — Standalone launcher and detection work
+- Added the compact native S launcher/shared standalone dock behavior.
+- Refined Hub install reminders and eliminated false standalone detection.
+
+### v1.9.12 — Extensible shared languages
+- English became the guaranteed standalone default.
+- Added an extensible locale registry with bundled English/Romanian fallback.
+- Language choices are generated from the locale registry.
+
+### v1.9.11 — English and Romanian interfaces
+- Added the persistent Language selector and shared localization across managed SakaLuX interfaces.
+
+### v1.9.10 — Cross-context module detection
+- Added hidden DOM bridges for isolated userscript contexts and corrected false OFF/INSTALL states.
+
+### v1.9.5 — Update-control cleanup
+- Converted Hub boolean settings to slide switches and consolidated registry/update controls into CHECK and UPDATE.
+
+### v1.9.4 — Control Center redesign
+- Rebuilt the Hub around the current premium TornPDA-first control-center layout.
+
+### v1.9.1 — Canonical registry minimum
+- Made `scripts.json` the canonical minimum version and invalidated update cache when registry versions change.
+
+### v1.9.0 — Native module power control
+- Introduced the current module-card ON/OFF model and shared Hub API-key management.
