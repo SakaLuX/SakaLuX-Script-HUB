@@ -243,7 +243,7 @@
       "name": "Company Intelligence",
       "icon": "🏢",
       "category": "Company",
-      "version": "1.8.15",
+      "version": "1.8.16",
       "description": "Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.",
       "metaUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "downloadUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js",
