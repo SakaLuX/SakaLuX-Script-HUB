@@ -1,6 +1,6 @@
 # 🏢 SakaLuX Company Intelligence
 
-> Complementary add-on for **SakaLuX Script Hub**. It also works standalone on TornPDA / Tampermonkey.
+> Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
 **v1.8.14**
@@ -18,11 +18,10 @@
 - Company timeline, report export, diagnostics and actionable advice.
 
 ## Current release note
-
-**v1.8.14** removes Company Intelligence from the shared standalone dock completely and removes its floating Company Intel launcher. Company Intelligence is now opened only through SakaLuX Script Hub using its runtime API/hidden bridge, preventing it from changing or breaking the standalone dock layout used by the other add-ons.
+**v1.8.14** removes Company Intelligence from the shared standalone dock and removes its floating Company Intel launcher. The module is opened through **SakaLuX Script Hub** using its runtime API/hidden bridge, so it no longer changes the standalone dock layout used by the other add-ons.
 
 ## Recommended
-- Install **SakaLuX Script Hub** when using Company Intelligence with the modular SakaLuX ecosystem.
+- Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
 - Use the API-key button to create a key with the displayed selections.
 - Refresh after Torn's daily company report to build useful history.
 - Director-only modules require the key owner to be the company director.
@@ -37,21 +36,20 @@
 - Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
 - Company rating is comparative and evaluated by Torn.
 - Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
-- Company Intelligence v1.8.12 is currently updated from its GitHub userscript source. A Greasy Fork metadata entry must not be used as the canonical update source unless the userscript is intentionally republished there later.
+- The active userscript, Hub registry entry and this information page are synchronized at **v1.8.14**.
+- The Hub registry uses Greasy Fork script **595873** for public version checks, while the userscript retains its own raw-GitHub `@downloadURL` / `@updateURL` metadata.
 
 ## License
 **All Rights Reserved**
 
 ## Release history
 ### v1.8.14 — Remove standalone Company launcher
-
 - Removes the Company entry from the shared standalone SakaLuX Scripts dock.
 - Removes the floating Company Intel page button completely.
 - Keeps Hub integration through `window.SakaLuXCompanyIntelligence` and the hidden module bridge.
 - Stops Company Intelligence from injecting its own standalone dock CSS/layout.
 
 ### v1.8.13 — Hub integration detection
-
 - Uses all current Script Hub DOM presence signals.
 - Removes the Company Intel floating button as soon as Hub is detected.
 - Registers Company Intelligence in the shared standalone dock only when Hub is truly absent.
