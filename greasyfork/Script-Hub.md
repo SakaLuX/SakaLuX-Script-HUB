@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.38**
+**v1.9.39**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -21,7 +21,7 @@
 - Uses live module presence/bridges rather than stale installation markers for current status.
 
 ## Current release note
-**v1.9.38** is built from the known-good v1.9.37 Hub baseline. It synchronizes the offline fallback registry with the current live registry, adds Company Intelligence v1.8.12, updates Market Intelligence to v1.17.19 and Elimination Assistant to v1.3.31, and makes published-version discrepancies clearer. Company Intelligence now uses its actual GitHub distribution source instead of a Greasy Fork source that did not match the installed userscript.
+**v1.9.39** publishes the Hub-active marker immediately at startup, before add-ons initialize. This prevents the shared standalone launcher from appearing when Hub is installed and lets Company Intelligence v1.8.13 integrate directly with Hub. Company Intelligence update metadata now points to its published Greasy Fork script 595873.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -32,7 +32,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 🎯 SakaLuX Mission Rewards **v1.0.18**
 - 📈 SakaLuX Market Intelligence **v1.17.19**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.31**
-- 🏢 SakaLuX Company Intelligence **v1.8.12**
+- 🏢 SakaLuX Company Intelligence **v1.8.13**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -46,13 +46,19 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - `scripts.json` is the canonical registry/minimum version source used by Hub.
 - A **PUBLISHED / REGISTRY** mismatch means the configured public distribution source has not yet caught up with the registry; it does not automatically mean the installed script is broken.
 - Market Intelligence is distributed through Greasy Fork, so a registry version newer than its Greasy Fork meta version legitimately appears as publish pending until that Greasy Fork release is published.
-- Company Intelligence v1.8.12 is currently distributed from the GitHub userscript source; Hub v1.9.38 no longer checks it against the unrelated Greasy Fork metadata that caused a false publish-pending state.
+- Company Intelligence v1.8.13 is published on Greasy Fork script 595873 and Hub checks that public update source.
 - Future complementary modules intended for Hub management must be added to `scripts.json` and keep their dedicated information page synchronized.
 
 ## License
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.39 — Reliable Hub presence handshake
+- Marks Hub as installed/active immediately when the userscript starts.
+- Prevents managed add-ons from showing the standalone dock while Hub is running.
+- Integrates Company Intelligence v1.8.13 with the same detection contract as the other add-ons.
+- Switches Company Intelligence public update checks to Greasy Fork 595873.
+
 ### v1.9.38 — Registry and distribution synchronization
 - Built from the stable v1.9.37 baseline.
 - Synchronized fallback registry versions with the live registry.

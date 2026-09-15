@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.12
+// @version      1.8.13
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -26,8 +26,16 @@
   const DOCK_ID = 'sakalux-standalone-dock';
   const PROMPT_ID = 'sakalux-hub-install-prompt';
   const STYLE_ID = 'sakalux-standalone-dock-style';
+  const REG_ATTR = 'data-slx-standalone-registration';
+  const SELF = {id:'company-intelligence',name:'Company',icon:'🏢',selector:'#ci-launch',fallback:'https://www.torn.com/joblist.php',version:'1.8.13'};
 
-  const hubInstalled = () => !!(window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button'));
+  function registerSelf(){
+    let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
+    if(!m){m=document.createElement('span');m.setAttribute(REG_ATTR,SELF.id);m.hidden=true;(document.body||document.documentElement).appendChild(m);}
+    Object.assign(m.dataset,SELF);
+  }
+
+  const hubInstalled = () => !!(window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button') || document.getElementById('sakalux-hub-top-skull') || document.getElementById('sakalux-hub-nav-skull') || document.getElementById('sakalux-hub-panel') || document.getElementById('sakalux-hub-style') || document.querySelector('[data-sakalux-hub-installed="1"]') || document.querySelector('[data-sakalux-hub-active="1"]'));
 
   function addStyle() {
     if (document.getElementById(STYLE_ID)) return;
@@ -50,6 +58,7 @@
     if (hubInstalled()) {
       document.getElementById(DOCK_ID)?.remove();
       document.getElementById(PROMPT_ID)?.remove();
+      document.getElementById('ci-launch')?.remove();
       return null;
     }
     addStyle();
@@ -107,7 +116,8 @@
   }
 
   function start() {
-    if (hubInstalled()) return;
+    registerSelf();
+    if (hubInstalled()) { ensureDock(); return; }
     ensureDock();
     collectLaunchers();
     setTimeout(maybePrompt, 1200);
@@ -115,13 +125,14 @@
     new MutationObserver(() => {
       clearTimeout(timer);
       timer = setTimeout(() => {
+        registerSelf();
         if (hubInstalled()) {
           document.getElementById(DOCK_ID)?.remove();
           document.getElementById(PROMPT_ID)?.remove();
         } else collectLaunchers();
       }, 80);
     }).observe(document.documentElement, {childList:true, subtree:true});
-    setInterval(() => { if (!hubInstalled()) { collectLaunchers(); maybePrompt(); } }, 60000);
+    setInterval(() => { registerSelf(); if (!hubInstalled()) { collectLaunchers(); maybePrompt(); } else ensureDock(); }, 60000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
@@ -143,7 +154,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.12',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.13',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -690,7 +701,7 @@ function init(){
  if(!S.data.profile){const cached=get(KEY.company,null),last=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>b.ts-a.ts)[0]?.company;if(cached||last)S.data.profile=cached||last}
  installHubBridge();syncHubBridge();
  try{localStorage.setItem('SakaLuX_Installed_company-intelligence',APP.version)}catch{}
- const hubActive=!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button'));if(hubActive)$('#ci-launch')?.remove();if(S.enabled&&!hubActive&&!$('#ci-launch')){const b=document.createElement('button');b.id='ci-launch';b.textContent='🏢 Company Intel';b.onclick=()=>{S.open=true;render();if(!S.updated&&apiKey())refresh()};document.body.appendChild(b)}
+ const hubActive=!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));if(hubActive)$('#ci-launch')?.remove();if(S.enabled&&!hubActive&&!$('#ci-launch')){const b=document.createElement('button');b.id='ci-launch';b.textContent='🏢 Company Intel';b.onclick=()=>{S.open=true;render();if(!S.updated&&apiKey())refresh()};document.body.appendChild(b)}
  try{
   window.SakaLuX=window.SakaLuX||{};
   window.SakaLuX.companyIntelligence={name:APP.name,version:APP.version,open:()=>{if(!S.enabled)setEnabled(true);S.open=true;render()},refresh,mode:m=>{if(['employee','director'].includes(m)){S.mode=m;S.tab='overview';set(KEY.mode,m);set(KEY.tab,S.tab);render()}},getApiKey:apiKey,setEnabled,toggleEnabled:()=>setEnabled(!S.enabled),isEnabled:()=>S.enabled};
