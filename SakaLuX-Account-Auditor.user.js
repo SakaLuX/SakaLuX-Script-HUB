@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.2
+// @version      1.3.3
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -33,14 +33,14 @@
     const s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = `
-#${DOCK_ID}{position:fixed;right:10px;bottom:72px;z-index:2147483000;display:flex;flex-direction:column;gap:6px;max-width:min(260px,calc(100vw - 20px));padding:8px;background:rgba(13,17,23,.96);border:1px solid #3b4654;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.45);font:12px Arial,sans-serif}
+#${DOCK_ID}{position:fixed;right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:2147483000;display:flex;flex-direction:column;gap:7px;width:min(220px,calc(100vw - 20px));max-height:calc(100dvh - 190px);overflow:hidden;padding:10px;background:rgba(13,17,23,.985);border:1px solid #465365;border-radius:16px;box-shadow:0 12px 34px rgba(0,0,0,.5);font:12px Arial,sans-serif;box-sizing:border-box}
 #${DOCK_ID}[data-collapsed="1"] .slx-dock-items{display:none}
 #${DOCK_ID} .slx-dock-head{display:flex;align-items:center;gap:6px}
 #${DOCK_ID} .slx-dock-title{flex:1;color:#facc15;font-weight:900}
 #${DOCK_ID} button,#${DOCK_ID} a{box-sizing:border-box!important;position:static!important;inset:auto!important;transform:none!important;float:none!important;margin:0!important;min-width:0!important;max-width:none!important;width:100%!important;height:auto!important;min-height:34px!important;padding:7px 9px!important;border-radius:8px!important;font:700 12px/1.2 Arial,sans-serif!important;white-space:normal!important}
 #${DOCK_ID} .slx-dock-head button{width:auto!important;min-height:28px!important;padding:4px 7px!important}
-#${DOCK_ID} .slx-dock-install{background:#8a5a00!important;border:1px solid #f59e0b!important;color:#fff!important;text-decoration:none!important;text-align:center!important;display:block!important}
-#${DOCK_ID} .slx-dock-items{display:flex;flex-direction:column;gap:5px}
+#${DOCK_ID} .slx-dock-install{background:linear-gradient(180deg,#9a741f,#6d5015)!important;border:1px solid #f0c44e!important;color:#fff7d6!important;text-decoration:none!important;text-align:center!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;min-height:42px!important;font-weight:900!important}
+#${DOCK_ID} .slx-dock-items{display:flex;flex:1 1 auto;min-height:0;overflow-y:auto;flex-direction:column;gap:7px}
 `;
     (document.head || document.documentElement).appendChild(s);
   }
