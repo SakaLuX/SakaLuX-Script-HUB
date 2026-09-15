@@ -1,105 +1,75 @@
 # 🔎 SakaLuX Account Auditor
 
-> Standalone SakaLuX account-auditing tool. Not registered in SakaLuX Script Hub.
+> Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
 **v1.3.2**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
-- Creates split snapshot files for easier review: `summary.json`, `finance.json`, `combat.json`, `crimes.json`, `messages.json`, `events.json` and `logs.json`.
-- Keeps the complete `SakaLuX-Account-Snapshot.json` audit file.
+- Creates split snapshot files including summary, finance, combat, crimes, messages, events, logs and other account sections.
+- Keeps the complete SakaLuX Account Snapshot audit file/pointer structure.
 - Can sync sanitized snapshot data to a user-controlled private GitHub repository.
-- Uses rate-limit-aware Torn API pacing with retry/backoff behavior.
-- Can explicitly capture the currently visible Torn message only when the user presses **CAPTURE CURRENT MESSAGE**.
+- Uses rate-limit-aware Torn API pacing with retry/backoff.
+- Can explicitly capture the currently visible Torn message only when the user presses CAPTURE CURRENT MESSAGE.
 - Never opens private conversations automatically.
-- Does not intentionally export browser cookies, passwords, Torn session tokens, the Torn API key or the GitHub token into snapshot files.
+- Does not intentionally export browser cookies, passwords, Torn session tokens, Torn API key or GitHub token into snapshot files.
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release note
-
-**v1.3.2** fixes account-audit accuracy and diagnostics: an explicitly saved Auditor API key now overrides the TornPDA-injected key, ID-sensitive v2 selections retry through the canonical `selections=` route, the single-trade detail endpoint is no longer incorrectly polled without a trade ID, nested v2 profile data populates `manifest.json`, and Torn merit/education catalogs are stored with decoded human-readable IDs (for example merit 15 = Education Length). The split manifest now includes sanitized API-key capability information to make Full-access/log failures diagnosable without storing the key itself.
+**v1.3.2** improves audit accuracy and diagnostics: an explicitly saved Auditor API key overrides TornPDA injection, ID-sensitive v2 selections retry through the canonical `selections=` route, invalid bare trade-detail polling is removed, nested v2 profile data populates the manifest, merit/education catalogs are decoded to readable IDs, and sanitized key-capability information is included for permission diagnostics without storing the key itself.
 
 ## Recommended
-Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and **Contents: read/write** permission.
+Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
 
-SakaLuX Script Hub is optional. Account Auditor may offer its installer, but Auditor remains a standalone tool and is intentionally excluded from `scripts.json`.
-
-## License
-MIT
+SakaLuX Script Hub is optional. Auditor remains intentionally standalone and excluded from `scripts.json`.
 
 ## Privacy
-Account Auditor handles sensitive account information. Snapshot files can contain private Torn account data, financial information, combat/account statistics, events, message metadata and any message text you explicitly choose to capture.
+Account Auditor handles sensitive account information. Snapshot files can contain private Torn account data, financial information, combat/account statistics, events, message metadata and message text you explicitly choose to capture.
 
 - Use a private GitHub repository.
-- Git commit history may retain older snapshot contents after files are replaced.
-- Explicitly captured message bodies are stored locally and are included in `messages.json` only when that option is enabled.
-- The official Torn API does not provide private message body text; the script captures body text only after the user manually opens the message and presses the capture control.
+- Git history may retain older snapshot contents after files are replaced.
+- Explicitly captured message bodies are stored locally and included only when that option is enabled.
+- The official Torn API does not provide private message body text; body capture occurs only after the user manually opens a message and presses the capture control.
 - Do not publish or share the Torn API key or GitHub token.
 
 ## Important
-Account Auditor is **not a complementary Hub module** and must not be added to the Hub registry unless that product decision is changed intentionally later.
+- Account Auditor is **not a complementary Hub module** and must not be added to the Hub registry unless that product decision is intentionally changed later.
+- The audit is a snapshot of data available through configured permissions and explicit captures.
+- Missing permissions/unavailable endpoints can produce incomplete sections rather than fabricated data.
 
-The audit is a snapshot of data available through the configured API permissions and explicit user captures. Missing permissions or unavailable endpoints can result in incomplete sections rather than fabricated data.
+## License
+**MIT**
 
 ## Release history
-
 ### v1.3.2 — API diagnostics and readable merits
-
-- Saved Auditor API key now takes priority over TornPDA injection so a manually configured Full key is actually used.
-- Added canonical v2 `selections=` fallback for selections that reject the path form with code 6/7.
-- Removed invalid bare `trade` detail polling; `trades` remains collected.
-- Fixed nested v2 profile extraction so manifest account fields are populated.
-- Added Torn merit and education reference catalogs plus decoded readable entries.
-- Added sanitized key capability information to the split manifest for log-access diagnostics.
-- Snapshot schema is now `sakalux-torn-account-snapshot-v5`; split manifest schema is `sakalux-account-split-v3`.
-
+- Saved Auditor API key takes priority over TornPDA injection.
+- Added canonical v2 `selections=` fallback for selections rejecting path form.
+- Removed invalid bare `trade` detail polling while retaining `trades` collection.
+- Fixed nested profile extraction and added readable merit/education reference data.
+- Added sanitized API-key capability information for log/access diagnostics.
+- Snapshot schema is `sakalux-torn-account-snapshot-v5`; split manifest schema is `sakalux-account-split-v3`.
 
 ### v1.3.1 — Complete inventory pagination
-
-- Inventory categories now follow Torn API pagination instead of stopping at the first 250 items.
-- Inventory item totals include every retrieved page while retaining the v1.3.0 deduplicated v2-first snapshot architecture.
-
+- Inventory categories follow Torn API pagination instead of stopping at the first 250 items.
 
 ### v1.3.0 — Deduplicated full-account collection
-
-- Switched the audit payload to **Torn API v2 as the canonical source** instead of storing matching v1 and v2 data twice.
-- Removed redundant subset pairs: `basic/profile`, `attacks/attacksfull`, `revives/revivesfull`, `newmessages/messages` and `newevents/events`.
-- Added missing account selections including Bazaar, crimes, criminal record, display, Hall of Fame, trade and snapshot data where API permissions allow them.
-- Follows API pagination with loop protection so multi-page history is not silently limited to the first page.
-- Split mode no longer uploads a second full copy of the same account data. The main snapshot path becomes a small pointer to `manifest.json`.
-- Added dedicated racing, forum, inventory, contacts and activity split files plus `other.json` fallback so newly returned unmapped fields are not discarded.
-- Identical GitHub file content is not rewritten unnecessarily.
-- Snapshot schema upgraded to `sakalux-torn-account-snapshot-v4`.
+- Made Torn API v2 the canonical snapshot source and removed redundant duplicated v1/v2 selections.
+- Added missing account selections and protected paginated collection with loop detection.
+- Split mode avoids uploading a duplicate second full account payload.
+- Added racing, forum, inventory, contacts, activity and other split files.
 
 ### v1.2.4 — Inline panel signature
-
-- Removed the floating author badge from the Torn page.
-- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
+- Moved the SakaLuX signature inside the Auditor panel.
 
 ### v1.2.3 — Persistent SakaLuX signature
+- Added the persistent linked author footer.
 
-- Added the persistent **Made with ❤️ by SakaLuX [2380374]** author footer with the author name and Torn ID linked to the profile.
-- Keeps the SakaLuX identity visible consistently across TornPDA and desktop.
+### v1.2.2 — Unified Control Center visual system
+- Adopted the shared SakaLuX interface style.
 
-### v1.2.2
+### v1.2.1 — Shared Hub installation prompt
+- Added the shared Hub installer prompt/cooldown while keeping Auditor standalone.
 
-- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
-- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
-- UI-only release: existing features, APIs and saved data remain unchanged.
-
-### v1.2.1
-
-- Added the shared SakaLuX Script Hub installation prompt used across the SakaLuX tools.
-- Uses the common `SakaLuX_HUB_INSTALL_PROMPT_LAST` local-storage cooldown.
-- The Hub prompt is offered at most once every 24 hours on the same Torn origin.
-- The prompt is skipped when Script Hub is already detected.
-- **LATER** records the cooldown and **INSTALL HUB** opens the official Hub installer.
-
-### v1.2.0
-
-- Added split snapshot files for smaller and easier-to-read GitHub payloads.
-- Added user-triggered **CAPTURE CURRENT MESSAGE** support.
-- Added deduplication and a **CLEAR CAPTURED MESSAGES** control.
-- Increased Torn API pacing to reduce rate-limit problems.
-- Upgraded the snapshot schema to `sakalux-torn-account-snapshot-v3`.
+### v1.2.0 — Split snapshots and explicit message capture
+- Added split snapshot files, explicit current-message capture, deduplication and safer API pacing.
