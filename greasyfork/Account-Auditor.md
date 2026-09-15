@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.2**
+**v1.3.4**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.16
+// @version      1.8.17
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -33,7 +33,7 @@ This is an information/decision-support tool. It never automates company actions
 (() => {
 'use strict';
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.16',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.17',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -57,9 +57,12 @@ function registerStandaloneEntry(){
 
 function normalizeStandaloneCompanyPlacement(){
  try{
-  const box=document.querySelector('#sakalux-standalone-dock .slx-dock-items');
-  if(!box) return;
-  const rows=[...box.querySelectorAll('.slx-dock-row')];
+  const dock=document.querySelector('#sakalux-standalone-dock');
+  const box=dock?.querySelector('.slx-dock-items');
+  if(!dock||!box) return;
+  // Repair malformed/legacy docks that placed a module row outside the list.
+  for(const row of [...dock.querySelectorAll(':scope > .slx-dock-row')]) box.appendChild(row);
+  const rows=[...box.querySelectorAll(':scope > .slx-dock-row')];
   const company=rows.find(row=>String(row.querySelector('.slx-title')?.textContent||row.textContent||'').trim().toLowerCase()==='company');
   if(company&&company!==box.lastElementChild) box.appendChild(company);
  }catch{}

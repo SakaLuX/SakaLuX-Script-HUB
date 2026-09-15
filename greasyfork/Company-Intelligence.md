@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.16**
+**v1.8.17**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.16** keeps Company Intelligence inside the shared Standalone menu but forces its row to stay with the script list instead of appearing directly under the Standalone header. This remains compatible with older installed dock providers that do not yet know the Company module order.
+**v1.8.17** hardens Company Intelligence placement in the shared Standalone dock. If an older dock renderer places Company outside the script list or directly below the STANDALONE subtitle, Company is moved back into the module list and kept after the other known add-ons.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -37,13 +37,19 @@
 - Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
 - Company rating is comparative and evaluated by Torn.
 - Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
-- The active userscript, Hub registry entry and this information page are synchronized at **v1.8.16**.
+- The active userscript, Hub registry entry and this information page are synchronized at **v1.8.17**.
 - The Hub registry uses Greasy Fork script **595873** for public version checks, while the userscript retains its own raw-GitHub `@downloadURL` / `@updateURL` metadata.
 
 ## License
 **All Rights Reserved**
 
 ## Release history
+### v1.8.17 — Standalone placement hardening
+
+- Repairs legacy/malformed dock placement for the Company row.
+- Keeps Company inside the module list, after the other known add-ons.
+- Preserves Hub integration and removes no standalone functionality.
+
 ### v1.8.16 — Standalone ordering fix
 
 - Keeps Company in the shared Standalone menu.
