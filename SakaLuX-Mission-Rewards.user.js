@@ -167,7 +167,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.0.18';
+    const VERSION = '1.0.20';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
