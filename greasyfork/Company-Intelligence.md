@@ -1,6 +1,6 @@
 # SakaLuX Company Intelligence
 
-> Standalone SakaLuX company-intelligence tool. Not registered in SakaLuX Script Hub.
+> Complementary add-on for SakaLuX Script Hub. Also works standalone on TornPDA / Tampermonkey.
 
 ## Current version
 **v1.8.11**
@@ -26,6 +26,11 @@
 - Refresh after Torn's daily company report to build useful history.
 - Director-only modules require the key owner to be the company director.
 - Add several same-type companies at the next star level before trusting Benchmark direction.
+
+## Links
+- GreasyFork: https://greasyfork.org/scripts/595873-sakalux-company-intelligence
+- Source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
+- Info / release: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
 
 ## License
 All Rights Reserved
