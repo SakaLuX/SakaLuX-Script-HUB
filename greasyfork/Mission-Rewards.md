@@ -7,72 +7,55 @@
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
-- Shows estimated market value for item rewards.
-- Calculates estimated value per mission credit.
+- Shows estimated market value and value per mission credit.
 - Shows currently owned special ammo.
-- Tracks normal and special weapon mod credit ranges locally from offers seen on the device.
-- Adds extra information directly to Mission Shop reward cards.
-- Adds a detailed reward information panel.
+- Tracks normal/special weapon-mod credit ranges locally from offers seen on the device.
+- Adds information directly to Mission Shop reward cards plus a detailed reward panel.
 - Includes refresh controls, local caching and API-key support.
-- Exposes `window.SakaLuXMissionRewards` for integration with SakaLuX Script Hub on every Torn page.
-- Keeps Mission Shop-specific scanning inactive outside the Missions page.
+- Exposes `window.SakaLuXMissionRewards` for Hub integration on every Torn page.
+- Keeps Mission Shop-specific scanning inactive outside Missions.
 
 ## Current release note
-
-**v1.0.18** is the restored stable Mission Rewards release. The experimental integrated Mission Hints/TornTools code is not part of the current userscript, preserving its proven startup, Hub registration, ON/OFF controls and Mission Shop reward intelligence.
+**v1.0.18** is the restored stable Mission Rewards release. Experimental Mission Hints/TornTools integration is not part of the current userscript, preserving reliable startup, Hub registration, ON/OFF controls and reward intelligence.
 
 ## Recommended
-Install **SakaLuX Script Hub** to manage Mission Rewards together with the rest of the SakaLuX add-ons and to use the shared Hub API key when available.
-
-## License
-All Rights Reserved
+Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
 
 ## Privacy
-Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-mod ranges locally in browser/TornPDA storage. Its Torn API requests are sent to `api.torn.com` and use the active API key only for the data required by the module. The script requests no Torn API write permissions.
+Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-mod ranges locally. Torn API requests are sent to `api.torn.com` and use only the active key required for module data. No Torn API write permissions are requested.
 
 ## Important
-Displayed market values and value-per-credit calculations are estimates based on available item data. Weapon-mod ranges are learned locally from offers seen by the script and should be treated as guidance rather than guaranteed future Mission Shop prices.
+- Market values and value-per-credit calculations are estimates.
+- Weapon-mod ranges are learned locally from offers seen by the script and are guidance, not guaranteed future Mission Shop prices.
+- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is v1.0.18.
+
+## License
+**All Rights Reserved**
 
 ## Release history
-### v1.2.0 — Experimental Mission Hints integration (rolled back)
+### v1.0.18 — Restored stable release
+- Restored the proven Mission Rewards code path after the experimental Mission Hints integration was rolled back.
+- Preserves reliable Hub detection/power controls and Mission Shop intelligence.
 
+### v1.2.0 — Experimental Mission Hints integration (ROLLED BACK)
 - Experimented with locally integrated Duke mission Task + Hint guidance.
-- The integration was later rolled back after it interfered with reliable Mission Rewards startup/detection in TornPDA.
-- The active stable release is v1.0.18 and does not contain this experimental Mission Hints code.
+- Rolled back after it interfered with reliable Mission Rewards startup/detection in TornPDA.
+- This version is historical only and is not the active release.
 
 ### v1.0.16 — Hub detection fix
-
-- Recognizes the current Hub S/Fly-out launchers and Hub-active marker.
-- Prevents the standalone dock/install prompt from appearing while Hub is installed.
+- Recognizes current Hub launchers/active marker and suppresses standalone prompts while Hub is installed.
 
 ### v1.0.12 — Compact native S standalone launcher
-
-- Smaller professional standalone dock.
-- Native gold **S** launcher mounts after Torn cash and opens/closes the dock.
-- Removed the dock **+** control.
-- Compact fallback **S** appears only when Torn status icons are unavailable.
-- Shared Hub reminder remains limited to once every 12 hours.
+- Added the compact native S/shared standalone dock behavior.
 
 ### v1.0.7 — Inline panel signature
-
-- Removed the floating author badge from the Torn page.
-- **Made with ❤️ by SakaLuX [2380374]** now lives inside the script panel as its final footer, with the author name and ID linked to the Torn profile.
+- Moved the SakaLuX signature inside the module panel.
 
 ### v1.0.6 — Persistent SakaLuX signature
+- Added the persistent linked author footer.
 
-- Added the persistent **Made with ❤️ by SakaLuX [2380374]** author footer with the author name and Torn ID linked to the profile.
-- Keeps the SakaLuX identity visible consistently across TornPDA and desktop.
+### v1.0.5 — Unified Control Center visual system
+- Adopted the shared SakaLuX panels, cards, buttons, inputs, borders, spacing and switches.
 
-### v1.0.5
-
-- Adopted the unified **SakaLuX Control Center** visual system used by Script Hub.
-- Standardized panels, cards, buttons, inputs, borders, spacing and compatible settings toggles for a more consistent TornPDA/desktop experience.
-- UI-only release: existing features, APIs and saved data remain unchanged.
-
-### v1.0.4
-
-- Added a persistent installation marker for reliable Script Hub detection on PC.
-- Added persistent `setEnabled`, `toggleEnabled` and `isEnabled` Hub power controls.
-- OFF disconnects Mission Shop scanning and removes injected badges/panels; ON restores them without a page reload.
-- Automatically uses the shared Hub key when available.
-- Standalone mode includes a creator for the required Ammo + Torn Items API key.
+### v1.0.4 — Hub power/API integration
+- Added reliable installation detection, `setEnabled`/`toggleEnabled`/`isEnabled`, shared-Hub-key preference and standalone required-key support.
