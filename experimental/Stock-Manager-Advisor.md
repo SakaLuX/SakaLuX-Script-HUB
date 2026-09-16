@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.2.0**
+**v0.3.0**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -12,16 +12,18 @@
 - Withdraw a chosen cash value from the selected stock.
 - Withdraw All with optional benefit-tier protection.
 - Benefit Lock prevents withdrawals that would drop the detected benefit tier.
-- Optional Torn API sync for money and portfolio data.
+- Dedicated Torn API Key Manager with Save, Show/Hide, Test & Sync, Create Required Key and Clear controls.
+- Torn API sync for money, portfolio positions and the public stock catalog.
+- Portfolio dashboard with position count, market value, cash, known unrealized P/L, per-stock benefit tier and protected-share floor.
 - Experimental portfolio advisor showing owned shares, current benefit tier, estimated cost to the next benefit tier and unrealized P/L when transaction data is available.
 - Global **PANIC** button available from any Torn page.
-- PANIC uses the configured vault target, navigates to Stocks when required, then buys the maximum affordable shares after the configured keep-cash amount.
+- PANIC uses the configured vault target and buys directly from the current Torn page without navigating to Stocks.
 - Optional Panic confirmation toggle.
 - Mobile/TornPDA-first panel.
 
 ## Current release note
 
-**v0.2.0** adds Direct Panic Buy. PANIC can now resolve the configured stock ID and current price through the Torn stocks API and submit the buy request from the current Torn page, without navigating to Stocks. Failures stay on the current page and are shown in the panel.
+**v0.3.0** adds the SakaLuX-style API Key Manager and the first full Portfolio dashboard. API setup can create the required Torn key, save/show/test/clear it, synchronize cash + holdings + stock prices, and render portfolio value/P&L/benefit protection from any Torn page.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -39,17 +41,27 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Torn may change stock-page DOM classes or trade endpoints; detection must be tested on both desktop Torn and TornPDA.
 - Average buy price / unrealized P&L depends on the transaction fields returned by the user's Torn API response.
 - Advisor v0.1.0 ranks benefit progress and next-tier cost; a full ROI engine, benefit-value pricing, bank comparison and trade scoring are planned for later versions.
-- Panic depends on the configured target being visible and tradeable on the Torn Stocks page.
+- Direct trade endpoints and returned response shapes remain experimental and must be verified in TornPDA with small transactions first.
 
 ## Planned roadmap
-- **v0.2.x:** full portfolio cards, richer P/L, configurable withdrawal presets and transaction history.
-- **v0.3.x:** benefit-value database and true ROI ranking.
+- **v0.3.x:** benefit-value database, true ROI ranking, configurable withdrawal presets and transaction history.
 - **v0.4.x:** Trade Assistant with buy/sell suggestions and liquidity-gap calculations.
 - **v0.5.x:** bank comparison, daily income / cost model and benefit-aware portfolio optimizer.
 - **v0.6.x:** hardened Panic flow, target lock, optional second fallback target and action log.
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.3.0 — API Key Manager & Portfolio
+
+- Added a dedicated API Key section matching the SakaLuX module workflow.
+- Added Save Key, Show/Hide, Test & Sync, Create Required Key and Clear controls.
+- Added a prefilled Torn API-key creation link requesting user money/stocks and torn stocks selections.
+- Added API connection status feedback and synchronized target-stock discovery from any Torn page.
+- Added Portfolio summary: position count, market value, cash and known unrealized P/L.
+- Added per-position shares, current value, average buy when available, benefit tier and Benefit Lock floor.
+- Refreshes portfolio/advisor data after successful vault/withdraw actions when an API key is available.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.2.0 — Direct Panic Buy
 
 - PANIC no longer redirects to the Stocks page.
