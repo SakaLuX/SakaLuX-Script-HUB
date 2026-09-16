@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Sync release MD files
-        run: python .github/scripts/sync_release_md_20260916.py
+        run: |
+          python .github/scripts/sync_release_md_20260916.py
+          python .github/scripts/fix_release_md_refs.py
       - name: Validate release docs
         shell: python
         run: |
@@ -33,17 +35,31 @@ jobs:
           }
           for path, ver in checks.items():
             text=Path(path).read_text(encoding='utf-8')
-            if f'v{ver}' not in text:
-              raise SystemExit(f'{path}: version {ver} missing')
-            if '## Current release note' not in text:
-              raise SystemExit(f'{path}: current release note missing')
+            current = re.search(r'## Current version\s*\n\s*\*\*v([^*]+)\*\*', text, re.I)
+            if not current:
+              current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', text, re.I)
+            if not current or current.group(1).strip()!=ver:
+              raise SystemExit(f'{path}: current version mismatch; expected {ver}')
+            rel = re.search(r'## Current release note\s*\n+\*\*v([^*]+)\*\*', text, re.I)
+            if not rel or rel.group(1).strip()!=ver:
+              raise SystemExit(f'{path}: current release note mismatch; expected {ver}')
             if not re.search(rf'###\s+v{re.escape(ver)}\b', text):
               raise SystemExit(f'{path}: changelog entry {ver} missing')
+          company=Path('greasyfork/Company-Intelligence.md').read_text(encoding='utf-8')
+          hub=Path('greasyfork/Script-Hub.md').read_text(encoding='utf-8')
+          if 'synchronized at **v1.8.17**' in company:
+              raise SystemExit('Company info still contains stale synchronized version')
+          if 'SakaLuX Company Intelligence **v1.8.17**' in hub or 'currently registered at **v1.8.17**' in hub:
+              raise SystemExit('Script Hub info still contains stale Company version')
           print('All release Markdown files synchronized.')
       - name: Commit release docs
         run: |
           git config user.name 'SakaLuX'
           git config user.email 'sakalutzu92@yahoo.com'
           git add greasyfork/*.md experimental/Stock-Manager-Advisor.md PERFORMANCE-UI-AUDIT.md
-          git commit -m 'Synchronize release MD files after performance UI optimization'
-          git push
+          if git diff --cached --quiet; then
+            echo 'No release-doc changes to commit.'
+          else
+            git commit -m 'Synchronize release MD files after performance UI optimization'
+            git push
+          fi
