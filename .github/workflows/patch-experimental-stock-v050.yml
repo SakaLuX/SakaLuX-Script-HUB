@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Fix helper markers
+        run: python .github/scripts/fix_v050_helper.py
       - name: Apply patch
         run: python .github/scripts/patch_experimental_stock_v050.py
       - name: Validate
@@ -30,4 +32,5 @@ jobs:
           git config user.email 'sakalutzu92@yahoo.com'
           git add experimental/SakaLuX-Stock-Manager-Advisor.user.js experimental/Stock-Manager-Advisor.md
           git commit -m 'Experimental Stock Manager v0.5.0 portfolio optimizer'
+          git pull --rebase origin main
           git push
