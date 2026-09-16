@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.5.6
-// @description  Experimental Torn stock workspace with per-stock quick BUY/SELL presets, benefit progress, inline metrics, ROI, Panic v2 and hardened direct trades.
+// @version      0.5.7
+// @description  Experimental Torn stock workspace with native stock sorting/filtering, opportunity highlighting, quick trades, ROI, Panic v2 and hardened direct trades.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.5.6',
+    version: '0.5.7',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -49,7 +49,9 @@
     inlineTab: 'SLX_STOCK_INLINE_TAB',
     inlineApiMode: 'SLX_STOCK_INLINE_API_MODE',
     inlinePresets: 'SLX_STOCK_INLINE_PRESETS',
-    inlineButtons: 'SLX_STOCK_INLINE_BUTTONS'
+    inlineButtons: 'SLX_STOCK_INLINE_BUTTONS',
+    stockSort: 'SLX_STOCK_SORT',
+    stockFilter: 'SLX_STOCK_FILTER'
   };
 
   const BENEFITS = {
@@ -494,6 +496,73 @@
     } catch(e) { inlineStatus(`Quick ${String(side||'trade').toUpperCase()} ${sym}: ${e.message}`,'bad'); }
   }
 
+  function stockViewScore(sym, mode) {
+    const m=stockRowMetrics(sym);
+    if(!m) return 0;
+    const candidate=buildRoiCandidates().find(x=>x.sym===sym);
+    if(mode==='owned') return m.owned||0;
+    if(mode==='roi') return candidate?.roi||0;
+    if(mode==='benefit') return m.nextGap>0 ? 1/Math.max(1,m.nextGap) : 0;
+    if(mode==='pl') return m.pl===null ? -Infinity : m.pl;
+    if(mode==='loss') return m.pl===null ? Infinity : m.pl;
+    if(mode==='excess') return m.freeShares||0;
+    if(mode==='value') return m.value||0;
+    return 0;
+  }
+
+  function stockPassesFilter(sym, filter) {
+    const m=stockRowMetrics(sym);
+    if(!m) return false;
+    if(filter==='owned') return m.owned>0;
+    if(filter==='loss') return m.pl!==null && m.pl<0;
+    if(filter==='profit') return m.pl!==null && m.pl>0;
+    if(filter==='excess') return m.freeShares>0;
+    if(filter==='benefit') return m.nextGap>0;
+    return true;
+  }
+
+  function applyStockView() {
+    if(!isStocks()) return;
+    scanStocks();
+    const sort=get(K.stockSort,'default');
+    const filter=get(K.stockFilter,'all');
+    const byParent=new Map();
+    for(const [sym,st] of S.stocks) {
+      const row=st?.row;
+      if(!row?.isConnected || !row.parentElement) continue;
+      if(!byParent.has(row.parentElement)) byParent.set(row.parentElement,[]);
+      byParent.get(row.parentElement).push({sym,row,score:stockViewScore(sym,sort)});
+      row.style.display=stockPassesFilter(sym,filter)?'':'none';
+      row.dataset.slxViewVisible=row.style.display==='none'?'0':'1';
+    }
+    if(sort==='default') return;
+    for(const [parent,items] of byParent) {
+      const visible=items.filter(x=>x.row.style.display!=='none');
+      const hidden=items.filter(x=>x.row.style.display==='none');
+      visible.sort((a,b)=> sort==='loss' ? a.score-b.score : b.score-a.score || a.sym.localeCompare(b.sym));
+      const ordered=[...visible,...hidden];
+      if(ordered.length<2) continue;
+      const marker=document.createComment('slx-stock-sort');
+      parent.insertBefore(marker,ordered[0].row);
+      const frag=document.createDocumentFragment();
+      ordered.forEach(x=>frag.appendChild(x.row));
+      marker.parentNode.insertBefore(frag,marker.nextSibling);
+      marker.remove();
+    }
+  }
+
+  function opportunityRanks() {
+    const roi=buildRoiCandidates();
+    const map=new Map();
+    roi.slice(0,3).forEach((r,i)=>map.set(r.sym,{rank:i+1,roi:r.roi}));
+    return map;
+  }
+
+  function refreshStockViewControls() {
+    const sort=$('#slx-stock-sort'); if(sort) sort.value=get(K.stockSort,'default');
+    const filter=$('#slx-stock-filter'); if(filter) filter.value=get(K.stockFilter,'all');
+  }
+
   function enhanceStockRows() {
     if(!isStocks()) return;
     scanStocks();
@@ -510,8 +579,9 @@
       const nextText=m.nextGap?`${m.nextGap.toLocaleString()} to next`:'No next gap';
       const plText=m.pl===null?'P/L n/a':`${m.pl>=0?'+':'-'}${money(Math.abs(m.pl))}${m.plPct===null?'':` (${m.plPct>=0?'+':''}${m.plPct.toFixed(2)}%)`}`;
       const progress=stockRowBenefitProgress(sym,m.owned);
+      const opp=opportunityRanks().get(sym);
       const quickOptions=stockRowQuickOptions().map(v=>`<option value="${esc(v)}">${esc(String(v).toUpperCase())}</option>`).join('');
-      li.innerHTML=`<div class="slx-row-stock"><b>${esc(sym)}</b><span>${money(m.price)}</span></div><div class="slx-row-stat"><small>Owned</small><b>${m.owned.toLocaleString()}</b><span>${money(m.value)}</span></div><div class="slx-row-stat"><small>Avg buy</small><b>${m.avg?money(m.avg):'n/a'}</b><span class="${m.pl===null?'muted':m.pl>=0?'good':'bad'}">${plText}</span></div><div class="slx-row-stat"><small>Benefit</small><b>${tierLabel}</b><span>${nextText}</span><div class="slx-row-progress"><i style="width:${progress.pct.toFixed(2)}%"></i></div><small class="slx-row-progress-label">${esc(progress.label)}</small></div><div class="slx-row-actions"><button type="button" data-row-target="${sym}">Target</button><button type="button" class="primary" data-row-buy="${sym}" ${m.nextGap?'':'disabled'}>Buy gap</button><button type="button" class="danger" data-row-sell="${sym}" ${m.freeShares?'':'disabled'}>Sell excess</button></div><div class="slx-row-quick"><select data-row-quick-amount="${sym}" title="Quick trade amount">${quickOptions}</select><button type="button" class="primary" data-row-quick-buy="${sym}">BUY</button><button type="button" class="danger" data-row-quick-sell="${sym}" ${m.owned?'':'disabled'}>SELL</button></div>`;
+      li.innerHTML=`<div class="slx-row-stock"><b>${esc(sym)}${opp?` <em class=\"slx-opp-badge\">#${opp.rank} ROI</em>`:''}</b><span>${money(m.price)}</span>${opp?`<small class=\"slx-opp-roi\">${opp.roi.toFixed(2)}% APR</small>`:''}</div><div class="slx-row-stat"><small>Owned</small><b>${m.owned.toLocaleString()}</b><span>${money(m.value)}</span></div><div class="slx-row-stat"><small>Avg buy</small><b>${m.avg?money(m.avg):'n/a'}</b><span class="${m.pl===null?'muted':m.pl>=0?'good':'bad'}">${plText}</span></div><div class="slx-row-stat"><small>Benefit</small><b>${tierLabel}</b><span>${nextText}</span><div class="slx-row-progress"><i style="width:${progress.pct.toFixed(2)}%"></i></div><small class="slx-row-progress-label">${esc(progress.label)}</small></div><div class="slx-row-actions"><button type="button" data-row-target="${sym}">Target</button><button type="button" class="primary" data-row-buy="${sym}" ${m.nextGap?'':'disabled'}>Buy gap</button><button type="button" class="danger" data-row-sell="${sym}" ${m.freeShares?'':'disabled'}>Sell excess</button></div><div class="slx-row-quick"><select data-row-quick-amount="${sym}" title="Quick trade amount">${quickOptions}</select><button type="button" class="primary" data-row-quick-buy="${sym}">BUY</button><button type="button" class="danger" data-row-quick-sell="${sym}" ${m.owned?'':'disabled'}>SELL</button></div>`;
       if(!old) row.appendChild(li);
       $('[data-row-target]',li).onclick=e=>{e.preventDefault();e.stopPropagation();set(K.target,sym);refreshTargetSelect();refreshInlinePanel();enhanceStockRows();inlineStatus(`${sym} selected as target.`,'ok');};
       $('[data-row-buy]',li).onclick=e=>{e.preventDefault();e.stopPropagation();stockRowBuyGap(sym);};
@@ -519,7 +589,9 @@
       const qbuy=$('[data-row-quick-buy]',li); if(qbuy) qbuy.onclick=()=>stockRowQuickTrade(sym,'buy',$('[data-row-quick-amount]',li)?.value||'max');
       const qsell=$('[data-row-quick-sell]',li); if(qsell) qsell.onclick=()=>stockRowQuickTrade(sym,'sell',$('[data-row-quick-amount]',li)?.value||'max');
       li.dataset.target=get(K.target).toUpperCase()===sym?'1':'0';
+      li.dataset.opportunity=opp?String(opp.rank):'';
     }
+    applyStockView();
   }
 
   function loadActionLog() {
@@ -912,6 +984,7 @@
       <div class="slx-inline-body">
         <div class="slx-inline-summary"><div><span>Total invested <small id="slx-inline-coverage"></small></span><b id="slx-inline-total">—</b></div><div><span>Market value</span><b id="slx-inline-market">—</b></div><div><span>Unrealized P/L</span><b id="slx-inline-pl">—</b><small id="slx-inline-pl-pct"></small></div><div><span>Cash</span><b id="slx-inline-cash">—</b></div></div>
         <div class="slx-inline-nav"><button data-slx-inline-tab="advisor" type="button">★ Advisor</button><button data-slx-inline-tab="trade" type="button">📈 Trade Assistant</button><button data-slx-inline-tab="rebalance" type="button">⚖ Rebalance</button></div>
+        <div class="slx-stock-view-controls"><label>Sort<select id="slx-stock-sort"><option value="default">Torn default</option><option value="owned">Owned shares</option><option value="value">Position value</option><option value="roi">Best ROI</option><option value="benefit">Closest benefit</option><option value="pl">Biggest P/L</option><option value="loss">Biggest loss</option><option value="excess">Excess shares</option></select></label><label>Filter<select id="slx-stock-filter"><option value="all">All stocks</option><option value="owned">Owned only</option><option value="profit">Profit only</option><option value="loss">Loss only</option><option value="excess">Excess shares</option><option value="benefit">Has next benefit</option></select></label><button id="slx-stock-view-reset" type="button">Reset</button></div>
         <div id="slx-inline-workspace" class="slx-inline-workspace" data-open="0"></div>
         <div class="slx-inline-target"><label>Target <select id="slx-inline-target"><option value="">Loading…</option></select></label><div><span>Owned</span><b id="slx-inline-owned">—</b></div></div>
         <div class="slx-inline-actions"><button id="slx-inline-vault-max" class="primary" type="button">Vault Max</button><label><input id="slx-inline-keep" value="${esc(get(K.keep,'0'))}" placeholder="Keep cash"></label><button id="slx-inline-vault-keep" type="button">Vault (Keep)</button><label><input id="slx-inline-withdraw-value" value="${esc(get(K.withdraw,'1m'))}" placeholder="Withdraw"></label><button id="slx-inline-withdraw" class="danger" type="button">Withdraw</button><button id="slx-inline-withdraw-all" class="danger" type="button">Withdraw All</button></div>
@@ -932,6 +1005,11 @@
     $('#slx-inline-withdraw-value',card).onchange=e=>set(K.withdraw,e.target.value);
     $('#slx-inline-api-mode',card).checked=bool(K.inlineApiMode,true);
     $('#slx-inline-api-mode',card).onchange=e=>{set(K.inlineApiMode,e.target.checked?'1':'0');refreshInlinePanel();inlineStatus(`API Mode ${e.target.checked?'ON':'OFF'}.`,e.target.checked?'ok':'info');};
+    refreshStockViewControls();
+    const sortCtl=$('#slx-stock-sort',card); if(sortCtl) sortCtl.onchange=()=>{set(K.stockSort,sortCtl.value);applyStockView();enhanceStockRows();inlineStatus(`Sorted: ${sortCtl.options[sortCtl.selectedIndex]?.text||sortCtl.value}`,'ok');};
+    const filterCtl=$('#slx-stock-filter',card); if(filterCtl) filterCtl.onchange=()=>{set(K.stockFilter,filterCtl.value);applyStockView();enhanceStockRows();inlineStatus(`Filter: ${filterCtl.options[filterCtl.selectedIndex]?.text||filterCtl.value}`,'ok');};
+    const resetView=$('#slx-stock-view-reset',card); if(resetView) resetView.onclick=()=>{set(K.stockSort,'default');set(K.stockFilter,'all');refreshStockViewControls();scanStocks();for(const [,st] of S.stocks){if(st?.row)st.row.style.display='';}enhanceStockRows();inlineStatus('Stock view reset.','ok');};
+
     $('#slx-inline-settings',card).onclick=()=>{const cfg=$('#slx-inline-config',card);cfg.hidden=!cfg.hidden;};
     $('#slx-inline-edit-presets',card).onclick=()=>{const cfg=$('#slx-inline-config',card);cfg.hidden=false;$('#slx-inline-preset-input',card)?.focus();};
     $('#slx-inline-save-presets',card).onclick=()=>{const raw=$('#slx-inline-preset-input',card).value;set(K.inlinePresets,raw);renderInlinePresetButtons(card);inlineStatus('Withdrawal presets saved.','ok');};
@@ -1079,9 +1157,9 @@
 #slx-stock-panel .optimizer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}#slx-stock-panel .optimizer-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}#slx-stock-panel .optimizer-summary>div{display:grid;gap:3px;padding:8px;border:1px solid #23374a;border-radius:9px;background:#101a25}#slx-stock-panel .optimizer-summary span{font-size:9px;color:#8293a7}#slx-stock-panel .optimizer-pick{display:grid;gap:3px;padding:8px;margin-bottom:7px;border:1px solid #365a78;border-radius:9px;background:#0e1c29}.optimizer-pick span,.optimizer-pick small{font-size:9px;color:#9fb3c6}#slx-stock-panel .optimizer-list{display:grid;gap:5px;max-height:310px;overflow:auto}#slx-stock-panel .optimizer-row{display:grid;grid-template-columns:62px 1fr 1fr 1fr 1.25fr;gap:6px;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px;align-items:center}.optimizer-row>div{display:grid;gap:3px}.optimizer-row small{color:#8293a7}
 #slx-stock-panel .rebalance-controls{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:8px}#slx-stock-panel .rebalance-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}#slx-stock-panel .rebalance-summary>div{display:grid;gap:3px;padding:8px;border:1px solid #23374a;border-radius:9px;background:#101a25}.rebalance-summary span{font-size:9px;color:#8293a7}#slx-stock-panel .rebalance-target{display:grid;gap:3px;padding:9px;border:1px solid #365a78;border-radius:9px;background:#0e1c29;margin-bottom:7px}.rebalance-target span,.rebalance-target small{font-size:9px;color:#9fb3c6}#slx-stock-panel .rebalance-list{display:grid;gap:5px;margin-bottom:7px}.rebalance-row{display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:6px;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px;align-items:center}
 #slx-stock-inline{margin:10px 0 14px;padding:0;border:1px solid #344458;border-radius:14px;background:#0b1118;color:#e8eef7;box-shadow:0 8px 24px #0008;overflow:hidden;font-family:Arial,sans-serif}#slx-stock-inline *{box-sizing:border-box}#slx-stock-inline .slx-inline-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(180deg,#182535,#101923);border-bottom:1px solid #2c3d50}#slx-stock-inline .slx-inline-head>div:first-child{display:grid;gap:2px;flex:1}#slx-stock-inline .slx-inline-head b{font-size:13px}#slx-stock-inline .slx-inline-head small{font-size:9px;color:#8394a7}#slx-stock-inline .slx-inline-head-actions{display:flex;gap:5px}#slx-stock-inline button,#slx-stock-inline input,#slx-stock-inline select{border:1px solid #415369;border-radius:8px;background:#17212c;color:#ecf4ff;padding:8px;font-size:11px}#slx-stock-inline button{font-weight:800}#slx-stock-inline .primary{border-color:#2c8b52;color:#7ee09f;background:#102a1d}#slx-stock-inline .danger{border-color:#8c3140;color:#ff7a86;background:#2b1016}#slx-stock-inline .slx-inline-body{padding:10px;display:grid;gap:9px}#slx-stock-inline[data-collapsed="1"] .slx-inline-body{display:none}#slx-stock-inline .slx-inline-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-summary>div{display:grid;gap:2px;padding:8px;border:1px solid #26384a;border-radius:9px;background:#101821}#slx-stock-inline .slx-inline-summary span,#slx-stock-inline .slx-inline-target span{font-size:9px;color:#8596a8}#slx-stock-inline .slx-inline-summary small{font-size:8px;color:#74869a}#slx-stock-inline .slx-inline-summary b{font-size:12px}#slx-stock-inline .slx-inline-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-target{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:end}#slx-stock-inline .slx-inline-target label,#slx-stock-inline .slx-inline-target>div{display:grid;gap:4px}#slx-stock-inline .slx-inline-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-actions label{display:block}#slx-stock-inline .slx-inline-actions input{width:100%}#slx-stock-inline .slx-inline-options{display:flex;flex-wrap:wrap;gap:9px;align-items:center}#slx-stock-inline .slx-inline-options label{display:flex;align-items:center;gap:4px;font-size:10px;color:#a4b1bf}#slx-stock-inline .slx-inline-options input{width:auto}#slx-stock-inline #slx-inline-panic{margin-left:auto}#slx-stock-inline .slx-inline-presets{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}#slx-stock-inline .slx-inline-config{padding:9px;border:1px solid #2b3d50;border-radius:9px;background:#0d1721;display:grid;gap:8px}#slx-stock-inline .slx-inline-config[hidden]{display:none}#slx-stock-inline .slx-inline-config label{display:grid;gap:4px;font-size:9px;color:#9aabba}#slx-stock-inline .slx-inline-config-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center}#slx-stock-inline .slx-inline-config-actions label{display:flex;align-items:center;gap:4px}#slx-stock-inline .slx-inline-note{font-size:9px;color:#8ea0b3}#slx-stock-inline .slx-inline-note[data-kind="bad"]{color:#ff7a86}#slx-stock-inline .slx-inline-note[data-kind="ok"]{color:#61e291}#slx-stock-inline .good{color:#61e291}#slx-stock-inline .bad{color:#ff7a86}#slx-stock-inline #slx-inline-api[data-kind="ok"]{border-color:#267c52;color:#63df9a}#slx-stock-inline #slx-inline-api[data-kind="warn"]{border-color:#8b6a1f;color:#ffd36b}
-#slx-stock-inline .slx-inline-nav button[data-active="1"]{border-color:#3b8ec9;background:#123653;color:#9bd5ff}#slx-stock-inline .slx-inline-workspace{display:none;border:1px solid #26394b;border-radius:10px;background:#0d151e;padding:8px}#slx-stock-inline .slx-inline-workspace[data-open="1"]{display:grid;gap:7px}#slx-stock-inline .slx-inline-work-head{display:flex;align-items:center;gap:8px}#slx-stock-inline .slx-inline-work-head>b{flex:1;font-size:11px;color:#9fc7ef}#slx-stock-inline .slx-inline-work-head button{padding:6px 8px;font-size:9px}#slx-stock-inline .slx-inline-roi-list,#slx-stock-inline .slx-inline-trade-list,#slx-stock-inline .slx-inline-rebalance-list{display:grid;gap:5px}#slx-stock-inline .slx-inline-roi-row{display:grid;grid-template-columns:66px 48px 68px 1fr auto;gap:5px;align-items:center;padding:7px;border:1px solid #203142;border-radius:8px;background:#101923;font-size:9px}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5;color:#8497aa}#slx-stock-inline .slx-inline-roi-row button{grid-row:1/3;grid-column:5;padding:6px}#slx-stock-inline .slx-inline-trade-card{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border:1px solid #263b4e;border-radius:9px;background:#101923}#slx-stock-inline .slx-inline-trade-card>div:first-child{display:grid;gap:2px}#slx-stock-inline .slx-inline-trade-card small,#slx-stock-inline .slx-inline-trade-card span{font-size:9px;color:#8497aa}#slx-stock-inline .slx-inline-mini-actions{display:flex;gap:5px}#slx-stock-inline .slx-inline-rebalance-target{display:grid;gap:3px;padding:8px;border:1px solid #365a78;border-radius:9px;background:#0e1c29}#slx-stock-inline .slx-inline-rebalance-target small,#slx-stock-inline .slx-inline-rebalance-target span{font-size:9px;color:#91a8bc}#slx-stock-inline .slx-inline-rebalance-row{display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;padding:6px;border-bottom:1px solid #1e2c39;font-size:9px}#slx-stock-inline .slx-inline-empty,#slx-stock-inline .slx-inline-error{padding:8px;font-size:9px;color:#8fa1b4}#slx-stock-inline .slx-inline-error{color:#ff7a86}
+#slx-stock-inline .slx-inline-nav button[data-active="1"]{border-color:#3b8ec9;background:#123653;color:#9bd5ff}#slx-stock-inline .slx-stock-view-controls{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:end}#slx-stock-inline .slx-stock-view-controls label{display:grid;gap:3px;font-size:9px;color:#8fa1b4}#slx-stock-inline .slx-stock-view-controls select{width:100%}.slx-stock-row-tools .slx-opp-badge{display:inline-block;margin-left:3px;padding:1px 4px;border:1px solid #8b6a1f;border-radius:999px;color:#ffd36b;background:#2b2412;font:800 7px Arial;font-style:normal}.slx-stock-row-tools .slx-opp-roi{color:#ffd36b!important}.slx-stock-row-tools[data-opportunity="1"]{box-shadow:inset 3px 0 #ffd36b}.slx-stock-row-tools[data-opportunity="2"],.slx-stock-row-tools[data-opportunity="3"]{box-shadow:inset 2px 0 #7c91a8}#slx-stock-inline .slx-inline-workspace{display:none;border:1px solid #26394b;border-radius:10px;background:#0d151e;padding:8px}#slx-stock-inline .slx-inline-workspace[data-open="1"]{display:grid;gap:7px}#slx-stock-inline .slx-inline-work-head{display:flex;align-items:center;gap:8px}#slx-stock-inline .slx-inline-work-head>b{flex:1;font-size:11px;color:#9fc7ef}#slx-stock-inline .slx-inline-work-head button{padding:6px 8px;font-size:9px}#slx-stock-inline .slx-inline-roi-list,#slx-stock-inline .slx-inline-trade-list,#slx-stock-inline .slx-inline-rebalance-list{display:grid;gap:5px}#slx-stock-inline .slx-inline-roi-row{display:grid;grid-template-columns:66px 48px 68px 1fr auto;gap:5px;align-items:center;padding:7px;border:1px solid #203142;border-radius:8px;background:#101923;font-size:9px}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5;color:#8497aa}#slx-stock-inline .slx-inline-roi-row button{grid-row:1/3;grid-column:5;padding:6px}#slx-stock-inline .slx-inline-trade-card{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border:1px solid #263b4e;border-radius:9px;background:#101923}#slx-stock-inline .slx-inline-trade-card>div:first-child{display:grid;gap:2px}#slx-stock-inline .slx-inline-trade-card small,#slx-stock-inline .slx-inline-trade-card span{font-size:9px;color:#8497aa}#slx-stock-inline .slx-inline-mini-actions{display:flex;gap:5px}#slx-stock-inline .slx-inline-rebalance-target{display:grid;gap:3px;padding:8px;border:1px solid #365a78;border-radius:9px;background:#0e1c29}#slx-stock-inline .slx-inline-rebalance-target small,#slx-stock-inline .slx-inline-rebalance-target span{font-size:9px;color:#91a8bc}#slx-stock-inline .slx-inline-rebalance-row{display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;padding:6px;border-bottom:1px solid #1e2c39;font-size:9px}#slx-stock-inline .slx-inline-empty,#slx-stock-inline .slx-inline-error{padding:8px;font-size:9px;color:#8fa1b4}#slx-stock-inline .slx-inline-error{color:#ff7a86}
 #slx-stock-inline~ul .slx-stock-row-tools,.slx-stock-row-tools{list-style:none!important;display:grid;grid-template-columns:90px 1fr 1.15fr 1fr auto;gap:7px;align-items:center;width:100%;margin:7px 0 0!important;padding:8px!important;border-top:1px solid #2a3b4d;background:linear-gradient(180deg,#101923,#0c141c);color:#dce9f7;font-family:Arial,sans-serif;box-sizing:border-box}.slx-stock-row-tools *{box-sizing:border-box}.slx-stock-row-tools[data-target="1"]{box-shadow:inset 3px 0 #4da3ff}.slx-stock-row-tools .slx-row-stock,.slx-stock-row-tools .slx-row-stat{display:grid;gap:2px;min-width:0}.slx-stock-row-tools b{font-size:10px}.slx-stock-row-tools span,.slx-stock-row-tools small{font-size:8px;color:#8fa0b2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slx-stock-row-tools .good{color:#61e291}.slx-stock-row-tools .bad{color:#ff7a86}.slx-stock-row-tools .slx-row-actions{display:flex;gap:4px;justify-content:flex-end}.slx-stock-row-tools button{border:1px solid #415369;border-radius:7px;background:#17212c;color:#ecf4ff;padding:6px 7px;font:800 9px Arial}.slx-stock-row-tools button.primary{border-color:#2c8b52;color:#7ee09f;background:#102a1d}.slx-stock-row-tools button.danger{border-color:#8c3140;color:#ff7a86;background:#2b1016}.slx-stock-row-tools button:disabled{opacity:.38}.slx-stock-row-tools .slx-row-progress{height:4px;border-radius:999px;background:#202d3a;overflow:hidden;margin-top:2px}.slx-stock-row-tools .slx-row-progress i{display:block;height:100%;background:linear-gradient(90deg,#2c8b52,#6bdc97);border-radius:999px}.slx-stock-row-tools .slx-row-progress-label{font-size:7px!important}.slx-stock-row-tools .slx-row-quick{grid-column:1/-1;display:grid;grid-template-columns:minmax(76px,120px) 72px 72px;gap:5px;justify-content:end;border-top:1px dashed #243548;padding-top:6px}.slx-stock-row-tools .slx-row-quick select{border:1px solid #415369;border-radius:7px;background:#17212c;color:#ecf4ff;padding:6px;font:800 9px Arial}
-@media(max-width:600px){.slx-stock-row-tools{grid-template-columns:58px 1fr 1fr!important;gap:5px!important;padding:7px!important}.slx-stock-row-tools .slx-row-stat:nth-child(4){grid-column:1/3}.slx-stock-row-tools .slx-row-actions{grid-column:1/4;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))}.slx-stock-row-tools button{padding:7px 4px!important}.slx-stock-row-tools .slx-row-quick{grid-column:1/4;grid-template-columns:1fr 1fr 1fr;justify-content:stretch}.slx-stock-row-tools .slx-row-quick select{width:100%;padding:7px 4px}#slx-stock-inline .slx-inline-roi-row{grid-template-columns:58px 42px 62px 1fr}#slx-stock-inline .slx-inline-roi-row button{grid-row:auto;grid-column:4}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5}#slx-stock-inline .slx-inline-trade-card{grid-template-columns:1fr}#slx-stock-inline .slx-inline-mini-actions{justify-content:flex-end}#slx-stock-inline .slx-inline-summary{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav button:nth-child(3){grid-column:1/3}#slx-stock-inline .slx-inline-target{grid-template-columns:1fr 86px}#slx-stock-inline .slx-inline-actions{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-presets{grid-template-columns:repeat(3,minmax(0,1fr))}#slx-stock-panel .rebalance-controls{grid-template-columns:1fr}#slx-stock-panel .rebalance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .rebalance-row{grid-template-columns:1fr 1fr}#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
+@media(max-width:600px){#slx-stock-inline .slx-stock-view-controls{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-stock-view-controls button{grid-column:1/3}.slx-stock-row-tools{grid-template-columns:58px 1fr 1fr!important;gap:5px!important;padding:7px!important}.slx-stock-row-tools .slx-row-stat:nth-child(4){grid-column:1/3}.slx-stock-row-tools .slx-row-actions{grid-column:1/4;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))}.slx-stock-row-tools button{padding:7px 4px!important}.slx-stock-row-tools .slx-row-quick{grid-column:1/4;grid-template-columns:1fr 1fr 1fr;justify-content:stretch}.slx-stock-row-tools .slx-row-quick select{width:100%;padding:7px 4px}#slx-stock-inline .slx-inline-roi-row{grid-template-columns:58px 42px 62px 1fr}#slx-stock-inline .slx-inline-roi-row button{grid-row:auto;grid-column:4}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5}#slx-stock-inline .slx-inline-trade-card{grid-template-columns:1fr}#slx-stock-inline .slx-inline-mini-actions{justify-content:flex-end}#slx-stock-inline .slx-inline-summary{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav button:nth-child(3){grid-column:1/3}#slx-stock-inline .slx-inline-target{grid-template-columns:1fr 86px}#slx-stock-inline .slx-inline-actions{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-presets{grid-template-columns:repeat(3,minmax(0,1fr))}#slx-stock-panel .rebalance-controls{grid-template-columns:1fr}#slx-stock-panel .rebalance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .rebalance-row{grid-template-columns:1fr 1fr}#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
 `;
     (document.head||document.documentElement).appendChild(s);
   }
