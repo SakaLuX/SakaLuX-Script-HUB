@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.7.5**
+**v0.7.6**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
