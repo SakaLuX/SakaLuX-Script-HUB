@@ -33,7 +33,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 🎯 SakaLuX Mission Rewards **v1.0.21**
 - 📈 SakaLuX Market Intelligence **v1.17.22**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.32**
-- 🏢 SakaLuX Company Intelligence **v1.8.17**
+- 🏢 SakaLuX Company Intelligence **v1.8.18**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -47,7 +47,7 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - `scripts.json` is the canonical registry/minimum version source used by Hub.
 - A **PUBLISHED / REGISTRY** mismatch means the configured public distribution source has not yet caught up with the registry; it does not automatically mean the installed script is broken.
 - Market Intelligence is distributed through Greasy Fork, so a registry version newer than its Greasy Fork meta version legitimately appears as publish pending until that Greasy Fork release is published.
-- Company Intelligence is currently registered at **v1.8.17** and uses Greasy Fork script **595873** for Hub public-version checks.
+- Company Intelligence is currently registered at **v1.8.18** and uses Greasy Fork script **595873** for Hub public-version checks.
 - Future complementary modules intended for Hub management must be added to `scripts.json` and keep their dedicated information page synchronized.
 
 ## License
