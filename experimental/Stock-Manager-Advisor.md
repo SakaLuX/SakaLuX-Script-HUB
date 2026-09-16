@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.5.1**
+**v0.5.2**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.5.1** fixes the Stock Manager launcher/panel regression and adds Rebalance Preview with cash reserve, excess-share release proposals, target opportunity selection, estimated funding shortfall and ROI-shift preview. The preview never executes trades.
+**v0.5.2** adds a native-style inline Stock Manager dashboard directly above the Torn Stock Market list on the Stocks page, with live portfolio summary, target/owned view, vault/withdraw controls, quick presets, Benefit Lock, Dry Run, PANIC and shortcuts into Advisor, Trade Assistant and Rebalance.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,20 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.5.2 — Inline Stock Market Dashboard
+
+- Added a compact **SakaLuX Stock Manager** dashboard directly inside the Torn Stocks page.
+- Shows Total Invested, known Unrealized P/L and on-hand Cash.
+- Added inline Target selector and live Owned shares display.
+- Added inline Vault Max, Vault Keep, Withdraw and Withdraw All controls.
+- Added 50K / 250K / 1M / 5M / 10M / 25M withdrawal presets.
+- Added inline Benefit Lock, Dry Run and PANIC controls.
+- Added quick links to API settings, full panel, ROI Advisor, Trade Assistant and Rebalance Preview.
+- Inline dashboard can be collapsed and the preference persists locally.
+- Dashboard remounts automatically after Torn SPA redraws and is removed outside the Stocks page.
+- Existing full modal panel remains available for advanced settings and diagnostics.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.5.1 — Panel Recovery & Rebalance Preview
 
 - Fixed the **Stock Manager** button/panel regression from v0.5.0.
