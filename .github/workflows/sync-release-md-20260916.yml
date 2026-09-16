@@ -1,0 +1,49 @@
+name: Sync release Markdown 2026-09-16
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/sync-release-md-20260916.trigger'
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync release MD files
+        run: python .github/scripts/sync_release_md_20260916.py
+      - name: Validate release docs
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          checks = {
+            'greasyfork/Account-Auditor.md':'1.3.5',
+            'greasyfork/Bazaar-Thanker.md':'5.3.26',
+            'greasyfork/Chat-Intelligence.md':'1.2.9',
+            'greasyfork/Company-Intelligence.md':'1.8.18',
+            'greasyfork/Elimination-Assistant.md':'1.3.32',
+            'greasyfork/Enhancer-Guard.md':'1.3.34',
+            'greasyfork/Market-Intelligence.md':'1.17.22',
+            'greasyfork/Mission-Rewards.md':'1.0.21',
+            'greasyfork/SakaLuX-Suite.md':'0.9.913',
+            'greasyfork/Script-Hub.md':'1.9.42',
+            'experimental/Stock-Manager-Advisor.md':'0.7.6',
+          }
+          for path, ver in checks.items():
+            text=Path(path).read_text(encoding='utf-8')
+            if f'v{ver}' not in text:
+              raise SystemExit(f'{path}: version {ver} missing')
+            if '## Current release note' not in text:
+              raise SystemExit(f'{path}: current release note missing')
+            if not re.search(rf'###\s+v{re.escape(ver)}\b', text):
+              raise SystemExit(f'{path}: changelog entry {ver} missing')
+          print('All release Markdown files synchronized.')
+      - name: Commit release docs
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add greasyfork/*.md experimental/Stock-Manager-Advisor.md PERFORMANCE-UI-AUDIT.md
+          git commit -m 'Synchronize release MD files after performance UI optimization'
+          git push
