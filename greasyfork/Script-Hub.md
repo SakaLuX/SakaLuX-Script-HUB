@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.40**
+**v1.9.41**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.40** fixes installed-version detection in the Hub. The Hub now compares all live version signals (module bridge, API/health and standalone registration) and uses the newest valid version, so a stale runtime constant can no longer make an up-to-date script appear outdated. Runtime constants for Enhancer, Bazaar, Missions and Market are synchronized with their userscript headers.
+**v1.9.41** synchronizes every offline Hub fallback add-on version with the canonical `scripts.json` registry. This fixes stale fallback version detection found during the full repository audit while keeping live registry/update behavior unchanged.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,6 +54,12 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.41 — Fallback registry synchronization
+
+- Synchronizes all Hub offline fallback add-on versions with `scripts.json`.
+- Fixes the stale Bazaar Thanker fallback version that caused CI cross-file synchronization failure.
+- Keeps the registered add-on information list synchronized with the canonical registry.
+
 ### v1.9.40 — Installed version reporting fix
 
 - Uses the newest valid live version signal instead of trusting the first bridge value.
