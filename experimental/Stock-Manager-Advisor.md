@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.5.3**
+**v0.5.4**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.5.3** turns the inline Stock Market dashboard into a workspace: Advisor, Trade Assistant and Rebalance now expand directly inside the Stocks page, with persistent active tab, quick target selection, direct Buy Gap, refresh control and throttled SPA remounting.
+**v0.5.4** refines the native inline Stock Market experience with cost-basis-aware Total Invested and P/L, Market Value, API Mode ON/OFF, editable withdrawal presets and configurable visibility for Advisor, Trade, Rebalance, PANIC and Full controls.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,19 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.5.4 — Native Metrics, API Mode & Inline Customization
+
+- Total Invested now uses known transaction cost basis instead of incorrectly mirroring market value.
+- Added Market Value as a separate live metric.
+- Unrealized P/L now shows amount and percentage using known cost basis.
+- Added cost-basis coverage indicator so incomplete API transaction history is obvious.
+- Added inline **API Mode** ON/OFF switch; manual refresh respects it.
+- Added editable withdrawal presets directly from the Stock Market card.
+- Added inline settings to show/hide Advisor, Trade Assistant, Rebalance, PANIC and Full controls.
+- Preset and control preferences persist locally.
+- Kept the full modal for API setup, benefit values and diagnostics.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.5.3 — Inline Advisor / Trade / Rebalance Workspace
 
 - Advisor, Trade Assistant and Rebalance now expand **inside the Stock Market dashboard** instead of forcing the full modal panel.
