@@ -31,5 +31,6 @@ jobs:
           git config user.email 'sakalutzu92@yahoo.com'
           git add experimental/SakaLuX-Stock-Manager-Advisor.user.js experimental/Stock-Manager-Advisor.md
           git commit -m 'Experimental Stock Manager v0.5.6 quick row trades and benefit progress'
+          git checkout -- .github/scripts/patch_experimental_stock_v056.py
           git pull --rebase origin main
           git push
