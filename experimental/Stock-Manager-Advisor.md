@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.1.0**
+**v0.2.0**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -20,7 +20,8 @@
 - Mobile/TornPDA-first panel.
 
 ## Current release note
-**v0.1.0** creates the first experimental SakaLuX stock-management build. It combines a custom stock vault manager/advisor workflow with a one-tap Panic cash-to-stock vault action. The script remains isolated from the public SakaLuX Hub registry while behavior and TornPDA compatibility are tested.
+
+**v0.2.0** adds Direct Panic Buy. PANIC can now resolve the configured stock ID and current price through the Torn stocks API and submit the buy request from the current Torn page, without navigating to Stocks. Failures stay on the current page and are shown in the panel.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -49,6 +50,15 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.2.0 — Direct Panic Buy
+
+- PANIC no longer redirects to the Stocks page.
+- Resolves stock ID and current price from the Torn stocks API when DOM stock data is unavailable.
+- Uses on-hand cash from the user API and submits the buy request directly from the current Torn page.
+- Keeps confirmation and keep-cash safeguards.
+- A failed direct trade stays on the current page and reports the error instead of redirecting.
+- Remains experimental and is not registered in Hub, Standalone, or `scripts.json`.
+
 ### v0.1.0 — Experimental foundation
 - Added stock scanning and target selection.
 - Added Vault Max and Vault (Keep).

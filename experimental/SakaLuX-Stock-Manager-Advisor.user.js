@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.1.0
+// @version      0.2.0
 // @description  Experimental Torn stock vault manager, benefit-safe withdrawals, portfolio advisor and one-tap Panic vault.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.1.0',
+    version: '0.2.0',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -30,6 +30,7 @@
     benefitLock: 'SLX_STOCK_BENEFIT_LOCK',
     panicPending: 'SLX_STOCK_PANIC_PENDING',
     panicConfirm: 'SLX_STOCK_PANIC_CONFIRM',
+    panicDirect: 'SLX_STOCK_PANIC_DIRECT',
     presets: 'SLX_STOCK_PRESETS',
     tx: 'SLX_STOCK_TX_CACHE'
   };
@@ -92,6 +93,38 @@
     if(data.stocks && typeof data.stocks==='object') S.portfolio=data.stocks;
     set(K.tx, JSON.stringify(S.portfolio||{}));
     return data;
+  }
+
+  async function syncStockCatalog() {
+    const key=get(K.api).trim();
+    if(!key) throw new Error('Add an API key first.');
+    const url=`https://api.torn.com/torn/?selections=stocks&key=${encodeURIComponent(key)}&ts=${Date.now()}`;
+    const res=await fetch(url, {credentials:'omit'});
+    const data=await res.json();
+    if(data?.error) throw new Error(data.error.error || 'Torn stocks API error');
+    const stocks=data?.stocks;
+    if(!stocks || typeof stocks!=='object') throw new Error('Torn stock catalog unavailable.');
+    const next=new Map(S.stocks);
+    for(const [id,raw] of Object.entries(stocks)) {
+      const sym=String(raw?.acronym||'').toUpperCase();
+      const price=Number(raw?.current_price||raw?.price||0);
+      if(!sym || !Number.isFinite(price) || price<=0) continue;
+      const prev=next.get(sym)||{};
+      next.set(sym,{...prev,sym,id:String(id),price,source:'api'});
+    }
+    if(next.size) S.stocks=next;
+    return S.stocks;
+  }
+
+  async function ensureStock(sym) {
+    sym=String(sym||'').toUpperCase();
+    scanStocks();
+    let stock=S.stocks.get(sym);
+    if(stock?.id && stock?.price) return stock;
+    await syncStockCatalog();
+    stock=S.stocks.get(sym);
+    if(!stock?.id || !stock?.price) throw new Error(`Unable to resolve ${sym} stock ID/price.`);
+    return stock;
   }
 
   function benefitTier(sym, shares) {
@@ -168,14 +201,12 @@
     });
   }
 
-  async function vault({keep=0, panic=false}={}) {
-    scanStocks();
+  async function vault({keep=0, panic=false, direct=false}={}) {
     const sym=get(K.target).toUpperCase();
     if(!sym) throw new Error('Choose a vault target first.');
-    const stock=S.stocks.get(sym);
-    if(!stock?.price) throw new Error(`Price unavailable for ${sym}.`);
+    const stock=await ensureStock(sym);
     let cash=currentMoneyFromDom();
-    if(!cash || panic) {
+    if(!cash || panic || direct) {
       try { await apiSync(); cash=S.money||cash; } catch(e) { if(!cash) throw e; }
     }
     const available=Math.max(0,cash-(Number(keep)||0));
@@ -254,13 +285,15 @@
     const target=get(K.target).toUpperCase();
     if(!target){ openPanel(); status('Choose a Panic target first.','bad'); return; }
     if(bool(K.panicConfirm,false) && !confirm(`PANIC: vault available cash into ${target}?`)) return;
-    if(!isStocks()) {
-      set(K.panicPending,'1');
-      location.href=APP.stocksUrl;
-      return;
+    try {
+      set(K.panicPending,'0');
+      status(`PANIC: resolving ${target} and available cash…`,'warn');
+      await vault({keep:parseAmount(get(K.keep,'0')),panic:true,direct:true});
+    } catch(e) {
+      set(K.panicPending,'0');
+      status(`PANIC failed: ${e.message}`,'bad');
+      openPanel();
     }
-    try { await vault({keep:parseAmount(get(K.keep,'0')),panic:true}); set(K.panicPending,'0'); }
-    catch(e){ status(`PANIC failed: ${e.message}`,'bad'); }
   }
 
   function style() {
