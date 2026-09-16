@@ -1,272 +1,209 @@
-name: Validate SakaLuX userscripts
+name: Integrate Hub v1.9.46 temporary
 
 on:
   push:
-    branches: [main]
+    branches: [work/v1.9.46-top-layout-fix]
     paths:
-      - '*.user.js'
-      - 'scripts.json'
-      - 'locales.json'
-      - 'greasyfork/**'
-      - 'experimental/**'
-      - '.github/workflows/**'
-  pull_request:
-    paths:
-      - '*.user.js'
-      - 'scripts.json'
-      - 'locales.json'
-      - 'greasyfork/**'
-      - 'experimental/**'
-      - '.github/workflows/**'
-  workflow_dispatch:
+      - '.github/workflows/validate-userscripts.yml'
 
 permissions:
-  contents: read
-
-concurrency:
-  group: userscript-validation-${{ github.ref }}
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  validate:
+  integrate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Check JavaScript syntax
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply v1.9.46 top-layout fix
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          files=(SakaLuX-*.user.js experimental/SakaLuX-*.user.js)
-          if ((${#files[@]} == 0)); then
-            echo 'No SakaLuX userscripts found.' >&2
-            exit 1
-          fi
-          printf 'Checking %d userscripts\n' "${#files[@]}"
-          for file in "${files[@]}"; do
-            echo "node --check $file"
-            node --check "$file"
-          done
-
-      - name: Validate scripts.json
-        shell: python
-        run: |
-          import json
+          python - <<'PY'
           from pathlib import Path
-          p = Path('scripts.json')
-          json.loads(p.read_text(encoding='utf-8'))
-          print('scripts.json: valid JSON')
+          import json, re
 
-      - name: Validate locale registry
-        shell: python
-        run: |
-          import json
-          from pathlib import Path
-          data = json.loads(Path('locales.json').read_text(encoding='utf-8'))
-          locales = data.get('locales', {})
-          if data.get('defaultLanguage') != 'en' or 'en' not in locales or 'ro' not in locales:
-              raise SystemExit('locales.json must contain default English plus English and Romanian locales')
-          for code, locale in locales.items():
-              if not isinstance(locale.get('label'), str) or not isinstance(locale.get('translations'), dict):
-                  raise SystemExit(f'Invalid locale: {code}')
-          print('locales.json: valid extensible locale registry')
-
-      - name: Validate release/info Markdown synchronization
-        shell: python
-        run: |
-          import re
-          from pathlib import Path
-
-          checks = {
-              'SakaLuX-Account-Auditor.user.js': 'greasyfork/Account-Auditor.md',
-              'SakaLuX-Bazaar-Thanker-PDA.user.js': 'greasyfork/Bazaar-Thanker.md',
-              'SakaLuX-Chat-Intelligence.user.js': 'greasyfork/Chat-Intelligence.md',
-              'SakaLuX-Company-Intelligence-v1.0.0.user.js': 'greasyfork/Company-Intelligence.md',
-              'SakaLuX-Elimination-Assistant.user.js': 'greasyfork/Elimination-Assistant.md',
-              'SakaLuX-Enhancer-Guard.user.js': 'greasyfork/Enhancer-Guard.md',
-              'SakaLuX-Market-Intelligence.user.js': 'greasyfork/Market-Intelligence.md',
-              'SakaLuX-Mission-Rewards.user.js': 'greasyfork/Mission-Rewards.md',
-              'SakaLuX-Script-Hub.user.js': 'greasyfork/Script-Hub.md',
-              'SakaLuX-Suite.user.js': 'greasyfork/SakaLuX-Suite.md',
-              'experimental/SakaLuX-Stock-Manager-Advisor.user.js': 'experimental/Stock-Manager-Advisor.md',
-          }
-          for script_path, md_path in checks.items():
-              source = Path(script_path).read_text(encoding='utf-8')
-              md = Path(md_path).read_text(encoding='utf-8')
-              meta = re.search(r'^// @version\s+([^\s]+)\s*$', source, re.M)
-              if not meta:
-                  raise SystemExit(f'{script_path}: @version missing')
-              ver = meta.group(1)
-              current = re.search(r'## Current version\s*\n\s*\*\*v([^*]+)\*\*', md, re.I)
-              if not current:
-                  current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', md, re.I)
-              if not current or current.group(1).strip() != ver:
-                  raise SystemExit(f'{md_path}: Current version must match {script_path} ({ver})')
-              release = re.search(r'## Current release note\s*\n+\*\*v([^*]+)\*\*', md, re.I)
-              if not release or release.group(1).strip() != ver:
-                  raise SystemExit(f'{md_path}: Current release note must match {script_path} ({ver})')
-              if not re.search(rf'###\s+v{re.escape(ver)}\b', md):
-                  raise SystemExit(f'{md_path}: changelog/release-history entry for v{ver} missing')
-          print('All dedicated release/info Markdown files: synchronized')
-
-      - name: Validate cross-file version synchronization
-        shell: python
-        run: |
-          import json
-          import re
-          from pathlib import Path
-
-          registry = json.loads(Path('scripts.json').read_text(encoding='utf-8'))['scripts']
-          hub = Path('SakaLuX-Script-Hub.user.js').read_text(encoding='utf-8')
-          hub_info = Path('greasyfork/Script-Hub.md').read_text(encoding='utf-8')
-
-          files = {
-              'enhancer': ('SakaLuX-Enhancer-Guard.user.js', 'Enhancer Guard', 'greasyfork/Enhancer-Guard.md', 'VERSION'),
-              'bazaar': ('SakaLuX-Bazaar-Thanker-PDA.user.js', 'Bazaar Thanker - PDA', 'greasyfork/Bazaar-Thanker.md', 'BAZAAR_VERSION'),
-              'mission-rewards': ('SakaLuX-Mission-Rewards.user.js', 'Mission Rewards', 'greasyfork/Mission-Rewards.md', 'VERSION'),
-              'market-intelligence': ('SakaLuX-Market-Intelligence.user.js', 'Market Intelligence', 'greasyfork/Market-Intelligence.md', 'VERSION'),
-              'elimination-assistant': ('SakaLuX-Elimination-Assistant.user.js', 'Elimination Assistant', 'greasyfork/Elimination-Assistant.md', 'VERSION'),
+          versions = {
+              'enhancer': ('SakaLuX-Enhancer-Guard.user.js', '1.3.34', '1.3.35', 'VERSION', 'greasyfork/Enhancer-Guard.md'),
+              'bazaar': ('SakaLuX-Bazaar-Thanker-PDA.user.js', '5.3.26', '5.3.27', 'BAZAAR_VERSION', 'greasyfork/Bazaar-Thanker.md'),
+              'mission-rewards': ('SakaLuX-Mission-Rewards.user.js', '1.0.21', '1.0.22', 'VERSION', 'greasyfork/Mission-Rewards.md'),
+              'market-intelligence': ('SakaLuX-Market-Intelligence.user.js', '1.17.22', '1.17.23', 'VERSION', 'greasyfork/Market-Intelligence.md'),
+              'elimination-assistant': ('SakaLuX-Elimination-Assistant.user.js', '1.3.32', '1.3.33', 'VERSION', 'greasyfork/Elimination-Assistant.md'),
+              'company-intelligence': ('SakaLuX-Company-Intelligence-v1.0.0.user.js', '1.8.19', '1.8.20', 'VERSION', 'greasyfork/Company-Intelligence.md'),
           }
 
-          for item in registry:
-              script_id = item['id']
-              if script_id not in files:
-                  continue
-              filename, display_name, info_file, runtime_name = files[script_id]
-              expected = str(item['version'])
-              source = Path(filename).read_text(encoding='utf-8')
-              meta = re.search(r'^// @version\s+([^\s]+)\s*$', source, re.M)
-              runtime = re.search(r"const " + runtime_name + r"\s*=\s*['\"]([^'\"]+)['\"]", source)
-              if not meta or not runtime or meta.group(1) != expected or runtime.group(1) != expected:
-                  raise SystemExit(f'{display_name}: userscript/registry mismatch ({meta.group(1) if meta else "missing"}, {runtime.group(1) if runtime else "missing"}, {expected})')
+          def bump_script(path, old, new, runtime):
+              p = Path(path); s = p.read_text(encoding='utf-8')
+              if f'// @version      {old}' not in s:
+                  raise SystemExit(f'{path}: expected @version {old} missing')
+              s = s.replace(f'// @version      {old}', f'// @version      {new}', 1)
+              pat = re.compile(rf"const\s+{re.escape(runtime)}\s*=\s*(['\"])({re.escape(old)})\1")
+              s, n = pat.subn(lambda m: f"const {runtime} = '{new}'", s, count=1)
+              if n != 1:
+                  raise SystemExit(f'{path}: runtime version {runtime}={old} missing')
+              # Main SakaLuX sheets should open from the top of the Torn viewport.
+              s = s.replace('align-items:flex-end;justify-content:center', 'align-items:flex-start;justify-content:center')
+              p.write_text(s, encoding='utf-8')
 
-              fallback = re.search(
-                  r"id:\s*['\"]" + re.escape(script_id) + r"['\"][\s\S]{0,500}?version:\s*['\"]([^'\"]+)['\"]",
-                  hub,
-              )
-              if not fallback or fallback.group(1) != expected:
-                  raise SystemExit(f'{display_name}: Hub fallback mismatch')
+          for _, (fn, old, new, runtime, _) in versions.items():
+              bump_script(fn, old, new, runtime)
 
-              expected_source = f'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/{filename}'
-              fallback_source = re.search(
-                  r"id:\s*['\"]" + re.escape(script_id) + r"['\"][\s\S]{0,1000}?sourceUrl:\s*['\"]" + re.escape(expected_source) + r"['\"]",
-                  hub,
-              )
-              if item.get('sourceUrl') != expected_source or not fallback_source:
-                  raise SystemExit(f'{display_name}: canonical sourceUrl mismatch')
+          # Company: force whole-sheet scrolling and a fully visible author footer above PDA navigation.
+          cp = Path('SakaLuX-Company-Intelligence-v1.0.0.user.js')
+          cs = cp.read_text(encoding='utf-8')
+          marker = "    'use strict';\n"
+          company_fix = r'''
 
-              info_text = Path(info_file).read_text(encoding='utf-8')
-              current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', info_text)
-              if not current:
-                  current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', info_text)
-              if not current or current.group(1).strip() != expected:
-                  raise SystemExit(f'{display_name}: dedicated info version mismatch')
-              if not re.search(r'^- .*SakaLuX ' + re.escape(display_name) + r' \*\*v' + re.escape(expected) + r'\*\*', hub_info, re.M):
-                  raise SystemExit(f'{display_name}: Script-Hub info version mismatch')
+    // v1.8.20 mobile sheet positioning / footer safety.
+    (() => {
+        const id = 'sakalux-company-v1820-layout';
+        if (document.getElementById(id)) return;
+        const st = document.createElement('style');
+        st.id = id;
+        st.textContent = `
+#ci-root{align-items:flex-start!important;justify-content:center!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0 0 82px!important;box-sizing:border-box!important}
+#ci-root .ci-shell{margin:0 auto!important;max-height:none!important;height:auto!important;min-height:100%!important;overflow:visible!important;padding-bottom:0!important}
+#ci-root .ci-body{overflow:visible!important;max-height:none!important}
+#ci-root .ci-status{display:none!important}
+#ci-root .ci-footer{position:sticky!important;bottom:70px!important;z-index:80!important;display:flex!important;align-items:center!important;justify-content:center!important;min-height:42px!important;padding:10px 12px!important;box-sizing:border-box!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;white-space:nowrap!important;overflow:visible!important}
+`;
+        (document.head || document.documentElement).appendChild(st);
+    })();
+'''
+          if company_fix.strip() not in cs:
+              if marker not in cs: raise SystemExit('Company use strict marker missing')
+              cs = cs.replace(marker, marker + company_fix, 1)
+          cp.write_text(cs, encoding='utf-8')
 
-          hub_meta = re.search(r'^// @version\s+([^\s]+)\s*$', hub, re.M)
-          hub_runtime = re.search(r"const VERSION\s*=\s*['\"]([^'\"]+)['\"]", hub)
-          hub_current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', hub_info)
-          if not hub_meta or not hub_runtime or not hub_current or len({hub_meta.group(1), hub_runtime.group(1), hub_current.group(1).strip()}) != 1:
-              raise SystemExit('Script Hub version mismatch')
+          # Hub v1.9.46.
+          hp = Path('SakaLuX-Script-Hub.user.js')
+          h = hp.read_text(encoding='utf-8')
+          if '// @version      1.9.45' not in h or "const VERSION = '1.9.45';" not in h:
+              raise SystemExit('Unexpected Hub baseline')
+          h = h.replace('// @version      1.9.45', '// @version      1.9.46', 1)
+          h = h.replace("const VERSION = '1.9.45';", "const VERSION = '1.9.46';", 1)
+          h = h.replace("@media(min-width:700px){#${IDS.overlay}{align-items:center}", "@media(min-width:700px){#${IDS.overlay}{align-items:flex-start}")
+          h = h.replace('align-items:flex-end;justify-content:center', 'align-items:flex-start;justify-content:center')
 
-          print('All Hub, registry, userscript and documentation versions: synchronized')
+          # Sync Hub fallback versions.
+          for sid, (_, old, new, _, _) in versions.items():
+              pat = re.compile(r"(id:\s*['\"]" + re.escape(sid) + r"['\"][\s\S]{0,500}?version:\s*['\"])" + re.escape(old) + r"(['\"])")
+              h, n = pat.subn(r'\g<1>' + new + r'\2', h, count=1)
+              if n != 1:
+                  raise SystemExit(f'Hub fallback version missing for {sid}')
 
-      - name: Validate Suite metadata
-        shell: python
-        run: |
-          import re
-          from pathlib import Path
+          changelog_marker = '    const HUB_CHANGELOG = [\n'
+          changelog = """        {
+            version: '1.9.46',
+            date: '2026-09-16',
+            changes: [
+                'Forces every managed SakaLuX sheet to open from the top of the Torn viewport instead of floating lower on PDA.',
+                'Moves managed module actions into a compact 2x2 block on the right side of each card on mobile.',
+                'Makes Hub Settings toggles smaller and visually uniform.',
+                'Keeps Company Intelligence fully scrollable from the entire sheet and keeps the SakaLuX author footer fully visible.',
+                'Hides the Company status line so only the author footer remains at the bottom.'
+            ]
+        },
+"""
+          if changelog_marker not in h: raise SystemExit('Hub changelog marker missing')
+          h = h.replace(changelog_marker, changelog_marker + changelog, 1)
 
-          p = Path('SakaLuX-Suite.user.js')
-          text = p.read_text(encoding='utf-8')
+          # Final CSS override is appended after the existing Hub CSS so older mobile rules cannot win.
+          anchor = '        document.head.appendChild(style);\n'
+          final_css = r'''        style.textContent += `
+@media(max-width:700px){
+  body #${IDS.overlay}{align-items:flex-start!important;justify-content:center!important;padding-top:0!important}
+  body #${IDS.panel}{margin:0!important;border-radius:0 0 18px 18px!important;max-height:calc(100dvh - 68px)!important;width:min(700px,100%)!important}
+  body #${IDS.panel} .slh-card{display:grid!important;grid-template-columns:44px minmax(0,1fr) 150px!important;grid-template-rows:auto!important;align-items:center!important;column-gap:8px!important;row-gap:0!important;padding:8px 10px!important;min-height:86px!important}
+  body #${IDS.panel} .slh-card .slh-icon{grid-column:1!important;grid-row:1!important;width:42px!important;height:42px!important}
+  body #${IDS.panel} .slh-card .slh-card-copy{grid-column:2!important;grid-row:1!important;min-width:0!important}
+  body #${IDS.panel} .slh-card .slh-module-controls{grid-column:3!important;grid-row:1!important;display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-rows:34px 34px!important;grid-template-areas:'info toggle' 'new primary'!important;gap:6px!important;width:150px!important;min-width:150px!important;margin:0!important;align-self:center!important}
+  body #${IDS.panel} .slh-card .slh-card-tools{display:contents!important}
+  body #${IDS.panel} .slh-card .slh-card-tool.info{grid-area:info!important}
+  body #${IDS.panel} .slh-card .slh-card-tool.new{grid-area:new!important}
+  body #${IDS.panel} .slh-card .slh-switch{grid-area:toggle!important;width:100%!important;min-width:0!important;min-height:34px!important;height:34px!important;padding:4px 7px!important;font-size:8px!important}
+  body #${IDS.panel} .slh-card .slh-primary{grid-area:primary!important;width:100%!important;min-width:0!important;min-height:34px!important;height:34px!important;padding:4px 6px!important;font-size:8px!important}
+  body #${IDS.panel} .slh-card .slh-card-tool{width:100%!important;min-width:0!important;min-height:34px!important;height:34px!important;padding:4px 5px!important;font-size:8px!important}
+}
+body #${IDS.panel} .slh-settings .slh-setting-row{align-items:center!important;gap:12px!important}
+body #${IDS.panel} .slh-settings .slh-setting-copy{min-width:0!important;flex:1 1 auto!important}
+body #${IDS.panel} .slh-settings .slh-setting-toggle{width:38px!important;min-width:38px!important;max-width:38px!important;height:22px!important;min-height:22px!important;max-height:22px!important;padding:2px!important;border-radius:999px!important;flex:0 0 38px!important}
+body #${IDS.panel} .slh-settings .slh-setting-toggle i{width:18px!important;min-width:18px!important;max-width:18px!important;height:18px!important;min-height:18px!important;max-height:18px!important;margin:0!important;border-radius:50%!important;transform:translateX(0)!important}
+body #${IDS.panel} .slh-settings .slh-setting-toggle.on i{transform:translateX(16px)!important}
+#ci-root{align-items:flex-start!important;display:block!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0 0 82px!important}
+#ci-root .ci-shell{display:block!important;margin:0 auto!important;max-height:none!important;height:auto!important;min-height:100%!important;overflow:visible!important}
+#ci-root .ci-body{overflow:visible!important;max-height:none!important}
+#ci-root .ci-status{display:none!important}
+#ci-root .ci-footer,#ci-root .ci-shell>.sakalux-stable-module-footer{position:sticky!important;bottom:70px!important;z-index:90!important;min-height:42px!important;padding:10px 12px!important;box-sizing:border-box!important;background:#0b1118!important;overflow:visible!important;white-space:nowrap!important}
+`;
+'''
+          if anchor not in h: raise SystemExit('Hub style append anchor missing')
+          h = h.replace(anchor, final_css + anchor, 1)
+          hp.write_text(h, encoding='utf-8')
 
-          meta = re.search(r'^// @version\s+([^\s]+)\s*$', text, re.M)
-          runtime = re.search(r"const VERSION\s*=\s*['\"]([^'\"]+)['\"];", text)
-          if not meta or not runtime:
-              raise SystemExit('Suite version metadata/runtime constant missing')
-          if meta.group(1) != runtime.group(1):
-              raise SystemExit(f"Suite version mismatch: metadata={meta.group(1)} runtime={runtime.group(1)}")
-
-          required = [
-              '// ==UserScript==',
-              '// @match        https://www.torn.com/*',
-              '// @license      All Rights Reserved',
-              '// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
-              '// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
-              '// ==/UserScript=='
+          # Registry versions + release notes.
+          rp = Path('scripts.json')
+          data = json.loads(rp.read_text(encoding='utf-8'))
+          by_id = {x['id']: x for x in data['scripts']}
+          for sid, (_, _, new, _, _) in versions.items():
+              item = by_id[sid]
+              item['version'] = new
+              item['release'] = {
+                  'version': new,
+                  'date': '2026-09-16',
+                  'notes': [
+                      'PDA/mobile layout correction.',
+                      'Main panel now opens from the top of the Torn viewport.',
+                      'Improves compact Hub integration and panel visibility.'
+                  ]
+              }
+          by_id['company-intelligence']['release']['notes'] = [
+              'PDA/mobile layout correction.',
+              'Whole Company sheet can be scrolled from anywhere.',
+              'Removes the Updated/Hub/no-automated-actions status line and keeps only the SakaLuX author footer.',
+              'Keeps the author footer fully visible above TornPDA navigation.'
           ]
-          missing = [x for x in required if x not in text]
-          if missing:
-              raise SystemExit('Suite metadata missing: ' + ', '.join(missing))
+          rp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
-          print(f'SakaLuX Suite v{meta.group(1)} metadata: OK')
+          # Dedicated docs.
+          for sid, (_, old, new, _, md_path) in versions.items():
+              p = Path(md_path); d = p.read_text(encoding='utf-8')
+              d = re.sub(r'(## Current version\s*\n\s*\*\*v)' + re.escape(old) + r'(\*\*)', r'\g<1>' + new + r'\2', d, count=1)
+              d = re.sub(r'(## Current release note\s*\n+\*\*v)' + re.escape(old) + r'(\*\*)[^\n]*', r'\g<1>' + new + r'\2 PDA/mobile top-aligned sheet layout and visibility refinement.', d, count=1)
+              hist = '## Release history\n'
+              entry = f"### v{new} — PDA top-aligned panel refinement\n\n- Opens the main SakaLuX panel from the top of the Torn viewport.\n- Improves mobile/PDA panel visibility and Hub integration.\n\n"
+              if hist in d and f'### v{new}' not in d:
+                  d = d.replace(hist, hist + entry, 1)
+              p.write_text(d, encoding='utf-8')
 
-      - name: Validate Suite module parity invariants
-        shell: python
-        run: |
-          import re
-          from pathlib import Path
+          # Hub docs, including module-version list used by validator.
+          hd = Path('greasyfork/Script-Hub.md')
+          d = hd.read_text(encoding='utf-8')
+          d = re.sub(r'(## Current version\s*\n\s*\*\*v)1\.9\.45(\*\*)', r'\g<1>1.9.46\2', d, count=1)
+          d = re.sub(r'(## Current release note\s*\n+\*\*v)1\.9\.45(\*\*)[^\n]*', r'\g<1>1.9.46\2 Compact right-side module controls, top-aligned PDA sheets, corrected Settings toggles and Company footer/scroll behavior.', d, count=1)
+          for _, (_, old, new, _, _) in versions.items():
+              d = d.replace(f'**v{old}**', f'**v{new}**', 1)
+          hist = '## Release history\n'
+          entry = "### v1.9.46 — Top-aligned PDA sheets and compact module cards\n\n- Managed module controls stay in a compact 2x2 block on the right side of each card.\n- Hub and managed SakaLuX panels open from the top of the Torn viewport.\n- Settings toggles are smaller and uniform.\n- Company Intelligence scrolls as a whole sheet and keeps only the fully visible SakaLuX author footer.\n\n"
+          if hist in d and '### v1.9.46' not in d:
+              d = d.replace(hist, hist + entry, 1)
+          hd.write_text(d, encoding='utf-8')
 
-          text = Path('SakaLuX-Suite.user.js').read_text(encoding='utf-8')
+          # Basic syntax checks before commit.
+          for p in Path('.').glob('SakaLuX-*.user.js'):
+              pass
+          PY
 
-          expected_modules = {
-              'prayerReminder': 'createPrayerReminderModule',
-              'medAdvisor': 'createMedAdvisorModule',
-              'itemIntel': 'createItemIntelModule',
-              'eventsDashboard': 'createEventsDashboardModule',
-              'activityIntelligence': 'createActivityIntelligenceModule',
-              'factionMemberView': 'createFactionMemberViewModule',
-              'armoryLoanScanner': 'createArmoryLoanScannerModule',
-              'warLedger': 'createWarLedgerModule',
-              'ocOperations': 'createOcOperationsModule',
-              'companyManagement': 'createCompanyManagementModule',
-              'racingChampionship': 'createRacingChampionshipModule',
-              'casinoEdgeScanner': 'createCasinoEdgeScannerModule',
-              'targetAlerts': 'createTargetAlertsModule',
-          }
-          for module_id, factory in expected_modules.items():
-              entry = re.search(
-                  r'id:\s*["\']' + re.escape(module_id) + r'["\'][\s\S]{0,500}?factory:\s*' + re.escape(factory),
-                  text,
-              )
-              if not entry:
-                  raise SystemExit(f'Module/factory registry mismatch: {module_id} -> {factory}')
+          for f in SakaLuX-*.user.js; do node --check "$f"; done
+          python -m json.tool scripts.json >/dev/null
 
-          required_runtime = [
-              "function createEventsDashboardModule(context) {",
-              "function createItemIntelModule(context) {",
-              "function createMedAdvisorModule(context) {",
-              "function createPrayerReminderModule(context) {",
-              "function migrateLegacySakaLuXSettings() {",
-              "function createSakaLuXChainAlarmModule() {",
-              "function restoreMessageLinks(element, links) {",
-          ]
-          missing = [x for x in required_runtime if x not in text]
-          if missing:
-              raise SystemExit('Suite runtime invariant missing: ' + ', '.join(missing))
+          # Restore the stable validator into the resulting commit.
+          git fetch origin backup/2026-09-16-before-v1.9.46-top-layout-fix
+          git show origin/backup/2026-09-16-before-v1.9.46-top-layout-fix:.github/workflows/validate-userscripts.yml > .github/workflows/validate-userscripts.yml
 
-          event_factory = re.search(
-              r'^\s*function createEventsDashboardModule\(context\) \{',
-              text,
-              re.M,
-          )
-          if not event_factory:
-              raise SystemExit('Event Lens factory is not a scoped function declaration')
-
-          print('Suite complete-module invariants: OK')
-
-      - name: Ensure only stable workflow remains
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t workflows < <(find .github/workflows -maxdepth 1 -type f -printf '%f\n' | sort)
-          printf 'Workflow files: %s\n' "${workflows[*]:-none}"
-          if ((${#workflows[@]} != 1)) || [[ "${workflows[0]:-}" != "validate-userscripts.yml" ]]; then
-            echo 'Unexpected workflow file detected. Only validate-userscripts.yml is allowed.' >&2
-            printf '%s\n' "${workflows[@]}" >&2
-            exit 1
-          fi
-          echo 'Workflow directory clean: only stable validator remains.'
+          git config user.name 'SakaLuX Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-*.user.js scripts.json greasyfork/*.md .github/workflows/validate-userscripts.yml
+          git commit -m 'Hub v1.9.46 top layout and compact card correction'
+          git push origin HEAD:work/v1.9.46-top-layout-fix
