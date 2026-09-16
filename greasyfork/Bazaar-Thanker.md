@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.23**
+**v5.3.24**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.23** standardizes the shared Standalone menu ordering. Known modules now use one canonical order, and any unknown/new module is placed after known modules instead of jumping directly below the STANDALONE subtitle. This prevents Company Intelligence from appearing at the top when another add-on renders the dock.
+**v5.3.24** removes the visible seller username from generated thank-you messages. The profile attribution is now a single clickable 🙏 emoji that still opens the configured SakaLuX profile.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -29,6 +29,12 @@ Generated thank-you text should be reviewed before sending. The script assists w
 **All Rights Reserved**
 
 ## Release history
+### v5.3.24 — Profile link cleanup
+
+- Removes the visible `SakaLuX` username from thank-you messages.
+- Keeps only a clickable `🙏` profile link.
+- Preserves the configured seller profile destination.
+
 ### v5.3.23 — Shared Standalone ordering fix
 
 - Uses the canonical SakaLuX standalone order including Company Intelligence.
