@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.5.0
-// @description  Experimental Torn stock portfolio optimizer with ROI, bank comparison, payback analysis, Panic v2 and hardened Trade Assistant.
+// @version      0.5.1
+// @description  Experimental Torn stock portfolio optimizer with rebalance preview, ROI, bank comparison, Panic v2 and hardened Trade Assistant.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.5.0',
+    version: '0.5.1',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -43,7 +43,8 @@
     panicMax: 'SLX_STOCK_PANIC_MAX_SPEND',
     panicUseAll: 'SLX_STOCK_PANIC_USE_ALL',
     bankApr: 'SLX_STOCK_BANK_APR',
-    optimizerMinApr: 'SLX_STOCK_OPTIMIZER_MIN_APR'
+    optimizerMinApr: 'SLX_STOCK_OPTIMIZER_MIN_APR',
+    rebalanceReserve: 'SLX_STOCK_REBALANCE_RESERVE'
   };
 
   const BENEFITS = {
@@ -528,6 +529,55 @@
     return rows.sort((a,b)=>({weak:0,excess:1,hold:2}[a.signal]-{weak:0,excess:1,hold:2}[b.signal]) || b.freeValue-a.freeValue || b.currentApr-a.currentApr);
   }
 
+  function safeRender(name, fn) {
+    try { fn(); return true; }
+    catch(e) {
+      console.error(`[${APP.name}] ${name} render failed`, e);
+      status(`${name} render error: ${e.message}`,'bad');
+      return false;
+    }
+  }
+
+  function buildRebalancePreview() {
+    const held=buildOptimizerRows();
+    const candidates=buildRoiCandidates();
+    const reserve=Math.max(0,parseAmount(get(K.rebalanceReserve,'0')));
+    const cash=Math.max(Number(S.money)||0,currentMoneyFromDom());
+    const freeRows=held.filter(r=>r.freeShares>0).sort((a,b)=>b.freeValue-a.freeValue);
+    const weakRows=held.filter(r=>r.signal==='weak').sort((a,b)=>a.currentApr-b.currentApr);
+    const sources=[...freeRows,...weakRows.filter(w=>!freeRows.some(f=>f.sym===w.sym))];
+    const sourceCapital=sources.reduce((n,r)=>n+(r.freeValue||0),0);
+    const deployable=Math.max(0,cash+sourceCapital-reserve);
+    const target=candidates.find(r=>r.cost<=deployable) || candidates[0] || null;
+    if(!target) return {cash,reserve,sourceCapital,deployable,sources,target:null};
+    const required=Math.max(0,target.cost-cash+reserve);
+    let need=required;
+    const sells=[];
+    for(const r of sources) {
+      if(need<=0) break;
+      const value=Math.min(r.freeValue,need);
+      const shares=Math.min(r.freeShares,Math.ceil(value/r.price));
+      if(shares<=0) continue;
+      const proceeds=shares*r.price;
+      sells.push({sym:r.sym,shares,proceeds,currentApr:r.currentApr});
+      need-=proceeds;
+    }
+    const funded=Math.max(0,target.cost-Math.max(0,need));
+    return {cash,reserve,sourceCapital,deployable,sources,target,required,sells,shortfall:Math.max(0,need),funded};
+  }
+
+  function renderRebalancePreview() {
+    const box=$('#slx-stock-rebalance-body'); if(!box) return;
+    const x=buildRebalancePreview();
+    if(!x.target){box.innerHTML='<div class="muted">No ROI candidate available yet. Sync API and benefit values first.</div>';return;}
+    const sellHtml=x.sells.length?x.sells.map(r=>`<div class="rebalance-row"><b>SELL ${r.sym}</b><span>${r.shares.toLocaleString()} shares</span><span>≈ ${money(r.proceeds)}</span><small>${r.currentApr?r.currentApr.toFixed(2)+'% current APR':'ROI n/a'}</small></div>`).join(''):'<div class="muted">No stock sale is needed; current cash can fund the selected opportunity.</div>';
+    const before=x.sells.reduce((n,r)=>n+r.currentApr*(r.proceeds||0),0);
+    const moved=x.sells.reduce((n,r)=>n+r.proceeds,0);
+    const sourceWeighted=moved>0?before/moved:0;
+    const delta=x.target.roi-sourceWeighted;
+    box.innerHTML=`<div class="rebalance-summary"><div><span>Available cash</span><b>${money(x.cash)}</b></div><div><span>Potential releases</span><b>${money(x.sourceCapital)}</b></div><div><span>Reserve</span><b>${money(x.reserve)}</b></div><div><span>Deployable</span><b>${money(x.deployable)}</b></div></div><div class="rebalance-target"><b>Target: ${x.target.sym} · Tier ${x.target.tier}</b><span>${x.target.sharesNeeded.toLocaleString()} shares · ${money(x.target.cost)} · ${x.target.roi.toFixed(2)}% APR</span><small>${Math.round(x.target.paybackDays).toLocaleString()}d payback${moved>0?` · estimated ROI shift ${delta>=0?'+':''}${delta.toFixed(2)}pp`:''}</small></div><div class="rebalance-list">${sellHtml}</div>${x.shortfall>0?`<div class="bad">Still missing ${money(x.shortfall)} after available free/excess capital.</div>`:'<div class="good">Preview fully funded. No trades executed.</div>'}`;
+  }
+
   function renderOptimizer() {
     const box=$('#slx-stock-optimizer-body'); if(!box) return;
     const held=buildOptimizerRows();
@@ -675,7 +725,8 @@
 #slx-stock-panel .roi-row{display:grid;grid-template-columns:78px 65px 78px 1fr 1fr 1fr;gap:6px;padding:7px 0;border-bottom:1px solid #1c2a38;font-size:10px;align-items:center}#slx-stock-panel .trade-list{display:grid;gap:7px}#slx-stock-panel .trade-card{display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;padding:9px;border:1px solid #27415a;border-radius:10px;background:#0e1823;align-items:center}.trade-card>div{display:grid;gap:3px}.trade-card small{font-size:9px;color:#8296aa}.trade-card span{font-size:9px;color:#a7b8c9}.trade-actions{display:flex!important;gap:5px}.trade-actions button{padding:7px!important}
 #slx-stock-panel .safety-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#slx-stock-panel .panic-preview{margin-top:8px;padding:8px;border:1px solid #2b3f53;border-radius:8px;background:#0d1721;color:#8fa2b6;font-size:10px;line-height:1.4}#slx-stock-panel .panic-preview[data-kind="ok"]{border-color:#267c52;color:#63df9a}#slx-stock-panel .panic-preview[data-kind="bad"]{border-color:#8c3140;color:#ff7a86}#slx-stock-panel .action-list{display:grid;gap:5px;max-height:230px;overflow:auto}#slx-stock-panel .action-row{display:grid;grid-template-columns:1.25fr .8fr .8fr 1fr 1.4fr;gap:6px;padding:6px 0;border-bottom:1px solid #1c2a38;font-size:9px;align-items:center}
 #slx-stock-panel .optimizer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}#slx-stock-panel .optimizer-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}#slx-stock-panel .optimizer-summary>div{display:grid;gap:3px;padding:8px;border:1px solid #23374a;border-radius:9px;background:#101a25}#slx-stock-panel .optimizer-summary span{font-size:9px;color:#8293a7}#slx-stock-panel .optimizer-pick{display:grid;gap:3px;padding:8px;margin-bottom:7px;border:1px solid #365a78;border-radius:9px;background:#0e1c29}.optimizer-pick span,.optimizer-pick small{font-size:9px;color:#9fb3c6}#slx-stock-panel .optimizer-list{display:grid;gap:5px;max-height:310px;overflow:auto}#slx-stock-panel .optimizer-row{display:grid;grid-template-columns:62px 1fr 1fr 1fr 1.25fr;gap:6px;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px;align-items:center}.optimizer-row>div{display:grid;gap:3px}.optimizer-row small{color:#8293a7}
-@media(max-width:600px){#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
+#slx-stock-panel .rebalance-controls{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:8px}#slx-stock-panel .rebalance-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}#slx-stock-panel .rebalance-summary>div{display:grid;gap:3px;padding:8px;border:1px solid #23374a;border-radius:9px;background:#101a25}.rebalance-summary span{font-size:9px;color:#8293a7}#slx-stock-panel .rebalance-target{display:grid;gap:3px;padding:9px;border:1px solid #365a78;border-radius:9px;background:#0e1c29;margin-bottom:7px}.rebalance-target span,.rebalance-target small{font-size:9px;color:#9fb3c6}#slx-stock-panel .rebalance-list{display:grid;gap:5px;margin-bottom:7px}.rebalance-row{display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:6px;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px;align-items:center}
+@media(max-width:600px){#slx-stock-panel .rebalance-controls{grid-template-columns:1fr}#slx-stock-panel .rebalance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .rebalance-row{grid-template-columns:1fr 1fr}#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
 `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -705,6 +756,7 @@
       <div class="section"><div class="title">Benefit Values</div><div class="actions"><button id="slx-benefit-fetch" class="primary" type="button">Fetch Market Values</button><button id="slx-benefit-reset" type="button">Reset Manual Values</button></div><div id="slx-stock-benefit-values" class="benefit-list"></div></div>
       <div class="section"><div class="title">Benefit ROI Advisor</div><div id="slx-stock-advisor-body" class="muted">Waiting for stock data…</div></div>
       <div class="section"><div class="title">Portfolio Optimizer</div><div class="optimizer-controls"><label>Bank APR % <input id="slx-bank-apr" inputmode="decimal" value="${esc(get(K.bankApr,'0'))}" placeholder="e.g. 70"></label><label>Minimum acceptable APR % <input id="slx-opt-min-apr" inputmode="decimal" value="${esc(get(K.optimizerMinApr,'0'))}" placeholder="e.g. 50"></label></div><div class="api-help">Bank APR is manual so the comparison uses your actual current bank return instead of a guessed rate.</div><div id="slx-stock-optimizer-body" class="muted">Waiting for portfolio data…</div></div>
+      <div class="section"><div class="title">Rebalance Preview</div><div class="rebalance-controls"><label>Cash reserve <input id="slx-rebalance-reserve" value="${esc(get(K.rebalanceReserve,'0'))}" placeholder="e.g. 10m"></label><button id="slx-rebalance-preview-btn" type="button">Build Preview</button></div><div class="api-help">Preview only: proposes which excess shares could be released and where capital could move. It never executes SELL/BUY automatically.</div><div id="slx-stock-rebalance-body" class="muted">Press Build Preview after syncing API and benefit values.</div></div>
       <div class="section"><div class="title">Trade Assistant</div><div id="slx-stock-trade-body" class="trade-list muted">Waiting for ROI data…</div></div>
       <div id="slx-stock-status">Experimental build. Not registered in SakaLuX Hub or Standalone.</div>
     </div></div>`;
@@ -736,6 +788,8 @@
     $('#slx-log-clear',p).onclick=clearActionLog;
     $('#slx-bank-apr',p).onchange=e=>{set(K.bankApr,String(Math.max(0,Number(e.target.value)||0)));renderAdvisor();renderOptimizer();renderTradeAssistant();};
     $('#slx-opt-min-apr',p).onchange=e=>{set(K.optimizerMinApr,String(Math.max(0,Number(e.target.value)||0)));renderOptimizer();};
+    $('#slx-rebalance-reserve',p).onchange=e=>{set(K.rebalanceReserve,e.target.value);renderRebalancePreview();};
+    $('#slx-rebalance-preview-btn',p).onclick=()=>safeRender('Rebalance Preview',renderRebalancePreview);
     $('#slx-stock-target',p).onchange=e=>{set(K.target,e.target.value);const v=$('#slx-panic-preview',p);if(v){v.dataset.kind='';v.textContent='Target changed · run Preview PANIC again.';}renderPortfolio();renderAdvisor();renderOptimizer();};
     $('#slx-vault-max',p).onclick=()=>vault().then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     $('#slx-vault-keep',p).onclick=()=>vault({keep:parseAmount($('#slx-stock-keep',p).value)}).then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
@@ -754,13 +808,13 @@
     if(fallback) fallback.innerHTML='<option value="">None</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===currentFallback?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
   }
 
-  function openPanel() { style(); panel(); refreshTargetSelect(); renderPortfolio(); renderBenefitValues(); renderAdvisor(); renderOptimizer(); renderTradeAssistant(); renderActionLog(); S.panel.dataset.open='1'; }
+  function openPanel() { style(); const p=panel(); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Action Log',renderActionLog); }
 
   function managerLauncher() {
     if($('#slx-stock-open')) return;
     const b=document.createElement('button'); b.id='slx-stock-open'; b.type='button'; b.textContent='📊 Stock Manager';
     b.style.cssText='position:fixed;right:10px;bottom:44px;z-index:2147482499;border:1px solid #3c6c96;border-radius:10px;padding:8px 10px;background:#102335;color:#dceeff;font:800 11px Arial;';
-    b.onclick=openPanel; document.body.appendChild(b);
+    b.onclick=()=>{try{openPanel();}catch(e){console.error(`[${APP.name}] open panel failed`,e);const p=S.panel;if(p?.isConnected)p.dataset.open='1';}}; document.body.appendChild(b);
   }
 
   function restoreCache() { try { S.portfolio=JSON.parse(get(K.tx,'{}'))||{}; } catch {} }
@@ -772,7 +826,7 @@
       const wait=setInterval(()=>{ if(scanStocks().size){clearInterval(wait); if(S.panel?.dataset.open==='1'){refreshTargetSelect();renderAdvisor();} if(get(K.panicPending)==='1') panic();}},500);
       setTimeout(()=>clearInterval(wait),15000);
     }
-    const mo=new MutationObserver(()=>{ if(isStocks()) scanStocks(); });
+    const mo=new MutationObserver(()=>{ if(isStocks()) scanStocks(); if(!$('#slx-stock-open')) managerLauncher(); if(!$('#slx-stock-panic')) panicButton(); });
     mo.observe(document.documentElement,{subtree:true,childList:true});
   }
 
