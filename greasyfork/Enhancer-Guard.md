@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.34**
+**v1.3.35**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.3.34** Performance/UI optimization: uses the shared single-instance SakaLuX performance helpers, reduces repeated observer/render work and aligns the standalone UI with the Hub visual system.
+**v1.3.35** PDA/mobile top-aligned sheet and compact Hub integration refinement.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -36,6 +36,11 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history
+### v1.3.35 — PDA top-aligned panel refinement
+
+- Opens the SakaLuX panel from the top of the available Torn viewport.
+- Improves compact Hub integration and mobile visibility.
+
 ### v1.3.33 — Shared Standalone ordering fix
 
 - Uses the canonical SakaLuX standalone order including Company Intelligence.

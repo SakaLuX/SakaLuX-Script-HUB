@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.19
+// @version      1.8.20
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -32,6 +32,21 @@ This is an information/decision-support tool. It never automates company actions
 
 (() => {
 'use strict';
+
+  // v1.8.20 authoritative TornPDA layout override.
+  (() => {
+    if (document.getElementById('sakalux-company-v1820-layout')) return;
+    const st=document.createElement('style');
+    st.id='sakalux-company-v1820-layout';
+    st.textContent=`
+#ci-root{align-items:flex-start!important;justify-content:center!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0 0 88px!important;box-sizing:border-box!important;overscroll-behavior:contain!important}
+#ci-root .ci-shell{display:block!important;margin:0 auto!important;max-height:none!important;height:auto!important;min-height:100%!important;overflow:visible!important;width:100%!important}
+#ci-root .ci-body{overflow:visible!important;max-height:none!important}
+#ci-root .ci-status{display:none!important}
+#ci-root .ci-footer{display:flex!important;align-items:center!important;justify-content:center!important;position:sticky!important;bottom:76px!important;z-index:2147483640!important;min-height:44px!important;padding:11px 10px!important;box-sizing:border-box!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;white-space:nowrap!important;overflow:visible!important;opacity:1!important;visibility:visible!important}
+`;
+    (document.head||document.documentElement).appendChild(st);
+  })();
 
   // Shared SakaLuX performance + Hub-style UI foundation.
   (() => {
@@ -68,7 +83,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.19',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.20',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';

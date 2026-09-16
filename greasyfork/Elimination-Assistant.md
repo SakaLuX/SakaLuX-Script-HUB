@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.32**
+**v1.3.33**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -21,7 +21,7 @@
 
 ## Current release note
 
-**v1.3.32** Performance/UI optimization: reduces duplicate observer-driven work and aligns assistant controls with the shared SakaLuX Hub-style UI foundation while preserving attack safety behavior.
+**v1.3.33** PDA/mobile top-aligned sheet and compact Hub integration refinement.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -39,6 +39,11 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 **All Rights Reserved**
 
 ## Release history
+### v1.3.33 — PDA top-aligned panel refinement
+
+- Opens the SakaLuX panel from the top of the available Torn viewport.
+- Improves compact Hub integration and mobile visibility.
+
 ### v1.3.31 — Desktop ATTACK route fix
 - Uses Torn's current `/page.php?sid=attack&user2ID=...` route.
 - Preserves TornPDA compatibility and manual player control.
