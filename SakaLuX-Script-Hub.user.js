@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.43
+// @version      1.9.44
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.43';
+    const VERSION = '1.9.44';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,16 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.44',
+            date: '2026-09-16',
+            changes: [
+                'Rearranges managed module controls into two clean rows on mobile: INFO + ON/OFF, then NEW + OPEN/SETTINGS.',
+                'Fixes Company Intelligence so its content scrolls independently while the author footer remains visible at the bottom of the panel.',
+                'Makes Hub Settings switches compact and proportional instead of oversized on PDA/mobile screens.',
+                'Keeps desktop module cards unchanged while improving narrow-screen readability and preventing clipped controls.'
+            ]
+        },
         {
             version: '1.9.43',
             date: '2026-09-16',
@@ -1483,7 +1493,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         '[id^="slx-elim-"][id*="panel" i]',
         '[id^="ci-"][id*="panel" i]',
         '[class^="ci-"][class*="panel" i]',
-        '[class*=" ci-"][class*="panel" i]'
+        '[class*=" ci-"][class*="panel" i]',
+        '#ci-root .ci-shell'
     ];
     let managedFooterObserver = null;
 
@@ -1499,6 +1510,28 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 .slh-card-tool.info{border-color:#3c6da7;background:linear-gradient(180deg,#173353,#10243a)}
 .slh-card-tool.new{border-color:#6a4c83;background:linear-gradient(180deg,#33213f,#23172d);color:#ecdfff}
 .slh-card .slh-switch,.slh-card .slh-primary{width:100%!important;box-sizing:border-box!important}
+
+.slh-settings .slh-setting-row{align-items:center!important;gap:10px!important}
+.slh-settings .slh-setting-toggle{width:46px!important;height:26px!important;min-width:46px!important;min-height:26px!important;max-width:46px!important;padding:2px!important;border-radius:999px!important;flex:0 0 46px!important}
+.slh-settings .slh-setting-toggle i{width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border-radius:50%!important;margin:0!important;transform:translateX(0)!important}
+.slh-settings .slh-setting-toggle.on i{transform:translateX(20px)!important}
+#ci-root{overflow:hidden!important;align-items:stretch!important}
+#ci-root .ci-shell{display:flex!important;flex-direction:column!important;max-height:calc(100dvh - 32px)!important;min-height:0!important;overflow:hidden!important;margin:auto 0!important}
+#ci-root .ci-head,#ci-root .ci-tabs,#ci-root .ci-status,#ci-root .ci-footer{flex:0 0 auto!important}
+#ci-root .ci-body{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+#ci-root .ci-footer,#ci-root .ci-shell>.sakalux-stable-module-footer{position:relative!important;bottom:auto!important;z-index:30!important;width:100%!important;box-sizing:border-box!important}
+@media(max-width:700px){
+  .slh-card{display:grid!important;grid-template-columns:46px minmax(0,1fr)!important;align-items:start!important;column-gap:10px!important;row-gap:7px!important}
+  .slh-card .slh-icon{grid-column:1!important;grid-row:1!important}
+  .slh-card .slh-card-copy{grid-column:2!important;grid-row:1!important;min-width:0!important}
+  .slh-card .slh-module-controls{grid-column:1/-1!important;grid-row:2!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-areas:'info toggle' 'new primary'!important;gap:7px!important;width:100%!important;min-width:0!important;margin-top:3px!important}
+  .slh-card .slh-card-tools{display:contents!important}
+  .slh-card .slh-card-tool.info{grid-area:info!important}
+  .slh-card .slh-card-tool.new{grid-area:new!important}
+  .slh-card .slh-switch{grid-area:toggle!important;min-height:36px!important;width:100%!important;justify-content:space-between!important;padding:5px 9px!important}
+  .slh-card .slh-primary{grid-area:primary!important;min-height:36px!important;width:100%!important}
+  .slh-card .slh-card-tool{min-height:36px!important;width:100%!important;font-size:9px!important}
+}
 .sakalux-stable-module-footer{flex:0 0 auto!important;position:sticky!important;bottom:0!important;z-index:25!important;width:100%!important;box-sizing:border-box!important;text-align:center!important;padding:9px 10px!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#0c131b!important;color:#74869a!important;font:500 10px/1.3 Arial,sans-serif!important}
 .sakalux-stable-module-footer a{color:#5f9fe8!important;text-decoration:none!important}
 @media(max-width:700px){.slh-card .slh-module-controls{min-width:124px!important}.slh-card-tool{min-height:34px!important}}
@@ -1512,7 +1545,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             document.querySelectorAll(selector).forEach(panel => {
                 if (!(panel instanceof HTMLElement) || seen.has(panel)) return;
                 seen.add(panel);
-                let footer = panel.querySelector('[id^="sakalux-inline-footer-"], .sakalux-stable-module-footer');
+                let footer = panel.querySelector('[id^="sakalux-inline-footer-"], .sakalux-stable-module-footer, .ci-footer');
                 if (!footer) {
                     footer = document.createElement('div');
                     footer.innerHTML = `Made with ❤️ by <a href="${PROFILE_URL}" target="_self" rel="noopener">SakaLuX [2380374]</a>`;
