@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.24**
+**v5.3.25**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.24** removes the visible seller username from generated thank-you messages. The profile attribution is now a single clickable 🙏 emoji that still opens the configured SakaLuX profile.
+**v5.3.25** keeps only the clickable 🙏 in thank-you messages and hard-links it to SakaLuX profile ID 2380374, independent of any configurable seller ID.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -29,6 +29,12 @@ Generated thank-you text should be reviewed before sending. The script assists w
 **All Rights Reserved**
 
 ## Release history
+### v5.3.25 — Fixed profile link
+
+- The visible seller attribution remains only `🙏`.
+- `🙏` always links to `https://www.torn.com/profiles.php?XID=2380374`.
+- The message link no longer depends on the configurable seller ID.
+
 ### v5.3.24 — Profile link cleanup
 
 - Removes the visible `SakaLuX` username from thank-you messages.
