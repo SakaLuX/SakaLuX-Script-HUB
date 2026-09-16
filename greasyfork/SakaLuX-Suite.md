@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.912**
+**v0.9.913**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -34,7 +34,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - `Alt + F` shortcut for the control interface.
 
 ## Current release note
-**v0.9.912** is the current experimental Suite build. Suite remains standalone and intentionally outside the Script Hub registry.
+
+**v0.9.913** Performance/UI optimization: introduces the shared SakaLuX performance/UI foundation, reduces duplicate high-frequency rendering work and aligns Suite surfaces with the Hub visual language.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
@@ -79,3 +80,10 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 - Improved Event Lens readability and trade continuation links.
 - Preserved standalone launch bridges and Chain Alarm.
 - Added automated checks for the principal module/factory pairs.
+
+## Changelog
+
+### v0.9.913
+
+- Performance/UI optimization: introduces the shared SakaLuX performance/UI foundation, reduces duplicate high-frequency rendering work and aligns Suite surfaces with the Hub visual language.
+

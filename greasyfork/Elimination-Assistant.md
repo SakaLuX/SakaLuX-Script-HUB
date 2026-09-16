@@ -20,7 +20,8 @@
 - Never attacks automatically.
 
 ## Current release note
-**v1.3.31** fixes ATTACK on desktop/Tampermonkey by using Torn's current `/page.php?sid=attack` target route instead of the legacy loader route while preserving TornPDA behavior.
+
+**v1.3.32** Performance/UI optimization: reduces duplicate observer-driven work and aligns assistant controls with the shared SakaLuX Hub-style UI foundation while preserving attack safety behavior.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -89,3 +90,10 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 
 ### v1.3.7 — Unified Torn + FFScouter API Access
 - Added the dedicated Torn/FFScouter API Access panel, exact Torn read-only permissions and calibration fallback.
+
+## Changelog
+
+### v1.3.32
+
+- Performance/UI optimization: reduces duplicate observer-driven work and aligns assistant controls with the shared SakaLuX Hub-style UI foundation while preserving attack safety behavior.
+

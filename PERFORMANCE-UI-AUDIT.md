@@ -23,3 +23,7 @@ Applied 2026-09-16.
 - Conservative tuning of known high-frequency MutationObserver render loops.
 - Version/registry/Hub fallback synchronization for registered modules.
 - Full JavaScript syntax and repository validator checks are run by CI.
+
+## Release documentation policy
+
+Every future userscript version bump must update its dedicated release/info Markdown in the same change: current version, current release note, changelog, and Hub registry/info references where applicable.

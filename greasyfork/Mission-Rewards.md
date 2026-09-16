@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.0.20** standardizes the shared Standalone menu ordering. Known modules now use one canonical order, and any unknown/new module is placed after known modules instead of jumping directly below the STANDALONE subtitle. This prevents Company Intelligence from appearing at the top when another add-on renders the dock.
+**v1.0.21** Performance/UI optimization: reduces unnecessary repeated DOM work and aligns Mission Rewards controls with the common SakaLuX Hub-style visual foundation.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -66,3 +66,10 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 
 ### v1.0.4 — Hub power/API integration
 - Added reliable installation detection, `setEnabled`/`toggleEnabled`/`isEnabled`, shared-Hub-key preference and standalone required-key support.
+
+## Changelog
+
+### v1.0.21
+
+- Performance/UI optimization: reduces unnecessary repeated DOM work and aligns Mission Rewards controls with the common SakaLuX Hub-style visual foundation.
+

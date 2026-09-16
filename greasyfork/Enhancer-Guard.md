@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.3.33** standardizes the shared Standalone menu ordering. Known modules now use one canonical order, and any unknown/new module is placed after known modules instead of jumping directly below the STANDALONE subtitle. This prevents Company Intelligence from appearing at the top when another add-on renders the dock.
+**v1.3.34** Performance/UI optimization: uses the shared single-instance SakaLuX performance helpers, reduces repeated observer/render work and aligns the standalone UI with the Hub visual system.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -79,3 +79,10 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 
 ### v1.3.14 — Item Protector integration
 - Added reliable installation detection and full/partial/unlocked lock badges directly on Torn Items with local quantity editing.
+
+## Changelog
+
+### v1.3.34
+
+- Performance/UI optimization: uses the shared single-instance SakaLuX performance helpers, reduces repeated observer/render work and aligns the standalone UI with the Hub visual system.
+
