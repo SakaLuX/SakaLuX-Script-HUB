@@ -8,6 +8,7 @@ on:
       - 'scripts.json'
       - 'locales.json'
       - 'greasyfork/**'
+      - 'experimental/**'
       - '.github/workflows/**'
   pull_request:
     paths:
@@ -15,6 +16,7 @@ on:
       - 'scripts.json'
       - 'locales.json'
       - 'greasyfork/**'
+      - 'experimental/**'
       - '.github/workflows/**'
   workflow_dispatch:
 
@@ -37,9 +39,9 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          files=(SakaLuX-*.user.js)
+          files=(SakaLuX-*.user.js experimental/SakaLuX-*.user.js)
           if ((${#files[@]} == 0)); then
-            echo 'No root SakaLuX userscripts found.' >&2
+            echo 'No SakaLuX userscripts found.' >&2
             exit 1
           fi
           printf 'Checking %d userscripts\n' "${#files[@]}"
@@ -70,6 +72,44 @@ jobs:
               if not isinstance(locale.get('label'), str) or not isinstance(locale.get('translations'), dict):
                   raise SystemExit(f'Invalid locale: {code}')
           print('locales.json: valid extensible locale registry')
+
+      - name: Validate release/info Markdown synchronization
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          checks = {
+              'SakaLuX-Account-Auditor.user.js': 'greasyfork/Account-Auditor.md',
+              'SakaLuX-Bazaar-Thanker-PDA.user.js': 'greasyfork/Bazaar-Thanker.md',
+              'SakaLuX-Chat-Intelligence.user.js': 'greasyfork/Chat-Intelligence.md',
+              'SakaLuX-Company-Intelligence-v1.0.0.user.js': 'greasyfork/Company-Intelligence.md',
+              'SakaLuX-Elimination-Assistant.user.js': 'greasyfork/Elimination-Assistant.md',
+              'SakaLuX-Enhancer-Guard.user.js': 'greasyfork/Enhancer-Guard.md',
+              'SakaLuX-Market-Intelligence.user.js': 'greasyfork/Market-Intelligence.md',
+              'SakaLuX-Mission-Rewards.user.js': 'greasyfork/Mission-Rewards.md',
+              'SakaLuX-Script-Hub.user.js': 'greasyfork/Script-Hub.md',
+              'SakaLuX-Suite.user.js': 'greasyfork/SakaLuX-Suite.md',
+              'experimental/SakaLuX-Stock-Manager-Advisor.user.js': 'experimental/Stock-Manager-Advisor.md',
+          }
+          for script_path, md_path in checks.items():
+              source = Path(script_path).read_text(encoding='utf-8')
+              md = Path(md_path).read_text(encoding='utf-8')
+              meta = re.search(r'^// @version\s+([^\s]+)\s*$', source, re.M)
+              if not meta:
+                  raise SystemExit(f'{script_path}: @version missing')
+              ver = meta.group(1)
+              current = re.search(r'## Current version\s*\n\s*\*\*v([^*]+)\*\*', md, re.I)
+              if not current:
+                  current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', md, re.I)
+              if not current or current.group(1).strip() != ver:
+                  raise SystemExit(f'{md_path}: Current version must match {script_path} ({ver})')
+              release = re.search(r'## Current release note\s*\n+\*\*v([^*]+)\*\*', md, re.I)
+              if not release or release.group(1).strip() != ver:
+                  raise SystemExit(f'{md_path}: Current release note must match {script_path} ({ver})')
+              if not re.search(rf'###\s+v{re.escape(ver)}\b', md):
+                  raise SystemExit(f'{md_path}: changelog/release-history entry for v{ver} missing')
+          print('All dedicated release/info Markdown files: synchronized')
 
       - name: Validate cross-file version synchronization
         shell: python
