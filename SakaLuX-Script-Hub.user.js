@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.44
+// @version      1.9.45
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.44';
+    const VERSION = '1.9.45';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.45',
+            date: '2026-09-16',
+            changes: [
+                'Moves INFO, NEW, ON/OFF and OPEN/SETTINGS into a compact 2x2 control block on the right side of every managed module card.',
+                'Pins the Hub sheet to the top of the available Torn viewport on mobile instead of leaving unused space above it.',
+                'Refines Hub Settings switches to smaller, cleaner proportions.',
+                'Expands module INFO content with detailed feature descriptions from scripts.json.',
+                'Company Intelligence now scrolls as one whole panel and keeps only the SakaLuX author footer at the bottom.'
+            ]
+        },
         {
             version: '1.9.44',
             date: '2026-09-16',
@@ -554,7 +565,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'company-intelligence', type: 'addon', active: true,
-                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.18',
+                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.19',
                 description: 'Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
                 metaUrl: 'https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js',
@@ -1028,6 +1039,39 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 .slh-bottom{padding:9px 11px;background:#0c1219;border-top:1px solid #263547;flex-shrink:0}.slh-bottom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.slh-bottom-btn{border:1px solid #2d3d50;border-radius:10px;padding:9px;background:#151f2a;color:#b9c7d6;font-size:8px;font-weight:900;letter-spacing:.04em}.slh-footer{padding:8px;text-align:center;color:#5f7083;font-size:8px;border-top:1px solid #202d3c;background:#0b1118}.slh-author{color:#78aef2;font-weight:900;text-decoration:none}
 .slh-setting,.slh-note,.slh-check-row{background:#17202b;border:1px solid #2c3b4e;border-radius:11px;padding:11px;margin-bottom:8px;color:#cbd5e1;font-size:10px;line-height:1.5}.slh-settings-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}.slh-settings-pair .slh-setting{min-width:0}.slh-setting select,.slh-setting input[type=range],.slh-setting input[type=password]{width:100%;box-sizing:border-box;margin-top:7px}.slh-setting input[type=password],.slh-setting select{min-height:40px;padding:9px;border:1px solid #3a4b61;border-radius:8px;background:#0d141d;color:#fff}.slh-setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-setting-copy{min-width:0}.slh-setting-title{color:#e7edf5;font-size:10px;font-weight:900}.slh-setting-desc{margin-top:3px;color:#7f90a6;font-size:8px;line-height:1.35}.slh-setting-toggle{position:relative;flex:0 0 auto;width:48px;height:26px;border:1px solid #46566a;border-radius:999px;background:#303a48;padding:0;box-shadow:inset 0 1px 3px rgba(0,0,0,.42);transition:.18s ease}.slh-setting-toggle i{position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:50%;background:#d7dee8;box-shadow:0 2px 5px rgba(0,0,0,.45);transition:.18s ease}.slh-setting-toggle.on{border-color:#237250;background:#168c58}.slh-setting-toggle.on i{transform:translateX(22px);background:#fff}.slh-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.slh-big-btn{width:100%;padding:10px;margin-top:6px;border:1px solid #3d78bf;border-radius:9px;background:linear-gradient(180deg,#377fcf,#275f9f);color:#fff;font-size:10px;font-weight:900}.slh-big-btn.gray{border-color:#394859;background:#1e2936}.slh-big-btn.red{border-color:#743946;background:#51222c}.slh-big-btn.update{border-color:#7a5b25;background:#684b1d}.slh-big-btn.install{border-color:#24754f;background:#176d46}.slh-version-title{font-size:12px;font-weight:900;margin-bottom:5px}.slh-version-date{color:#718197;font-size:8px;margin-left:5px}
 @media(max-width:520px){.slh-header{padding:12px 10px 10px}.slh-brand-icon{width:38px;height:38px;font-size:19px}.slh-title{font-size:15px}.slh-kicker{font-size:7px}.slh-sub{font-size:8px}.slh-close{width:34px;height:34px}.slh-stats{gap:5px;margin-top:10px}.slh-stat{padding:8px 5px 7px}.slh-stat strong{font-size:13px}.slh-stat span{font-size:6.5px}.slh-stat small{display:none}.slh-tools{gap:4px}.slh-tool{height:38px;gap:3px;font-size:7px}.slh-tool span{font-size:11px}.slh-cats{gap:5px}.slh-cat{padding:5px 8px;font-size:7px}.slh-list{padding:8px}.slh-card{grid-template-columns:39px minmax(0,1fr) 84px;gap:8px;padding:9px 8px;margin-bottom:7px;border-radius:13px}.slh-icon{width:37px;height:37px;border-radius:11px;font-size:18px}.slh-name{font-size:11.5px}.slh-category-chip{font-size:5.8px}.slh-description{font-size:7.7px;-webkit-line-clamp:1}.slh-chips{gap:3px;margin-top:5px}.slh-chip{min-height:15px;padding:2px 4px;font-size:5.7px}.slh-module-controls{gap:5px}.slh-switch,.slh-primary{min-height:32px;font-size:8px}.slh-switch{grid-template-columns:31px 1fr;padding:4px}.slh-switch-track{width:30px;height:17px}.slh-switch-track i{width:11px;height:11px}.slh-switch.on .slh-switch-track i{transform:translateX(13px)}}
+
+/* v1.9.45 compact PDA layout */
+@media(max-width:699px){
+#${IDS.overlay}{align-items:flex-start!important;padding:0!important}
+#${IDS.panel}{height:100dvh!important;max-height:100dvh!important;border-radius:0 0 18px 18px!important;margin:0!important}
+.slh-card{display:grid!important;grid-template-columns:42px minmax(0,1fr) 142px!important;align-items:center!important;column-gap:9px!important;row-gap:4px!important;padding:9px!important;min-height:82px!important}
+.slh-card .slh-icon{grid-column:1!important;grid-row:1!important}
+.slh-card .slh-card-copy{grid-column:2!important;grid-row:1!important;min-width:0!important}
+.slh-card .slh-module-controls{grid-column:3!important;grid-row:1!important;display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-areas:'info toggle' 'new primary'!important;gap:6px!important;min-width:0!important;width:142px!important;margin:0!important;align-self:center!important}
+.slh-card .slh-card-tools{display:contents!important}
+.slh-card .slh-card-tool.info{grid-area:info!important}
+.slh-card .slh-card-tool.new{grid-area:new!important}
+.slh-card .slh-switch{grid-area:toggle!important}
+.slh-card .slh-primary{grid-area:primary!important}
+.slh-card .slh-card-tool,.slh-card .slh-switch,.slh-card .slh-primary{width:100%!important;min-width:0!important;min-height:34px!important;height:34px!important;padding:4px 5px!important;font-size:8px!important;border-radius:9px!important;box-sizing:border-box!important}
+.slh-card .slh-switch{justify-content:space-between!important;gap:3px!important}
+.slh-card .slh-switch-track{transform:scale(.88)!important;transform-origin:left center!important}
+.slh-card-name{font-size:11px!important}.slh-card-meta{gap:4px!important}.slh-chip{font-size:7px!important;padding:3px 5px!important}
+.slh-settings .slh-setting{padding:8px 9px!important;margin-bottom:7px!important}
+.slh-settings .slh-setting-row{min-height:40px!important;gap:9px!important}
+.slh-settings .slh-setting-title{font-size:9px!important}.slh-settings .slh-setting-desc{font-size:8px!important;line-height:1.35!important}
+.slh-settings .slh-setting-toggle{width:40px!important;height:22px!important;min-width:40px!important;min-height:22px!important;max-width:40px!important;padding:2px!important;flex:0 0 40px!important}
+.slh-settings .slh-setting-toggle i{width:16px!important;height:16px!important;min-width:16px!important;min-height:16px!important}
+.slh-settings .slh-setting-toggle.on i{transform:translateX(18px)!important}
+}
+#ci-root{overflow-y:auto!important;overflow-x:hidden!important;align-items:flex-start!important;display:block!important;padding:0!important}
+#ci-root .ci-shell{display:block!important;max-height:none!important;min-height:100%!important;height:auto!important;overflow:visible!important;margin:0 auto!important}
+#ci-root .ci-head{position:sticky!important;top:0!important;z-index:20!important}
+#ci-root .ci-tabs{position:sticky!important;top:58px!important;z-index:19!important}
+#ci-root .ci-body{overflow:visible!important;min-height:auto!important}
+#ci-root .ci-status{display:none!important}
+#ci-root .ci-footer,#ci-root .ci-shell>.sakalux-stable-module-footer{position:relative!important;bottom:auto!important;width:100%!important;box-sizing:border-box!important}
+
 @media(min-width:700px){#${IDS.overlay}{align-items:center}#${IDS.panel}{border-radius:22px;max-height:90vh}.slh-tools{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
 /* SakaLuX Unified Control Center theme ------------------------------------ */

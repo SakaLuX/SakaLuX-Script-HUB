@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.18**
+**v1.8.19**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.18** Performance/UI optimization: throttles expensive redraw paths and applies the shared Hub-style surface, controls, spacing and mobile-friendly visual foundation.
+**v1.8.19** Whole-panel mobile scrolling, simplified visible footer and removal of the status timestamp line.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -44,6 +44,12 @@
 **All Rights Reserved**
 
 ## Release history
+### v1.8.19 — Whole-panel mobile scrolling
+
+- The entire Company Intelligence panel is now the scroll surface on mobile.
+- Removed the visible `Updated … · SakaLuX Script Hub · no automated company actions` status line.
+- Keeps the `Made with ❤️ by SakaLuX [2380374]` footer as the only bottom attribution line.
+
 ### v1.8.17 — Standalone placement hardening
 
 - Repairs legacy/malformed dock placement for the Company row.

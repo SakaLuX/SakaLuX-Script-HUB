@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.44**
+**v1.9.45**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.44** Mobile layout refinement: managed module controls use a two-row PDA layout, Company Intelligence keeps its author footer visible while content scrolls, and Hub Settings switches are compact.
+**v1.9.45** Compact right-side module controls, top-aligned mobile Hub, refined Settings switches, detailed INFO content and Company whole-panel scrolling.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -33,7 +33,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 🎯 SakaLuX Mission Rewards **v1.0.21**
 - 📈 SakaLuX Market Intelligence **v1.17.22**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.32**
-- 🏢 SakaLuX Company Intelligence **v1.8.18**
+- 🏢 SakaLuX Company Intelligence **v1.8.19**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -54,6 +54,14 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.45 — Compact module cards and detailed INFO
+
+- Moves INFO, NEW, ON/OFF and OPEN/SETTINGS into a compact 2x2 block on the right side of each managed module card.
+- Aligns the Hub panel with the top of the available Torn viewport on mobile.
+- Refines Settings switches to smaller proportions.
+- Expands per-module INFO content in `scripts.json`.
+- Updates Company Intelligence integration for whole-panel scrolling and a simplified footer.
+
 ### v1.9.44 — Mobile control and Company footer refinement
 
 - Uses two rows for managed module actions on narrow screens: INFO + ON/OFF, then NEW + OPEN/SETTINGS.
