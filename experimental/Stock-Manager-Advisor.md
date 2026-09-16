@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.5.5**
+**v0.5.6**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.5.5** enhances the original Torn stock rows themselves with live SakaLuX metrics and safe quick actions: Owned, market value, average buy, unrealized P/L, benefit tier, next-tier gap, Target, Buy Gap and Sell Excess.
+**v0.5.6** adds quick BUY/SELL presets and a live benefit-tier progress bar directly to every enhanced Torn stock row. Quick MAX respects the configured cash reserve on BUY and Benefit Lock on SELL.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,21 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.5.6 — Quick Row Trades & Benefit Progress
+
+- Added a compact quick-trade selector to every enhanced stock row using the editable inline preset values plus **MAX**.
+- Added direct **BUY** and **SELL** buttons beside the quick amount selector.
+- Quick BUY converts the selected cash preset into shares using the live stock price.
+- Quick BUY **MAX** spends only cash above the configured Vault Keep reserve.
+- Quick SELL converts the selected cash preset into shares and never exceeds the available position.
+- Quick SELL **MAX** sells only the sellable portion when Benefit Lock is enabled; protected benefit-floor shares are preserved.
+- Every quick trade shows an exact confirmation with shares and estimated value before sending the order.
+- Quick trades continue to use Dry Run, trade serialization/cooldown and the Action Log through the existing hardened trade path.
+- Added a live progress bar for each stock showing percentage progress from the current benefit floor to the next detected tier.
+- Added a progress label such as `63.2% to Tier 3` directly below the benefit status.
+- Mobile/TornPDA layout keeps the amount selector and BUY/SELL controls on a dedicated full-width row.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.5.5 — Native Per-Stock Row Tools
 
 - Added a SakaLuX metrics/action strip directly inside every detected Torn stock row.
