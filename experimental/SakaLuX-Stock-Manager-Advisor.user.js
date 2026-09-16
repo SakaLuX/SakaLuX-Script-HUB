@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.4.1
-// @description  Experimental Torn stock vault manager with hardened trades, ROI advisor, benefit valuation, Trade Assistant and one-tap Panic vault.
+// @version      0.4.2
+// @description  Experimental Torn stock vault manager with Panic v2, hardened trades, ROI advisor, benefit valuation and Trade Assistant.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.4.1',
+    version: '0.4.2',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -37,7 +37,11 @@
     tx: 'SLX_STOCK_TX_CACHE',
     benefitValues: 'SLX_STOCK_BENEFIT_VALUES',
     dryRun: 'SLX_STOCK_DRY_RUN',
-    actionLog: 'SLX_STOCK_ACTION_LOG'
+    actionLog: 'SLX_STOCK_ACTION_LOG',
+    panicFallback: 'SLX_STOCK_PANIC_FALLBACK',
+    panicKeep: 'SLX_STOCK_PANIC_KEEP_CASH',
+    panicMax: 'SLX_STOCK_PANIC_MAX_SPEND',
+    panicUseAll: 'SLX_STOCK_PANIC_USE_ALL'
   };
 
   const BENEFITS = {
@@ -521,19 +525,76 @@
   function panicButton() {
     if($('#slx-stock-panic')) return;
     const b=document.createElement('button');
-    b.id='slx-stock-panic'; b.type='button'; b.textContent='PANIC'; b.title='Vault on-hand cash into your selected stock';
+    b.id='slx-stock-panic'; b.type='button'; b.textContent='PANIC'; b.title='Panic v2 · preview and vault on-hand cash into the configured stock target';
     b.addEventListener('click', panic);
     (document.body||document.documentElement).appendChild(b);
   }
 
+  async function resolvePanicPreview() {
+    const primary=get(K.target).toUpperCase();
+    const fallback=get(K.panicFallback).toUpperCase();
+    const candidates=[primary,fallback].filter((v,i,a)=>v && a.indexOf(v)===i);
+    if(!candidates.length) throw new Error('Choose a Panic primary target first.');
+
+    let cash=currentMoneyFromDom();
+    if(get(K.api).trim()) {
+      try { await apiSync(); cash=Number(S.money)||cash; } catch(e) { if(!cash) throw e; }
+    }
+    if(!cash) throw new Error('Unable to determine on-hand cash. Add/test the API key first.');
+
+    const useAll=bool(K.panicUseAll,false);
+    const keep=useAll ? 0 : parseAmount(get(K.panicKeep,get(K.keep,'0')));
+    const maxSpend=useAll ? 0 : parseAmount(get(K.panicMax,'0'));
+    const available=Math.max(0,cash-keep);
+    const allowed=maxSpend>0?Math.min(available,maxSpend):available;
+    if(allowed<=0) throw new Error(`No Panic cash available after keeping ${money(keep)}.`);
+
+    let lastError=null;
+    for(let i=0;i<candidates.length;i++) {
+      const sym=candidates[i];
+      try {
+        const stock=await ensureStock(sym);
+        const shares=Math.floor(allowed/stock.price);
+        if(shares<=0){lastError=new Error(`${sym} is too expensive for the configured Panic spend.`);continue;}
+        const estimate=shares*stock.price;
+        return {sym,stock,cash,keep,maxSpend,available,allowed,shares,estimate,leftover:Math.max(0,cash-estimate),fallbackUsed:i>0,useAll};
+      } catch(e) { lastError=e; }
+    }
+    throw lastError||new Error('No Panic target could be resolved.');
+  }
+
+  function panicPreviewText(x) {
+    return `${x.fallbackUsed?'Fallback ':''}${x.sym} · ${x.shares.toLocaleString()} shares · about ${money(x.estimate)} · cash ${money(x.cash)} → ${money(x.leftover)} remaining${x.useAll?' · 100% mode':''}`;
+  }
+
+  async function previewPanic() {
+    try {
+      status('PANIC preview: calculating exact order…','warn');
+      const x=await resolvePanicPreview();
+      const box=$('#slx-panic-preview');
+      if(box){box.dataset.kind='ok';box.textContent=panicPreviewText(x);}
+      status(`PANIC preview · ${panicPreviewText(x)}`,'ok');
+      return x;
+    } catch(e) {
+      const box=$('#slx-panic-preview');
+      if(box){box.dataset.kind='bad';box.textContent=e.message;}
+      status(`PANIC preview failed: ${e.message}`,'bad');
+      throw e;
+    }
+  }
+
   async function panic() {
-    const target=get(K.target).toUpperCase();
-    if(!target){ openPanel(); status('Choose a Panic target first.','bad'); return; }
-    if(bool(K.panicConfirm,false) && !confirm(`PANIC: vault available cash into ${target}?`)) return;
     try {
       set(K.panicPending,'0');
-      status(`PANIC: resolving ${target} and available cash…`,'warn');
-      await vault({keep:parseAmount(get(K.keep,'0')),panic:true,direct:true});
+      const x=await previewPanic();
+      if(bool(K.panicConfirm,false)) {
+        const ok=confirm(`PANIC v2\n\nTarget: ${x.sym}${x.fallbackUsed?' (fallback)':''}\nShares: ${x.shares.toLocaleString()}\nEstimated spend: ${money(x.estimate)}\nCash before: ${money(x.cash)}\nEstimated cash after: ${money(x.leftover)}\n\nExecute now?`);
+        if(!ok){status('PANIC cancelled.','warn');return;}
+      }
+      status(`PANIC: buying ${x.shares.toLocaleString()} ${x.sym}…`,'warn');
+      await postTrade(x.sym,x.shares,'buyShares');
+      status(`PANIC complete · ${panicPreviewText(x)}`,'ok');
+      if(get(K.api).trim() && !bool(K.dryRun,false)) syncAllApi().catch(()=>{});
     } catch(e) {
       set(K.panicPending,'0');
       status(`PANIC failed: ${e.message}`,'bad');
@@ -564,7 +625,7 @@
 #slx-stock-panel .portfolio-list{display:grid;gap:6px}#slx-stock-panel .portfolio-row{display:grid;grid-template-columns:1.05fr 1.1fr 1.15fr 1.15fr;gap:7px;align-items:center;padding:8px;border:1px solid #1f3040;border-radius:9px;background:#0d1620;font-size:10px}#slx-stock-panel .portfolio-row>div{display:grid;gap:3px}.portfolio-sym b{font-size:12px;color:#dcecff}
 #slx-stock-panel .benefit-list{display:grid;gap:6px;max-height:280px;overflow:auto}#slx-stock-panel .benefit-row{display:grid;grid-template-columns:42px 1.4fr 95px 62px 1fr;gap:6px;align-items:center;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px}#slx-stock-panel .benefit-row input{min-width:0;padding:6px}#slx-stock-panel .benefit-row small{color:#7f91a5}
 #slx-stock-panel .roi-row{display:grid;grid-template-columns:78px 65px 78px 1fr 1fr 1fr;gap:6px;padding:7px 0;border-bottom:1px solid #1c2a38;font-size:10px;align-items:center}#slx-stock-panel .trade-list{display:grid;gap:7px}#slx-stock-panel .trade-card{display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;padding:9px;border:1px solid #27415a;border-radius:10px;background:#0e1823;align-items:center}.trade-card>div{display:grid;gap:3px}.trade-card small{font-size:9px;color:#8296aa}.trade-card span{font-size:9px;color:#a7b8c9}.trade-actions{display:flex!important;gap:5px}.trade-actions button{padding:7px!important}
-#slx-stock-panel .safety-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#slx-stock-panel .action-list{display:grid;gap:5px;max-height:230px;overflow:auto}#slx-stock-panel .action-row{display:grid;grid-template-columns:1.25fr .8fr .8fr 1fr 1.4fr;gap:6px;padding:6px 0;border-bottom:1px solid #1c2a38;font-size:9px;align-items:center}
+#slx-stock-panel .safety-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#slx-stock-panel .panic-preview{margin-top:8px;padding:8px;border:1px solid #2b3f53;border-radius:8px;background:#0d1721;color:#8fa2b6;font-size:10px;line-height:1.4}#slx-stock-panel .panic-preview[data-kind="ok"]{border-color:#267c52;color:#63df9a}#slx-stock-panel .panic-preview[data-kind="bad"]{border-color:#8c3140;color:#ff7a86}#slx-stock-panel .action-list{display:grid;gap:5px;max-height:230px;overflow:auto}#slx-stock-panel .action-row{display:grid;grid-template-columns:1.25fr .8fr .8fr 1fr 1.4fr;gap:6px;padding:6px 0;border-bottom:1px solid #1c2a38;font-size:9px;align-items:center}
 @media(max-width:600px){#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
 `;
     (document.head||document.documentElement).appendChild(s);
@@ -579,12 +640,16 @@
         <div class="actions"><button id="slx-api-save" class="primary" type="button">Save Key</button><button id="slx-api-test" type="button">Test & Sync</button><button id="slx-api-create" type="button">Create Required Key</button><button id="slx-api-clear" class="danger" type="button">Clear</button></div>
         <div class="api-help">Required selections: <b>user → money, stocks</b> and <b>torn → stocks</b>. The key is stored locally in this experimental script.</div>
       </div>
-      <div class="section"><div class="title">Vault & Panic</div><div class="grid">
-        <label>Vault target <select id="slx-stock-target"><option value="">Sync API or open Stocks to detect symbols</option></select></label>
-        <label>Keep cash <input id="slx-stock-keep" value="${esc(get(K.keep,'0'))}" placeholder="e.g. 250k"></label>
+      <div class="section"><div class="title">Vault & Panic v2</div><div class="grid">
+        <label>Primary target <select id="slx-stock-target"><option value="">Sync API or open Stocks to detect symbols</option></select></label>
+        <label>Fallback target <select id="slx-panic-fallback"><option value="">None</option></select></label>
+        <label>Vault keep cash <input id="slx-stock-keep" value="${esc(get(K.keep,'0'))}" placeholder="e.g. 250k"></label>
         <label>Withdraw amount <input id="slx-stock-withdraw" value="${esc(get(K.withdraw,'1m'))}" placeholder="e.g. 1m"></label>
+        <label>PANIC keep cash <input id="slx-panic-keep" value="${esc(get(K.panicKeep,get(K.keep,'0')))}" placeholder="e.g. 100k"></label>
+        <label>PANIC max spend <input id="slx-panic-max" value="${esc(get(K.panicMax,'0'))}" placeholder="0 = unlimited"></label>
       </div><div class="actions"><button id="slx-vault-max" class="primary">Vault Max</button><button id="slx-vault-keep">Vault (Keep)</button><button id="slx-withdraw">Withdraw</button><button id="slx-withdraw-all">Withdraw All</button></div>
-      <div class="actions"><label><input id="slx-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-panic-confirm" type="checkbox"> Confirm Panic</label></div></div>
+      <div class="actions"><label><input id="slx-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-panic-confirm" type="checkbox"> Confirm Panic</label><label><input id="slx-panic-use-all" type="checkbox"> PANIC uses 100% cash</label><button id="slx-panic-preview-btn" type="button">Preview PANIC</button></div>
+      <div id="slx-panic-preview" class="panic-preview">Preview shows target, exact shares, estimated spend and cash remaining before any order is sent.</div></div>
       <div class="section"><div class="title">Safety</div><div class="safety-grid"><label><input id="slx-dry-run" type="checkbox"> Dry Run · calculate/log only, never send BUY/SELL</label><div class="muted">Trades are serialized and protected by a 1.5s anti-double-click cooldown.</div></div></div>
       <div class="section"><div class="api-head"><div class="title">Action Log</div><button id="slx-log-clear" type="button">Clear Log</button></div><div id="slx-stock-action-log" class="action-list muted">No stock actions logged yet.</div></div>
       <div class="section"><div class="title">Portfolio</div><div id="slx-stock-portfolio-body" class="muted">Waiting for portfolio data…</div></div>
@@ -599,6 +664,7 @@
     $('#slx-stock-api-badge',p).dataset.kind=get(K.api)?'idle':'idle';
     $('#slx-benefit-lock',p).checked=bool(K.benefitLock,true);
     $('#slx-panic-confirm',p).checked=bool(K.panicConfirm,false);
+    $('#slx-panic-use-all',p).checked=bool(K.panicUseAll,false);
     $('#slx-dry-run',p).checked=bool(K.dryRun,true);
     $('#slx-api-show',p).onclick=()=>{const i=$('#slx-stock-api',p);i.type=i.type==='password'?'text':'password';};
     $('#slx-api-save',p).onclick=()=>{try{saveApiKeyFromPanel();}catch(e){status(e.message,'bad');}};
@@ -609,11 +675,16 @@
     $('#slx-benefit-reset',p).onclick=()=>{if(confirm('Reset all manual benefit values/frequencies?')){del(K.benefitValues);renderBenefitValues();renderAdvisor();renderTradeAssistant();status('Manual benefit values reset.','ok');}};
     $('#slx-stock-keep',p).onchange=e=>set(K.keep,e.target.value);
     $('#slx-stock-withdraw',p).onchange=e=>set(K.withdraw,e.target.value);
+    $('#slx-panic-keep',p).onchange=e=>set(K.panicKeep,e.target.value);
+    $('#slx-panic-max',p).onchange=e=>set(K.panicMax,e.target.value);
     $('#slx-benefit-lock',p).onchange=e=>set(K.benefitLock,e.target.checked?'1':'0');
     $('#slx-panic-confirm',p).onchange=e=>set(K.panicConfirm,e.target.checked?'1':'0');
+    $('#slx-panic-use-all',p).onchange=e=>{set(K.panicUseAll,e.target.checked?'1':'0');status(`PANIC 100% cash mode ${e.target.checked?'enabled':'disabled'}.`,e.target.checked?'warn':'ok');};
+    $('#slx-panic-fallback',p).onchange=e=>set(K.panicFallback,e.target.value);
+    $('#slx-panic-preview-btn',p).onclick=()=>previewPanic().catch(()=>{});
     $('#slx-dry-run',p).onchange=e=>{set(K.dryRun,e.target.checked?'1':'0');status(`Dry Run ${e.target.checked?'enabled':'disabled'}.`,e.target.checked?'warn':'ok');};
     $('#slx-log-clear',p).onclick=clearActionLog;
-    $('#slx-stock-target',p).onchange=e=>{set(K.target,e.target.value);renderPortfolio();renderAdvisor();};
+    $('#slx-stock-target',p).onchange=e=>{set(K.target,e.target.value);const v=$('#slx-panic-preview',p);if(v){v.dataset.kind='';v.textContent='Target changed · run Preview PANIC again.';}renderPortfolio();renderAdvisor();};
     $('#slx-vault-max',p).onclick=()=>vault().then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     $('#slx-vault-keep',p).onclick=()=>vault({keep:parseAmount($('#slx-stock-keep',p).value)}).then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     $('#slx-withdraw',p).onclick=()=>withdrawCash(parseAmount($('#slx-stock-withdraw',p).value)).then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
@@ -624,10 +695,11 @@
   function refreshTargetSelect() {
     if(!S.panel?.isConnected) return;
     scanStocks();
-    const sel=$('#slx-stock-target',S.panel); if(!sel) return;
-    const current=get(K.target).toUpperCase();
+    const primary=$('#slx-stock-target',S.panel), fallback=$('#slx-panic-fallback',S.panel);
+    const current=get(K.target).toUpperCase(), currentFallback=get(K.panicFallback).toUpperCase();
     const list=[...S.stocks.keys()].sort();
-    sel.innerHTML='<option value="">Select stock…</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===current?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
+    if(primary) primary.innerHTML='<option value="">Select stock…</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===current?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
+    if(fallback) fallback.innerHTML='<option value="">None</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===currentFallback?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
   }
 
   function openPanel() { style(); panel(); refreshTargetSelect(); renderPortfolio(); renderBenefitValues(); renderAdvisor(); renderTradeAssistant(); renderActionLog(); S.panel.dataset.open='1'; }

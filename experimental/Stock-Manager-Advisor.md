@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.4.1**
+**v0.4.2**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.4.1** hardens every stock transaction with a global trade lock, anti-double-click cooldown, stricter Torn response validation, Dry Run mode and a persistent local action log. It also removes a stale duplicate Advisor renderer left by the previous experimental patch.
+**v0.4.2** introduces Panic v2: separate primary/fallback targets, Panic-only keep-cash, optional maximum spend, 100% cash mode and an exact pre-trade preview showing target, shares, estimated spend and cash remaining.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -51,6 +51,18 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.4.2 — Panic v2
+
+- Added separate **primary** and **fallback** Panic stock targets.
+- Fallback is used if the primary target cannot be resolved or cannot buy at least one share with the configured spend.
+- Added Panic-only **Keep cash** independent from normal Vault Keep.
+- Added **Maximum Panic spend**; `0` means unlimited.
+- Added optional **PANIC uses 100% cash** mode, which ignores Panic keep/max limits.
+- Added **Preview PANIC** with exact stock, share count, estimated spend, cash before and estimated cash remaining.
+- Confirm Panic now uses the calculated preview values instead of a generic confirmation.
+- Panic continues to buy directly from the current Torn page and remains protected by v0.4.1 trade locking/cooldown/Dry Run.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.4.1 — Trade Hardening & Safety
 
 - Added global transaction lock so two BUY/SELL requests cannot run concurrently.
