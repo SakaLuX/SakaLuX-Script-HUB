@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.4.2**
+**v0.5.0**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.4.2** introduces Panic v2: separate primary/fallback targets, Panic-only keep-cash, optional maximum spend, 100% cash mode and an exact pre-trade preview showing target, shares, estimated spend and cash remaining.
+**v0.5.0** adds the Portfolio Optimizer with protected/free/weak capital analysis, configurable Bank APR comparison, minimum acceptable APR, payback days and Best ROI / Best Affordable opportunity cards.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -45,12 +45,23 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 
 ## Planned roadmap
 - **v0.4.x:** refine benefit values, transaction history, withdrawal presets and Trade Assistant liquidity planning.
-- **v0.5.x:** bank comparison, daily income / cost model and benefit-aware portfolio optimizer.
-- **v0.5.x:** bank comparison, daily income / cost model and benefit-aware portfolio optimizer.
+- **v0.5.x:** refine optimizer, income/cost modelling, rebalance preview and capital-allocation scenarios.
 - **v0.6.x:** hardened Panic flow, target lock, optional second fallback target and action log.
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.5.0 — Portfolio Optimizer & Bank Comparison
+
+- Added Portfolio Optimizer for held stocks.
+- Splits holdings into Benefit-Lock protected shares and free/excess shares.
+- Calculates protected, excess/free and below-threshold capital.
+- Added manual Bank APR comparison and Minimum acceptable APR.
+- Added payback days and percentage-point comparison versus bank to ROI candidates.
+- Added Best ROI and Best Affordable optimizer opportunity cards.
+- Flags positions as Protected, Excess shares, or Below threshold.
+- Keeps Dry Run, Action Log, hardened trades and Panic v2 protections.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.4.2 — Panic v2
 
 - Added separate **primary** and **fallback** Panic stock targets.
