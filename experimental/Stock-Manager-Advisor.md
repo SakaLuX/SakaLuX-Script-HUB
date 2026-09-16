@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.5.2**
+**v0.5.3**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.5.2** adds a native-style inline Stock Manager dashboard directly above the Torn Stock Market list on the Stocks page, with live portfolio summary, target/owned view, vault/withdraw controls, quick presets, Benefit Lock, Dry Run, PANIC and shortcuts into Advisor, Trade Assistant and Rebalance.
+**v0.5.3** turns the inline Stock Market dashboard into a workspace: Advisor, Trade Assistant and Rebalance now expand directly inside the Stocks page, with persistent active tab, quick target selection, direct Buy Gap, refresh control and throttled SPA remounting.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,19 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.5.3 — Inline Advisor / Trade / Rebalance Workspace
+
+- Advisor, Trade Assistant and Rebalance now expand **inside the Stock Market dashboard** instead of forcing the full modal panel.
+- Added persistent inline workspace tab state.
+- Inline Advisor shows the top five ROI opportunities with tier, APR, gap, payback and bank comparison.
+- Inline Trade Assistant shows Best ROI / Best Affordable candidates with **Target** and **Buy gap** actions.
+- Buy gap continues to use the hardened trade path and respects Dry Run.
+- Inline Rebalance shows the selected target, proposed SELL sources, funding status and shortfall without executing trades.
+- Added inline refresh button for API/catalog/portfolio refresh.
+- Full modal remains available for API setup, Benefit Values and detailed diagnostics.
+- Throttled Torn SPA remounts to reduce repeated inline rendering on mobile/TornPDA.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.5.2 — Inline Stock Market Dashboard
 
 - Added a compact **SakaLuX Stock Manager** dashboard directly inside the Torn Stocks page.

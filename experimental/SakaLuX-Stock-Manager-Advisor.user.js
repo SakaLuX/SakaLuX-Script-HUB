@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.5.2
-// @description  Experimental Torn stock dashboard with inline Stock Market controls, rebalance preview, ROI, Panic v2 and hardened Trade Assistant.
+// @version      0.5.3
+// @description  Experimental Torn stock workspace with inline Advisor, Trade Assistant, Rebalance, ROI, Panic v2 and hardened direct controls.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.5.2',
+    version: '0.5.3',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -45,7 +45,8 @@
     bankApr: 'SLX_STOCK_BANK_APR',
     optimizerMinApr: 'SLX_STOCK_OPTIMIZER_MIN_APR',
     rebalanceReserve: 'SLX_STOCK_REBALANCE_RESERVE',
-    inlineCollapsed: 'SLX_STOCK_INLINE_COLLAPSED'
+    inlineCollapsed: 'SLX_STOCK_INLINE_COLLAPSED',
+    inlineTab: 'SLX_STOCK_INLINE_TAB'
   };
 
   const BENEFITS = {
@@ -734,10 +735,11 @@
     const card=document.createElement('section');
     card.id='slx-stock-inline';
     card.dataset.collapsed=bool(K.inlineCollapsed,false)?'1':'0';
-    card.innerHTML=`<div class="slx-inline-head"><div><b>📊 SakaLuX Stock Manager</b><small>v${APP.version} · EXPERIMENTAL</small></div><div class="slx-inline-head-actions"><button id="slx-inline-api" type="button">API</button><button id="slx-inline-full" type="button">Full</button><button id="slx-inline-toggle" type="button">${card.dataset.collapsed==='1'?'＋':'−'}</button></div></div>
+    card.innerHTML=`<div class="slx-inline-head"><div><b>📊 SakaLuX Stock Manager</b><small>v${APP.version} · EXPERIMENTAL</small></div><div class="slx-inline-head-actions"><button id="slx-inline-refresh" type="button" title="Refresh Stock Manager">↻</button><button id="slx-inline-api" type="button">API</button><button id="slx-inline-full" type="button">Full</button><button id="slx-inline-toggle" type="button">${card.dataset.collapsed==='1'?'＋':'−'}</button></div></div>
       <div class="slx-inline-body">
         <div class="slx-inline-summary"><div><span>Total invested</span><b id="slx-inline-total">—</b></div><div><span>Unrealized P/L</span><b id="slx-inline-pl">—</b></div><div><span>Cash</span><b id="slx-inline-cash">—</b></div></div>
-        <div class="slx-inline-nav"><button id="slx-inline-advisor" type="button">★ Advisor</button><button id="slx-inline-trade" type="button">📈 Trade Assistant</button><button id="slx-inline-rebalance" type="button">⚖ Rebalance</button></div>
+        <div class="slx-inline-nav"><button data-slx-inline-tab="advisor" type="button">★ Advisor</button><button data-slx-inline-tab="trade" type="button">📈 Trade Assistant</button><button data-slx-inline-tab="rebalance" type="button">⚖ Rebalance</button></div>
+        <div id="slx-inline-workspace" class="slx-inline-workspace" data-open="0"></div>
         <div class="slx-inline-target"><label>Target <select id="slx-inline-target"><option value="">Loading…</option></select></label><div><span>Owned</span><b id="slx-inline-owned">—</b></div></div>
         <div class="slx-inline-actions"><button id="slx-inline-vault-max" class="primary" type="button">Vault Max</button><label><input id="slx-inline-keep" value="${esc(get(K.keep,'0'))}" placeholder="Keep cash"></label><button id="slx-inline-vault-keep" type="button">Vault (Keep)</button><label><input id="slx-inline-withdraw-value" value="${esc(get(K.withdraw,'1m'))}" placeholder="Withdraw"></label><button id="slx-inline-withdraw" class="danger" type="button">Withdraw</button><button id="slx-inline-withdraw-all" class="danger" type="button">Withdraw All</button></div>
         <div class="slx-inline-options"><label><input id="slx-inline-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-inline-dry" type="checkbox"> Dry Run</label><button id="slx-inline-panic" class="danger" type="button">PANIC</button></div>
@@ -749,9 +751,8 @@
     $('#slx-inline-toggle',card).onclick=()=>{const closed=card.dataset.collapsed!=='1';card.dataset.collapsed=closed?'1':'0';set(K.inlineCollapsed,closed?'1':'0');$('#slx-inline-toggle',card).textContent=closed?'＋':'−';};
     $('#slx-inline-full',card).onclick=openPanel;
     $('#slx-inline-api',card).onclick=()=>openPanelAt('#slx-stock-api');
-    $('#slx-inline-advisor',card).onclick=()=>openPanelAt('#slx-stock-advisor-body');
-    $('#slx-inline-trade',card).onclick=()=>openPanelAt('#slx-stock-trade-body');
-    $('#slx-inline-rebalance',card).onclick=()=>openPanelAt('#slx-stock-rebalance-body');
+    $('#slx-inline-refresh',card).onclick=async()=>{try{inlineStatus('Refreshing…','info');if(get(K.api).trim())await syncAllApi();else{scanStocks();refreshInlinePanel();}inlineStatus('Refreshed.','ok');}catch(e){inlineStatus(e.message,'bad');}};
+    $$('[data-slx-inline-tab]',card).forEach(b=>b.onclick=()=>toggleInlineWorkspace(b.dataset.slxInlineTab));
     $('#slx-inline-target',card).onchange=e=>{set(K.target,e.target.value);refreshTargetSelect();refreshInlinePanel();};
     $('#slx-inline-keep',card).onchange=e=>set(K.keep,e.target.value);
     $('#slx-inline-withdraw-value',card).onchange=e=>set(K.withdraw,e.target.value);
@@ -767,6 +768,75 @@
     $$('[data-slx-preset]',card).forEach(b=>b.onclick=()=>{const v=b.dataset.slxPreset;$('#slx-inline-withdraw-value',card).value=v;set(K.withdraw,v);inlineStatus(`Withdraw preset: ${v.toUpperCase()}`,'ok');});
     refreshInlinePanel();
     return card;
+  }
+
+  function toggleInlineWorkspace(tab) {
+    tab=String(tab||'');
+    const current=get(K.inlineTab,'');
+    const next=current===tab?'':tab;
+    set(K.inlineTab,next);
+    renderInlineWorkspace(next);
+  }
+
+  function renderInlineWorkspace(tab=get(K.inlineTab,'')) {
+    const card=$('#slx-stock-inline');
+    const box=$('#slx-inline-workspace',card||document);
+    if(!card || !box) return;
+    tab=String(tab||'');
+    $$('[data-slx-inline-tab]',card).forEach(b=>b.dataset.active=b.dataset.slxInlineTab===tab?'1':'0');
+    if(!tab){box.dataset.open='0';box.innerHTML='';return;}
+    box.dataset.open='1';
+    try {
+      if(tab==='advisor') return renderInlineAdvisor(box);
+      if(tab==='trade') return renderInlineTrade(box);
+      if(tab==='rebalance') return renderInlineRebalance(box);
+      box.innerHTML='<div class="slx-inline-empty">Unknown workspace.</div>';
+    } catch(e) {
+      console.error(`[${APP.name}] inline ${tab} failed`,e);
+      box.innerHTML=`<div class="slx-inline-error">${esc(e.message||'Workspace error')}</div>`;
+    }
+  }
+
+  function renderInlineAdvisor(box) {
+    const rows=buildRoiCandidates();
+    if(!rows.length){box.innerHTML='<div class="slx-inline-empty">No ROI data yet. Sync API and Fetch Market Values from Full → Benefit Values.</div>';return;}
+    const bankApr=Math.max(0,Number(get(K.bankApr,'0'))||0);
+    box.innerHTML=`<div class="slx-inline-work-head"><b>★ Benefit ROI Advisor</b><button type="button" data-open-full="#slx-stock-advisor-body">Full Advisor</button></div><div class="slx-inline-roi-list">${rows.slice(0,5).map((r,i)=>`<div class="slx-inline-roi-row"><b>#${i+1} ${r.sym}</b><span>Tier ${r.tier}</span><span>${r.roi.toFixed(2)}% APR</span><span>${money(r.cost)} gap</span><small>${Math.round(r.paybackDays).toLocaleString()}d payback${bankApr?` · ${r.bankDelta>=0?'+':''}${r.bankDelta.toFixed(2)}pp vs bank`:''}</small><button type="button" data-inline-target="${r.sym}">Target</button></div>`).join('')}</div>`;
+    $('[data-open-full]',box).onclick=()=>openPanelAt('#slx-stock-advisor-body');
+    $$('[data-inline-target]',box).forEach(b=>b.onclick=()=>{set(K.target,b.dataset.inlineTarget);refreshTargetSelect();refreshInlinePanel();inlineStatus(`${b.dataset.inlineTarget} selected as target.`,'ok');});
+  }
+
+  async function inlineBuyGap(sym,requested) {
+    try {
+      const st=await ensureStock(sym);
+      let cash=Math.max(Number(S.money)||0,currentMoneyFromDom());
+      if(!cash && get(K.api).trim()){await apiSync();cash=Number(S.money)||0;}
+      const shares=Math.min(Math.max(0,Math.floor(Number(requested)||0)),Math.floor(cash/st.price));
+      if(shares<=0) throw new Error(`Not enough cash to buy ${sym}.`);
+      if(!confirm(`Buy ${shares.toLocaleString()} ${sym} shares for about ${money(shares*st.price)}?`)) return;
+      await postTrade(sym,shares,'buyShares');
+      inlineStatus(`${bool(K.dryRun,false)?'Dry Run · ':''}Buy gap ${shares.toLocaleString()} ${sym}.`,'ok');
+      if(get(K.api).trim() && !bool(K.dryRun,false)) await syncAllApi(); else refreshInlinePanel();
+    } catch(e) { inlineStatus(`Trade Assistant: ${e.message}`,'bad'); }
+  }
+
+  function renderInlineTrade(box) {
+    const rows=buildRoiCandidates();
+    if(!rows.length){box.innerHTML='<div class="slx-inline-empty">No trade candidates yet. Sync API and benefit values first.</div>';return;}
+    const best=rows[0], affordable=rows.find(r=>r.affordable);
+    const cards=[['Best ROI',best],['Best affordable',affordable]].filter((x,i,a)=>x[1] && a.findIndex(y=>y[1]?.sym===x[1].sym && y[1]?.tier===x[1].tier)===i);
+    box.innerHTML=`<div class="slx-inline-work-head"><b>📈 Trade Assistant</b><button type="button" data-open-full="#slx-stock-trade-body">Full Assistant</button></div><div class="slx-inline-trade-list">${cards.map(([title,r])=>`<div class="slx-inline-trade-card"><div><small>${title}</small><b>${r.sym} · Tier ${r.tier}</b><span>${r.roi.toFixed(2)}% APR · ${money(r.cost)}</span></div><div class="slx-inline-mini-actions"><button type="button" data-inline-target="${r.sym}">Target</button><button type="button" class="primary" data-inline-buy="${r.sym}" data-shares="${r.sharesNeeded}">Buy gap</button></div></div>`).join('')}</div>`;
+    $('[data-open-full]',box).onclick=()=>openPanelAt('#slx-stock-trade-body');
+    $$('[data-inline-target]',box).forEach(b=>b.onclick=()=>{set(K.target,b.dataset.inlineTarget);refreshTargetSelect();refreshInlinePanel();});
+    $$('[data-inline-buy]',box).forEach(b=>b.onclick=()=>inlineBuyGap(b.dataset.inlineBuy,Number(b.dataset.shares)||0));
+  }
+
+  function renderInlineRebalance(box) {
+    const x=buildRebalancePreview();
+    if(!x.target){box.innerHTML='<div class="slx-inline-empty">No rebalance candidate yet. Sync API and benefit values first.</div>';return;}
+    const sells=x.sells.length?x.sells.map(r=>`<div class="slx-inline-rebalance-row"><b>SELL ${r.sym}</b><span>${r.shares.toLocaleString()} sh</span><span>≈ ${money(r.proceeds)}</span></div>`).join(''):'<div class="slx-inline-empty">Current cash can fund the target; no stock sale is required.</div>';
+    box.innerHTML=`<div class="slx-inline-work-head"><b>⚖ Rebalance Preview</b><button type="button" data-open-full="#slx-stock-rebalance-body">Full Preview</button></div><div class="slx-inline-rebalance-target"><small>Target</small><b>${x.target.sym} · Tier ${x.target.tier}</b><span>${x.target.sharesNeeded.toLocaleString()} shares · ${money(x.target.cost)} · ${x.target.roi.toFixed(2)}% APR</span></div><div class="slx-inline-rebalance-list">${sells}</div><div class="${x.shortfall>0?'bad':'good'}">${x.shortfall>0?`Shortfall ${money(x.shortfall)}`:'Fully fundable · preview only, no trades executed'}</div>`;
+    $('[data-open-full]',box).onclick=()=>openPanelAt('#slx-stock-rebalance-body');
   }
 
   function inlineStatus(msg,kind='info') {
@@ -794,6 +864,7 @@
     const api=$('#slx-inline-api',card); if(api){api.textContent=get(K.api).trim()?'API ✓':'API !';api.dataset.kind=get(K.api).trim()?'ok':'warn';}
     const lock=$('#slx-inline-benefit-lock',card); if(lock) lock.checked=bool(K.benefitLock,true);
     const dry=$('#slx-inline-dry',card); if(dry) dry.checked=bool(K.dryRun,true);
+    renderInlineWorkspace(get(K.inlineTab,''));
   }
 
   function style() {
@@ -823,7 +894,8 @@
 #slx-stock-panel .optimizer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}#slx-stock-panel .optimizer-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}#slx-stock-panel .optimizer-summary>div{display:grid;gap:3px;padding:8px;border:1px solid #23374a;border-radius:9px;background:#101a25}#slx-stock-panel .optimizer-summary span{font-size:9px;color:#8293a7}#slx-stock-panel .optimizer-pick{display:grid;gap:3px;padding:8px;margin-bottom:7px;border:1px solid #365a78;border-radius:9px;background:#0e1c29}.optimizer-pick span,.optimizer-pick small{font-size:9px;color:#9fb3c6}#slx-stock-panel .optimizer-list{display:grid;gap:5px;max-height:310px;overflow:auto}#slx-stock-panel .optimizer-row{display:grid;grid-template-columns:62px 1fr 1fr 1fr 1.25fr;gap:6px;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px;align-items:center}.optimizer-row>div{display:grid;gap:3px}.optimizer-row small{color:#8293a7}
 #slx-stock-panel .rebalance-controls{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:8px}#slx-stock-panel .rebalance-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}#slx-stock-panel .rebalance-summary>div{display:grid;gap:3px;padding:8px;border:1px solid #23374a;border-radius:9px;background:#101a25}.rebalance-summary span{font-size:9px;color:#8293a7}#slx-stock-panel .rebalance-target{display:grid;gap:3px;padding:9px;border:1px solid #365a78;border-radius:9px;background:#0e1c29;margin-bottom:7px}.rebalance-target span,.rebalance-target small{font-size:9px;color:#9fb3c6}#slx-stock-panel .rebalance-list{display:grid;gap:5px;margin-bottom:7px}.rebalance-row{display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:6px;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px;align-items:center}
 #slx-stock-inline{margin:10px 0 14px;padding:0;border:1px solid #344458;border-radius:14px;background:#0b1118;color:#e8eef7;box-shadow:0 8px 24px #0008;overflow:hidden;font-family:Arial,sans-serif}#slx-stock-inline *{box-sizing:border-box}#slx-stock-inline .slx-inline-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(180deg,#182535,#101923);border-bottom:1px solid #2c3d50}#slx-stock-inline .slx-inline-head>div:first-child{display:grid;gap:2px;flex:1}#slx-stock-inline .slx-inline-head b{font-size:13px}#slx-stock-inline .slx-inline-head small{font-size:9px;color:#8394a7}#slx-stock-inline .slx-inline-head-actions{display:flex;gap:5px}#slx-stock-inline button,#slx-stock-inline input,#slx-stock-inline select{border:1px solid #415369;border-radius:8px;background:#17212c;color:#ecf4ff;padding:8px;font-size:11px}#slx-stock-inline button{font-weight:800}#slx-stock-inline .primary{border-color:#2c8b52;color:#7ee09f;background:#102a1d}#slx-stock-inline .danger{border-color:#8c3140;color:#ff7a86;background:#2b1016}#slx-stock-inline .slx-inline-body{padding:10px;display:grid;gap:9px}#slx-stock-inline[data-collapsed="1"] .slx-inline-body{display:none}#slx-stock-inline .slx-inline-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-summary>div{display:grid;gap:2px;padding:8px;border:1px solid #26384a;border-radius:9px;background:#101821}#slx-stock-inline .slx-inline-summary span,#slx-stock-inline .slx-inline-target span{font-size:9px;color:#8596a8}#slx-stock-inline .slx-inline-summary b{font-size:12px}#slx-stock-inline .slx-inline-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-target{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:end}#slx-stock-inline .slx-inline-target label,#slx-stock-inline .slx-inline-target>div{display:grid;gap:4px}#slx-stock-inline .slx-inline-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-actions label{display:block}#slx-stock-inline .slx-inline-actions input{width:100%}#slx-stock-inline .slx-inline-options{display:flex;flex-wrap:wrap;gap:9px;align-items:center}#slx-stock-inline .slx-inline-options label{display:flex;align-items:center;gap:4px;font-size:10px;color:#a4b1bf}#slx-stock-inline .slx-inline-options input{width:auto}#slx-stock-inline #slx-inline-panic{margin-left:auto}#slx-stock-inline .slx-inline-presets{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}#slx-stock-inline .slx-inline-note{font-size:9px;color:#8ea0b3}#slx-stock-inline .slx-inline-note[data-kind="bad"]{color:#ff7a86}#slx-stock-inline .slx-inline-note[data-kind="ok"]{color:#61e291}#slx-stock-inline .good{color:#61e291}#slx-stock-inline .bad{color:#ff7a86}#slx-stock-inline #slx-inline-api[data-kind="ok"]{border-color:#267c52;color:#63df9a}#slx-stock-inline #slx-inline-api[data-kind="warn"]{border-color:#8b6a1f;color:#ffd36b}
-@media(max-width:600px){#slx-stock-inline .slx-inline-summary{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-summary>div:nth-child(3){grid-column:1/3}#slx-stock-inline .slx-inline-nav{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav button:nth-child(3){grid-column:1/3}#slx-stock-inline .slx-inline-target{grid-template-columns:1fr 86px}#slx-stock-inline .slx-inline-actions{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-presets{grid-template-columns:repeat(3,minmax(0,1fr))}#slx-stock-panel .rebalance-controls{grid-template-columns:1fr}#slx-stock-panel .rebalance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .rebalance-row{grid-template-columns:1fr 1fr}#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
+#slx-stock-inline .slx-inline-nav button[data-active="1"]{border-color:#3b8ec9;background:#123653;color:#9bd5ff}#slx-stock-inline .slx-inline-workspace{display:none;border:1px solid #26394b;border-radius:10px;background:#0d151e;padding:8px}#slx-stock-inline .slx-inline-workspace[data-open="1"]{display:grid;gap:7px}#slx-stock-inline .slx-inline-work-head{display:flex;align-items:center;gap:8px}#slx-stock-inline .slx-inline-work-head>b{flex:1;font-size:11px;color:#9fc7ef}#slx-stock-inline .slx-inline-work-head button{padding:6px 8px;font-size:9px}#slx-stock-inline .slx-inline-roi-list,#slx-stock-inline .slx-inline-trade-list,#slx-stock-inline .slx-inline-rebalance-list{display:grid;gap:5px}#slx-stock-inline .slx-inline-roi-row{display:grid;grid-template-columns:66px 48px 68px 1fr auto;gap:5px;align-items:center;padding:7px;border:1px solid #203142;border-radius:8px;background:#101923;font-size:9px}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5;color:#8497aa}#slx-stock-inline .slx-inline-roi-row button{grid-row:1/3;grid-column:5;padding:6px}#slx-stock-inline .slx-inline-trade-card{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border:1px solid #263b4e;border-radius:9px;background:#101923}#slx-stock-inline .slx-inline-trade-card>div:first-child{display:grid;gap:2px}#slx-stock-inline .slx-inline-trade-card small,#slx-stock-inline .slx-inline-trade-card span{font-size:9px;color:#8497aa}#slx-stock-inline .slx-inline-mini-actions{display:flex;gap:5px}#slx-stock-inline .slx-inline-rebalance-target{display:grid;gap:3px;padding:8px;border:1px solid #365a78;border-radius:9px;background:#0e1c29}#slx-stock-inline .slx-inline-rebalance-target small,#slx-stock-inline .slx-inline-rebalance-target span{font-size:9px;color:#91a8bc}#slx-stock-inline .slx-inline-rebalance-row{display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;padding:6px;border-bottom:1px solid #1e2c39;font-size:9px}#slx-stock-inline .slx-inline-empty,#slx-stock-inline .slx-inline-error{padding:8px;font-size:9px;color:#8fa1b4}#slx-stock-inline .slx-inline-error{color:#ff7a86}
+@media(max-width:600px){#slx-stock-inline .slx-inline-roi-row{grid-template-columns:58px 42px 62px 1fr}#slx-stock-inline .slx-inline-roi-row button{grid-row:auto;grid-column:4}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5}#slx-stock-inline .slx-inline-trade-card{grid-template-columns:1fr}#slx-stock-inline .slx-inline-mini-actions{justify-content:flex-end}#slx-stock-inline .slx-inline-summary{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-summary>div:nth-child(3){grid-column:1/3}#slx-stock-inline .slx-inline-nav{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav button:nth-child(3){grid-column:1/3}#slx-stock-inline .slx-inline-target{grid-template-columns:1fr 86px}#slx-stock-inline .slx-inline-actions{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-presets{grid-template-columns:repeat(3,minmax(0,1fr))}#slx-stock-panel .rebalance-controls{grid-template-columns:1fr}#slx-stock-panel .rebalance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .rebalance-row{grid-template-columns:1fr 1fr}#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
 `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -916,6 +988,12 @@
 
   function restoreCache() { try { S.portfolio=JSON.parse(get(K.tx,'{}'))||{}; } catch {} }
 
+  let inlineMountTimer=0;
+  function scheduleInlineMount() {
+    clearTimeout(inlineMountTimer);
+    inlineMountTimer=setTimeout(()=>{if(isStocks()) mountInlinePanel(); else $('#slx-stock-inline')?.remove();},120);
+  }
+
   async function init() {
     style(); restoreCache(); panicButton(); managerLauncher(); if(isStocks()) setTimeout(mountInlinePanel,250);
     try { if(sessionStorage.getItem('SakaLuX_STOCK_KEY_SETUP_PENDING')==='1'){sessionStorage.removeItem('SakaLuX_STOCK_KEY_SETUP_PENDING');setTimeout(openPanel,700);} } catch {}
@@ -923,7 +1001,7 @@
       const wait=setInterval(()=>{ if(scanStocks().size){clearInterval(wait); if(S.panel?.dataset.open==='1'){refreshTargetSelect();renderAdvisor();} if(get(K.panicPending)==='1') panic();}},500);
       setTimeout(()=>clearInterval(wait),15000);
     }
-    const mo=new MutationObserver(()=>{ if(isStocks()){scanStocks();mountInlinePanel();} else $('#slx-stock-inline')?.remove(); if(!$('#slx-stock-open')) managerLauncher(); if(!$('#slx-stock-panic')) panicButton(); });
+    const mo=new MutationObserver(()=>{ if(isStocks()) scanStocks(); scheduleInlineMount(); if(!$('#slx-stock-open')) managerLauncher(); if(!$('#slx-stock-panic')) panicButton(); });
     mo.observe(document.documentElement,{subtree:true,childList:true});
   }
 
