@@ -1,4 +1,4 @@
-name: Integrate Hub v1.9.44 mobile layout fixes
+name: Integrate Hub v1.9.44 temporary
 
 on:
   push:
@@ -18,103 +18,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          p = Path('SakaLuX-Script-Hub.user.js')
-          s = p.read_text(encoding='utf-8')
-          if '// @version      1.9.43' not in s or "const VERSION = '1.9.43';" not in s:
-              raise SystemExit('Unexpected Hub baseline')
-
-          s = s.replace('// @version      1.9.43', '// @version      1.9.44', 1)
-          s = s.replace("const VERSION = '1.9.43';", "const VERSION = '1.9.44';", 1)
-
-          marker = '    const HUB_CHANGELOG = [\n'
-          changelog = """        {
-            version: '1.9.44',
-            date: '2026-09-16',
-            changes: [
-                'Rearranges managed module controls into two clean rows on mobile: INFO + ON/OFF, then NEW + OPEN/SETTINGS.',
-                'Fixes Company Intelligence so its content scrolls independently while the author footer remains visible at the bottom of the panel.',
-                'Makes Hub Settings switches compact and proportional instead of oversized on PDA/mobile screens.',
-                'Keeps desktop module cards unchanged while improving narrow-screen readability and preventing clipped controls.'
-            ]
-        },
-"""
-          if marker not in s:
-              raise SystemExit('HUB_CHANGELOG marker missing')
-          s = s.replace(marker, marker + changelog, 1)
-
-          # Company panel must be recognized by Hub footer management.
-          old_selectors = """        '[class*=" ci-"][class*="panel" i]'\n    ];"""
-          new_selectors = """        '[class*=" ci-"][class*="panel" i]',\n        '#ci-root .ci-shell'\n    ];"""
-          if old_selectors not in s:
-              raise SystemExit('Managed panel selector marker missing')
-          s = s.replace(old_selectors, new_selectors, 1)
-
-          # Reuse Company's own footer rather than creating a second footer.
-          old_footer_query = "panel.querySelector('[id^=\"sakalux-inline-footer-\"], .sakalux-stable-module-footer')"
-          new_footer_query = "panel.querySelector('[id^=\"sakalux-inline-footer-\"], .sakalux-stable-module-footer, .ci-footer')"
-          if old_footer_query not in s:
-              raise SystemExit('Footer query marker missing')
-          s = s.replace(old_footer_query, new_footer_query, 1)
-
-          # Add mobile module grid, compact Settings switches and Company fixed-footer layout.
-          css_anchor = ".slh-card .slh-switch,.slh-card .slh-primary{width:100%!important;box-sizing:border-box!important}\n"
-          css_extra = r'''
-.slh-settings .slh-setting-row{align-items:center!important;gap:10px!important}
-.slh-settings .slh-setting-toggle{width:46px!important;height:26px!important;min-width:46px!important;min-height:26px!important;max-width:46px!important;padding:2px!important;border-radius:999px!important;flex:0 0 46px!important}
-.slh-settings .slh-setting-toggle i{width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;border-radius:50%!important;margin:0!important;transform:translateX(0)!important}
-.slh-settings .slh-setting-toggle.on i{transform:translateX(20px)!important}
-#ci-root{overflow:hidden!important;align-items:stretch!important}
-#ci-root .ci-shell{display:flex!important;flex-direction:column!important;max-height:calc(100dvh - 32px)!important;min-height:0!important;overflow:hidden!important;margin:auto 0!important}
-#ci-root .ci-head,#ci-root .ci-tabs,#ci-root .ci-status,#ci-root .ci-footer{flex:0 0 auto!important}
-#ci-root .ci-body{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important}
-#ci-root .ci-footer,#ci-root .ci-shell>.sakalux-stable-module-footer{position:relative!important;bottom:auto!important;z-index:30!important;width:100%!important;box-sizing:border-box!important}
-@media(max-width:700px){
-  .slh-card{display:grid!important;grid-template-columns:46px minmax(0,1fr)!important;align-items:start!important;column-gap:10px!important;row-gap:7px!important}
-  .slh-card .slh-icon{grid-column:1!important;grid-row:1!important}
-  .slh-card .slh-card-copy{grid-column:2!important;grid-row:1!important;min-width:0!important}
-  .slh-card .slh-module-controls{grid-column:1/-1!important;grid-row:2!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-areas:'info toggle' 'new primary'!important;gap:7px!important;width:100%!important;min-width:0!important;margin-top:3px!important}
-  .slh-card .slh-card-tools{display:contents!important}
-  .slh-card .slh-card-tool.info{grid-area:info!important}
-  .slh-card .slh-card-tool.new{grid-area:new!important}
-  .slh-card .slh-switch{grid-area:toggle!important;min-height:36px!important;width:100%!important;justify-content:space-between!important;padding:5px 9px!important}
-  .slh-card .slh-primary{grid-area:primary!important;min-height:36px!important;width:100%!important}
-  .slh-card .slh-card-tool{min-height:36px!important;width:100%!important;font-size:9px!important}
-}
-'''
-          if css_anchor not in s:
-              raise SystemExit('Native card CSS anchor missing')
-          s = s.replace(css_anchor, css_anchor + css_extra, 1)
-
-          p.write_text(s, encoding='utf-8')
-
-          doc = Path('greasyfork/Script-Hub.md')
-          d = doc.read_text(encoding='utf-8')
-          d = d.replace('## Current version\n**v1.9.43**', '## Current version\n**v1.9.44**', 1)
-          d = re.sub(
-              r'(## Current release note\s*\n+)\*\*v1\.9\.43\*\*[^\n]*',
-              r'\1**v1.9.44** Mobile layout refinement: managed module controls use a two-row PDA layout, Company Intelligence keeps its author footer visible while content scrolls, and Hub Settings switches are compact.',
-              d,
-              count=1,
-          )
-          history = '## Release history\n'
-          entry = """### v1.9.44 — Mobile control and Company footer refinement
-
-- Uses two rows for managed module actions on narrow screens: INFO + ON/OFF, then NEW + OPEN/SETTINGS.
-- Keeps Company Intelligence content independently scrollable while its SakaLuX author footer stays visible at the bottom of the panel.
-- Reduces Hub Settings toggle dimensions for Torn launchers and automatic update checks.
-- Preserves the existing desktop layout.
-
-"""
-          if history not in d:
-              raise SystemExit('Release history marker missing')
-          d = d.replace(history, history + entry, 1)
-          doc.write_text(d, encoding='utf-8')
-          PY
-
+          echo 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCmltcG9ydCByZQoKcCA9IFBhdGgoJ1Nha2FMdVgtU2NyaXB0LUh1Yi51c2VyLmpzJykKcyA9IHAucmVhZF90ZXh0KGVuY29kaW5nPSd1dGYtOCcpCmlmICcvLyBAdmVyc2lvbiAgICAgIDEuOS40Mycgbm90IGluIHMgb3IgImNvbnN0IFZFUlNJT04gPSAnMS45LjQzJzsiIG5vdCBpbiBzOgogICAgcmFpc2UgU3lzdGVtRXhpdCgnVW5leHBlY3RlZCBIdWIgYmFzZWxpbmUnKQoKcyA9IHMucmVwbGFjZSgnLy8gQHZlcnNpb24gICAgICAxLjkuNDMnLCAnLy8gQHZlcnNpb24gICAgICAxLjkuNDQnLCAxKQpzID0gcy5yZXBsYWNlKCJjb25zdCBWRVJTSU9OID0gJzEuOS40Myc7IiwgImNvbnN0IFZFUlNJT04gPSAnMS45LjQ0JzsiLCAxKQoKbWFya2VyID0gJyAgICBjb25zdCBIVUJfQ0hBTkdFTE9HID0gW1xcbicKY2hhbmdlbG9nID0gJycnICAgICAgICB7CiAgICAgICAgICAgIHZlcnNpb246ICcxLjkuNDQnLAogICAgICAgICAgICBkYXRlOiAnMjAyNi0wOS0xNicsCiAgICAgICAgICAgIGNoYW5nZXM6IFsKICAgICAgICAgICAgICAgICdSZWFycmFuZ2VzIG1hbmFnZWQgbW9kdWxlIGNvbnRyb2xzIGludG8gdHdvIGNsZWFuIHJvd3Mgb24gbW9iaWxlOiBJTkZPICsgT04vT0ZGLCB0aGVuIE5FVyArIE9QRU4vU0VUVElOR1MuJywKICAgICAgICAgICAgICAgICdGaXhlcyBDb21wYW55IEludGVsbGlnZW5jZSBzbyBpdHMgY29udGVudCBzY3JvbGxzIGluZGVwZW5kZW50bHkgd2hpbGUgdGhlIGF1dGhvciBmb290ZXIgcmVtYWlucyB2aXNpYmxlIGF0IHRoZSBib3R0b20gb2YgdGhlIHBhbmVsLicsCiAgICAgICAgICAgICAgICAnTWFrZXMgSHViIFNldHRpbmdzIHN3aXRjaGVzIGNvbXBhY3QgYW5kIHByb3BvcnRpb25hbCBpbnN0ZWFkIG9mIG92ZXJzaXplZCBvbiBQREEvbW9iaWxlIHNjcmVlbnMuJywKICAgICAgICAgICAgICAgICdLZWVwcyBkZXNrdG9wIG1vZHVsZSBjYXJkcyB1bmNoYW5nZWQgd2hpbGUgaW1wcm92aW5nIG5hcnJvdy1zY3JlZW4gcmVhZGFiaWxpdHkgYW5kIHByZXZlbnRpbmcgY2xpcHBlZCBjb250cm9scy4nCiAgICAgICAgICAgIF0KICAgICAgICB9LAonJycKaWYgbWFya2VyIG5vdCBpbiBzOgogICAgcmFpc2UgU3lzdGVtRXhpdCgnSFVCX0NIQU5HRUxPRyBtYXJrZXIgbWlzc2luZycpCnMgPSBzLnJlcGxhY2UobWFya2VyLCBtYXJrZXIgKyBjaGFuZ2Vsb2csIDEpCgpvbGRfc2VsZWN0b3JzID0gJycnICAgICAgICAnW2NsYXNzKj0iIGNpLSJdW2NsYXNzKj0icGFuZWwiIGldJwogICAgXTsnJycKbmV3X3NlbGVjdG9ycyA9ICcnJyAgICAgICAgJ1tjbGFzcyo9IiBjaS0iXVtjbGFzcyo9InBhbmVsIiBpXScsCiAgICAgICAgJyNjaS1yb290IC5jaS1zaGVsbCcKICAgIF07JycnCmlmIG9sZF9zZWxlY3RvcnMgbm90IGluIHM6CiAgICByYWlzZSBTeXN0ZW1FeGl0KCdNYW5hZ2VkIHBhbmVsIHNlbGVjdG9yIG1hcmtlciBtaXNzaW5nJykKcyA9IHMucmVwbGFjZShvbGRfc2VsZWN0b3JzLCBuZXdfc2VsZWN0b3JzLCAxKQoKb2xkX2Zvb3Rlcl9xdWVyeSA9ICcnJ3BhbmVsLnF1ZXJ5U2VsZWN0b3IoJ1tpZF49InNha2FsdXgtaW5saW5lLWZvb3Rlci0iXSwgLnNha2FsdXgtc3RhYmxlLW1vZHVsZS1mb290ZXInKScnJwpuZXdfZm9vdGVyX3F1ZXJ5ID0gJycncGFuZWwucXVlcnlTZWxlY3RvcignW2lkXj0ic2FrYWx1eC1pbmxpbmUtZm9vdGVyLSJdLCAuc2FrYWx1eC1zdGFibGUtbW9kdWxlLWZvb3RlciwgLmNpLWZvb3RlcicpJycnCmlmIG9sZF9mb290ZXJfcXVlcnkgbm90IGluIHM6CiAgICByYWlzZSBTeXN0ZW1FeGl0KCdGb290ZXIgcXVlcnkgbWFya2VyIG1pc3NpbmcnKQpzID0gcy5yZXBsYWNlKG9sZF9mb290ZXJfcXVlcnksIG5ld19mb290ZXJfcXVlcnksIDEpCgpjc3NfYW5jaG9yID0gIi5zbGgtY2FyZCAuc2xoLXN3aXRjaCwuc2xoLWNhcmQgLnNsaC1wcmltYXJ5e3dpZHRoOjEwMCUhaW1wb3J0YW50O2JveC1zaXppbmc6Ym9yZGVyLWJveCFpbXBvcnRhbnR9XFxuIgpjc3NfZXh0cmEgPSByJycnCi5zbGgtc2V0dGluZ3MgLnNsaC1zZXR0aW5nLXJvd3thbGlnbi1pdGVtczpjZW50ZXIhaW1wb3J0YW50O2dhcDoxMHB4IWltcG9ydGFudH0KLnNsaC1zZXR0aW5ncyAuc2xoLXNldHRpbmctdG9nZ2xle3dpZHRoOjQ2cHghaW1wb3J0YW50O2hlaWdodDoyNnB4IWltcG9ydGFudDttaW4td2lkdGg6NDZweCFpbXBvcnRhbnQ7bWluLWhlaWdodDoyNnB4IWltcG9ydGFudDttYXgtd2lkdGg6NDZweCFpbXBvcnRhbnQ7cGFkZGluZzoycHghaW1wb3J0YW50O2JvcmRlci1yYWRpdXM6OTk5cHghaW1wb3J0YW50O2ZsZXg6MCAwIDQ2cHghaW1wb3J0YW50fQouc2xoLXNldHRpbmdzIC5zbGgtc2V0dGluZy10b2dnbGUgaXt3aWR0aDoyMHB4IWltcG9ydGFudDtoZWlnaHQ6MjBweCFpbXBvcnRhbnQ7bWluLXdpZHRoOjIwcHghaW1wb3J0YW50O21pbi1oZWlnaHQ6MjBweCFpbXBvcnRhbnQ7Ym9yZGVyLXJhZGl1czo1MCUhaW1wb3J0YW50O21hcmdpbjowIWltcG9ydGFudDt0cmFuc2Zvcm06dHJhbnNsYXRlWCgwKSFpbXBvcnRhbnR9Ci5zbGgtc2V0dGluZ3MgLnNsaC1zZXR0aW5nLXRvZ2dsZS5vbiBpe3RyYW5zZm9ybTp0cmFuc2xhdGVYKDIwcHgpIWltcG9ydGFudH0KI2NpLXJvb3R7b3ZlcmZsb3c6aGlkZGVuIWltcG9ydGFudDthbGlnbi1pdGVtczpzdHJldGNoIWltcG9ydGFudH0KI2NpLXJvb3QgLmNpLXNoZWxse2Rpc3BsYXk6ZmxleCFpbXBvcnRhbnQ7ZmxleC1kaXJlY3Rpb246Y29sdW1uIWltcG9ydGFudDttYXgtaGVpZ2h0OmNhbGMoMTAwZHZoIC0gMzJweCkhaW1wb3J0YW50O21pbi1oZWlnaHQ6MCFpbXBvcnRhbnQ7b3ZlcmZsb3c6aGlkZGVuIWltcG9ydGFudDttYXJnaW46YXV0byAwIWltcG9ydGFudH0KI2NpLXJvb3QgLmNpLWhlYWQsI2NpLXJvb3QgLmNpLXRhYnMsI2NpLXJvb3QgLmNpLXN0YXR1cywjY2ktcm9vdCAuY2ktZm9vdGVye2ZsZXg6MCAwIGF1dG8haW1wb3J0YW50fQojY2ktcm9vdCAuY2ktYm9keXtmbGV4OjEgMSBhdXRvIWltcG9ydGFudDttaW4taGVpZ2h0OjAhaW1wb3J0YW50O292ZXJmbG93LXk6YXV0byFpbXBvcnRhbnQ7b3ZlcnNjcm9sbC1iZWhhdmlvcjpjb250YWluIWltcG9ydGFudH0KI2NpLXJvb3QgLmNpLWZvb3RlciwjY2ktcm9vdCAuY2ktc2hlbGw+LnNha2FsdXgtc3RhYmxlLW1vZHVsZS1mb290ZXJ7cG9zaXRpb246cmVsYXRpdmUhaW1wb3J0YW50O2JvdHRvbTphdXRvIWltcG9ydGFudDt6LWluZGV4OjMwIWltcG9ydGFudDt3aWR0aDoxMDAlIWltcG9ydGFudDtib3gtc2l6aW5nOmJvcmRlci1ib3ghaW1wb3J0YW50fQpAbWVkaWEobWF4LXdpZHRoOjcwMHB4KXsKICAuc2xoLWNhcmR7ZGlzcGxheTpncmlkIWltcG9ydGFudDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6NDZweCBtaW5tYXgoMCwxZnIpIWltcG9ydGFudDthbGlnbi1pdGVtczpzdGFydCFpbXBvcnRhbnQ7Y29sdW1uLWdhcDoxMHB4IWltcG9ydGFudDtyb3ctZ2FwOjdweCFpbXBvcnRhbnR9CiAgLnNsaC1jYXJkIC5zbGgtaWNvbntncmlkLWNvbHVtbjoxIWltcG9ydGFudDtncmlkLXJvdzoxIWltcG9ydGFudH0KICAuc2xoLWNhcmQgLnNsaC1jYXJkLWNvcHl7Z3JpZC1jb2x1bW46MiFpbXBvcnRhbnQ7Z3JpZC1yb3c6MSFpbXBvcnRhbnQ7bWluLXdpZHRoOjAhaW1wb3J0YW50fQogIC5zbGgtY2FyZCAuc2xoLW1vZHVsZS1jb250cm9sc3tncmlkLWNvbHVtbjoxLy0xIWltcG9ydGFudDtncmlkLXJvdzoyIWltcG9ydGFudDtkaXNwbGF5OmdyaWQhaW1wb3J0YW50O2dyaWQtdGVtcGxhdGUtY29sdW1uczptaW5tYXgoMCwxZnIpIG1pbm1heCgwLDFmcikhaW1wb3J0YW50O2dyaWQtdGVtcGxhdGUtYXJlYXM6J2luZm8gdG9nZ2xlJyAnbmV3IHByaW1hcnknIWltcG9ydGFudDtnYXA6N3B4IWltcG9ydGFudDt3aWR0aDoxMDAlIWltcG9ydGFudDttaW4td2lkdGg6MCFpbXBvcnRhbnQ7bWFyZ2luLXRvcDozcHghaW1wb3J0YW50fQogIC5zbGgtY2FyZCAuc2xoLWNhcmQtdG9vbHN7ZGlzcGxheTpjb250ZW50cyFpbXBvcnRhbnR9CiAgLnNsaC1jYXJkIC5zbGgtY2FyZC10b29sLmluZm97Z3JpZC1hcmVhOmluZm8haW1wb3J0YW50fQogIC5zbGgtY2FyZCAuc2xoLWNhcmQtdG9vbC5uZXd7Z3JpZC1hcmVhOm5ldyFpbXBvcnRhbnR9CiAgLnNsaC1jYXJkIC5zbGgtc3dpdGNoe2dyaWQtYXJlYTp0b2dnbGUhaW1wb3J0YW50O21pbi1oZWlnaHQ6MzZweCFpbXBvcnRhbnQ7d2lkdGg6MTAwJSFpbXBvcnRhbnQ7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW4haW1wb3J0YW50O3BhZGRpbmc6NXB4IDlweCFpbXBvcnRhbnR9CiAgLnNsaC1jYXJkIC5zbGgtcHJpbWFyeXtncmlkLWFyZWE6cHJpbWFyeSFpbXBvcnRhbnQ7bWluLWhlaWdodDozNnB4IWltcG9ydGFudDt3aWR0aDoxMDAlIWltcG9ydGFudH0KICAuc2xoLWNhcmQgLnNsaC1jYXJkLXRvb2x7bWluLWhlaWdodDozNnB4IWltcG9ydGFudDt3aWR0aDoxMDAlIWltcG9ydGFudDtmb250LXNpemU6OXB4IWltcG9ydGFudH0KfQonJycKaWYgY3NzX2FuY2hvciBub3QgaW4gczoKICAgIHJhaXNlIFN5c3RlbUV4aXQoJ05hdGl2ZSBjYXJkIENTUyBhbmNob3IgbWlzc2luZycpCnMgPSBzLnJlcGxhY2UoY3NzX2FuY2hvciwgY3NzX2FuY2hvciArIGNzc19leHRyYSwgMSkKcC53cml0ZV90ZXh0KHMsIGVuY29kaW5nPSd1dGYtOCcpCgpkb2MgPSBQYXRoKCdncmVhc3lmb3JrL1NjcmlwdC1IdWIubWQnKQpkID0gZG9jLnJlYWRfdGV4dChlbmNvZGluZz0ndXRmLTgnKQpkID0gZC5yZXBsYWNlKCcjIyBDdXJyZW50IHZlcnNpb25cXG4qKnYxLjkuNDMqKicsICcjIyBDdXJyZW50IHZlcnNpb25cXG4qKnYxLjkuNDQqKicsIDEpCmQgPSByZS5zdWIoCiAgICByJygjIyBDdXJyZW50IHJlbGVhc2Ugbm90ZVxccypcXG4rKVxcKlxcKnYxXFwuOVxcLjQzXFwqXFwqW15cXG5dKicsCiAgICByJ1xcMSoqdjEuOS40NCoqIE1vYmlsZSBsYXlvdXQgcmVmaW5lbWVudDogbWFuYWdlZCBtb2R1bGUgY29udHJvbHMgdXNlIGEgdHdvLXJvdyBQREEgbGF5b3V0LCBDb21wYW55IEludGVsbGlnZW5jZSBrZWVwcyBpdHMgYXV0aG9yIGZvb3RlciB2aXNpYmxlIHdoaWxlIGNvbnRlbnQgc2Nyb2xscywgYW5kIEh1YiBTZXR0aW5ncyBzd2l0Y2hlcyBhcmUgY29tcGFjdC4nLAogICAgZCwKICAgIGNvdW50PTEsCikKaGlzdG9yeSA9ICcjIyBSZWxlYXNlIGhpc3RvcnlcXG4nCmVudHJ5ID0gJycnIyMjIHYxLjkuNDQg4oCUIE1vYmlsZSBjb250cm9sIGFuZCBDb21wYW55IGZvb3RlciByZWZpbmVtZW50CgotIFVzZXMgdHdvIHJvd3MgZm9yIG1hbmFnZWQgbW9kdWxlIGFjdGlvbnMgb24gbmFycm93IHNjcmVlbnM6IElORk8gKyBPTi9PRkYsIHRoZW4gTkVXICsgT1BFTi9TRVRUSU5HUy4KLSBLZWVwcyBDb21wYW55IEludGVsbGlnZW5jZSBjb250ZW50IGluZGVwZW5kZW50bHkgc2Nyb2xsYWJsZSB3aGlsZSBpdHMgU2FrYUx1WCBhdXRob3IgZm9vdGVyIHN0YXlzIHZpc2libGUgYXQgdGhlIGJvdHRvbSBvZiB0aGUgcGFuZWwuCi0gUmVkdWNlcyBIdWIgU2V0dGluZ3MgdG9nZ2xlIGRpbWVuc2lvbnMgZm9yIFRvcm4gbGF1bmNoZXJzIGFuZCBhdXRvbWF0aWMgdXBkYXRlIGNoZWNrcy4KLSBQcmVzZXJ2ZXMgdGhlIGV4aXN0aW5nIGRlc2t0b3AgbGF5b3V0LgoKJycnCmlmIGhpc3Rvcnkgbm90IGluIGQ6CiAgICByYWlzZSBTeXN0ZW1FeGl0KCdSZWxlYXNlIGhpc3RvcnkgbWFya2VyIG1pc3NpbmcnKQpkID0gZC5yZXBsYWNlKGhpc3RvcnksIGhpc3RvcnkgKyBlbnRyeSwgMSkKZG9jLndyaXRlX3RleHQoZCwgZW5jb2Rpbmc9J3V0Zi04JykK' | base64 -d > /tmp/patch.py
+          python /tmp/patch.py
           node --check SakaLuX-Script-Hub.user.js
           git config user.name 'SakaLuX Automation'
           git config user.email 'actions@users.noreply.github.com'
