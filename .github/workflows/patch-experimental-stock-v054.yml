@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Apply patch
-        run: python .github/scripts/patch_experimental_stock_v054.py
+        run: |
+          python .github/scripts/patch_experimental_stock_v054.py
+          python .github/scripts/fix_experimental_stock_v054.py
       - name: Validate
         run: |
           grep -q '@version      0.5.4' experimental/SakaLuX-Stock-Manager-Advisor.user.js
