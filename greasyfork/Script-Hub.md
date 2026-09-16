@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.43**
+**v1.9.44**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.43** Native module-card release center: adds per-module INFO/NEW controls, compact status-only cards, Greasy Fork public version checks, and stable SakaLuX panel footers.
+**v1.9.44** Mobile layout refinement: managed module controls use a two-row PDA layout, Company Intelligence keeps its author footer visible while content scrolls, and Hub Settings switches are compact.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,6 +54,13 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.44 — Mobile control and Company footer refinement
+
+- Uses two rows for managed module actions on narrow screens: INFO + ON/OFF, then NEW + OPEN/SETTINGS.
+- Keeps Company Intelligence content independently scrollable while its SakaLuX author footer stays visible at the bottom of the panel.
+- Reduces Hub Settings toggle dimensions for Torn launchers and automatic update checks.
+- Preserves the existing desktop layout.
+
 ### v1.9.43 — Native module information and release center
 
 - Adds INFO and NEW buttons directly to every managed module card.
