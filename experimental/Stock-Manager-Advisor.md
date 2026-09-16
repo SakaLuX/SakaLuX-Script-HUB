@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.3.0**
+**v0.4.0**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.3.0** adds the SakaLuX-style API Key Manager and the first full Portfolio dashboard. API setup can create the required Torn key, save/show/test/clear it, synchronize cash + holdings + stock prices, and render portfolio value/P&L/benefit protection from any Torn page.
+**v0.4.0** adds a benefit-value engine, marginal annual ROI ranking and the first SakaLuX Trade Assistant. Item-based benefits can load current Torn market values, cash benefits have editable defaults, manual overrides are supported, active benefit tiers use cumulative block math, and Buy Gap performs a user-confirmed direct purchase without automatically selling lower-ROI holdings.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -44,13 +44,26 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Direct trade endpoints and returned response shapes remain experimental and must be verified in TornPDA with small transactions first.
 
 ## Planned roadmap
-- **v0.3.x:** benefit-value database, true ROI ranking, configurable withdrawal presets and transaction history.
-- **v0.4.x:** Trade Assistant with buy/sell suggestions and liquidity-gap calculations.
+- **v0.4.x:** refine benefit values, transaction history, withdrawal presets and Trade Assistant liquidity planning.
+- **v0.5.x:** bank comparison, daily income / cost model and benefit-aware portfolio optimizer.
 - **v0.5.x:** bank comparison, daily income / cost model and benefit-aware portfolio optimizer.
 - **v0.6.x:** hardened Panic flow, target lock, optional second fallback target and action log.
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.4.0 — Benefit ROI & Trade Assistant
+
+- Added benefit value models for item, cash, average-cache and manual-value stock benefits.
+- Added Fetch Market Values for supported item benefits through Torn API item values.
+- Added editable benefit value and payout-frequency overrides stored locally.
+- Corrected active benefit-tier math to cumulative blocks: base + 2×base + 4×base, matching marginal-tier ROI calculations.
+- Added Benefit ROI Advisor ranking next benefit tiers by estimated annual marginal ROI.
+- Added affordability and missing-cash calculations.
+- Added Trade Assistant cards for Best ROI and Best Affordable candidates.
+- Added Set Target and user-confirmed Buy Gap actions. Buy Gap never auto-sells holdings.
+- Kept PANIC direct-buy behavior and Benefit Lock protection.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.3.0 — API Key Manager & Portfolio
 
 - Added a dedicated API Key section matching the SakaLuX module workflow.
