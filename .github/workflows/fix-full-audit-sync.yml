@@ -11,22 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply fixes
+      - name: Apply documentation sync fixes
         run: python .github/scripts/fix_full_audit_sync.py
-      - name: Validate edited files
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          json.loads(Path('scripts.json').read_text())
-          print('registry JSON OK')
-          PY
-          grep -q "'company-intelligence': ('SakaLuX-Company-Intelligence-v1.0.0.user.js'" .github/workflows/validate-userscripts.yml
-          grep -q "find . -type f -name '\*.user.js'" .github/workflows/validate-userscripts.yml
       - name: Commit fixes
         run: |
           git config user.name 'SakaLuX'
           git config user.email 'sakalutzu92@yahoo.com'
-          git add greasyfork/Script-Hub.md .github/workflows/validate-userscripts.yml
-          git commit -m 'Synchronize Hub docs and strengthen userscript validation'
+          git add greasyfork/Script-Hub.md
+          git commit -m 'Synchronize Hub add-on versions with registry'
           git push
