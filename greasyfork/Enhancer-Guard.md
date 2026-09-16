@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.33**
+**v1.3.34**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.

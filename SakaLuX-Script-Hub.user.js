@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.41
+// @version      1.9.42
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -31,13 +31,48 @@
 (function () {
     'use strict';
 
+  // Shared SakaLuX performance + Hub-style UI foundation.
+  (() => {
+    const g = window;
+    if (!g.SakaLuXPerf) {
+      const timers = new Map();
+      g.SakaLuXPerf = {
+        debounce(key, fn, wait=220) {
+          const old = timers.get(key); if (old) clearTimeout(old);
+          const id = setTimeout(() => { timers.delete(key); fn(); }, Math.max(120, wait));
+          timers.set(key,id); return id;
+        },
+        idle(fn, timeout=700) {
+          if ('requestIdleCallback' in g) return g.requestIdleCallback(fn,{timeout});
+          return setTimeout(fn,32);
+        }
+      };
+    }
+    if (!document.getElementById('sakalux-shared-hub-skin')) {
+      const st=document.createElement('style');
+      st.id='sakalux-shared-hub-skin';
+      st.textContent=`
+:root{--slx-bg:#0b1118;--slx-card:#111a24;--slx-card2:#172331;--slx-border:#34465b;--slx-border-soft:rgba(255,255,255,.09);--slx-text:#edf3fa;--slx-muted:#93a4b7;--slx-blue:#4f8fe8;--slx-gold:#dfbd61;--slx-green:#55d98a;--slx-red:#ff6b78;--slx-shadow:0 16px 40px rgba(0,0,0,.46)}
+body [id^="sakalux-"] button,body [id^="slx-"] button,body [class^="sakalux-"] button,body [class*=" sakalux-"] button{border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);font-family:Inter,Arial,sans-serif;transition:border-color .15s ease,background .15s ease,transform .08s ease,opacity .15s ease}
+body [id^="sakalux-"] button:active,body [id^="slx-"] button:active{transform:scale(.985)}
+body [id^="sakalux-"] input,body [id^="sakalux-"] select,body [id^="slx-"] input,body [id^="slx-"] select{border-radius:10px;border-color:#3a4d63;background:#151f2b;color:var(--slx-text);font-family:Inter,Arial,sans-serif}
+body [id*="sakalux"][id*="panel"],body [id*="sakalux"][id*="modal"],body [id*="slx"][id*="panel"],body [id*="slx"][id*="modal"],body #slx-stock-inline{font-family:Inter,Arial,sans-serif;color:var(--slx-text);border-color:var(--slx-border);box-shadow:var(--slx-shadow)}
+body [id^="sakalux-"] .header,body [id^="sakalux-"] .head,body [id^="slx-"] .header,body [id^="slx-"] .head{background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 42%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-color:var(--slx-border-soft)}
+body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-border-soft);background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(11,17,24,.98))}
+@media(max-width:700px){body [id^="sakalux-"] button,body [id^="slx-"] button{min-height:36px}body [id^="sakalux-"] input,body [id^="sakalux-"] select,body [id^="slx-"] input,body [id^="slx-"] select{min-height:36px}}
+`;
+      (document.head||document.documentElement).appendChild(st);
+    }
+  })();
+
+
     // Publish Hub presence immediately so add-ons never enter standalone mode while Hub is running.
     try {
         document.documentElement?.setAttribute('data-sakalux-hub-installed', '1');
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.41';
+    const VERSION = '1.9.42';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -409,7 +444,7 @@
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.33',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.34',
                 description: 'Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -425,7 +460,7 @@
             },
             {
                 id: 'bazaar', type: 'addon', active: true,
-                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.25',
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.26',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
@@ -441,7 +476,7 @@
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.20',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.21',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -457,7 +492,7 @@
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.21',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.22',
                 description: 'Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
@@ -475,7 +510,7 @@
             },
             {
                 id: 'elimination-assistant', type: 'addon', active: true,
-                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.31',
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.32',
                 description: 'Eliminations advisor with unified Torn + FFScouter API setup, rotating 500-player batches, availability status, TornPDA export and PC-safe attack routing.',
                 greasyForkId: '594921',
                 metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
@@ -497,7 +532,7 @@
             },
             {
                 id: 'company-intelligence', type: 'addon', active: true,
-                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.17',
+                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.18',
                 description: 'Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
                 metaUrl: 'https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js',

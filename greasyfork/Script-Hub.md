@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.41**
+**v1.9.42**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -28,11 +28,11 @@
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.33**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.25**
-- 🎯 SakaLuX Mission Rewards **v1.0.20**
-- 📈 SakaLuX Market Intelligence **v1.17.21**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.31**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.34**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.26**
+- 🎯 SakaLuX Mission Rewards **v1.0.21**
+- 📈 SakaLuX Market Intelligence **v1.17.22**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.32**
 - 🏢 SakaLuX Company Intelligence **v1.8.17**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
