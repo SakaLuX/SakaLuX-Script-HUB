@@ -11,10 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fix helper markers
-        run: python .github/scripts/fix_v050_helper.py
       - name: Apply patch
-        run: python .github/scripts/patch_experimental_stock_v050.py
+        run: python .github/scripts/patch_experimental_stock_v050b.py
       - name: Validate
         run: |
           grep -q '@version      0.5.0' experimental/SakaLuX-Stock-Manager-Advisor.user.js
