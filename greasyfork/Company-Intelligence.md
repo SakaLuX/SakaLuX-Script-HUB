@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.17**
+**v1.8.18**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.17** hardens Company Intelligence placement in the shared Standalone dock. If an older dock renderer places Company outside the script list or directly below the STANDALONE subtitle, Company is moved back into the module list and kept after the other known add-ons.
+**v1.8.18** Performance/UI optimization: throttles expensive redraw paths and applies the shared Hub-style surface, controls, spacing and mobile-friendly visual foundation.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -115,3 +115,10 @@
 - Added reliable API v2/classic fallbacks, Employee Progress, Growth, Staff Optimizer, Smart Training, Contracts, Balance, Benchmark, Timeline and Advice.
 - Added CSV/report exports and complete JSON backup/restore.
 - Star predictions remain confidence-based and never invent an exact probability without comparison data.
+
+## Changelog
+
+### v1.8.18
+
+- Performance/UI optimization: throttles expensive redraw paths and applies the shared Hub-style surface, controls, spacing and mobile-friendly visual foundation.
+

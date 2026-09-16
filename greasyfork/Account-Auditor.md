@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.4**
+**v1.3.5**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -17,7 +17,8 @@
 - Works with Torn PDA and Tampermonkey.
 
 ## Current release note
-**v1.3.2** improves audit accuracy and diagnostics: an explicitly saved Auditor API key overrides TornPDA injection, ID-sensitive v2 selections retry through the canonical `selections=` route, invalid bare trade-detail polling is removed, nested v2 profile data populates the manifest, merit/education catalogs are decoded to readable IDs, and sanitized key-capability information is included for permission diagnostics without storing the key itself.
+
+**v1.3.5** Performance/UI optimization: adds the shared SakaLuX performance foundation, reduces duplicate high-frequency UI work, and aligns controls/cards with the Hub visual language.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
@@ -73,3 +74,10 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 
 ### v1.2.0 — Split snapshots and explicit message capture
 - Added split snapshot files, explicit current-message capture, deduplication and safer API pacing.
+
+## Changelog
+
+### v1.3.5
+
+- Performance/UI optimization: adds the shared SakaLuX performance foundation, reduces duplicate high-frequency UI work, and aligns controls/cards with the Hub visual language.
+

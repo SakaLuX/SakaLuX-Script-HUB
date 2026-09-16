@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.25** keeps only the clickable 🙏 in thank-you messages and hard-links it to SakaLuX profile ID 2380374, independent of any configurable seller ID.
+**v5.3.26** Performance/UI optimization: reduces repeated DOM work on Torn/TornPDA redraws and aligns standalone controls with the shared SakaLuX Hub-style UI foundation.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -75,3 +75,10 @@ Generated thank-you text should be reviewed before sending. The script assists w
 
 ### v5.3.6 — PC detection and message-price fix
 - Added reliable installation detection, refreshed the Settings UI and corrected per-item price display in generated purchase messages.
+
+## Changelog
+
+### v5.3.26
+
+- Performance/UI optimization: reduces repeated DOM work on Torn/TornPDA redraws and aligns standalone controls with the shared SakaLuX Hub-style UI foundation.
+

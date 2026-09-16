@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.41** synchronizes every offline Hub fallback add-on version with the canonical `scripts.json` registry. This fixes stale fallback version detection found during the full repository audit while keeping live registry/update behavior unchanged.
+**v1.9.42** Performance/UI optimization release: adds the shared single-instance SakaLuX performance foundation used across compatible scripts, synchronizes optimized module versions, and keeps the Hub as the canonical visual design reference.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -138,3 +138,10 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 
 ### v1.9.0 — Native module power control
 - Introduced the current module-card ON/OFF model and shared Hub API-key management.
+
+## Changelog
+
+### v1.9.42
+
+- Performance/UI optimization release: adds the shared single-instance SakaLuX performance foundation used across compatible scripts, synchronizes optimized module versions, and keeps the Hub as the canonical visual design reference.
+

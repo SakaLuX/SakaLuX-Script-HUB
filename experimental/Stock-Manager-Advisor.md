@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.7.3** fixes non-responsive Advisor/Trade Assistant/Rebalance Preview workspaces, restores the missing portfolio builder, restores the central Dry Run helper, moves Execute Rebalance beside its preview, and converts Edit presets into the Compact toggle.
+**v0.7.6** Performance/UI optimization: builds on the Stock Manager v0.7.5 SPA throttling with the shared SakaLuX performance/UI foundation so multiple SakaLuX scripts can coexist with less duplicate work and a consistent Hub-style interface.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,11 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+
+### v0.7.6
+
+- Performance/UI optimization: builds on the Stock Manager v0.7.5 SPA throttling with the shared SakaLuX performance/UI foundation so multiple SakaLuX scripts can coexist with less duplicate work and a consistent Hub-style interface.
+
 ### v0.7.5 — Performance & Hub-Style UI
 
 - Rebuilt the Stock Manager visual layer around the Script Hub design language: premium dark surfaces, radial/gradient headers, consistent borders, rounded cards, unified buttons and mobile spacing.
