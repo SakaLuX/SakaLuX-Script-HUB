@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.7.3**
+**v0.7.4**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -50,6 +50,13 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.7.4 — Vault Layout Cleanup
+
+- Vault Max and Withdraw All share the top row and both require confirmation.
+- Vault Keep is followed by its keep-amount field.
+- Withdraw is followed by its amount field.
+- Removed the inline PANIC button under Compact; global PANIC remains available.
+
 ### v0.7.3 — Inline Workspace & Runtime Fixes
 
 - Fixed **Advisor**, **Trade Assistant** and **Rebalance Preview** appearing unresponsive while Compact mode was enabled.

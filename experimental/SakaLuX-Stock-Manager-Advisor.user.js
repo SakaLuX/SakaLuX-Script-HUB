@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.3
+// @version      0.7.4
 // @description  Experimental Torn stock workspace with repaired inline workspaces, portfolio runtime helpers, compact controls and guided rebalance execution beside its preview.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.3',
+    version: '0.7.4',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -1176,8 +1176,8 @@
         <div id="slx-inline-advanced" class="slx-inline-advanced"><div class="slx-stock-view-controls"><label>Sort<select id="slx-stock-sort"><option value="default">Torn default</option><option value="owned">Owned shares</option><option value="value">Position value</option><option value="roi">Best ROI</option><option value="benefit">Closest benefit</option><option value="pl">Biggest P/L</option><option value="loss">Biggest loss</option><option value="excess">Excess shares</option></select></label><label>Filter<select id="slx-stock-filter"><option value="all">All stocks</option><option value="owned">Owned only</option><option value="profit">Profit only</option><option value="loss">Loss only</option><option value="excess">Excess shares</option><option value="benefit">Has next benefit</option><option value="favorites">Favorites only</option></select></label><button id="slx-stock-view-reset" type="button">Reset</button></div><div class="slx-v070-toolbar"><input id="slx-stock-search" type="search" placeholder="Search stock…"><button id="slx-favorites-only" type="button">★ Favorites</button><label><input id="slx-target-lock" type="checkbox"> Target lock</label><button id="slx-diagnostics" type="button">Diagnostics</button><button id="slx-export" type="button">Export</button><button id="slx-import" type="button">Import</button><input id="slx-import-file" type="file" accept="application/json" hidden><button id="slx-target-fav-toggle" type="button">☆ Target</button><select id="slx-target-favorites"><option value="">Favorite targets…</option></select><label>Near % <input id="slx-near-pct" inputmode="decimal" value="90" style="width:55px"></label><label>Cash target <input id="slx-cash-target" value="0" placeholder="e.g. 50m" style="width:85px"></label><button id="slx-sell-cash-target" type="button">Sell → Cash</button><button id="slx-history-open" type="button">History</button></div><div id="slx-diagnostic-line" class="slx-inline-note"></div></div>
         <div id="slx-inline-workspace" class="slx-inline-workspace" data-open="0"></div>
         <div class="slx-inline-target"><label>Target <select id="slx-inline-target"><option value="">Loading…</option></select></label><div><span>Owned</span><b id="slx-inline-owned">—</b></div></div>
-        <div class="slx-inline-actions"><button id="slx-inline-vault-max" class="primary" type="button">Vault Max</button><label><input id="slx-inline-keep" value="${esc(get(K.keep,'0'))}" placeholder="Keep cash"></label><button id="slx-inline-vault-keep" type="button">Vault (Keep)</button><label><input id="slx-inline-withdraw-value" value="${esc(get(K.withdraw,'1m'))}" placeholder="Withdraw"></label><button id="slx-inline-withdraw" class="danger" type="button">Withdraw</button><button id="slx-inline-withdraw-all" class="danger" type="button">Withdraw All</button></div>
-        <div class="slx-inline-options"><label><input id="slx-inline-api-mode" type="checkbox"> API Mode</label><label><input id="slx-inline-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-inline-dry" type="checkbox"> Dry Run</label><button id="slx-inline-compact" type="button">Compact</button><button id="slx-inline-panic" class="danger" type="button">PANIC</button></div>
+        <div class="slx-inline-actions"><button id="slx-inline-vault-max" class="primary" type="button">Vault Max</button><button id="slx-inline-withdraw-all" class="danger" type="button">Withdraw All</button><button id="slx-inline-vault-keep" type="button">Vault Keep</button><label><input id="slx-inline-keep" value="${esc(get(K.keep,'0'))}" placeholder="Keep cash"></label><button id="slx-inline-withdraw" class="danger" type="button">Withdraw</button><label><input id="slx-inline-withdraw-value" value="${esc(get(K.withdraw,'1m'))}" placeholder="Withdraw amount"></label></div>
+        <div class="slx-inline-options"><label><input id="slx-inline-api-mode" type="checkbox"> API Mode</label><label><input id="slx-inline-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-inline-dry" type="checkbox"> Dry Run</label><button id="slx-inline-compact" type="button">Compact</button></div>
         <div id="slx-inline-presets" class="slx-inline-presets"></div>
         <div id="slx-inline-config" class="slx-inline-config" hidden><label>Withdrawal presets <input id="slx-inline-preset-input" value="${esc(get(K.inlinePresets,'50k,250k,1m,5m,10m,25m'))}" placeholder="50k,250k,1m,5m,10m,25m"></label><div class="slx-inline-config-actions"><button id="slx-inline-save-presets" type="button">Save presets</button><label><input data-inline-button="advisor" type="checkbox"> Advisor</label><label><input data-inline-button="trade" type="checkbox"> Trade</label><label><input data-inline-button="rebalance" type="checkbox"> Rebalance</label><label><input data-inline-button="panic" type="checkbox"> PANIC</label><label><input data-inline-button="full" type="checkbox"> Full</label></div></div>
         <div id="slx-inline-status" class="slx-inline-note">Ready.</div>
@@ -1222,11 +1222,10 @@
     $('#slx-inline-benefit-lock',card).onchange=e=>{set(K.benefitLock,e.target.checked?'1':'0');renderPortfolio();renderOptimizer();refreshInlinePanel();};
     $('#slx-inline-dry',card).checked=bool(K.dryRun,true);
     $('#slx-inline-dry',card).onchange=e=>{set(K.dryRun,e.target.checked?'1':'0');refreshInlinePanel();};
-    $('#slx-inline-vault-max',card).onclick=()=>vault().then(()=>syncAllApi().catch(()=>refreshInlinePanel())).catch(e=>inlineStatus(e.message,'bad'));
+    $('#slx-inline-vault-max',card).onclick=()=>{if(!confirm('Vault Max: continue?'))return;vault().then(()=>syncAllApi().catch(()=>refreshInlinePanel())).catch(e=>inlineStatus(e.message,'bad'));};
     $('#slx-inline-vault-keep',card).onclick=()=>vault({keep:parseAmount($('#slx-inline-keep',card).value)}).then(()=>syncAllApi().catch(()=>refreshInlinePanel())).catch(e=>inlineStatus(e.message,'bad'));
     $('#slx-inline-withdraw',card).onclick=()=>withdrawCash(parseAmount($('#slx-inline-withdraw-value',card).value)).then(()=>syncAllApi().catch(()=>refreshInlinePanel())).catch(e=>inlineStatus(e.message,'bad'));
-    $('#slx-inline-withdraw-all',card).onclick=()=>withdrawAll().then(()=>syncAllApi().catch(()=>refreshInlinePanel())).catch(e=>inlineStatus(e.message,'bad'));
-    $('#slx-inline-panic',card).onclick=panic;
+    $('#slx-inline-withdraw-all',card).onclick=()=>{if(!confirm('Withdraw All: continue?'))return;withdrawAll().then(()=>syncAllApi().catch(()=>refreshInlinePanel())).catch(e=>inlineStatus(e.message,'bad'));};
     renderInlinePresetButtons(card);
     applyInlineButtonPrefs(card);
     refreshInlinePanel();
