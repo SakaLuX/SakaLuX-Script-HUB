@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.5.0**
+**v0.5.1**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.5.0** adds the Portfolio Optimizer with protected/free/weak capital analysis, configurable Bank APR comparison, minimum acceptable APR, payback days and Best ROI / Best Affordable opportunity cards.
+**v0.5.1** fixes the Stock Manager launcher/panel regression and adds Rebalance Preview with cash reserve, excess-share release proposals, target opportunity selection, estimated funding shortfall and ROI-shift preview. The preview never executes trades.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,18 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.5.1 — Panel Recovery & Rebalance Preview
+
+- Fixed the **Stock Manager** button/panel regression from v0.5.0.
+- Panel is opened before any renderer runs, so one failed section can no longer keep the entire panel hidden.
+- Added safe per-section rendering with console/status error reporting.
+- Launcher and PANIC buttons are restored automatically after Torn SPA redraws.
+- Added **Rebalance Preview** with configurable cash reserve.
+- Preview identifies excess/free shares that could be released without crossing the Benefit Lock floor.
+- Selects an ROI candidate and estimates required SELL sources, funding, shortfall, target shares, payback and approximate ROI shift.
+- Rebalance Preview is analysis-only and never executes SELL/BUY automatically.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.5.0 — Portfolio Optimizer & Bank Comparison
 
 - Added Portfolio Optimizer for held stocks.
