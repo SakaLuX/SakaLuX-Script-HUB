@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.5.4**
+**v0.5.5**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.5.4** refines the native inline Stock Market experience with cost-basis-aware Total Invested and P/L, Market Value, API Mode ON/OFF, editable withdrawal presets and configurable visibility for Advisor, Trade, Rebalance, PANIC and Full controls.
+**v0.5.5** enhances the original Torn stock rows themselves with live SakaLuX metrics and safe quick actions: Owned, market value, average buy, unrealized P/L, benefit tier, next-tier gap, Target, Buy Gap and Sell Excess.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,19 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.5.5 — Native Per-Stock Row Tools
+
+- Added a SakaLuX metrics/action strip directly inside every detected Torn stock row.
+- Shows symbol, live price, Owned shares, position value, Average Buy, unrealized P/L and P/L %.
+- Shows current benefit tier and the number of shares needed for the next detected tier.
+- Added per-stock **Target** button to change the active vault/PANIC target instantly.
+- Added per-stock **Buy gap** with exact confirmation and the hardened BUY path.
+- Added per-stock **Sell excess** that only sells shares above the currently protected benefit floor.
+- Row BUY/SELL respects Dry Run, trade locking and existing API refresh behavior.
+- Selected target is highlighted directly in the stock list.
+- Row tools remount after Torn SPA redraws and use a compact TornPDA/mobile layout.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.5.4 — Native Metrics, API Mode & Inline Customization
 
 - Total Invested now uses known transaction cost basis instead of incorrectly mirroring market value.
