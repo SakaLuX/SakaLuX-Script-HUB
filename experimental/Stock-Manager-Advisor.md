@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.7.4**
+**v0.7.5**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -50,6 +50,17 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.7.5 — Performance & Hub-Style UI
+
+- Rebuilt the Stock Manager visual layer around the Script Hub design language: premium dark surfaces, radial/gradient headers, consistent borders, rounded cards, unified buttons and mobile spacing.
+- Removed the red destructive styling from the normal **Withdraw** button; **Withdraw All** remains visually destructive.
+- Identified and fixed the main performance bottleneck: the global MutationObserver previously called `scanStocks()` synchronously on every Torn DOM mutation and then triggered another scan/render/enhance cycle.
+- SPA updates are now debounced/throttled and processed as one refresh pass rather than repeated full row scans.
+- Existing inline panels are no longer fully refreshed merely because `mountInlinePanel()` was called after a DOM mutation.
+- Reduced initial stock polling frequency and timeout while preserving SPA remount recovery.
+- Added Hub-style responsive treatment for the full modal, inline workspace, summary cards, vault controls, settings, row tools and launcher.
+- Preserved all trading protections, confirmations, Benefit Lock, Dry Run and transaction logic.
+
 ### v0.7.4 — Vault Layout Cleanup
 
 - Vault Max and Withdraw All share the top row and both require confirmation.
