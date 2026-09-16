@@ -1,0 +1,40 @@
+name: Fix Hub fallback versions v1.9.41
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/fix-hub-fallback-v1941.trigger'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply fallback synchronization
+        run: python .github/scripts/fix_hub_fallback_versions_v1941.py
+      - name: Validate Hub and registry synchronization
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Script-Hub.user.js
+          grep -q '@version      1.9.41' SakaLuX-Script-Hub.user.js
+          grep -q "const VERSION = '1.9.41'" SakaLuX-Script-Hub.user.js
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          reg=json.loads(Path('scripts.json').read_text())['scripts']
+          hub=Path('SakaLuX-Script-Hub.user.js').read_text()
+          for item in reg:
+              m=re.search(r"id:\s*['\"]"+re.escape(item['id'])+r"['\"][\s\S]{0,500}?version:\s*['\"]([^'\"]+)['\"]",hub)
+              if not m or m.group(1)!=str(item['version']):
+                  raise SystemExit(f"fallback mismatch {item['id']}: {m.group(1) if m else 'missing'} vs {item['version']}")
+          print('All Hub fallback versions synchronized')
+          PY
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md
+          git commit -m 'Script Hub v1.9.41 synchronize fallback registry versions'
+          git push
