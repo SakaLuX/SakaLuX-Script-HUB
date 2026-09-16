@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.5.6**
+**v0.5.7**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.5.6** adds quick BUY/SELL presets and a live benefit-tier progress bar directly to every enhanced Torn stock row. Quick MAX respects the configured cash reserve on BUY and Benefit Lock on SELL.
+**v0.5.7** adds native sorting/filtering directly on the Torn Stocks page, persistent view preferences, and visual highlighting for the top ROI opportunities.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,19 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.5.7 — Stock Sort, Filters & Opportunity Highlights
+
+- Added persistent **Sort** controls directly in the inline Stock Market workspace.
+- Sort modes: Torn default, Owned shares, Position value, Best ROI, Closest benefit, Biggest P/L, Biggest loss and Excess shares.
+- Added persistent **Filter** controls: All, Owned only, Profit only, Loss only, Excess shares and Has next benefit.
+- Added one-tap **Reset** to restore Torn's default stock view and show all rows.
+- Sorting reorders only detected Torn stock rows while keeping the rest of the page structure intact.
+- Added visual ROI opportunity badges for the current top 3 benefit ROI candidates.
+- The #1 ROI opportunity receives a stronger highlight in the original Torn stock list.
+- Sorting/filtering preferences persist locally and are reapplied after Torn SPA redraws.
+- Compatible with the v0.5.6 quick BUY/SELL controls, benefit progress, Dry Run and Benefit Lock.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.5.6 — Quick Row Trades & Benefit Progress
 
 - Added a compact quick-trade selector to every enhanced stock row using the editable inline preset values plus **MAX**.
