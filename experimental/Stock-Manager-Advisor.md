@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.5.7**
+**v0.7.0**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.5.7** adds native sorting/filtering directly on the Torn Stocks page, persistent view preferences, and visual highlighting for the top ROI opportunities.
+**v0.7.0** completes the experimental 0.5.8→0.7 milestone with watchlist/favorites, near-benefit alerts, target lock, diagnostics, search, compact mode and local settings/history import-export.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,34 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.7.0 — UX, Search, Backup & Diagnostics
+
+- Added stock search directly in the Stock Market workspace.
+- Added Compact mode for smaller mobile/TornPDA footprint.
+- Added one-click local settings + Action Log export/import (API key excluded).
+- Added live Diagnostics line for API, Dry Run, locks, target, detected stocks/rows and portfolio positions.
+- Preserves all v0.6 safety controls and v0.5 native row tools.
+
+### v0.6.5 — Safety Center & Target Lock
+
+- Added persistent Target Lock to prevent accidental target changes from stock rows.
+- Added a consolidated safety snapshot/diagnostic state.
+- Existing direct trades continue through confirmation, Dry Run, cooldown, serialization and Action Log.
+- PANIC fallback and protected benefit-floor behavior remain active.
+
+### v0.6.0 — Watchlist-aware Trading Workspace
+
+- Favorites integrate with stock rows and filters.
+- Added Favorites-only view and persistent watchlist state.
+- Near-benefit status is shown directly beside benefit progress without executing trades automatically.
+
+### v0.5.8 — Watchlist & Near-Benefit Alerts
+
+- Added ★/☆ favorite toggle to every enhanced stock row.
+- Added Favorites-only quick filter.
+- Added configurable near-benefit calculation (default 90%) and visual ⚡ gap indicator.
+- Favorites persist locally across Torn sessions.
+
 ### v0.5.7 — Stock Sort, Filters & Opportunity Highlights
 
 - Added persistent **Sort** controls directly in the inline Stock Market workspace.
