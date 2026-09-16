@@ -1,0 +1,33 @@
+name: Patch Stock Manager v0.7.5 performance UI
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/patch-stock-v075-performance-ui.trigger'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v0.7.5 patch
+        run: python .github/scripts/patch_stock_v075_performance_ui.py
+      - name: Validate script
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q '@version      0.7.5' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "version: '0.7.5'" experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'function premiumStyle()' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'lastSpaRefresh' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'Withdraw All' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          ! grep -q '<button id="slx-inline-withdraw" class="danger"' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add experimental/SakaLuX-Stock-Manager-Advisor.user.js experimental/Stock-Manager-Advisor.md
+          git commit -m 'Stock Manager v0.7.5 improve performance and Hub-style UI'
+          git push
