@@ -1,0 +1,34 @@
+name: Patch experimental Stock Manager v0.4.1
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/patch-experimental-stock-v041.trigger'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python .github/scripts/patch_experimental_stock_v041.py
+      - name: Validate
+        run: |
+          grep -q '@version      0.4.1' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "version: '0.4.1'" experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'SLX_STOCK_DRY_RUN' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'SLX_STOCK_ACTION_LOG' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'tradeCooldownRemaining' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'DRY RUN' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'Action Log' experimental/SakaLuX-Stock-Manager-Advisor.user.js
+          test "$(grep -c 'function renderAdvisor()' experimental/SakaLuX-Stock-Manager-Advisor.user.js)" -eq 1
+          grep -q 'v0.4.1' experimental/Stock-Manager-Advisor.md
+          node --check experimental/SakaLuX-Stock-Manager-Advisor.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add experimental/SakaLuX-Stock-Manager-Advisor.user.js experimental/Stock-Manager-Advisor.md
+          git commit -m 'Experimental Stock Manager v0.4.1 trade hardening and safety'
+          git push
