@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.1
-// @description  Experimental Torn stock workspace with complete roadmap tools: favorite targets, cash-target selling, transaction history, configurable benefit alerts, guided rebalance, diagnostics and hardened trades.
+// @version      0.7.2
+// @description  Experimental Torn stock workspace with repaired API v2 sync, reorganized inline controls, fixed settings access and validated guided rebalance trade amounts.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.1',
+    version: '0.7.2',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -130,17 +130,53 @@
     return raw ? num(raw) : parseAmount(el.textContent);
   }
 
+  function apiErrorMessage(data, fallback='Torn API error') {
+    const raw=data?.error?.error ?? data?.error?.message ?? data?.error ?? data?.message;
+    if(typeof raw==='string' && raw.trim()) return raw.trim();
+    return fallback;
+  }
+
+  async function apiJson(url, label='API') {
+    const res=await fetch(url,{credentials:'omit',cache:'no-store'});
+    let data=null;
+    try { data=await res.json(); } catch { throw new Error(`${label}: invalid JSON response (HTTP ${res.status}).`); }
+    if(!res.ok) throw new Error(`${label}: HTTP ${res.status} · ${apiErrorMessage(data,'request failed')}`);
+    if(data?.error) throw new Error(`${label}: ${apiErrorMessage(data)}`);
+    return data;
+  }
+
+  function normalizeUserStocks(data) {
+    const out={};
+    const raw=data?.stocks;
+    if(Array.isArray(raw)) {
+      for(const st of raw) {
+        const id=String(st?.id ?? st?.stock_id ?? '');
+        if(!id) continue;
+        const shares=Number(st?.shares ?? st?.total_shares ?? st?.amount ?? 0)||0;
+        out[id]={...st,total_shares:shares,transactions:st?.transactions||{}};
+      }
+      return out;
+    }
+    if(raw && typeof raw==='object') {
+      for(const [id,st] of Object.entries(raw)) out[String(id)]={...st,total_shares:Number(st?.total_shares ?? st?.shares ?? 0)||0,transactions:st?.transactions||{}};
+    }
+    return out;
+  }
+
   async function apiSync() {
     const key=get(K.api).trim();
     if(!key) throw new Error('Add an API key first.');
-    const url=`https://api.torn.com/user/?selections=money,stocks&key=${encodeURIComponent(key)}&ts=${Date.now()}`;
-    const res=await fetch(url, {credentials:'omit'});
-    const data=await res.json();
-    if(data?.error) throw new Error(data.error.error || 'Torn API error');
-    if(Number.isFinite(Number(data.money_onhand))) S.money=Number(data.money_onhand);
-    if(data.stocks && typeof data.stocks==='object') S.portfolio=data.stocks;
-    set(K.tx, JSON.stringify(S.portfolio||{}));
-    return data;
+    const q=`key=${encodeURIComponent(key)}&ts=${Date.now()}`;
+    const [moneyData,stocksData]=await Promise.all([
+      apiJson(`https://api.torn.com/v2/user/money?${q}`,'User / money'),
+      apiJson(`https://api.torn.com/v2/user/stocks?${q}`,'User / stocks')
+    ]);
+    const rawCash=moneyData?.money?.onhand ?? moneyData?.money?.cash ?? moneyData?.money_onhand ?? moneyData?.cash;
+    const cash=Number(rawCash);
+    if(Number.isFinite(cash)) S.money=cash;
+    S.portfolio=normalizeUserStocks(stocksData);
+    set(K.tx,JSON.stringify(S.portfolio||{}));
+    return {money:moneyData,stocks:stocksData};
   }
 
   function setApiBadge(text, kind='idle') {
@@ -196,19 +232,18 @@
   async function syncStockCatalog() {
     const key=get(K.api).trim();
     if(!key) throw new Error('Add an API key first.');
-    const url=`https://api.torn.com/torn/?selections=stocks&key=${encodeURIComponent(key)}&ts=${Date.now()}`;
-    const res=await fetch(url, {credentials:'omit'});
-    const data=await res.json();
-    if(data?.error) throw new Error(data.error.error || 'Torn stocks API error');
+    const data=await apiJson(`https://api.torn.com/v2/torn/stocks?key=${encodeURIComponent(key)}&ts=${Date.now()}`,'Torn / stocks');
     const stocks=data?.stocks;
-    if(!stocks || typeof stocks!=='object') throw new Error('Torn stock catalog unavailable.');
+    if(!stocks || (typeof stocks!=='object' && !Array.isArray(stocks))) throw new Error('Torn / stocks: stock catalog unavailable.');
     const next=new Map(S.stocks);
-    for(const [id,raw] of Object.entries(stocks)) {
-      const sym=String(raw?.acronym||'').toUpperCase();
-      const price=Number(raw?.current_price||raw?.price||0);
-      if(!sym || !Number.isFinite(price) || price<=0) continue;
+    const list=Array.isArray(stocks)?stocks:Object.entries(stocks).map(([id,v])=>({...v,id:v?.id??id}));
+    for(const raw of list) {
+      const id=String(raw?.id ?? raw?.stock_id ?? '');
+      const sym=String(raw?.acronym||raw?.symbol||'').toUpperCase();
+      const price=Number(raw?.market?.price ?? raw?.current_price ?? raw?.price ?? 0);
+      if(!id || !sym || !Number.isFinite(price) || price<=0) continue;
       const prev=next.get(sym)||{};
-      next.set(sym,{...prev,sym,id:String(id),price,source:'api'});
+      next.set(sym,{...prev,sym,id,price,source:'api-v2'});
     }
     if(next.size) S.stocks=next;
     return S.stocks;
@@ -589,24 +624,35 @@
     await postTrade(sym,shares,'sellShares'); if(get(K.api).trim()) await apiSync(); refreshInlinePanel(); renderTransactionHistory();
   }
   function buildExecutableRebalancePlan() {
-    const target=buildRoiCandidates()[0]; if(!target) return null;
-    const cash=Math.max(Number(S.money)||0,currentMoneyFromDom()), need=Math.max(0,target.cost-cash), sources=[];
-    let remaining=need;
-    for(const r of buildOptimizerRows().filter(x=>x.sym!==target.sym&&x.freeShares>0).sort((a,b)=>b.freeValue-a.freeValue)){
-      if(remaining<=0) break; const shares=Math.min(r.freeShares,Math.ceil(remaining/r.price)); if(shares<=0) continue; const value=shares*r.price; sources.push({sym:r.sym,shares,value}); remaining=Math.max(0,remaining-value);
-    }
-    return {target,cash,need,sources,shortfall:remaining};
+    const x=buildRebalancePreview();
+    if(!x?.target) return null;
+    const sources=(x.sells||[]).filter(r=>Number.isFinite(Number(r.shares))&&Number(r.shares)>0&&Number.isFinite(Number(r.proceeds))&&Number(r.proceeds)>0)
+      .map(r=>({sym:String(r.sym||'').toUpperCase(),shares:Math.floor(Number(r.shares)),value:Number(r.proceeds),price:Number(r.price)||0}));
+    return {target:x.target,cash:x.cash,need:x.required||0,sources,shortfall:Number(x.shortfall)||0,reserve:x.reserve||0};
   }
+
+  function rebalanceConfirmText(plan) {
+    const sellTotal=plan.sources.reduce((n,x)=>n+Number(x.value||0),0);
+    const sells=plan.sources.length?plan.sources.map(x=>`SELL ${x.shares.toLocaleString()} ${x.sym} ≈ ${money(x.value)}`).join('\n'):'No SELL required · current cash is enough';
+    const projectedCash=Math.max(0,Number(plan.cash||0)+sellTotal);
+    return `Guided Rebalance\n\nSELL PHASE\n${sells}\n\nTotal estimated sale: ${money(sellTotal)}\nCash before: ${money(plan.cash||0)}\nCash after SELL: ≈ ${money(projectedCash)}\nReserve kept: ${money(plan.reserve||0)}\n\nBUY PHASE\nBUY ${Math.floor(Number(plan.target.sharesNeeded)||0).toLocaleString()} ${plan.target.sym} ≈ ${money(plan.target.cost)}\nTarget Tier ${plan.target.tier}\n\nBenefit floors are preserved. Continue with SELL phase?`;
+  }
+
   async function executeGuidedRebalance() {
     const plan=buildExecutableRebalancePlan(); if(!plan) throw new Error('No ROI rebalance candidate available.');
-    if(plan.shortfall>0) throw new Error(`Rebalance still needs ${money(plan.shortfall)} after all free/excess shares.`);
-    const sells=plan.sources.map(x=>`SELL ${x.shares.toLocaleString()} ${x.sym} ≈ ${money(x.value)}`).join('\n')||'No sales required';
-    if(!confirm(`Guided Rebalance\n\n${sells}\n\nThen BUY ${plan.target.sharesNeeded.toLocaleString()} ${plan.target.sym} ≈ ${money(plan.target.cost)}\nTarget Tier ${plan.target.tier}\n\nBenefit floors are preserved. Continue with SELL phase?`)) return;
-    for(const x of plan.sources){ await postTrade(x.sym,x.shares,'sellShares'); if(!isDryRun()) await new Promise(r=>setTimeout(r,1650)); }
+    if(plan.shortfall>0) throw new Error(`Rebalance still needs ${money(plan.shortfall)} after all valid free/excess shares.`);
+    if(!confirm(rebalanceConfirmText(plan))) return;
+    for(const x of plan.sources){
+      if(!Number.isFinite(x.shares)||x.shares<=0) throw new Error(`Invalid SELL amount detected for ${x.sym}; rebalance stopped.`);
+      await postTrade(x.sym,x.shares,'sellShares');
+      if(!isDryRun()) await new Promise(r=>setTimeout(r,1650));
+    }
     if(get(K.api).trim()&&!isDryRun()) await apiSync();
-    if(!confirm(`SELL phase complete${isDryRun()?' (Dry Run)':''}.\n\nProceed with BUY ${plan.target.sharesNeeded.toLocaleString()} ${plan.target.sym} toward Tier ${plan.target.tier}?`)){inlineStatus('Rebalance stopped before BUY phase.','warn');return;}
+    const buyShares=Math.floor(Number(plan.target.sharesNeeded)||0);
+    if(!Number.isFinite(buyShares)||buyShares<=0) throw new Error('Invalid BUY share amount; rebalance stopped before BUY.');
+    if(!confirm(`SELL phase complete${isDryRun()?' (Dry Run)':''}.\n\nProceed with BUY ${buyShares.toLocaleString()} ${plan.target.sym} toward Tier ${plan.target.tier} for about ${money(plan.target.cost)}?`)){inlineStatus('Rebalance stopped before BUY phase.','warn');return;}
     if(!isDryRun() && tradeCooldownRemaining()>0) await new Promise(r=>setTimeout(r,Math.max(1650,tradeCooldownRemaining()+100)));
-    await postTrade(plan.target.sym,plan.target.sharesNeeded,'buyShares'); if(get(K.api).trim()&&!isDryRun()) await apiSync(); refreshInlinePanel(); renderTransactionHistory(); inlineStatus(`Guided rebalance finished for ${plan.target.sym}.`,'ok');
+    await postTrade(plan.target.sym,buyShares,'buyShares'); if(get(K.api).trim()&&!isDryRun()) await apiSync(); refreshInlinePanel(); renderTransactionHistory(); inlineStatus(`Guided rebalance finished for ${plan.target.sym}.`,'ok');
   }
 
   function stockViewScore(sym, mode) {
@@ -862,7 +908,7 @@
       let signal='hold';
       if(freeShares>0) signal='excess';
       if(currentApr>0 && currentApr<Math.max(minApr,bankApr)) signal='weak';
-      rows.push({sym,owned,price,tier:tier.tier,protectedShares,freeShares,protectedValue,freeValue,currentApr,nextGap,nextCost,signal,bankApr,minApr});
+      rows.push({sym,owned,price:Number(st.price)||0,tier:tier.tier,protectedShares,freeShares,protectedValue,freeValue,currentApr,nextGap,nextCost,signal,bankApr,minApr});
     }
     return rows.sort((a,b)=>({weak:0,excess:1,hold:2}[a.signal]-{weak:0,excess:1,hold:2}[b.signal]) || b.freeValue-a.freeValue || b.currentApr-a.currentApr);
   }
@@ -878,29 +924,33 @@
 
   function buildRebalancePreview() {
     const held=buildOptimizerRows();
-    const candidates=buildRoiCandidates();
+    const candidates=buildRoiCandidates().filter(r=>Number.isFinite(Number(r.cost))&&Number(r.cost)>0&&Number.isFinite(Number(r.sharesNeeded))&&Number(r.sharesNeeded)>0);
     const reserve=Math.max(0,parseAmount(get(K.rebalanceReserve,'0')));
     const cash=Math.max(Number(S.money)||0,currentMoneyFromDom());
-    const freeRows=held.filter(r=>r.freeShares>0).sort((a,b)=>b.freeValue-a.freeValue);
-    const weakRows=held.filter(r=>r.signal==='weak').sort((a,b)=>a.currentApr-b.currentApr);
+    const validSource=r=>Number.isFinite(Number(r?.price))&&Number(r.price)>0&&Number.isFinite(Number(r?.freeShares))&&Number(r.freeShares)>0&&Number.isFinite(Number(r?.freeValue))&&Number(r.freeValue)>0;
+    const freeRows=held.filter(validSource).sort((a,b)=>Number(b.freeValue)-Number(a.freeValue));
+    const weakRows=held.filter(r=>r.signal==='weak'&&validSource(r)).sort((a,b)=>Number(a.currentApr||0)-Number(b.currentApr||0));
     const sources=[...freeRows,...weakRows.filter(w=>!freeRows.some(f=>f.sym===w.sym))];
-    const sourceCapital=sources.reduce((n,r)=>n+(r.freeValue||0),0);
+    const sourceCapital=sources.reduce((n,r)=>n+Number(r.freeValue||0),0);
     const deployable=Math.max(0,cash+sourceCapital-reserve);
-    const target=candidates.find(r=>r.cost<=deployable) || candidates[0] || null;
-    if(!target) return {cash,reserve,sourceCapital,deployable,sources,target:null};
-    const required=Math.max(0,target.cost-cash+reserve);
+    const target=candidates.find(r=>Number(r.cost)<=deployable) || candidates[0] || null;
+    if(!target) return {cash,reserve,sourceCapital,deployable,sources,target:null,sells:[],shortfall:0};
+    const required=Math.max(0,Number(target.cost)-cash+reserve);
     let need=required;
     const sells=[];
     for(const r of sources) {
       if(need<=0) break;
-      const value=Math.min(r.freeValue,need);
-      const shares=Math.min(r.freeShares,Math.ceil(value/r.price));
-      if(shares<=0) continue;
-      const proceeds=shares*r.price;
-      sells.push({sym:r.sym,shares,proceeds,currentApr:r.currentApr});
-      need-=proceeds;
+      const price=Number(r.price), freeShares=Math.floor(Number(r.freeShares));
+      if(!Number.isFinite(price)||price<=0||!Number.isFinite(freeShares)||freeShares<=0) continue;
+      const value=Math.min(Number(r.freeValue)||0,need);
+      const shares=Math.min(freeShares,Math.ceil(value/price));
+      if(!Number.isFinite(shares)||shares<=0) continue;
+      const proceeds=shares*price;
+      if(!Number.isFinite(proceeds)||proceeds<=0) continue;
+      sells.push({sym:r.sym,shares,proceeds,currentApr:Number(r.currentApr)||0,price});
+      need=Math.max(0,need-proceeds);
     }
-    const funded=Math.max(0,target.cost-Math.max(0,need));
+    const funded=Math.max(0,Number(target.cost)-Math.max(0,need));
     return {cash,reserve,sourceCapital,deployable,sources,target,required,sells,shortfall:Math.max(0,need),funded};
   }
 
@@ -1103,8 +1153,8 @@
     card.innerHTML=`<div class="slx-inline-head"><div><b>📊 SakaLuX Stock Manager</b><small>v${APP.version} · EXPERIMENTAL</small></div><div class="slx-inline-head-actions"><button id="slx-inline-refresh" type="button" title="Refresh Stock Manager">↻</button><button id="slx-inline-api" type="button">API</button><button id="slx-inline-settings" type="button" title="Inline settings">⚙</button><button id="slx-inline-full" type="button">Full</button><button id="slx-inline-toggle" type="button">${card.dataset.collapsed==='1'?'＋':'−'}</button></div></div>
       <div class="slx-inline-body">
         <div class="slx-inline-summary"><div><span>Total invested <small id="slx-inline-coverage"></small></span><b id="slx-inline-total">—</b></div><div><span>Market value</span><b id="slx-inline-market">—</b></div><div><span>Unrealized P/L</span><b id="slx-inline-pl">—</b><small id="slx-inline-pl-pct"></small></div><div><span>Cash</span><b id="slx-inline-cash">—</b></div></div>
-        <div class="slx-inline-nav"><button data-slx-inline-tab="advisor" type="button">★ Advisor</button><button data-slx-inline-tab="trade" type="button">📈 Trade Assistant</button><button data-slx-inline-tab="rebalance" type="button">⚖ Rebalance</button></div>
-        <div class="slx-stock-view-controls"><label>Sort<select id="slx-stock-sort"><option value="default">Torn default</option><option value="owned">Owned shares</option><option value="value">Position value</option><option value="roi">Best ROI</option><option value="benefit">Closest benefit</option><option value="pl">Biggest P/L</option><option value="loss">Biggest loss</option><option value="excess">Excess shares</option></select></label><label>Filter<select id="slx-stock-filter"><option value="all">All stocks</option><option value="owned">Owned only</option><option value="profit">Profit only</option><option value="loss">Loss only</option><option value="excess">Excess shares</option><option value="benefit">Has next benefit</option><option value="favorites">Favorites only</option></select></label><button id="slx-stock-view-reset" type="button">Reset</button></div><div class="slx-v070-toolbar"><input id="slx-stock-search" type="search" placeholder="Search stock…"><button id="slx-favorites-only" type="button">★ Favorites</button><label><input id="slx-target-lock" type="checkbox"> Target lock</label><label><input id="slx-compact-mode" type="checkbox"> Compact</label><button id="slx-diagnostics" type="button">Diagnostics</button><button id="slx-export" type="button">Export</button><button id="slx-import" type="button">Import</button><input id="slx-import-file" type="file" accept="application/json" hidden><button id="slx-target-fav-toggle" type="button">☆ Target</button><select id="slx-target-favorites"><option value="">Favorite targets…</option></select><label>Near % <input id="slx-near-pct" inputmode="decimal" value="90" style="width:55px"></label><label>Cash target <input id="slx-cash-target" value="0" placeholder="e.g. 50m" style="width:85px"></label><button id="slx-sell-cash-target" type="button">Sell → Cash</button><button id="slx-exec-rebalance" type="button">Execute Rebalance</button><button id="slx-history-open" type="button">History</button></div><div id="slx-diagnostic-line" class="slx-inline-note"></div>
+        <div class="slx-inline-nav"><button data-slx-inline-tab="advisor" type="button">★ Advisor</button><button data-slx-inline-tab="trade" type="button">📈 Trade Assistant</button><button data-slx-inline-tab="rebalance" type="button">⚖ Rebalance Preview</button></div>
+        <div id="slx-inline-advanced" class="slx-inline-advanced"><div class="slx-stock-view-controls"><label>Sort<select id="slx-stock-sort"><option value="default">Torn default</option><option value="owned">Owned shares</option><option value="value">Position value</option><option value="roi">Best ROI</option><option value="benefit">Closest benefit</option><option value="pl">Biggest P/L</option><option value="loss">Biggest loss</option><option value="excess">Excess shares</option></select></label><label>Filter<select id="slx-stock-filter"><option value="all">All stocks</option><option value="owned">Owned only</option><option value="profit">Profit only</option><option value="loss">Loss only</option><option value="excess">Excess shares</option><option value="benefit">Has next benefit</option><option value="favorites">Favorites only</option></select></label><button id="slx-stock-view-reset" type="button">Reset</button></div><div class="slx-v070-toolbar"><input id="slx-stock-search" type="search" placeholder="Search stock…"><button id="slx-favorites-only" type="button">★ Favorites</button><label><input id="slx-target-lock" type="checkbox"> Target lock</label><label><input id="slx-compact-mode" type="checkbox"> Compact</label><button id="slx-diagnostics" type="button">Diagnostics</button><button id="slx-export" type="button">Export</button><button id="slx-import" type="button">Import</button><input id="slx-import-file" type="file" accept="application/json" hidden><button id="slx-target-fav-toggle" type="button">☆ Target</button><select id="slx-target-favorites"><option value="">Favorite targets…</option></select><label>Near % <input id="slx-near-pct" inputmode="decimal" value="90" style="width:55px"></label><label>Cash target <input id="slx-cash-target" value="0" placeholder="e.g. 50m" style="width:85px"></label><button id="slx-sell-cash-target" type="button">Sell → Cash</button><button id="slx-exec-rebalance" type="button">Execute Rebalance</button><button id="slx-history-open" type="button">History</button></div><div id="slx-diagnostic-line" class="slx-inline-note"></div></div>
         <div id="slx-inline-workspace" class="slx-inline-workspace" data-open="0"></div>
         <div class="slx-inline-target"><label>Target <select id="slx-inline-target"><option value="">Loading…</option></select></label><div><span>Owned</span><b id="slx-inline-owned">—</b></div></div>
         <div class="slx-inline-actions"><button id="slx-inline-vault-max" class="primary" type="button">Vault Max</button><label><input id="slx-inline-keep" value="${esc(get(K.keep,'0'))}" placeholder="Keep cash"></label><button id="slx-inline-vault-keep" type="button">Vault (Keep)</button><label><input id="slx-inline-withdraw-value" value="${esc(get(K.withdraw,'1m'))}" placeholder="Withdraw"></label><button id="slx-inline-withdraw" class="danger" type="button">Withdraw</button><button id="slx-inline-withdraw-all" class="danger" type="button">Withdraw All</button></div>
@@ -1114,6 +1164,7 @@
         <div id="slx-inline-status" class="slx-inline-note">Ready.</div>
       </div>`;
     if(before) host.insertBefore(card,before); else host.prepend(card);
+    const advanced=$('#slx-inline-advanced',card), configBox=$('#slx-inline-config',card); if(advanced&&configBox) configBox.after(advanced);
 
     $('#slx-inline-toggle',card).onclick=()=>{const closed=card.dataset.collapsed!=='1';card.dataset.collapsed=closed?'1':'0';set(K.inlineCollapsed,closed?'1':'0');$('#slx-inline-toggle',card).textContent=closed?'＋':'−';};
     $('#slx-inline-full',card).onclick=openPanel;
@@ -1130,7 +1181,7 @@
     const filterCtl=$('#slx-stock-filter',card); if(filterCtl) filterCtl.onchange=()=>{set(K.stockFilter,filterCtl.value);applyStockView();enhanceStockRows();inlineStatus(`Filter: ${filterCtl.options[filterCtl.selectedIndex]?.text||filterCtl.value}`,'ok');};
     const resetView=$('#slx-stock-view-reset',card); if(resetView) resetView.onclick=()=>{set(K.stockSort,'default');set(K.stockFilter,'all');refreshStockViewControls();scanStocks();for(const [,st] of S.stocks){if(st?.row)st.row.style.display='';}enhanceStockRows();inlineStatus('Stock view reset.','ok');};
 
-    $('#slx-inline-settings',card).onclick=()=>{const cfg=$('#slx-inline-config',card);cfg.hidden=!cfg.hidden;};
+    $('#slx-inline-settings',card).onclick=()=>{const cfg=$('#slx-inline-config',card),btn=$('#slx-inline-settings',card);if(!cfg)return;const opening=cfg.hidden;cfg.hidden=!opening;btn.dataset.active=opening?'1':'0';btn.textContent=opening?'⚙✓':'⚙';if(opening)setTimeout(()=>cfg.scrollIntoView({behavior:'smooth',block:'nearest'}),30);};
     const search=$('#slx-stock-search',card); if(search){search.value=get(K.rowSearch,'');search.oninput=()=>{set(K.rowSearch,search.value);applyStockView();};}
     const favOnly=$('#slx-favorites-only',card); if(favOnly) favOnly.onclick=()=>{set(K.stockFilter,'favorites');refreshStockViewControls();applyStockView();enhanceStockRows();};
     const tl=$('#slx-target-lock',card); if(tl){tl.checked=bool(K.targetLock,false);tl.onchange=()=>{set(K.targetLock,tl.checked?'1':'0');enhanceStockRows();inlineStatus(`Target lock ${tl.checked?'ON':'OFF'}.`,'ok');};}
@@ -1294,7 +1345,7 @@
 #slx-stock-inline{margin:10px 0 14px;padding:0;border:1px solid #344458;border-radius:14px;background:#0b1118;color:#e8eef7;box-shadow:0 8px 24px #0008;overflow:hidden;font-family:Arial,sans-serif}#slx-stock-inline *{box-sizing:border-box}#slx-stock-inline .slx-inline-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(180deg,#182535,#101923);border-bottom:1px solid #2c3d50}#slx-stock-inline .slx-inline-head>div:first-child{display:grid;gap:2px;flex:1}#slx-stock-inline .slx-inline-head b{font-size:13px}#slx-stock-inline .slx-inline-head small{font-size:9px;color:#8394a7}#slx-stock-inline .slx-inline-head-actions{display:flex;gap:5px}#slx-stock-inline button,#slx-stock-inline input,#slx-stock-inline select{border:1px solid #415369;border-radius:8px;background:#17212c;color:#ecf4ff;padding:8px;font-size:11px}#slx-stock-inline button{font-weight:800}#slx-stock-inline .primary{border-color:#2c8b52;color:#7ee09f;background:#102a1d}#slx-stock-inline .danger{border-color:#8c3140;color:#ff7a86;background:#2b1016}#slx-stock-inline .slx-inline-body{padding:10px;display:grid;gap:9px}#slx-stock-inline[data-collapsed="1"] .slx-inline-body{display:none}#slx-stock-inline .slx-inline-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-summary>div{display:grid;gap:2px;padding:8px;border:1px solid #26384a;border-radius:9px;background:#101821}#slx-stock-inline .slx-inline-summary span,#slx-stock-inline .slx-inline-target span{font-size:9px;color:#8596a8}#slx-stock-inline .slx-inline-summary small{font-size:8px;color:#74869a}#slx-stock-inline .slx-inline-summary b{font-size:12px}#slx-stock-inline .slx-inline-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-target{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:end}#slx-stock-inline .slx-inline-target label,#slx-stock-inline .slx-inline-target>div{display:grid;gap:4px}#slx-stock-inline .slx-inline-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#slx-stock-inline .slx-inline-actions label{display:block}#slx-stock-inline .slx-inline-actions input{width:100%}#slx-stock-inline .slx-inline-options{display:flex;flex-wrap:wrap;gap:9px;align-items:center}#slx-stock-inline .slx-inline-options label{display:flex;align-items:center;gap:4px;font-size:10px;color:#a4b1bf}#slx-stock-inline .slx-inline-options input{width:auto}#slx-stock-inline #slx-inline-panic{margin-left:auto}#slx-stock-inline .slx-inline-presets{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}#slx-stock-inline .slx-inline-config{padding:9px;border:1px solid #2b3d50;border-radius:9px;background:#0d1721;display:grid;gap:8px}#slx-stock-inline .slx-inline-config[hidden]{display:none}#slx-stock-inline .slx-inline-config label{display:grid;gap:4px;font-size:9px;color:#9aabba}#slx-stock-inline .slx-inline-config-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center}#slx-stock-inline .slx-inline-config-actions label{display:flex;align-items:center;gap:4px}#slx-stock-inline .slx-inline-note{font-size:9px;color:#8ea0b3}#slx-stock-inline .slx-inline-note[data-kind="bad"]{color:#ff7a86}#slx-stock-inline .slx-inline-note[data-kind="ok"]{color:#61e291}#slx-stock-inline .good{color:#61e291}#slx-stock-inline .bad{color:#ff7a86}#slx-stock-inline #slx-inline-api[data-kind="ok"]{border-color:#267c52;color:#63df9a}#slx-stock-inline #slx-inline-api[data-kind="warn"]{border-color:#8b6a1f;color:#ffd36b}
 #slx-stock-inline .slx-inline-nav button[data-active="1"]{border-color:#3b8ec9;background:#123653;color:#9bd5ff}#slx-stock-inline .slx-stock-view-controls{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:end}#slx-stock-inline .slx-stock-view-controls label{display:grid;gap:3px;font-size:9px;color:#8fa1b4}#slx-stock-inline .slx-stock-view-controls select{width:100%}.slx-stock-row-tools .slx-opp-badge{display:inline-block;margin-left:3px;padding:1px 4px;border:1px solid #8b6a1f;border-radius:999px;color:#ffd36b;background:#2b2412;font:800 7px Arial;font-style:normal}.slx-stock-row-tools .slx-opp-roi{color:#ffd36b!important}.slx-stock-row-tools[data-opportunity="1"]{box-shadow:inset 3px 0 #ffd36b}.slx-stock-row-tools[data-opportunity="2"],.slx-stock-row-tools[data-opportunity="3"]{box-shadow:inset 2px 0 #7c91a8}#slx-stock-inline .slx-inline-workspace{display:none;border:1px solid #26394b;border-radius:10px;background:#0d151e;padding:8px}#slx-stock-inline .slx-inline-workspace[data-open="1"]{display:grid;gap:7px}#slx-stock-inline .slx-inline-work-head{display:flex;align-items:center;gap:8px}#slx-stock-inline .slx-inline-work-head>b{flex:1;font-size:11px;color:#9fc7ef}#slx-stock-inline .slx-inline-work-head button{padding:6px 8px;font-size:9px}#slx-stock-inline .slx-inline-roi-list,#slx-stock-inline .slx-inline-trade-list,#slx-stock-inline .slx-inline-rebalance-list{display:grid;gap:5px}#slx-stock-inline .slx-inline-roi-row{display:grid;grid-template-columns:66px 48px 68px 1fr auto;gap:5px;align-items:center;padding:7px;border:1px solid #203142;border-radius:8px;background:#101923;font-size:9px}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5;color:#8497aa}#slx-stock-inline .slx-inline-roi-row button{grid-row:1/3;grid-column:5;padding:6px}#slx-stock-inline .slx-inline-trade-card{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border:1px solid #263b4e;border-radius:9px;background:#101923}#slx-stock-inline .slx-inline-trade-card>div:first-child{display:grid;gap:2px}#slx-stock-inline .slx-inline-trade-card small,#slx-stock-inline .slx-inline-trade-card span{font-size:9px;color:#8497aa}#slx-stock-inline .slx-inline-mini-actions{display:flex;gap:5px}#slx-stock-inline .slx-inline-rebalance-target{display:grid;gap:3px;padding:8px;border:1px solid #365a78;border-radius:9px;background:#0e1c29}#slx-stock-inline .slx-inline-rebalance-target small,#slx-stock-inline .slx-inline-rebalance-target span{font-size:9px;color:#91a8bc}#slx-stock-inline .slx-inline-rebalance-row{display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;padding:6px;border-bottom:1px solid #1e2c39;font-size:9px}#slx-stock-inline .slx-inline-empty,#slx-stock-inline .slx-inline-error{padding:8px;font-size:9px;color:#8fa1b4}#slx-stock-inline .slx-inline-error{color:#ff7a86}
 #slx-stock-inline~ul .slx-stock-row-tools,.slx-stock-row-tools{list-style:none!important;display:grid;grid-template-columns:90px 1fr 1.15fr 1fr auto;gap:7px;align-items:center;width:100%;margin:7px 0 0!important;padding:8px!important;border-top:1px solid #2a3b4d;background:linear-gradient(180deg,#101923,#0c141c);color:#dce9f7;font-family:Arial,sans-serif;box-sizing:border-box}.slx-stock-row-tools *{box-sizing:border-box}.slx-stock-row-tools[data-target="1"]{box-shadow:inset 3px 0 #4da3ff}.slx-stock-row-tools .slx-row-stock,.slx-stock-row-tools .slx-row-stat{display:grid;gap:2px;min-width:0}.slx-stock-row-tools b{font-size:10px}.slx-stock-row-tools span,.slx-stock-row-tools small{font-size:8px;color:#8fa0b2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slx-stock-row-tools .good{color:#61e291}.slx-stock-row-tools .bad{color:#ff7a86}.slx-stock-row-tools .slx-row-actions{display:flex;gap:4px;justify-content:flex-end}.slx-stock-row-tools button{border:1px solid #415369;border-radius:7px;background:#17212c;color:#ecf4ff;padding:6px 7px;font:800 9px Arial}.slx-stock-row-tools button.primary{border-color:#2c8b52;color:#7ee09f;background:#102a1d}.slx-stock-row-tools button.danger{border-color:#8c3140;color:#ff7a86;background:#2b1016}.slx-stock-row-tools button:disabled{opacity:.38}.slx-stock-row-tools .slx-row-progress{height:4px;border-radius:999px;background:#202d3a;overflow:hidden;margin-top:2px}.slx-stock-row-tools .slx-row-progress i{display:block;height:100%;background:linear-gradient(90deg,#2c8b52,#6bdc97);border-radius:999px}.slx-stock-row-tools .slx-row-progress-label{font-size:7px!important}.slx-stock-row-tools .slx-row-quick{grid-column:1/-1;display:grid;grid-template-columns:minmax(76px,120px) 72px 72px;gap:5px;justify-content:end;border-top:1px dashed #243548;padding-top:6px}.slx-stock-row-tools .slx-row-quick select{border:1px solid #415369;border-radius:7px;background:#17212c;color:#ecf4ff;padding:6px;font:800 9px Arial}
-.slx-stock-row-tools .slx-fav{font-size:13px!important;padding:3px 6px!important;color:#ffd36b}.slx-stock-row-tools .slx-row-progress-label{white-space:normal!important}#slx-stock-inline .slx-v070-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}#slx-stock-inline .slx-v070-toolbar input[type="search"]{flex:1;min-width:130px}#slx-stock-inline .slx-v070-toolbar label{display:flex;align-items:center;gap:4px;font-size:9px;color:#9fb0c0}#slx-stock-inline .slx-v070-toolbar input[type="checkbox"]{width:auto}#slx-stock-inline[data-compact="1"] .slx-inline-summary,#slx-stock-inline[data-compact="1"] .slx-inline-workspace,#slx-stock-inline[data-compact="1"] .slx-inline-presets{display:none!important}#slx-stock-inline .slx-v070-toolbar select{max-width:140px}#slx-stock-inline .slx-v070-toolbar #slx-exec-rebalance{border-color:#3b8ec9;color:#9bd5ff}#slx-stock-inline .slx-v070-toolbar #slx-sell-cash-target{border-color:#8b6a1f;color:#ffd36b}@media(max-width:600px){#slx-stock-inline .slx-stock-view-controls{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-stock-view-controls button{grid-column:1/3}.slx-stock-row-tools{grid-template-columns:58px 1fr 1fr!important;gap:5px!important;padding:7px!important}.slx-stock-row-tools .slx-row-stat:nth-child(4){grid-column:1/3}.slx-stock-row-tools .slx-row-actions{grid-column:1/4;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))}.slx-stock-row-tools button{padding:7px 4px!important}.slx-stock-row-tools .slx-row-quick{grid-column:1/4;grid-template-columns:1fr 1fr 1fr;justify-content:stretch}.slx-stock-row-tools .slx-row-quick select{width:100%;padding:7px 4px}#slx-stock-inline .slx-inline-roi-row{grid-template-columns:58px 42px 62px 1fr}#slx-stock-inline .slx-inline-roi-row button{grid-row:auto;grid-column:4}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5}#slx-stock-inline .slx-inline-trade-card{grid-template-columns:1fr}#slx-stock-inline .slx-inline-mini-actions{justify-content:flex-end}#slx-stock-inline .slx-inline-summary{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav button:nth-child(3){grid-column:1/3}#slx-stock-inline .slx-inline-target{grid-template-columns:1fr 86px}#slx-stock-inline .slx-inline-actions{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-presets{grid-template-columns:repeat(3,minmax(0,1fr))}#slx-stock-panel .rebalance-controls{grid-template-columns:1fr}#slx-stock-panel .rebalance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .rebalance-row{grid-template-columns:1fr 1fr}#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
+.slx-stock-row-tools .slx-fav{font-size:13px!important;padding:3px 6px!important;color:#ffd36b}.slx-stock-row-tools .slx-row-progress-label{white-space:normal!important}#slx-stock-inline .slx-v070-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}#slx-stock-inline .slx-v070-toolbar input[type="search"]{flex:1;min-width:130px}#slx-stock-inline .slx-v070-toolbar label{display:flex;align-items:center;gap:4px;font-size:9px;color:#9fb0c0}#slx-stock-inline .slx-v070-toolbar input[type="checkbox"]{width:auto}#slx-stock-inline[data-compact="1"] .slx-inline-summary,#slx-stock-inline[data-compact="1"] .slx-inline-workspace,#slx-stock-inline[data-compact="1"] .slx-inline-presets{display:none!important}#slx-stock-inline .slx-inline-advanced{display:grid;gap:8px;padding-top:9px;margin-top:2px;border-top:1px solid #243548}#slx-stock-inline #slx-inline-settings[data-active="1"]{border-color:#3b8ec9;color:#9bd5ff;background:#123653}#slx-stock-inline .slx-v070-toolbar select{max-width:140px}#slx-stock-inline .slx-v070-toolbar #slx-exec-rebalance{border-color:#3b8ec9;color:#9bd5ff}#slx-stock-inline .slx-v070-toolbar #slx-sell-cash-target{border-color:#8b6a1f;color:#ffd36b}@media(max-width:600px){#slx-stock-inline .slx-stock-view-controls{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-stock-view-controls button{grid-column:1/3}.slx-stock-row-tools{grid-template-columns:58px 1fr 1fr!important;gap:5px!important;padding:7px!important}.slx-stock-row-tools .slx-row-stat:nth-child(4){grid-column:1/3}.slx-stock-row-tools .slx-row-actions{grid-column:1/4;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))}.slx-stock-row-tools button{padding:7px 4px!important}.slx-stock-row-tools .slx-row-quick{grid-column:1/4;grid-template-columns:1fr 1fr 1fr;justify-content:stretch}.slx-stock-row-tools .slx-row-quick select{width:100%;padding:7px 4px}#slx-stock-inline .slx-inline-roi-row{grid-template-columns:58px 42px 62px 1fr}#slx-stock-inline .slx-inline-roi-row button{grid-row:auto;grid-column:4}#slx-stock-inline .slx-inline-roi-row small{grid-column:1/5}#slx-stock-inline .slx-inline-trade-card{grid-template-columns:1fr}#slx-stock-inline .slx-inline-mini-actions{justify-content:flex-end}#slx-stock-inline .slx-inline-summary{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-nav button:nth-child(3){grid-column:1/3}#slx-stock-inline .slx-inline-target{grid-template-columns:1fr 86px}#slx-stock-inline .slx-inline-actions{grid-template-columns:1fr 1fr}#slx-stock-inline .slx-inline-presets{grid-template-columns:repeat(3,minmax(0,1fr))}#slx-stock-panel .rebalance-controls{grid-template-columns:1fr}#slx-stock-panel .rebalance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .rebalance-row{grid-template-columns:1fr 1fr}#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
 `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -1339,7 +1390,7 @@
     $('#slx-dry-run',p).checked=bool(K.dryRun,true);
     $('#slx-api-show',p).onclick=()=>{const i=$('#slx-stock-api',p);i.type=i.type==='password'?'text':'password';};
     $('#slx-api-save',p).onclick=()=>{try{saveApiKeyFromPanel();}catch(e){status(e.message,'bad');}};
-    $('#slx-api-test',p).onclick=async()=>{try{saveApiKeyFromPanel();await syncAllApi();}catch(e){setApiBadge('Error','warn');status(e.message,'bad');}};
+    $('#slx-api-test',p).onclick=async()=>{try{saveApiKeyFromPanel();await syncAllApi();}catch(e){const msg=String(e?.message||'API test failed');setApiBadge('Error','warn');status(`API test: ${msg}`,'bad');console.error(`[${APP.name}] API test failed`,e);}};
     $('#slx-api-create',p).onclick=createRequiredApiKey;
     $('#slx-api-clear',p).onclick=clearApiKey;
     $('#slx-benefit-fetch',p).onclick=()=>fetchBenefitMarketValues().catch(e=>status(e.message,'bad'));

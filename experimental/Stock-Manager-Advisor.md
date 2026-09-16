@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.7.1**
+**v0.7.2**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.7.1** completes the previously listed roadmap gaps: favorite target presets, Sell-to-Cash target, dedicated searchable transaction history, configurable near-benefit threshold and a user-confirmed guided SELL → BUY rebalance workflow.
+**v0.7.2** fixes Torn API key testing/sync with API v2 endpoints, repairs the inline Settings gear, moves advanced Sort/Filter/Watchlist/Rebalance controls below the preset/PANIC/settings area, and fixes NaN SELL quantities in Guided Rebalance.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,20 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.7.2 — API, Inline Layout & Rebalance Fixes
+
+- Migrated API sync to current Torn API v2 endpoints: `user/money`, `user/stocks`, and `torn/stocks`.
+- Added normalization for the v2 user stocks array so existing portfolio/benefit logic continues to work.
+- API test errors now include the failing endpoint/permission message in the panel status instead of only showing `Error`.
+- Fixed Inline Settings gear: it now visibly toggles the settings block and scrolls it into view when opened.
+- Moved the complete advanced block (Sort, Filter, Search, Favorites, Target Lock, Compact, Diagnostics, Export/Import, Favorite Targets, Near %, Cash Target, Sell → Cash, Execute Rebalance and History) below the presets/settings/PANIC area.
+- Renamed the top Rebalance button to **Rebalance Preview** to clarify that it only previews a plan and never trades.
+- Fixed the optimizer row `price` field that could resolve to a page-global DOM value and produce `SELL NaN`.
+- Hardened rebalance calculations against non-finite prices/shares/proceeds.
+- Execute Rebalance now shows every planned SELL symbol, exact share count, estimated proceeds, total estimated sale, cash before/after SELL, reserve, and the planned BUY before the first confirmation.
+- Execute Rebalance still requires a second explicit confirmation before the BUY phase.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.7.1 — Roadmap Completion
 
 - Added a separate **Favorite Targets** list, independent from the general stock watchlist.
