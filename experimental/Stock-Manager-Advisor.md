@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.7.2**
+**v0.7.3**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.7.2** fixes Torn API key testing/sync with API v2 endpoints, repairs the inline Settings gear, moves advanced Sort/Filter/Watchlist/Rebalance controls below the preset/PANIC/settings area, and fixes NaN SELL quantities in Guided Rebalance.
+**v0.7.3** fixes non-responsive Advisor/Trade Assistant/Rebalance Preview workspaces, restores the missing portfolio builder, restores the central Dry Run helper, moves Execute Rebalance beside its preview, and converts Edit presets into the Compact toggle.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,17 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.7.3 — Inline Workspace & Runtime Fixes
+
+- Fixed **Advisor**, **Trade Assistant** and **Rebalance Preview** appearing unresponsive while Compact mode was enabled.
+- Compact mode now hides summary/preset clutter but keeps the selected inline workspace visible.
+- Restored missing `buildPortfolioRows()` used by portfolio totals and the full Portfolio panel.
+- Restored central `isDryRun()` with safe default **ON** and routed runtime Dry Run checks through it.
+- Replaced the old **Edit presets** inline button with a persistent **Compact** toggle; preset editing remains available from the settings gear.
+- Removed the duplicate Compact checkbox from the lower advanced controls.
+- Moved **Execute Rebalance** directly beside **Rebalance Preview** in the top workspace controls.
+- Added visible inline error reporting when a workspace renderer fails.
+
 ### v0.7.2 — API, Inline Layout & Rebalance Fixes
 
 - Migrated API sync to current Torn API v2 endpoints: `user/money`, `user/stocks`, and `torn/stocks`.
