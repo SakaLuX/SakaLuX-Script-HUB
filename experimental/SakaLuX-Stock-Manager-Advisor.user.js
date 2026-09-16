@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.4.0
-// @description  Experimental Torn stock vault manager with ROI advisor, benefit valuation, trade assistant and one-tap Panic vault.
+// @version      0.4.1
+// @description  Experimental Torn stock vault manager with hardened trades, ROI advisor, benefit valuation, Trade Assistant and one-tap Panic vault.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.4.0',
+    version: '0.4.1',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -35,7 +35,9 @@
     panicDirect: 'SLX_STOCK_PANIC_DIRECT',
     presets: 'SLX_STOCK_PRESETS',
     tx: 'SLX_STOCK_TX_CACHE',
-    benefitValues: 'SLX_STOCK_BENEFIT_VALUES'
+    benefitValues: 'SLX_STOCK_BENEFIT_VALUES',
+    dryRun: 'SLX_STOCK_DRY_RUN',
+    actionLog: 'SLX_STOCK_ACTION_LOG'
   };
 
   const BENEFITS = {
@@ -70,7 +72,7 @@
     TCT:{type:'cash',value:1000000,freq:31,label:'Cash-equivalent benefit'}
   };
 
-  const S = { stocks:new Map(), portfolio:{}, money:null, panel:null, status:null, benefitPrices:{} };
+  const S = { stocks:new Map(), portfolio:{}, money:null, panel:null, status:null, benefitPrices:{}, tradeBusy:false, lastTradeAt:0 };
 
   const $ = (q, r=document) => r.querySelector(q);
   const $$ = (q, r=document) => [...r.querySelectorAll(q)];
@@ -364,20 +366,85 @@
     return shares?cost/shares:0;
   }
 
-  function postTrade(sym, shares, step) {
+  function loadActionLog() {
+    try { const v=JSON.parse(get(K.actionLog,'[]')); return Array.isArray(v)?v:[]; } catch { return []; }
+  }
+
+  function addActionLog(entry) {
+    const rows=loadActionLog();
+    rows.unshift({time:Date.now(),...entry});
+    set(K.actionLog,JSON.stringify(rows.slice(0,40)));
+    renderActionLog();
+  }
+
+  function clearActionLog() {
+    del(K.actionLog);
+    renderActionLog();
+    status('Action log cleared.','ok');
+  }
+
+  function renderActionLog() {
+    const box=$('#slx-stock-action-log'); if(!box) return;
+    const rows=loadActionLog();
+    if(!rows.length){box.innerHTML='<div class="muted">No stock actions logged yet.</div>';return;}
+    box.innerHTML=rows.slice(0,15).map(r=>{
+      const when=new Date(Number(r.time)||Date.now()).toLocaleString();
+      const verb=r.step==='buyShares'?'BUY':r.step==='sellShares'?'SELL':String(r.step||'ACTION').toUpperCase();
+      const cls=r.status==='ok'?'good':r.status==='dry'?'warn':'bad';
+      return `<div class="action-row"><span>${esc(when)}</span><b>${esc(verb)} ${esc(r.sym||'')}</b><span>${Number(r.shares||0).toLocaleString()} sh</span><span>${r.estimate?money(r.estimate):''}</span><span class="${cls}">${esc(r.message||r.status||'')}</span></div>`;
+    }).join('');
+  }
+
+  function setTradeBusy(on, label='') {
+    S.tradeBusy=!!on;
+    const p=S.panel;
+    if(p){p.dataset.trading=on?'1':'0';$$('button',p).forEach(b=>{if(!b.classList.contains('close')) b.disabled=!!on;});}
+    const panic=$('#slx-stock-panic'); if(panic) panic.disabled=!!on;
+    if(on && label) status(label,'warn');
+  }
+
+  function tradeCooldownRemaining() {
+    return Math.max(0,1500-(Date.now()-Number(S.lastTradeAt||0)));
+  }
+
+  async function postTrade(sym, shares, step) {
     const stock=S.stocks.get(sym);
-    if(!stock?.id) return Promise.reject(new Error(`Stock ID missing for ${sym}. Open Stocks and refresh.`));
+    if(!stock?.id) throw new Error(`Stock ID missing for ${sym}. Sync API or open Stocks.`);
     shares=Math.floor(Number(shares)||0);
-    if(shares<=0) return Promise.reject(new Error('Share amount is 0.'));
-    const body=new URLSearchParams({stockId:stock.id,amount:String(shares)});
-    return fetch(`https://www.torn.com/page.php?sid=StockMarket&step=${encodeURIComponent(step)}&rfcv=${encodeURIComponent(rfc())}`, {
-      method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, body, credentials:'include'
-    }).then(async res => {
-      const text=await res.text(); let data=null;
-      try{data=JSON.parse(text);}catch{}
-      if(data && data.success===false) throw new Error(data.text||'Trade failed');
-      return data||text;
-    });
+    if(shares<=0) throw new Error('Share amount is 0.');
+    const estimate=shares*Number(stock.price||0);
+    if(S.tradeBusy) throw new Error('Another stock transaction is already running.');
+    const wait=tradeCooldownRemaining();
+    if(wait>0) throw new Error(`Trade cooldown: wait ${Math.ceil(wait/1000)}s.`);
+    const dry=bool(K.dryRun,false);
+    if(dry){
+      addActionLog({status:'dry',step,sym,shares,estimate,message:'DRY RUN · no order sent'});
+      status(`DRY RUN: ${step==='buyShares'?'buy':'sell'} ${shares.toLocaleString()} ${sym} ≈ ${money(estimate)} · no order sent.`,'warn');
+      return {success:true,dryRun:true};
+    }
+    const token=rfc();
+    if(!token) throw new Error('Torn session token unavailable. Refresh the page and try again.');
+    setTradeBusy(true,`${step==='buyShares'?'Buying':'Selling'} ${shares.toLocaleString()} ${sym}…`);
+    try {
+      const body=new URLSearchParams({stockId:String(stock.id),amount:String(shares)});
+      const res=await fetch(`https://www.torn.com/page.php?sid=StockMarket&step=${encodeURIComponent(step)}&rfcv=${encodeURIComponent(token)}`, {
+        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','X-Requested-With':'XMLHttpRequest'}, body, credentials:'include', cache:'no-store'
+      });
+      const text=await res.text();
+      let data=null; try{data=JSON.parse(text);}catch{}
+      if(!res.ok) throw new Error(`Torn returned HTTP ${res.status}.`);
+      const serverMessage=String(data?.text||data?.message||data?.error?.error||'').trim();
+      if(data?.success===false || data?.error) throw new Error(serverMessage||'Torn rejected the stock transaction.');
+      if(!data && /(?:error|invalid|failed|denied|insufficient)/i.test(text.slice(0,600))) throw new Error('Torn returned an unexpected trade error response.');
+      S.lastTradeAt=Date.now();
+      addActionLog({status:'ok',step,sym,shares,estimate,message:serverMessage||'Accepted by Torn'});
+      return data||{success:true,raw:text};
+    } catch(e) {
+      addActionLog({status:'error',step,sym,shares,estimate,message:e.message||'Trade failed'});
+      throw e;
+    } finally {
+      setTradeBusy(false);
+    }
   }
 
   async function vault({keep=0, panic=false, direct=false}={}) {
@@ -450,12 +517,6 @@
       `<div class="portfolio-list">${rows.map(r=>`<div class="portfolio-row"><div class="portfolio-sym"><b>${esc(r.sym)}</b><small>${r.tier?'Benefit tier '+r.tier:'No active benefit'}</small></div><div><span>${r.owned.toLocaleString()} shares</span><small>@ ${money(r.price)}</small></div><div><span>${money(r.value)}</span><small>${r.avg?`avg ${money(r.avg)}`:'avg n/a'}</small></div><div>${r.pl===null?'<span class="muted">P/L n/a</span>':`<span class="${r.pl>=0?'good':'bad'}">${r.pl>=0?'+':''}${money(Math.abs(r.pl))}</span>`}<small>${r.locked?`${r.locked.toLocaleString()} protected`:'no lock floor'}</small></div></div>`).join('')}</div>`;
   }
 
-  function renderAdvisor() {
-    const box=$('#slx-stock-advisor-body'); if(!box) return;
-    const rows=buildAdvisorRows();
-    if(!rows.length){box.innerHTML='<div class="muted">Sync the API or open Torn Stocks to load stock prices and benefit progress.</div>';return;}
-    box.innerHTML=rows.slice(0,12).map(r=>`<div class="adv-row"><b>${esc(r.sym)}</b><span>${r.owned.toLocaleString()} sh</span><span>${r.tier?'Tier '+r.tier:'No benefit'}</span><span>${r.nextShares?money(r.nextCost)+' to next':'Current tier max'}</span>${r.pl===null?'':`<span class="${r.pl>=0?'good':'bad'}">P/L ${r.pl>=0?'+':''}${money(Math.abs(r.pl))}</span>`}</div>`).join('');
-  }
 
   function panicButton() {
     if($('#slx-stock-panic')) return;
@@ -492,7 +553,7 @@
 #slx-stock-panel button{font-weight:800} #slx-stock-panel .close{width:36px} #slx-stock-panel .body{padding:12px;display:grid;gap:10px}
 #slx-stock-panel .section{border:1px solid #27384a;border-radius:12px;padding:10px;background:#0b121a} #slx-stock-panel .title{font-size:11px;font-weight:900;color:#90b9e8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em}
 #slx-stock-panel .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px} #slx-stock-panel label{display:grid;gap:5px;font-size:10px;color:#9aabba} #slx-stock-panel .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
-#slx-stock-panel .primary{background:#194f86;border-color:#2e77b9} #slx-stock-panel .danger{background:#64131c;border-color:#a92c3b} #slx-stock-panel .good{color:#55d98a}.bad{color:#ff6b78}.muted{color:#8392a4}
+#slx-stock-panel .primary{background:#194f86;border-color:#2e77b9} #slx-stock-panel .danger{background:#64131c;border-color:#a92c3b} #slx-stock-panel .good{color:#55d98a}.bad{color:#ff6b78}.muted{color:#8392a4} #slx-stock-panel .warn{color:#ffd36b} #slx-stock-panel button:disabled,#slx-stock-panic:disabled{opacity:.5;cursor:not-allowed} #slx-stock-panel[data-trading="1"] .card{outline:1px solid #8b6a1f}
 #slx-stock-panel #slx-stock-status{padding:8px;border-radius:8px;background:#111b26;font-size:11px;color:#9fb0c3} #slx-stock-panel #slx-stock-status[data-kind="ok"]{color:#61e291} #slx-stock-panel #slx-stock-status[data-kind="bad"]{color:#ff7a86} #slx-stock-panel #slx-stock-status[data-kind="warn"]{color:#ffd36b}
 #slx-stock-panel .adv-row{display:grid;grid-template-columns:70px 1fr 1fr 1.4fr 1fr;gap:7px;padding:7px 0;border-bottom:1px solid #1c2a38;font-size:10px;align-items:center}
 #slx-stock-panel .api-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}#slx-stock-panel .api-head .title{margin:0;flex:1}
@@ -503,7 +564,8 @@
 #slx-stock-panel .portfolio-list{display:grid;gap:6px}#slx-stock-panel .portfolio-row{display:grid;grid-template-columns:1.05fr 1.1fr 1.15fr 1.15fr;gap:7px;align-items:center;padding:8px;border:1px solid #1f3040;border-radius:9px;background:#0d1620;font-size:10px}#slx-stock-panel .portfolio-row>div{display:grid;gap:3px}.portfolio-sym b{font-size:12px;color:#dcecff}
 #slx-stock-panel .benefit-list{display:grid;gap:6px;max-height:280px;overflow:auto}#slx-stock-panel .benefit-row{display:grid;grid-template-columns:42px 1.4fr 95px 62px 1fr;gap:6px;align-items:center;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px}#slx-stock-panel .benefit-row input{min-width:0;padding:6px}#slx-stock-panel .benefit-row small{color:#7f91a5}
 #slx-stock-panel .roi-row{display:grid;grid-template-columns:78px 65px 78px 1fr 1fr 1fr;gap:6px;padding:7px 0;border-bottom:1px solid #1c2a38;font-size:10px;align-items:center}#slx-stock-panel .trade-list{display:grid;gap:7px}#slx-stock-panel .trade-card{display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;padding:9px;border:1px solid #27415a;border-radius:10px;background:#0e1823;align-items:center}.trade-card>div{display:grid;gap:3px}.trade-card small{font-size:9px;color:#8296aa}.trade-card span{font-size:9px;color:#a7b8c9}.trade-actions{display:flex!important;gap:5px}.trade-actions button{padding:7px!important}
-@media(max-width:600px){#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
+#slx-stock-panel .safety-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#slx-stock-panel .action-list{display:grid;gap:5px;max-height:230px;overflow:auto}#slx-stock-panel .action-row{display:grid;grid-template-columns:1.25fr .8fr .8fr 1fr 1.4fr;gap:6px;padding:6px 0;border-bottom:1px solid #1c2a38;font-size:9px;align-items:center}
+@media(max-width:600px){#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
 `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -523,6 +585,8 @@
         <label>Withdraw amount <input id="slx-stock-withdraw" value="${esc(get(K.withdraw,'1m'))}" placeholder="e.g. 1m"></label>
       </div><div class="actions"><button id="slx-vault-max" class="primary">Vault Max</button><button id="slx-vault-keep">Vault (Keep)</button><button id="slx-withdraw">Withdraw</button><button id="slx-withdraw-all">Withdraw All</button></div>
       <div class="actions"><label><input id="slx-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-panic-confirm" type="checkbox"> Confirm Panic</label></div></div>
+      <div class="section"><div class="title">Safety</div><div class="safety-grid"><label><input id="slx-dry-run" type="checkbox"> Dry Run · calculate/log only, never send BUY/SELL</label><div class="muted">Trades are serialized and protected by a 1.5s anti-double-click cooldown.</div></div></div>
+      <div class="section"><div class="api-head"><div class="title">Action Log</div><button id="slx-log-clear" type="button">Clear Log</button></div><div id="slx-stock-action-log" class="action-list muted">No stock actions logged yet.</div></div>
       <div class="section"><div class="title">Portfolio</div><div id="slx-stock-portfolio-body" class="muted">Waiting for portfolio data…</div></div>
       <div class="section"><div class="title">Benefit Values</div><div class="actions"><button id="slx-benefit-fetch" class="primary" type="button">Fetch Market Values</button><button id="slx-benefit-reset" type="button">Reset Manual Values</button></div><div id="slx-stock-benefit-values" class="benefit-list"></div></div>
       <div class="section"><div class="title">Benefit ROI Advisor</div><div id="slx-stock-advisor-body" class="muted">Waiting for stock data…</div></div>
@@ -535,6 +599,7 @@
     $('#slx-stock-api-badge',p).dataset.kind=get(K.api)?'idle':'idle';
     $('#slx-benefit-lock',p).checked=bool(K.benefitLock,true);
     $('#slx-panic-confirm',p).checked=bool(K.panicConfirm,false);
+    $('#slx-dry-run',p).checked=bool(K.dryRun,true);
     $('#slx-api-show',p).onclick=()=>{const i=$('#slx-stock-api',p);i.type=i.type==='password'?'text':'password';};
     $('#slx-api-save',p).onclick=()=>{try{saveApiKeyFromPanel();}catch(e){status(e.message,'bad');}};
     $('#slx-api-test',p).onclick=async()=>{try{saveApiKeyFromPanel();await syncAllApi();}catch(e){setApiBadge('Error','warn');status(e.message,'bad');}};
@@ -546,6 +611,8 @@
     $('#slx-stock-withdraw',p).onchange=e=>set(K.withdraw,e.target.value);
     $('#slx-benefit-lock',p).onchange=e=>set(K.benefitLock,e.target.checked?'1':'0');
     $('#slx-panic-confirm',p).onchange=e=>set(K.panicConfirm,e.target.checked?'1':'0');
+    $('#slx-dry-run',p).onchange=e=>{set(K.dryRun,e.target.checked?'1':'0');status(`Dry Run ${e.target.checked?'enabled':'disabled'}.`,e.target.checked?'warn':'ok');};
+    $('#slx-log-clear',p).onclick=clearActionLog;
     $('#slx-stock-target',p).onchange=e=>{set(K.target,e.target.value);renderPortfolio();renderAdvisor();};
     $('#slx-vault-max',p).onclick=()=>vault().then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     $('#slx-vault-keep',p).onclick=()=>vault({keep:parseAmount($('#slx-stock-keep',p).value)}).then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
@@ -563,7 +630,7 @@
     sel.innerHTML='<option value="">Select stock…</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===current?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
   }
 
-  function openPanel() { style(); panel(); refreshTargetSelect(); renderPortfolio(); renderBenefitValues(); renderAdvisor(); renderTradeAssistant(); S.panel.dataset.open='1'; }
+  function openPanel() { style(); panel(); refreshTargetSelect(); renderPortfolio(); renderBenefitValues(); renderAdvisor(); renderTradeAssistant(); renderActionLog(); S.panel.dataset.open='1'; }
 
   function managerLauncher() {
     if($('#slx-stock-open')) return;
