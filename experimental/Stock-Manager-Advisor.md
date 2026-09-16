@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.4.0**
+**v0.4.1**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.4.0** adds a benefit-value engine, marginal annual ROI ranking and the first SakaLuX Trade Assistant. Item-based benefits can load current Torn market values, cash benefits have editable defaults, manual overrides are supported, active benefit tiers use cumulative block math, and Buy Gap performs a user-confirmed direct purchase without automatically selling lower-ROI holdings.
+**v0.4.1** hardens every stock transaction with a global trade lock, anti-double-click cooldown, stricter Torn response validation, Dry Run mode and a persistent local action log. It also removes a stale duplicate Advisor renderer left by the previous experimental patch.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -51,6 +51,18 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.4.1 — Trade Hardening & Safety
+
+- Added global transaction lock so two BUY/SELL requests cannot run concurrently.
+- Added 1.5-second anti-double-click cooldown.
+- Added stricter HTTP / Torn-response validation and session-token validation.
+- Added **Dry Run** mode: calculations and logs run, but no BUY/SELL request is sent.
+- Added persistent local Action Log for BUY, SELL, errors and Dry Run simulations.
+- Disabled trade controls while a real stock request is in progress.
+- Added estimated transaction value to each action-log entry.
+- Fixed a stale duplicate `renderAdvisor()` implementation that could override the ROI Advisor at runtime.
+- Remains experimental and outside Hub, Standalone, `scripts.json` and GreasyFork.
+
 ### v0.4.0 — Benefit ROI & Trade Assistant
 
 - Added benefit value models for item, cash, average-cache and manual-value stock benefits.
