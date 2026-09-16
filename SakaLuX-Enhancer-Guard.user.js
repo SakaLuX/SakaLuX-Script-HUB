@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.34
+// @version      1.3.35
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -201,7 +201,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.3.34';
+    const VERSION = '1.3.35';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1014,7 +1014,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         const style = document.createElement('style');
         style.id = 'sl-eg-style';
         style.textContent = `
-            #sl-eg-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
+            #sl-eg-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.72);display:flex;align-items:flex-start;justify-content:center;font-family:Arial,sans-serif}
             #sl-eg-panel{width:min(700px,100%);max-height:94vh;overflow:hidden;background:#101318;color:#f3f4f6;border-radius:18px 18px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.5);display:flex;flex-direction:column}
             #sl-eg-header{padding:14px;border-bottom:1px solid #272c34;flex-shrink:0}
             #sl-eg-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -1042,7 +1042,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
             .sl-eg-price{text-align:right;white-space:nowrap}.sl-eg-mv{font-size:12px;font-weight:900}.sl-eg-total{margin-top:3px;color:#9ca3af;font-size:9px}.sl-eg-relic{color:#c084fc;font-size:11px;font-weight:900}button.sl-eg-star{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:20px!important;min-width:20px!important;max-width:20px!important;height:20px!important;min-height:20px!important;max-height:20px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#fbbf24!important;box-shadow:none!important;font-size:16px!important;line-height:20px!important;padding:0!important;margin:0 0 0 5px!important;vertical-align:middle!important}.sl-eg-lock{touch-action:none}
             .sl-eg-protection-note{padding:10px;background:#181d24;border:1px solid #303640;border-radius:9px;color:#c9d1d9;font-size:11px;line-height:1.45}.sl-eg-protection-list{margin-top:8px;max-height:38vh;overflow:auto}.sl-eg-protection-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #292f38}.sl-eg-protection-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-eg-protection-clear{width:100%;margin-top:10px;min-height:38px;border:0;border-radius:8px;background:#7f1d1d;color:#fff;font-weight:900}
             .sl-eg-diagnostics{padding:10px;margin-top:10px;background:#111827;border-radius:8px;color:#9ca3af;font-size:9px;line-height:1.5}.sl-eg-footer{padding:8px 10px;border-top:1px solid #272c34;color:#6b7280;font-size:9px;text-align:center;flex-shrink:0}.sl-eg-empty{padding:30px 10px;text-align:center;color:#9ca3af}.sl-eg-error{padding:15px;background:#32191d;border:1px solid #6b252d;color:#fca5a5;border-radius:12px;margin:10px;font-size:12px;line-height:1.5}
-            #sl-eg-api-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif}
+            #sl-eg-api-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-start;justify-content:center;font-family:Arial,sans-serif}
             #sl-eg-api-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.55)}
             .sl-eg-api-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-eg-api-head-actions{display:flex;align-items:center;gap:7px}.sl-eg-api-title{font-size:17px;font-weight:900}.sl-eg-api-sub{margin-top:3px;color:#8e96a3;font-size:10px}.sl-eg-api-required{margin:9px 0;padding:10px;border:1px solid #66591d;border-radius:9px;background:#211d10;color:#e4c95d;font-size:11px;line-height:1.5}.sl-eg-api-required b{color:#fde68a}.sl-eg-api-create{width:100%;min-height:42px;border:1px solid #7c681e;border-radius:9px;background:#2a2512;color:#f5d85f;font-weight:900}.sl-eg-api-box{margin-top:10px;padding:9px;border:1px solid #2f3945;border-radius:10px;background:#121820}.sl-eg-api-status{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:#181d24;font-size:10px;line-height:1.35}.sl-eg-api-status b{color:#d7b94c}.sl-eg-api-status.ok span{color:#78d98b}.sl-eg-api-status.missing span,.sl-eg-api-status.missing-permission span,.sl-eg-api-status.error span{color:#f08b8b}.sl-eg-api-source{margin:8px 0;color:#9ca3af;font-size:10px}.sl-eg-api-field{display:block;margin:8px 0;color:#d1d5db;font-size:10px}.sl-eg-api-field input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:10px;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:8px;font-size:12px}.sl-eg-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.sl-eg-api-actions button,.sl-eg-api-clear{min-height:38px;border:0;border-radius:8px;background:#374151;color:#fff;font-weight:900;font-size:10px}.sl-eg-api-actions button:first-child{background:#2563eb}.sl-eg-api-clear{width:100%;margin-top:7px}.sl-eg-api-note{margin-top:9px;color:#8e96a3;font-size:9px;line-height:1.5}.sl-eg-lock-size{width:36px;height:36px;border:1px solid #66591d;border-radius:10px;background:#2a2512;color:#f5d85f;font-size:17px;font-weight:900}
             #sl-eg-panel.compact .sl-eg-row{padding:6px;margin-bottom:4px}#sl-eg-panel.compact .sl-eg-icon{width:25px;height:25px}#sl-eg-panel.compact .sl-eg-name{font-size:12px}#sl-eg-panel.compact .sl-eg-category{display:none}
@@ -1243,7 +1243,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
             }).join('');
         const overlay = document.createElement('div');
         overlay.id = 'sl-eg-protection-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-end;justify-content:center;font-family:Arial,sans-serif;';
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-start;justify-content:center;font-family:Arial,sans-serif;';
         overlay.innerHTML = `<div id="sl-eg-api-panel"><div class="sl-eg-api-head"><div><div class="sl-eg-api-title">🔒 Item Protector</div><div class="sl-eg-api-sub">Shared with #1 Item Protector 🔐 MP</div></div><button class="sl-eg-close" data-close="1">×</button></div><div class="sl-eg-protection-note">The lock is shown directly over the item icon on the Items page, as in Item Protector: green = unlocked, red = protected, orange = reserved quantity. Short press toggles protection and long press sets the reserved quantity.</div><div class="sl-eg-protection-list">${rows || '<div class="sl-eg-empty">You have no protected items.</div>'}</div><button class="sl-eg-protection-clear" data-clear="1">CLEAR ALL PROTECTIONS</button></div>`;
         document.body.appendChild(overlay);
         overlay.onclick = event => { if (event.target === overlay || event.target.closest('[data-close]')) overlay.remove(); };

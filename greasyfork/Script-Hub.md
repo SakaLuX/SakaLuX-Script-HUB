@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.45**
+**v1.9.46**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,18 +22,18 @@
 
 ## Current release note
 
-**v1.9.45** Compact right-side module controls, top-aligned mobile Hub, refined Settings switches, detailed INFO content and Company whole-panel scrolling.
+**v1.9.46** Right-side 2x2 module controls, compact Settings toggles, top-aligned SakaLuX sheets and corrected Company footer/scroll behavior.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.34**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.26**
-- 🎯 SakaLuX Mission Rewards **v1.0.21**
-- 📈 SakaLuX Market Intelligence **v1.17.22**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.32**
-- 🏢 SakaLuX Company Intelligence **v1.8.19**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.35**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.27**
+- 🎯 SakaLuX Mission Rewards **v1.0.22**
+- 📈 SakaLuX Market Intelligence **v1.17.23**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.33**
+- 🏢 SakaLuX Company Intelligence **v1.8.20**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -54,6 +54,13 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.46 — Authoritative PDA layout correction
+
+- Keeps INFO, NEW, ON/OFF and OPEN/SETTINGS in a compact 2×2 block on the right side of managed module cards.
+- Makes Hub Settings switches smaller and uniform.
+- Opens Hub and managed SakaLuX panels from the top of the available Torn viewport.
+- Makes Company Intelligence scroll as a whole sheet and keeps only the fully visible SakaLuX author footer.
+
 ### v1.9.45 — Compact module cards and detailed INFO
 
 - Moves INFO, NEW, ON/OFF and OPEN/SETTINGS into a compact 2x2 block on the right side of each managed module card.
