@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.3.0
-// @description  Experimental Torn stock vault manager, benefit-safe withdrawals, portfolio advisor and one-tap Panic vault.
+// @version      0.4.0
+// @description  Experimental Torn stock vault manager with ROI advisor, benefit valuation, trade assistant and one-tap Panic vault.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.3.0',
+    version: '0.4.0',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -34,7 +34,8 @@
     panicConfirm: 'SLX_STOCK_PANIC_CONFIRM',
     panicDirect: 'SLX_STOCK_PANIC_DIRECT',
     presets: 'SLX_STOCK_PRESETS',
-    tx: 'SLX_STOCK_TX_CACHE'
+    tx: 'SLX_STOCK_TX_CACHE',
+    benefitValues: 'SLX_STOCK_BENEFIT_VALUES'
   };
 
   const BENEFITS = {
@@ -49,7 +50,27 @@
     WSU:{base:1000000,type:'P'}, WLT:{base:9000000,type:'P'}, YAZ:{base:1000000,type:'P'}
   };
 
-  const S = { stocks:new Map(), portfolio:{}, money:null, panel:null, status:null };
+  const BENEFIT_MODELS = {
+    MUN:{type:'item',id:818,freq:7,label:'Six-Pack of Energy Drink'},
+    ASS:{type:'item',id:817,freq:7,label:'Six-Pack of Alcohol'},
+    HRG:{type:'manual',freq:31,label:'Average property value'},
+    LSC:{type:'item',id:369,freq:7,label:'Lottery Voucher'},
+    LAG:{type:'item',id:368,freq:14,label:'Lawyer Business Card'},
+    FHG:{type:'item',id:367,freq:7.75,label:'Feathery Hotel Coupon'},
+    PRN:{type:'item',id:366,freq:7,label:'Erotic DVD'},
+    SYM:{type:'item',id:370,freq:7,label:'Drug Pack'},
+    TCC:{type:'average',ids:[1057,1112,1113,1114,1115,1116,1117],freq:31,label:'Average clothing cache'},
+    THS:{type:'item',id:365,freq:7,label:'Box of Medical Supplies'},
+    EWM:{type:'item',id:364,freq:7,label:'Box of Grenades'},
+    CNC:{type:'cash',value:80000000,freq:31,label:'Cash-equivalent benefit'},
+    TSB:{type:'cash',value:50000000,freq:31,label:'Cash dividend'},
+    TMI:{type:'cash',value:25000000,freq:31,label:'Cash dividend'},
+    IOU:{type:'cash',value:12000000,freq:31,label:'Cash dividend'},
+    GRN:{type:'cash',value:4000000,freq:31,label:'Cash dividend'},
+    TCT:{type:'cash',value:1000000,freq:31,label:'Cash-equivalent benefit'}
+  };
+
+  const S = { stocks:new Map(), portfolio:{}, money:null, panel:null, status:null, benefitPrices:{} };
 
   const $ = (q, r=document) => r.querySelector(q);
   const $$ = (q, r=document) => [...r.querySelectorAll(q)];
@@ -134,7 +155,9 @@
     setApiBadge('Connected','ok');
     refreshTargetSelect();
     renderPortfolio();
+    renderBenefitValues();
     renderAdvisor();
+    renderTradeAssistant();
     status(`API connected · cash ${money(S.money||0)} · ${Object.keys(S.portfolio||{}).length} stock positions detected.`,'ok');
     return user;
   }
@@ -178,13 +201,120 @@
 
   function benefitTier(sym, shares) {
     const d=BENEFITS[sym];
-    if(!d) return {tier:0,keep:0,next:0};
+    if(!d) return {tier:0,keep:0,next:0,nextBlock:0};
     shares=Math.max(0,Number(shares)||0);
-    if(d.type==='P') return shares>=d.base ? {tier:1,keep:d.base,next:0} : {tier:0,keep:0,next:d.base};
-    if(shares<d.base) return {tier:0,keep:0,next:d.base};
-    let tier=1;
-    while(shares>=d.base*tier*2) tier*=2;
-    return {tier,keep:d.base*tier,next:d.base*tier*2};
+    if(d.type==='P') return shares>=d.base ? {tier:1,keep:d.base,next:0,nextBlock:0} : {tier:0,keep:0,next:d.base,nextBlock:d.base};
+    let tier=0;
+    while(shares >= d.base*(Math.pow(2,tier+1)-1)) tier++;
+    const keep=tier>0 ? d.base*(Math.pow(2,tier)-1) : 0;
+    const next=d.base*(Math.pow(2,tier+1)-1);
+    const nextBlock=d.base*Math.pow(2,tier);
+    return {tier,keep,next,nextBlock};
+  }
+
+  function loadBenefitOverrides() {
+    try { return JSON.parse(get(K.benefitValues,'{}'))||{}; } catch { return {}; }
+  }
+
+  function saveBenefitOverrides(v) { set(K.benefitValues,JSON.stringify(v||{})); }
+
+  function benefitValueInfo(sym) {
+    const model=BENEFIT_MODELS[sym];
+    if(!model) return {value:0,freq:0,label:'Not modelled',source:'none'};
+    const overrides=loadBenefitOverrides();
+    const ov=overrides[sym]||{};
+    const freq=Number(ov.freq)>0?Number(ov.freq):Number(model.freq||0);
+    let value=Number(ov.value)>0?Number(ov.value):0;
+    let source=Number(ov.value)>0?'manual':'default';
+    if(!value && model.type==='cash') value=Number(model.value||0);
+    if(!value && model.type==='item') { value=Number(S.benefitPrices[model.id]||0); source=value?'Torn market':'missing'; }
+    if(!value && model.type==='average') {
+      const vals=(model.ids||[]).map(id=>Number(S.benefitPrices[id]||0)).filter(v=>v>0);
+      if(vals.length){ value=vals.reduce((a,b)=>a+b,0)/vals.length; source='Torn market avg'; }
+    }
+    if(model.type==='manual' && !value) source='manual required';
+    return {value,freq,label:model.label||sym,source};
+  }
+
+  function benefitDailyValue(sym) {
+    const i=benefitValueInfo(sym);
+    return i.value>0 && i.freq>0 ? i.value/i.freq : 0;
+  }
+
+  async function fetchBenefitMarketValues() {
+    const key=get(K.api).trim();
+    if(!key) throw new Error('Add an API key first.');
+    const ids=[...new Set(Object.values(BENEFIT_MODELS).flatMap(m=>m.id?[m.id]:(m.ids||[])))];
+    let ok=0;
+    status(`Benefit values: fetching 0/${ids.length}…`,'warn');
+    for(let i=0;i<ids.length;i++) {
+      const id=ids[i];
+      try {
+        const r=await fetch(`https://api.torn.com/v2/torn/${id}/items?key=${encodeURIComponent(key)}&ts=${Date.now()}`,{credentials:'omit'});
+        const d=await r.json();
+        if(d?.error) throw new Error(d.error.error||'API error');
+        let price=Number(d?.value?.market_price||d?.items?.[0]?.value?.market_price||d?.items?.[0]?.market_value||d?.market_price||0);
+        if(price>0){S.benefitPrices[id]=price;ok++;}
+      } catch {}
+      status(`Benefit values: fetching ${i+1}/${ids.length}…`,'warn');
+      await new Promise(r=>setTimeout(r,80));
+    }
+    renderBenefitValues(); renderAdvisor(); renderTradeAssistant();
+    status(`Benefit values updated: ${ok}/${ids.length} market prices loaded.`,'ok');
+    return ok;
+  }
+
+  function buildRoiCandidates() {
+    scanStocks();
+    const cash=Math.max(Number(S.money)||0,currentMoneyFromDom());
+    const rows=[];
+    for(const [sym,model] of Object.entries(BENEFIT_MODELS)) {
+      const d=BENEFITS[sym], st=S.stocks.get(sym);
+      if(!d || !st?.price) continue;
+      const daily=benefitDailyValue(sym);
+      if(daily<=0) continue;
+      const owned=ownedShares(sym);
+      const tier=benefitTier(sym,owned);
+      if(d.type==='P' && tier.tier>=1) continue;
+      const targetShares=d.type==='P'?d.base:tier.next;
+      const sharesNeeded=Math.max(0,targetShares-owned);
+      if(sharesNeeded<=0) continue;
+      const marginalShares=d.type==='P'?d.base:tier.nextBlock;
+      const marginalCapital=marginalShares*st.price;
+      const cost=sharesNeeded*st.price;
+      const annual=daily*365;
+      const roi=marginalCapital>0?(annual/marginalCapital)*100:0;
+      if(!(roi>0)) continue;
+      rows.push({sym,model,tier:tier.tier+1,owned,targetShares,sharesNeeded,price:st.price,cost,marginalCapital,daily,annual,roi,affordable:cash>=cost,cash});
+    }
+    return rows.sort((a,b)=>b.roi-a.roi || a.cost-b.cost);
+  }
+
+  function renderBenefitValues() {
+    const box=$('#slx-stock-benefit-values'); if(!box) return;
+    const overrides=loadBenefitOverrides();
+    const rows=Object.keys(BENEFIT_MODELS).sort().map(sym=>{
+      const m=BENEFIT_MODELS[sym], i=benefitValueInfo(sym), ov=overrides[sym]||{};
+      return `<div class="benefit-row" data-sym="${sym}"><b>${sym}</b><span>${esc(m.label||'Benefit')}</span><input class="benefit-value" inputmode="numeric" placeholder="${i.value?Math.round(i.value):'value'}" value="${ov.value||''}"><input class="benefit-freq" inputmode="decimal" placeholder="days" value="${ov.freq||m.freq||''}"><small>${i.value?money(i.value):'value missing'} · ${esc(i.source)}</small></div>`;
+    }).join('');
+    box.innerHTML=rows;
+    $$('.benefit-row',box).forEach(row=>{
+      const sym=row.dataset.sym;
+      const save=()=>{const all=loadBenefitOverrides();const value=parseAmount($('.benefit-value',row).value);const freq=Number($('.benefit-freq',row).value)||0;if(value>0||freq>0) all[sym]={value:value||undefined,freq:freq||undefined}; else delete all[sym];saveBenefitOverrides(all);renderAdvisor();renderTradeAssistant();};
+      $('.benefit-value',row).onchange=save; $('.benefit-freq',row).onchange=save;
+    });
+  }
+
+  function renderTradeAssistant() {
+    const box=$('#slx-stock-trade-body'); if(!box) return;
+    const rows=buildRoiCandidates();
+    if(!rows.length){box.innerHTML='<div class="muted">Sync API and fetch benefit values to generate ROI candidates.</div>';return;}
+    const best=rows[0];
+    const affordable=rows.find(r=>r.affordable);
+    const cards=[['Best ROI',best],['Best affordable',affordable]].filter(x=>x[1]);
+    box.innerHTML=cards.map(([title,r])=>`<div class="trade-card"><div><small>${title}</small><b>${r.sym} · Tier ${r.tier}</b><span>${r.roi.toFixed(2)}% est. annual ROI</span></div><div><small>Need</small><b>${r.sharesNeeded.toLocaleString()} shares</b><span>${money(r.cost)}</span></div><div class="trade-actions"><button data-set="${r.sym}">Set target</button><button class="primary" data-buy="${r.sym}" data-shares="${r.sharesNeeded}">Buy gap</button></div></div>`).join('');
+    $$('[data-set]',box).forEach(b=>b.onclick=()=>{set(K.target,b.dataset.set);refreshTargetSelect();status(`${b.dataset.set} selected as vault target.`,'ok');});
+    $$('[data-buy]',box).forEach(b=>b.onclick=async()=>{const sym=b.dataset.buy;const requested=Number(b.dataset.shares)||0;try{const st=await ensureStock(sym);let cash=Math.max(Number(S.money)||0,currentMoneyFromDom());if(!cash){await apiSync();cash=Number(S.money)||0;}const can=Math.floor(cash/st.price);const shares=Math.min(requested,can);if(shares<=0)throw new Error(`Not enough cash to buy ${sym}.`);if(!confirm(`Buy ${shares.toLocaleString()} ${sym} shares for about ${money(shares*st.price)}?`))return;await postTrade(sym,shares,'buyShares');status(`Trade Assistant bought ${shares.toLocaleString()} ${sym}.`,'ok');await syncAllApi();}catch(e){status(`Trade Assistant: ${e.message}`,'bad');}});
   }
 
   function scanStocks() {
@@ -296,41 +426,13 @@
     status(`Sold ${sell.toLocaleString()} ${sym}`,'ok');
   }
 
-  function buildAdvisorRows() {
-    scanStocks();
-    const rows=[];
-    for(const [sym,st] of S.stocks) {
-      const owned=ownedShares(sym), tier=benefitTier(sym,owned);
-      if(!BENEFITS[sym] || !st.price) continue;
-      const nextShares=tier.next?Math.max(0,tier.next-owned):0;
-      const nextCost=nextShares*st.price;
-      const avg=averageBuy(sym);
-      const pl=avg>0 && owned>0 ? (st.price-avg)*owned : null;
-      rows.push({sym,owned,tier:tier.tier,nextShares,nextCost,price:st.price,pl});
-    }
-    rows.sort((a,b)=>{
-      const az=a.nextCost||Number.MAX_SAFE_INTEGER, bz=b.nextCost||Number.MAX_SAFE_INTEGER;
-      return az-bz || a.sym.localeCompare(b.sym);
-    });
-    return rows;
+  function renderAdvisor() {
+    const box=$('#slx-stock-advisor-body'); if(!box) return;
+    const rows=buildRoiCandidates();
+    if(!rows.length){box.innerHTML='<div class="muted">Sync API and load benefit values. Only benefits with a known cash-equivalent value are ranked.</div>';return;}
+    box.innerHTML=rows.slice(0,10).map((r,index)=>`<div class="roi-row"><b>#${index+1} ${r.sym}</b><span>Tier ${r.tier}</span><span>${r.roi.toFixed(2)}% APR</span><span>${money(r.cost)} gap</span><span>${money(r.daily)}/day est.</span><span class="${r.affordable?'good':'muted'}">${r.affordable?'Affordable':'Missing '+money(Math.max(0,r.cost-r.cash))}</span></div>`).join('');
   }
 
-  function buildPortfolioRows() {
-    scanStocks();
-    const rows=[];
-    for(const [sym,st] of S.stocks) {
-      const owned=ownedShares(sym);
-      if(!owned || !st.price) continue;
-      const avg=averageBuy(sym);
-      const value=owned*st.price;
-      const cost=avg>0?owned*avg:null;
-      const pl=cost===null?null:value-cost;
-      const tier=benefitTier(sym,owned);
-      rows.push({sym,owned,price:st.price,value,avg,cost,pl,tier:tier.tier,locked:tier.keep});
-    }
-    rows.sort((a,b)=>b.value-a.value||a.sym.localeCompare(b.sym));
-    return rows;
-  }
 
   function renderPortfolio() {
     const box=$('#slx-stock-portfolio-body'); if(!box) return;
@@ -399,7 +501,9 @@
 #slx-stock-panel .api-key-row{display:grid;grid-template-columns:1fr auto;gap:7px}#slx-stock-panel .api-help{margin-top:7px;font-size:10px;line-height:1.35;color:#8293a7}
 #slx-stock-panel .portfolio-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}#slx-stock-panel .portfolio-summary>div{padding:8px;border:1px solid #23374a;border-radius:9px;background:#101a25;display:grid;gap:3px}#slx-stock-panel .portfolio-summary span,#slx-stock-panel .portfolio-row small{color:#8192a5;font-size:9px}#slx-stock-panel .portfolio-summary b{font-size:11px}
 #slx-stock-panel .portfolio-list{display:grid;gap:6px}#slx-stock-panel .portfolio-row{display:grid;grid-template-columns:1.05fr 1.1fr 1.15fr 1.15fr;gap:7px;align-items:center;padding:8px;border:1px solid #1f3040;border-radius:9px;background:#0d1620;font-size:10px}#slx-stock-panel .portfolio-row>div{display:grid;gap:3px}.portfolio-sym b{font-size:12px;color:#dcecff}
-@media(max-width:600px){#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
+#slx-stock-panel .benefit-list{display:grid;gap:6px;max-height:280px;overflow:auto}#slx-stock-panel .benefit-row{display:grid;grid-template-columns:42px 1.4fr 95px 62px 1fr;gap:6px;align-items:center;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px}#slx-stock-panel .benefit-row input{min-width:0;padding:6px}#slx-stock-panel .benefit-row small{color:#7f91a5}
+#slx-stock-panel .roi-row{display:grid;grid-template-columns:78px 65px 78px 1fr 1fr 1fr;gap:6px;padding:7px 0;border-bottom:1px solid #1c2a38;font-size:10px;align-items:center}#slx-stock-panel .trade-list{display:grid;gap:7px}#slx-stock-panel .trade-card{display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;padding:9px;border:1px solid #27415a;border-radius:10px;background:#0e1823;align-items:center}.trade-card>div{display:grid;gap:3px}.trade-card small{font-size:9px;color:#8296aa}.trade-card span{font-size:9px;color:#a7b8c9}.trade-actions{display:flex!important;gap:5px}.trade-actions button{padding:7px!important}
+@media(max-width:600px){#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
 `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -420,7 +524,9 @@
       </div><div class="actions"><button id="slx-vault-max" class="primary">Vault Max</button><button id="slx-vault-keep">Vault (Keep)</button><button id="slx-withdraw">Withdraw</button><button id="slx-withdraw-all">Withdraw All</button></div>
       <div class="actions"><label><input id="slx-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-panic-confirm" type="checkbox"> Confirm Panic</label></div></div>
       <div class="section"><div class="title">Portfolio</div><div id="slx-stock-portfolio-body" class="muted">Waiting for portfolio data…</div></div>
-      <div class="section"><div class="title">Advisor</div><div id="slx-stock-advisor-body" class="muted">Waiting for stock data…</div></div>
+      <div class="section"><div class="title">Benefit Values</div><div class="actions"><button id="slx-benefit-fetch" class="primary" type="button">Fetch Market Values</button><button id="slx-benefit-reset" type="button">Reset Manual Values</button></div><div id="slx-stock-benefit-values" class="benefit-list"></div></div>
+      <div class="section"><div class="title">Benefit ROI Advisor</div><div id="slx-stock-advisor-body" class="muted">Waiting for stock data…</div></div>
+      <div class="section"><div class="title">Trade Assistant</div><div id="slx-stock-trade-body" class="trade-list muted">Waiting for ROI data…</div></div>
       <div id="slx-stock-status">Experimental build. Not registered in SakaLuX Hub or Standalone.</div>
     </div></div>`;
     document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
@@ -434,6 +540,8 @@
     $('#slx-api-test',p).onclick=async()=>{try{saveApiKeyFromPanel();await syncAllApi();}catch(e){setApiBadge('Error','warn');status(e.message,'bad');}};
     $('#slx-api-create',p).onclick=createRequiredApiKey;
     $('#slx-api-clear',p).onclick=clearApiKey;
+    $('#slx-benefit-fetch',p).onclick=()=>fetchBenefitMarketValues().catch(e=>status(e.message,'bad'));
+    $('#slx-benefit-reset',p).onclick=()=>{if(confirm('Reset all manual benefit values/frequencies?')){del(K.benefitValues);renderBenefitValues();renderAdvisor();renderTradeAssistant();status('Manual benefit values reset.','ok');}};
     $('#slx-stock-keep',p).onchange=e=>set(K.keep,e.target.value);
     $('#slx-stock-withdraw',p).onchange=e=>set(K.withdraw,e.target.value);
     $('#slx-benefit-lock',p).onchange=e=>set(K.benefitLock,e.target.checked?'1':'0');
@@ -455,7 +563,7 @@
     sel.innerHTML='<option value="">Select stock…</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===current?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
   }
 
-  function openPanel() { style(); panel(); refreshTargetSelect(); renderPortfolio(); renderAdvisor(); S.panel.dataset.open='1'; }
+  function openPanel() { style(); panel(); refreshTargetSelect(); renderPortfolio(); renderBenefitValues(); renderAdvisor(); renderTradeAssistant(); S.panel.dataset.open='1'; }
 
   function managerLauncher() {
     if($('#slx-stock-open')) return;
