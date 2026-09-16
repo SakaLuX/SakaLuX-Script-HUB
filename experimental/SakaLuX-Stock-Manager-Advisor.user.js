@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.4.2
-// @description  Experimental Torn stock vault manager with Panic v2, hardened trades, ROI advisor, benefit valuation and Trade Assistant.
+// @version      0.5.0
+// @description  Experimental Torn stock portfolio optimizer with ROI, bank comparison, payback analysis, Panic v2 and hardened Trade Assistant.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.4.2',
+    version: '0.5.0',
     experimental: true,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -41,7 +41,9 @@
     panicFallback: 'SLX_STOCK_PANIC_FALLBACK',
     panicKeep: 'SLX_STOCK_PANIC_KEEP_CASH',
     panicMax: 'SLX_STOCK_PANIC_MAX_SPEND',
-    panicUseAll: 'SLX_STOCK_PANIC_USE_ALL'
+    panicUseAll: 'SLX_STOCK_PANIC_USE_ALL',
+    bankApr: 'SLX_STOCK_BANK_APR',
+    optimizerMinApr: 'SLX_STOCK_OPTIMIZER_MIN_APR'
   };
 
   const BENEFITS = {
@@ -163,6 +165,7 @@
     renderPortfolio();
     renderBenefitValues();
     renderAdvisor();
+    renderOptimizer();
     renderTradeAssistant();
     status(`API connected · cash ${money(S.money||0)} · ${Object.keys(S.portfolio||{}).length} stock positions detected.`,'ok');
     return user;
@@ -265,7 +268,7 @@
       status(`Benefit values: fetching ${i+1}/${ids.length}…`,'warn');
       await new Promise(r=>setTimeout(r,80));
     }
-    renderBenefitValues(); renderAdvisor(); renderTradeAssistant();
+    renderBenefitValues(); renderAdvisor(); renderOptimizer(); renderTradeAssistant();
     status(`Benefit values updated: ${ok}/${ids.length} market prices loaded.`,'ok');
     return ok;
   }
@@ -291,7 +294,9 @@
       const annual=daily*365;
       const roi=marginalCapital>0?(annual/marginalCapital)*100:0;
       if(!(roi>0)) continue;
-      rows.push({sym,model,tier:tier.tier+1,owned,targetShares,sharesNeeded,price:st.price,cost,marginalCapital,daily,annual,roi,affordable:cash>=cost,cash});
+      const bankApr=Math.max(0,Number(get(K.bankApr,'0'))||0);
+      const paybackDays=daily>0?marginalCapital/daily:Infinity;
+      rows.push({sym,model,tier:tier.tier+1,owned,targetShares,sharesNeeded,price:st.price,cost,marginalCapital,daily,annual,roi,paybackDays,bankApr,bankDelta:roi-bankApr,beatsBank:bankApr>0?roi>bankApr:null,affordable:cash>=cost,cash});
     }
     return rows.sort((a,b)=>b.roi-a.roi || a.cost-b.cost);
   }
@@ -497,11 +502,54 @@
     status(`Sold ${sell.toLocaleString()} ${sym}`,'ok');
   }
 
+  function buildOptimizerRows() {
+    scanStocks();
+    const minApr=Math.max(0,Number(get(K.optimizerMinApr,'0'))||0);
+    const bankApr=Math.max(0,Number(get(K.bankApr,'0'))||0);
+    const rows=[];
+    for(const [sym,st] of S.stocks) {
+      const owned=ownedShares(sym);
+      if(!owned || !st?.price) continue;
+      const tier=benefitTier(sym,owned);
+      const protectedShares=bool(K.benefitLock,true)?tier.keep:0;
+      const freeShares=Math.max(0,owned-protectedShares);
+      const protectedValue=protectedShares*st.price;
+      const freeValue=freeShares*st.price;
+      const daily=benefitDailyValue(sym);
+      const currentApr=protectedValue>0&&daily>0?(daily*365/protectedValue)*100:0;
+      const next=tier.next||0;
+      const nextGap=next>owned?next-owned:0;
+      const nextCost=nextGap*st.price;
+      let signal='hold';
+      if(freeShares>0) signal='excess';
+      if(currentApr>0 && currentApr<Math.max(minApr,bankApr)) signal='weak';
+      rows.push({sym,owned,price,tier:tier.tier,protectedShares,freeShares,protectedValue,freeValue,currentApr,nextGap,nextCost,signal,bankApr,minApr});
+    }
+    return rows.sort((a,b)=>({weak:0,excess:1,hold:2}[a.signal]-{weak:0,excess:1,hold:2}[b.signal]) || b.freeValue-a.freeValue || b.currentApr-a.currentApr);
+  }
+
+  function renderOptimizer() {
+    const box=$('#slx-stock-optimizer-body'); if(!box) return;
+    const held=buildOptimizerRows();
+    const candidates=buildRoiCandidates();
+    const cash=Math.max(Number(S.money)||0,currentMoneyFromDom());
+    const freeCapital=held.reduce((n,r)=>n+r.freeValue,0);
+    const protectedCapital=held.reduce((n,r)=>n+r.protectedValue,0);
+    const weakCapital=held.filter(r=>r.signal==='weak').reduce((n,r)=>n+r.protectedValue,0);
+    const bankApr=Math.max(0,Number(get(K.bankApr,'0'))||0);
+    const best=candidates[0]||null;
+    const affordable=candidates.find(r=>r.affordable)||null;
+    const summary=`<div class="optimizer-summary"><div><span>Protected capital</span><b>${money(protectedCapital)}</b></div><div><span>Free / excess</span><b>${money(freeCapital)}</b></div><div><span>Weak capital</span><b>${money(weakCapital)}</b></div><div><span>Cash</span><b>${money(cash)}</b></div></div>`;
+    const picks=(best?`<div class="optimizer-pick"><b>Best ROI: ${best.sym} · Tier ${best.tier}</b><span>${best.roi.toFixed(2)}% APR · ${Math.round(best.paybackDays).toLocaleString()}d payback · gap ${money(best.cost)}</span>${bankApr?`<small>${best.bankDelta>=0?'+':''}${best.bankDelta.toFixed(2)}pp vs bank</small>`:''}</div>`:'')+(affordable?`<div class="optimizer-pick"><b>Best affordable: ${affordable.sym}</b><span>${affordable.roi.toFixed(2)}% APR · gap ${money(affordable.cost)}</span></div>`:'');
+    const rows=held.length?held.map(r=>`<div class="optimizer-row"><div><b>${r.sym}</b><small>Tier ${r.tier||0}</small></div><div><span>${r.protectedShares.toLocaleString()} protected</span><small>${money(r.protectedValue)}</small></div><div><span>${r.freeShares.toLocaleString()} free</span><small>${money(r.freeValue)}</small></div><div><span>${r.currentApr?r.currentApr.toFixed(2)+'% APR':'ROI n/a'}</span><small>${bankApr?`${(r.currentApr-bankApr).toFixed(2)}pp vs bank`:'set bank APR'}</small></div><div><span>${r.nextGap?money(r.nextCost)+' to next':'no next tier'}</span><small class="${r.signal==='weak'?'bad':r.signal==='excess'?'warn':'good'}">${r.signal==='weak'?'Below threshold':r.signal==='excess'?'Excess shares':'Protected'}</small></div></div>`).join(''):'<div class="muted">No held-stock optimizer data yet. Sync API first.</div>';
+    box.innerHTML=summary+picks+`<div class="optimizer-list">${rows}</div>`;
+  }
+
   function renderAdvisor() {
     const box=$('#slx-stock-advisor-body'); if(!box) return;
     const rows=buildRoiCandidates();
     if(!rows.length){box.innerHTML='<div class="muted">Sync API and load benefit values. Only benefits with a known cash-equivalent value are ranked.</div>';return;}
-    box.innerHTML=rows.slice(0,10).map((r,index)=>`<div class="roi-row"><b>#${index+1} ${r.sym}</b><span>Tier ${r.tier}</span><span>${r.roi.toFixed(2)}% APR</span><span>${money(r.cost)} gap</span><span>${money(r.daily)}/day est.</span><span class="${r.affordable?'good':'muted'}">${r.affordable?'Affordable':'Missing '+money(Math.max(0,r.cost-r.cash))}</span></div>`).join('');
+    box.innerHTML=rows.slice(0,10).map((r,index)=>`<div class="roi-row"><b>#${index+1} ${r.sym}</b><span>Tier ${r.tier}</span><span>${r.roi.toFixed(2)}% APR</span><span>${Math.round(r.paybackDays).toLocaleString()}d payback</span><span>${money(r.cost)} gap</span><span>${money(r.daily)}/day</span><span class="${r.bankApr?(r.beatsBank?'good':'bad'):'muted'}">${r.bankApr?`${r.bankDelta>=0?'+':''}${r.bankDelta.toFixed(2)}pp vs bank`:'Bank APR n/a'}</span><span class="${r.affordable?'good':'muted'}">${r.affordable?'Affordable':'Missing '+money(Math.max(0,r.cost-r.cash))}</span></div>`).join('');
   }
 
 
@@ -626,7 +674,8 @@
 #slx-stock-panel .benefit-list{display:grid;gap:6px;max-height:280px;overflow:auto}#slx-stock-panel .benefit-row{display:grid;grid-template-columns:42px 1.4fr 95px 62px 1fr;gap:6px;align-items:center;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px}#slx-stock-panel .benefit-row input{min-width:0;padding:6px}#slx-stock-panel .benefit-row small{color:#7f91a5}
 #slx-stock-panel .roi-row{display:grid;grid-template-columns:78px 65px 78px 1fr 1fr 1fr;gap:6px;padding:7px 0;border-bottom:1px solid #1c2a38;font-size:10px;align-items:center}#slx-stock-panel .trade-list{display:grid;gap:7px}#slx-stock-panel .trade-card{display:grid;grid-template-columns:1.4fr 1fr auto;gap:8px;padding:9px;border:1px solid #27415a;border-radius:10px;background:#0e1823;align-items:center}.trade-card>div{display:grid;gap:3px}.trade-card small{font-size:9px;color:#8296aa}.trade-card span{font-size:9px;color:#a7b8c9}.trade-actions{display:flex!important;gap:5px}.trade-actions button{padding:7px!important}
 #slx-stock-panel .safety-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#slx-stock-panel .panic-preview{margin-top:8px;padding:8px;border:1px solid #2b3f53;border-radius:8px;background:#0d1721;color:#8fa2b6;font-size:10px;line-height:1.4}#slx-stock-panel .panic-preview[data-kind="ok"]{border-color:#267c52;color:#63df9a}#slx-stock-panel .panic-preview[data-kind="bad"]{border-color:#8c3140;color:#ff7a86}#slx-stock-panel .action-list{display:grid;gap:5px;max-height:230px;overflow:auto}#slx-stock-panel .action-row{display:grid;grid-template-columns:1.25fr .8fr .8fr 1fr 1.4fr;gap:6px;padding:6px 0;border-bottom:1px solid #1c2a38;font-size:9px;align-items:center}
-@media(max-width:600px){#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
+#slx-stock-panel .optimizer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}#slx-stock-panel .optimizer-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:8px}#slx-stock-panel .optimizer-summary>div{display:grid;gap:3px;padding:8px;border:1px solid #23374a;border-radius:9px;background:#101a25}#slx-stock-panel .optimizer-summary span{font-size:9px;color:#8293a7}#slx-stock-panel .optimizer-pick{display:grid;gap:3px;padding:8px;margin-bottom:7px;border:1px solid #365a78;border-radius:9px;background:#0e1c29}.optimizer-pick span,.optimizer-pick small{font-size:9px;color:#9fb3c6}#slx-stock-panel .optimizer-list{display:grid;gap:5px;max-height:310px;overflow:auto}#slx-stock-panel .optimizer-row{display:grid;grid-template-columns:62px 1fr 1fr 1fr 1.25fr;gap:6px;padding:7px;border:1px solid #203142;border-radius:8px;background:#0d1620;font-size:9px;align-items:center}.optimizer-row>div{display:grid;gap:3px}.optimizer-row small{color:#8293a7}
+@media(max-width:600px){#slx-stock-panel .optimizer-controls{grid-template-columns:1fr}#slx-stock-panel .optimizer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .optimizer-row{grid-template-columns:1fr 1fr}.optimizer-row>div:nth-child(5){grid-column:1/3}#slx-stock-panel .safety-grid{grid-template-columns:1fr}#slx-stock-panel .action-row{grid-template-columns:1fr 1fr}.action-row span:nth-child(n+3){grid-column:2/3}#slx-stock-panel .grid{grid-template-columns:1fr}#slx-stock-panel .benefit-row{grid-template-columns:42px 1fr 85px 58px}.benefit-row small{grid-column:2/5}#slx-stock-panel .roi-row{grid-template-columns:65px 55px 70px}.roi-row span:nth-child(n+4){grid-column:2/4}#slx-stock-panel .trade-card{grid-template-columns:1fr 1fr}.trade-actions{grid-column:1/3}#slx-stock-panel .portfolio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-panel .portfolio-row{grid-template-columns:1fr 1fr}#slx-stock-panel .adv-row{grid-template-columns:56px 1fr 1fr;}.adv-row span:nth-child(4),.adv-row span:nth-child(5){grid-column:2/4}#slx-stock-panic{top:auto;bottom:88px;right:12px}}
 `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -655,6 +704,7 @@
       <div class="section"><div class="title">Portfolio</div><div id="slx-stock-portfolio-body" class="muted">Waiting for portfolio data…</div></div>
       <div class="section"><div class="title">Benefit Values</div><div class="actions"><button id="slx-benefit-fetch" class="primary" type="button">Fetch Market Values</button><button id="slx-benefit-reset" type="button">Reset Manual Values</button></div><div id="slx-stock-benefit-values" class="benefit-list"></div></div>
       <div class="section"><div class="title">Benefit ROI Advisor</div><div id="slx-stock-advisor-body" class="muted">Waiting for stock data…</div></div>
+      <div class="section"><div class="title">Portfolio Optimizer</div><div class="optimizer-controls"><label>Bank APR % <input id="slx-bank-apr" inputmode="decimal" value="${esc(get(K.bankApr,'0'))}" placeholder="e.g. 70"></label><label>Minimum acceptable APR % <input id="slx-opt-min-apr" inputmode="decimal" value="${esc(get(K.optimizerMinApr,'0'))}" placeholder="e.g. 50"></label></div><div class="api-help">Bank APR is manual so the comparison uses your actual current bank return instead of a guessed rate.</div><div id="slx-stock-optimizer-body" class="muted">Waiting for portfolio data…</div></div>
       <div class="section"><div class="title">Trade Assistant</div><div id="slx-stock-trade-body" class="trade-list muted">Waiting for ROI data…</div></div>
       <div id="slx-stock-status">Experimental build. Not registered in SakaLuX Hub or Standalone.</div>
     </div></div>`;
@@ -684,7 +734,9 @@
     $('#slx-panic-preview-btn',p).onclick=()=>previewPanic().catch(()=>{});
     $('#slx-dry-run',p).onchange=e=>{set(K.dryRun,e.target.checked?'1':'0');status(`Dry Run ${e.target.checked?'enabled':'disabled'}.`,e.target.checked?'warn':'ok');};
     $('#slx-log-clear',p).onclick=clearActionLog;
-    $('#slx-stock-target',p).onchange=e=>{set(K.target,e.target.value);const v=$('#slx-panic-preview',p);if(v){v.dataset.kind='';v.textContent='Target changed · run Preview PANIC again.';}renderPortfolio();renderAdvisor();};
+    $('#slx-bank-apr',p).onchange=e=>{set(K.bankApr,String(Math.max(0,Number(e.target.value)||0)));renderAdvisor();renderOptimizer();renderTradeAssistant();};
+    $('#slx-opt-min-apr',p).onchange=e=>{set(K.optimizerMinApr,String(Math.max(0,Number(e.target.value)||0)));renderOptimizer();};
+    $('#slx-stock-target',p).onchange=e=>{set(K.target,e.target.value);const v=$('#slx-panic-preview',p);if(v){v.dataset.kind='';v.textContent='Target changed · run Preview PANIC again.';}renderPortfolio();renderAdvisor();renderOptimizer();};
     $('#slx-vault-max',p).onclick=()=>vault().then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     $('#slx-vault-keep',p).onclick=()=>vault({keep:parseAmount($('#slx-stock-keep',p).value)}).then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     $('#slx-withdraw',p).onclick=()=>withdrawCash(parseAmount($('#slx-stock-withdraw',p).value)).then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
@@ -702,7 +754,7 @@
     if(fallback) fallback.innerHTML='<option value="">None</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===currentFallback?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
   }
 
-  function openPanel() { style(); panel(); refreshTargetSelect(); renderPortfolio(); renderBenefitValues(); renderAdvisor(); renderTradeAssistant(); renderActionLog(); S.panel.dataset.open='1'; }
+  function openPanel() { style(); panel(); refreshTargetSelect(); renderPortfolio(); renderBenefitValues(); renderAdvisor(); renderOptimizer(); renderTradeAssistant(); renderActionLog(); S.panel.dataset.open='1'; }
 
   function managerLauncher() {
     if($('#slx-stock-open')) return;
