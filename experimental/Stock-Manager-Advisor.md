@@ -3,7 +3,7 @@
 > Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
 
 ## Current version
-**v0.7.0**
+**v0.7.1**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.7.0** completes the experimental 0.5.8→0.7 milestone with watchlist/favorites, near-benefit alerts, target lock, diagnostics, search, compact mode and local settings/history import-export.
+**v0.7.1** completes the previously listed roadmap gaps: favorite target presets, Sell-to-Cash target, dedicated searchable transaction history, configurable near-benefit threshold and a user-confirmed guided SELL → BUY rebalance workflow.
 
 ## Experimental rules
 - Do **not** add this script to `scripts.json` yet.
@@ -50,6 +50,20 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Public/Hub integration only after the experimental build is stable.
 
 ## Changelog
+### v0.7.1 — Roadmap Completion
+
+- Added a separate **Favorite Targets** list, independent from the general stock watchlist.
+- Added **Sell → Cash** with a configurable cash target; Benefit Lock limits shares that may be sold.
+- Added dedicated persistent **Transaction History** (up to 200 BUY/SELL records), separate from the general Action Log.
+- Transaction History includes BUY/SELL filter, text search, timestamp, shares, estimated value, status and server/log message.
+- Added an inline **Near Benefit %** control; the existing near-benefit alert threshold is now user configurable.
+- Added **Execute Rebalance**, a guided two-phase SELL → BUY flow using only free/excess shares for funding and preserving protected benefit floors.
+- Guided Rebalance requires explicit confirmation before the SELL phase and a second explicit confirmation before BUY.
+- Dry Run, trade serialization, 1.5 second cooldown and Action Log remain active for every guided transaction.
+- Added a History shortcut directly in the Stock Market toolbar.
+- API key remains excluded from Export/Import backup data.
+- This closes the outstanding feature ideas previously listed for the 0.7 roadmap.
+
 ### v0.7.0 — UX, Search, Backup & Diagnostics
 
 - Added stock search directly in the Stock Market workspace.
