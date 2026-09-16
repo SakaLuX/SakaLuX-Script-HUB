@@ -3,12 +3,12 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.42**
+**v1.9.43**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
 - Detects installed, missing and outdated registered SakaLuX add-ons.
-- Gives installed modules a native ON/OFF switch plus one OPEN or SETTINGS action.
+- Gives installed modules native INFO, NEW, ON/OFF and OPEN/SETTINGS controls.
 - **CHECK** refreshes the live registry and verifies available updates.
 - **UPDATE** refreshes the registry/update state before opening installers.
 - Revalidates update status against the actually installed version to avoid stale alerts.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.42** Performance/UI optimization release: adds the shared single-instance SakaLuX performance foundation used across compatible scripts, synchronizes optimized module versions, and keeps the Hub as the canonical visual design reference.
+**v1.9.43** Native module-card release center: adds per-module INFO/NEW controls, compact status-only cards, Greasy Fork public version checks, and stable SakaLuX panel footers.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,6 +54,15 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.43 — Native module information and release center
+
+- Adds INFO and NEW buttons directly to every managed module card.
+- Keeps only version, update state, ACTIVE/DISABLED state and last-check time on the compact card body.
+- INFO explains what each script does; NEW shows the current module release notes from `scripts.json`.
+- Restores Greasy Fork as the public version/update verification source for all registered modules.
+- Keeps the SakaLuX author footer stable inside managed module panels.
+- Removes the temporary standalone Hub Card UX layer.
+
 ### v1.9.41 — Fallback registry synchronization
 
 - Synchronizes all Hub offline fallback add-on versions with `scripts.json`.

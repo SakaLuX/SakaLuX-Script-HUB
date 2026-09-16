@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.42
+// @version      1.9.43
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.42';
+    const VERSION = '1.9.43';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.43',
+            date: '2026-09-16',
+            changes: [
+                'Adds native INFO and NEW controls to every managed module card.',
+                'Keeps module cards focused on version, update status, ACTIVE/DISABLED state and last-check time.',
+                'INFO explains exactly what a module does; NEW shows that module current release notes from scripts.json.',
+                'Uses Greasy Fork again as the official public version/update source for managed modules.',
+                'Stabilizes the Made with ❤️ by SakaLuX [2380374] footer inside managed module panels.',
+                'Removes the temporary standalone Hub Card UX userscript because its behavior is now native to Script Hub.'
+            ]
+        },
         {
             version: '1.9.40',
             date: '2026-09-15',
@@ -1461,7 +1473,88 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         return `<div class="slh-header"><div class="slh-headrow"><div class="slh-brand"><div class="slh-brand-icon">${icon}</div><div class="slh-brand-copy"><div class="slh-kicker">${escapeHtml(kicker)}</div><div class="slh-title">${escapeHtml(title)}</div><div class="slh-sub">${subtitle}</div></div></div><button class="slh-close" id="${closeId}" aria-label="Close">×</button></div></div>`;
     }
 
+
+    const MANAGED_PANEL_SELECTORS = [
+        '#sl-eg-panel',
+        '#sakalux-bt-settings',
+        '#sl-mr-settings',
+        '#sl-mi-panel',
+        '#slx-elim',
+        '[id^="slx-elim-"][id*="panel" i]',
+        '[id^="ci-"][id*="panel" i]',
+        '[class^="ci-"][class*="panel" i]',
+        '[class*=" ci-"][class*="panel" i]'
+    ];
+    let managedFooterObserver = null;
+
+    function ensureNativeCardStyles() {
+        if (document.getElementById('sakalux-hub-native-card-style')) return;
+        const style = document.createElement('style');
+        style.id = 'sakalux-hub-native-card-style';
+        style.textContent = `
+.slh-card .slh-description{display:none!important}
+.slh-card .slh-module-controls{display:flex!important;flex-direction:column!important;gap:7px!important;align-items:stretch!important;min-width:136px!important}
+.slh-card-tools{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%}
+.slh-card-tool{min-height:31px;padding:6px 8px;border-radius:9px;border:1px solid #3b4d63;background:linear-gradient(180deg,#182536,#111a25);color:#dbe8f7;font:800 9px/1 Arial,sans-serif;letter-spacing:.6px;box-shadow:inset 0 1px rgba(255,255,255,.04)}
+.slh-card-tool.info{border-color:#3c6da7;background:linear-gradient(180deg,#173353,#10243a)}
+.slh-card-tool.new{border-color:#6a4c83;background:linear-gradient(180deg,#33213f,#23172d);color:#ecdfff}
+.slh-card .slh-switch,.slh-card .slh-primary{width:100%!important;box-sizing:border-box!important}
+.sakalux-stable-module-footer{flex:0 0 auto!important;position:sticky!important;bottom:0!important;z-index:25!important;width:100%!important;box-sizing:border-box!important;text-align:center!important;padding:9px 10px!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#0c131b!important;color:#74869a!important;font:500 10px/1.3 Arial,sans-serif!important}
+.sakalux-stable-module-footer a{color:#5f9fe8!important;text-decoration:none!important}
+@media(max-width:700px){.slh-card .slh-module-controls{min-width:124px!important}.slh-card-tool{min-height:34px!important}}
+`;
+        (document.head || document.documentElement).appendChild(style);
+    }
+
+    function ensureManagedModuleFooters() {
+        const seen = new Set();
+        for (const selector of MANAGED_PANEL_SELECTORS) {
+            document.querySelectorAll(selector).forEach(panel => {
+                if (!(panel instanceof HTMLElement) || seen.has(panel)) return;
+                seen.add(panel);
+                let footer = panel.querySelector('[id^="sakalux-inline-footer-"], .sakalux-stable-module-footer');
+                if (!footer) {
+                    footer = document.createElement('div');
+                    footer.innerHTML = `Made with ❤️ by <a href="${PROFILE_URL}" target="_self" rel="noopener">SakaLuX [2380374]</a>`;
+                    footer.querySelector('a').onclick = event => { event.preventDefault(); location.href = PROFILE_URL; };
+                    panel.appendChild(footer);
+                }
+                footer.classList.add('sakalux-stable-module-footer');
+            });
+        }
+    }
+
+    function startManagedFooterObserver() {
+        if (managedFooterObserver) return;
+        managedFooterObserver = new MutationObserver(() => {
+            if (window.SakaLuXPerf?.debounce) window.SakaLuXPerf.debounce('hub-managed-footers', ensureManagedModuleFooters, 140);
+            else setTimeout(ensureManagedModuleFooters, 140);
+        });
+        managedFooterObserver.observe(document.documentElement, { childList: true, subtree: true });
+        ensureManagedModuleFooters();
+    }
+
+    function openModuleInfo(script) {
+        if (!script) return;
+        createOverlay(`${headerMarkup(script.name, 'What this module does', 'slhmi-close', script.icon || '🧩', 'MODULE INFORMATION')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(script.version || script.expectedVersion || '?')} <span class="slh-version-date">${escapeHtml(script.category || 'Other')}</span></div><div style="margin-top:8px">${escapeHtml(script.info || script.description || 'No module information available.')}</div></div><button class="slh-big-btn gray" id="slhmi-back">← BACK</button></div>`);
+        document.getElementById('slhmi-close').onclick = closeHub;
+        document.getElementById('slhmi-back').onclick = openHub;
+    }
+
+    function openModuleRelease(script) {
+        if (!script) return;
+        const release = script.release || {};
+        const notes = Array.isArray(release.notes) && release.notes.length
+            ? release.notes.map(note => `<div>• ${escapeHtml(note)}</div>`).join('')
+            : '<div>No release notes available yet.</div>';
+        createOverlay(`${headerMarkup(script.name, 'Current module release notes', 'slhmn-close', '✦', 'RELEASE CENTER')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version || script.version || script.expectedVersion || '?')} ${release.date ? `<span class="slh-version-date">${escapeHtml(release.date)}</span>` : ''}</div><div style="margin-top:8px">${notes}</div></div><button class="slh-big-btn gray" id="slhmn-back">← BACK</button></div>`);
+        document.getElementById('slhmn-close').onclick = closeHub;
+        document.getElementById('slhmn-back').onclick = openHub;
+    }
+
     function openHub() {
+        ensureNativeCardStyles();
+        startManagedFooterObserver();
         const registryClass = registryStatus === 'online' ? 'online' : '';
         createOverlay(`
             <div class="slh-header">
@@ -1561,12 +1654,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         const health = row.health;
         const update = row.update;
         const installed = getInstalledVersion(script);
-        const latest = update.data?.publishedLatest || update.data?.latest || script.expectedVersion || '?';
         const missing = health.state === 'missing';
-        let extra = '';
-        if (script.id === 'enhancer' && health.data) extra = `Inventory ${health.data.inventoryEntries ?? 0}`;
-        if (script.id === 'bazaar' && health.data) extra = (health.data.onEvents || health.data.onMessages) ? `Buyers ${health.data.buyers ?? 0}` : 'Standby';
-        if (script.id === 'mission-rewards' && health.data) extra = health.data.onMissions === false ? 'Standby' : `Rewards ${health.data.rewardCards ?? 0}`;
         const enabled = !missing && isModuleEnabled(script);
         const moduleApi = script.api();
         const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id));
@@ -1575,19 +1663,16 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'pending' ? 'info' : update.state === 'failed' ? 'bad' : 'muted';
         const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';
         const controls = missing
-            ? `<button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
-            : `<button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
+            ? `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
+            : `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
         return `<div class="slh-card ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''} ${!missing && !enabled ? 'off' : ''}">
             <div class="slh-icon">${script.icon || '🧩'}</div>
             <div class="slh-card-copy">
                 <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
-                ${script.description ? `<div class="slh-description">${escapeHtml(script.description)}</div>` : ''}
                 <div class="slh-chips">
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
-                    ${update.state === 'pending' ? `<span class="slh-chip muted">PUBLISHED v${escapeHtml(update.data?.publishedLatest || '?')} · REGISTRY v${escapeHtml(script.expectedVersion || '?')}</span>` : latest !== '?' && update.state === 'available' ? `<span class="slh-chip info">LATEST v${escapeHtml(latest)}</span>` : ''}
-                    ${extra ? `<span class="slh-chip muted">${escapeHtml(extra)}</span>` : ''}
                     ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
                 </div>
             </div>
@@ -1596,6 +1681,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
 
     function bindCards() {
+        document.querySelectorAll('[data-module-info]').forEach(button => { button.onclick = () => openModuleInfo(SCRIPTS.find(item => item.id === button.dataset.moduleInfo)); });
+        document.querySelectorAll('[data-module-new]').forEach(button => { button.onclick = () => openModuleRelease(SCRIPTS.find(item => item.id === button.dataset.moduleNew)); });
         document.querySelectorAll('[data-module-toggle]').forEach(button => {
             button.onclick = async () => {
                 const id = button.dataset.moduleToggle;
@@ -1646,6 +1733,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             if (typeof api[action.method] === 'function') {
                 recordUsage(id);
                 const result = await api[action.method]();
+                setTimeout(ensureManagedModuleFooters, 120);
                 if (result === false && action.fallbackUrl) { location.href = action.fallbackUrl; return; }
                 if (isPanelAction) closeHub(); else setTimeout(openHub, 100);
                 return;
