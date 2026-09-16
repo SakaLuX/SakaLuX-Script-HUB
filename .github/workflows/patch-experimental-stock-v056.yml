@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare patch helper
+        run: python .github/scripts/fix_patch_experimental_stock_v056_helper.py
       - name: Apply patch
         run: python .github/scripts/patch_experimental_stock_v056.py
       - name: Validate
