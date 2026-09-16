@@ -1,3 +1,4 @@
+# second-push trigger for the one-shot integration workflow
 name: Integrate native Hub card UX
 
 on:
@@ -171,12 +172,8 @@ jobs:
 
           s = s.replace("                const result = await api[action.method]();\n", "                const result = await api[action.method]();\n                setTimeout(ensureManagedModuleFooters, 120);\n", 1)
 
-          # Ensure a fresh cache generation after this structural Hub update.
-          s = s.replace("'SakaLuX_HUB_UPDATES_V", "'SakaLuX_HUB_UPDATES_V", 1)
-
           p.write_text(s, encoding='utf-8')
 
-          # Update the public information page if present.
           doc = Path('greasyfork/Script-Hub.md')
           if doc.exists():
               d = doc.read_text(encoding='utf-8')
@@ -186,7 +183,6 @@ jobs:
                   d = d.replace(anchor, anchor + '\n**v1.9.43** Native module-card release center: adds per-module INFO/NEW controls, compact status-only cards, Greasy Fork public checks, and stable SakaLuX panel footers.\n', 1)
               doc.write_text(d, encoding='utf-8')
 
-          # Temporary overlay no longer needed after native integration.
           Path('SakaLuX-Hub-Card-UX.user.js').unlink(missing_ok=True)
           PY
 
@@ -196,7 +192,6 @@ jobs:
           git commit -m "Hub v1.9.43 native module INFO and NEW controls"
           git push origin main
 
-          # Remove this one-shot workflow from the repository in the same follow-up commit.
           git rm -f .github/workflows/integrate-native-hub-card-ux.yml
           git commit -m "Remove one-shot Hub integration workflow"
           git push origin main
