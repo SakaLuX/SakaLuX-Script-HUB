@@ -1,0 +1,184 @@
+from pathlib import Path
+import re, json, shutil
+
+ROOT=Path('.')
+managed={
+  'SakaLuX-Enhancer-Guard.user.js':('1.3.36','1.3.37','enhancer','greasyfork/Enhancer-Guard.md','Enhancer Guard'),
+  'SakaLuX-Bazaar-Thanker-PDA.user.js':('5.3.28','5.3.29','bazaar','greasyfork/Bazaar-Thanker.md','Bazaar Thanker'),
+  'SakaLuX-Mission-Rewards.user.js':('1.0.23','1.0.24','mission-rewards','greasyfork/Mission-Rewards.md','Mission Rewards'),
+  'SakaLuX-Market-Intelligence.user.js':('1.17.24','1.17.25','market-intelligence','greasyfork/Market-Intelligence.md','Market Intelligence'),
+  'SakaLuX-Elimination-Assistant.user.js':('1.3.34','1.3.35','elimination-assistant','greasyfork/Elimination-Assistant.md','Elimination Assistant'),
+  'SakaLuX-Company-Intelligence-v1.0.0.user.js':('1.8.20','1.8.21','company-intelligence','greasyfork/Company-Intelligence.md','Company Intelligence'),
+}
+extra={
+  'SakaLuX-Chat-Intelligence.user.js':('1.2.10','1.2.11','greasyfork/Chat-Intelligence.md','Chat Intelligence'),
+  'SakaLuX-Account-Auditor.user.js':('1.3.5','1.3.6','greasyfork/Account-Auditor.md','Account Auditor'),
+  'SakaLuX-Suite.user.js':('0.9.913','0.9.914','greasyfork/SakaLuX-Suite.md','SakaLuX Suite'),
+}
+hub=('1.9.47','1.9.48')
+
+backup_dir=ROOT/'backups'/'ui-contract-2026-09-17'
+backup_dir.mkdir(parents=True,exist_ok=True)
+for f in ['SakaLuX-Script-Hub.user.js',*managed.keys(),*extra.keys(),'scripts.json']:
+    p=ROOT/f
+    if p.exists():
+        b=backup_dir/f
+        b.parent.mkdir(parents=True,exist_ok=True)
+        if not b.exists(): shutil.copy2(p,b)
+
+UNIVERSAL = r'''
+
+/* SakaLuX Mobile Surface Contract v2 — full-height + blur */
+(()=>{
+  'use strict';
+  if(window.__SakaLuXMobileSurfaceV2)return;
+  window.__SakaLuXMobileSurfaceV2=1;
+  const MOBILE=()=>matchMedia('(max-width: 820px)').matches;
+  const TITLES=['Script Hub','Enhancer Guard','Bazaar Thanker','Mission Rewards','Market Intelligence','Elimination Assistant','Company Intelligence','Account Auditor','SakaLuX Suite','Chat Intelligence'];
+  const style=document.createElement('style');
+  style.id='sakalux-mobile-surface-v2';
+  style.textContent=`@media(max-width:820px){
+    [data-slx-fullsheet-v2="1"]{position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}
+    [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important}
+    [data-slx-fullsheet-v2="1"] input,[data-slx-fullsheet-v2="1"] textarea,[data-slx-fullsheet-v2="1"] select{scroll-margin-bottom:38vh}
+  }`;
+  (document.head||document.documentElement).appendChild(style);
+  const visible=e=>{if(!e||!e.isConnected)return false;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&r.width>240&&r.height>180};
+  const findSheet=title=>{
+    const candidates=[];
+    for(const e of document.querySelectorAll('div,section,main,aside')){
+      if(!visible(e))continue;
+      const txt=e.innerText||''; if(!txt.includes(title))continue;
+      if(title!=='Script Hub'&&e.closest('#sakalux-hub-panel'))continue;
+      const s=getComputedStyle(e); if(!['fixed','absolute'].includes(s.position))continue;
+      const r=e.getBoundingClientRect(); candidates.push([r.width*r.height,e]);
+    }
+    candidates.sort((a,b)=>a[0]-b[0]); return candidates[0]?.[1]||null;
+  };
+  const apply=()=>{
+    if(!MOBILE())return;
+    for(const t of TITLES){
+      const p=findSheet(t); if(!p)continue;
+      p.dataset.slxFullsheetV2='1';
+      let a=p.parentElement;
+      for(let i=0;a&&i<3;i++,a=a.parentElement){
+        const s=getComputedStyle(a),r=a.getBoundingClientRect();
+        if(['fixed','absolute'].includes(s.position)&&r.width>=innerWidth*.9&&r.height>=innerHeight*.7){a.dataset.slxBackdropV2='1';break}
+      }
+    }
+  };
+  new MutationObserver(()=>requestAnimationFrame(apply)).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
+  addEventListener('resize',apply,{passive:true});setTimeout(apply,0);setTimeout(apply,350);setTimeout(apply,1200);
+})();
+'''
+
+HUB_PATCH = r'''
+
+/* SakaLuX Hub mobile card/runtime repair v1 */
+(()=>{
+  'use strict';
+  if(window.__SakaLuXHubCardRepairV1)return;window.__SakaLuXHubCardRepairV1=1;
+  const css=document.createElement('style');css.textContent=`@media(max-width:820px){
+    #sakalux-hub-panel{inset:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important;margin:0!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important}
+    [data-slx-action-grid="1"]{display:grid!important;grid-template-columns:minmax(92px,1fr) minmax(92px,1fr)!important;grid-template-rows:auto auto!important;gap:8px!important;align-items:stretch!important;min-width:200px!important;max-width:238px!important}
+    [data-slx-action-grid="1"]>button,[data-slx-action-grid="1"]>*{min-width:0!important;width:100%!important;margin:0!important}
+  }`;(document.head||document.documentElement).appendChild(css);
+  const txt=b=>(b?.textContent||'').trim().toUpperCase();
+  const repair=()=>{
+    if(!matchMedia('(max-width:820px)').matches)return;
+    const hub=document.getElementById('sakalux-hub-panel');if(!hub)return;
+    hub.dataset.slxFullsheetV2='1';
+    for(const info of [...hub.querySelectorAll('button')].filter(b=>txt(b)==='INFO')){
+      let a=info.parentElement;
+      for(let i=0;a&&i<5;i++,a=a.parentElement){
+        const bs=[...a.querySelectorAll(':scope > button, :scope > * > button')],labels=bs.map(txt);
+        if(labels.includes('INFO')&&labels.includes('NEW')&&labels.some(x=>x==='ON'||x==='OFF')&&labels.some(x=>x==='OPEN'||x==='SETTINGS')){a.dataset.slxActionGrid='1';break}
+      }
+    }
+  };
+  new MutationObserver(repair).observe(document.documentElement,{childList:true,subtree:true});setInterval(repair,1200);repair();
+})();
+'''
+
+COMPANY_PATCH = r'''
+
+/* SakaLuX Company whole-sheet scroll + footer repair v1 */
+(()=>{
+  'use strict';
+  if(window.__SakaLuXCompanySheetRepairV1)return;window.__SakaLuXCompanySheetRepairV1=1;
+  const profile='https://www.torn.com/profiles.php?XID=2380374';
+  const findPanel=()=>{
+    const arr=[];
+    for(const e of document.querySelectorAll('div,section,main,aside')){
+      const r=e.getBoundingClientRect(),s=getComputedStyle(e),t=e.innerText||'';
+      if(t.includes('Company Intelligence')&&!e.closest('#sakalux-hub-panel')&&r.width>260&&r.height>220&&['fixed','absolute'].includes(s.position))arr.push([r.width*r.height,e]);
+    }
+    arr.sort((a,b)=>a[0]-b[0]);return arr[0]?.[1]||null;
+  };
+  let touchY=0;
+  const repair=()=>{
+    if(!matchMedia('(max-width:820px)').matches)return;
+    const p=findPanel();if(!p)return;
+    p.dataset.slxFullsheetV2='1';
+    p.style.setProperty('overflow-y','auto','important');p.style.setProperty('overflow-x','hidden','important');p.style.setProperty('overscroll-behavior','contain','important');p.style.setProperty('-webkit-overflow-scrolling','touch','important');p.style.setProperty('touch-action','pan-y','important');
+    for(const e of p.querySelectorAll('div,section,main')){
+      if(e===p)continue;const r=e.getBoundingClientRect(),s=getComputedStyle(e);
+      if((s.overflowY==='auto'||s.overflowY==='scroll')&&e.scrollHeight>e.clientHeight+24&&r.height>120){e.style.setProperty('overflow-y','visible','important');e.style.setProperty('max-height','none','important');e.style.setProperty('height','auto','important')}
+    }
+    const candidates=[...p.querySelectorAll('div,a,span')].filter(e=>(e.textContent||'').includes('Made with')&&(e.textContent||'').includes('SakaLuX'));
+    if(candidates.length){const f=candidates.sort((a,b)=>a.children.length-b.children.length)[0];f.innerHTML=`<span style="color:#f59e0b;font-weight:800">Made with <span style="color:#ff5b6e">❤️</span> by</span> <a href="${profile}" target="_self" rel="noopener" style="color:#ff9f43!important;font-weight:900;text-decoration:none">SakaLuX [2380374]</a>`;f.style.setProperty('display','block','important');f.style.setProperty('width','100%','important');f.style.setProperty('text-align','center','important');f.style.setProperty('padding','12px 8px calc(12px + env(safe-area-inset-bottom))','important');f.style.setProperty('border-top','1px solid rgba(245,158,11,.32)','important');f.style.setProperty('background','rgba(8,13,19,.82)','important')}
+    if(!p.dataset.slxScrollBound){p.dataset.slxScrollBound='1';p.addEventListener('touchstart',e=>{touchY=e.touches?.[0]?.clientY||0},{passive:true});p.addEventListener('touchmove',e=>{const y=e.touches?.[0]?.clientY;if(!y)return;const d=touchY-y;touchY=y;if(Math.abs(d)>1)p.scrollTop+=d},{passive:true})}
+  };
+  new MutationObserver(()=>requestAnimationFrame(repair)).observe(document.documentElement,{childList:true,subtree:true});setInterval(repair,900);repair();
+})();
+'''
+
+def replace_version(text,old,new):
+    text=re.sub(r'(^//\s*@version\s+)'+re.escape(old)+r'(\s*$)',r'\g<1>'+new,text,count=1,flags=re.M)
+    for pat in [r"(const\s+VERSION\s*=\s*['\"])"+re.escape(old)+r"(['\"])",r"(const\s+V\s*=\s*['\"])"+re.escape(old)+r"(['\"])"]:
+        text=re.sub(pat,r'\g<1>'+new+r'\g<2>',text,count=1)
+    return text
+
+hp=ROOT/'SakaLuX-Script-Hub.user.js'
+t=replace_version(hp.read_text(encoding='utf-8'),*hub)
+if "version: '1.9.48'" not in t:
+    t=t.replace("const HUB_CHANGELOG = [","const HUB_CHANGELOG = [\n        { version: '1.9.48', date: '2026-09-17', changes: ['Makes Hub a true top-to-bottom mobile sheet with translucent blur.','Enforces INFO / ON-OFF / NEW / OPEN-SETTINGS as a runtime 2x2 module control block.','Introduces the shared SakaLuX full-height + blur surface contract.','Company Intelligence now uses whole-sheet scrolling and orange SakaLuX attribution.'] },",1)
+if 'SakaLuX Mobile Surface Contract v2' not in t:t+=UNIVERSAL+HUB_PATCH
+hp.write_text(t,encoding='utf-8')
+
+for f,(old,new,_,_,_) in managed.items():
+    p=ROOT/f;t=replace_version(p.read_text(encoding='utf-8'),old,new)
+    if 'SakaLuX Mobile Surface Contract v2' not in t:t+=UNIVERSAL
+    if f.startswith('SakaLuX-Company') and 'SakaLuX Company whole-sheet scroll + footer repair v1' not in t:t+=COMPANY_PATCH
+    p.write_text(t,encoding='utf-8')
+for f,(old,new,_,_) in extra.items():
+    p=ROOT/f;t=replace_version(p.read_text(encoding='utf-8'),old,new)
+    if 'SakaLuX Mobile Surface Contract v2' not in t:t+=UNIVERSAL
+    p.write_text(t,encoding='utf-8')
+
+rp=ROOT/'scripts.json';data=json.loads(rp.read_text(encoding='utf-8'));byid={v[2]:v for v in managed.values()}
+for s in data.get('scripts',[]):
+    if s.get('id') in byid:
+        old,new,_,_,name=byid[s['id']];s['version']=new
+        s['release']={'version':new,'date':'2026-09-17','notes':['Mobile sheet now uses the shared top-to-bottom SakaLuX surface contract.','Adds translucent background blur while the script sheet is open.']}
+        if s['id']=='company-intelligence':s['release']['notes']=['Whole Company Intelligence sheet is the mobile scroll surface, including previously non-scrollable areas.','Panel fills the available viewport top-to-bottom and uses shared translucent blur.','Made with ❤️ by SakaLuX [2380374] now uses the orange SakaLuX attribution treatment.']
+rp.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+def update_md(path,new,title,note):
+    p=ROOT/path
+    if not p.exists():return
+    s=p.read_text(encoding='utf-8')
+    s=re.sub(r'(## Current version\s*\n\*\*v)[^*]+(\*\*)',r'\g<1>'+new+r'\g<2>',s,count=1)
+    s=re.sub(r'(## Current release note\s*\n)(.*?)(?=\n## )',r'\1**v'+new+'** '+note+'\n',s,count=1,flags=re.S)
+    heading='### v'+new+' — Mobile full-height + blur contract\n- Opens the active mobile sheet from top to bottom of the available viewport.\n- Adds the shared translucent SakaLuX blur treatment.\n'
+    if title=='Company Intelligence':heading='### v'+new+' — Whole-sheet scroll and footer repair\n- Makes the complete Company sheet the mobile scroll surface.\n- Opens the sheet top-to-bottom with shared SakaLuX blur.\n- Restyles `Made with ❤️ by SakaLuX [2380374]` with the orange SakaLuX attribution treatment.\n'
+    marker='## Release history' if '## Release history' in s else ('## Changelog' if '## Changelog' in s else None)
+    if marker and ('### v'+new) not in s:s=s.replace(marker,marker+'\n'+heading,1)
+    p.write_text(s,encoding='utf-8')
+
+update_md('greasyfork/Script-Hub.md','1.9.48','Script Hub','makes Hub a true top-to-bottom mobile sheet, adds translucent blur, enforces the module 2x2 controls at runtime, and introduces the shared mobile surface contract.')
+for _,(_,new,_,md,name) in managed.items():
+    note='adds the shared top-to-bottom mobile sheet and translucent blur contract.'
+    if name=='Company Intelligence':note='fixes whole-sheet scrolling, full-height mobile placement, shared blur and the orange SakaLuX author footer.'
+    update_md(md,new,name,note)
+for _,(_,new,md,name) in extra.items():update_md(md,new,name,'adds the shared top-to-bottom mobile sheet and translucent blur contract where the script exposes a sheet/panel.')
