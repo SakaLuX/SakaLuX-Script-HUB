@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub TEST
 // @namespace    sakalux.script.hub
-// @version      1.9.65-test.2
+// @version      1.9.65-test.3
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.65-test.2';
+    const VERSION = '1.9.65-test.3';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2169,8 +2169,21 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         }
     }
 
+    window.__SLX_HUBTEST_STATE = window.__SLX_HUBTEST_STATE || {version: VERSION, listenerReady:false, eventReceived:false, openCalled:false, openSucceeded:false, openError:null};
+    window.__SLX_HUBTEST_STATE.listenerReady = true;
     document.addEventListener('sakalux-hub-test-open-request', () => {
-        try { openHub(); } catch (error) { console.error('[SakaLuX Hub TEST] direct open failed', error); }
+        const st = window.__SLX_HUBTEST_STATE;
+        st.eventReceived = true;
+        st.openCalled = true;
+        try {
+            openHub();
+            st.openSucceeded = true;
+            st.openError = null;
+        } catch (error) {
+            st.openSucceeded = false;
+            st.openError = String(error && (error.stack || error.message) || error);
+            console.error('[SakaLuX Hub TEST] direct open failed', error);
+        }
     });
 
     window.SakaLuXScriptHub = {
@@ -2317,9 +2330,38 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     (document.head||document.documentElement).appendChild(st);
   }
 
+  function showDiag(){
+    const prev=document.getElementById('sakalux-hubtest-diagnostic'); if(prev) prev.remove();
+    const st=window.__SLX_HUBTEST_STATE || {};
+    const overlays=[...document.querySelectorAll('[id*=hub][id*=overlay], .slh-overlay')].map(el=>{
+      const cs=getComputedStyle(el), r=el.getBoundingClientRect();
+      return {id:el.id||'', cls:el.className||'', display:cs.display, visibility:cs.visibility, opacity:cs.opacity, zIndex:cs.zIndex, width:r.width, height:r.height, top:r.top, left:r.left};
+    });
+    const box=document.createElement('div'); box.id='sakalux-hubtest-diagnostic';
+    box.style.cssText='position:fixed!important;inset:72px 8px 86px!important;z-index:2147483647!important;background:#07111c!important;color:#eef6ff!important;border:2px solid #ff9f32!important;border-radius:16px!important;padding:14px!important;overflow:auto!important;font:700 13px/1.45 monospace!important;white-space:pre-wrap!important;';
+    const api=window.SakaLuXScriptHub;
+    box.textContent='SakaLuX HUB TEST DIAGNOSTIC v1.9.65-test.3\n\n'+JSON.stringify({
+      state:st,
+      apiExists:!!api,
+      apiVersion:api?.version||null,
+      apiOpenType:typeof api?.open,
+      overlays,
+      url:location.href,
+      readyState:document.readyState,
+      innerWidth:innerWidth, innerHeight:innerHeight
+    },null,2);
+    const close=document.createElement('button'); close.textContent='CLOSE'; close.style.cssText='position:sticky;top:0;float:right;background:#17304b;color:#fff;border:1px solid #55708c;border-radius:8px;padding:8px 12px;margin:0 0 8px 8px;'; close.onclick=()=>box.remove(); box.prepend(close);
+    (document.body||document.documentElement).appendChild(box);
+  }
+
   function openRealHub(){
-    // TEST v2: direct same-script bridge. No dependency on Torn launchers or page globals.
+    const st=window.__SLX_HUBTEST_STATE || (window.__SLX_HUBTEST_STATE={});
+    st.buttonClicked=true; st.clickAt=Date.now();
     document.dispatchEvent(new CustomEvent('sakalux-hub-test-open-request', {detail:{source:'forced-test-launcher'}}));
+    setTimeout(()=>{
+      const overlay=document.querySelector('[id*=hub][id*=overlay], .slh-overlay');
+      if(!overlay) showDiag();
+    },350);
   }
 
   function mount(){
