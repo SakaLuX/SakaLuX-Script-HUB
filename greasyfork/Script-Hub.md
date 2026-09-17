@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.66**
+**v1.9.67**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.66** Restores the missing Hub IDS map and fixes the TornPDA runtime error that prevented Script Hub from opening.
+**v1.9.67** Synchronizes Stocks v0.7.11 and its compact UI/footer release details in the registry and offline fallback.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -34,7 +34,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 📈 SakaLuX Market Intelligence **v1.17.35**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.42**
 - 🏢 SakaLuX Company Intelligence **v1.8.31**
-- 📊 SakaLuX Stock Manager & Advisor **v0.7.9**
+- 📊 SakaLuX Stock Manager & Advisor **v0.7.11**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -56,6 +56,9 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 
 ## Release history / Changelog
 
+
+### v1.9.67 — Stocks UI release synchronization
+- Synchronizes Stocks v0.7.11 and its compact UI/footer release details in the registry and offline fallback.
 ### v1.9.66 — Hub open/runtime fix
 - Restores the missing `IDS` map used by launchers, overlay, panel and style selectors.
 - Fixes `ReferenceError: IDS is not defined`, which prevented the Hub from opening in TornPDA.

@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.7.10**
+**v0.7.11**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.7.10** Uses the shared SakaLuX full-sheet panel geometry, keeps the content as the scrollable area, and adds a stable Made with ❤️ by SakaLuX [2380374] footer at the bottom.
+**v0.7.11** Rounds the full Stocks sheet and author footer at the bottom; uses the same orange author line and 20px donation buttons as Script Hub. Compacts panel/inline action buttons to 32px, form fields to 34px and checkboxes to 18px; arranges vault/API controls in two columns. Keeps header and footer fixed around scrolling content, sizes the sheet to the TornPDA host, removes mobile blur/transitions and installs footer styles once.
 
 ## Installation and Hub integration
 - Install/update the public release through Greasy Fork script 596192. GitHub remains the canonical source repository.
@@ -52,6 +52,12 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 
 ## Changelog
 
+
+### v0.7.11 — Compact UI and rounded Hub footer
+
+- Rounds the full Stocks sheet and author footer at the bottom; uses the same orange author line and 20px donation buttons as Script Hub.
+- Compacts panel/inline action buttons to 32px, form fields to 34px and checkboxes to 18px; arranges vault/API controls in two columns.
+- Keeps header and footer fixed around scrolling content, sizes the sheet to the TornPDA host, removes mobile blur/transitions and installs footer styles once.
 ### v0.7.9 — Shared panel geometry and stable footer
 
 - Matches the full-sheet shape used by the other SakaLuX managed modules.

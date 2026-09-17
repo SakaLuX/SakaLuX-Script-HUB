@@ -366,16 +366,17 @@
         }
       ],
       "release": {
-        "version": "0.7.10",
+        "version": "0.7.11",
         "date": "2026-09-17",
         "notes": [
-          "Matches Script Hub bottom donation panel with SEND MONEY and SEND ITEMS controls.",
-          "Keeps the SakaLuX author footer as a separate stable bottom row."
+          "Rounds the full Stocks sheet and author footer at the bottom; uses the same orange author line and 20px donation buttons as Script Hub.",
+          "Compacts panel/inline action buttons to 32px, form fields to 34px and checkboxes to 18px; arranges vault/API controls in two columns.",
+          "Keeps header and footer fixed around scrolling content, sizes the sheet to the TornPDA host, removes mobile blur/transitions and installs footer styles once."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.7.10"
+      "version": "0.7.11"
     }
   ]
 }

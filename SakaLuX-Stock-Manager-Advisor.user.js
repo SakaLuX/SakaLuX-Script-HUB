@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.10
+// @version      0.7.11
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -53,7 +53,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.10',
+    version: '0.7.11',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -1407,20 +1407,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 `;
 
     s.textContent += `
-/* v0.7.9 shared SakaLuX full-sheet geometry */
-#slx-stock-panel{box-sizing:border-box!important;align-items:flex-start!important;justify-content:center!important;overflow:hidden!important;padding:4px 4px 36px!important}
-#slx-stock-panel .card{display:flex!important;flex-direction:column!important;width:min(780px,100%)!important;height:calc(100dvh - 40px)!important;max-height:calc(100dvh - 40px)!important;min-height:0!important;margin:0 auto!important;border-radius:14px!important;overflow:hidden!important}
-#slx-stock-panel .head{flex:0 0 auto!important}
-#slx-stock-panel .body{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
-#slx-stock-panel .slx-stock-footer{flex:0 0 44px!important;min-height:44px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;padding:10px 12px!important;border-top:1px solid rgba(142,170,201,.22)!important;background:#0b1118!important;color:#b7c5d4!important;font:800 11px/1.2 Inter,Arial,sans-serif!important;white-space:nowrap!important;visibility:visible!important;opacity:1!important;overflow:visible!important}
-#slx-stock-panel .slx-stock-footer a{color:#e7a34b!important;text-decoration:none!important;font-weight:900!important;margin-left:4px!important}
-@media(max-width:700px){
-  #slx-stock-panel{padding:0 4px 36px!important;background:rgba(3,7,11,.84)!important}
-  #slx-stock-panel .card{width:100%!important;height:calc(100dvh - 36px)!important;max-height:calc(100dvh - 36px)!important;border-radius:14px 14px 0 0!important}
-  #slx-stock-panel .head{padding:11px 12px!important}
-  #slx-stock-panel .body{padding:9px!important;gap:8px!important}
-  #slx-stock-panel .slx-stock-footer{flex-basis:42px!important;min-height:42px!important;padding:9px 8px!important}
-}
+
 `;
     (document.head||document.documentElement).appendChild(s);
   }
@@ -1431,7 +1418,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     p.innerHTML=`<div class="card"><div class="head"><div>📊</div><h2>${APP.name} <span class="muted">v${APP.version}</span></h2><button class="close" type="button">×</button></div><div class="body">
       <div class="section"><div class="api-head"><div class="title">Torn API Key</div><span id="slx-stock-api-badge" class="api-badge">${get(K.api)?'Saved':'Not configured'}</span></div>
         <div class="api-key-row"><input id="slx-stock-api" type="password" autocomplete="off" placeholder="Paste Torn API key"><button id="slx-api-show" type="button" title="Show / hide API key">👁</button></div>
-        <div class="actions"><button id="slx-api-save" class="primary" type="button">Save Key</button><button id="slx-api-test" type="button">Test & Sync</button><button id="slx-api-create" type="button">Create Required Key</button><button id="slx-api-clear" class="danger" type="button">Clear</button></div>
+        <div class="actions slx-api-actions"><button id="slx-api-save" class="primary" type="button">Save Key</button><button id="slx-api-test" type="button">Test & Sync</button><button id="slx-api-create" type="button">Create Required Key</button><button id="slx-api-clear" class="danger" type="button">Clear</button></div>
         <div class="api-help">Required selections: <b>user → money, stocks</b> and <b>torn → stocks</b>. The key is stored locally in this script.</div>
       </div>
       <div class="section"><div class="title">Vault & Panic v2</div><div class="grid">
@@ -1441,8 +1428,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         <label>Withdraw amount <input id="slx-stock-withdraw" value="${esc(get(K.withdraw,'1m'))}" placeholder="e.g. 1m"></label>
         <label>PANIC keep cash <input id="slx-panic-keep" value="${esc(get(K.panicKeep,get(K.keep,'0')))}" placeholder="e.g. 100k"></label>
         <label>PANIC max spend <input id="slx-panic-max" value="${esc(get(K.panicMax,'0'))}" placeholder="0 = unlimited"></label>
-      </div><div class="actions"><button id="slx-vault-max" class="primary">Vault Max</button><button id="slx-vault-keep">Vault (Keep)</button><button id="slx-withdraw">Withdraw</button><button id="slx-withdraw-all">Withdraw All</button></div>
-      <div class="actions"><label><input id="slx-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-panic-confirm" type="checkbox"> Confirm Panic</label><label><input id="slx-panic-use-all" type="checkbox"> PANIC uses 100% cash</label><button id="slx-panic-preview-btn" type="button">Preview PANIC</button></div>
+      </div><div class="actions slx-vault-actions"><button id="slx-vault-max" class="primary">Vault Max</button><button id="slx-vault-keep">Vault (Keep)</button><button id="slx-withdraw">Withdraw</button><button id="slx-withdraw-all">Withdraw All</button></div>
+      <div class="actions slx-safety-options"><label><input id="slx-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-panic-confirm" type="checkbox"> Confirm Panic</label><label><input id="slx-panic-use-all" type="checkbox"> PANIC uses 100% cash</label><button id="slx-panic-preview-btn" type="button">Preview PANIC</button></div>
       <div id="slx-panic-preview" class="panic-preview">Preview shows target, exact shares, estimated spend and cash remaining before any order is sent.</div></div>
       <div class="section"><div class="title">Safety</div><div class="safety-grid"><label><input id="slx-dry-run" type="checkbox"> Dry Run · calculate/log only, never send BUY/SELL</label><div class="muted">Trades are serialized and protected by a 1.5s anti-double-click cooldown.</div></div></div>
       <div class="section"><div class="api-head"><div class="title">Transaction History</div><div><select id="slx-tx-filter"><option value="all">All</option><option value="buy">BUY</option><option value="sell">SELL</option></select> <input id="slx-tx-search" placeholder="Search symbol/status…" style="max-width:170px"></div></div><div id="slx-stock-tx-history" class="action-list muted">No transactions yet.</div></div>
@@ -1464,14 +1451,6 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 <div id="slx-stock-author-footer">Made with ❤️ by&nbsp;<a href="https://www.torn.com/profiles.php?XID=2380374" target="_blank" rel="noopener noreferrer">SakaLuX [2380374]</a></div>
 </div>`;
     
-const slxStockFooterStyle=document.createElement('style'); slxStockFooterStyle.textContent=`
-#slx-stock-donation-wrap{flex:0 0 auto;background:#0b1118;border-top:1px solid #243447;padding:8px 10px 0}
-#slx-stock-donation-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-#slx-stock-donation-row button{height:40px;min-height:40px;border:1px solid #34465b;border-radius:10px;background:#111a24;color:#edf3fa;font-weight:700;font-size:12px;letter-spacing:.02em}
-#slx-stock-author-footer{height:34px;display:flex;align-items:center;justify-content:center;border-top:1px solid #243447;background:#0b1118;color:#93a4b7;font-size:12px;flex:0 0 auto}
-#slx-stock-author-footer a{color:#4f8fe8;text-decoration:none;font-weight:700}
-@media(max-width:700px){#slx-stock-donation-wrap{padding:8px 10px 0}#slx-stock-donation-row{gap:8px}#slx-stock-donation-row button{height:38px;min-height:38px;font-size:11px}#slx-stock-author-footer{height:32px;font-size:11px}}
-`; document.head.appendChild(slxStockFooterStyle);
 document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     $('.close',p).onclick=()=>p.dataset.open='0';
     $('#slx-stock-api',p).value=get(K.api);
@@ -1567,6 +1546,40 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 #slx-stock-panic{border-radius:13px!important;box-shadow:0 10px 28px rgba(0,0,0,.42)!important}
 .slx-stock-row-tools{border-color:rgba(142,170,201,.20)!important;background:linear-gradient(180deg,rgba(17,26,36,.94),rgba(10,16,23,.95))!important;border-radius:12px!important;box-shadow:inset 0 1px rgba(255,255,255,.025)}
 @media(max-width:620px){#slx-stock-panel{padding:42px 5px 86px}#slx-stock-inline{border-radius:16px}#slx-stock-inline .slx-inline-head{align-items:flex-start;flex-wrap:wrap}#slx-stock-inline .slx-inline-head-actions{width:100%;display:grid;grid-template-columns:repeat(5,1fr)}#slx-stock-inline .slx-inline-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-inline .slx-inline-nav{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-inline .slx-inline-target{grid-template-columns:1fr 92px}#slx-stock-inline .slx-inline-actions{grid-template-columns:repeat(2,minmax(0,1fr))}#slx-stock-inline .slx-inline-presets{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Compact Stocks UI; isolated from shared userscript control styles. */
+#slx-stock-panel#slx-stock-panel{inset:0!important;box-sizing:border-box!important;padding:4px 4px 36px!important;overflow:hidden!important;align-items:stretch!important;justify-content:center!important;backdrop-filter:none!important}
+#slx-stock-panel#slx-stock-panel>.card{display:flex!important;flex-direction:column!important;box-sizing:border-box!important;width:min(780px,100%)!important;height:100%!important;max-height:100%!important;min-height:0!important;margin:0 auto!important;border-radius:14px!important;overflow:hidden!important}
+#slx-stock-panel#slx-stock-panel .head{flex:0 0 auto!important;padding:10px 12px!important;gap:8px}
+#slx-stock-panel#slx-stock-panel h2{font-size:15px!important;line-height:1.25}
+#slx-stock-panel#slx-stock-panel .body{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;padding:9px!important;gap:8px!important}
+#slx-stock-panel#slx-stock-panel .section{padding:9px;border-radius:11px}
+#slx-stock-panel#slx-stock-panel button,#slx-stock-inline#slx-stock-inline button{box-sizing:border-box!important;min-height:32px!important;padding:5px 8px!important;font-size:11px!important;line-height:1.2!important;border-radius:9px!important}
+#slx-stock-panel#slx-stock-panel .close{width:32px!important;height:32px!important;flex:0 0 32px}
+#slx-stock-panel#slx-stock-panel input:not([type="checkbox"]),#slx-stock-panel#slx-stock-panel select,#slx-stock-inline#slx-stock-inline input:not([type="checkbox"]):not([type="file"]),#slx-stock-inline#slx-stock-inline select{box-sizing:border-box!important;min-height:34px!important;min-width:0!important;max-width:100%!important;padding:6px 8px!important;font-size:12px!important;border-radius:9px!important}
+#slx-stock-panel#slx-stock-panel .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}
+#slx-stock-panel#slx-stock-panel .grid input,#slx-stock-panel#slx-stock-panel .grid select{width:100%!important}
+#slx-stock-panel#slx-stock-panel .api-key-row{grid-template-columns:minmax(0,1fr) 34px}
+#slx-stock-panel#slx-stock-panel .api-key-row input{width:100%!important}
+#slx-stock-panel#slx-stock-panel .actions{gap:6px;align-items:center}
+#slx-stock-panel#slx-stock-panel .slx-api-actions,#slx-stock-panel#slx-stock-panel .slx-vault-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+#slx-stock-panel#slx-stock-panel .slx-safety-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#slx-stock-panel#slx-stock-panel .slx-safety-options>label:nth-child(3),#slx-stock-panel#slx-stock-panel .slx-safety-options>button{grid-column:1/-1}
+#slx-stock-panel#slx-stock-panel .actions>label,#slx-stock-panel#slx-stock-panel .safety-grid>label,#slx-stock-inline#slx-stock-inline .slx-inline-options>label,#slx-stock-inline#slx-stock-inline .slx-inline-config-actions>label{display:flex;align-items:center;gap:6px;font-size:11px;line-height:1.3}
+#slx-stock-panel#slx-stock-panel input[type="checkbox"],#slx-stock-inline#slx-stock-inline input[type="checkbox"]{appearance:auto!important;box-sizing:border-box!important;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;max-width:18px!important;max-height:18px!important;flex:0 0 18px!important;padding:0!important;margin:0!important;accent-color:#168bea;box-shadow:none!important}
+#slx-stock-panel#slx-stock-panel #slx-stock-donation-wrap{box-sizing:border-box!important;flex:0 0 28px!important;height:28px!important;min-height:28px!important;padding:4px 14px!important;margin:0!important;width:100%!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;border-radius:10px 10px 0 0!important;overflow:hidden!important}
+#slx-stock-panel#slx-stock-panel #slx-stock-donation-row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;height:20px!important}
+#slx-stock-panel#slx-stock-panel #slx-stock-donation-row button{height:20px!important;min-height:20px!important;max-height:20px!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#151f2a!important;color:#b9c7d6!important;font-size:8px!important;font-weight:900!important;line-height:1.2!important;letter-spacing:.04em!important}
+#slx-stock-panel#slx-stock-panel #slx-stock-author-footer{box-sizing:border-box!important;flex:0 0 22px!important;height:22px!important;min-height:22px!important;max-height:22px!important;padding:0 6px!important;margin:0!important;width:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;background:#080d13!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important;font:500 9px/20px Inter,Arial,sans-serif!important;border-radius:0 0 14px 14px!important;overflow:hidden!important}
+#slx-stock-panel#slx-stock-panel #slx-stock-author-footer a{color:#78aef2!important;text-decoration:none!important;font-weight:900!important}
+@media(max-width:820px){
+#slx-stock-panel#slx-stock-panel{inset:0 4px 36px!important;padding:0!important;background:transparent!important;border-radius:14px!important}
+#slx-stock-panel#slx-stock-panel>.card{width:100%!important}
+#slx-stock-panel#slx-stock-panel .head{background:linear-gradient(155deg,#18212d,#101720 72%)!important}
+#slx-stock-panel#slx-stock-panel button,#slx-stock-inline#slx-stock-inline button{transition:none!important}
+}
+@media(max-width:340px){#slx-stock-panel#slx-stock-panel .grid{grid-template-columns:1fr!important}}
+
 `;
     document.head.appendChild(st);
   }
