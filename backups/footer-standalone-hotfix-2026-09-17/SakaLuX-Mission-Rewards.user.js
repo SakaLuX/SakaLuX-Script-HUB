@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.37
+// @version      1.0.36
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,13 +73,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.37'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.36'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
-  const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];
+  const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence'];
   const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
 
   function registerSelf(){
@@ -1105,7 +1105,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
 /* SakaLuX Hub footer v3: native module root only; compact donation controls. */
 (()=>{
- const selector="#sl-mr-settings-panel",id="sakalux-inline-footer-mission-rewards",profile='https://www.torn.com/profiles.php?XID=2380374';
+ const selector="#sl-mr-settings",id="sakalux-inline-footer-mission-rewards",profile='https://www.torn.com/profiles.php?XID=2380374';
  const st=document.createElement('style');st.textContent=`
  #${id}#${id}{position:sticky!important;bottom:0!important;inset-inline:auto!important;display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;max-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;z-index:5!important;font-family:Arial,sans-serif!important;overflow:hidden!important;border-radius:10px!important}
  #${id}#${id} *{box-sizing:border-box!important}
@@ -1116,7 +1116,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  #${id}#${id} .slh-author{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}
  `;(document.head||document.documentElement).appendChild(st);
  function ensure(){
-  const panel=document.querySelector(selector);if(!panel)return;
+  const panel=document.querySelector(selector);if(!panel||panel.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return;
   if(panel.querySelector('#'+id))return;
   const f=document.createElement('div');f.id=id;
   f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+profile+'">SakaLuX [2380374]</a></div>';
@@ -1132,13 +1132,4 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
   scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
  }).observe(document.body,{childList:true,subtree:true});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
-
-/* SAKALUX_FORCE_FOOTER_V5_MISSION */
-(()=>{
- const PANEL='#sl-mr-settings-panel',ID='sakalux-inline-footer-mission-rewards',PROFILE='https://www.torn.com/profiles.php?XID=2380374';
- function ensure(){const panel=document.querySelector(PANEL);if(!panel)return;let f=panel.querySelector('#'+ID);if(f)return;f=document.createElement('div');f.id=ID;f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+PROFILE+'">SakaLuX [2380374]</a></div>';f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>location.href=PROFILE);panel.appendChild(f);}
- const kick=()=>{ensure();requestAnimationFrame(ensure);setTimeout(ensure,100);setTimeout(ensure,300)};
- new MutationObserver(kick).observe(document.body||document.documentElement,{childList:true,subtree:true});
- kick();
 })();
