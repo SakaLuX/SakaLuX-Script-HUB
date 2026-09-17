@@ -1,0 +1,1 @@
+Backup anchor for Stocks footer parity work. Pre-change main commit: 9055cbb9dd61db4eaedc0af692ac507b0e50d6fd
