@@ -310,15 +310,15 @@
         }
       ],
       "release": {
-        "version": "1.8.28",
+        "version": "1.8.29",
         "date": "2026-09-17",
         "notes": [
-          "Fixes Company panel scrolling: header and Overview/other tabs remain fixed, only the body scrolls, and the full-width 50px footer stays at the bottom. Removes leftover shell bottom padding and the legacy whole-sheet scroll repair."
+          "Refresh prioritizes fresh job status over cached company profiles. Confirmed departure clears current company, employee, stock and effectiveness caches while preserving historical snapshots and planning records."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.28"
+      "version": "1.8.29"
     }
   ]
 }

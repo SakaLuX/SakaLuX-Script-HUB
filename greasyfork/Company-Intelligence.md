@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.28**
+**v1.8.29**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -22,7 +22,8 @@
 
 
 
-**v1.8.28** Fixes Company panel scrolling: header and Overview/other tabs remain fixed, only the body scrolls, and the full-width 50px footer stays at the bottom. Removes leftover shell bottom padding and the legacy whole-sheet scroll repair.
+
+**v1.8.29** Refresh prioritizes fresh job status over cached company profiles. Confirmed departure clears current company, employee, stock and effectiveness caches while preserving historical snapshots and planning records.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -47,6 +48,10 @@
 **All Rights Reserved**
 
 ## Release history
+
+### v1.8.29 — Current employment refresh
+- Refresh prioritizes fresh job status over cached company profiles. Confirmed departure clears current company, employee, stock and effectiveness caches while preserving historical snapshots and planning records.
+
 
 ### v1.8.28 — Fixed navigation/footer and content scrolling
 - Fixes Company panel scrolling: header and Overview/other tabs remain fixed, only the body scrolls, and the full-width 50px footer stays at the bottom. Removes leftover shell bottom padding and the legacy whole-sheet scroll repair.
