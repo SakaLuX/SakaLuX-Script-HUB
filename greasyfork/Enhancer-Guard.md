@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.3.42** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.3.42** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.

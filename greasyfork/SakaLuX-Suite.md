@@ -35,7 +35,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.916** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v0.9.916** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
