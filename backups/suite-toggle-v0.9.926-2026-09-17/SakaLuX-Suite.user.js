@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.926
+// @version      0.9.925
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -172,7 +172,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.926';
+  const VERSION = '0.9.925';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -1202,65 +1202,50 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         opacity: .35;
         cursor: not-allowed;
       }
-      /* Switch geometry must override shared button themes on TornPDA. */
-      #${SUITE.panelId} button.sakalux-switch {
-        box-sizing: border-box !important;
-        position: relative !important;
-        display: inline-block !important;
-        width: 46px !important;
-        min-width: 46px !important;
-        max-width: 46px !important;
-        height: 25px !important;
-        min-height: 25px !important;
-        max-height: 25px !important;
-        flex: 0 0 46px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: 1px solid #546276 !important;
-        border-radius: 999px !important;
-        background: #394554 !important;
+      .sakalux-switch {
+        position: relative;
+        width: 46px;
+        height: 25px;
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 0;
+        border: 1px solid #404652;
+        border-radius: 999px;
+        background: #292d35;
         cursor: pointer;
-        appearance: none !important;
-        -webkit-appearance: none !important;
-        box-shadow: none !important;
-        transform: none !important;
-        overflow: hidden !important;
-        transition: border-color .18s ease, background-color .18s ease !important;
+        appearance: none;
+        box-shadow: none;
+        transition:
+          border-color .18s ease,
+          background-color .18s ease;
       }
-      #${SUITE.panelId} button.sakalux-switch::before {
-        content: none !important;
+      .sakalux-switch::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 17px;
+        height: 17px;
+        border-radius: 50%;
+        background: #8c939e;
+        transition:
+          left .18s ease,
+          background-color .18s ease;
       }
-      #${SUITE.panelId} button.sakalux-switch::after {
-        content: "" !important;
-        position: absolute !important;
-        top: 3px !important;
-        left: 3px !important;
-        right: auto !important;
-        bottom: auto !important;
-        width: 17px !important;
-        height: 17px !important;
-        margin: 0 !important;
-        border: 0 !important;
-        border-radius: 50% !important;
-        background: #c5ced9 !important;
-        box-shadow: none !important;
-        transform: none !important;
-        transition: left .18s ease, background-color .18s ease !important;
+      .sakalux-switch[aria-checked="true"] {
+        border-color: rgba(216,179,95,.72);
+        background: rgba(216,179,95,.21);
       }
-      #${SUITE.panelId} button.sakalux-switch[aria-checked="true"] {
-        border-color: #bd9b4c !important;
-        background: #67562d !important;
+      .sakalux-switch[aria-checked="true"]::after {
+        left: 24px;
+        background: var(--sakalux-gold-bright);
       }
-      #${SUITE.panelId} button.sakalux-switch[aria-checked="true"]::after {
-        left: 24px !important;
-        background: #f0d16f !important;
+      .sakalux-switch:focus-visible {
+        outline: 2px solid rgba(216,179,95,.4);
+        outline-offset: 2px;
       }
-      #${SUITE.panelId} button.sakalux-switch:focus-visible {
-        outline: 2px solid #f0d16f !important;
-        outline-offset: 2px !important;
-      }
-      #${SUITE.panelId} button.sakalux-switch:disabled {
-        opacity: .35 !important;
+      .sakalux-switch:disabled {
+        opacity: .35;
         cursor: not-allowed;
       }
       .sakalux-suite-footer {

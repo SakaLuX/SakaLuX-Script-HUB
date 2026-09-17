@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.926**
+**v0.9.925**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -35,8 +35,6 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.926** restores compact pill-shaped module switches. Scoped switch styles override shared blue button themes and mobile minimum heights; the thumb slides between the gray OFF and gold ON states. The confirmed v0.9.925 panel layout is preserved.
-
 **v0.9.925** extends Master Control to 36px above the viewport bottom on mobile and TornPDA desktop-width touch layouts. Explicit viewport heights keep the module list scrollable and the footer at the bottom. The launcher and close behavior remain controlled by the existing open class.
 
 **v0.9.924** emergency hotfix restores the last working Master Control runtime after v0.9.923 prevented the Suite launcher from opening in TornPDA. The v0.9.923 coarse-pointer full-height override has been removed completely; launcher behavior is restored first, while the mobile-height adjustment will be reworked separately without touching the open path.
@@ -61,15 +59,6 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v0.9.926 — Module switch styling
-
-- Restores 46×25px pill switches with a 17px thumb centered vertically.
-- Overrides generic blue button backgrounds, square corners, padding and mobile minimum heights only for Suite module switches.
-- Preserves aria-checked, disabled states, keyboard focus and the existing module toggle handlers.
-- Uses gray OFF and gold ON states with sliding thumb feedback.
-- Preserves the confirmed panel height, content scrolling and footer geometry.
-- Includes a complete v0.9.925 script/description backup; JavaScript syntax validated.
 
 ### v0.9.925 — Master Control height near chat
 
