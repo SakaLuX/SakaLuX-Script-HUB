@@ -171,3 +171,5 @@
 
 ## Current release note — v1.8.34
 - Aligns the Company header and API controls with Elimination: compact Employee/Director selector, equal refresh/key/close buttons, tighter tabs and balanced API action buttons.
+
+- v1.8.36: Fixed TornPDA/mobile Company header overflow. Refresh, API key and Close buttons now stay permanently visible in the first header row, while Employee/Director uses a full-width second row. Shared standalone dock behavior is unchanged.
