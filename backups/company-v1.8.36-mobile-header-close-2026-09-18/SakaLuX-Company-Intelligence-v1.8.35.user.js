@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.36
+// @version      1.8.35
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -76,7 +76,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.36'});
+  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.35'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -851,7 +851,7 @@ function css(){
  .ci-roster-table td[data-label="MAN"],.ci-roster-table td[data-label="INT"],.ci-roster-table td[data-label="END"]{font-variant-numeric:tabular-nums!important}
  .ci-optimizer-table td[data-label="Suggested"] b{color:#7dd3fc!important}
 }
-@media(max-width:720px){#ci-root{inset:0 0 72px;padding:0;display:block;overflow:hidden;touch-action:pan-y;overscroll-behavior:contain}.ci-shell{width:100%;height:100%;min-height:0;border:0;border-radius:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:24px;box-sizing:border-box}.ci-grid,.ci-snapshots{grid-template-columns:1fr}.ci-head{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px 44px;grid-template-rows:auto auto;gap:6px;padding:7px}.ci-brand{grid-column:1/2;grid-row:1;min-width:0;overflow:hidden}.ci-brand b{font-size:13px;white-space:normal;line-height:1.05}.ci-brand small{font-size:10px;line-height:1.15;display:block}.ci-head>.ci-icon{width:44px;height:44px;min-width:44px;padding:0;display:grid;place-items:center;align-self:center}.ci-head>.ci-icon[data-act="refresh"]{grid-column:2;grid-row:1}.ci-head>.ci-icon[data-act="settings"]{grid-column:3;grid-row:1}.ci-head>.ci-icon[data-act="close"]{grid-column:4;grid-row:1}.ci-mode{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:1fr 1fr;width:100%;box-sizing:border-box}.ci-mode button{font-size:10px;padding:8px 7px;min-width:0}.ci-tabs{position:sticky;top:102px;z-index:2;padding:5px}.ci-tabs button{font-size:11px;padding:7px 8px}.ci-form{grid-template-columns:1fr}.ci-form .wide{grid-column:auto}#ci-launch{right:8px;bottom:72px}}
+@media(max-width:720px){#ci-root{inset:0 0 72px;padding:0;display:block;overflow:hidden;touch-action:pan-y;overscroll-behavior:contain}.ci-shell{width:100%;height:100%;min-height:0;border:0;border-radius:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:24px;box-sizing:border-box}.ci-grid,.ci-snapshots{grid-template-columns:1fr}.ci-head{padding:7px}.ci-brand b{font-size:13px}.ci-brand small{font-size:10px}.ci-mode button{font-size:10px;padding:7px}.ci-tabs{position:sticky;top:58px;z-index:2;padding:5px}.ci-tabs button{font-size:11px;padding:7px 8px}.ci-form{grid-template-columns:1fr}.ci-form .wide{grid-column:auto}#ci-launch{right:8px;bottom:72px}}
 `;document.head.appendChild(st);
 }
 function render(){
