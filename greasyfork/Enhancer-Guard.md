@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.36**
+**v1.3.37**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.3.36** PDA/mobile top-aligned sheet and compact Hub integration refinement.
+**v1.3.37** adds the shared top-to-bottom mobile sheet and translucent blur contract.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -36,6 +36,10 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history
+### v1.3.37 — Mobile full-height + blur contract
+- Opens the active mobile sheet from top to bottom of the available viewport.
+- Adds the shared translucent SakaLuX blur treatment.
+
 ### v1.3.36 — Mobile top alignment
 - Opens the script panel from the top of the TornPDA viewport.
 - Uses the shared SakaLuX top-alignment contract.
