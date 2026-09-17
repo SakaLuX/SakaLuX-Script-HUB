@@ -126,17 +126,16 @@
         }
       ],
       "release": {
-        "date": "2026-09-18",
-        "version": "1.0.39",
+        "date": "2026-09-17",
         "notes": [
-          "Removes the duplicate inline API Missing/key input from Mission settings.",
-          "Rebuilds dedicated Mission API Access to match Enhancer API Access layout and button geometry.",
-          "Keeps Mission Items/Ammo read-only permissions and existing save/check/clear behavior."
-        ]
+          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
+          "Ignores Mission/Hub settings and self-generated reward decorations in the reward observer to avoid redundant scans."
+        ],
+        "version": "1.0.35"
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.39"
+      "version": "1.0.38"
     },
     {
       "active": true,
