@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.37
+// @version      5.3.38
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -71,7 +71,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.37'});
+  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.38'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -967,8 +967,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         panel.style.cssText = 'position:fixed;z-index:999999;top:52px;left:50%;transform:translateX(-50%);width:min(94vw,640px);max-height:88vh;overflow:auto;background:linear-gradient(160deg,#111a26,#0b1119);color:#f8fafc;border:1px solid #334155;border-radius:18px;padding:18px;box-sizing:border-box;display:none;box-shadow:0 18px 55px rgba(0,0,0,.75);font-family:Arial,sans-serif;';
 
         panel.innerHTML = `
+            <div class="sbt-settings-head">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;"><div style="font-size:21px;font-weight:900;letter-spacing:.01em;">⚙️ SakaLuX Bazaar Thanker</div><span style="padding:5px 8px;border:1px solid #334155;border-radius:999px;background:#172235;color:#93c5fd;font-size:10px;font-weight:900;">PDA</span></div>
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:15px;">Version 5.3.29 · buyer messages and bazaar analytics</div>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:15px;">Version ${BAZAAR_VERSION} · buyer messages and bazaar analytics</div>
+            </div><div class="sbt-settings-content">
             <div id="sbtStats" style="background:linear-gradient(145deg,#172334,#111923);border:1px solid #334155;border-radius:12px;padding:12px;margin-bottom:15px;"></div>
             <label>Your Torn ID</label><input id="sbtSellerId" value="${escapeHtml(settings.sellerId)}" style="${inputStyle()}">
             <label>Bazaar URL</label><input id="sbtBazaarUrl" value="${escapeHtml(settings.bazaarUrl)}" style="${inputStyle()}">
@@ -995,7 +997,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
                 <button id="sbtReset" style="${buttonStyle('#555')}">RESET SETTINGS</button>
                 <button id="sbtResetHistory" style="${buttonStyle('#8b3030')}">🧹 RESET HISTORY</button>
                 <button id="sbtClose" style="${buttonStyle('#444')}">CLOSE</button>
-            </div>
+            </div></div>
         `;
 
         document.body.appendChild(panel);
@@ -1176,14 +1178,14 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.37';
+    const BAZAAR_VERSION='5.3.38';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
         createSettings();
         const panel = document.getElementById('sakalux-bt-settings');
         if (!panel) return false;
-        panel.style.display = 'block';
+        panel.style.display = 'flex';
         updateStats();
         return true;
     }
@@ -1423,3 +1425,14 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
 /* Compact donation controls and Elimination mobile panel geometry 5.3.37 */
 (()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sakalux-bt-settings#sakalux-bt-settings#sakalux-bt-settings{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border-radius:14px!important;overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
+
+/* Bazaar v5.3.38: fixed title/footer, separately scrollable settings. */
+(()=>{const s=document.createElement('style');s.textContent=`
+#sakalux-bt-settings#sakalux-bt-settings#sakalux-bt-settings{flex-direction:column!important;padding:0!important;overflow:hidden!important}
+#sakalux-bt-settings#sakalux-bt-settings>.sbt-settings-head{flex:0 0 auto!important;padding:14px 18px 0!important}
+#sakalux-bt-settings#sakalux-bt-settings>.sbt-settings-content{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0 18px 14px!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+#sakalux-bt-settings#sakalux-bt-settings .sbt-settings-content input,
+#sakalux-bt-settings#sakalux-bt-settings .sbt-settings-content textarea{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important}
+#sakalux-bt-settings#sakalux-bt-settings>#sakalux-inline-footer-bazaar-thanker{position:relative!important;inset:auto!important;flex:0 0 50px!important;width:100%!important;margin:0!important;padding:0!important;border-radius:10px 10px 14px 14px!important}
+@media(min-width:821px){#sakalux-bt-settings#sakalux-bt-settings#sakalux-bt-settings{height:min(820px,calc(100vh - 104px))!important}}
+`;(document.head||document.documentElement).appendChild(s)})();
