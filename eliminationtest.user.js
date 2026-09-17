@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant TEST
 // @namespace    sakalux.elimination.assistant.test
-// @version      1.3.40
+// @version      1.3.41
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -221,7 +221,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  */
 (() => {
 'use strict';
-const VERSION = '1.3.40';
+const VERSION = '1.3.41';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -599,5 +599,47 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #slx-elim #slx-safe-list-modal .slx-safe-row{gap:10px!important;padding:10px!important}
 #slx-elim #slx-safe-list-modal .slx-safe-player a{font-size:13px!important;overflow-wrap:anywhere!important}
 #slx-elim #slx-safe-list-modal .slx-safe-player small{font:11px/1.4 Arial,sans-serif!important}
+`;(document.head||document.documentElement).appendChild(s);
+})();
+
+/* Elimination TEST v1.3.41: API form fits within the panel and scrolls to manual save. */
+(()=>{
+ const s=document.createElement('style');s.id='slx-elim-test-api-1341';
+ s.textContent=`
+#slx-elim #slx-settings#slx-settings{
+ position:absolute!important;inset:0 0 32px!important;width:auto!important;height:auto!important;
+ min-height:0!important;max-height:none!important;max-width:none!important;
+ margin:0!important;padding:12px 12px 18px!important;box-sizing:border-box!important;
+ background:#0d1117!important;border-radius:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+ overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+ z-index:60!important;color:#e2e8f0!important;font:13px/1.4 Arial,sans-serif!important;
+}
+#slx-elim #slx-settings *,#slx-elim #slx-settings *::before,#slx-elim #slx-settings *::after{box-sizing:border-box!important}
+#slx-elim #slx-settings .slx-api-head{align-items:center!important;gap:10px!important}
+#slx-elim #slx-settings .slx-api-head>div{min-width:0!important;flex:1!important}
+#slx-elim #slx-settings .slx-api-head h3{margin:0!important;font:800 17px/1.25 Arial,sans-serif!important}
+#slx-elim #slx-settings .slx-api-box,#slx-elim #slx-settings .slx-manual-box{min-width:0!important;max-width:100%!important}
+#slx-elim #slx-settings label{display:block!important;margin:8px 0 4px!important;font:12px/1.4 Arial,sans-serif!important}
+#slx-elim #slx-settings input{
+ display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;
+ height:40px!important;min-height:40px!important;margin:0 0 10px!important;padding:9px 10px!important;
+ font:13px/1.4 Arial,sans-serif!important;border-radius:8px!important;
+}
+#slx-elim #slx-settings button{
+ min-width:0!important;max-width:100%!important;min-height:38px!important;
+ margin:0!important;padding:9px 10px!important;font:800 12px/1.25 Arial,sans-serif!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;border-radius:8px!important;
+}
+#slx-elim #slx-settings #slx-cancel{flex:0 0 36px!important}
+#slx-elim #slx-settings .slx-api-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+#slx-elim #slx-settings .slx-api-clear{margin-top:8px!important}
+#slx-elim #slx-settings .slx-api-create{margin:10px 0!important}
+#slx-elim #slx-settings .slx-api-status{flex-wrap:wrap!important}
+#slx-elim #slx-settings .slx-api-status span{min-width:0!important;overflow-wrap:anywhere!important}
+#slx-elim #slx-settings #slx-save-manual{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-height:42px!important;height:auto!important;margin:0!important;
+ padding:10px!important;line-height:1.3!important;
+}
 `;(document.head||document.documentElement).appendChild(s);
 })();
