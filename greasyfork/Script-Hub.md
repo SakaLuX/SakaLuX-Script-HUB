@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.46**
+**v1.9.47**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,17 +22,17 @@
 
 ## Current release note
 
-**v1.9.46** Right-side 2x2 module controls, compact Settings toggles, top-aligned SakaLuX sheets and corrected Company footer/scroll behavior.
+**v1.9.47** Right-side 2x2 module controls, compact Settings toggles, top-aligned SakaLuX sheets and corrected Company footer/scroll behavior.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.35**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.27**
-- 🎯 SakaLuX Mission Rewards **v1.0.22**
-- 📈 SakaLuX Market Intelligence **v1.17.23**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.33**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.36**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.28**
+- 🎯 SakaLuX Mission Rewards **v1.0.23**
+- 📈 SakaLuX Market Intelligence **v1.17.24**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.34**
 - 🏢 SakaLuX Company Intelligence **v1.8.20**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
@@ -54,6 +54,12 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.47 — Global mobile top alignment
+
+- Applies top alignment directly in Hub, managed modules and Chat Intelligence.
+- Enforces the compact right-side 2×2 Hub controls after legacy CSS.
+- Keeps Settings switches compact and uniform.
+
 ### v1.9.46 — Authoritative PDA layout correction
 
 - Keeps INFO, NEW, ON/OFF and OPEN/SETTINGS in a compact 2×2 block on the right side of managed module cards.

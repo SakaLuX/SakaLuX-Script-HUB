@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.22**
+**v1.0.23**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.0.22** PDA/mobile top-aligned sheet and compact Hub integration refinement.
+**v1.0.23** PDA/mobile top-aligned sheet and compact Hub integration refinement.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -34,6 +34,10 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history
+### v1.0.23 — Mobile top alignment
+- Opens the script panel from the top of the TornPDA viewport.
+- Uses the shared SakaLuX top-alignment contract.
+
 ### v1.0.22 — PDA top-aligned panel refinement
 
 - Opens the SakaLuX panel from the top of the available Torn viewport.

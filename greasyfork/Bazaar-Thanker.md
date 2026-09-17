@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.27**
+**v5.3.28**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.27** PDA/mobile top-aligned sheet and compact Hub integration refinement.
+**v5.3.28** PDA/mobile top-aligned sheet and compact Hub integration refinement.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -29,6 +29,10 @@ Generated thank-you text should be reviewed before sending. The script assists w
 **All Rights Reserved**
 
 ## Release history
+### v5.3.28 — Mobile top alignment
+- Opens the script panel from the top of the TornPDA viewport.
+- Uses the shared SakaLuX top-alignment contract.
+
 ### v5.3.27 — PDA top-aligned panel refinement
 
 - Opens the SakaLuX panel from the top of the available Torn viewport.
