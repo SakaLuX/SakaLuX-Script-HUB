@@ -7,14 +7,14 @@
       "name": "Enhancer Guard",
       "icon": "🛡️",
       "category": "Inventory",
-      "version": "1.3.39",
+      "version": "1.3.40",
       "description": "Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.",
       "info": "Enhancer Guard is the inventory-safety module for SakaLuX. It reads your Torn inventory through the configured API key, identifies Enhancer-related items, shows counts and status, and lets you protect important items from accidental sale through local protection rules. It exposes health/version state to Script Hub, supports refresh and hard-refresh actions, and includes dedicated API-key setup and TornPDA-friendly controls. It is informational and protective; it does not automate item sales or gameplay actions.",
       "release": {
-        "version": "1.3.39",
+        "version": "1.3.40",
         "date": "2026-09-17",
         "notes": [
-          "Restores Standalone panel opening by removing the shared full-sheet geometry mutation while keeping the module’s own native panel layout."
+          "Removes the periodic standalone render loop and throttles DOM reactions while Script Hub is active, reducing TornPDA scroll overhead."
         ]
       },
       "greasyForkId": "592698",
@@ -51,14 +51,14 @@
       "name": "Bazaar Thanker",
       "icon": "💬",
       "category": "Trading",
-      "version": "5.3.31",
+      "version": "5.3.32",
       "description": "Bazaar buyer grouping, thank-you messages, statistics and history management.",
       "info": "Bazaar Thanker is a Bazaar management and customer-history module. It groups buyers from Bazaar sales, prepares reusable thank-you messages, keeps local buyer history and statistics, highlights larger or repeat buyers, and provides quick access to relevant Bazaar and event information. It is designed for TornPDA and desktop userscript managers, stores working data locally, and can be configured directly from Script Hub. Its core thank-you workflow does not require a Torn API key.",
       "release": {
-        "version": "5.3.31",
+        "version": "5.3.32",
         "date": "2026-09-17",
         "notes": [
-          "Restores Standalone panel opening by removing the shared full-sheet geometry mutation while keeping the module’s own native panel layout."
+          "Removes the periodic standalone render loop and throttles DOM reactions while Script Hub is active, reducing TornPDA scroll overhead."
         ]
       },
       "greasyForkId": "592388",
@@ -96,14 +96,14 @@
       "name": "Mission Rewards",
       "icon": "🎯",
       "category": "Missions",
-      "version": "1.0.26",
+      "version": "1.0.27",
       "description": "Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.",
       "info": "Mission Rewards enhances Torn's Mission Shop with decision-support information. It calculates estimated market value and value per mission credit, shows reward context, tracks ammunition ownership, and helps identify weapon mods and other rewards you already own. It can use the shared Script Hub API key and refresh from the Hub while keeping normal Mission Shop interactions manual.",
       "release": {
-        "version": "1.0.26",
+        "version": "1.0.27",
         "date": "2026-09-17",
         "notes": [
-          "Restores Standalone panel opening by removing the shared full-sheet geometry mutation while keeping the module’s own native panel layout."
+          "Removes the periodic standalone render loop and throttles DOM reactions while Script Hub is active, reducing TornPDA scroll overhead."
         ]
       },
       "greasyForkId": "592711",
@@ -143,14 +143,14 @@
       "name": "Market Intelligence",
       "icon": "📈",
       "category": "Trading",
-      "version": "1.17.27",
+      "version": "1.17.28",
       "description": "Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.",
       "info": "Market Intelligence is the trading and travel analysis module. It provides Item Market price intelligence, comparisons and signals, Bazaar-flip support, loadout comparison, travel-profit tools, route and basket analysis, and API-access diagnostics. Market panels are scoped to relevant Torn pages and travel tools to travel pages. It is TornPDA-first and provides decision support rather than automated buying or selling.",
       "release": {
-        "version": "1.17.27",
+        "version": "1.17.28",
         "date": "2026-09-17",
         "notes": [
-          "Restores Standalone panel opening by removing the shared full-sheet geometry mutation while keeping the module’s own native panel layout."
+          "Removes the periodic standalone render loop and throttles DOM reactions while Script Hub is active, reducing TornPDA scroll overhead."
         ]
       },
       "greasyForkId": "592781",

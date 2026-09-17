@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.52**
+**v1.9.51**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,16 +22,16 @@
 
 ## Current release note
 
-**v1.9.52** fixes the mobile bottom actions/footer placement and reduces TornPDA scroll lag by cutting Hub and managed-module DOM observer work plus mobile compositor cost.
+**v1.9.51** reduces TornPDA lag by removing redundant document-wide DOM observers/scans, keeps only Managed Modules scrollable, and anchors the donation/actions footer compactly at the bottom to expose more module cards.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.40**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.32**
-- 🎯 SakaLuX Mission Rewards **v1.0.27**
-- 📈 SakaLuX Market Intelligence **v1.17.28**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.39**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.31**
+- 🎯 SakaLuX Mission Rewards **v1.0.26**
+- 📈 SakaLuX Market Intelligence **v1.17.27**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.36**
 - 🏢 SakaLuX Company Intelligence **v1.8.22**
 
@@ -54,14 +54,6 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
-
-### v1.9.52 — Scroll performance + bottom layout
-- Keeps SEND MONEY / SEND ITEMS fully visible.
-- Moves the author footer lower in the available TornPDA area.
-- Reduces blur/shadow rendering cost while scrolling.
-- Ignores unrelated Torn DOM mutations while Hub is open.
-- Coordinates managed module standalone performance updates.
-
 
 ### v1.9.51 — TornPDA performance + compact footer
 - Keeps only Managed Modules as the main scroll surface.

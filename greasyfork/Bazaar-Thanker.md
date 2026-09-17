@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.31**
+**v5.3.32**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.31** restores Standalone panel opening by removing the shared full-sheet geometry mutation and leaving panel sizing to the module itself.
+**v5.3.32** removes the periodic standalone render loop and throttles DOM reactions while Script Hub is active to improve TornPDA scrolling performance.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -29,6 +29,12 @@ Generated thank-you text should be reviewed before sending. The script assists w
 **All Rights Reserved**
 
 ## Release history
+
+### v5.3.32 — TornPDA performance
+- Removes the recurring standalone render interval.
+- Throttles DOM-driven standalone refreshes.
+- Avoids repeated work while Script Hub is active.
+
 
 ### v5.3.31 — Standalone panel repair
 - Restores Standalone OPEN behavior.

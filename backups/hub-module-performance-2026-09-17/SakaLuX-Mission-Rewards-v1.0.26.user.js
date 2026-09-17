@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.27
+// @version      1.0.26
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,7 +73,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
   })();
 
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.27'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.26'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -180,24 +180,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     p.querySelector('[data-later]').onclick=()=>p.remove();
     p.querySelector('[data-install]').onclick=()=>location.href=HUB_URL;
   }
-  function start(){
-    registerSelf();render();setTimeout(maybePrompt,1200);
-    let t=0;
-    const refresh=()=>{registerSelf();render();};
-    const queue=(wait=650)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
-    const root=document.body||document.documentElement;
-    const observer=new MutationObserver(ms=>{
-      if(hubInstalled()){
-        const stale=document.getElementById(DOCK_ID)||document.getElementById(NATIVE_ID)||document.getElementById(FALLBACK_ID)||document.getElementById(PROMPT_ID);
-        if(stale)queue(120);
-        return;
-      }
-      if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(650);
-    });
-    observer.observe(root,{childList:true,subtree:true});
-    addEventListener('hashchange',()=>queue(300),{passive:true});
-    addEventListener('popstate',()=>queue(300),{passive:true});
-  }
+  function start(){registerSelf();render();setTimeout(maybePrompt,1200);let t=0;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(()=>{registerSelf();render();},220);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(()=>{registerSelf();render();maybePrompt();},60000);}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
 })();
 (() => {
@@ -240,7 +223,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.0.27';
+    const VERSION = '1.0.26';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
