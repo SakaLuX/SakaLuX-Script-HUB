@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.44**
+**v1.3.45**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -18,7 +18,8 @@
 ## Current release note
 
 
-**v1.3.44** Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
+**v1.3.45** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -37,6 +38,10 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history
+
+### v1.3.45 — Elimination panel layout and 20px donation buttons
+- Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
 
 ### v1.3.44 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.

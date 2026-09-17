@@ -34,16 +34,15 @@
         }
       ],
       "release": {
-        "version": "1.3.44",
+        "version": "1.3.45",
         "date": "2026-09-17",
         "notes": [
-          "Replaces the old author footer with the compact Hub donation/author section: SEND MONEY, SEND ITEMS and Made with ❤️.",
-          "Uses 40px donation buttons and avoids duplicate legacy footer injection."
+          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.44"
+      "version": "1.3.45"
     },
     {
       "active": true,
@@ -80,16 +79,15 @@
         }
       ],
       "release": {
-        "version": "5.3.36",
+        "version": "5.3.37",
         "date": "2026-09-17",
         "notes": [
-          "Replaces the old author footer with the compact Hub donation/author section: SEND MONEY, SEND ITEMS and Made with ❤️.",
-          "Uses 40px donation buttons and avoids duplicate legacy footer injection."
+          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.36"
+      "version": "5.3.37"
     },
     {
       "active": true,
@@ -128,16 +126,15 @@
         }
       ],
       "release": {
-        "version": "1.0.31",
+        "version": "1.0.32",
         "date": "2026-09-17",
         "notes": [
-          "Replaces the old author footer with the compact Hub donation/author section: SEND MONEY, SEND ITEMS and Made with ❤️.",
-          "Uses 40px donation buttons and avoids duplicate legacy footer injection."
+          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.31"
+      "version": "1.0.32"
     },
     {
       "active": true,
@@ -188,16 +185,15 @@
         }
       ],
       "release": {
-        "version": "1.17.32",
+        "version": "1.17.33",
         "date": "2026-09-17",
         "notes": [
-          "Replaces the old author footer with the compact Hub donation/author section: SEND MONEY, SEND ITEMS and Made with ❤️.",
-          "Uses 40px donation buttons and avoids duplicate legacy footer injection."
+          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.32"
+      "version": "1.17.33"
     },
     {
       "active": true,
@@ -270,16 +266,15 @@
         }
       ],
       "release": {
-        "version": "1.3.40",
+        "version": "1.3.41",
         "date": "2026-09-17",
         "notes": [
-          "Replaces the old author footer with the compact Hub donation/author section: SEND MONEY, SEND ITEMS and Made with ❤️.",
-          "Uses 40px donation buttons and avoids duplicate legacy footer injection."
+          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.40"
+      "version": "1.3.41"
     },
     {
       "active": true,
@@ -315,16 +310,15 @@
         }
       ],
       "release": {
-        "version": "1.8.26",
+        "version": "1.8.27",
         "date": "2026-09-17",
         "notes": [
-          "Replaces the old author footer with the compact Hub donation/author section: SEND MONEY, SEND ITEMS and Made with ❤️.",
-          "Uses 40px donation buttons and avoids duplicate legacy footer injection."
+          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.26"
+      "version": "1.8.27"
     }
   ]
 }

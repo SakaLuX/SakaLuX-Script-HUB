@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.40**
+**v1.3.41**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -22,7 +22,8 @@
 ## Current release note
 
 
-**v1.3.40** Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
+**v1.3.41** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -40,6 +41,10 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 **All Rights Reserved**
 
 ## Release history
+
+### v1.3.41 — Elimination panel layout and 20px donation buttons
+- Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
 
 ### v1.3.40 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.

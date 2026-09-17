@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.40
+// @version      1.3.41
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,7 +73,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.40'});
+  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.41'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -221,7 +221,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  */
 (() => {
 'use strict';
-const VERSION = '1.3.40';
+const VERSION = '1.3.41';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -554,7 +554,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  const s=document.createElement('style');s.id='slx-elim-safe-layout-1339';
  s.textContent=`
 #slx-elim #slx-safe-list-modal#slx-safe-list-modal{
- position:absolute!important;inset:0 0 70px!important;width:auto!important;height:auto!important;
+ position:absolute!important;inset:0 0 50px!important;width:auto!important;height:auto!important;
  min-height:0!important;max-height:none!important;max-width:none!important;
  margin:0!important;padding:12px!important;box-sizing:border-box!important;
  background:#0d1117!important;border-radius:0!important;overflow:hidden!important;
@@ -581,7 +581,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  const s=document.createElement('style');s.id='slx-elim-api-layout-1339';
  s.textContent=`
 #slx-elim #slx-settings#slx-settings{
- position:absolute!important;inset:0 0 70px!important;width:auto!important;height:auto!important;
+ position:absolute!important;inset:0 0 50px!important;width:auto!important;height:auto!important;
  min-height:0!important;max-height:none!important;max-width:none!important;
  margin:0!important;padding:12px 12px 18px!important;box-sizing:border-box!important;
  background:#0d1117!important;border-radius:0!important;overflow-y:auto!important;overflow-x:hidden!important;
@@ -622,11 +622,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (()=>{
  const selector="#slx-elim",id="sakalux-inline-footer-elimination-assistant",profile='https://www.torn.com/profiles.php?XID=2380374';
  const st=document.createElement('style');st.textContent=`
- #${id}#${id}{position:sticky!important;bottom:0!important;inset-inline:auto!important;display:block!important;flex:0 0 70px!important;width:100%!important;height:70px!important;min-height:70px!important;max-height:70px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;z-index:5!important;font-family:Arial,sans-serif!important;overflow:hidden!important;border-radius:10px!important}
+ #${id}#${id}{position:sticky!important;bottom:0!important;inset-inline:auto!important;display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;max-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;z-index:5!important;font-family:Arial,sans-serif!important;overflow:hidden!important;border-radius:10px!important}
  #${id}#${id} *{box-sizing:border-box!important}
- #${id}#${id} .slh-bottom{height:48px!important;margin:0!important;padding:4px 14px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;border-radius:10px 10px 0 0!important;overflow:hidden!important}
- #${id}#${id} .slh-bottom-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;height:40px!important}
- #${id}#${id} .slh-bottom-btn{display:block!important;width:100%!important;min-width:0!important;height:40px!important;min-height:40px!important;max-height:40px!important;margin:0!important;padding:6px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#151f2a!important;color:#b9c7d6!important;font:900 8px/1.2 Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important;cursor:pointer!important}
+ #${id}#${id} .slh-bottom{height:28px!important;margin:0!important;padding:4px 14px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;border-radius:10px 10px 0 0!important;overflow:hidden!important}
+ #${id}#${id} .slh-bottom-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;height:20px!important}
+ #${id}#${id} .slh-bottom-btn{display:block!important;width:100%!important;min-width:0!important;height:20px!important;min-height:20px!important;max-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#151f2a!important;color:#b9c7d6!important;font:900 8px/1.2 Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important;cursor:pointer!important}
  #${id}#${id} .slh-footer{height:22px!important;min-height:22px!important;max-height:22px!important;margin:0!important;padding:0 6px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;border-top:1px solid rgba(223,154,55,.52)!important;border-radius:0 0 10px 10px!important;background:#080d13!important;color:#df9a37!important;font:400 9px/20px Arial,sans-serif!important;white-space:nowrap!important;overflow:hidden!important}
  #${id}#${id} .slh-author{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}
  `;(document.head||document.documentElement).appendChild(st);
@@ -643,3 +643,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  }).observe(document.body,{childList:true,subtree:true});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
+
+/* Compact donation controls and Elimination mobile panel geometry 1.3.41 */
+(()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#slx-elim#slx-elim#slx-elim{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border-radius:14px!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();

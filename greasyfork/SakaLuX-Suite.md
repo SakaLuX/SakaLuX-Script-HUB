@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.918**
+**v0.9.919**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -36,7 +36,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 ## Current release note
 
 
-**v0.9.918** Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
+**v0.9.919** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
@@ -56,6 +57,10 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history
+
+### v0.9.919 — Elimination panel layout and 20px donation buttons
+- Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
 
 ### v0.9.918 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
