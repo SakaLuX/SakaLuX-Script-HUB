@@ -131,6 +131,3 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 
 ### v1.0.4 — Hub power/API integration
 - Added reliable installation detection, `setEnabled`/`toggleEnabled`/`isEnabled`, shared-Hub-key preference and standalone required-key support.
-
-## Current release note — v1.0.38
-- Footer now mounts on the real `#sl-mr-settings` panel and stays visible with SEND MONEY / SEND ITEMS / Made with ❤️.

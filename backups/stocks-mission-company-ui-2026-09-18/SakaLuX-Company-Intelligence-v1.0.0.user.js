@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.32
+// @version      1.8.31
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -83,7 +83,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.32',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.31',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -101,7 +101,7 @@ function registerStandaloneEntry(){
  try{
   let m=document.querySelector(`[${STANDALONE_REG_ATTR}="company-intelligence"]`);
   if(!m){m=document.createElement('span');m.setAttribute(STANDALONE_REG_ATTR,'company-intelligence');m.hidden=true;(document.body||document.documentElement).appendChild(m)}
-  Object.assign(m.dataset,{id:'company-intelligence',name:'Company',icon:'🏢',selector:'#sakalux-module-bridge-company-intelligence',fallback:'https://www.torn.com/joblist.php',version:APP.version});
+  Object.assign(m.dataset,{id:'company-intelligence',name:'Company',icon:'🏢',selector:'',fallback:'https://www.torn.com/joblist.php',version:APP.version});
  }catch{}
 }
 
@@ -866,7 +866,3 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
 #ci-root#ci-root#ci-root>.ci-shell>.ci-body{overflow-y:auto!important;min-height:0!important;flex:1 1 0!important}
 `;(document.head||document.documentElement).appendChild(s);
 })();
-
-
-/* SAKALUX_COMPANY_ABOVE_STANDALONE_V1832 */
-(()=>{const st=document.createElement('style');st.textContent='#ci-root#ci-root{z-index:2147483646!important}';(document.head||document.documentElement).appendChild(st);const fix=()=>{const e=document.querySelector('[data-slx-standalone-registration="company-intelligence"]');if(e){e.dataset.selector='#sakalux-module-bridge-company-intelligence';e.dataset.version='1.8.32';}};fix();setTimeout(fix,100);setTimeout(fix,700);})();
