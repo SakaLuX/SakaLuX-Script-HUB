@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.51**
+**v1.9.50**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.51** reduces TornPDA lag by removing redundant document-wide DOM observers/scans, keeps only Managed Modules scrollable, and anchors the donation/actions footer compactly at the bottom to expose more module cards.
+**v1.9.50** restores the intended mobile layout: only Managed Modules scrolls while Hub controls stay fixed, and removes the shared panel geometry mutation that broke Standalone OPEN actions.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,13 +54,6 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
-
-### v1.9.51 — TornPDA performance + compact footer
-- Keeps only Managed Modules as the main scroll surface.
-- Anchors SEND MONEY / SEND ITEMS and the author footer at the bottom without consuming list height.
-- Removes the document-wide Mobile Surface scan and obsolete recurring card repair timer.
-- Replaces the managed module footer observer with a one-shot repair.
-
 ### v1.9.50 — List-only scroll + Standalone repair
 - Keeps Hub header, stats, controls and tabs fixed.
 - Makes only Managed Modules the main vertical scroll surface.
