@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.41**
+**v1.3.42**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -21,9 +21,7 @@
 
 ## Current release note
 
-
-
-**v1.3.41** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+**v1.3.42** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs. Limits SAFE/persistence installation observers to top-level panel lifecycle changes. Skips rebuilding the standalone dock when its module entries have not changed.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -40,15 +38,18 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 ## License
 **All Rights Reserved**
 
-## Release history
+## Release history / Changelog
+
+### v1.3.42 — Performance and release metadata audit
+- Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+- Limits SAFE/persistence installation observers to top-level panel lifecycle changes.
+- Skips rebuilding the standalone dock when its module entries have not changed.
 
 ### v1.3.41 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
-
 ### v1.3.40 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
-
 
 ### v1.3.39 — Mobile UI refinement
 - Refines TARGETS switches with consistent sizing and alignment.
@@ -61,13 +62,11 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 - Excludes Script Hub and its subtree from shared styling/fullscreen rules.
 - Restricts the author footer to the native Elimination panel.
 
-
 ### v1.3.37 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.
 - Removes backdrop blur and heavy mobile visual effects.
 - Disables the legacy document-scanning Mobile Surface observer where present.
 - Reduces mobile animation/transition cost for faster input and scrolling.
-
 
 ### v1.3.36 — TornPDA host-scroll contract
 - Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling works normally while the translucent blur surface is preserved.
@@ -81,9 +80,11 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 - Uses the shared SakaLuX top-alignment contract.
 
 ### v1.3.33 — PDA top-aligned panel refinement
-
 - Opens the SakaLuX panel from the top of the available Torn viewport.
 - Improves compact Hub integration and mobile visibility.
+
+### v1.3.32
+- Performance/UI optimization: reduces duplicate observer-driven work and aligns assistant controls with the shared SakaLuX Hub-style UI foundation while preserving attack safety behavior.
 
 ### v1.3.31 — Desktop ATTACK route fix
 - Uses Torn's current `/page.php?sid=attack&user2ID=...` route.
@@ -136,19 +137,3 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 
 ### v1.3.7 — Unified Torn + FFScouter API Access
 - Added the dedicated Torn/FFScouter API Access panel, exact Torn read-only permissions and calibration fallback.
-
-## Changelog
-
-### v1.3.39
-
-- Refines TARGETS switches with consistent sizing and alignment.
-- Extends the mobile panel closer to the chat controls while keeping the target list independently scrollable.
-- Fits the opaque SAFE sheet inside the panel with a visible title, aligned buttons and a scrollable saved-target list.
-- Fits Torn/FFScouter API-key and manual battle-stat inputs within the panel; keeps SAVE MANUAL BS fully visible and reachable by scrolling.
-- UI-only release: preserves target calculations, API behavior, saved data and manual attack controls.
-
-
-### v1.3.32
-
-- Performance/UI optimization: reduces duplicate observer-driven work and aligns assistant controls with the shared SakaLuX Hub-style UI foundation while preserving attack safety behavior.
-

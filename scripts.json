@@ -34,15 +34,15 @@
         }
       ],
       "release": {
-        "version": "1.3.45",
+        "version": "1.3.46",
         "date": "2026-09-17",
         "notes": [
-          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
+          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.45"
+      "version": "1.3.46"
     },
     {
       "active": true,
@@ -79,15 +79,15 @@
         }
       ],
       "release": {
-        "version": "5.3.38",
+        "version": "5.3.39",
         "date": "2026-09-17",
         "notes": [
-          "Keeps the title and full-width donation footer fixed while the settings form scrolls independently. Fixes the stale displayed version and keeps fields within the panel."
+          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.38"
+      "version": "5.3.39"
     },
     {
       "active": true,
@@ -126,15 +126,16 @@
         }
       ],
       "release": {
-        "version": "1.0.34",
+        "version": "1.0.35",
         "date": "2026-09-17",
         "notes": [
-          "Removes the duplicate lower API ACCESS button. Dedicated API Access remains available through the header key button."
+          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
+          "Ignores Mission/Hub settings and self-generated reward decorations in the reward observer to avoid redundant scans."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.34"
+      "version": "1.0.35"
     },
     {
       "active": true,
@@ -185,15 +186,15 @@
         }
       ],
       "release": {
-        "version": "1.17.34",
+        "version": "1.17.35",
         "date": "2026-09-17",
         "notes": [
-          "Extends the donation/author footer to the full panel width, compensates for the content padding and removes the bottom gap. Keeps 20px donation buttons and the mobile chat clearance."
+          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.34"
+      "version": "1.17.35"
     },
     {
       "active": true,
@@ -266,15 +267,17 @@
         }
       ],
       "release": {
-        "version": "1.3.41",
+        "version": "1.3.42",
         "date": "2026-09-17",
         "notes": [
-          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
+          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
+          "Limits SAFE/persistence installation observers to top-level panel lifecycle changes.",
+          "Skips rebuilding the standalone dock when its module entries have not changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.41"
+      "version": "1.3.42"
     },
     {
       "active": true,
@@ -310,15 +313,18 @@
         }
       ],
       "release": {
-        "version": "1.8.30",
+        "version": "1.8.31",
         "date": "2026-09-17",
         "notes": [
-          "Routes vertical touch gestures from the header, tabs, content and footer into the main content scroll area. Preserves horizontal tab swipes and taps, and forwards header/footer mouse-wheel scrolling."
+          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
+          "Runs native position scraping only on visible Company/Job pages and ignores changes inside Company/Hub panels.",
+          "Prevents duplicate standalone placement timers after OFF/ON.",
+          "Clears employment caches through the same GM/local-storage abstraction used to save them."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.30"
+      "version": "1.8.31"
     }
   ]
 }

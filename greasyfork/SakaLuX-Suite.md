@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.919**
+**v0.9.920**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -35,9 +35,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-
-
-**v0.9.919** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+**v0.9.920** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
@@ -56,15 +54,19 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 ## License
 **All Rights Reserved**
 
-## Release history
+## Release history / Changelog
+
+### v0.9.920 — Performance and release metadata audit
+- Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
 ### v0.9.919 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
-
 ### v0.9.918 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
 
+### v0.9.917 — Hub isolation
+- Excludes Script Hub and its subtree from shared module styling/fullscreen rules; restricts footer routines to native module roots.
 
 ### v0.9.916 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.
@@ -72,13 +74,15 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 - Disables the legacy document-scanning Mobile Surface observer where present.
 - Reduces mobile animation/transition cost for faster input and scrolling.
 
-
 ### v0.9.915 — TornPDA host-scroll contract
 - Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling and mobile interaction remain stable while blur is preserved.
 
 ### v0.9.914 — Mobile full-height + blur contract
 - Opens the active mobile sheet from top to bottom of the available viewport.
 - Adds the shared translucent SakaLuX blur treatment.
+
+### v0.9.913
+- Performance/UI optimization: introduces the shared SakaLuX performance/UI foundation, reduces duplicate high-frequency rendering work and aligns Suite surfaces with the Hub visual language.
 
 ### v0.9.912 — Current experimental build
 - Maintains the current experimental all-in-one Suite architecture and standalone status.
@@ -105,10 +109,3 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 - Improved Event Lens readability and trade continuation links.
 - Preserved standalone launch bridges and Chain Alarm.
 - Added automated checks for the principal module/factory pairs.
-
-## Changelog
-
-### v0.9.913
-
-- Performance/UI optimization: introduces the shared SakaLuX performance/UI foundation, reduces duplicate high-frequency rendering work and aligns Suite surfaces with the Hub visual language.
-

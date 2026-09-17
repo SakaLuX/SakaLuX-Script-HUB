@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.16
+// @version      1.2.17
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -67,7 +67,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-const V='1.2.16',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+const V='1.2.17',ID='chat-intelligence',API='SakaLuXChatIntelligence';
 const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
 const D={enabled:true,search:true,quickActions:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
 const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
@@ -179,7 +179,12 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
   f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>{location.href=profile});panel.appendChild(f);
  }
  function start(){ensure();let scheduled=false;new MutationObserver(records=>{
-  if(scheduled||!records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&!n.closest?.('[id^="sakalux-inline-footer-"]'))))return;
+  const nativeRoot=selector.split(/[ >]/)[0];
+  const relevant=records.some(r=>{
+   if(r.target?.closest?.('[id^="sakalux-inline-footer-"]'))return false;
+   return r.target?.closest?.(nativeRoot)||[...r.addedNodes].some(n=>n.nodeType===1&&n.matches?.(nativeRoot));
+  });
+  if(scheduled||!relevant)return;
   scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
  }).observe(document.body,{childList:true,subtree:true});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

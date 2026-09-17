@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.12
+// @version      1.3.13
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -168,7 +168,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.12';
+    const VERSION = '1.3.13';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -544,7 +544,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>{location.href=profile});panel.appendChild(f);
  }
  function start(){ensure();let scheduled=false;new MutationObserver(records=>{
-  if(scheduled||!records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&!n.closest?.('[id^="sakalux-inline-footer-"]'))))return;
+  const nativeRoot=selector.split(/[ >]/)[0];
+  const relevant=records.some(r=>{
+   if(r.target?.closest?.('[id^="sakalux-inline-footer-"]'))return false;
+   return r.target?.closest?.(nativeRoot)||[...r.addedNodes].some(n=>n.nodeType===1&&n.matches?.(nativeRoot));
+  });
+  if(scheduled||!relevant)return;
   scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
  }).observe(document.body,{childList:true,subtree:true});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

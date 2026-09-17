@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.60**
+**v1.9.61**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,21 +22,18 @@
 
 ## Current release note
 
-
-
-
-**v1.9.60** Makes the Hub header more compact: 38px summary cards and 32px toolbar buttons matching module INFO / NEW controls. Preserves the rounded mobile panel and 20px donation buttons.
+**v1.9.61** Synchronizes module INFO/NEW fallback details and versions with the registry. Updates release histories and registered-module documentation after the UI and performance audit.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.43**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.35**
-- 🎯 SakaLuX Mission Rewards **v1.0.30**
-- 📈 SakaLuX Market Intelligence **v1.17.31**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.38**
-- 🏢 SakaLuX Company Intelligence **v1.8.25**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.46**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.39**
+- 🎯 SakaLuX Mission Rewards **v1.0.35**
+- 📈 SakaLuX Market Intelligence **v1.17.35**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.42**
+- 🏢 SakaLuX Company Intelligence **v1.8.31**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -50,31 +47,31 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - `scripts.json` is the canonical registry/minimum version source used by Hub.
 - A **PUBLISHED / REGISTRY** mismatch means the configured public distribution source has not yet caught up with the registry; it does not automatically mean the installed script is broken.
 - Market Intelligence is distributed through Greasy Fork, so a registry version newer than its Greasy Fork meta version legitimately appears as publish pending until that Greasy Fork release is published.
-- Company Intelligence is currently registered at **v1.8.25** and uses Greasy Fork script **595873** for Hub public-version checks.
+- Company Intelligence is currently registered at **v1.8.31** and uses Greasy Fork script **595873** for Hub public-version checks.
 - Future complementary modules intended for Hub management must be added to `scripts.json` and keep their dedicated information page synchronized.
 
 ## License
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
-## Release history
+## Release history / Changelog
+
+### v1.9.61 — Performance and release metadata audit
+- Synchronizes module INFO/NEW fallback details and versions with the registry.
+- Updates release histories and registered-module documentation after the UI and performance audit.
 
 ### v1.9.60 — Compact status cards and toolbar
 - Makes the Hub header more compact: 38px summary cards and 32px toolbar buttons matching module INFO / NEW controls. Preserves the rounded mobile panel and 20px donation buttons.
 
-
 ### v1.9.59 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
-
 ### v1.9.58 — Compact Hub footer
 - Reduces SEND MONEY / SEND ITEMS buttons to 40px while preserving the validated Hub layout. SakaLuX modules now use the same compact footer.
-
 
 ### v1.9.57 — Settings switch fix
 - Fixes switch dimensions and centers the thumb in ON and OFF states.
 - Keeps thumbs inside the track despite older shared/mobile styles.
 - Preserves the validated Hub panel layout.
-
 
 ### v1.9.56 — UI refinement and performance tweaks
 - Refines mobile panel height, donation controls and compact author-footer placement.
@@ -82,14 +79,11 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - Keeps Managed Modules as the primary scrolling area.
 - Applies lightweight rendering and reduces global DOM scanning.
 
-
 ### v1.9.55 — Add-on parity full-screen
 - Uses the same full-screen container structure as Enhancer Guard and Market Intelligence.
 - Makes the overlay own the viewport and lets the Hub panel fill it with flex.
 - Removes the double-fixed geometry that could leave unused space below the Hub in TornPDA.
 - Keeps blur disabled and only the Managed Modules area as the main scroll surface.
-
-
 
 ### v1.9.54 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.
@@ -163,6 +157,9 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - Restores Greasy Fork as the public version/update verification source for all registered modules.
 - Keeps the SakaLuX author footer stable inside managed module panels.
 - Removes the temporary standalone Hub Card UX layer.
+
+### v1.9.42
+- Performance/UI optimization release: adds the shared single-instance SakaLuX performance foundation used across compatible scripts, synchronizes optimized module versions, and keeps the Hub as the canonical visual design reference.
 
 ### v1.9.41 — Fallback registry synchronization
 - Synchronizes all Hub offline fallback add-on versions with `scripts.json`.
@@ -246,8 +243,3 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 
 ### v1.9.0 — Native module power control
 - Introduced the current module-card ON/OFF model and shared Hub API-key management.
-
-## Changelog
-
-### v1.9.42
-- Performance/UI optimization release: adds the shared single-instance SakaLuX performance foundation used across compatible scripts, synchronizes optimized module versions, and keeps the Hub as the canonical visual design reference.

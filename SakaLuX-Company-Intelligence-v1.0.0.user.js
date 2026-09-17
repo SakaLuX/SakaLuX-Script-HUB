@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.30
+// @version      1.8.31
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -83,7 +83,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.30',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.31',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -204,7 +204,7 @@ function employmentFromResponse(response){
 }
 function clearCurrentCompany(){
  delete S.data.profile;delete S.data.employees;delete S.data.stock;
- try{localStorage.removeItem(KEY.company);localStorage.removeItem(KEY.ownEffectiveness);}catch{}
+ del(KEY.company);del(KEY.ownEffectiveness);
 }
 
 function detectCompanyId(){
@@ -329,6 +329,7 @@ function seededCompanyPositions(){const type=String(meta().type||'').toLowerCase
 function positionReqCache(){const all=get(KEY.positionReqs,{})||{},key=String(detectCompanyId()||meta().name||'unknown');return {all,key,rows:all[key]||{}}}
 function savePositionReqRows(rows){if(!rows?.length)return;const c=positionReqCache();for(const row of rows){if(!row?.name)continue;const old=c.rows[row.name]||{};c.rows[row.name]={...old,...row,primary:row.primary||old.primary,secondary:row.secondary||old.secondary,updated:now()}}c.all[c.key]=c.rows;set(KEY.positionReqs,c.all)}
 function scrapePositionRequirements(){
+ if(document.hidden||!/(?:companies|joblist)\.php/i.test(location.pathname))return [];
  const text=document.body?.innerText||'';if(!/Company Positions/i.test(text))return [];
  const isPrimary=/Primary Stat/i.test(text)&&!/Secondary Stat/i.test(text),isSecondary=/Secondary Stat/i.test(text)&&!/Primary Stat/i.test(text);
  const mode=isPrimary?'primary':isSecondary?'secondary':null;if(!mode)return [];
@@ -684,11 +685,12 @@ function act(a){
 function syncHubBridge(){const b=$('#sakalux-module-bridge-company-intelligence');if(b)b.dataset.enabled=String(S.enabled)}
 function installHubBridge(){let b=$('#sakalux-module-bridge-company-intelligence');if(!b){b=document.createElement('button');b.type='button';b.id='sakalux-module-bridge-company-intelligence';b.hidden=true;(document.body||document.documentElement).appendChild(b)}b.dataset.version=APP.version;b.dataset.enabled=String(S.enabled);b.onclick=()=>{const a=b.dataset.action;if(a==='open'){if(!S.enabled)setEnabled(true);S.open=true;render()}else if(a==='toggle')setEnabled(!S.enabled);else if(a==='on'||a==='off')setEnabled(a==='on');b.dataset.action='';syncHubBridge()}}
 function setEnabled(value){S.enabled=!!value;set(KEY.enabled,S.enabled);if(!S.enabled){S.open=false;$('#ci-root')?.remove();$('#ci-launch')?.remove()}else init();syncHubBridge();try{window.dispatchEvent(new CustomEvent('SakaLuXCompanyIntelligenceStateChanged',{detail:{enabled:S.enabled,version:APP.version}}))}catch{}return S.enabled}
+let ciPlacementTimer=null;
 function init(){
  registerStandaloneEntry();
  setTimeout(normalizeStandaloneCompanyPlacement,250);
  setTimeout(normalizeStandaloneCompanyPlacement,900);
- setInterval(normalizeStandaloneCompanyPlacement,2000);
+ if(!ciPlacementTimer)ciPlacementTimer=setInterval(normalizeStandaloneCompanyPlacement,2000);
  css();S.enabled=get(KEY.enabled,true)!==false;S.compact=get(KEY.compact,true)!==false;S.mode=get(KEY.mode,'employee')||'employee';S.tab=get(KEY.tab,'overview')||'overview';
  S.employment=get(APP.key+':employment',null);
  if(!S.data.profile&&!(S.employment?.known&&!S.employment.id)){const cached=get(KEY.company,null),last=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>b.ts-a.ts)[0]?.company;if(cached||last)S.data.profile=cached||last}
@@ -702,7 +704,7 @@ function init(){
   window.dispatchEvent(new CustomEvent('SakaLuX:ModuleReady',{detail:{id:'company-intelligence',name:APP.name,version:APP.version,actions:['OPEN','REFRESH','EMPLOYEE','DIRECTOR']}}));
  }catch{}
 }
-let ciPosTimer=0;new MutationObserver(()=>{clearTimeout(ciPosTimer);ciPosTimer=setTimeout(()=>{try{scrapePositionRequirements()}catch{}},300)}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+let ciPosTimer=0;new MutationObserver(records=>{if(document.hidden||!/(?:companies|joblist)\.php/i.test(location.pathname)||records.every(r=>(r.target.nodeType===1?r.target:r.target.parentElement)?.closest?.('#ci-root,#sakalux-hub-overlay,[id^="sakalux-inline-footer-"]')))return;clearTimeout(ciPosTimer);ciPosTimer=setTimeout(()=>{try{scrapePositionRequirements()}catch{}},300)}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
 setTimeout(()=>{try{scrapePositionRequirements()}catch{}},800);
 setInterval(registerStandaloneEntry,15000);
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
@@ -780,7 +782,12 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>{location.href=profile});panel.appendChild(f);
  }
  function start(){ensure();let scheduled=false;new MutationObserver(records=>{
-  if(scheduled||!records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&!n.closest?.('[id^="sakalux-inline-footer-"]'))))return;
+  const nativeRoot=selector.split(/[ >]/)[0];
+  const relevant=records.some(r=>{
+   if(r.target?.closest?.('[id^="sakalux-inline-footer-"]'))return false;
+   return r.target?.closest?.(nativeRoot)||[...r.addedNodes].some(n=>n.nodeType===1&&n.matches?.(nativeRoot));
+  });
+  if(scheduled||!relevant)return;
   scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
  }).observe(document.body,{childList:true,subtree:true});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
