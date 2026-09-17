@@ -1,0 +1,2167 @@
+// ==UserScript==
+// @name         SakaLuX Market Intelligence
+// @namespace    sakalux.market.intelligence
+// @version      1.17.33
+// @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
+// @author       SakaLuX [2380374]
+// @copyright    2026 SakaLuX [2380374]
+// @match        https://www.torn.com/*
+// @grant        GM_xmlhttpRequest
+// @connect      api.torn.com
+// @connect      yata.yt
+// @connect      raw.githubusercontent.com
+// @license      All Rights Reserved
+// @run-at       document-end
+// @downloadURL  https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js
+// @updateURL    https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js
+// ==/UserScript==
+
+/* SakaLuX Standalone Dock Bootstrap — BEGIN */
+(() => {
+  'use strict';
+  // SakaLuX shared mobile top-alignment contract.
+  (() => {
+    const id='sakalux-global-top-align-v3';
+    if(document.getElementById(id)) return;
+    const st=document.createElement('style');
+    st.id=id;
+    st.textContent=`@media(max-width:700px){
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="overlay"],body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"],
+body [id^="slx-"][id*="overlay"],body [id^="slx-"][id*="modal"],
+body [id^="sl-"][id*="overlay"],body [id^="sl-"][id*="modal"],
+#sl-eg-overlay,#sl-mr-settings-overlay,#sl-mi-overlay,#ci-root{
+ align-items:flex-start!important;justify-content:center!important;padding-top:0!important;margin-top:0!important;
+}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"],body [id^="slx-"][id*="panel"],body [id^="sl-"][id*="panel"],
+#sl-eg-panel,#sl-mr-settings-panel,#sl-mi-panel,#ci-root .ci-shell{
+ margin-top:0!important;align-self:flex-start!important;
+}
+}`;
+    (document.head||document.documentElement).appendChild(st);
+  })();
+
+
+  // Shared SakaLuX performance + Hub-style UI foundation.
+  (() => {
+    const g = window;
+    if (!g.SakaLuXPerf) {
+      const timers = new Map();
+      g.SakaLuXPerf = {
+        debounce(key, fn, wait=220) {
+          const old = timers.get(key); if (old) clearTimeout(old);
+          const id = setTimeout(() => { timers.delete(key); fn(); }, Math.max(120, wait));
+          timers.set(key,id); return id;
+        },
+        idle(fn, timeout=700) {
+          if ('requestIdleCallback' in g) return g.requestIdleCallback(fn,{timeout});
+          return setTimeout(fn,32);
+        }
+      };
+    }
+    if (!document.getElementById('sakalux-shared-hub-skin')) {
+      const st=document.createElement('style');
+      st.id='sakalux-shared-hub-skin';
+      st.textContent=`
+:root{--slx-bg:#0b1118;--slx-card:#111a24;--slx-card2:#172331;--slx-border:#34465b;--slx-border-soft:rgba(255,255,255,.09);--slx-text:#edf3fa;--slx-muted:#93a4b7;--slx-blue:#4f8fe8;--slx-gold:#dfbd61;--slx-green:#55d98a;--slx-red:#ff6b78;--slx-shadow:0 16px 40px rgba(0,0,0,.46)}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button,body [id^="slx-"] button,body [class^="sakalux-"] button,body [class*=" sakalux-"] button{border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);font-family:Inter,Arial,sans-serif;transition:border-color .15s ease,background .15s ease,transform .08s ease,opacity .15s ease}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button:active,body [id^="slx-"] button:active{transform:scale(.985)}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) input,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) select,body [id^="slx-"] input,body [id^="slx-"] select{border-radius:10px;border-color:#3a4d63;background:#151f2b;color:var(--slx-text);font-family:Inter,Arial,sans-serif}
+body [id*="sakalux"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"],body [id*="sakalux"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"],body [id*="slx"][id*="panel"],body [id*="slx"][id*="modal"],body #slx-stock-inline{font-family:Inter,Arial,sans-serif;color:var(--slx-text);border-color:var(--slx-border);box-shadow:var(--slx-shadow)}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .header,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .head,body [id^="slx-"] .header,body [id^="slx-"] .head{background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 42%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-color:var(--slx-border-soft)}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .card,body [id^="slx-"] .card{border-color:var(--slx-border-soft);background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(11,17,24,.98))}
+@media(max-width:700px){body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button,body [id^="slx-"] button{min-height:36px}body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) input,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) select,body [id^="slx-"] input,body [id^="slx-"] select{min-height:36px}}
+`;
+      (document.head||document.documentElement).appendChild(st);
+    }
+  })();
+
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.33'});
+  const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+  const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
+  const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
+  const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
+  const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
+  const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence'];
+  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
+
+  function registerSelf(){
+    let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
+    if(!m){m=document.createElement('span');m.setAttribute(REG_ATTR,SELF.id);m.hidden=true;(document.body||document.documentElement).appendChild(m);}
+    Object.assign(m.dataset,SELF);
+  }
+
+  function addStyle(){
+    if(document.getElementById(STYLE_ID)) return;
+    const s=document.createElement('style');
+    s.id=STYLE_ID;
+    s.textContent=`
+#${DOCK_ID}{position:fixed;right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:2147483000;width:min(220px,calc(100vw - 20px));max-height:calc(100dvh - 190px);overflow:hidden;padding:10px;background:linear-gradient(180deg,rgba(10,14,20,.992),rgba(7,10,15,.992));border:1px solid rgba(255,255,255,.09);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:none!important;font-family:Inter,Arial,sans-serif;display:none;flex-direction:column;box-sizing:border-box}
+#${DOCK_ID}[data-open="1"]{display:flex}
+#${DOCK_ID} .slx-dock-head{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;padding:4px 6px 10px;margin-bottom:7px;border-bottom:1px solid rgba(255,255,255,.055)}
+#${DOCK_ID} .slx-dock-mark{width:30px;height:30px;display:grid;place-items:center;padding:0;margin:0;border-radius:10px;background:linear-gradient(180deg,#293545,#1a2430);border:1px solid rgba(223,189,97,.38);color:#dfbd61;font:900 16px/30px Arial,sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 10px rgba(0,0,0,.2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}#${DOCK_ID} .slx-dock-mark:active{transform:scale(.92);background:linear-gradient(180deg,#344256,#202b39)}
+#${DOCK_ID} .slx-dock-title{color:#f4f7fb;font-size:11px;font-weight:900;line-height:1.15;letter-spacing:.01em;text-align:center}
+#${DOCK_ID} .slx-dock-sub{color:#8693a3;font-size:8px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;text-align:center}
+#${DOCK_ID} .slx-dock-items{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;gap:7px;overflow-y:auto;overflow-x:hidden;padding:2px 2px 4px;overscroll-behavior:contain;scrollbar-width:thin}
+#${DOCK_ID} .slx-dock-row{position:relative!important;display:flex!important;align-items:center!important;width:100%!important;min-height:44px!important;flex:0 0 auto!important;margin:0!important;padding:0 12px!important;box-sizing:border-box!important;inset:auto!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:14px!important;background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(13,20,29,.98))!important;color:#f5f7fa!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 4px 10px rgba(0,0,0,.14)!important;overflow:hidden!important;transform:none!important}
+#${DOCK_ID} .slx-dock-row:active{transform:scale(.985)!important;background:linear-gradient(180deg,#1b2531,#141c26)!important}
+#${DOCK_ID} .slx-left{width:22px;height:22px;min-width:22px;display:grid;place-items:center;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#202b38,#151d27);box-shadow:inset 0 1px 0 rgba(255,255,255,.03);z-index:1}
+#${DOCK_ID} .slx-left .i{font-size:13px;line-height:1}
+#${DOCK_ID} .slx-title{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font:800 10px/1 Arial,sans-serif;letter-spacing:.01em;pointer-events:none}
+#${DOCK_ID} .slx-right-pad{margin-left:auto;width:22px;min-width:22px;height:22px;opacity:0;pointer-events:none}
+#${DOCK_ID} .slx-dock-install{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;width:100%!important;min-height:42px!important;box-sizing:border-box!important;margin-top:9px!important;padding:9px 12px!important;border-radius:13px!important;background:linear-gradient(180deg,#9a741f,#6d5015)!important;border:1px solid rgba(240,196,78,.72)!important;color:#fff7d6!important;text-align:center!important;text-decoration:none!important;font:900 11px/1.2 Arial,sans-serif!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px rgba(0,0,0,.22)!important;white-space:nowrap!important;overflow:visible!important}
+#${DOCK_ID} .slx-dock-install:active{transform:scale(.985)}
+#${NATIVE_ID}{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;list-style:none!important;background:none!important;box-shadow:none!important}#${NATIVE_ID}::before,#${NATIVE_ID}::after{content:none!important;display:none!important}#${NATIVE_ID} .slx-s-link{display:grid!important;place-items:center!important;width:17px!important;height:17px!important;margin:0!important;padding:0!important;border:0!important;background:none!important;text-decoration:none!important;color:#dfbd61!important;font:900 15px/17px Arial,sans-serif!important;text-shadow:0 1px 1px rgba(0,0,0,.72),0 0 4px rgba(223,189,97,.18)!important}#${NATIVE_ID} .slx-s-link:active{transform:scale(.9)!important}
+#${FALLBACK_ID}{position:fixed;right:10px;bottom:78px;z-index:2147483001;width:32px;height:32px;padding:0;border:1px solid #64748b;border-radius:9px;background:linear-gradient(145deg,#202b39,#111923);color:#dfbd61;box-shadow:0 8px 22px rgba(0,0,0,.42);font:900 15px Arial;display:none;align-items:center;justify-content:center}
+body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-button,#sl-mri-button,#sl-mi-button,#slx-elim-btn){display:none!important}
+`;
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function findStatusIconList(){
+    const selectors=['ul[class*="statusIcons"][class*="big"]','ul[class*="status-icons"][class*="big"]','ul[class*="statusIcons"]','ul[class*="status-icons"]'];
+    const lists=selectors.flatMap(q=>[...document.querySelectorAll(q)]);
+    return lists.find(list=>list.isConnected&&[...list.children].some(item=>item.querySelector?.('a')))||null;
+  }
+  function copyNativeCell(item,list){
+    const ref=[...list.children].find(x=>x!==item&&x.querySelector?.('a')); if(!ref) return;
+    const native=[...ref.classList].filter(x=>x&&!x.startsWith('slx-')&&!x.startsWith('sakalux-'));
+    item.className=[...native,'slx-standalone-native'].join(' ');
+  }
+  function toggleDock(force){
+    const d=ensureDock(); if(!d) return;
+    const next=typeof force==='boolean'?force:d.dataset.open!=='1';
+    d.dataset.open=next?'1':'0';
+    try{localStorage.setItem(OPEN_KEY,next?'1':'0')}catch{}
+  }
+  function ensureNativeLauncher(){
+    if(hubInstalled()){document.getElementById(NATIVE_ID)?.remove();document.getElementById(FALLBACK_ID)?.remove();return false;}
+    const list=findStatusIconList(); let item=document.getElementById(NATIVE_ID);
+    if(list){
+      if(!item){item=document.createElement('li');item.id=NATIVE_ID;item.innerHTML='<a href="#" class="slx-s-link" aria-label="SakaLuX Scripts" title="SakaLuX Scripts">S</a>';item.querySelector('a').onclick=e=>{e.preventDefault();e.stopPropagation();toggleDock();};}
+      copyNativeCell(item,list);
+      const children=[...list.children].filter(x=>x!==item);
+      const cashIndex=children.findIndex(x=>/\$|cash|money/i.test((x.textContent||'')+' '+(x.className||'')));
+      const anchor=cashIndex>=0?children[cashIndex]:children[0];
+      if(anchor) anchor.insertAdjacentElement('afterend',item); else list.appendChild(item);
+      document.getElementById(FALLBACK_ID)?.remove(); return true;
+    }
+    item?.remove();
+    let fb=document.getElementById(FALLBACK_ID);
+    if(!fb){fb=document.createElement('button');fb.id=FALLBACK_ID;fb.type='button';fb.textContent='S';fb.title='SakaLuX Scripts';fb.onclick=()=>toggleDock();(document.body||document.documentElement).appendChild(fb);}
+    fb.style.display='flex'; return false;
+  }
+  function ensureDock(){
+    if(hubInstalled()){document.body?.setAttribute('data-sakalux-hub-active','1');document.getElementById(DOCK_ID)?.remove();document.getElementById(PROMPT_ID)?.remove();document.getElementById(NATIVE_ID)?.remove();document.getElementById(FALLBACK_ID)?.remove();return null;}
+    document.body?.removeAttribute('data-sakalux-hub-active'); addStyle();
+    let d=document.getElementById(DOCK_ID); if(d) return d;
+    d=document.createElement('div'); d.id=DOCK_ID; d.dataset.open=localStorage.getItem(OPEN_KEY)==='1'?'1':'0';
+    d.innerHTML=`<div class="slx-dock-head"><button type="button" class="slx-dock-mark" aria-label="Close SakaLuX Scripts" title="Close SakaLuX Scripts">S</button><div class="slx-dock-title">SakaLuX Scripts</div><div class="slx-dock-sub">Standalone</div></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">Install SakaLuX Hub</a>`;
+    (document.body||document.documentElement).appendChild(d); const close=d.querySelector('.slx-dock-mark'); if(close) close.onclick=e=>{e.preventDefault();e.stopPropagation();toggleDock(false);}; return d;
+  }
+  function openEntry(data){const el=data.selector?document.querySelector(data.selector):null;if(el){el.click();return;}const bridge=document.getElementById('sakalux-module-bridge-'+data.id);if(bridge){bridge.dataset.action='open';bridge.click();return;}if(data.fallback)location.href=data.fallback;}
+  function render(){
+    const d=ensureDock(); if(!d) return;
+    const box=d.querySelector('.slx-dock-items');
+    const regs=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id);
+    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); box.replaceChildren();
+    for(const r of regs){
+      const b=document.createElement('button'); b.type='button'; b.className='slx-dock-row';
+      b.innerHTML=`<span class="slx-left"><span class="i">${r.icon||'•'}</span></span><span class="slx-title">${r.name||r.id}</span><span class="slx-right-pad"></span>`;
+      b.onclick=()=>openEntry(r); box.appendChild(b);
+    }
+    ensureNativeLauncher();
+  }
+  function maybePrompt(){
+    if(hubInstalled()||document.getElementById(PROMPT_ID)) return;
+    let last=0; try{last=Number(localStorage.getItem(LAST_KEY)||0)}catch{}
+    if(last&&Date.now()-last<INTERVAL) return;
+    try{localStorage.setItem(LAST_KEY,String(Date.now()))}catch{}
+    const p=document.createElement('div'); p.id=PROMPT_ID; p.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px';
+    p.innerHTML=`<div style="width:min(350px,100%);background:#111820;color:#fff;border:1px solid #394657;border-radius:14px;padding:16px;font:13px Arial,sans-serif;box-shadow:0 16px 48px #0008"><b style="display:block;text-align:center;font-size:16px">Install SakaLuX Script Hub?</b><div style="margin-top:7px;color:#cbd5e1;line-height:1.4;text-align:center">Manage every SakaLuX add-on from one place with shared settings and controls.</div><div style="display:flex;gap:7px;margin-top:12px"><button type="button" data-later style="flex:1;padding:9px;border-radius:8px;background:#202a36;color:#fff;border:1px solid #526174">Later</button><button type="button" data-install style="flex:1;padding:9px;border-radius:8px;background:#6a4d12;color:#fff4cf;border:1px solid #cda84e;font-weight:900">Install Hub</button></div></div>`;
+    (document.body||document.documentElement).appendChild(p);
+    p.querySelector('[data-later]').onclick=()=>p.remove();
+    p.querySelector('[data-install]').onclick=()=>location.href=HUB_URL;
+  }
+  function start(){
+    registerSelf();render();setTimeout(maybePrompt,1200);
+    let t=0, observer=null;
+    const refresh=()=>{registerSelf();render();};
+    const stopForHub=()=>{
+      clearTimeout(t);
+      if(observer){observer.disconnect();observer=null;}
+      render();
+    };
+    if(hubInstalled()){stopForHub();return;}
+    const queue=(wait=700)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
+    const root=document.body||document.documentElement;
+    observer=new MutationObserver(ms=>{
+      if(hubInstalled()){stopForHub();return;}
+      if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(700);
+    });
+    observer.observe(root,{childList:true,subtree:true});
+    addEventListener('SakaLuX:ScriptHubReady',stopForHub,{once:true});
+    addEventListener('hashchange',()=>queue(350),{passive:true});
+    addEventListener('popstate',()=>queue(350),{passive:true});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
+})();
+(() => {
+  const id='sakalux-standalone-layer-style';
+  if(!document.getElementById(id)){
+    const style=document.createElement('style');
+    style.id=id;
+    style.textContent=`/* Keep managed add-on panels above the shared standalone dock. */
+:where(
+  [id^="sl-eg-"][id*="panel" i],
+  [id^="sakalux-bt-"][id*="settings" i],
+  [id^="sl-mr-"][id*="panel" i],
+  [id^="sl-mri-"][id*="panel" i],
+  [id^="sl-mi-"][id*="panel" i],
+  #slx-elim,
+  [id^="slx-elim-"][id*="panel" i]
+){z-index:2147483646!important;}
+#sakalux-standalone-dock{z-index:2147483500!important;}`;
+    (document.head||document.documentElement).appendChild(style);
+  }
+})();
+
+/* SakaLuX Standalone Dock Bootstrap — END */
+
+
+
+/*
+ * Copyright © 2026 SakaLuX [2380374]
+ * All Rights Reserved.
+ *
+ * Personal use and private modification are permitted.
+ * Redistribution, republication, rebranding, or publication of
+ * modified versions requires prior written permission from
+ * SakaLuX [2380374].
+ *
+ * Original author attribution must be retained in all authorized
+ * derivative works.
+ */
+
+(function () {
+    'use strict';
+
+    const VERSION = '1.17.33';
+    const NAME = 'SakaLuX Market Intelligence';
+    const PDA_KEY = '###PDA-APIKEY###';
+    const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+    const HUB_PROMPT_STORAGE = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
+    const HUB_PROMPT_INTERVAL = 12 * 60 * 60 * 1000;
+    const YATA_EXPORT_URL = 'https://yata.yt/api/v1/travel/export/';
+    const PRICE_NETWORK_DEFAULT_URL = '';
+
+    const STORAGE = {
+        apiKey: 'SakaLuX_MI_API_KEY',
+        settings: 'SakaLuX_MI_SETTINGS_V2',
+        marketCache: 'SakaLuX_MI_MARKET_CACHE_V1',
+        watchlist: 'SakaLuX_MI_WATCHLIST_V1',
+        pointsRate: 'SakaLuX_MI_POINTS_RATE_V1',
+        stockHistory: 'SakaLuX_MI_STOCK_HISTORY_V1',
+        itemCatalog: 'SakaLuX_MI_ITEM_CATALOG_V1',
+        priceHistory: 'SakaLuX_MI_PRICE_HISTORY_V1',
+        travelSessions: 'SakaLuX_MI_TRAVEL_SESSIONS_V1',
+        networkQueue: 'SakaLuX_MI_PRICE_NETWORK_QUEUE_V1',
+        networkConsensus: 'SakaLuX_MI_PRICE_NETWORK_CONSENSUS_V1',
+        networkLastObservation: 'SakaLuX_MI_PRICE_NETWORK_LAST_OBS_V1',
+        loadoutCache: 'SakaLuX_MI_LOADOUT_CACHE_V1'
+    };
+
+    const MARKET_CACHE_MS = 10 * 60 * 1000;
+    const TRAVEL_CACHE_MAX_STALE_MS = 6 * 60 * 60 * 1000;
+    const TRAVEL_REFRESH_LIMIT = 15;
+    const ARRIVAL_REFRESH_LIMIT = 12;
+    const MAX_LIVE_FETCHES = 45;
+    const CONCURRENCY = 6;
+    const MAX_HISTORY_EVENTS = 8;
+    const STOCK_HISTORY_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+    const ITEM_CATALOG_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+    const POINTS_RATE_MAX_AGE = 24 * 60 * 60 * 1000;
+    const PRICE_HISTORY_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
+    const PRICE_HISTORY_MAX_SAMPLES = 120;
+    const PRICE_HISTORY_MIN_GAP = 5 * 60 * 1000;
+    const LANDED_REFRESH_MIN_MS = 12 * 1000;
+    const LANDED_MARKET_REFRESH_MS = 2 * 60 * 1000;
+    const LANDED_SIGNATURE_DEBOUNCE_MS = 1200;
+    const MAX_REASONABLE_TRAVEL_STOCK = 100000;
+    const MIN_LEARNED_RESTOCK_GAP_MIN = 10;
+    const PRICE_NETWORK_MIN_GAP = 10 * 60 * 1000;
+    const PRICE_NETWORK_FLUSH_MS = 60 * 1000;
+    const PRICE_NETWORK_CACHE_MS = 5 * 60 * 1000;
+    const PRICE_NETWORK_MAX_QUEUE = 200;
+    const PRICE_NETWORK_BATCH = 25;
+    const CASH_CACHE_MS = 30 * 1000;
+    const LOADOUT_CACHE_MS = 2 * 60 * 1000;
+
+    const FLIGHT_MINS = {
+        Mexico: 25, Caymans: 33, Canada: 39, Hawaii: 127, UK: 151,
+        Argentina: 158, Switzerland: 166, Japan: 213, China: 229,
+        UAE: 257, 'South Africa': 281
+    };
+
+    const YATA_COUNTRY_MAP = {
+        mex: 'Mexico', cay: 'Caymans', can: 'Canada', haw: 'Hawaii',
+        uni: 'UK', arg: 'Argentina', swi: 'Switzerland', jap: 'Japan',
+        chi: 'China', uae: 'UAE', sou: 'South Africa'
+    };
+
+    const MUSEUM_SETS = [
+        { id:'arrowheads', name:'Arrowhead Set', points:25, members:[
+            {name:'Chert Point',qty:1},{name:'Quartzite Point',qty:1},{name:'Basalt Point',qty:1},
+            {name:'Obsidian Point',qty:1},{name:'Quartz Point',qty:1},{name:'Chalcedony Point',qty:1}
+        ]},
+        { id:'medieval-coins', name:'Medieval Coin Set', points:100, members:[
+            {name:'Leopard Coin',qty:1},{name:'Florin Coin',qty:1},{name:'Gold Noble Coin',qty:1}
+        ]},
+        { id:'patagonian-fossil', name:'Patagonian Fossil', points:20, members:[{name:'Patagonian Fossil',qty:1}] },
+        { id:'meteorite-fragment', name:'Meteorite Fragment', points:15, members:[{name:'Meteorite Fragment',qty:1}] },
+        { id:'vairocana-buddha', name:'Vairocana Buddha', points:100, members:[{name:'Vairocana Buddha Sculpture',qty:1}] },
+        { id:'ganesha', name:'Ganesha Sculpture', points:250, members:[{name:'Ganesha Sculpture',qty:1}] },
+        { id:'shabti', name:'Shabti Sculpture', points:500, members:[{name:'Shabti Sculpture',qty:1}] },
+        { id:'senet', name:'Senet Game Set', points:2000, members:[
+            {name:'Senet Board',qty:1},{name:'White Senet Pawn',qty:5},{name:'Black Senet Pawn',qty:5}
+        ]},
+        { id:'companion-scripts', name:'Companion Script Set', points:1000, members:[
+            {name:'Companion Script : Abdullah',qty:1},{name:'Companion Script : Ali',qty:1},{name:'Companion Script : Ubay',qty:1}
+        ]},
+        { id:'egyptian-amulet', name:'Egyptian Amulet', points:10000, members:[{name:'Egyptian Amulet',qty:1}] }
+    ];
+
+    const TORN_TRAVEL_LABELS = {
+        Mexico: ['Mexico', 'Ciudad Juarez'],
+        Caymans: ['Cayman Islands', 'Caymans', 'George Town'],
+        Canada: ['Canada', 'Toronto'],
+        Hawaii: ['Hawaii', 'Honolulu'],
+        UK: ['United Kingdom', 'UK', 'London'],
+        Argentina: ['Argentina', 'Buenos Aires'],
+        Switzerland: ['Switzerland', 'Zurich', 'Zürich'],
+        Japan: ['Japan', 'Tokyo'],
+        China: ['China', 'Beijing'],
+        UAE: ['UAE', 'United Arab Emirates', 'Dubai'],
+        'South Africa': ['South Africa', 'Johannesburg']
+    };
+
+    const DEFAULT_SETTINGS = {
+        enabled: true,
+        travel: true,
+        bestRun: true,
+        countryBestBuys: true,
+        stockEta: true,
+        arrivalStock: true,
+        arrivalBasket: true,
+        smartLandedRefresh: true,
+        sessionSummary: true,
+        bazaar: true,
+        itemMarket: true,
+        loadoutComparator: true,
+        priceNetwork: false,
+        priceNetworkEndpoint: PRICE_NETWORK_DEFAULT_URL,
+        items: true,
+        museum: true,
+        points: true,
+        showButton: true,
+        marketFeePct: 5,
+        minProfit: 0,
+        travelSlots: 29,
+        travelBudget: 0,
+        flightMultiplier: 1
+    };
+
+    let settings = Object.assign({}, DEFAULT_SETTINGS, loadJson(STORAGE.settings, {}));
+    let marketCache = loadJson(STORAGE.marketCache, {});
+    let watchlist = loadJson(STORAGE.watchlist, {});
+    let stockHistory = loadJson(STORAGE.stockHistory, {});
+    let priceHistory = loadJson(STORAGE.priceHistory, {});
+    let travelSessions = loadJson(STORAGE.travelSessions, {current:null,history:[]});
+    let networkQueue = loadJson(STORAGE.networkQueue, []);
+    let networkConsensus = loadJson(STORAGE.networkConsensus, {});
+    let networkLastObservation = loadJson(STORAGE.networkLastObservation, {});
+    if(!Array.isArray(networkQueue))networkQueue=[];
+    if(!networkConsensus||typeof networkConsensus!=='object'||Array.isArray(networkConsensus))networkConsensus={};
+    if(!networkLastObservation||typeof networkLastObservation!=='object'||Array.isArray(networkLastObservation))networkLastObservation={};
+    if(!travelSessions||typeof travelSessions!=='object')travelSessions={current:null,history:[]};
+    if(!Array.isArray(travelSessions.history))travelSessions.history=[];
+
+    const state = {
+        page: '', apiMode: '', busy: false, lastScan: 0, lastError: '',
+        scanCount: 0, marketRequests: 0, decorated: 0, observer: null,
+        scanTimer: null, bestRunRows: 0, stockEtaLearned: 0,
+        arrivalRows: 0, flightDestination: '', landingMins: null, arrivalBasketItems: 0, arrivalBasketCost: 0, arrivalBasketProfit: 0, arrivalBasketSlots: 0, arrivalBasketMode: '',
+        travelCacheHits: 0, travelRefreshes: 0, observerSkips: 0, lastObserverScan: 0,
+        museumSets: 0, museumRecommendation: '', museumMissingSets: 0,
+        bazaarDeals: 0, bazaarBestProfit: 0, bazaarBestRoi: 0,
+        itemMarketSignal: '', itemMarketTrend: 0, itemMarketVolatility: 0, itemMarketHistorySamples: 0,
+        actualFlightTimes: 0, travelTimeSource: 'fallback',
+        travelPlanItems: 0, travelPlanCost: 0, travelPlanProfit: 0, travelPlanSlots: 0, travelPlanBudget: 0, travelPlanUnusedBudget: 0, travelPlanMode: '', travelPlanOptimizationGain: 0,
+        bestRunBudgetAware: false, bestRunAffordableRoutes: 0, bestRunBlockedRoutes: 0,
+        bestRunBasketRoutes: 0, bestRunBasketItems: 0, bestRunBasketProfit: 0,
+        countryBestBuysRows: 0, countryBestBuyName: '', countryBestBuyProfit: 0, countryBestBuyQty: 0, countryBestBuysDestination: '',
+        landedRefreshes: 0, landedStockRefreshes: 0, landedMarketRefreshes: 0, landedRefreshSkips: 0, landedLastRefresh: 0, landedLastMarketRefresh: 0, landedSignature: '', landedRefreshTimer: null,
+        travelSessionCount: 0, currentSessionDestination: '', currentSessionStatus: '', currentSessionPredictedProfit: 0, currentSessionLandedProfit: 0, currentSessionRecordedProfit: 0, lastSessionProfit: 0,
+        networkBusy: false, networkQueued: networkQueue.length, networkSent: 0, networkLastFlush: 0, networkLastError: '', networkSamples: 0, networkMedian: 0, networkLastConsensusAt: 0,
+        availableCash: null, availableCashAt: 0,
+        loadoutReady: false, loadoutItems: 0, loadoutComparisons: 0, loadoutBestVerdict: '', loadoutLastError: '',
+        apiAccessStatus: 'unknown', apiAccessMessage: 'Not checked yet', apiAccessCheckedAt: 0,
+        routeHandler: null
+    };
+
+    function loadJson(key, fallback) {
+        try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+        catch (_) { return fallback; }
+    }
+    function saveJson(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
+
+    function normalizeNetworkEndpoint(value) {
+        const raw=String(value||'').trim().replace(/\/+$/,'');
+        if(!raw)return '';
+        try { const u=new URL(raw); return u.protocol==='https:'?u.origin+u.pathname.replace(/\/+$/,''):''; }
+        catch (_) { return ''; }
+    }
+    function priceNetworkEndpoint(){return normalizeNetworkEndpoint(settings.priceNetworkEndpoint||PRICE_NETWORK_DEFAULT_URL);}
+    function priceNetworkConfigured(){return Boolean(priceNetworkEndpoint());}
+    function saveNetworkQueue(){networkQueue=networkQueue.slice(-PRICE_NETWORK_MAX_QUEUE);saveJson(STORAGE.networkQueue,networkQueue);state.networkQueued=networkQueue.length;}
+    function networkObservationKey(itemId,source){return String(itemId)+'|'+String(source||'itemmarket');}
+    function queueNetworkObservation(itemId,price,source='itemmarket',now=Date.now()){
+        if(!settings.priceNetwork||!priceNetworkConfigured())return false;
+        const id=Math.round(Number(itemId)),p=Math.round(Number(price));
+        if(!(id>0)||!(p>0)||p>2000000000000)return false;
+        if(!['itemmarket','bazaar','travel'].includes(source))source='itemmarket';
+        const key=networkObservationKey(id,source),last=networkLastObservation[key];
+        const materiallyChanged=last?.price>0?Math.abs(p-Number(last.price))/Number(last.price)>=0.01:true;
+        if(last?.at&&now-Number(last.at)<PRICE_NETWORK_MIN_GAP&&!materiallyChanged)return false;
+        if(last?.at&&now-Number(last.at)<120000)return false;
+        networkLastObservation[key]={at:now,price:p};saveJson(STORAGE.networkLastObservation,networkLastObservation);
+        networkQueue.push({itemId:id,price:p,observedAt:now,source});saveNetworkQueue();
+        schedulePriceNetworkFlush(1500);return true;
+    }
+    function networkRequest(path,options={}){
+        const base=priceNetworkEndpoint();if(!base)return Promise.reject(new Error('Price Network endpoint not configured'));
+        return fetch(base+path,{method:options.method||'GET',headers:{'content-type':'application/json','accept':'application/json'},body:options.body?JSON.stringify(options.body):undefined,cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer'}).then(async r=>{
+            let data=null;try{data=await r.json();}catch(_){data=null;}
+            if(!r.ok||data?.ok===false)throw new Error(data?.error||('Price Network HTTP '+r.status));
+            return data;
+        });
+    }
+    let networkFlushTimer=null;
+    function schedulePriceNetworkFlush(delay=PRICE_NETWORK_FLUSH_MS){
+        if(!settings.priceNetwork||!priceNetworkConfigured()||!networkQueue.length||networkFlushTimer)return;
+        networkFlushTimer=setTimeout(()=>{networkFlushTimer=null;flushPriceNetwork();},Math.max(250,Number(delay)||0));
+    }
+    async function flushPriceNetwork(){
+        if(state.networkBusy||!settings.priceNetwork||!priceNetworkConfigured()||!networkQueue.length)return false;
+        state.networkBusy=true;state.networkLastError='';
+        const batch=networkQueue.slice(0,PRICE_NETWORK_BATCH);
+        try{
+            const data=await networkRequest('/v1/observe',{method:'POST',body:{observations:batch}});
+            networkQueue.splice(0,batch.length);saveNetworkQueue();
+            state.networkSent+=Number(data?.accepted)||batch.length;state.networkLastFlush=Date.now();
+            if(networkQueue.length)schedulePriceNetworkFlush(PRICE_NETWORK_FLUSH_MS);
+            return true;
+        }catch(e){state.networkLastError=String(e?.message||e);schedulePriceNetworkFlush(PRICE_NETWORK_FLUSH_MS);return false;}
+        finally{state.networkBusy=false;}
+    }
+    function cachedNetworkConsensus(itemId){
+        const row=networkConsensus[String(itemId)];
+        if(!row?.at||Date.now()-Number(row.at)>PRICE_NETWORK_CACHE_MS)return null;
+        return row.data||null;
+    }
+    async function fetchNetworkConsensus(itemId,force=false){
+        if(!settings.priceNetwork||!priceNetworkConfigured())return null;
+        if(!force){const c=cachedNetworkConsensus(itemId);if(c)return c;}
+        try{
+            const data=await networkRequest('/v1/items/'+encodeURIComponent(itemId));
+            networkConsensus[String(itemId)]={at:Date.now(),data};saveJson(STORAGE.networkConsensus,networkConsensus);
+            state.networkSamples=Number(data?.samples)||0;state.networkMedian=Number(data?.consensus?.median)||0;state.networkLastConsensusAt=Date.now();state.networkLastError='';
+            return data;
+        }catch(e){state.networkLastError=String(e?.message||e);return null;}
+    }
+    function networkConsensusHtml(data){
+        if(!settings.priceNetwork)return '';
+        if(!priceNetworkConfigured())return '<div class="sl-mi-network"><b>🌐 PRICE NETWORK</b><span>Opt-in enabled, but no HTTPS endpoint is configured yet.</span></div>';
+        if(!data)return '<div class="sl-mi-network"><b>🌐 PRICE NETWORK</b><span>Loading anonymous network consensus…</span></div>';
+        const c=data.consensus,samples=Number(data.samples)||0;
+        if(!c||samples<=0)return '<div class="sl-mi-network"><b>🌐 PRICE NETWORK</b><span>No shared samples yet for this item.</span></div>';
+        return '<div class="sl-mi-network"><b>🌐 PRICE NETWORK</b><span>Median <strong>'+money(c.median)+'</strong> · range '+money(c.low)+'–'+money(c.high)+' · '+samples+' samples</span><small>Secondary anonymous reference only — Torn/local prices remain primary.</small></div>';
+    }
+    function updateNetworkBlock(bar,data){
+        if(!bar?.isConnected)return;const old=bar.querySelector('.sl-mi-network');if(!old)return;
+        const wrap=document.createElement('div');wrap.innerHTML=networkConsensusHtml(data);const next=wrap.firstElementChild;if(next)old.replaceWith(next);
+    }
+    function esc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+    function money(v) { const n=Number(v); if(!Number.isFinite(n)) return '?'; return (n<0?'-':'')+'$'+Math.round(Math.abs(n)).toLocaleString('en-US'); }
+    function pct(v) { const n=Number(v); if(!Number.isFinite(n)) return '?'; return (n>=0?'+':'')+n.toFixed(1)+'%'; }
+    function parseMoney(text) {
+        const raw=String(text||'').trim().replace(/[$,\s]/g,'');
+        const m=raw.match(/^([0-9]*\.?[0-9]+)([kmb])?$/i);
+        if(m){const mult=!m[2]?1:(m[2].toLowerCase()==='k'?1e3:m[2].toLowerCase()==='m'?1e6:1e9);return Number(m[1])*mult;}
+        const digits=raw.replace(/[^0-9]/g,''); return digits?Number(digits):NaN;
+    }
+    function fmtDuration(mins) { if(mins==null||!Number.isFinite(mins)) return 'learning'; mins=Math.max(0,Math.round(mins)); if(mins<60) return '~'+mins+'m'; const h=Math.floor(mins/60),m=mins%60; return '~'+h+'h'+(m?' '+m+'m':''); }
+    function normText(text) { return String(text||'').replace(/\s+/g,' ').trim(); }
+    function median(values) { const a=values.filter(Number.isFinite).sort((x,y)=>x-y); return a.length ? a[Math.floor(a.length/2)] : null; }
+
+
+
+    function saveTravelSessions(){
+        travelSessions.history=(travelSessions.history||[]).slice(0,20);
+        saveJson(STORAGE.travelSessions,travelSessions);
+        state.travelSessionCount=(travelSessions.history||[]).length+(travelSessions.current?1:0);
+        state.currentSessionDestination=travelSessions.current?.destination||'';
+        state.currentSessionStatus=travelSessions.current?.status||'';
+        state.currentSessionPredictedProfit=Number(travelSessions.current?.predicted?.profit)||0;
+        state.currentSessionLandedProfit=Number(travelSessions.current?.landed?.profit)||0;
+        state.currentSessionRecordedProfit=Number(travelSessions.current?.recorded?.profit)||0;
+        state.lastSessionProfit=Number((travelSessions.history||[])[0]?.recorded?.profit||(travelSessions.history||[])[0]?.landed?.profit)||0;
+    }
+
+    function sessionPlanSnapshot(plan){
+        if(!plan)return null;
+        return {
+            at:Date.now(),
+            cost:Number(plan.totalCost)||0,
+            profit:Number(plan.totalProfit)||0,
+            slots:Number(plan.used)||0,
+            mode:plan.mode||'',
+            items:(plan.rows||[]).map(r=>({id:Number(r.id)||0,name:r.name||'',qty:Number(r.qty)||0,buy:Number(r.buy)||0,profit:Number(r.profit)||0})).filter(r=>r.qty>0)
+        };
+    }
+
+    function archiveCurrentSession(){
+        const cur=travelSessions.current;if(!cur)return;
+        cur.endedAt=cur.endedAt||Date.now();
+        const history=(travelSessions.history||[]).filter(x=>x?.id!==cur.id);
+        history.unshift(cur);travelSessions.history=history.slice(0,20);travelSessions.current=null;saveTravelSessions();
+    }
+
+    function ensureTravelSession(destination,phase='FLYING'){
+        if(!destination)return null;
+        let cur=travelSessions.current;
+        const startNew=!cur||cur.destination!==destination||(phase==='FLYING'&&['LANDED','PURCHASED'].includes(cur.status));
+        if(startNew){
+            if(cur)archiveCurrentSession();
+            cur={id:destination+'-'+Date.now(),destination,startedAt:Date.now(),status:phase,predicted:null,landed:null,recorded:null};
+            travelSessions.current=cur;
+        }
+        cur.status=phase||cur.status;saveTravelSessions();return cur;
+    }
+
+    function updatePredictedSession(destination,plan,landingMins){
+        if(!destination||!plan)return;
+        const cur=ensureTravelSession(destination,'FLYING');
+        cur.predicted=sessionPlanSnapshot(plan);cur.landingMins=Number(landingMins)||0;cur.lastSeenAt=Date.now();saveTravelSessions();
+    }
+
+    function updateLandedSession(destination,plan){
+        if(!destination||!plan)return;
+        const cur=ensureTravelSession(destination,'LANDED');
+        cur.status=cur.recorded?'PURCHASED':'LANDED';cur.landedAt=cur.landedAt||Date.now();cur.landed=sessionPlanSnapshot(plan);cur.lastSeenAt=Date.now();saveTravelSessions();
+    }
+
+    function markCurrentPlanBought(){
+        const cur=travelSessions.current;if(!cur?.landed)return false;
+        cur.recorded={...cur.landed,at:Date.now(),confirmed:true};cur.status='PURCHASED';saveTravelSessions();paintTravelSessionSummary();return true;
+    }
+
+    function fmtSessionTime(ts){
+        if(!ts)return '—';
+        try{return new Date(ts).toLocaleString([], {month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(_){return '—';}
+    }
+
+    function paintTravelSessionSummary(){
+        const existing=document.getElementById('sl-mi-session');
+        if(detectPage()!=='travel'){existing?.remove();return;}
+        if(!settings.sessionSummary){existing?.remove();return;}
+        const cur=travelSessions.current,history=(travelSessions.history||[]).slice(0,5);
+        if(!cur&&!history.length){existing?.remove();return;}
+        const wasOpen=existing?existing.classList.contains('open'):true;
+        const bar=existing||document.createElement('div');bar.id='sl-mi-session';bar.classList.toggle('open',wasOpen);
+        const active=cur||history[0];
+        const predicted=Number(active?.predicted?.profit)||0,landed=Number(active?.landed?.profit)||0,recorded=Number(active?.recorded?.profit)||0;
+        const displayProfit=recorded||landed||predicted;
+        bar.innerHTML='<div class="sl-mi-session-head"><div><span class="sl-mi-br-title">📒 TRAVEL SESSION SUMMARY</span><strong>'+esc(active?.destination||'History')+'</strong></div><div>'+esc(active?.status||'ARCHIVED')+' · '+money(displayProfit)+' est. profit</div><button type="button">▾</button></div><div class="sl-mi-session-note">Trip values are estimates from the script\'s market/basket calculations. “MARK PLAN BOUGHT” records your confirmation; it does not verify later Item Market sale proceeds.</div><div class="sl-mi-session-body"></div>';
+        const body=bar.querySelector('.sl-mi-session-body');
+        if(cur){
+            const delta=cur.predicted&&cur.landed?(Number(cur.landed.profit||0)-Number(cur.predicted.profit||0)):null;
+            const card=document.createElement('div');card.className='sl-mi-session-current';
+            card.innerHTML='<div><b>'+esc(cur.destination)+'</b><span>'+esc(cur.status||'')+' · started '+fmtSessionTime(cur.startedAt)+'</span></div><div><small>BEFORE LANDING</small><strong>'+money(cur.predicted?.profit||0)+'</strong></div><div><small>AT LANDING</small><strong>'+money(cur.landed?.profit||0)+'</strong></div><div><small>RECORDED PLAN</small><strong>'+money(cur.recorded?.profit||0)+'</strong></div>'+(delta==null?'':'<div><small>LANDING Δ</small><strong class="'+(delta>=0?'pos':'neg')+'">'+(delta>=0?'+':'')+money(delta)+'</strong></div>');
+            body.appendChild(card);
+        }
+        if(history.length){
+            const title=document.createElement('div');title.className='sl-mi-session-history-title';title.textContent='RECENT TRIPS';body.appendChild(title);
+            history.forEach(h=>{
+                const p=Number(h.recorded?.profit||h.landed?.profit||h.predicted?.profit)||0;
+                const row=document.createElement('div');row.className='sl-mi-session-row';
+                row.innerHTML='<span class="name">'+esc(h.destination||'?')+'</span><span>'+esc(h.status||'ARCHIVED')+'</span><span>'+fmtSessionTime(h.startedAt)+'</span><strong>'+money(p)+'</strong>';
+                body.appendChild(row);
+            });
+        }
+        bar.querySelector('.sl-mi-session-head').onclick=()=>bar.classList.toggle('open');
+        if(!existing)mountTop(bar);
+    }
+
+    function museumNameKey(name) {
+        return normText(name).toLowerCase().replace(/\s*:\s*/g, ':');
+    }
+
+    function museumDomCatalog() {
+        const map=new Map();
+        document.querySelectorAll('img[src*="/images/items/"]').forEach(img=>{
+            const id=itemIdFromImg(img); if(!id)return;
+            const row=rowContainer(img);
+            const raw=normText(img.getAttribute('alt')||'') || normText((row?.innerText||'').split('\n')[0]);
+            if(!raw)return;
+            map.set(museumNameKey(raw),{id,name:raw,source:'museum-dom'});
+        });
+        return map;
+    }
+
+    async function loadMuseumCatalog() {
+        const merged=museumDomCatalog();
+        const cached=loadJson(STORAGE.itemCatalog,null);
+        if(cached?.items && cached?.at && Date.now()-cached.at<ITEM_CATALOG_MAX_AGE) {
+            for(const item of cached.items){if(item?.id&&item?.name)merged.set(museumNameKey(item.name),item);}
+            return merged;
+        }
+        const key=getApiKey();
+        if(!key)return merged;
+        try {
+            const data=await requestJson('https://api.torn.com/torn/?selections=items&key='+encodeURIComponent(key));
+            checkApiError(data);
+            const items=[];
+            for(const [id,meta] of Object.entries(data?.items||{})){
+                const n=Number(id); if(!n||!meta?.name)continue;
+                const item={id:n,name:meta.name,type:meta.type||'',source:'torn-catalog'};
+                items.push(item); merged.set(museumNameKey(item.name),item);
+            }
+            if(items.length)saveJson(STORAGE.itemCatalog,{at:Date.now(),items});
+        } catch (_) {}
+        return merged;
+    }
+
+    function freshPointsRate() {
+        const row=loadJson(STORAGE.pointsRate,null);
+        if(!row?.rate||!row?.at)return null;
+        if(Date.now()-Number(row.at)>POINTS_RATE_MAX_AGE)return null;
+        return Number(row.rate)||null;
+    }
+
+    function normalizeDestination(value) {
+        const text=normText(value).toLowerCase();
+        if(!text) return null;
+        for(const [key,labels] of Object.entries(TORN_TRAVEL_LABELS)) {
+            if(key.toLowerCase()===text || labels.some(v=>v.toLowerCase()===text)) return key;
+        }
+        if(text.includes('cayman')) return 'Caymans';
+        if(text==='united kingdom'||text==='uk') return 'UK';
+        if(text.includes('united arab')||text==='uae') return 'UAE';
+        if(text.includes('south africa')) return 'South Africa';
+        for(const key of Object.keys(FLIGHT_MINS)) if(text.includes(key.toLowerCase())) return key;
+        return null;
+    }
+
+    function getApiKey() {
+        try { const hubKey=window.SakaLuXScriptHub?.getApiKey?.()||''; if(hubKey){state.apiMode='SakaLuX Hub';return hubKey;}if(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')){const storedHubKey=localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'';if(storedHubKey){state.apiMode='SakaLuX Hub';return storedHubKey;}} } catch (_) {}
+        if (PDA_KEY && PDA_KEY !== '###PDA-APIKEY###') { state.apiMode='Torn PDA'; return PDA_KEY; }
+        try { const key=localStorage.getItem(STORAGE.apiKey)||''; if(key) state.apiMode='Manual'; return key; } catch (_) { return ''; }
+    }
+    function saveApiKey(key) { try { localStorage.setItem(STORAGE.apiKey,key); state.apiMode='Manual'; } catch (_) {} }
+
+    function clearLoadoutCache(){ try{localStorage.removeItem(STORAGE.loadoutCache);}catch(_){} state.loadoutReady=false;state.loadoutItems=0; }
+    function apiErrorText(data){ return normText(data?.error?.error||data?.error?.message||data?.error||''); }
+    async function checkRequiredApiAccess(force=true){
+        const key=getApiKey();
+        if(!key){state.apiAccessStatus='missing';state.apiAccessMessage='No API key configured';state.apiAccessCheckedAt=Date.now();return {ok:false,status:'missing',message:state.apiAccessMessage};}
+        try{
+            const data=await requestJson('https://api.torn.com/v2/user/equipment?key='+encodeURIComponent(key));
+            if(data?.error){
+                const msg=apiErrorText(data)||'Torn API rejected equipment access';
+                state.apiAccessStatus=/permission|access|scope|key/i.test(msg)?'missing-equipment':'error';
+                state.apiAccessMessage=state.apiAccessStatus==='missing-equipment'?'API KEY MISSING EQUIPMENT ACCESS':msg;
+                state.apiAccessCheckedAt=Date.now();
+                return {ok:false,status:state.apiAccessStatus,message:state.apiAccessMessage,raw:msg};
+            }
+            const items=collectEquipmentItems(data);
+            state.apiAccessStatus='ok';state.apiAccessMessage='API access OK · user/equipment available';state.apiAccessCheckedAt=Date.now();
+            if(force){saveJson(STORAGE.loadoutCache,{at:Date.now(),items});state.loadoutReady=items.length>0;state.loadoutItems=items.length;}
+            return {ok:true,status:'ok',message:state.apiAccessMessage,items};
+        }catch(e){
+            const msg=String(e?.message||e||'API request failed');
+            state.apiAccessStatus=/permission|access|scope/i.test(msg)?'missing-equipment':'error';
+            state.apiAccessMessage=state.apiAccessStatus==='missing-equipment'?'API KEY MISSING EQUIPMENT ACCESS':msg;state.apiAccessCheckedAt=Date.now();
+            return {ok:false,status:state.apiAccessStatus,message:state.apiAccessMessage,raw:msg};
+        }
+    }
+    function saveReplacementApiKey(key){
+        const clean=String(key||'').trim();if(!clean)return false;
+        saveApiKey(clean);clearLoadoutCache();state.apiAccessStatus='unknown';state.apiAccessMessage='New key saved · checking access…';state.apiAccessCheckedAt=0;
+        try{sessionStorage.removeItem('SakaLuX_MI_KEY_SETUP_PENDING');}catch(_){}
+        return true;
+    }
+
+    async function fetchAvailableCash(force=false) {
+        const now=Date.now();
+        if(!force&&Number.isFinite(state.availableCash)&&now-state.availableCashAt<CASH_CACHE_MS)return state.availableCash;
+        const key=getApiKey();if(!key)return Number.isFinite(state.availableCash)?state.availableCash:null;
+        try{
+            const data=await requestJson('https://api.torn.com/user/?selections=money&key='+encodeURIComponent(key));
+            checkApiError(data);
+            const raw=data?.money_onhand??data?.money?.onhand??data?.money?.cash??data?.cash;
+            const cash=Number(raw);
+            if(Number.isFinite(cash)&&cash>=0){state.availableCash=Math.floor(cash);state.availableCashAt=now;return state.availableCash;}
+        }catch(_){}
+        return Number.isFinite(state.availableCash)?state.availableCash:null;
+    }
+
+    function normalizeGearStats(raw) {
+        const stats=raw?.stats||raw?.item_details?.stats||raw?.itemDetails?.stats||raw?.item?.stats||{};
+        const num=v=>{const n=Number(v);return Number.isFinite(n)?n:null;};
+        return {damage:num(stats.damage),accuracy:num(stats.accuracy),armor:num(stats.armor??stats.armour),quality:num(stats.quality)};
+    }
+
+    function inferGearSlot(raw, hint='') {
+        const text=normText([hint,raw?.slot,raw?.position,raw?.type,raw?.sub_type,raw?.subType,raw?.name,raw?.item?.type,raw?.item?.sub_type,raw?.item?.name].filter(Boolean).join(' ')).toLowerCase();
+        if(/primary/.test(text))return 'primary';
+        if(/secondary/.test(text))return 'secondary';
+        if(/melee/.test(text))return 'melee';
+        if(/temporary/.test(text))return 'temporary';
+        if(/helmet|mask|head/.test(text))return 'armor-head';
+        if(/glove|gauntlet|hand/.test(text))return 'armor-hands';
+        if(/boot|shoe|foot|feet/.test(text))return 'armor-feet';
+        if(/pant|trouser|legging|leg/.test(text))return 'armor-legs';
+        if(/vest|body|chest|mail/.test(text))return 'armor-body';
+        if(/armor|armour/.test(text))return 'armor';
+        if(/weapon|rifle|pistol|smg|shotgun|machine gun/.test(text))return 'weapon';
+        return '';
+    }
+
+    function normalizeEquipmentItem(raw, hint='') {
+        if(!raw||typeof raw!=='object')return null;
+        const details=raw.item_details||raw.itemDetails||raw.item||raw;
+        const stats=normalizeGearStats(raw);
+        if(stats.damage==null&&stats.accuracy==null&&stats.armor==null)return null;
+        const name=details?.name||raw.name||raw.item_name||raw.label||hint||'Equipped item';
+        const uid=details?.uid??raw.uid??raw.item_uid??null;
+        const type=details?.type||raw.type||'';
+        const subType=details?.sub_type||details?.subType||raw.sub_type||raw.subType||'';
+        const slot=inferGearSlot({...raw,...details,name,type,sub_type:subType},hint);
+        const bonuses=Array.isArray(details?.bonuses)?details.bonuses:(Array.isArray(raw.bonuses)?raw.bonuses:[]);
+        return {name:String(name),uid,slot,type,subType,stats,bonuses};
+    }
+
+    function collectEquipmentItems(payload) {
+        const out=[],seen=new Set();
+        const visit=(node,hint='',depth=0)=>{
+            if(depth>6||node==null)return;
+            if(Array.isArray(node)){node.forEach((x,i)=>visit(x,hint||String(i),depth+1));return;}
+            if(typeof node!=='object')return;
+            const item=normalizeEquipmentItem(node,hint);
+            if(item){const key=String(item.uid||'')+'|'+item.name+'|'+item.slot;if(!seen.has(key)){seen.add(key);out.push(item);}return;}
+            for(const [k,v] of Object.entries(node)){
+                if(['ammo','mods','modifications','clothing'].includes(String(k).toLowerCase()))continue;
+                visit(v,k,depth+1);
+            }
+        };
+        visit(payload?.equipment??payload,'equipment',0);
+        return out;
+    }
+
+    async function fetchEquippedLoadout(force=false) {
+        const cached=loadJson(STORAGE.loadoutCache,null);
+        if(!force&&cached?.at&&Date.now()-Number(cached.at)<LOADOUT_CACHE_MS&&Array.isArray(cached.items)){
+            state.loadoutReady=true;state.loadoutItems=cached.items.length;state.loadoutLastError='';return cached.items;
+        }
+        const key=getApiKey();
+        if(!key){state.loadoutReady=false;state.loadoutLastError='API key not configured';return [];}
+        try{
+            const data=await requestJson('https://api.torn.com/v2/user/equipment?key='+encodeURIComponent(key));
+            if(data?.error){
+                const msg=apiErrorText(data)||'Torn API rejected equipment access';
+                state.apiAccessStatus=/permission|access|scope|key/i.test(msg)?'missing-equipment':'error';
+                state.apiAccessMessage=state.apiAccessStatus==='missing-equipment'?'API KEY MISSING EQUIPMENT ACCESS':msg;state.apiAccessCheckedAt=Date.now();
+                throw new Error(state.apiAccessMessage);
+            }
+            const items=collectEquipmentItems(data);
+            saveJson(STORAGE.loadoutCache,{at:Date.now(),items});
+            state.apiAccessStatus='ok';state.apiAccessMessage='API access OK · user/equipment available';state.apiAccessCheckedAt=Date.now();
+            state.loadoutReady=items.length>0;state.loadoutItems=items.length;state.loadoutLastError=items.length?'':'API access OK, but no equipped combat items were returned';
+            return items;
+        }catch(e){state.loadoutReady=false;state.loadoutLastError=String(e?.message||e);return cached?.items||[];}
+    }
+
+    function marketGearListings(market) { return Array.isArray(market?.gearListings)?market.gearListings:[]; }
+    function candidateSlot(market) { const meta=market?.itemMeta||{};return inferGearSlot(meta,meta.type||''); }
+    function armorFamily(slot){return String(slot||'').startsWith('armor-')?slot:(slot==='armor'?'armor':'');}
+    function compatibleEquipped(candidateSlotValue,equipped){
+        if(!candidateSlotValue)return [];
+        if(candidateSlotValue==='weapon')return equipped.filter(x=>['primary','secondary','melee','weapon'].includes(x.slot));
+        if(candidateSlotValue==='armor')return equipped.filter(x=>armorFamily(x.slot));
+        if(candidateSlotValue.startsWith('armor-')){const exact=equipped.filter(x=>x.slot===candidateSlotValue);return exact.length?exact:equipped.filter(x=>armorFamily(x.slot));}
+        return equipped.filter(x=>x.slot===candidateSlotValue);
+    }
+    function equippedScore(item,slot){const st=item?.stats||{};return String(slot).startsWith('armor')?(Number(st.armor)||0):((Number(st.damage)||0)+(Number(st.accuracy)||0));}
+    function compareGear(candidate,equippedItem,slot) {
+        const cs=candidate?.stats||{},es=equippedItem?.stats||{};
+        const delta=(a,b)=>a==null||b==null?null:Number(a)-Number(b);
+        const dd=delta(cs.damage,es.damage),da=delta(cs.accuracy,es.accuracy),dar=delta(cs.armor,es.armor),dq=delta(cs.quality,es.quality);
+        let verdict='SIDEGRADE';
+        if(String(slot).startsWith('armor')) verdict=dar==null?'UNKNOWN':dar>0.05?'UPGRADE':dar<-0.05?'DOWNGRADE':'SIDEGRADE';
+        else if(dd!=null||da!=null){const vals=[dd,da].filter(v=>v!=null);if(vals.length&&vals.every(v=>v>=0)&&vals.some(v=>v>0.05))verdict='UPGRADE';else if(vals.length&&vals.every(v=>v<=0)&&vals.some(v=>v<-0.05))verdict='DOWNGRADE';}
+        else verdict='UNKNOWN';
+        return {verdict,deltaDamage:dd,deltaAccuracy:da,deltaArmor:dar,deltaQuality:dq};
+    }
+    function signedStat(v){if(v==null||!Number.isFinite(Number(v)))return '—';const n=Number(v);return (n>=0?'+':'')+n.toFixed(2);}
+    function statValue(v){return v==null||!Number.isFinite(Number(v))?'—':Number(v).toFixed(2);}
+    function verdictClass(v){return v==='UPGRADE'?'upgrade':v==='DOWNGRADE'?'downgrade':v==='SIDEGRADE'?'sidegrade':'unknown';}
+
+    async function renderLoadoutComparator(bar,market,id) {
+        bar.querySelector('.sl-mi-loadout')?.remove();
+        if(!settings.loadoutComparator)return;
+        const gear=marketGearListings(market),slot=candidateSlot(market),block=document.createElement('div');block.className='sl-mi-loadout';
+        if(!gear.length||!slot){block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>Not a comparable weapon/armor listing</span></div>';bar.appendChild(block);state.loadoutComparisons=0;state.loadoutBestVerdict='';return;}
+        block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>Loading equipped gear…</span></div>';bar.appendChild(block);
+        const equipped=await fetchEquippedLoadout(false);if(!bar.isConnected||bar.dataset.itemId!==String(id))return;
+        const matches=compatibleEquipped(slot,equipped).sort((a,b)=>equippedScore(b,slot)-equippedScore(a,slot)),current=matches[0]||null;
+        if(!current){
+            const missing=state.apiAccessStatus==='missing-equipment'||/MISSING EQUIPMENT ACCESS/i.test(state.loadoutLastError||'');
+            const headline=missing?'API KEY MISSING EQUIPMENT ACCESS':'Could not match equipped '+esc(slot);
+            const detail=missing?'Create a new SakaLuX Market Intelligence API key, then paste/save it in Settings.':(state.loadoutLastError||'No compatible equipped item was returned.');
+            block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>'+headline+'</span></div><small class="sl-mi-loadout-error">'+esc(detail)+'</small><button type="button" class="sl-mi-loadout-keyfix">FIX API KEY</button>';
+            block.querySelector('.sl-mi-loadout-keyfix').onclick=()=>openSettings();state.loadoutComparisons=0;state.loadoutBestVerdict='';return;
+        }
+        const rows=gear.slice(0,8).map(g=>({...g,comparison:compareGear(g,current,slot)})),rank={UPGRADE:3,SIDEGRADE:2,UNKNOWN:1,DOWNGRADE:0};
+        rows.sort((a,b)=>(rank[b.comparison.verdict]-rank[a.comparison.verdict])||(Number(a.price)-Number(b.price)));
+        state.loadoutComparisons=rows.length;state.loadoutBestVerdict=rows[0]?.comparison?.verdict||'';
+        const cs=current.stats||{},currentStats=String(slot).startsWith('armor')?'Armor '+statValue(cs.armor):'Dmg '+statValue(cs.damage)+' · Acc '+statValue(cs.accuracy);
+        block.innerHTML='<div class="sl-mi-loadout-head"><div><b>⚔ LOADOUT COMPARATOR</b><span>Equipped: <strong>'+esc(current.name)+'</strong> · '+esc(currentStats)+'</span></div><button type="button" class="sl-mi-loadout-refresh">↻</button></div><div class="sl-mi-loadout-note">Verdict compares base combat stats only. Weapon bonuses/mods can change the practical choice.</div><div class="sl-mi-loadout-rows"></div>';
+        const host=block.querySelector('.sl-mi-loadout-rows');
+        rows.forEach(g=>{const c=g.comparison,row=document.createElement('div');row.className='sl-mi-loadout-row '+verdictClass(c.verdict);const stats=String(slot).startsWith('armor')?'Armor '+statValue(g.stats.armor)+' ('+signedStat(c.deltaArmor)+')':'Dmg '+statValue(g.stats.damage)+' ('+signedStat(c.deltaDamage)+') · Acc '+statValue(g.stats.accuracy)+' ('+signedStat(c.deltaAccuracy)+')';const bonus=(g.bonuses||[]).map(x=>x?.title).filter(Boolean).slice(0,2).join(', ');row.innerHTML='<strong class="sl-mi-loadout-verdict">'+esc(c.verdict)+'</strong><span>'+money(g.price)+'</span><span>'+esc(stats)+'</span><span>Q '+statValue(g.stats.quality)+(bonus?' · '+esc(bonus):'')+'</span>';host.appendChild(row);});
+        block.querySelector('.sl-mi-loadout-refresh').onclick=async()=>{localStorage.removeItem(STORAGE.loadoutCache);await renderLoadoutComparator(bar,market,id);};
+    }
+
+    function requestJson(url) {
+        return new Promise((resolve,reject)=>{
+            if (typeof window.PDA_httpGet === 'function') {
+                state.apiMode='Torn PDA';
+                window.PDA_httpGet(url,{Accept:'application/json'}).then(r=>{
+                    try { if(typeof r==='string') return resolve(JSON.parse(r)); const raw=r?.responseText??r?.body??r?.data??r; resolve(typeof raw==='string'?JSON.parse(raw):raw); }
+                    catch(e){reject(e);}
+                }).catch(reject); return;
+            }
+            if (typeof GM_xmlhttpRequest === 'function') {
+                state.apiMode=state.apiMode||'Tampermonkey';
+                GM_xmlhttpRequest({method:'GET',url,timeout:15000,headers:{Accept:'application/json'},onload:r=>{try{resolve(JSON.parse(r.responseText));}catch(e){reject(e);}},onerror:()=>reject(new Error('Network error')),ontimeout:()=>reject(new Error('Request timeout'))});
+                return;
+            }
+            fetch(url).then(r=>r.json()).then(resolve).catch(reject);
+        });
+    }
+    function checkApiError(data) { if(data?.error) throw new Error(data.error.error||data.error.message||'Torn API error'); }
+
+    function detectPage() {
+        const u=location.href, body=document.body?.innerText||'';
+        // Torn's mobile/PDA in-flight screen is not always kept on ?sid=travel.
+        // Detect the actual flight card too so Arrival Basket runs on /index.php-style travel views.
+        if(/sid=travel/i.test(u)||/Remaining Flight Time/i.test(body)||/(?:Traveling\s+(?:from\s+.+?\s+)?to|Torn\s+to)\s+[A-Za-zÀ-ÿ .'-]+/i.test(body)) return 'travel';
+        if(/sid=items?/i.test(u)||/page\.php\?sid=items/i.test(u)||/item\.php/i.test(u)) return 'items';
+        if(/profiles?\.php/i.test(u)||/sid=profile/i.test(u)) return 'profile';
+        if(/sid=ItemMarket/i.test(u)||(document.querySelector('input[type="search"],input[placeholder*="item" i]')&&/Item Market/i.test(body))) return 'itemmarket';
+        if(/bazaar\.php/i.test(u)) return 'bazaar';
+        if(/museum\.php/i.test(u)) return 'museum';
+        if(/pmarket\.php/i.test(u)) return 'points';
+        return 'other';
+    }
+    function detectDestination() { const body=document.body?.innerText||''; const m=body.match(/You are in ([A-Z][A-Za-z ]+?) and have/); return m?normalizeDestination(m[1]):null; }
+    function detectInFlight() { const body=document.body?.innerText||''; return /Remaining Flight Time/i.test(body)||/Traveling from .* to /i.test(body); }
+
+    function parseClockToSeconds(text) {
+        const m=String(text||'').match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+        if(!m) return null;
+        if(m[3]!=null) return Number(m[1])*3600+Number(m[2])*60+Number(m[3]);
+        return Number(m[1])*60+Number(m[2]);
+    }
+
+    function detectFlightFromDom() {
+        const body=document.body?.innerText||'';
+        let destination=null, seconds=null;
+        // Desktop commonly says "Traveling ... to X" while Torn PDA/mobile can say
+        // "Torn to Ciudad Juarez. Remaining Flight Time - 00:16:43".
+        const to=body.match(/(?:Traveling\s+(?:from\s+.+?\s+)?to|Torn\s+to)\s+([A-Za-zÀ-ÿ .'-]+?)(?=\s*(?:\.|\n|Remaining Flight Time|$))/i);
+        if(to) destination=normalizeDestination(to[1]);
+        if(!destination) {
+            for(const key of Object.keys(FLIGHT_MINS)) {
+                const labels=TORN_TRAVEL_LABELS[key]||[key];
+                if(labels.some(l=>new RegExp('(?:to|destination)\\s+'+l.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i').test(body))) { destination=key; break; }
+            }
+        }
+        const rt=body.match(/Remaining Flight Time[^0-9]*(\d{1,2}:\d{2}(?::\d{2})?)/i);
+        if(rt) seconds=parseClockToSeconds(rt[1]);
+        return {destination,seconds,source:'page'};
+    }
+
+    async function fetchFlightStatus() {
+        const fallback=detectFlightFromDom();
+        const key=getApiKey();
+        if(!key) return fallback;
+        try {
+            const data=await requestJson('https://api.torn.com/user/?selections=travel&key='+encodeURIComponent(key));
+            checkApiError(data);
+            const travel=data?.travel||{};
+            const destination=normalizeDestination(travel.destination)||fallback.destination;
+            let seconds=Number(travel.time_left);
+            if(!Number.isFinite(seconds) || seconds<0) {
+                const ts=Number(travel.timestamp);
+                seconds=Number.isFinite(ts)&&ts>0 ? Math.max(0,ts-Math.floor(Date.now()/1000)) : fallback.seconds;
+            }
+            return {destination,seconds:Number.isFinite(seconds)?seconds:fallback.seconds,source:'Torn API'};
+        } catch (_) {
+            return fallback;
+        }
+    }
+
+    function isVisible(el) {
+        if(!el || !(el instanceof Element)) return false;
+        const r=el.getBoundingClientRect();
+        if(r.width===0 && r.height===0) return false;
+        const s=getComputedStyle(el);
+        return s.display!=='none' && s.visibility!=='hidden';
+    }
+
+    function parseTravelDurationMinutes(text) {
+        const t=normText(text);
+        let m=t.match(/\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/);
+        if(m){
+            const h=Number(m[1]),min=Number(m[2]),sec=m[3]==null?0:Number(m[3]);
+            const total=h*60+min+sec/60;
+            if(total>=1&&total<=600)return total;
+        }
+        m=t.match(/\b(\d+)\s*h(?:ours?)?\s*(?:(\d+)\s*m(?:in(?:ute)?s?)?)?/i);
+        if(m){const total=Number(m[1])*60+Number(m[2]||0);if(total>=1&&total<=600)return total;}
+        m=t.match(/\b(\d+)\s*m(?:in(?:ute)?s?)\b/i);
+        if(m){const total=Number(m[1]);if(total>=1&&total<=600)return total;}
+        return null;
+    }
+
+    function fmtFlightMinutes(mins) {
+        const n=Math.max(0,Math.round(Number(mins)||0));
+        if(n<60)return n+'m';
+        const h=Math.floor(n/60),m=n%60;
+        return h+'h'+(m?' '+m+'m':'');
+    }
+
+    function scrapeTravelTimes() {
+        const found=new Map();
+        const nodes=[...document.querySelectorAll('tr,li,[role="row"],a,button,[class*="destination"],[class*="travel"],[class*="row"],[class*="Row"]')];
+        for(const destination of Object.keys(FLIGHT_MINS)){
+            const labels=TORN_TRAVEL_LABELS[destination]||[destination];
+            let best=null;
+            for(const el of nodes){
+                if(!isVisible(el))continue;
+                const text=normText(el.innerText||el.textContent);
+                if(!text||text.length>260)continue;
+                const lower=text.toLowerCase();
+                if(!labels.some(label=>lower.includes(label.toLowerCase())))continue;
+                const mins=parseTravelDurationMinutes(text);
+                if(!Number.isFinite(mins))continue;
+                const score=text.length+(el.children?.length||0)*2;
+                if(!best||score<best.score)best={mins,score,text};
+            }
+            if(best)found.set(destination,{mins:best.mins,source:'torn-page'});
+        }
+        return found;
+    }
+
+    function flightInfo(destination,actualMap) {
+        const actual=actualMap?.get(destination);
+        if(actual&&Number.isFinite(actual.mins))return actual;
+        const base=Number(FLIGHT_MINS[destination]);
+        if(!Number.isFinite(base))return null;
+        return {mins:base*Math.max(0.1,Number(settings.flightMultiplier)||1),source:'fallback'};
+    }
+
+    function selectTravelDestination(destination) {
+        if(detectPage()!=='travel' || detectDestination() || detectInFlight()) return false;
+        const labels=TORN_TRAVEL_LABELS[destination]||[destination];
+        const candidates=[];
+        const nodes=document.querySelectorAll('a,button,[role="button"],li,tr,div');
+        for(const el of nodes){
+            if(!isVisible(el)) continue;
+            const text=normText(el.innerText||el.textContent);
+            if(!text || text.length>180) continue;
+            const lower=text.toLowerCase();
+            let hit=false;
+            for(const label of labels){
+                const l=label.toLowerCase();
+                if(lower===l || lower.startsWith(l+' -') || lower.startsWith(l+'-') || lower.startsWith(l+' ')){hit=true;break;}
+            }
+            if(!hit) continue;
+            candidates.push({el,textLen:text.length,area:Math.max(1,el.getBoundingClientRect().width*el.getBoundingClientRect().height)});
+        }
+        candidates.sort((a,b)=>a.textLen-b.textLen || a.area-b.area);
+        const seed=candidates[0]?.el;
+        if(!seed) return false;
+        const target=seed.closest('a,button,[role="button"],li,tr')||seed;
+        try { target.scrollIntoView({behavior:'smooth',block:'center'}); } catch (_) { try { target.scrollIntoView(); } catch(__){} }
+        setTimeout(()=>{
+            try { target.click(); }
+            catch (_) { try { target.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window})); } catch(__){} }
+        },120);
+        return true;
+    }
+
+
+
+    function travelShopSignature(){
+        const destination=detectDestination();if(!destination)return '';
+        const parts=[];
+        const seen=new Set();
+        document.querySelectorAll('img[src*="/images/items/"]').forEach(img=>{
+            const id=itemIdFromImg(img),row=rowContainer(img);if(!id||!row||seen.has(row))return;
+            seen.add(row);
+            const buy=extractFirstPrice(row),stock=extractTravelStock(row);
+            if(!(buy>0))return;
+            parts.push(id+':'+Math.max(0,Number(stock)||0)+':'+Math.round(buy));
+        });
+        parts.sort();
+        return destination+'|'+parts.join('|');
+    }
+
+    function scheduleLandedSmartRefresh(reason='mutation'){
+        if(!settings.smartLandedRefresh||detectPage()!=='travel'||detectInFlight()||!detectDestination())return;
+        if(state.landedRefreshTimer)clearTimeout(state.landedRefreshTimer);
+        state.landedRefreshTimer=setTimeout(()=>{
+            state.landedRefreshTimer=null;
+            const now=Date.now(),signature=travelShopSignature();
+            if(!signature)return;
+            if(signature===state.landedSignature){state.landedRefreshSkips++;return;}
+            if(now-state.landedLastRefresh<LANDED_REFRESH_MIN_MS){state.landedRefreshSkips++;return;}
+            state.landedSignature=signature;
+            state.landedLastRefresh=now;
+            state.landedRefreshes++;
+            state.landedStockRefreshes++;
+            const marketDue=now-state.landedLastMarketRefresh>=LANDED_MARKET_REFRESH_MS;
+            if(marketDue){
+                state.landedLastMarketRefresh=now;
+                state.landedMarketRefreshes++;
+                marketCache={};saveJson(STORAGE.marketCache,marketCache);
+            }
+            scheduleScan(true);
+        },LANDED_SIGNATURE_DEBOUNCE_MS);
+    }
+
+    function rowContainer(img) { return img.closest('tr')||img.closest('li')||img.closest('[class*="row"]')||img.closest('[class*="Row"]')||img.closest('[class*="item"]')||img.parentElement?.parentElement||img.parentElement; }
+    function travelRowContainer(img) {
+        if(!img)return null;
+        let el=img;
+        for(let i=0;i<7&&el;i++,el=el.parentElement){
+            const txt=normText(el.innerText||el.textContent||'');
+            if(!txt)continue;
+            if(/\$\s*[\d,.]+\s*[KMB]?/i.test(txt)&&!/\b(?:Value|Circ|Damage|Accuracy|Rate of Fire|Ammo):/i.test(txt)&&txt.length<=180)return el;
+        }
+        return rowContainer(img);
+    }
+    function extractTravelStock(node) {
+        const txt=normText(node?.innerText||node?.textContent||'');
+        if(!txt)return null;
+        const clean=txt.replace(/\$\s*[\d,.]+\s*[KMB]?/ig,' ');
+        const nums=[...clean.matchAll(/(?:^|\s)(\d{1,6})(?=\s|$)/g)].map(m=>Number(m[1])).filter(n=>Number.isFinite(n)&&n>=0&&n<=MAX_REASONABLE_TRAVEL_STOCK);
+        return nums.length?nums[0]:null;
+    }
+    function extractTornDisplayedValue(img) {
+        let el=img;
+        for(let i=0;i<8&&el;i++,el=el.parentElement){
+            const m=normText(el.innerText||el.textContent||'').match(/\bValue:\s*\$\s*([\d,.]+)\s*([KMB])?/i);
+            if(m){const v=parseMoney(m[1]+(m[2]||''));if(v>0)return v;}
+        }
+        return null;
+    }
+    function itemIdFromImg(img) { const m=(img?.getAttribute('src')||'').match(/\/images\/items\/(\d+)\//); return m?Number(m[1]):null; }
+    function extractFirstPrice(node) { const txt=(node?.innerText||node?.textContent||'').replace(/\s+/g,' '); const m=txt.match(/\$\s*([\d,.]+)\s*([KMB])?/i); return m?parseMoney(m[1]+(m[2]||'')):NaN; }
+    function extractStock(node) { const txt=(node?.innerText||'').replace(/\$\s*[\d,.]+/g,' '); const nums=txt.match(/\b\d[\d,]*\b/g)||[]; if(!nums.length) return null; const vals=nums.map(x=>Number(x.replace(/,/g,''))).filter(Number.isFinite); return vals.length?Math.max(...vals):null; }
+
+    function cacheGet(itemId) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>MARKET_CACHE_MS) return null; return row; }
+    function cachePeek(itemId,maxAge=TRAVEL_CACHE_MAX_STALE_MS) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>maxAge) return null; return row; }
+    function cachePut(itemId,row) { marketCache[String(itemId)]=Object.assign({},row,{at:Date.now()}); saveJson(STORAGE.marketCache,marketCache); }
+    async function fetchMarket(itemId,force=false) {
+        if(!force){const c=cacheGet(itemId); if(c) return c;}
+        const key=getApiKey(); if(!key) return null;
+        state.marketRequests++;
+        const data=await requestJson('https://api.torn.com/v2/market/'+encodeURIComponent(itemId)+'/itemmarket?key='+encodeURIComponent(key));
+        checkApiError(data);
+        const listings=Array.isArray(data?.itemmarket?.listings)?data.itemmarket.listings:(Array.isArray(data?.itemmarket)?data.itemmarket:[]);
+        const norm=listings.map(l=>({price:Number(l.price??l.cost??0),qty:Number(l.amount??l.quantity??1)})).filter(l=>l.price>0).sort((a,b)=>a.price-b.price);
+        const itemMeta=data?.itemmarket?.item||{};
+        const gearListings=listings.map(l=>{const d=l?.item_details||l?.itemDetails||null;if(!d?.stats)return null;return{price:Number(l.price??l.cost??0),qty:Number(l.amount??l.quantity??1),uid:d.uid??null,stats:normalizeGearStats(d),bonuses:Array.isArray(d.bonuses)?d.bonuses:[],rarity:d.rarity||null};}).filter(x=>x&&x.price>0);
+        const average=Number(data?.itemmarket?.average_price??data?.itemmarket?.market_value??0);
+        if(!norm.length && !(average>0)) return null;
+        const effective=norm.length?(norm.find(l=>l.qty>=2)||norm[0]):null;
+        const floor=norm[0]?.price||average;
+        const marketValue=average>0?average:(effective?.price||floor);
+        const row={price:marketValue,averagePrice:average>0?average:null,minPrice:floor,listingPrice:effective?.price||floor,qty:effective?.qty||0,count:norm.length,itemMeta,gearListings}; cachePut(itemId,row); queueNetworkObservation(itemId,row.minPrice,'itemmarket'); return row;
+    }
+    async function mapWithLimit(items,fn) { const out=new Array(items.length); let i=0; async function worker(){while(i<items.length){const idx=i++; try{out[idx]=await fn(items[idx],idx);}catch(_){out[idx]=null;}}} const workers=[]; for(let w=0;w<Math.min(CONCURRENCY,items.length);w++) workers.push(worker()); await Promise.all(workers); return out; }
+    function metrics(buyPrice,marketPrice) { const fee=Math.max(0,Number(settings.marketFeePct)||0)/100; const net=marketPrice*(1-fee); const profit=net-buyPrice; return {net,profit,roi:buyPrice>0?profit/buyPrice*100:0}; }
+
+    function stockKey(destination,itemId){return destination+'|'+itemId;}
+    function nextQuarterHourMins(now=Date.now()){const tick=15*60*1000; return (Math.ceil(now/tick)*tick-now)/60000;}
+    function recordStock(destination,itemId,stock,now=Date.now()) {
+        if(!destination||!Number.isFinite(Number(stock))) return;
+        const key=stockKey(destination,itemId), qty=Number(stock);
+        if(qty<0||qty>MAX_REASONABLE_TRAVEL_STOCK)return;
+        let h=stockHistory[key]||{last:null,restocks:[],restockQty:[]};
+        if(!Array.isArray(h.restocks)) h.restocks=[];
+        if(!Array.isArray(h.restockQty)) h.restockQty=[];
+        if(h.last&&(!Number.isFinite(Number(h.last.qty))||Number(h.last.qty)<0||Number(h.last.qty)>MAX_REASONABLE_TRAVEL_STOCK))h.last=null;
+        if(h.last&&Number.isFinite(h.last.qty)&&qty>h.last.qty){
+            const delta=qty-h.last.qty;
+            if(delta>0&&delta<=MAX_REASONABLE_TRAVEL_STOCK){
+                h.restocks=h.restocks.filter(t=>now-t<STOCK_HISTORY_MAX_AGE); h.restocks.push(now); h.restocks=h.restocks.slice(-MAX_HISTORY_EVENTS);
+                h.restockQty.push(delta); h.restockQty=h.restockQty.filter(v=>Number.isFinite(v)&&v>0&&v<=MAX_REASONABLE_TRAVEL_STOCK).slice(-MAX_HISTORY_EVENTS);
+            }
+        }
+        h.last={qty,at:now}; stockHistory[key]=h;
+    }
+
+    function restockStats(destination,itemId,now=Date.now()) {
+        const h=stockHistory[stockKey(destination,itemId)];
+        const events=(h?.restocks||[]).filter(t=>Number.isFinite(t)&&now-t<STOCK_HISTORY_MAX_AGE).sort((a,b)=>a-b);
+        const gaps=[];
+        for(let i=1;i<events.length;i++){const g=(events[i]-events[i-1])/60000;if(g>=MIN_LEARNED_RESTOCK_GAP_MIN&&g<24*60)gaps.push(g);}
+        const medGap=median(gaps);
+        const medQty=median((h?.restockQty||[]).map(Number).filter(v=>v>0&&v<=MAX_REASONABLE_TRAVEL_STOCK));
+        return {events,gaps,medGap,medQty,samples:events.length};
+    }
+
+    function estimateRestock(destination,itemId,now=Date.now()) {
+        const stats=restockStats(destination,itemId,now);
+        if(stats.medGap&&stats.events.length>=2){
+            const last=stats.events[stats.events.length-1]; let target=last+stats.medGap*60000;
+            while(target<=now) target+=stats.medGap*60000;
+            state.stockEtaLearned++;
+            return {mins:(target-now)/60000,learned:true,samples:stats.events.length,gap:stats.medGap,qty:stats.medQty};
+        }
+        return {mins:nextQuarterHourMins(now),learned:false,samples:stats.events.length,gap:null,qty:stats.medQty};
+    }
+
+    function predictAtArrival(destination,itemId,currentStock,landingMins,now=Date.now()) {
+        const stock=Number(currentStock);
+        const horizon=Math.max(0,Number(landingMins)||0);
+        const e=estimateRestock(destination,itemId,now);
+        let expectedRestocks=0;
+        let confidence='LOW';
+        let projected=Number.isFinite(stock)?stock:null;
+        if(e.learned&&e.gap>0){
+            if(e.mins<=horizon) expectedRestocks=1+Math.floor(Math.max(0,horizon-e.mins)/e.gap);
+            confidence=e.samples>=5?'HIGH':e.samples>=3?'MEDIUM':'LOW';
+            if(projected!=null&&e.qty&&expectedRestocks>0) projected=Math.min(MAX_REASONABLE_TRAVEL_STOCK,projected+e.qty*expectedRestocks);
+        } else {
+            expectedRestocks=Math.max(0,Math.floor((horizon-nextQuarterHourMins(now))/15)+1);
+            confidence='LEARNING';
+        }
+        if(projected!=null)projected=Math.max(0,Math.min(MAX_REASONABLE_TRAVEL_STOCK,projected));
+        return {current:projected==null?null:stock,projected,expectedRestocks,confidence,eta:e};
+    }
+
+    function stockEtaText(destination,itemId,stock){
+        if(!settings.stockEta) return '';
+        const e=estimateRestock(destination,itemId);
+        if(e.learned) return ' · next stock '+fmtDuration(e.mins);
+        if(Number(stock)===0) return ' · possible restock ≤'+Math.max(1,Math.ceil(e.mins))+'m';
+        return ' · restock ETA learning';
+    }
+    function flushStockHistory(){ saveJson(STORAGE.stockHistory,stockHistory); }
+
+    async function fetchYataAll(){
+        const data=await requestJson(YATA_EXPORT_URL); const countries=data?.stocks||data||{}; const rows=[];
+        for(const code of Object.keys(countries)){
+            const destination=YATA_COUNTRY_MAP[code]; if(!destination) continue;
+            const arr=countries[code]?.stocks||countries[code]||[]; if(!Array.isArray(arr)) continue;
+            for(const s of arr){const id=Number(s.id),buy=Number(s.cost),stock=Number(s.quantity);if(!id||!(buy>0))continue;rows.push({itemId:id,name:s.name||('Item #'+id),destination,buyPrice:buy,stock:Number.isFinite(stock)?stock:null});}
+        }
+        return rows;
+    }
+
+    function ensureBadge(row,cls){let box=row.querySelector(':scope > .'+cls);if(!box){box=document.createElement('div');box.className=cls;row.appendChild(box);}return box;}
+
+    function extractAdjacentTornDisplayedValue(row){
+        if(!row)return null;
+        let node=row.nextElementSibling,steps=0;
+        while(node&&steps<4){
+            if(node.matches?.('tr')&&node.querySelector?.('img[src*="/images/items/"]'))break;
+            const text=normText(node.innerText||node.textContent||'');
+            const m=text.match(/Value\s*:\s*\$\s*([0-9][0-9,]*(?:\.\d+)?(?:\s*[KMB])?)/i);
+            if(m){const v=parseMoney(m[1]);if(Number.isFinite(v)&&v>0)return v;}
+            node=node.nextElementSibling;steps++;
+        }
+        return null;
+    }
+
+
+    function bazaarItemHost(img,row){
+        let el=row||img;
+        for(let depth=0;depth<8&&el?.parentElement;depth++){
+            const parent=el.parentElement;
+            const itemChildren=[...parent.children].filter(child=>child.querySelector?.('img[src*="/images/items/"]'));
+            if(itemChildren.length>=2)return el;
+            el=parent;
+        }
+        return row||img;
+    }
+
+    function ensureBazaarBadge(row,cls){
+        if(!row)return null;
+        const host=row;
+        const next=host.nextElementSibling;
+        if(next?.classList?.contains('sl-mi-bazaar-badge-wrap')){
+            const existing=next.querySelector('.'+cls);if(existing)return existing;
+        }
+        const wrap=document.createElement(host.tagName==='TR'?'tr':'div');
+        wrap.className='sl-mi-bazaar-badge-wrap';
+        if(host.tagName==='TR'){
+            const td=document.createElement('td');td.colSpan=Math.max(1,host.children?.length||4);wrap.appendChild(td);
+            td.style.cssText='padding:0 6px 6px!important;border:0!important;background:transparent!important;';
+            const box=document.createElement('div');box.className=cls+' sl-mi-bazaar-wide';td.appendChild(box);host.insertAdjacentElement('afterend',wrap);return box;
+        }
+        const box=document.createElement('div');box.className=cls+' sl-mi-bazaar-wide';wrap.appendChild(box);host.insertAdjacentElement('afterend',wrap);return box;
+    }
+
+    function ensureTravelBadge(row,cls){
+        if(!row)return null;
+        const host=row.closest?.('tr')||row;
+        if(host?.tagName==='TR'){
+            const next=host.nextElementSibling;
+            if(next?.classList?.contains('sl-mi-pda-badge-row')&&next.dataset.miClass===cls){
+                const existing=next.querySelector('.'+cls);if(existing)return existing;
+            }
+            const tr=document.createElement('tr');
+            tr.className='sl-mi-pda-badge-row';
+            tr.dataset.miClass=cls;
+            const td=document.createElement('td');
+            td.colSpan=Math.max(1,host.children?.length||5);
+            td.style.cssText='padding:0 6px 6px!important;border:0!important;background:transparent!important;height:auto!important;';
+            const box=document.createElement('div');
+            box.className=cls+' sl-mi-pda-wide-badge';
+            box.style.cssText='display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35!important;margin:0!important;padding:7px 10px!important;';
+            td.appendChild(box);tr.appendChild(td);host.insertAdjacentElement('afterend',tr);return box;
+        }
+        const next=host?.nextElementSibling;
+        if(next?.classList?.contains('sl-mi-pda-badge-block')&&next.dataset.miClass===cls){
+            const existing=next.querySelector('.'+cls);if(existing)return existing;
+        }
+        const wrap=document.createElement('div');
+        wrap.className='sl-mi-pda-badge-block';wrap.dataset.miClass=cls;
+        wrap.style.cssText='display:block!important;width:100%!important;clear:both!important;box-sizing:border-box!important;margin:2px 0 6px!important;';
+        const box=document.createElement('div');box.className=cls+' sl-mi-pda-wide-badge';
+        box.style.cssText='display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35!important;padding:7px 10px!important;';
+        wrap.appendChild(box);host.insertAdjacentElement('afterend',wrap);return box;
+    }
+
+    function bestRunAffordableQty(row,slots){
+        const stockQty=row.stock==null?slots:Math.min(slots,Math.max(0,Number(row.stock)||0));
+        const budget=Math.max(0,Number(settings.travelBudget)||0);
+        if(!(budget>0)) return stockQty;
+        return Math.min(stockQty,Math.floor(budget/Math.max(1,Number(row.buyPrice)||1)));
+    }
+
+    function routeBasketEntries(rows){
+        return rows.map(r=>({id:r.itemId,name:r.name,buy:r.buyPrice,stock:r.stock,row:null,destination:r.destination}));
+    }
+
+    function buildBestRunRows(candidates,marketMap,actualTimes){
+        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),grouped=new Map(),ranked=[];
+        for(const r of candidates){if(!grouped.has(r.destination))grouped.set(r.destination,[]);grouped.get(r.destination).push(r);}
+        let blocked=0,totalBasketItems=0;
+        for(const [destination,rows] of grouped){
+            const flight=flightInfo(destination,actualTimes);if(!flight)continue;
+            const entries=routeBasketEntries(rows);
+            const plan=buildTravelBuyPlan(destination,entries,marketMap);
+            if(!plan?.rows?.length||!(plan.totalProfit>0)){blocked++;continue;}
+            const roundTrip=flight.mins*2,profitHour=plan.totalProfit/(roundTrip/60);
+            const summary=plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':'');
+            totalBasketItems+=plan.rows.length;
+            ranked.push({
+                destination,
+                basket:plan.rows,
+                basketSummary:summary,
+                qty:plan.used,
+                slots,
+                costRun:plan.totalCost,
+                profitRun:plan.totalProfit,
+                profitHour,
+                flightMins:flight.mins,
+                flightSource:flight.source,
+                budgetLimited:budget>0&&plan.unusedBudget!==null,
+                mode:plan.mode,
+                optimizationGain:plan.optimizationGain||0
+            });
+        }
+        state.bestRunBudgetAware=budget>0;
+        state.bestRunAffordableRoutes=ranked.length;
+        state.bestRunBlockedRoutes=blocked;
+        state.bestRunBasketRoutes=ranked.length;
+        state.bestRunBasketItems=totalBasketItems;
+        const sorted=ranked.sort((a,b)=>b.profitHour-a.profitHour || b.profitRun-a.profitRun).slice(0,11);
+        state.bestRunBasketProfit=sorted[0]?.profitRun||0;
+        return sorted;
+    }
+
+    function paintBestTravelRun(top,phase){
+        if(detectPage()!=='travel'){document.getElementById('sl-mi-best-run')?.remove();return;}
+        state.bestRunRows=top.length;if(!top.length)return;
+        const existing=document.getElementById('sl-mi-best-run');
+        const wasOpen=existing?existing.classList.contains('open'):false;
+        const bar=existing||document.createElement('div');bar.id='sl-mi-best-run';bar.classList.toggle('open',wasOpen);const best=top[0];
+        bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST ROUTE BASKET</span><strong>'+esc(best.destination)+' · '+best.basket.length+' item types</strong><span>'+money(best.profitHour)+'/hr</span><button type="button">▾</button></div><div class="sl-mi-perf-note">'+esc(phase||'cached')+'</div><div class="sl-mi-br-body"></div>';
+        const body=bar.querySelector('.sl-mi-br-body');
+        for(const r of top){
+            const row=document.createElement('div');row.className='sl-mi-br-row sl-mi-route';row.dataset.destination=r.destination;row.setAttribute('role','button');row.tabIndex=0;row.title='Select '+r.destination+' in Torn Travel';
+            const routeInfo=r.basket.length+' item types · '+r.qty+'/'+r.slots+' slots · flight '+fmtFlightMinutes(r.flightMins)+' '+(r.flightSource==='torn-page'?'actual':'fallback');
+            const costLine='cost '+money(r.costRun)+(settings.travelBudget>0?' · budget '+money(settings.travelBudget):'');
+            row.innerHTML='<span class="name">'+esc(r.destination)+'</span><span>'+esc(r.basketSummary)+'</span><span>'+routeInfo+'</span><span class="eta">'+costLine+' · '+esc(r.mode)+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
+            const activate=()=>selectTravelDestination(r.destination);row.addEventListener('click',activate);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});body.appendChild(row);
+        }
+        bar.querySelector('.sl-mi-br-head').onclick=()=>bar.classList.toggle('open');
+        if(!existing)mountTop(bar);
+    }
+
+    function travelRefreshIds(candidates,limit,actualTimes){
+        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),byDestination=new Map();
+        for(const r of candidates){
+            const affordableQty=bestRunAffordableQty(r,slots);
+            if(affordableQty<=0) continue;
+            const c=cachePeek(r.itemId),flight=flightInfo(r.destination,actualTimes)?.mins||9999;
+            let score=0;
+            if(c){const m=metrics(r.buyPrice,c.price);score=Math.max(0,m.profit)*affordableQty/(flight||1);}
+            else score=Math.max(1,r.buyPrice)/Math.max(1,flight);
+            const scored={id:r.itemId,destination:r.destination,score,cached:!!c,budgetAware:budget>0};
+            if(!byDestination.has(r.destination))byDestination.set(r.destination,[]);
+            byDestination.get(r.destination).push(scored);
+        }
+        for(const list of byDestination.values())list.sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+        const ids=[],seen=new Set();
+        const destinationHeads=[...byDestination.values()].map(list=>list[0]).filter(Boolean).sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+        for(const x of destinationHeads){if(seen.has(x.id))continue;seen.add(x.id);ids.push(x.id);if(ids.length>=limit)return ids;}
+        const rest=[...byDestination.values()].flatMap(list=>list.slice(1)).sort((a,b)=>(b.cached-a.cached)||(b.score-a.score));
+        for(const x of rest){if(seen.has(x.id))continue;seen.add(x.id);ids.push(x.id);if(ids.length>=limit)break;}
+        return ids;
+    }
+
+    async function renderBestTravelRun(){
+        const existing=document.getElementById('sl-mi-best-run');
+        if(!settings.bestRun||detectDestination()||detectInFlight()){existing?.remove();return;}
+        const yata=await fetchYataAll(); if(!yata.length) return;
+        const candidates=[];
+        for(const r of yata){if(r.stock!=null)recordStock(r.destination,r.itemId,r.stock);if(r.stock===0)continue;candidates.push(r);}flushStockHistory();
+
+        const actualTimes=scrapeTravelTimes();
+        state.actualFlightTimes=actualTimes.size;
+        state.travelTimeSource=actualTimes.size?'torn-page':'fallback';
+        const cachedMap=new Map();
+        for(const r of candidates){const c=cachePeek(r.itemId);if(c)cachedMap.set(r.itemId,c);}
+        state.travelCacheHits=cachedMap.size;
+        const cachedTop=buildBestRunRows(candidates,cachedMap,actualTimes);
+        if(cachedTop.length) paintBestTravelRun(cachedTop,'route baskets · instant cache · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn times '+actualTimes.size+'/'+Object.keys(FLIGHT_MINS).length:'fallback flight times')+' · refreshing '+TRAVEL_REFRESH_LIMIT+' prices');
+
+        const ids=travelRefreshIds(candidates,TRAVEL_REFRESH_LIMIT,actualTimes);
+        state.travelRefreshes=ids.length;
+        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)return m;});
+
+        const finalMap=new Map();
+        for(const r of candidates){const c=cachePeek(r.itemId);if(c)finalMap.set(r.itemId,c);}
+        const finalTop=buildBestRunRows(candidates,finalMap,actualTimes);
+        if(finalTop.length) paintBestTravelRun(finalTop,'route baskets · live-refreshed · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn flight times':'fallback flight times')+' · '+ids.length+' prices checked');
+    }
+
+    async function renderArrivalStock(){
+        const previousArrival=document.getElementById('sl-mi-arrival');
+        state.arrivalRows=0;state.flightDestination='';state.landingMins=null;
+        state.arrivalBasketItems=0;state.arrivalBasketCost=0;state.arrivalBasketProfit=0;state.arrivalBasketSlots=0;state.arrivalBasketMode='';
+        if(!settings.arrivalStock||!detectInFlight()){previousArrival?.remove();return;}
+        const flight=await fetchFlightStatus();
+        const destination=normalizeDestination(flight.destination),landingMins=Number(flight.seconds)/60;
+        if(!destination||!Number.isFinite(landingMins)||landingMins<0){previousArrival?.remove();return;}
+        state.flightDestination=destination;state.landingMins=landingMins;
+        const yata=(await fetchYataAll()).filter(r=>r.destination===destination);if(!yata.length)return;
+        for(const r of yata)if(r.stock!=null)recordStock(destination,r.itemId,r.stock);flushStockHistory();
+
+        const marketMap=new Map();
+        for(const r of yata){const c=cachePeek(r.itemId);if(c)marketMap.set(r.itemId,c);}
+        const ids=travelRefreshIds(yata,ARRIVAL_REFRESH_LIMIT,new Map());
+        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id,true);if(m)marketMap.set(id,m);});
+
+        const slots=Math.max(1,Number(settings.travelSlots)||29),rows=[];
+        for(const r of yata){
+            const market=marketMap.get(r.itemId);if(!market)continue;
+            const m=metrics(r.buyPrice,market.price);if(m.profit<=0)continue;
+            const p=predictAtArrival(destination,r.itemId,r.stock,landingMins);
+            const projectedStock=p.projected==null?(r.stock==null?0:Number(r.stock)||0):Math.max(0,Math.floor(Number(p.projected)||0));
+            const availableQty=Math.min(slots,projectedStock);
+            const currentQty=r.stock==null?0:Math.min(slots,Math.max(0,Number(r.stock)||0));
+            const projectedProfit=m.profit*availableQty,currentProfit=m.profit*currentQty;
+            const score=projectedProfit+(p.expectedRestocks>0?Math.max(0,m.profit)*Math.min(slots,Number(p.eta.qty)||0)*0.25:0);
+            rows.push(Object.assign({},r,{market:market.price,profitItem:m.profit,roi:m.roi,p,currentProfit,projectedProfit,projectedStock,score}));
+        }
+        if(!rows.length)return;
+
+        let plan=null,plannedQty=new Map();
+        if(settings.arrivalBasket){
+            const projectedEntries=rows.map(r=>({id:r.itemId,name:r.name,buy:r.buyPrice,stock:r.projectedStock,row:null,destination}));
+            plan=buildTravelBuyPlan(destination,projectedEntries,marketMap);
+            plannedQty=new Map((plan?.rows||[]).map(r=>[String(r.id),Number(r.qty)||0]));
+            state.arrivalBasketItems=plan?.rows?.length||0;
+            state.arrivalBasketCost=plan?.totalCost||0;
+            state.arrivalBasketProfit=plan?.totalProfit||0;
+            state.arrivalBasketSlots=plan?.used||0;
+            state.arrivalBasketMode=plan?.mode||'';
+            if(plan?.rows?.length)updatePredictedSession(destination,plan,landingMins);
+        }
+
+        rows.forEach(r=>{r.plannedQty=plannedQty.get(String(r.itemId))||0;r.plannedProfit=r.plannedQty*r.profitItem;});
+        rows.sort((a,b)=>{
+            if((a.plannedQty>0)!==(b.plannedQty>0))return (b.plannedQty>0)-(a.plannedQty>0);
+            if(a.plannedQty>0&&b.plannedQty>0)return b.plannedProfit-a.plannedProfit||b.profitItem-a.profitItem;
+            return b.score-a.score;
+        });
+        const top=rows.slice(0,10);state.arrivalRows=top.length;if(!top.length)return;
+
+        const bar=document.createElement('div');bar.id='sl-mi-arrival';bar.className='open';
+        const title=settings.arrivalBasket?'✈ ARRIVAL BASKET':'✈ ARRIVAL STOCK';
+        const planSummary=settings.arrivalBasket&&plan?.rows?.length
+            ?('<strong>'+plan.used+'/'+slots+' slots · '+money(plan.totalProfit)+' profit · '+esc(plan.mode)+'</strong>')
+            :('<strong>'+top.length+' opportunities</strong>');
+        const budgetText=settings.travelBudget>0?(' · budget '+money(settings.travelBudget)):' · unlimited budget';
+        bar.innerHTML='<div class="sl-mi-arrival-head"><div><span class="sl-mi-br-title">'+title+'</span><strong>'+esc(destination)+'</strong></div><div>Landing '+fmtDuration(landingMins)+' · '+esc(flight.source)+'</div><button type="button">▾</button></div>'+
+            '<div class="sl-mi-arrival-note">'+(settings.arrivalBasket?'Pre-builds the best basket for landing using predicted stock, travel slots and your budget. ':'Prediction uses current YATA stock plus locally learned restock timing. ')+planSummary+budgetText+' · projected stock is an estimate, not guaranteed.</div><div class="sl-mi-arrival-body"></div>';
+        const body=bar.querySelector('.sl-mi-arrival-body');
+        for(const r of top){
+            const p=r.p,restockText=p.expectedRestocks>0?(p.eta.learned?('likely '+p.expectedRestocks+' restock'+(p.expectedRestocks===1?'':'s')):'possible restock'):'no learned restock';
+            const proj=Math.max(0,Math.round(r.projectedStock)).toLocaleString('en-US');
+            const row=document.createElement('div');row.className='sl-mi-arrival-row '+(r.plannedQty>0?'recommended':'alternative');
+            const buy=r.plannedQty>0?('BUY ×'+r.plannedQty):'ALT';
+            const total=r.plannedQty>0?r.plannedProfit:r.projectedProfit;
+            row.innerHTML='<span class="name">'+esc(r.name)+'</span><strong class="buy">'+buy+'</strong><span>now '+(r.stock==null?'?':Number(r.stock).toLocaleString('en-US'))+'</span><span class="eta">arrival ~'+proj+' · '+esc(restockText)+'</span><span>+'+money(r.profitItem)+'/ea</span><span class="conf '+p.confidence.toLowerCase()+'">'+esc(p.confidence)+'</span><strong>'+money(total)+'</strong>';
+            body.appendChild(row);
+        }
+        bar.querySelector('.sl-mi-arrival-head').onclick=()=>bar.classList.toggle('open');
+        previousArrival?.remove();
+        mountTop(bar);
+        paintTravelSessionSummary();
+    }
+
+    function travelPlannerCandidates(entries,marketMap,slots){
+        const ranked=[];
+        for(const e of entries){
+            const market=marketMap.get(e.id);if(!market)continue;
+            const m=metrics(e.buy,market.price);if(m.profit<=0)continue;
+            const stock=e.stock==null?slots:Math.max(0,Number(e.stock)||0);
+            if(stock<=0||!(e.buy>0))continue;
+            ranked.push({id:e.id,name:e.name,buy:e.buy,stock:Math.min(stock,slots),market:market.price,profitItem:m.profit,roi:m.roi,row:e.row,efficiency:m.profit/e.buy});
+        }
+        return ranked;
+    }
+
+    function buildGreedyTravelPlan(destination,candidates,slots,configuredBudget){
+        let budgetLeft=configuredBudget>0?configuredBudget:Infinity;
+        const ranked=candidates.slice().sort((a,b)=>b.profitItem-a.profitItem || b.efficiency-a.efficiency || b.roi-a.roi);
+        let remaining=slots,totalCost=0,totalProfit=0;const plan=[];
+        for(const r of ranked){
+            if(remaining<=0||budgetLeft<=0)break;
+            const affordable=Number.isFinite(budgetLeft)?Math.floor(budgetLeft/r.buy):remaining;
+            const qty=Math.min(remaining,r.stock,affordable);if(qty<=0)continue;
+            const cost=r.buy*qty,profit=r.profitItem*qty;
+            totalCost+=cost;totalProfit+=profit;remaining-=qty;
+            if(Number.isFinite(budgetLeft))budgetLeft-=cost;
+            plan.push({...r,qty,cost,profit});
+        }
+        return {destination,slots,used:slots-remaining,remaining,totalCost,totalProfit,rows:plan,budget:configuredBudget,unusedBudget:configuredBudget>0?Math.max(0,configuredBudget-totalCost):null,mode:'GREEDY'};
+    }
+
+    function prunePlannerStates(states,budget,maxStates=700){
+        if(!states.length)return states;
+        states=states.filter(x=>x.cost<=budget).sort((a,b)=>a.cost-b.cost || b.profit-a.profit);
+        const out=[];let bestProfit=-Infinity;
+        for(const st of states){
+            if(st.profit<=bestProfit+0.0001)continue;
+            bestProfit=st.profit;out.push(st);
+        }
+        if(out.length<=maxStates)return out;
+        const kept=[];const step=(out.length-1)/(maxStates-1);
+        for(let i=0;i<maxStates;i++)kept.push(out[Math.round(i*step)]);
+        return kept;
+    }
+
+    function buildOptimizedTravelPlan(destination,candidates,slots,configuredBudget){
+        if(!(configuredBudget>0))return buildGreedyTravelPlan(destination,candidates,slots,configuredBudget);
+        const budget=configuredBudget;
+        const states=Array.from({length:slots+1},()=>[]);
+        states[0]=[{cost:0,profit:0,counts:{}}];
+        for(const item of candidates){
+            const next=states.map(bucket=>bucket.slice());
+            for(let used=0;used<=slots;used++){
+                const bucket=states[used];if(!bucket.length)continue;
+                const maxQty=Math.min(item.stock,slots-used,Math.floor(budget/item.buy));
+                for(const base of bucket){
+                    const affordable=Math.min(maxQty,Math.floor((budget-base.cost)/item.buy));
+                    for(let qty=1;qty<=affordable;qty++){
+                        const nu=used+qty;
+                        const cost=base.cost+item.buy*qty;
+                        const profit=base.profit+item.profitItem*qty;
+                        const counts={...base.counts,[item.id]:(base.counts[item.id]||0)+qty};
+                        next[nu].push({cost,profit,counts});
+                    }
+                }
+            }
+            for(let used=0;used<=slots;used++)next[used]=prunePlannerStates(next[used],budget);
+            for(let used=0;used<=slots;used++)states[used]=next[used];
+        }
+        let best={cost:0,profit:0,counts:{},used:0};
+        for(let used=0;used<=slots;used++)for(const st of states[used]){
+            if(st.profit>best.profit+0.0001 || (Math.abs(st.profit-best.profit)<0.0001&&used>best.used))best={...st,used};
+        }
+        const byId=new Map(candidates.map(x=>[String(x.id),x]));
+        const rows=[];
+        for(const [id,qtyRaw] of Object.entries(best.counts)){
+            const r=byId.get(String(id)),qty=Number(qtyRaw)||0;if(!r||qty<=0)continue;
+            rows.push({...r,qty,cost:r.buy*qty,profit:r.profitItem*qty});
+        }
+        rows.sort((a,b)=>b.profit-a.profit || b.profitItem-a.profitItem);
+        const totalCost=rows.reduce((sum,r)=>sum+r.cost,0),totalProfit=rows.reduce((sum,r)=>sum+r.profit,0),used=rows.reduce((sum,r)=>sum+r.qty,0);
+        return {destination,slots,used,remaining:slots-used,totalCost,totalProfit,rows,budget:configuredBudget,unusedBudget:Math.max(0,configuredBudget-totalCost),mode:'OPTIMIZED'};
+    }
+
+    function buildTravelBuyPlan(destination, entries, marketMap, budgetOverride=null) {
+        const slots=Math.max(1,Number(settings.travelSlots)||29);
+        const configuredBudget=Number.isFinite(Number(budgetOverride))&&Number(budgetOverride)>=0?Math.max(0,Number(budgetOverride)):Math.max(0,Number(settings.travelBudget)||0);
+        const candidates=travelPlannerCandidates(entries,marketMap,slots);
+        const greedy=buildGreedyTravelPlan(destination,candidates,slots,configuredBudget);
+        const optimized=buildOptimizedTravelPlan(destination,candidates,slots,configuredBudget);
+        optimized.greedyProfit=greedy.totalProfit;
+        optimized.optimizationGain=Math.max(0,optimized.totalProfit-greedy.totalProfit);
+        optimized.candidateCount=candidates.length;
+        return optimized;
+    }
+
+
+    function paintCountryBestBuys(destination,entries,marketMap,availableCash=null){
+        document.getElementById('sl-mi-country-best')?.remove();
+        const slots=Math.max(1,Number(settings.travelSlots)||29);
+        const plan=buildTravelBuyPlan(destination,entries,marketMap,availableCash);
+        updateLandedSession(destination,plan);
+        const plannedQty=new Map((plan?.rows||[]).map(r=>[String(r.id),Number(r.qty)||0]));
+        const candidates=travelPlannerCandidates(entries,marketMap,slots).map(r=>{
+            const qty=plannedQty.get(String(r.id))||0;
+            const stock=Math.max(0,Number(r.stock)||0);
+            return {...r,plannedQty:qty,plannedProfit:r.profitItem*qty,stock};
+        });
+        candidates.sort((a,b)=>{
+            const ap=a.plannedQty>0?1:0,bp=b.plannedQty>0?1:0;
+            if(ap!==bp)return bp-ap;
+            if(ap&&bp)return b.plannedProfit-a.plannedProfit || b.profitItem-a.profitItem || b.roi-a.roi;
+            return b.profitItem-a.profitItem || b.roi-a.roi;
+        });
+        const top=candidates.slice(0,12);
+        state.countryBestBuysRows=top.length;
+        state.countryBestBuysDestination=destination||'';
+        state.countryBestBuyName=top[0]?.name||'';
+        state.countryBestBuyProfit=top[0]?.profitItem||0;
+        state.countryBestBuyQty=top[0]?.plannedQty||0;
+        if(!top.length)return;
+
+        const bar=document.createElement('div');bar.id='sl-mi-country-best';bar.className='open';
+        const plannedCount=top.filter(r=>r.plannedQty>0).length;
+        const budgetText=Number.isFinite(Number(availableCash))?(' · cash '+money(availableCash)):(plan?.budget>0?(' · fallback budget '+money(plan.budget)):' · cash unavailable');
+        bar.innerHTML='<div class="sl-mi-country-head"><div><span class="sl-mi-br-title">🌍 BEST BUYS · '+esc(destination.toUpperCase())+'</span><strong>'+plannedCount+' recommended item'+(plannedCount===1?'':'s')+'</strong></div><div>'+((plan?.used)||0)+'/'+slots+' slots · '+money(plan?.totalProfit||0)+' profit'+budgetText+'</div><button type="button">▾</button></div>'+
+            '<div class="sl-mi-country-note">Shows what is best to buy here right now. The recommended basket uses your live Torn cash balance automatically; the manual Travel budget is ignored for this Best Buys panel. Green rows are recommended; alternatives stay ranked below.</div>'+
+            '<div class="sl-mi-country-summary"><span>Spend <strong>'+money(plan?.totalCost||0)+'</strong></span><span>Expected net profit <strong>'+money(plan?.totalProfit||0)+'</strong></span><span>Mode <strong>'+esc(plan?.mode||'GREEDY')+'</strong></span>'+(plan?.unusedBudget!=null?'<span>Budget left <strong>'+money(plan.unusedBudget)+'</strong></span>':'')+'<button type="button" id="sl-mi-mark-bought">'+(travelSessions.current?.recorded?'PLAN RECORDED ✓':'MARK PLAN BOUGHT')+'</button></div><div class="sl-mi-country-body"></div>';
+        const body=bar.querySelector('.sl-mi-country-body');
+        top.forEach((r,index)=>{
+            const row=document.createElement('div');row.className='sl-mi-country-row '+(r.plannedQty>0?'recommended':'alternative');row.setAttribute('role','button');row.tabIndex=0;
+            const buyLabel=r.plannedQty>0?('BUY ×'+r.plannedQty):'ALT';
+            const total=r.plannedQty>0?r.plannedProfit:r.profitItem;
+            row.innerHTML='<span class="rank">#'+(index+1)+'</span><span class="name">'+esc(r.name)+'</span><strong class="buy">'+buyLabel+'</strong><span>stock '+Math.round(r.stock).toLocaleString('en-US')+'</span><span>buy '+money(r.buy)+'</span><span>market '+money(r.market)+'</span><span class="profit">+'+money(r.profitItem)+'/ea</span><span>'+pct(r.roi)+'</span><strong class="total">+'+money(total)+'</strong>';
+            const go=()=>{try{r.row?.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){r.row?.scrollIntoView();}if(r.row){r.row.classList.add('sl-mi-target');setTimeout(()=>r.row.classList.remove('sl-mi-target'),2200);}};
+            row.onclick=go;row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};body.appendChild(row);
+        });
+        bar.querySelector('.sl-mi-country-head').onclick=()=>bar.classList.toggle('open');
+        const mark=bar.querySelector('#sl-mi-mark-bought');if(mark)mark.onclick=e=>{e.stopPropagation();if(markCurrentPlanBought()){mark.textContent='PLAN RECORDED ✓';mark.disabled=true;}};
+        mountTop(bar);
+        paintTravelSessionSummary();
+    }
+
+    function paintTravelBuyPlan(plan){
+        document.getElementById('sl-mi-travel-plan')?.remove();
+        state.travelPlanItems=plan?.rows?.length||0;
+        state.travelPlanCost=plan?.totalCost||0;
+        state.travelPlanProfit=plan?.totalProfit||0;
+        state.travelPlanSlots=plan?.used||0;
+        state.travelPlanBudget=plan?.budget||0;
+        state.travelPlanUnusedBudget=plan?.unusedBudget||0;
+        state.travelPlanMode=plan?.mode||'';
+        state.travelPlanOptimizationGain=plan?.optimizationGain||0;
+        if(!plan?.rows?.length)return;
+        const bar=document.createElement('div');bar.id='sl-mi-travel-plan';bar.className='open';
+        const budgetText=plan.budget>0?(' · budget '+money(plan.budget)):' · unlimited budget';
+        const modeText=plan.mode==='OPTIMIZED'?'OPTIMIZED':'GREEDY';
+        const gainText=plan.optimizationGain>0?(' · +'+money(plan.optimizationGain)+' vs greedy'):'';
+        bar.innerHTML='<div class="sl-mi-plan-head"><div><span class="sl-mi-br-title">🧳 TRAVEL BUY PLANNER</span><strong>'+esc(plan.destination)+'</strong></div><div>'+plan.used+'/'+plan.slots+' slots · '+money(plan.totalProfit)+' profit · '+modeText+gainText+budgetText+'</div><button type="button">▾</button></div><div class="sl-mi-plan-note">Recommended quantities maximize estimated total net profit across your slot limit and cash budget. 0 budget uses the simpler slot-only greedy path because that is already optimal without a cash constraint.</div><div class="sl-mi-plan-summary"><span>Spend <strong>'+money(plan.totalCost)+'</strong></span><span>Expected net profit <strong>'+money(plan.totalProfit)+'</strong></span><span>Unused slots <strong>'+plan.remaining+'</strong></span>'+(plan.budget>0?'<span>Budget left <strong>'+money(plan.unusedBudget)+'</strong></span>':'')+'</div><div class="sl-mi-plan-body"></div>';
+        const body=bar.querySelector('.sl-mi-plan-body');
+        for(const r of plan.rows){
+            const row=document.createElement('div');row.className='sl-mi-plan-row';row.setAttribute('role','button');row.tabIndex=0;
+            row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>BUY ×'+r.qty+'</span><span>'+money(r.buy)+'/ea</span><span>cost '+money(r.cost)+'</span><span>'+money(r.profit)+'</span><strong>'+pct(r.roi)+'</strong>';
+            const go=()=>{try{r.row?.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){r.row?.scrollIntoView();}if(r.row){r.row.classList.add('sl-mi-target');setTimeout(()=>r.row.classList.remove('sl-mi-target'),2200);}};
+            row.onclick=go;row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};body.appendChild(row);
+        }
+        bar.querySelector('.sl-mi-plan-head').onclick=()=>bar.classList.toggle('open');
+        mountTop(bar);
+    }
+
+    async function scanTravel(){
+        if(!settings.travel)return;
+        if(detectInFlight()){document.getElementById('sl-mi-best-run')?.remove();await renderArrivalStock();return;}
+        document.getElementById('sl-mi-arrival')?.remove();
+        if(!detectDestination()){await renderBestTravelRun();paintTravelSessionSummary();return;}
+        const destination=detectDestination();if(!destination)return;
+        document.getElementById('sl-mi-best-run')?.remove();
+        const availableCash=await fetchAvailableCash(true);
+        const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
+        for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}
+        const unique=[...new Map(entries.map(e=>[e.id,e])).values()].slice(0,MAX_LIVE_FETCHES);
+        const marketMap=new Map();
+        for(const e of unique){const c=cachePeek(e.id);if(c)marketMap.set(e.id,c);}
+        await mapWithLimit(unique,async e=>{if(e.stock!=null)recordStock(destination,e.id,e.stock);const fetched=await fetchMarket(e.id);if(!fetched)return;const market=e.displayValue>0?{...fetched,price:e.displayValue,tornDisplayedValue:e.displayValue}:fetched;marketMap.set(e.id,market);const m=metrics(e.buy,market.price),box=ensureTravelBadge(e.row,'sl-mi-travel');box.classList.toggle('loss',m.profit<Number(settings.minProfit||0));box.innerHTML='<b>☠︎ MI</b> Market '+money(market.price)+' · Net '+money(m.net)+' · <strong>'+money(m.profit)+' ('+pct(m.roi)+')</strong>'+(e.stock!=null?' · Stock '+e.stock.toLocaleString('en-US')+stockEtaText(destination,e.id,e.stock):'');state.decorated++;});
+        flushStockHistory();
+        if(settings.countryBestBuys) paintCountryBestBuys(destination,unique,marketMap,availableCash);
+        else paintTravelBuyPlan(buildTravelBuyPlan(destination,unique,marketMap));
+        state.landedSignature=travelShopSignature();
+        state.landedLastRefresh=Date.now();
+        paintTravelSessionSummary();
+    }
+
+    function paintBazaarBoard(rows){
+        state.bazaarDeals=rows.length;
+        state.bazaarBestProfit=rows[0]?.profit||0;
+        state.bazaarBestRoi=rows.slice().sort((a,b)=>b.roi-a.roi)[0]?.roi||0;
+        const existing=document.getElementById('sl-mi-bazaar-board');
+        if(!rows.length){existing?.remove();return;}
+        const top=rows.slice(0,10),best=top[0];
+        const wasOpen=existing?existing.classList.contains('open'):true;
+        const bar=existing||document.createElement('div');bar.id='sl-mi-bazaar-board';bar.classList.toggle('open',wasOpen);
+        bar.innerHTML='<div class="sl-mi-baz-head"><div><span class="sl-mi-br-title">💰 BAZAAR FLIP INTELLIGENCE</span><strong>'+esc(best.name)+' · '+money(best.profit)+'</strong></div><div>'+top.length+' deals</div><button type="button">▾</button></div><div class="sl-mi-baz-note">Ranked by estimated net profit after '+esc(settings.marketFeePct)+'% market fee. Tap a row to scroll to that Bazaar listing.</div><div class="sl-mi-baz-body"></div>';
+        const body=bar.querySelector('.sl-mi-baz-body');
+        for(const r of top){
+            const row=document.createElement('div');row.className='sl-mi-baz-row';row.tabIndex=0;row.setAttribute('role','button');
+            row.innerHTML='<span class="name">'+esc(r.name)+'</span><span>Buy '+money(r.buy)+'</span><span>Market '+money(r.market)+'</span><strong>'+money(r.profit)+'</strong><span>'+pct(r.roi)+'</span>';
+            const go=()=>{try{r.row.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){r.row.scrollIntoView();}r.row.classList.add('sl-mi-focus');setTimeout(()=>r.row.classList.remove('sl-mi-focus'),1800);};
+            row.onclick=go;row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};body.appendChild(row);
+        }
+        bar.querySelector('.sl-mi-baz-head').onclick=()=>bar.classList.toggle('open');
+        if(!existing)mountTop(bar);
+    }
+
+    async function scanBazaar(){
+        if(!settings.bazaar)return;
+        state.bazaarDeals=0;state.bazaarBestProfit=0;state.bazaarBestRoi=0;
+        document.querySelectorAll('.sl-mi-bazaar-badge-wrap,.sl-mi-bazaar').forEach(n=>n.remove());
+        const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
+        for(const img of imgs){
+            const id=itemIdFromImg(img),row=rowContainer(img);if(!id||!row)continue;
+            const host=bazaarItemHost(img,row);if(!host||seen.has(host))continue;
+            const buy=extractFirstPrice(host);if(!(buy>1))continue;
+            seen.add(host);entries.push({id,row:host,buy,name:img.alt||('Item #'+id)});
+        }
+        const ids=[...new Set(entries.map(e=>e.id))].slice(0,MAX_LIVE_FETCHES),map=new Map();
+        for(const id of ids){const c=cachePeek(id);if(c)map.set(id,c);}
+        await mapWithLimit(ids,async id=>{const m=await fetchMarket(id);if(m)map.set(id,m);});
+        const deals=[];
+        for(const e of entries){
+            const market=map.get(e.id);if(!market)continue;
+            const m=metrics(e.buy,market.price);
+            const good=m.profit>=Number(settings.minProfit||0)&&m.profit>0;
+            const compactPda=window.matchMedia?.('(max-width: 900px)')?.matches;
+            if(!compactPda){
+                const box=ensureBazaarBadge(e.row,'sl-mi-bazaar');
+                if(box){box.classList.toggle('good',good);box.classList.toggle('bad',!good);box.innerHTML='<b>'+(good?'▲ DEAL':'▼ NO FLIP')+'</b> · Market '+money(market.price)+' · '+money(m.profit)+' · '+pct(m.roi);}
+            }
+            if(good)deals.push({id:e.id,row:e.row,name:e.name,buy:e.buy,market:market.price,profit:m.profit,roi:m.roi});
+            state.decorated++;
+        }
+        deals.sort((a,b)=>b.profit-a.profit || b.roi-a.roi);
+        paintBazaarBoard(deals);
+    }
+
+    function percentile(values,p){
+        const a=values.filter(Number.isFinite).sort((x,y)=>x-y);if(!a.length)return null;
+        const idx=(a.length-1)*Math.max(0,Math.min(1,p));const lo=Math.floor(idx),hi=Math.ceil(idx);
+        if(lo===hi)return a[lo];const w=idx-lo;return a[lo]*(1-w)+a[hi]*w;
+    }
+    function avg(values){const a=values.filter(Number.isFinite);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
+    function stdev(values){const a=values.filter(Number.isFinite);if(a.length<2)return 0;const m=avg(a);return Math.sqrt(a.reduce((sum,v)=>sum+(v-m)*(v-m),0)/a.length);}
+    function recordPriceHistory(itemId,market,now=Date.now()){
+        if(!itemId||!market?.minPrice)return;
+        const key=String(itemId),current=Array.isArray(priceHistory[key])?priceHistory[key]:[];
+        const fresh=current.filter(x=>x?.at&&now-Number(x.at)<PRICE_HISTORY_MAX_AGE&&Number(x.price)>0);
+        const last=fresh[fresh.length-1];
+        if(!last||now-Number(last.at)>=PRICE_HISTORY_MIN_GAP||Number(last.price)!==Number(market.minPrice)){
+            fresh.push({at:now,price:Number(market.minPrice),effective:Number(market.price)||Number(market.minPrice),count:Number(market.count)||0});
+        } else {
+            fresh[fresh.length-1]={...last,effective:Number(market.price)||Number(market.minPrice),count:Number(market.count)||0};
+        }
+        priceHistory[key]=fresh.slice(-PRICE_HISTORY_MAX_SAMPLES);saveJson(STORAGE.priceHistory,priceHistory);
+    }
+    function analyzePriceHistory(itemId,currentPrice,market){
+        const rows=(Array.isArray(priceHistory[String(itemId)])?priceHistory[String(itemId)]:[]).filter(x=>x?.at&&Date.now()-Number(x.at)<PRICE_HISTORY_MAX_AGE&&Number(x.price)>0);
+        const prices=rows.map(x=>Number(x.price));const samples=prices.length;
+        const med=median(prices),p25=percentile(prices,.25),p75=percentile(prices,.75);
+        let trend=0;
+        if(samples>=4){const cut=Math.max(2,Math.floor(samples/3));const older=avg(prices.slice(0,cut)),recent=avg(prices.slice(-cut));if(older>0)trend=(recent-older)/older*100;}
+        const mean=avg(prices),volatility=mean>0?stdev(prices)/mean*100:0;
+        const spread=market?.minPrice>0?((Number(market.price)-Number(market.minPrice))/Number(market.minPrice))*100:0;
+        let signal='LEARNING',reason='Collecting local price history';
+        if(samples>=3&&med>0){
+            if((p25&&currentPrice<=p25)||(currentPrice<=med*.97&&trend>=0)){signal='BUY NOW';reason='Current floor is cheap versus recent history';}
+            else if((p75&&currentPrice>=p75)||(currentPrice>=med*1.05)||(trend<-3&&currentPrice>med*.98)){signal='WAIT';reason='Price is elevated or trend is falling';}
+            else {signal='FAIR';reason='Current price is close to its recent range';}
+        }
+        return {samples,median:med,p25,p75,trend,volatility,spread,signal,reason,rows};
+    }
+    function sparkText(rows){
+        const vals=rows.slice(-12).map(x=>Number(x.price)).filter(Number.isFinite);if(vals.length<2)return '···';
+        const blocks='▁▂▃▄▅▆▇█',lo=Math.min(...vals),hi=Math.max(...vals),span=Math.max(1,hi-lo);
+        return vals.map(v=>blocks[Math.min(blocks.length-1,Math.max(0,Math.round((v-lo)/span*(blocks.length-1))))]).join('');
+    }
+
+    function selectedMarketItemId(){
+        const sources=[location.hash||'',location.search||'',location.href||''];
+        for(const src of sources){
+            const m=String(src).match(/(?:itemID|itemId|item_id)=(\d+)/i);
+            if(m&&Number(m[1])>0)return Number(m[1]);
+        }
+        const links=[...document.querySelectorAll('a[href*="itemID="],a[href*="itemId="],[data-itemid],[data-item-id],[data-item]')];
+        for(const el of links){
+            const raw=el.getAttribute('href')||el.getAttribute('data-itemid')||el.getAttribute('data-item-id')||el.getAttribute('data-item')||'';
+            const m=String(raw).match(/(?:itemID|itemId|item_id)?=?\b(\d{1,6})\b/i);
+            if(m&&Number(m[1])>0)return Number(m[1]);
+        }
+        const searchText=normText(document.querySelector('input[type="search"],input[placeholder*="Search" i],input[placeholder*="item" i]')?.value||'').toLowerCase();
+        const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')].filter(isVisible);
+        if(searchText){
+            const exact=imgs.find(img=>normText(img.alt||img.getAttribute('title')||'').toLowerCase()===searchText);
+            const id=itemIdFromImg(exact);if(id)return id;
+        }
+        const ids=imgs.map(itemIdFromImg).filter(Boolean);
+        const unique=[...new Set(ids)];
+        if(unique.length===1)return unique[0];
+        if(ids.length)return ids[0];
+        return null;
+    }
+    async function scanItemMarket(){
+        if(!settings.itemMarket||!/[?&]sid=ItemMarket(?:[&#]|$)/i.test(location.href)){
+            document.getElementById('sl-mi-market-bar')?.remove();
+            return;
+        }
+        const previous=document.getElementById('sl-mi-market-bar');
+        const id=selectedMarketItemId();if(!id){if(detectPage()==='itemmarket'){setTimeout(()=>scheduleScan(false),700);return;}previous?.remove();return;}
+        const market=await fetchMarket(id,true);if(!market)return;
+        recordPriceHistory(id,market);
+        const analysis=analyzePriceHistory(id,Number(market.minPrice),market);
+        state.itemMarketSignal=analysis.signal;state.itemMarketTrend=analysis.trend;state.itemMarketVolatility=analysis.volatility;state.itemMarketHistorySamples=analysis.samples;
+        const watched=watchlist[String(id)]||null,bar=document.createElement('div');bar.id='sl-mi-market-bar';
+        const trendIcon=analysis.trend>1?'↑':analysis.trend<-1?'↓':'→';
+        const signalClass=analysis.signal==='BUY NOW'?'buy':analysis.signal==='WAIT'?'wait':analysis.signal==='FAIR'?'fair':'learning';
+        const cachedNetwork=settings.priceNetwork&&priceNetworkConfigured()?cachedNetworkConsensus(id):null;bar.dataset.itemId=String(id);
+        bar.innerHTML='<div class="sl-mi-market-head"><div><b>📈 ITEM MARKET INTELLIGENCE</b><span>floor <strong>'+money(market.minPrice)+'</strong> · effective <strong>'+money(market.price)+'</strong> · '+market.count+' listings</span></div><span class="sl-mi-signal '+signalClass+'">'+esc(analysis.signal)+'</span></div>'+
+            '<div class="sl-mi-market-grid"><div><small>TREND</small><strong>'+trendIcon+' '+pct(analysis.trend)+'</strong></div><div><small>MEDIAN</small><strong>'+money(analysis.median)+'</strong></div><div><small>VOLATILITY</small><strong>'+analysis.volatility.toFixed(1)+'%</strong></div><div><small>SPREAD</small><strong>'+analysis.spread.toFixed(1)+'%</strong></div></div>'+
+            '<div class="sl-mi-spark"><span>'+esc(sparkText(analysis.rows))+'</span><small>'+analysis.samples+' local samples · '+esc(analysis.reason)+'</small></div>'+
+            networkConsensusHtml(cachedNetwork)+
+            '<div class="sl-mi-watch-row"><input id="sl-mi-watch-price" inputmode="numeric" placeholder="Watch below..." value="'+esc(watched?.maxPrice||'')+'"><button id="sl-mi-watch-save">'+(watched?'UPDATE WATCH':'ADD WATCH')+'</button>'+(watched?'<button id="sl-mi-watch-remove">REMOVE</button>':'')+'</div>';
+        previous?.remove();
+        mountTop(bar);
+        if(settings.priceNetwork&&priceNetworkConfigured())fetchNetworkConsensus(id).then(data=>{if(bar.dataset.itemId===String(id))updateNetworkBlock(bar,data);});
+        await renderLoadoutComparator(bar,market,id);
+        bar.querySelector('#sl-mi-watch-save').onclick=()=>{const n=parseMoney(bar.querySelector('#sl-mi-watch-price').value);if(!(n>0))return;watchlist[String(id)]={itemId:id,maxPrice:n,updatedAt:Date.now()};saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
+        const rm=bar.querySelector('#sl-mi-watch-remove');if(rm)rm.onclick=()=>{delete watchlist[String(id)];saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
+        if(watched&&market.minPrice<=watched.maxPrice)bar.classList.add('hit');
+    }
+
+    async function scanItems(){
+        if(!settings.items)return;const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
+        for(const img of imgs){const id=itemIdFromImg(img),row=rowContainer(img);if(!id||!row||seen.has(row))continue;const qm=(row.innerText||'').match(/\bx\s*([\d,]+)/i);if(!qm)continue;const qty=Number(qm[1].replace(/,/g,''));if(!(qty>0))continue;seen.add(row);entries.push({id,row,qty});}
+        await mapWithLimit(entries.slice(0,MAX_LIVE_FETCHES),async e=>{const market=await fetchMarket(e.id);if(!market)return;const net=market.price*(1-(Number(settings.marketFeePct)||0)/100),box=ensureBadge(e.row,'sl-mi-items');box.innerHTML='<b>☠︎ MI</b> est. net '+money(net)+'/ea · stack '+money(net*e.qty);state.decorated++;});
+    }
+
+    function scrapePointsRate(){const vals=[];document.querySelectorAll('*').forEach(el=>{if(el.children.length)return;const m=(el.textContent||'').trim().match(/^\$\s*([\d,]+)$/);if(!m)return;const n=parseMoney(m[1]);if(n>=5000&&n<=200000)vals.push(n);});return vals.length?Math.min(...vals):null;}
+    function scanPoints(){if(!settings.points)return;const rate=scrapePointsRate();if(!rate)return;saveJson(STORAGE.pointsRate,{rate,at:Date.now()});document.getElementById('sl-mi-points-bar')?.remove();const bar=document.createElement('div');bar.id='sl-mi-points-bar';bar.innerHTML='<b>☠︎ Points Intelligence</b> · captured <strong>'+money(rate)+'/point</strong>';mountTop(bar);}
+    async function scanMuseum(){
+        if(!settings.museum)return;
+        document.getElementById('sl-mi-museum-bar')?.remove();
+        state.museumSets=0;state.museumRecommendation='';state.museumMissingSets=0;
+
+        const pointsRate=freshPointsRate();
+        const catalog=await loadMuseumCatalog();
+        const resolved=[];
+        const itemIds=new Set();
+
+        for(const set of MUSEUM_SETS){
+            const members=[];const missing=[];
+            for(const member of set.members){
+                const item=catalog.get(museumNameKey(member.name));
+                if(!item?.id){missing.push(member.name);continue;}
+                members.push({id:Number(item.id),name:item.name||member.name,qty:Number(member.qty)||1});
+                itemIds.add(Number(item.id));
+            }
+            resolved.push({set,members,missing});
+        }
+
+        const marketMap=new Map();
+        for(const id of itemIds){const c=cachePeek(id);if(c)marketMap.set(id,c);}
+        await mapWithLimit([...itemIds].slice(0,MAX_LIVE_FETCHES),async id=>{
+            const m=await fetchMarket(id);if(m){const img=[...document.querySelectorAll('img[src*="/images/items/"]')].find(x=>itemIdFromImg(x)===id);const v=extractTornDisplayedValue(img);marketMap.set(id,v?{...m,price:v,displayedValue:v}:m);}return m;
+        });
+
+        const rows=[];
+        const fee=Math.max(0,Number(settings.marketFeePct)||0)/100;
+        for(const entry of resolved){
+            let gross=0;const unpriced=[];
+            for(const member of entry.members){
+                const market=marketMap.get(member.id);
+                if(!market?.price){unpriced.push(member.name);continue;}
+                gross+=Number(market.price)*member.qty;
+            }
+            const complete=entry.missing.length===0&&unpriced.length===0&&entry.members.length===entry.set.members.length;
+            const sellNet=complete?gross*(1-fee):null;
+            const pointsCash=complete&&pointsRate?entry.set.points*pointsRate:null;
+            let recommendation='WAITING FOR DATA',difference=null,edgePct=null;
+            if(complete&&!pointsRate)recommendation='CAPTURE POINTS RATE';
+            if(complete&&pointsRate){
+                difference=pointsCash-sellNet;
+                recommendation=difference>=0?'TURN IN SET':'SELL ITEMS';
+                const winner=Math.max(pointsCash,sellNet),loser=Math.max(1,Math.min(pointsCash,sellNet));
+                edgePct=(winner-loser)/loser*100;
+            }
+            rows.push({set:entry.set,complete,missing:[...entry.missing,...unpriced],gross,sellNet,pointsCash,recommendation,difference,edgePct});
+        }
+
+        const ready=rows.filter(r=>r.complete);
+        state.museumSets=ready.length;
+        state.museumMissingSets=rows.length-ready.length;
+        const actionable=ready.filter(r=>r.pointsCash!=null).sort((a,b)=>Math.abs(b.difference)-Math.abs(a.difference));
+        state.museumRecommendation=actionable[0]?.recommendation||'';
+
+        const bar=document.createElement('div');bar.id='sl-mi-museum-bar';bar.className='open';
+        const rateText=pointsRate?money(pointsRate)+'/pt':'not captured / stale';
+        bar.innerHTML='<div class="sl-mi-museum-head"><div><span class="sl-mi-br-title">🏛 MUSEUM INTELLIGENCE</span><strong>'+esc(rateText)+'</strong></div><button type="button">▾</button></div>'+
+            '<div class="sl-mi-museum-note">Compares net Item Market sale value after '+esc(settings.marketFeePct)+'% fee with the cash-equivalent value of the Museum points reward.</div><div class="sl-mi-museum-body"></div>';
+        const body=bar.querySelector('.sl-mi-museum-body');
+
+        rows.sort((a,b)=>{
+            if(a.complete!==b.complete)return a.complete?-1:1;
+            return Math.abs(b.difference||0)-Math.abs(a.difference||0);
+        });
+        for(const r of rows){
+            const row=document.createElement('div');row.className='sl-mi-museum-row';
+            if(!r.complete){
+                row.classList.add('missing');
+                row.innerHTML='<span class="name">'+esc(r.set.name)+'</span><span>'+r.set.points.toLocaleString('en-US')+' pts</span><span class="muted">missing price/data: '+esc(r.missing.slice(0,2).join(', '))+(r.missing.length>2?' +'+(r.missing.length-2):'')+'</span>';
+            } else if(!pointsRate){
+                row.classList.add('missing');
+                row.innerHTML='<span class="name">'+esc(r.set.name)+'</span><span>'+r.set.points.toLocaleString('en-US')+' pts</span><span>Sell net '+money(r.sellNet)+'</span><strong>CAPTURE POINTS RATE</strong>';
+            } else {
+                const turn=r.recommendation==='TURN IN SET';row.classList.add(turn?'turn':'sell');
+                row.innerHTML='<span class="name">'+esc(r.set.name)+'</span><span>'+r.set.points.toLocaleString('en-US')+' pts</span><span>Sell net '+money(r.sellNet)+'</span><span>Points '+money(r.pointsCash)+'</span><strong>'+esc(r.recommendation)+'</strong><span class="edge">+'+money(Math.abs(r.difference))+' · '+pct(r.edgePct)+'</span>';
+            }
+            body.appendChild(row);
+        }
+        if(!pointsRate){
+            const hint=document.createElement('button');hint.type='button';hint.className='sl-mi-points-link';hint.textContent='OPEN POINTS MARKET';hint.onclick=()=>{location.href='https://www.torn.com/pmarket.php';};body.prepend(hint);
+        }
+        bar.querySelector('.sl-mi-museum-head').onclick=()=>bar.classList.toggle('open');
+        mountTop(bar);
+    }
+    function mountTop(el){const host=document.querySelector('#mainContainer .content-wrapper')||document.querySelector('.content-wrapper')||document.querySelector('#mainContainer')||document.body;host.insertBefore(el,host.firstChild);}
+
+    async function scan(force=false){
+        if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
+        try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());if(state.page!=='travel')document.querySelectorAll('.sl-mi-travel,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}if(state.page==='items'||state.page==='profile')document.getElementById('sl-mi-market-bar')?.remove();state.lastScan=Date.now();state.scanCount++;}
+        catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;if(!settings.enabled)cleanupLiveFeature('enabled');}
+    }
+    function scheduleScan(force=false){if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},450);}
+
+    function toggle(key,label){return '<label class="sl-mi-toggle"><span class="sl-mi-toggle-label">'+esc(label)+'</span><span class="sl-mi-switch"><input data-mi-toggle="1" data-setting="'+esc(key)+'" id="sl-mi-'+key+'" type="checkbox" '+(settings[key]?'checked':'')+'><span class="sl-mi-switch-ui"></span></span></label>';}
+    function removeNodes(selector){document.querySelectorAll(selector).forEach(n=>n.remove());}
+    function cleanupLiveFeature(key){
+        const map={
+            enabled:'.sl-mi-travel,.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,.sl-mi-items,#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-bazaar-board,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session',
+            travel:'.sl-mi-travel,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session',
+            bestRun:'#sl-mi-best-run',countryBestBuys:'#sl-mi-country-best',arrivalStock:'#sl-mi-arrival',sessionSummary:'#sl-mi-session',
+            bazaar:'.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,#sl-mi-bazaar-board',itemMarket:'#sl-mi-market-bar',loadoutComparator:'.sl-mi-loadout',
+            items:'.sl-mi-items',museum:'#sl-mi-museum-bar',points:'#sl-mi-points-bar'
+        };
+        const sel=map[key];if(sel)removeNodes(sel);
+    }
+    function applyLiveToggle(key,value){
+        if(!(key in settings))return;
+        if(key==='enabled'){setEnabled(value);return;}
+        settings[key]=!!value;saveJson(STORAGE.settings,settings);
+        if(!settings[key])cleanupLiveFeature(key);
+        if(key==='enabled'&&!settings.enabled){cleanupLiveFeature('enabled');return;}
+        if(settings.enabled)scheduleScan(false);
+    }
+    const REQUIRED_API_KEY_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Market%20Intelligence&user=money,travel,equipment&torn=items&market=itemmarket';
+    function createRequiredApiKey(){
+        clearLoadoutCache();state.apiAccessStatus='setup';state.apiAccessMessage='Create the Market Intelligence key in Torn, then return and paste it below.';
+        try{sessionStorage.setItem('SakaLuX_MI_KEY_SETUP_PENDING','1');}catch(_){}
+        location.href=REQUIRED_API_KEY_URL;
+        return true;
+    }
+    function apiSetupPending(){try{return sessionStorage.getItem('SakaLuX_MI_KEY_SETUP_PENDING')==='1';}catch(_){return false;}}
+
+    function apiAccessCss(){
+        if(document.getElementById('sl-mi-api-access-style'))return;
+        const s=document.createElement('style');s.id='sl-mi-api-access-style';s.textContent=`
+.sl-mi-head-actions{display:flex;align-items:center;gap:7px}
+#sl-mi-close,#sl-mi-api-close{width:42px!important;height:42px!important;min-width:42px!important;padding:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:11px!important;font-size:22px!important}
+#sl-mi-api-access,#sl-mi-api-close{width:40px;height:40px;min-width:40px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;border-radius:10px!important}
+#sl-mi-api-access{background:linear-gradient(180deg,#322b10,#211c0c)!important;border:1px solid #7c681e!important;color:#f5d85f!important;font-size:18px!important}
+#sl-mi-api-access:hover{filter:brightness(1.08)}
+.sl-mi-api-panel .sl-mi-head{position:sticky;top:0;z-index:2}
+.sl-mi-api-required{margin:10px 0;padding:11px;border:1px solid #66591d;border-radius:10px;background:#211d10;color:#e4c95d;font-size:11px;line-height:1.55}
+.sl-mi-api-required b{color:#f5d85f}
+.sl-mi-api-create-main{display:block;width:100%;box-sizing:border-box;margin:9px 0 10px!important;min-height:42px;background:linear-gradient(180deg,#322b10,#211c0c)!important;border:1px solid #7c681e!important;color:#f5d85f!important;font-weight:900!important}
+.sl-mi-api-card{margin:9px 0;padding:10px;border:1px solid #2f3945;border-radius:10px;background:#121820}
+.sl-mi-api-panel .sl-mi-api-status{display:flex;justify-content:space-between;gap:8px;padding:9px;border-radius:8px;background:#181d24;font-size:10px;line-height:1.35}
+.sl-mi-api-panel .sl-mi-api-status b{color:#d7b94c}.sl-mi-api-panel .sl-mi-api-status.ok span{color:#78d98b}.sl-mi-api-panel .sl-mi-api-status.error span,.sl-mi-api-panel .sl-mi-api-status.missing span,.sl-mi-api-panel .sl-mi-api-status.missing-equipment span{color:#f08b8b}
+.sl-mi-api-source,.sl-mi-api-note{margin:8px 0;color:#9ca3af;font-size:9px;line-height:1.45}.sl-mi-api-source b{color:#e5e7eb}
+.sl-mi-api-panel .sl-mi-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.sl-mi-api-panel .sl-mi-api-actions button{min-height:38px;border-radius:9px!important;font-weight:900!important}
+#sl-mi-api-save-test{background:linear-gradient(180deg,#377fcf,#275f9f)!important;border-color:#3d78bf!important}#sl-mi-api-check{background:linear-gradient(180deg,#253243,#1a2431)!important;border-color:#3a4a5d!important;color:#d7e1eb!important}
+#sl-mi-api-clear-local{width:100%;margin-top:7px;min-height:36px;background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+@media(max-width:520px){#sl-mi-api-access,#sl-mi-api-close{width:38px;height:38px;min-width:38px}.sl-mi-api-panel .sl-mi-api-actions{grid-template-columns:1fr}}
+`;(document.head||document.documentElement).appendChild(s);
+    }
+
+    function openApiAccess(){
+        if(!settings.enabled)setEnabled(true);
+        apiAccessCss();
+        document.getElementById('sl-mi-overlay')?.remove();
+        getApiKey();
+        const overlay=document.createElement('div');overlay.id='sl-mi-overlay';
+        const source=state.apiMode||'None';
+        overlay.innerHTML='<div id="sl-mi-panel" class="sl-mi-api-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">🔑 Market Intelligence API Access</div><div class="sl-mi-sub">SakaLuX Market Intelligence v'+VERSION+' · dedicated read-only access</div></div><div class="sl-mi-head-actions"><button id="sl-mi-api-close" class="sl-mi-secondary">×</button></div></div>'+
+            '<div class="sl-mi-api-required"><b>Exact Torn permissions required</b><br>User: Money + Travel + Equipment<br>Torn: Items<br>Market: Item Market<br>No write permission is requested.</div>'+
+            '<button type="button" class="sl-mi-api-create-main" id="sl-mi-api-create-main">🔑 CREATE MARKET INTELLIGENCE API KEY</button>'+
+            '<div class="sl-mi-api-card"><div class="sl-mi-api-status '+esc(state.apiAccessStatus)+'" id="sl-mi-api-status"><b>TORN API ACCESS</b><span>'+esc(state.apiAccessMessage||'Not checked yet')+'</span></div>'+
+            '<div class="sl-mi-api-source">Active source: <b>'+esc(source)+'</b></div>'+
+            '<label class="sl-mi-field">Replace / paste standalone Torn API key<input id="sl-mi-api-key-input" type="password" autocomplete="off" placeholder="Paste newly created Market Intelligence key here"></label>'+
+            '<div class="sl-mi-api-actions"><button type="button" id="sl-mi-api-save-test">SAVE & TEST</button><button type="button" id="sl-mi-api-check">CHECK ACCESS</button></div>'+
+            '<button type="button" id="sl-mi-api-clear-local">CLEAR LOCAL API KEY</button>'+
+            '<div class="sl-mi-api-note">The shared SakaLuX Hub key is preferred automatically when available. A local key is kept only as the standalone fallback. Creating a key here always opens the exact Market Intelligence permission set above.</div></div></div>';
+        document.body.appendChild(overlay);
+        overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+        overlay.querySelector('#sl-mi-api-close').onclick=()=>overlay.remove();
+        overlay.querySelector('#sl-mi-api-create-main').onclick=()=>createRequiredApiKey();
+        overlay.querySelector('#sl-mi-api-save-test').onclick=async()=>{
+            const input=overlay.querySelector('#sl-mi-api-key-input');
+            if(!saveReplacementApiKey(input?.value)){input?.focus();return;}
+            const b=overlay.querySelector('#sl-mi-api-save-test');b.textContent='CHECKING…';
+            const r=await checkRequiredApiAccess(true);
+            b.textContent=r.ok?'API KEY OK ✓':'SAVED · CHECK FAILED';
+            if(r.ok){input.value='';scheduleScan(false);}
+            setTimeout(()=>{if(overlay.isConnected)openApiAccess();},450);
+        };
+        overlay.querySelector('#sl-mi-api-check').onclick=async()=>{
+            const b=overlay.querySelector('#sl-mi-api-check');b.textContent='CHECKING…';
+            await checkRequiredApiAccess(true);
+            if(overlay.isConnected)openApiAccess();
+        };
+        overlay.querySelector('#sl-mi-api-clear-local').onclick=()=>{
+            try{localStorage.removeItem(STORAGE.apiKey);}catch(_){}
+            clearLoadoutCache();
+            state.apiMode='';
+            const remaining=getApiKey();
+            state.apiAccessStatus=remaining?'unknown':'missing';
+            state.apiAccessMessage=remaining?('Local key cleared · '+(state.apiMode||'shared key')+' remains active'):'No Torn API key configured';
+            state.apiAccessCheckedAt=0;
+            openApiAccess();
+        };
+        return true;
+    }
+
+    function openSettings(){
+        if(!settings.enabled)setEnabled(true);
+        apiAccessCss();
+        document.getElementById('sl-mi-overlay')?.remove();const overlay=document.createElement('div');overlay.id='sl-mi-overlay';
+        overlay.innerHTML='<div id="sl-mi-panel"><div class="sl-mi-head"><div><div class="sl-mi-title">☠︎ SakaLuX Market Intelligence</div><div class="sl-mi-sub">v'+VERSION+' · Market • Bazaar • Travel Intelligence</div></div><div class="sl-mi-head-actions"><button id="sl-mi-api-access" title="Market Intelligence API Access" aria-label="Market Intelligence API Access">🔑</button><button id="sl-mi-close">×</button></div></div>'+toggle('enabled','Enable Market Intelligence')+toggle('travel','Travel profit intelligence')+toggle('bestRun','Best Travel Run board')+toggle('countryBestBuys','In-country Best Buys board')+toggle('stockEta','Stock + restock ETA')+toggle('arrivalStock','Arrival-stock prediction while flying')+toggle('arrivalBasket','Arrival Basket Planner while flying')+toggle('smartLandedRefresh','Smart refresh after landing')+toggle('sessionSummary','Travel Session Summary + local history')+toggle('bazaar','Bazaar deal detection')+toggle('itemMarket','Item Market + local watchlist')+toggle('loadoutComparator','Loadout Comparator — compare market gear vs equipped')+toggle('priceNetwork','SakaLuX Price Network — anonymous opt-in')+'<label class="sl-mi-field">Price Network HTTPS endpoint<input id="sl-mi-network-endpoint" inputmode="url" placeholder="https://your-worker.workers.dev" value="'+esc(settings.priceNetworkEndpoint||'')+'"></label><div class="sl-mi-network-privacy">When enabled, only item ID, observed Item Market floor price, timestamp and source are shared. Torn ID, username, API key, device ID and cookies are never sent.</div>'+toggle('items','Inventory market estimates')+toggle('museum','Museum intelligence')+toggle('points','Points Market rate capture')+'<label class="sl-mi-field">Travel slots<input id="sl-mi-slots" type="number" min="1" max="100" value="'+esc(settings.travelSlots)+'"></label><label class="sl-mi-field">Travel budget ($)<input id="sl-mi-budget" inputmode="numeric" value="'+esc(settings.travelBudget||0)+'" placeholder="0 = unlimited"></label><label class="sl-mi-field">Fallback flight multiplier<input id="sl-mi-flight" type="number" min="0.1" max="1" step="0.01" value="'+esc(settings.flightMultiplier)+'"></label><label class="sl-mi-field">Market fee %<input id="sl-mi-fee" type="number" min="0" max="100" step="0.1" value="'+esc(settings.marketFeePct)+'"></label><label class="sl-mi-field">Minimum highlighted profit<input id="sl-mi-min-profit" inputmode="numeric" value="'+esc(settings.minProfit)+'"></label><div class="sl-mi-info">Watchlist: <b>'+Object.keys(watchlist).length+'</b> · Cached market: <b>'+Object.keys(marketCache).length+'</b> · Stock histories: <b>'+Object.keys(stockHistory).length+'</b> · Travel sessions: <b>'+((travelSessions.history||[]).length+(travelSessions.current?1:0))+'</b></div><button class="sl-mi-primary" id="sl-mi-save">SAVE VALUES</button><button class="sl-mi-secondary" id="sl-mi-clear-sessions">CLEAR TRAVEL HISTORY</button><button class="sl-mi-secondary" id="sl-mi-refresh">REFRESH PAGE DATA</button><button class="sl-mi-secondary" id="sl-mi-hard">HARD REFRESH MARKET CACHE</button></div>';
+        document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+        overlay.querySelector('#sl-mi-close').onclick=()=>overlay.remove();
+        overlay.querySelector('#sl-mi-api-access').onclick=()=>openApiAccess();
+        overlay.querySelectorAll('input[data-mi-toggle="1"]').forEach(input=>input.addEventListener('change',()=>applyLiveToggle(input.dataset.setting,input.checked)));
+        overlay.querySelector('#sl-mi-save').onclick=()=>{settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;settings.priceNetworkEndpoint=normalizeNetworkEndpoint(overlay.querySelector('#sl-mi-network-endpoint')?.value||'');saveJson(STORAGE.settings,settings);if(settings.priceNetwork)schedulePriceNetworkFlush(500);const b=overlay.querySelector('#sl-mi-save');if(b){const t=b.textContent;b.textContent='SAVED ✓';setTimeout(()=>{if(b.isConnected)b.textContent=t;},900);}scheduleScan(false);};
+        overlay.querySelector('#sl-mi-clear-sessions').onclick=()=>{travelSessions={current:null,history:[]};saveTravelSessions();overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-refresh').onclick=()=>{overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-hard').onclick=()=>{marketCache={};saveJson(STORAGE.marketCache,marketCache);overlay.remove();scheduleScan(true);};
+    }
+
+    function injectCss(){if(document.getElementById('sl-mi-style'))return;const s=document.createElement('style');s.id='sl-mi-style';s.textContent=`
+.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival{box-sizing:border-box;margin:4px 0;padding:6px 8px;border-radius:6px;background:#15191f;border:1px solid #2c333d;color:#d7dce5;font:700 10px/1.4 Arial,sans-serif}
+.sl-mi-travel strong,.sl-mi-bazaar.good,.sl-mi-bazaar.good strong,#sl-mi-market-bar strong,#sl-mi-points-bar strong,#sl-mi-museum-bar strong,#sl-mi-best-run strong,#sl-mi-arrival strong{color:#78d98b}.sl-mi-travel.loss,.sl-mi-bazaar.bad,.sl-mi-bazaar.bad strong{color:#e06c6c}
+#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-bazaar-board,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session{margin:8px auto 10px;max-width:1100px;border-left:3px solid #d7b94c;font-size:11px}#sl-mi-market-bar.hit{border-left-color:#78d98b;background:#152219}
+.sl-mi-br-head,.sl-mi-arrival-head{display:flex;align-items:center;gap:8px;cursor:pointer}.sl-mi-br-title{color:#d7b94c;font-weight:900;letter-spacing:.08em}.sl-mi-br-head strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-br-head button,.sl-mi-arrival-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-br-body,.sl-mi-arrival-body{display:none;margin-top:7px;gap:4px}.open .sl-mi-br-body,.open .sl-mi-arrival-body{display:flex;flex-direction:column}.sl-mi-br-row,.sl-mi-arrival-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.8fr) auto auto auto auto;gap:8px;align-items:center;padding:5px 6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-br-row .name,.sl-mi-arrival-row .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{color:#d7b94c}.sl-mi-route{cursor:pointer;transition:background .12s ease,border-color .12s ease}.sl-mi-route:hover,.sl-mi-route:focus{background:#1c2522;border-color:#4d6957;outline:none}.sl-mi-route:active{background:#203028}
+.sl-mi-arrival-head{justify-content:space-between}.sl-mi-arrival-head>div:first-child{display:flex;gap:8px;align-items:center}.sl-mi-arrival-note,.sl-mi-perf-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-perf-note{color:#7f8996}.sl-mi-arrival-row .conf{padding:2px 5px;border-radius:4px;text-align:center}.sl-mi-arrival-row .conf.high{color:#78d98b}.sl-mi-arrival-row .conf.medium{color:#d7b94c}.sl-mi-arrival-row .conf.low,.sl-mi-arrival-row .conf.learning{color:#9da6b3}.sl-mi-arrival-row.recommended{border-left:3px solid #78d98b;background:#142019}.sl-mi-arrival-row.alternative{border-left:3px solid #59616c}.sl-mi-arrival-row .buy{color:#78d98b}
+.sl-mi-museum-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-museum-head>div{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-museum-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-museum-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-museum-body{display:none;margin-top:7px;gap:4px}#sl-mi-museum-bar.open .sl-mi-museum-body{display:flex;flex-direction:column}.sl-mi-museum-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-museum-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-museum-row.turn{border-left:3px solid #78d98b;background:#142019}.sl-mi-museum-row.sell{border-left:3px solid #d7b94c;background:#201d13}.sl-mi-museum-row.missing{border-left:3px solid #5c6570}.sl-mi-museum-row .edge{color:#9da6b3}.sl-mi-points-link{border:1px solid #66591d;background:#2a2512;color:#e4c95d;border-radius:6px;padding:7px 9px;font-weight:900;font-size:10px;align-self:flex-start}
+
+.sl-mi-country-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-country-head>div:first-child{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-country-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-country-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-country-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;padding:6px;border:1px solid #29323a;border-radius:6px}.sl-mi-country-body{display:none;margin-top:7px;gap:4px}#sl-mi-country-best.open .sl-mi-country-body{display:flex;flex-direction:column}.sl-mi-country-row{display:grid;grid-template-columns:auto minmax(0,1.5fr) auto auto auto auto auto auto auto;gap:7px;align-items:center;padding:7px;border:1px solid #292f38;border-radius:6px;font-size:10px;cursor:pointer}.sl-mi-country-row.recommended{border-left:3px solid #78d98b;background:#142019}.sl-mi-country-row.alternative{border-left:3px solid #59616c;background:#15191f}.sl-mi-country-row:hover,.sl-mi-country-row:focus{background:#1b251f;border-color:#4d6957;outline:none}.sl-mi-country-row .rank{color:#d7b94c;font-weight:900}.sl-mi-country-row .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-country-row .buy,.sl-mi-country-row .profit,.sl-mi-country-row .total{color:#78d98b}.sl-mi-country-row.alternative .buy{color:#9da6b3}
+
+.sl-mi-session-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-session-head>div:first-child{display:flex;align-items:center;gap:8px;min-width:0}.sl-mi-session-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-session-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-session-body{display:none;margin-top:7px;gap:5px}#sl-mi-session.open .sl-mi-session-body{display:flex;flex-direction:column}.sl-mi-session-current{display:grid;grid-template-columns:minmax(0,1.5fr) repeat(4,auto);gap:8px;align-items:center;padding:7px;border:1px solid #29323a;border-radius:6px;background:#121820}.sl-mi-session-current>div:first-child{display:flex;flex-direction:column}.sl-mi-session-current small{display:block;color:#7f8996;font-size:8px}.sl-mi-session-current strong{color:#78d98b}.sl-mi-session-current .neg{color:#e06c6c}.sl-mi-session-history-title{color:#d7b94c;font-size:9px;font-weight:900;margin-top:3px}.sl-mi-session-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px}.sl-mi-session-row .name{font-weight:900}.sl-mi-country-summary button{border:1px solid #42664b;background:#16351f;color:#78d98b;border-radius:6px;padding:6px 8px;font-weight:900;font-size:9px}.sl-mi-country-summary button:disabled{opacity:.7}
+.sl-mi-plan-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-plan-head>div:first-child{display:flex;align-items:center;gap:8px}.sl-mi-plan-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-plan-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-plan-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:7px;padding:6px;border:1px solid #29323a;border-radius:6px}.sl-mi-plan-body{display:none;margin-top:7px;gap:4px}#sl-mi-travel-plan.open .sl-mi-plan-body{display:flex;flex-direction:column}.sl-mi-plan-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px;cursor:pointer}.sl-mi-plan-row:hover,.sl-mi-plan-row:focus{background:#1b251f;border-color:#4d6957;outline:none}.sl-mi-plan-row .name{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-mi-target{outline:2px solid #d7b94c!important;box-shadow:0 0 0 2px rgba(215,185,76,.22)!important}
+.sl-mi-baz-head{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer}.sl-mi-baz-head>div:first-child{display:flex;gap:8px;align-items:center;min-width:0}.sl-mi-baz-head strong{color:#78d98b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-baz-head button{border:0;background:transparent;color:#d7b94c;font-size:14px}.sl-mi-baz-note{margin-top:5px;color:#8f98a5;font-weight:600;font-size:9px}.sl-mi-baz-body{display:none;margin-top:7px;gap:4px}#sl-mi-bazaar-board.open .sl-mi-baz-body{display:flex;flex-direction:column}.sl-mi-baz-row{display:grid;grid-template-columns:minmax(0,1.4fr) auto auto auto auto;gap:8px;align-items:center;padding:6px;border:1px solid #292f38;border-radius:5px;font-size:10px;cursor:pointer}.sl-mi-baz-row:hover,.sl-mi-baz-row:focus{background:#1a231c;border-color:#4d6957;outline:none}.sl-mi-baz-row .name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sl-mi-focus{outline:2px solid #78d98b!important;outline-offset:2px!important}
+.sl-mi-bazaar-badge-wrap{display:block!important;width:100%!important;clear:both!important;box-sizing:border-box!important;margin:2px 0 7px!important}.sl-mi-bazaar-wide{display:block!important;width:100%!important;max-width:none!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.35!important;padding:7px 10px!important;margin:0!important}.sl-mi-baz-head>div:first-child{flex:1;min-width:0}.sl-mi-baz-head>div:nth-child(2){white-space:nowrap}
+.sl-mi-market-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.sl-mi-market-head>div{display:flex;flex-direction:column;gap:3px}.sl-mi-signal{padding:4px 7px;border-radius:6px;font-weight:900;white-space:nowrap}.sl-mi-signal.buy{background:#16351f;color:#78d98b}.sl-mi-signal.wait{background:#3a1d1d;color:#f08b8b}.sl-mi-signal.fair{background:#2f2b17;color:#e1c865}.sl-mi-signal.learning{background:#252a31;color:#aab2bd}.sl-mi-market-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:7px}.sl-mi-market-grid>div{background:#0f1318;border:1px solid #2b323b;border-radius:6px;padding:6px}.sl-mi-market-grid small{display:block;color:#7f8894;font-size:8px}.sl-mi-market-grid strong{display:block;margin-top:2px}.sl-mi-spark{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:6px;border-radius:6px;background:#0f1318;border:1px solid #2b323b}.sl-mi-spark>span{font-size:15px;letter-spacing:1px;color:#d7b94c}.sl-mi-spark small{color:#8f98a5;text-align:right}
+.sl-mi-loadout{margin-top:7px;padding:7px;border:1px solid #374151;border-radius:7px;background:#10151b}.sl-mi-loadout-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.sl-mi-loadout-head>div{display:flex;flex-direction:column;gap:2px}.sl-mi-loadout-head>b,.sl-mi-loadout-head div>b{color:#d7b94c}.sl-mi-loadout-head span{color:#b8c0cb;font-size:9px}.sl-mi-loadout-refresh{border:1px solid #3a4654;background:#1a222c;color:#d7b94c;border-radius:6px;padding:4px 8px;font-weight:900}.sl-mi-loadout-note,.sl-mi-loadout-error{display:block;margin-top:5px;color:#8f98a5;font-size:8px;font-weight:600}.sl-mi-loadout-rows{display:flex;flex-direction:column;gap:4px;margin-top:6px}.sl-mi-loadout-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) minmax(0,1fr);gap:6px;align-items:center;padding:6px;border-radius:5px;border:1px solid #29323a;font-size:9px}.sl-mi-loadout-row.upgrade{border-left:3px solid #78d98b;background:#142019}.sl-mi-loadout-row.downgrade{border-left:3px solid #e06c6c;background:#211515}.sl-mi-loadout-row.sidegrade{border-left:3px solid #d7b94c;background:#211e13}.sl-mi-loadout-row.unknown{border-left:3px solid #6b7280}.sl-mi-loadout-row.upgrade .sl-mi-loadout-verdict{color:#78d98b}.sl-mi-loadout-row.downgrade .sl-mi-loadout-verdict{color:#e06c6c}.sl-mi-loadout-row.sidegrade .sl-mi-loadout-verdict{color:#d7b94c}@media(max-width:700px){.sl-mi-loadout-row{grid-template-columns:auto auto;gap:3px 7px}.sl-mi-loadout-row>span:nth-child(3),.sl-mi-loadout-row>span:nth-child(4){grid-column:1/-1}}
+.sl-mi-network{display:flex;flex-direction:column;gap:3px;margin-top:7px;padding:7px;border:1px solid #2b3b49;border-radius:6px;background:#101820}.sl-mi-network>b{color:#7fc8ff}.sl-mi-network>span{color:#cbd5df}.sl-mi-network small{color:#7f8996;font-weight:600}.sl-mi-network-privacy{margin:6px 0;padding:8px;border-radius:7px;background:#111820;border:1px solid #273542;color:#9da8b5;font-size:9px;line-height:1.45}.sl-mi-watch-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.sl-mi-watch-row input{flex:1 1 140px;background:#0d0f14;color:#fff;border:1px solid #363e49;border-radius:6px;padding:8px}.sl-mi-watch-row button{border:0;border-radius:6px;padding:7px 9px;background:#303844;color:#fff;font-weight:900;font-size:10px}
+#sl-mi-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:flex-start;justify-content:center;font-family:Arial,sans-serif}#sl-mi-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0}.sl-mi-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mi-title{font-size:16px;font-weight:900}.sl-mi-sub{margin-top:3px;color:#8e96a3;font-size:9px}#sl-mi-close{width:36px;height:36px;border:0;border-radius:9px;background:#272d35;color:#fff;font-size:20px}.sl-mi-toggle,.sl-mi-field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:7px 0;padding:10px;border-radius:9px;background:#181d24;border:1px solid #292f38;font-size:11px}.sl-mi-toggle-label{flex:1;min-width:0}.sl-mi-switch{position:relative;display:inline-flex;width:46px;height:25px;flex:0 0 46px}.sl-mi-switch input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}.sl-mi-switch-ui{position:absolute;inset:0;border-radius:999px;background:#4a1f24;border:1px solid #71333c;transition:background .16s ease,border-color .16s ease}.sl-mi-switch-ui:before{content:'';position:absolute;width:19px;height:19px;left:2px;top:2px;border-radius:50%;background:#f3f4f6;box-shadow:0 1px 4px rgba(0,0,0,.45);transition:transform .16s ease}.sl-mi-switch input:checked+.sl-mi-switch-ui{background:#174d2b;border-color:#2e8a50}.sl-mi-switch input:checked+.sl-mi-switch-ui:before{transform:translateX(21px)}.sl-mi-switch input:focus-visible+.sl-mi-switch-ui{outline:2px solid #d7b94c;outline-offset:2px}.sl-mi-field input{width:45%;box-sizing:border-box;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:7px;padding:7px}.sl-mi-api-create{border:1px solid #66591d!important;background:#2a2512!important;color:#e4c95d!important}.sl-mi-api-box{margin:9px 0;padding:8px;border:1px solid #2f3945;border-radius:9px;background:#121820}.sl-mi-api-status{display:flex;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:7px;background:#181d24;font-size:10px}.sl-mi-api-status b{color:#d7b94c}.sl-mi-api-status.ok span{color:#78d98b}.sl-mi-api-status.missing-equipment span,.sl-mi-api-status.error span,.sl-mi-api-status.missing span{color:#f08b8b}.sl-mi-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.sl-mi-api-actions button,.sl-mi-loadout-keyfix{min-height:36px;border:0;border-radius:8px;background:#374151;color:#fff;font-weight:900;font-size:10px}.sl-mi-loadout-keyfix{margin-top:6px;width:100%;background:#6b4f12;color:#ffe08a}.sl-mi-info{margin:10px 0;color:#a6adb8;font-size:10px}.sl-mi-primary,.sl-mi-secondary{width:100%;min-height:40px;margin-top:7px;border:0;border-radius:9px;color:#fff;font-weight:900}.sl-mi-primary{background:#2563eb}.sl-mi-secondary{background:#374151}.muted{color:#7e8793}
+@media(max-width:700px){.sl-mi-session-current{grid-template-columns:repeat(2,minmax(0,1fr))}.sl-mi-session-current>div:first-child{grid-column:1/-1}.sl-mi-session-row{grid-template-columns:minmax(0,1fr) auto}.sl-mi-session-row>span:nth-child(3){grid-column:1/-1}.sl-mi-country-row{grid-template-columns:auto minmax(0,1fr) auto;gap:3px 7px}.sl-mi-country-row .name{grid-column:2/-1}.sl-mi-country-row .profit,.sl-mi-country-row .total{font-weight:900}.sl-mi-plan-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-plan-row .name{grid-column:1/-1}.sl-mi-br-row,.sl-mi-arrival-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-br-row>span:nth-child(2){grid-column:1/-1}.sl-mi-museum-row{grid-template-columns:minmax(0,1fr) auto;gap:3px 7px}.sl-mi-museum-row .name{grid-column:1/-1}.sl-mi-market-grid{grid-template-columns:repeat(2,1fr)}.sl-mi-spark{align-items:flex-start;flex-direction:column}.sl-mi-spark small{text-align:left}.sl-mi-baz-row{grid-template-columns:minmax(0,1fr) auto auto;gap:3px 7px}.sl-mi-baz-row .name{grid-column:1/-1}.sl-mi-baz-head{align-items:flex-start;flex-wrap:wrap}.sl-mi-baz-head>div:first-child{width:100%;flex-wrap:wrap}.sl-mi-baz-head>div:nth-child(2){margin-left:auto}.sl-mi-baz-row{grid-template-columns:minmax(0,1fr) auto}.sl-mi-baz-row>span:nth-child(2){grid-column:1/2}.sl-mi-baz-row>span:nth-child(3){grid-column:2/3;text-align:right}.sl-mi-baz-row>strong{grid-column:1/2}.sl-mi-baz-row>span:last-child{grid-column:2/3;text-align:right}.sl-mi-br-row .eta,.sl-mi-arrival-row .eta{grid-column:1/-1}.sl-mi-arrival-head{align-items:flex-start;flex-wrap:wrap}}@media(min-width:700px){#sl-mi-overlay{align-items:center}#sl-mi-panel{border-radius:18px}}
+`;document.head.appendChild(s);}
+
+    function maybePromptHub(){if(!settings.enabled||window.SakaLuXScriptHub)return;let last=0;try{last=Number(localStorage.getItem(HUB_PROMPT_STORAGE)||0);}catch(_){}if(Date.now()-last<HUB_PROMPT_INTERVAL)return;setTimeout(()=>{if(!settings.enabled||window.SakaLuXScriptHub||document.getElementById('sl-mi-hub-prompt'))return;const box=document.createElement('div');box.id='sl-mi-hub-prompt';box.style.cssText='position:fixed;left:10px;right:10px;bottom:20px;z-index:2147483647;max-width:520px;margin:auto;background:#11161d;color:#fff;border:1px solid #39414c;border-radius:12px;padding:12px;font:12px Arial;box-shadow:0 8px 30px rgba(0,0,0,.55)';box.innerHTML='<b>☠︎ SakaLuX Script Hub</b><div style="margin:6px 0;color:#b8bec7">Install the Hub to manage Market Intelligence and the other SakaLuX add-ons from one place.</div><div style="display:flex;gap:7px"><button id="sl-mi-hub-install" style="flex:1;padding:9px;border:0;border-radius:7px;background:#2563eb;color:white;font-weight:900">INSTALL HUB</button><button id="sl-mi-hub-later" style="flex:1;padding:9px;border:0;border-radius:7px;background:#353c46;color:white;font-weight:900">NOT NOW</button></div>';document.body.appendChild(box);box.querySelector('#sl-mi-hub-install').onclick=()=>{location.href=HUB_INSTALL_URL;};box.querySelector('#sl-mi-hub-later').onclick=()=>{try{localStorage.setItem(HUB_PROMPT_STORAGE,String(Date.now()));}catch(_){}box.remove();};},1800);}
+    function startObserver(){if(!settings.enabled||state.observer)return;state.observer=new MutationObserver(muts=>{const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-session,#sl-mi-arrival,#sl-mi-overlay,#sl-mi-country-best,#sl-mi-travel-plan,#sl-mi-bazaar-board,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&detectDestination()&&!detectInFlight()){scheduleLandedSmartRefresh('mutation');return;}if(detectPage()==='travel'&&now-state.lastObserverScan<1800){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});state.routeHandler=()=>scheduleScan(true);window.addEventListener('hashchange',state.routeHandler);}
+
+    function stopRuntime(){
+        state.observer?.disconnect();state.observer=null;
+        if(state.routeHandler)window.removeEventListener('hashchange',state.routeHandler);state.routeHandler=null;
+        if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=null;
+        if(state.landedRefreshTimer)clearTimeout(state.landedRefreshTimer);state.landedRefreshTimer=null;
+        if(networkFlushTimer)clearTimeout(networkFlushTimer);networkFlushTimer=null;
+        cleanupLiveFeature('enabled');
+        removeNodes('#sl-mi-overlay,#sl-mi-hub-prompt');
+    }
+    function startRuntime(){if(!settings.enabled)return;injectCss();startObserver();if(settings.priceNetwork&&networkQueue.length)schedulePriceNetworkFlush(2500);if(getApiKey())checkRequiredApiAccess(false);scheduleScan(true);}
+    function setEnabled(value){settings.enabled=!!value;saveJson(STORAGE.settings,settings);if(settings.enabled)startRuntime();else stopRuntime();window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceStateChanged',{detail:{version:VERSION,enabled:settings.enabled}}));syncHubBridge('market-intelligence',settings.enabled);return settings.enabled;}
+    function toggleEnabled(){return setEnabled(!settings.enabled);}
+    function syncHubBridge(id,value){const bridge=document.getElementById('sakalux-module-bridge-'+id);if(bridge)bridge.dataset.enabled=String(Boolean(value));}
+    function installHubBridge(id,openHandler){let bridge=document.getElementById('sakalux-module-bridge-'+id);if(!bridge){bridge=document.createElement('button');bridge.type='button';bridge.id='sakalux-module-bridge-'+id;bridge.hidden=true;(document.body||document.documentElement).appendChild(bridge);}bridge.dataset.version=VERSION;bridge.dataset.enabled=String(Boolean(settings.enabled));bridge.onclick=()=>{const action=bridge.dataset.action;if(action==='open')openHandler();else if(action==='toggle')toggleEnabled();else if(action==='on'||action==='off')setEnabled(action==='on');bridge.dataset.action='';syncHubBridge(id,settings.enabled);};}
+
+    window.SakaLuXMarketIntelligence={
+        id:'market-intelligence',name:'Market Intelligence',version:VERSION,
+        open(){if(!settings.enabled)setEnabled(true);openSettings();return true;},
+        async refresh(){await scan(true);return true;},
+        async hardRefresh(){marketCache={};saveJson(STORAGE.marketCache,marketCache);await scan(true);return true;},
+        setEnabled,toggleEnabled,isEnabled(){return settings.enabled;},
+        createRequiredTornKey:createRequiredApiKey,
+        health(){return{ready:true,version:VERSION,enabled:settings.enabled,page:state.page||detectPage(),apiMode:state.apiMode,hasApiKey:Boolean(getApiKey()),busy:state.busy,lastScan:state.lastScan,lastError:state.lastError,scanCount:state.scanCount,marketRequests:state.marketRequests,decorated:state.decorated,bestRunRows:state.bestRunRows,bestRunBudgetAware:state.bestRunBudgetAware,bestRunAffordableRoutes:state.bestRunAffordableRoutes,bestRunBlockedRoutes:state.bestRunBlockedRoutes,bestRunBasketRoutes:state.bestRunBasketRoutes,bestRunBasketItems:state.bestRunBasketItems,bestRunBasketProfit:state.bestRunBasketProfit,countryBestBuysRows:state.countryBestBuysRows,countryBestBuyName:state.countryBestBuyName,countryBestBuyProfit:state.countryBestBuyProfit,countryBestBuyQty:state.countryBestBuyQty,countryBestBuysDestination:state.countryBestBuysDestination,availableCash:state.availableCash,availableCashAt:state.availableCashAt,travelSessionCount:state.travelSessionCount,currentSessionDestination:state.currentSessionDestination,currentSessionStatus:state.currentSessionStatus,currentSessionPredictedProfit:state.currentSessionPredictedProfit,currentSessionLandedProfit:state.currentSessionLandedProfit,currentSessionRecordedProfit:state.currentSessionRecordedProfit,lastSessionProfit:state.lastSessionProfit,landedRefreshes:state.landedRefreshes,landedStockRefreshes:state.landedStockRefreshes,landedMarketRefreshes:state.landedMarketRefreshes,landedRefreshSkips:state.landedRefreshSkips,landedLastRefresh:state.landedLastRefresh,arrivalRows:state.arrivalRows,flightDestination:state.flightDestination,landingMins:state.landingMins,arrivalBasketItems:state.arrivalBasketItems,arrivalBasketCost:state.arrivalBasketCost,arrivalBasketProfit:state.arrivalBasketProfit,arrivalBasketSlots:state.arrivalBasketSlots,arrivalBasketMode:state.arrivalBasketMode,stockEtaLearned:state.stockEtaLearned,stockHistories:Object.keys(stockHistory).length,watchlistItems:Object.keys(watchlist).length,cachedMarketItems:Object.keys(marketCache).length,priceNetworkEnabled:settings.priceNetwork,priceNetworkConfigured:priceNetworkConfigured(),networkQueued:networkQueue.length,networkSent:state.networkSent,networkBusy:state.networkBusy,networkLastFlush:state.networkLastFlush,networkLastError:state.networkLastError,networkSamples:state.networkSamples,networkMedian:state.networkMedian,networkLastConsensusAt:state.networkLastConsensusAt,travelCacheHits:state.travelCacheHits,travelRefreshes:state.travelRefreshes,observerSkips:state.observerSkips,actualFlightTimes:state.actualFlightTimes,travelTimeSource:state.travelTimeSource,travelPlanItems:state.travelPlanItems,travelPlanCost:state.travelPlanCost,travelPlanProfit:state.travelPlanProfit,travelPlanSlots:state.travelPlanSlots,travelPlanBudget:state.travelPlanBudget,travelPlanUnusedBudget:state.travelPlanUnusedBudget,travelPlanMode:state.travelPlanMode,travelPlanOptimizationGain:state.travelPlanOptimizationGain,museumSets:state.museumSets,museumMissingSets:state.museumMissingSets,museumRecommendation:state.museumRecommendation,bazaarDeals:state.bazaarDeals,bazaarBestProfit:state.bazaarBestProfit,bazaarBestRoi:state.bazaarBestRoi,itemMarketSignal:state.itemMarketSignal,itemMarketTrend:state.itemMarketTrend,itemMarketVolatility:state.itemMarketVolatility,itemMarketHistorySamples:state.itemMarketHistorySamples,loadoutComparatorEnabled:settings.loadoutComparator,loadoutReady:state.loadoutReady,loadoutItems:state.loadoutItems,loadoutComparisons:state.loadoutComparisons,loadoutBestVerdict:state.loadoutBestVerdict,loadoutLastError:state.loadoutLastError,apiAccessStatus:state.apiAccessStatus,apiAccessMessage:state.apiAccessMessage,apiAccessCheckedAt:state.apiAccessCheckedAt};},
+        goToTravel(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
+        goToBestRun(){location.href='https://www.torn.com/page.php?sid=travel';return true;},
+        selectDestination(destination){return selectTravelDestination(destination);},
+        async arrivalPrediction(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
+        smartLandedRefresh(){if(detectPage()!=='travel'||detectInFlight()||!detectDestination())return false;scheduleLandedSmartRefresh('api');return true;},
+        travelSessionSummary(){paintTravelSessionSummary();return {current:travelSessions.current,history:(travelSessions.history||[]).slice(0,20)};},
+        async arrivalBasket(){if(detectPage()!=='travel'||!detectInFlight())return false;await renderArrivalStock();return true;},
+        goToMarket(){location.href='https://www.torn.com/page.php?sid=ItemMarket';return true;},
+        itemMarketIntelligence(){if(detectPage()!=='itemmarket')return null;const id=selectedMarketItemId();if(!id)return null;const c=cachePeek(id);if(!c)return null;return analyzePriceHistory(id,Number(c.minPrice),c);},
+        async loadoutComparator(force=false){const id=selectedMarketItemId();if(!id)return null;const market=await fetchMarket(id,!!force);const equipped=await fetchEquippedLoadout(!!force);const slot=candidateSlot(market),current=compatibleEquipped(slot,equipped).sort((a,b)=>equippedScore(b,slot)-equippedScore(a,slot))[0]||null;return{itemId:id,slot,equipped:current,listings:marketGearListings(market).map(g=>({...g,comparison:current?compareGear(g,current,slot):null}))};},
+        priceNetworkStatus(){return{enabled:settings.priceNetwork,configured:priceNetworkConfigured(),endpoint:priceNetworkEndpoint(),queued:networkQueue.length,sent:state.networkSent,lastFlush:state.networkLastFlush,lastError:state.networkLastError,samples:state.networkSamples,median:state.networkMedian};},
+        async flushPriceNetwork(){return flushPriceNetwork();},
+        goToBazaar(){location.href='https://www.torn.com/bazaar.php';return true;},
+        goToMuseum(){location.href='https://www.torn.com/museum.php';return true;},
+        async museumIntelligence(){if(detectPage()!=='museum')return false;await scanMuseum();return true;}
+    };
+    window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceReady',{detail:{version:VERSION,enabled:settings.enabled}}));
+
+    function init(){try{localStorage.setItem('SakaLuX_Installed_market-intelligence',VERSION);}catch(_){}installHubBridge('market-intelligence',()=>window.SakaLuXMarketIntelligence.open());injectCss();saveTravelSessions();if(settings.enabled){startRuntime();maybePromptHub();if(apiSetupPending()&&!/preferences\.php/i.test(location.pathname+location.href)){setTimeout(()=>openSettings(),900);}}console.log('['+NAME+' v'+VERSION+'] Loaded.');}
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+
+
+    /* SakaLuX Unified Control Center UI — visual layer only. */
+    function installSakaLuXUnifiedTheme_market_intelligence() {
+        if (document.getElementById('sakalux-unified-theme-market-intelligence')) return;
+        const style = document.createElement('style');
+        style.id = 'sakalux-unified-theme-market-intelligence';
+        style.textContent = `
+:where([id^="sl-mi-"],[class*="sl-mi-"]){font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}
+:where([id^="sl-mi-"][id*="panel" i],[id^="sl-mi-"][id*="settings" i],[id^="sl-mi-"][id*="modal" i],[id^="sl-mi-"][id*="details" i]){background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important}
+:where([class*="sl-mi-"][class*="header" i],[id^="sl-mi-"][id*="header" i]){background:linear-gradient(155deg,#1b2634,#111923)!important;border-color:#314154!important;color:#f8fafc!important}
+:where([class*="sl-mi-"][class*="card" i],[class*="sl-mi-"][class*="row" i],[class*="sl-mi-"][class*="section" i],[class*="sl-mi-"][class*="note" i]){background:linear-gradient(145deg,#18212d,#131b25)!important;border-color:#2d3c4e!important;border-radius:12px!important;color:#dce6f0!important;box-shadow:0 6px 18px rgba(0,0,0,.14)!important}
+:where(button[id^="sl-mi-"],button[class*="sl-mi-"]){border:1px solid #3d78bf!important;border-radius:10px!important;background:linear-gradient(180deg,#377fcf,#275f9f)!important;color:#fff!important;font-weight:900!important;box-shadow:none!important;transition:transform .12s ease,filter .12s ease!important}
+:where(button[id^="sl-mi-"],button[class*="sl-mi-"]):active{transform:translateY(1px)!important}
+:where(input[id^="sl-mi-"],select[id^="sl-mi-"],textarea[id^="sl-mi-"],[id^="sl-mi-"] input,[id^="sl-mi-"] select,[id^="sl-mi-"] textarea){background:#0d141d!important;border:1px solid #3a4b61!important;border-radius:9px!important;color:#f4f7fb!important;outline:none!important}
+:where(input[type="checkbox"][id^="sl-mi-"]){appearance:none!important;-webkit-appearance:none!important;width:38px!important;height:21px!important;min-width:38px!important;margin:0 8px 0 0!important;vertical-align:middle!important;border:1px solid #546276!important;border-radius:999px!important;background:radial-gradient(circle at 10px 50%,#e7edf5 0 6px,transparent 6.5px),#465365!important;cursor:pointer!important;transition:.18s ease!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important}
+:where(input[type="checkbox"][id^="sl-mi-"]):checked{border-color:#24754f!important;background:radial-gradient(circle at 27px 50%,#fff 0 6px,transparent 6.5px),#1eb36a!important}
+:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="close" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="close" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="back" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="gray" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="secondary" i]{background:linear-gradient(180deg,#253243,#1a2431)!important;border-color:#3a4a5d!important;color:#d7e1eb!important}
+:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="clear" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="reset" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[id*="delete" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="danger" i],:where(button[id^="sl-mi-"],button[class*="sl-mi-"])[class*="red" i]{background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+@media(max-width:520px){:where([id^="sl-mi-"][id*="panel" i],[id^="sl-mi-"][id*="settings" i],[id^="sl-mi-"][id*="modal" i],[id^="sl-mi-"][id*="details" i]){border-radius:15px!important}:where(button[id^="sl-mi-"],button[class*="sl-mi-"]){min-height:34px!important}}
+`;
+        (document.head || document.documentElement).appendChild(style);
+    }
+    installSakaLuXUnifiedTheme_market_intelligence();
+
+})();
+
+
+
+
+
+/* slx-host-scroll-contract-v3 */
+(()=>{if(document.getElementById('slx-host-scroll-contract-v3'))return;const s=document.createElement('style');s.id='slx-host-scroll-contract-v3';s.textContent=`@media(max-width:820px){
+[data-slx-fullsheet-v2="1"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)){position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+}`;(document.head||document.documentElement).appendChild(s)})();
+
+
+/* SakaLuX Mobile Full-Screen Performance Contract */
+(()=>{
+  if(document.getElementById('sakalux-fullscreen-performance-contract')) return;
+  const s=document.createElement('style');
+  s.id='sakalux-fullscreen-performance-contract';
+  s.textContent=`@media(max-width:820px){
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="overlay"],
+    [id^="slx-"][id*="overlay"],
+    [id^="sl-"][id*="overlay"]{
+      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
+      width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+      margin:0!important;padding:0!important;border-radius:0!important;overflow:hidden!important;
+      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#0b1118!important;box-shadow:none!important
+    }
+    [data-slx-fullsheet-v2="1"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)),
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"],[id^="slx-"][id*="panel"],[id^="sl-"][id*="panel"],
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"],[id^="slx-"][id*="modal"],[id^="sl-"][id*="modal"]{
+      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
+      width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;max-height:none!important;
+      margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow:auto!important;
+      touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important
+    }
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) *,[id^="slx-"] *,[id^="sl-"] *{ -webkit-backdrop-filter:none!important;backdrop-filter:none!important }
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"] *,[id^="slx-"][id*="panel"] *,[id^="sl-"][id*="panel"] *,
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"] *,[id^="slx-"][id*="modal"] *,[id^="sl-"][id*="modal"] *{
+      animation:none!important;transition:none!important
+    }
+  }`;
+  (document.head||document.documentElement).appendChild(s);
+})();
+
+
+/* SakaLuX Hub footer v3: native module root only; compact donation controls. */
+(()=>{
+ const selector="#sl-mi-panel",id="sakalux-inline-footer-market-intelligence",profile='https://www.torn.com/profiles.php?XID=2380374';
+ const st=document.createElement('style');st.textContent=`
+ #${id}#${id}{position:sticky!important;bottom:0!important;inset-inline:auto!important;display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;max-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;z-index:5!important;font-family:Arial,sans-serif!important;overflow:hidden!important;border-radius:10px!important}
+ #${id}#${id} *{box-sizing:border-box!important}
+ #${id}#${id} .slh-bottom{height:28px!important;margin:0!important;padding:4px 14px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;border-radius:10px 10px 0 0!important;overflow:hidden!important}
+ #${id}#${id} .slh-bottom-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;height:20px!important}
+ #${id}#${id} .slh-bottom-btn{display:block!important;width:100%!important;min-width:0!important;height:20px!important;min-height:20px!important;max-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#151f2a!important;color:#b9c7d6!important;font:900 8px/1.2 Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important;cursor:pointer!important}
+ #${id}#${id} .slh-footer{height:22px!important;min-height:22px!important;max-height:22px!important;margin:0!important;padding:0 6px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;border-top:1px solid rgba(223,154,55,.52)!important;border-radius:0 0 10px 10px!important;background:#080d13!important;color:#df9a37!important;font:400 9px/20px Arial,sans-serif!important;white-space:nowrap!important;overflow:hidden!important}
+ #${id}#${id} .slh-author{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}
+ `;(document.head||document.documentElement).appendChild(st);
+ function ensure(){
+  const panel=document.querySelector(selector);if(!panel||panel.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return;
+  if(panel.querySelector('#'+id))return;
+  const f=document.createElement('div');f.id=id;
+  f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+profile+'">SakaLuX [2380374]</a></div>';
+  f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>{location.href=profile});panel.appendChild(f);
+ }
+ function start(){ensure();let scheduled=false;new MutationObserver(records=>{
+  if(scheduled||!records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&!n.closest?.('[id^="sakalux-inline-footer-"]'))))return;
+  scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
+ }).observe(document.body,{childList:true,subtree:true});}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+
+/* Compact donation controls and Elimination mobile panel geometry 1.17.33 */
+(()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sl-mi-overlay#sl-mi-overlay#sl-mi-overlay{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;padding:0!important;background:transparent!important;overflow:hidden!important;border-radius:14px!important;align-items:stretch!important;justify-content:stretch!important;}\n#sl-mi-overlay#sl-mi-overlay#sl-mi-overlay #sl-mi-panel#sl-mi-panel{position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;align-self:stretch!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;max-width:100%!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border:1px solid #3c4652!important;border-radius:14px!important;}\n#sl-mi-overlay#sl-mi-overlay#sl-mi-overlay #sl-mi-panel#sl-mi-panel{overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
