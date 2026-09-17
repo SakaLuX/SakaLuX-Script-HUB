@@ -3,7 +3,7 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.15**
+**v1.2.16**
 
 ## What it does
 - Enhances Torn chat with SakaLuX chat intelligence features.
@@ -13,7 +13,8 @@
 ## Current release note
 
 
-**v1.2.15** Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
+**v1.2.16** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
 ## Recommended
 - Use together with SakaLuX Script Hub for consistent controls and status handling.
@@ -41,6 +42,10 @@ All Rights Reserved — SakaLuX [2380374].
 
 
 ## Release history
+
+### v1.2.16 — Elimination panel layout and 20px donation buttons
+- Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
 
 ### v1.2.15 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.

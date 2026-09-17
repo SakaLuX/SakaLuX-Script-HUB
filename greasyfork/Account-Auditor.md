@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.11**
+**v1.3.12**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -19,7 +19,8 @@
 ## Current release note
 
 
-**v1.3.11** Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
+**v1.3.12** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
@@ -44,6 +45,10 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 **MIT**
 
 ## Release history
+
+### v1.3.12 — Elimination panel layout and 20px donation buttons
+- Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
 
 ### v1.3.11 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
