@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.31** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs. Runs native position scraping only on visible Company/Job pages and ignores changes inside Company/Hub panels. Prevents duplicate standalone placement timers after OFF/ON. Clears employment caches through the same GM/local-storage abstraction used to save them.
+**v1.8.37** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs. Runs native position scraping only on visible Company/Job pages and ignores changes inside Company/Hub panels. Prevents duplicate standalone placement timers after OFF/ON. Clears employment caches through the same GM/local-storage abstraction used to save them.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
