@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.38**
+**v1.17.37**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -19,8 +19,6 @@
 - Exposes `window.SakaLuXMarketIntelligence` and supports persistent Hub ON/OFF control.
 
 ## Current release note
-
-**v1.17.38** Restores the Elimination-style footer in Market whether opened standalone or from Hub; removes the Hub suppression guard and force-mounts SEND MONEY / SEND ITEMS and the author line.
 
 **v1.17.37** Copies the complete working Elimination Assistant donation/footer implementation into Market Intelligence, changing only the target panel selector/footer ID. Restores one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.
 
