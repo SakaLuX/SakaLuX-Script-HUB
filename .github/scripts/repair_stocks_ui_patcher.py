@@ -1,17 +1,27 @@
 from pathlib import Path
-p=Path('.github/scripts/fix_stocks_mission_company_ui.py')
-s=p.read_text()
-old='''s, count = re.subn(\n    r"  function managerLauncher\\(\\) \\{.*?\\n  \\}\\n\\n  function restoreCache",\n    "  function managerLauncher() { $(\'#slx-stock-open\')?.remove(); }\\n\\n  function restoreCache",\n    s,\n    count=1,\n    flags=re.S,\n)'''
-# Match the entire launcher up to whichever next top-level function follows it.
-start="s, count = re.subn(\n    r\"  function managerLauncher\\(\\) \\{.*?\\n  \\}\\n\\n  function restoreCache\","
-if start in s:
-    begin=s.index(start)
-    end=s.index("\nif count != 1:", begin)
-    replacement='''s, count = re.subn(\n    r"  function managerLauncher\\(\\) \\{.*?\\n  \\}(?=\\n\\n  function )",\n    "  function managerLauncher() { $(\'#slx-stock-open\')?.remove(); }",\n    s,\n    count=1,\n    flags=re.S,\n)'''
-    s=s[:begin]+replacement+s[end:]
-else:
-    # Idempotent fallback if the patcher layout has changed.
-    s=s.replace(r'r"  function managerLauncher\(\) \{.*?\n  \}\n\n  function restoreCache"', r'r"  function managerLauncher\(\) \{.*?\n  \}(?=\n\n  function )"')
-    s=s.replace('"  function managerLauncher() { $(\'#slx-stock-open\')?.remove(); }\\n\\n  function restoreCache"', '"  function managerLauncher() { $(\'#slx-stock-open\')?.remove(); }"')
+
+p = Path('.github/scripts/fix_stocks_mission_company_ui.py')
+s = p.read_text()
+
+start_marker = '# Remove the old bottom floating launcher; the standalone Stocks entry is the launcher now.'
+next_marker = "s = s.replace(\n    \"$('#slx-inline-api',card).onclick=()=>openPanelAt('#slx-stock-api');\""
+
+start = s.find(start_marker)
+end = s.find(next_marker, start if start >= 0 else 0)
+if start < 0 or end < 0:
+    raise SystemExit('Could not locate launcher patch block in main patcher')
+
+replacement = r'''# Remove the old bottom floating launcher; the standalone Stocks entry is the launcher now.
+launcher_start = s.find("  function managerLauncher() {")
+if launcher_start < 0:
+    raise SystemExit('Stock managerLauncher function missing')
+launcher_end = s.find("\n\n  function ", launcher_start + len("  function managerLauncher() {"))
+if launcher_end < 0:
+    raise SystemExit('Could not locate function after Stock managerLauncher')
+s = s[:launcher_start] + "  function managerLauncher() { $('#slx-stock-open')?.remove(); }" + s[launcher_end:]
+
+'''
+
+s = s[:start] + replacement + s[end:]
 p.write_text(s)
-print('patcher repaired')
+print('patcher repaired with boundary-based launcher replacement')
