@@ -1,0 +1,183 @@
+name: Fix Market duplicate author footer v1.17.36
+
+on:
+  push:
+    paths:
+      - '.github/fix-market-duplicate-author-v11736.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Backup current release files
+        shell: bash
+        run: |
+          set -euo pipefail
+          B="backups/market-duplicate-author-v1.17.36-2026-09-17"
+          mkdir -p "$B/greasyfork"
+          cp SakaLuX-Market-Intelligence.user.js "$B/SakaLuX-Market-Intelligence-v1.17.35.user.js"
+          cp SakaLuX-Suite.user.js "$B/SakaLuX-Suite-v0.9.924.user.js"
+          cp SakaLuX-Script-Hub.user.js "$B/SakaLuX-Script-Hub-v1.9.68.user.js"
+          cp scripts.json "$B/scripts.json"
+          cp greasyfork/Market-Intelligence.md "$B/greasyfork/Market-Intelligence.md"
+          cp greasyfork/SakaLuX-Suite.md "$B/greasyfork/SakaLuX-Suite.md"
+          cp greasyfork/Script-Hub.md "$B/greasyfork/Script-Hub.md"
+          [ -f RELEASE-PERFORMANCE-AUDIT-2026-09-17.md ] && cp RELEASE-PERFORMANCE-AUDIT-2026-09-17.md "$B/RELEASE-PERFORMANCE-AUDIT-2026-09-17.md" || true
+
+      - name: Patch duplicate Market author line and release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, json
+
+          PHRASE = 'Made with ❤️ by'
+          HARD = 'HARD REFRESH MARKET CACHE'
+
+          def remove_market_legacy_author(path):
+              p = Path(path)
+              s = p.read_text()
+              # Locate standalone author-only HTML elements and remove only the one belonging
+              # to the Market settings block (the block containing HARD REFRESH MARKET CACHE).
+              tag_re = re.compile(r'<(?P<tag>div|footer|p|span)(?P<attrs>[^>]*)>(?P<body>.*?Made with ❤️ by.*?SakaLuX\s*\[2380374\].*?)</(?P=tag)>', re.S)
+              matches = list(tag_re.finditer(s))
+              candidates=[]
+              for m in matches:
+                  before=s[max(0,m.start()-12000):m.start()]
+                  attrs=m.group('attrs')
+                  body=m.group('body')
+                  if HARD in before.upper() and 'SEND MONEY' not in body.upper() and 'SEND ITEMS' not in body.upper():
+                      if 'slh-footer' not in attrs and 'sakalux-inline-footer' not in attrs:
+                          candidates.append(m)
+              if not candidates:
+                  # fallback: nearest author-only element after the last HARD REFRESH marker
+                  hardpos=s.upper().rfind(HARD)
+                  if hardpos >= 0:
+                      for m in matches:
+                          if m.start() > hardpos and m.start()-hardpos < 12000:
+                              attrs=m.group('attrs'); body=m.group('body')
+                              if 'SEND MONEY' not in body.upper() and 'SEND ITEMS' not in body.upper() and 'slh-footer' not in attrs and 'sakalux-inline-footer' not in attrs:
+                                  candidates.append(m); break
+              if len(candidates) != 1:
+                  contexts=[]
+                  for m in matches:
+                      contexts.append(s[max(0,m.start()-180):min(len(s),m.end()+180)].replace('\n',' '))
+                  raise SystemExit(f'{path}: expected exactly one Market legacy author candidate, got {len(candidates)}. contexts={contexts[:8]}')
+              m=candidates[0]
+              print(path, 'REMOVING:', s[m.start():m.end()][:500].replace('\n',' '))
+              s=s[:m.start()]+s[m.end():]
+              p.write_text(s)
+
+          remove_market_legacy_author('SakaLuX-Market-Intelligence.user.js')
+          remove_market_legacy_author('SakaLuX-Suite.user.js')
+
+          # Market version
+          p=Path('SakaLuX-Market-Intelligence.user.js'); s=p.read_text()
+          s=s.replace('// @version      1.17.35','// @version      1.17.36',1)
+          s=s.replace("version:'1.17.35'","version:'1.17.36'",1)
+          p.write_text(s)
+
+          # Suite version because its embedded Market module changed too.
+          p=Path('SakaLuX-Suite.user.js'); s=p.read_text()
+          s=s.replace('// @version      0.9.924','// @version      0.9.925',1)
+          s=s.replace("const VERSION = '0.9.924';","const VERSION = '0.9.925';",1)
+          p.write_text(s)
+
+          # Canonical registry.
+          p=Path('scripts.json')
+          data=json.loads(p.read_text())
+          hit=0
+          def walk(x):
+              nonlocal_hit=[0]
+          for item in data if isinstance(data,list) else data.get('scripts', data.get('modules', [])):
+              if isinstance(item,dict) and item.get('id')=='market-intelligence':
+                  item['version']='1.17.36'
+                  notes=item.get('notes')
+                  if isinstance(notes,list):
+                      item['notes']=['Removes the duplicate legacy Made with ❤️ author line from Market settings; only the shared SEND MONEY / SEND ITEMS footer remains.']+notes[:4]
+                  hit+=1
+          if hit!=1:
+              raise SystemExit(f'scripts.json market-intelligence entries changed: {hit}')
+          p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
+
+          # Hub embedded registry + Hub release version.
+          p=Path('SakaLuX-Script-Hub.user.js'); s=p.read_text()
+          s=s.replace('// @version      1.9.68','// @version      1.9.69',1)
+          s=s.replace("const VERSION = '1.9.68';","const VERSION = '1.9.69';",1)
+          s=s.replace("name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.35'","name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.36'",1)
+          p.write_text(s)
+
+          # Greasy Fork Market notes.
+          p=Path('greasyfork/Market-Intelligence.md'); s=p.read_text()
+          s=s.replace('**v1.17.35**','**v1.17.36**',1)
+          marker='## Current release note\n'
+          note='\n**v1.17.36** removes the duplicate legacy `Made with ❤️ by SakaLuX [2380374]` line from the Market settings panel. The shared bottom footer remains unchanged with `SEND MONEY`, `SEND ITEMS` and the single author line below them. No Market calculations, settings, cache handling or buttons were changed.\n'
+          if marker in s: s=s.replace(marker,marker+note,1)
+          else: raise SystemExit('Market markdown release-note marker missing')
+          p.write_text(s)
+
+          # Suite notes.
+          p=Path('greasyfork/SakaLuX-Suite.md'); s=p.read_text()
+          s=s.replace('**v0.9.924**','**v0.9.925**',1)
+          marker='## Current release note\n'
+          note='\n**v0.9.925** removes the duplicate legacy Market author line from the embedded Market settings view. The Suite shared footer remains the only footer: SEND MONEY, SEND ITEMS and one Made with ❤️ author line. This change is scoped to the duplicate Market footer and preserves the restored v0.9.924 launcher behavior.\n'
+          if marker in s: s=s.replace(marker,marker+note,1)
+          else: raise SystemExit('Suite markdown release-note marker missing')
+          p.write_text(s)
+
+          # Hub notes + registered addon version.
+          p=Path('greasyfork/Script-Hub.md'); s=p.read_text()
+          s=s.replace('**v1.9.68**','**v1.9.69**',1)
+          s=s.replace('📈 SakaLuX Market Intelligence **v1.17.35**','📈 SakaLuX Market Intelligence **v1.17.36**')
+          marker='## Current release note\n'
+          note='\n**v1.9.69** synchronizes Market Intelligence v1.17.36 after removal of the duplicate legacy author line in Market settings. Registry/version metadata now points to the corrected Market release.\n'
+          if marker in s: s=s.replace(marker,marker+note,1)
+          else: raise SystemExit('Hub markdown release-note marker missing')
+          p.write_text(s)
+
+          # Audit document if present.
+          p=Path('RELEASE-PERFORMANCE-AUDIT-2026-09-17.md')
+          if p.exists():
+              s=p.read_text().replace('| SakaLuX-Market-Intelligence.user.js | 1.17.35 |','| SakaLuX-Market-Intelligence.user.js | 1.17.36 |')
+              s=s.replace('| SakaLuX-Suite.user.js | 0.9.924 |','| SakaLuX-Suite.user.js | 0.9.925 |')
+              s=s.replace('| SakaLuX-Script-Hub.user.js | 1.9.68 |','| SakaLuX-Script-Hub.user.js | 1.9.69 |')
+              p.write_text(s)
+          PY
+
+      - name: Validate release
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Market-Intelligence.user.js
+          node --check SakaLuX-Suite.user.js
+          node --check SakaLuX-Script-Hub.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q '@version      1.17.36' SakaLuX-Market-Intelligence.user.js
+          grep -q '@version      0.9.925' SakaLuX-Suite.user.js
+          grep -q '@version      1.9.69' SakaLuX-Script-Hub.user.js
+          grep -q '"version": "1.17.36"' scripts.json
+          # The Market settings author-only line must be gone, while shared donation footer text still exists.
+          grep -q 'SEND MONEY' SakaLuX-Market-Intelligence.user.js
+          grep -q 'SEND ITEMS' SakaLuX-Market-Intelligence.user.js
+          grep -q 'SEND MONEY' SakaLuX-Suite.user.js
+          grep -q 'SEND ITEMS' SakaLuX-Suite.user.js
+
+      - name: Commit release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Market-Intelligence.user.js SakaLuX-Suite.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/Market-Intelligence.md greasyfork/SakaLuX-Suite.md greasyfork/Script-Hub.md backups/market-duplicate-author-v1.17.36-2026-09-17/
+          [ -f RELEASE-PERFORMANCE-AUDIT-2026-09-17.md ] && git add RELEASE-PERFORMANCE-AUDIT-2026-09-17.md || true
+          git commit -m 'Market v1.17.36: remove duplicate author footer'
+          git push
