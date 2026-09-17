@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.31**
+**v1.8.37**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -44,6 +44,14 @@
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.8.37 — Professional TornPDA header layout
+- Fixes the Company header overflow caused by the older one-row override.
+- Keeps Refresh, API and Close grouped tightly at the top-right and permanently inside the viewport.
+- Gives the Company title the remaining header width for cleaner typography.
+- Moves Employee/Director to a dedicated full-width second row with equal-width controls.
+- Leaves shared standalone behavior unchanged.
+
 
 ### v1.8.31 — Performance and release metadata audit
 - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
