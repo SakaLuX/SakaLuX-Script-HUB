@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.41**
+**v1.0.40**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,9 +17,9 @@
 
 ## Current release note
 
-**v1.0.41 — Exact Enhancer API panel copy**
-- Uses the same API overlay/panel structure, spacing, dimensions, button sizes, cards, colors and responsive behavior as Enhancer Guard.
-- Only Mission-specific text and permissions differ: `User: Ammo` and `Torn: Items`.
+**v1.0.40 — Compact API controls**
+- Reduces Mission API Access button height/font sizing to match Enhancer more closely.
+- Removes the extra blank gap between `Exact permissions required` and `User: Ammo`.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -36,9 +36,6 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.0.41 — Exact Enhancer API panel copy
-- Copies Enhancer Guard API panel geometry/CSS exactly; only Mission labels, IDs and required permissions are changed.
 
 ### v1.0.40 — Compact API controls
 - Makes the dedicated API buttons smaller to match Enhancer.

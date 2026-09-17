@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.41
+// @version      1.0.40
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,7 +73,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.41'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.40'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -243,7 +243,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.0.41';
+    const VERSION = '1.0.40';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -733,54 +733,55 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         }));
     }
     function openApiSettings() {
-        injectCss();
-        document.getElementById('sl-mr-api-overlay')?.remove();
+        if(!document.getElementById('sl-mr-settings')) {openSettings();if(!document.getElementById('sl-mr-settings'))return;}
+        const panel=document.getElementById('sl-mr-settings');
+        panel.querySelector('#sl-mr-api-sheet')?.remove();
+        const sheet=document.createElement('div');sheet.id='sl-mr-api-sheet';
         const local=localStorage.getItem(STORAGE.apiKey)||'';
         getApiKey();
-        const overlay=document.createElement('div');
-        overlay.id='sl-mr-api-overlay';
-        overlay.innerHTML=`
-            <div id="sl-mr-api-panel">
-                <div class="sl-mr-api-head">
-                    <div><div class="sl-mr-api-title">🔑 Mission Rewards API Access</div><div class="sl-mr-api-sub">SakaLuX Mission Rewards v${VERSION}</div></div>
-                    <button class="sl-mr-close" id="sl-mr-api-close">×</button>
-                </div>
-                <div class="sl-mr-api-required"><b>Exact permissions required</b><br>User: Ammo<br>Torn: Items<br>No write permission is requested.</div>
-                <button type="button" class="sl-mr-api-create" id="sl-mr-api-create">🔑 CREATE MISSION API KEY</button>
-                <div class="sl-mr-api-box">
-                    <div class="sl-mr-api-status"><b>API ACCESS</b><span id="sl-mr-api-result" role="status" aria-live="polite">Not checked yet</span></div>
-                    <div class="sl-mr-api-source">Active source: <b id="sl-mr-api-source"></b></div>
-                    <label class="sl-mr-api-field">Replace / paste Torn API key<input id="sl-mr-api-local" type="password" autocomplete="off" placeholder="Paste newly created key here" value="${escapeHtml(local)}"></label>
-                    <div class="sl-mr-api-actions"><button type="button" id="sl-mr-api-save">SAVE NEW API KEY</button><button type="button" id="sl-mr-api-check">CHECK API ACCESS</button></div>
-                    <button type="button" class="sl-mr-api-clear" id="sl-mr-api-clear">CLEAR LOCAL KEY</button>
-                    <div class="sl-mr-api-note">The Hub general key is used first when available. This local key remains the standalone fallback. TornPDA's injected key is never overwritten.</div>
-                </div>
-            </div>`;
-        document.body.appendChild(overlay);
-        const input=overlay.querySelector('#sl-mr-api-local'),result=overlay.querySelector('#sl-mr-api-result');
-        const source=()=>{const active=getApiKey();overlay.querySelector('#sl-mr-api-source').textContent=active?(state.apiMode||'Active key'):'None';};
+        sheet.innerHTML=`
+        <div class="sl-mr-api-head">
+          <div class="sl-mr-api-heading"><div class="sl-mr-api-title">🔑 Mission Rewards API Access</div><div class="sl-mr-api-sub">SakaLuX Mission Rewards v${VERSION}</div></div>
+          <button type="button" class="sl-mr-api-close" id="sl-mr-api-close">×</button>
+        </div>
+        <div class="sl-mr-api-body">
+          <div class="sl-mr-api-required"><b>Exact permissions required</b>User: Ammo<br>Torn: Items<br>No write permission is requested.</div>
+          <button type="button" class="sl-mr-api-primary sl-mr-api-create" id="sl-mr-api-create">🔑 CREATE MISSION API KEY</button>
+          <div class="sl-mr-api-card">
+            <div class="sl-mr-api-status"><b>API ACCESS</b><span id="sl-mr-api-result" role="status" aria-live="polite">Not checked yet</span></div>
+            <div class="sl-mr-api-source" id="sl-mr-api-source"></div>
+            <label for="sl-mr-api-local">Replace / paste Torn API key</label>
+            <input id="sl-mr-api-local" type="password" autocomplete="off" placeholder="Paste newly created key here" value="${escapeHtml(local)}">
+            <div class="sl-mr-api-actions"><button type="button" class="sl-mr-api-primary" id="sl-mr-api-save">SAVE NEW API KEY</button><button type="button" class="sl-mr-api-primary" id="sl-mr-api-check">CHECK API ACCESS</button></div>
+            <button type="button" class="sl-mr-api-danger" id="sl-mr-api-clear">CLEAR LOCAL KEY</button>
+            <div class="sl-mr-api-note">The Hub general key is used first when available. This local key remains the standalone fallback. TornPDA's injected key is never overwritten.</div>
+          </div>
+        </div>`;
+        panel.appendChild(sheet);
+        const input=sheet.querySelector('#sl-mr-api-local'),result=sheet.querySelector('#sl-mr-api-result');
+        const source=()=>{const active=getApiKey();sheet.querySelector('#sl-mr-api-source').textContent='Active source: '+(active?state.apiMode:'No key configured');};
         source();
-        overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
-        overlay.querySelector('#sl-mr-api-close').onclick=()=>overlay.remove();
-        overlay.querySelector('#sl-mr-api-create').onclick=()=>{location.href=REQUIRED_API_KEY_URL;};
+        sheet.querySelector('#sl-mr-api-close').onclick=()=>sheet.remove();
+        sheet.querySelector('#sl-mr-api-create').onclick=()=>{location.href=REQUIRED_API_KEY_URL;};
         const run=async save=>{
             const typed=input.value.trim();
             if(save&&!typed){input.focus();result.textContent='Paste a local API key first.';return;}
             if(save)saveApiKey(typed);
             const effective=getApiKey(),key=typed||effective;
-            const buttons=[overlay.querySelector('#sl-mr-api-save'),overlay.querySelector('#sl-mr-api-check')];
-            buttons.forEach(x=>x.disabled=true);result.textContent='Checking access…';
-            try{
+            const buttons=[sheet.querySelector('#sl-mr-api-save'),sheet.querySelector('#sl-mr-api-check')];
+            buttons.forEach(b=>b.disabled=true);result.textContent='Checking access…';
+            try {
                 const rows=await checkMissionApiAccess(key);
-                result.textContent=(save?'Local key saved. ':'')+rows.map(r=>r.label+': '+r.message).join(' · ');
+                result.textContent=(save?'Local key saved. ':'')+(typed?'Checking local key. ':'Checking active key. ')+rows.map(r=>r.label+': '+r.message).join(' · ');
                 if(save){state.catalogue=new Map();state.ammo=[];localStorage.removeItem(STORAGE.catalogueTime);localStorage.removeItem(STORAGE.ammoTime);}
                 source();
-            }finally{buttons.forEach(x=>x.disabled=false);}
+            }finally{buttons.forEach(b=>b.disabled=false);}
         };
-        overlay.querySelector('#sl-mr-api-save').onclick=()=>run(true);
-        overlay.querySelector('#sl-mr-api-check').onclick=()=>run(false);
-        overlay.querySelector('#sl-mr-api-clear').onclick=()=>{localStorage.removeItem(STORAGE.apiKey);input.value='';result.textContent='Local key cleared. Shared Hub / TornPDA keys are preserved.';source();};
-        return true;
+        sheet.querySelector('#sl-mr-api-save').onclick=()=>run(true);
+        sheet.querySelector('#sl-mr-api-check').onclick=()=>run(false);
+        sheet.querySelector('#sl-mr-api-clear').onclick=()=>{
+            localStorage.removeItem(STORAGE.apiKey);input.value='';result.textContent='Local key cleared. Shared Hub / TornPDA keys are preserved.';source();
+        };
     }
 
     function openSettings() {
@@ -1220,12 +1221,3 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 #sl-mr-api-sheet .sl-mr-api-actions{gap:8px!important}
 `;(document.head||document.documentElement).appendChild(st);
 })();
-
-
-/* SAKALUX_MISSION_EXACT_ENHANCER_API_V1041 */
-(()=>{const s=document.createElement('style');s.id='sakalux-mission-exact-enhancer-api-v1041';s.textContent=`
-#sl-mr-api-overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:flex-start;justify-content:center;font-family:Arial,sans-serif}
-#sl-mr-api-panel{width:min(560px,100%);max-height:90vh;overflow:auto;box-sizing:border-box;padding:14px;background:#101318;color:#fff;border-radius:18px 18px 0 0;box-shadow:0 -8px 35px rgba(0,0,0,.55)}
-.sl-mr-api-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.sl-mr-api-head-actions{display:flex;align-items:center;gap:7px}.sl-mr-api-title{font-size:17px;font-weight:900}.sl-mr-api-sub{margin-top:3px;color:#8e96a3;font-size:10px}.sl-mr-api-required{margin:9px 0;padding:10px;border:1px solid #66591d;border-radius:9px;background:#211d10;color:#e4c95d;font-size:11px;line-height:1.5}.sl-mr-api-required b{color:#fde68a}.sl-mr-api-create{width:100%;min-height:42px;border:1px solid #7c681e;border-radius:9px;background:#2a2512;color:#f5d85f;font-weight:900}.sl-mr-api-box{margin-top:10px;padding:9px;border:1px solid #2f3945;border-radius:10px;background:#121820}.sl-mr-api-status{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:#181d24;font-size:10px;line-height:1.35}.sl-mr-api-status b{color:#d7b94c}.sl-mr-api-status.ok span{color:#78d98b}.sl-mr-api-status.missing span,.sl-mr-api-status.missing-permission span,.sl-mr-api-status.error span{color:#f08b8b}.sl-mr-api-source{margin:8px 0;color:#9ca3af;font-size:10px}.sl-mr-api-field{display:block;margin:8px 0;color:#d1d5db;font-size:10px}.sl-mr-api-field input{display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:10px;background:#0f1217;color:#fff;border:1px solid #303640;border-radius:8px;font-size:12px}.sl-mr-api-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.sl-mr-api-actions button,.sl-mr-api-clear{min-height:38px;border:0;border-radius:8px;background:#374151;color:#fff;font-weight:900;font-size:10px}.sl-mr-api-actions button:first-child{background:#2563eb}.sl-mr-api-clear{width:100%;margin-top:7px}.sl-mr-api-note{margin-top:9px;color:#8e96a3;font-size:9px;line-height:1.5}.sl-mr-close{width:36px;height:36px;border:1px solid #343b45;border-radius:10px;background:#252a32;color:#fff;font-size:18px}
-@media(min-width:700px){#sl-mr-api-overlay{align-items:center}#sl-mr-api-panel{border-radius:18px;max-height:90vh}}
-`;document.head.appendChild(s);})();

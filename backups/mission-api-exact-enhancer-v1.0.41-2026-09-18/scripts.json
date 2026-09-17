@@ -127,15 +127,15 @@
       ],
       "release": {
         "date": "2026-09-18",
-        "version": "1.0.41",
+        "version": "1.0.40",
         "notes": [
-          "Copies the Enhancer Guard API Access structure and CSS exactly, changing only Mission-specific text, IDs and permissions.",
-          "Mission API permissions remain User: Ammo and Torn: Items."
+          "Matches Mission API buttons more closely to the compact Enhancer sizing.",
+          "Removes the extra blank spacing between Exact permissions required and User: Ammo."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.41"
+      "version": "1.0.40"
     },
     {
       "active": true,
