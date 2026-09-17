@@ -1,1 +1,1 @@
-run footer + standalone audit 2026-09-17 retry 2
+footer standalone hotfix trigger 2026-09-17
