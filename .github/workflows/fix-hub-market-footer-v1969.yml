@@ -12,12 +12,11 @@ jobs:
   patch:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Backup current release
+      - name: Backup and patch
         shell: bash
         run: |
           set -euo pipefail
@@ -28,63 +27,38 @@ jobs:
           cp scripts.json "$B/scripts.json"
           [ -f RELEASE-PERFORMANCE-AUDIT-2026-09-17.md ] && cp RELEASE-PERFORMANCE-AUDIT-2026-09-17.md "$B/RELEASE-PERFORMANCE-AUDIT-2026-09-17.md" || true
 
-      - name: Patch Hub footer ownership
-        shell: bash
-        run: |
-          set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import re
 
-          p=Path('SakaLuX-Script-Hub.user.js')
-          s=p.read_text()
-          old=s
-
-          # Version metadata/runtime.
+          p=Path('SakaLuX-Script-Hub.user.js'); s=p.read_text(); old=s
+          if '// @version      1.9.68' not in s: raise SystemExit('Hub header is not v1.9.68')
           s=s.replace('// @version      1.9.68','// @version      1.9.69',1)
           s=s.replace("const VERSION = '1.9.68';","const VERSION = '1.9.69';",1)
 
-          # Market Intelligence owns its complete compact footer. Hub must never create
-          # the older generic author-only fallback inside #sl-mi-panel while Market's
-          # native footer is being appended asynchronously.
           needle="""                seen.add(panel);\n                let footer = panel.querySelector('[id^=\"sakalux-inline-footer-\"], .sakalux-stable-module-footer, .ci-footer');"""
-          repl="""                seen.add(panel);\n\n                // Market Intelligence renders its own SEND MONEY / SEND ITEMS + author footer.\n                // Do not inject the generic author-only fallback during the short render gap,\n                // otherwise both footers remain visible in #sl-mi-panel.\n                if (panel.matches('#sl-mi-panel')) {\n                    const nativeMarketFooter = panel.querySelector('#sakalux-inline-footer-market-intelligence');\n                    if (nativeMarketFooter) nativeMarketFooter.classList.add('sakalux-stable-module-footer');\n                    return;\n                }\n\n                let footer = panel.querySelector('[id^=\"sakalux-inline-footer-\"], .sakalux-stable-module-footer, .ci-footer');"""
-          if needle not in s:
-              raise SystemExit('ensureManagedModuleFooters insertion point not found')
+          repl="""                seen.add(panel);\n\n                // Market Intelligence owns its complete compact footer. Never inject\n                // the older generic author-only fallback into #sl-mi-panel.\n                if (panel.matches('#sl-mi-panel')) {\n                    const nativeMarketFooter = panel.querySelector('#sakalux-inline-footer-market-intelligence');\n                    if (nativeMarketFooter) nativeMarketFooter.classList.add('sakalux-stable-module-footer');\n                    return;\n                }\n\n                let footer = panel.querySelector('[id^=\"sakalux-inline-footer-\"], .sakalux-stable-module-footer, .ci-footer');"""
+          if needle not in s: raise SystemExit('footer ownership insertion point missing')
           s=s.replace(needle,repl,1)
 
-          # Add release history entry near start of release history array, before v1.9.68.
-          anchor="""        {\n            version: '1.9.68',"""
-          entry="""        {\n            version: '1.9.69',\n            date: '2026-09-17',\n            changes: [\n                'Prevents Script Hub from injecting its legacy author-only fallback footer into Market Intelligence settings.',\n                'Market Intelligence now keeps exactly one footer: SEND MONEY, SEND ITEMS, then Made with ❤️ by SakaLuX [2380374].',\n                'Preserves Market settings, calculations, cache controls and Suite launcher behavior unchanged.'\n            ]\n        },\n"""
-          if anchor not in s:
-              raise SystemExit('Hub release history v1.9.68 anchor not found')
-          s=s.replace(anchor,entry+anchor,1)
-
-          if s==old:
-              raise SystemExit('Hub source did not change')
+          anchor='    const HUB_CHANGELOG = ['
+          entry="\n        {version:'1.9.69',date:'2026-09-17',changes:['Prevents Script Hub from injecting its legacy author-only fallback footer into Market Intelligence settings.','Market Intelligence keeps exactly one footer: SEND MONEY, SEND ITEMS, then Made with ❤️ by SakaLuX [2380374].','Preserves Market settings, calculations, cache controls and Suite launcher behavior unchanged.']},"
+          if anchor not in s: raise SystemExit('HUB_CHANGELOG anchor missing')
+          s=s.replace(anchor,anchor+entry,1)
+          if s==old: raise SystemExit('Hub source unchanged')
           p.write_text(s)
 
-          # Greasy Fork / INFO markdown.
-          p=Path('greasyfork/Script-Hub.md')
-          m=p.read_text()
-          if '**v1.9.68**' not in m:
-              raise SystemExit('Script-Hub.md current version anchor missing')
+          p=Path('greasyfork/Script-Hub.md'); m=p.read_text()
+          if '**v1.9.68**' not in m: raise SystemExit('Script-Hub.md current version missing')
           m=m.replace('**v1.9.68**','**v1.9.69**',1)
           marker='## Current release note\n'
-          note='\n**v1.9.69** fixes the duplicate author line in Market Intelligence settings. Script Hub no longer creates its generic author-only fallback inside `#sl-mi-panel`; Market keeps its own compact footer with `SEND MONEY`, `SEND ITEMS`, and one `Made with ❤️ by SakaLuX [2380374]` line. Market logic and the restored Suite launcher are unchanged.\n'
-          if marker not in m:
-              raise SystemExit('Script-Hub.md Current release note marker missing')
+          note='\n**v1.9.69** fixes the duplicate author line in Market Intelligence settings. Script Hub no longer injects its generic author-only fallback into `#sl-mi-panel`; Market keeps its native compact footer with `SEND MONEY`, `SEND ITEMS`, and one `Made with ❤️ by SakaLuX [2380374]` line. Market logic and the restored Suite launcher are unchanged.\n'
+          if marker not in m: raise SystemExit('Current release note marker missing')
           m=m.replace(marker,marker+note,1)
-          hist='## Release history'
-          if hist in m:
-              m=m.replace(hist,hist+'\n\n### v1.9.69 — Market footer deduplication\n- Prevents Hub from injecting the legacy author-only fallback into Market settings.\n- Keeps only the native compact Market footer below SEND MONEY / SEND ITEMS.\n- Leaves Market functionality and Suite launcher behavior unchanged.\n',1)
           p.write_text(m)
 
-          # Release audit, if it tracks Hub.
           p=Path('RELEASE-PERFORMANCE-AUDIT-2026-09-17.md')
           if p.exists():
-              a=p.read_text()
-              a=a.replace('| SakaLuX-Script-Hub.user.js | 1.9.68 |','| SakaLuX-Script-Hub.user.js | 1.9.69 |')
+              a=p.read_text().replace('| SakaLuX-Script-Hub.user.js | 1.9.68 |','| SakaLuX-Script-Hub.user.js | 1.9.69 |')
               p.write_text(a)
           PY
 
@@ -93,20 +67,19 @@ jobs:
         run: |
           set -euo pipefail
           node --check SakaLuX-Script-Hub.user.js
+          node --check SakaLuX-Market-Intelligence.user.js
+          node --check SakaLuX-Suite.user.js
           python3 -m json.tool scripts.json >/dev/null
           grep -q '@version      1.9.69' SakaLuX-Script-Hub.user.js
           grep -q "const VERSION = '1.9.69';" SakaLuX-Script-Hub.user.js
           grep -q "panel.matches('#sl-mi-panel')" SakaLuX-Script-Hub.user.js
           grep -q "#sakalux-inline-footer-market-intelligence" SakaLuX-Script-Hub.user.js
           grep -q '\*\*v1.9.69\*\*' greasyfork/Script-Hub.md
-          # Confirm Market itself still owns exactly one author line in source.
           test "$(python3 - <<'PY'
           from pathlib import Path
           print(Path('SakaLuX-Market-Intelligence.user.js').read_text().count('Made with ❤️'))
           PY
           )" = '1'
-          node --check SakaLuX-Market-Intelligence.user.js
-          node --check SakaLuX-Suite.user.js
 
       - name: Commit release
         shell: bash
