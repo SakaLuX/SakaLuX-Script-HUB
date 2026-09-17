@@ -168,6 +168,3 @@
 
 ## Current release note — v1.8.33
 - Company now opens through the standalone module bridge and its panel is layered above SakaLuX Scripts Standalone.
-
-## Current release note — v1.8.34
-- Aligns the Company header and API controls with Elimination: compact Employee/Director selector, equal refresh/key/close buttons, tighter tabs and balanced API action buttons.
