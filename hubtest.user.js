@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub TEST
 // @namespace    sakalux.script.hub
-// @version      1.9.65-test.1
+// @version      1.9.65-test.2
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.65-test.1';
+    const VERSION = '1.9.65-test.2';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2169,8 +2169,12 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         }
     }
 
+    document.addEventListener('sakalux-hub-test-open-request', () => {
+        try { openHub(); } catch (error) { console.error('[SakaLuX Hub TEST] direct open failed', error); }
+    });
+
     window.SakaLuXScriptHub = {
-        id: 'script-hub', name: 'SakaLuX Script Hub', version: VERSION, ready: true,
+        id: 'script-hub', name: 'SakaLuX Script Hub TEST', version: VERSION, ready: true,
         open: () => { openHub(); return true; }, getApiKey: getSharedApiKey, setApiKey: setSharedApiKey,
         getLanguage: language, getLanguages:()=>Object.fromEntries(Object.entries(LOCALES).map(([code,locale])=>[code,locale.label])), setLanguage: value => { settings.language=LOCALES[value]?value:'en';saveJson(STORAGE.settings,settings);applyLanguage();return settings.language; },
         hasApiKey: () => Boolean(getSharedApiKey()), createRequiredTornKey: createSharedApiKey,
@@ -2314,17 +2318,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
   }
 
   function openRealHub(){
-    const candidates=['sakalux-hub-button','sakalux-hub-top-skull','sakalux-hub-nav-skull'];
-    for(const id of candidates){
-      const el=document.getElementById(id);
-      if(el){ try{el.click(); return;}catch{} }
-    }
-    try {
-      const fn = window.SakaLuXScriptHub?.open || window.SakaLuXHub?.open || window.SakaLuXScriptHub?.openHub;
-      if(typeof fn==='function'){ fn(); return; }
-    } catch{}
-    // Last resort: dispatch a test-only event; production code remains untouched.
-    document.dispatchEvent(new CustomEvent('sakalux-hub-test-open-request'));
+    // TEST v2: direct same-script bridge. No dependency on Torn launchers or page globals.
+    document.dispatchEvent(new CustomEvent('sakalux-hub-test-open-request', {detail:{source:'forced-test-launcher'}}));
   }
 
   function mount(){
