@@ -1,0 +1,324 @@
+{
+  "scripts": [
+    {
+      "id": "enhancer",
+      "type": "addon",
+      "active": true,
+      "name": "Enhancer Guard",
+      "icon": "🛡️",
+      "category": "Inventory",
+      "version": "1.3.43",
+      "description": "Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.",
+      "info": "Enhancer Guard is the inventory-safety module for SakaLuX. It reads your Torn inventory through the configured API key, identifies Enhancer-related items, shows counts and status, and lets you protect important items from accidental sale through local protection rules. It exposes health/version state to Script Hub, supports refresh and hard-refresh actions, and includes dedicated API-key setup and TornPDA-friendly controls. It is informational and protective; it does not automate item sales or gameplay actions.",
+      "release": {
+        "version": "1.3.43",
+        "date": "2026-09-17",
+        "notes": [
+          "Excludes Script Hub and its subtree from shared styling/fullscreen rules; footer routines are restricted to native module roots."
+        ]
+      },
+      "greasyForkId": "592698",
+      "metaUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js",
+      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
+      "apiGlobal": "SakaLuXEnhancerGuard",
+      "buttonSelector": "#sl-eg-button",
+      "quickActions": [
+        {
+          "id": "open",
+          "label": "OPEN",
+          "icon": "🛡️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "hardRefresh",
+          "label": "HARD",
+          "icon": "⚡",
+          "method": "hardRefresh"
+        }
+      ]
+    },
+    {
+      "id": "bazaar",
+      "type": "addon",
+      "active": true,
+      "name": "Bazaar Thanker",
+      "icon": "💬",
+      "category": "Trading",
+      "version": "5.3.35",
+      "description": "Bazaar buyer grouping, thank-you messages, statistics and history management.",
+      "info": "Bazaar Thanker is a Bazaar management and customer-history module. It groups buyers from Bazaar sales, prepares reusable thank-you messages, keeps local buyer history and statistics, highlights larger or repeat buyers, and provides quick access to relevant Bazaar and event information. It is designed for TornPDA and desktop userscript managers, stores working data locally, and can be configured directly from Script Hub. Its core thank-you workflow does not require a Torn API key.",
+      "release": {
+        "version": "5.3.35",
+        "date": "2026-09-17",
+        "notes": [
+          "Excludes Script Hub and its subtree from shared styling/fullscreen rules; footer routines are restricted to native module roots."
+        ]
+      },
+      "greasyForkId": "592388",
+      "metaUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js",
+      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
+      "apiGlobal": "SakaLuXBazaarThanker",
+      "buttonSelector": "#sakalux-bt-settings-button",
+      "quickActions": [
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "events",
+          "label": "EVENTS",
+          "icon": "📋",
+          "method": "goToEvents",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=events"
+        }
+      ]
+    },
+    {
+      "id": "mission-rewards",
+      "type": "addon",
+      "active": true,
+      "name": "Mission Rewards",
+      "icon": "🎯",
+      "category": "Missions",
+      "version": "1.0.30",
+      "description": "Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.",
+      "info": "Mission Rewards enhances Torn's Mission Shop with decision-support information. It calculates estimated market value and value per mission credit, shows reward context, tracks ammunition ownership, and helps identify weapon mods and other rewards you already own. It can use the shared Script Hub API key and refresh from the Hub while keeping normal Mission Shop interactions manual.",
+      "release": {
+        "version": "1.0.30",
+        "date": "2026-09-17",
+        "notes": [
+          "Excludes Script Hub and its subtree from shared styling/fullscreen rules; footer routines are restricted to native module roots."
+        ]
+      },
+      "greasyForkId": "592711",
+      "metaUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js",
+      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
+      "apiGlobal": "SakaLuXMissionRewards",
+      "buttonSelector": "#sl-mri-button",
+      "quickActions": [
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        },
+        {
+          "id": "missions",
+          "label": "MISSIONS",
+          "icon": "🎯",
+          "method": "goToMissions",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=missions"
+        }
+      ]
+    },
+    {
+      "id": "market-intelligence",
+      "type": "addon",
+      "active": true,
+      "name": "Market Intelligence",
+      "icon": "📈",
+      "category": "Trading",
+      "version": "1.17.31",
+      "description": "Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.",
+      "info": "Market Intelligence is the trading and travel analysis module. It provides Item Market price intelligence, comparisons and signals, Bazaar-flip support, loadout comparison, travel-profit tools, route and basket analysis, and API-access diagnostics. Market panels are scoped to relevant Torn pages and travel tools to travel pages. It is TornPDA-first and provides decision support rather than automated buying or selling.",
+      "release": {
+        "version": "1.17.31",
+        "date": "2026-09-17",
+        "notes": [
+          "Excludes Script Hub and its subtree from shared styling/fullscreen rules; footer routines are restricted to native module roots."
+        ]
+      },
+      "greasyForkId": "592781",
+      "metaUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js",
+      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
+      "apiGlobal": "SakaLuXMarketIntelligence",
+      "buttonSelector": "#sl-mi-button",
+      "quickActions": [
+        {
+          "id": "open",
+          "label": "SETTINGS",
+          "icon": "⚙️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "best-run",
+          "label": "BEST RUN",
+          "icon": "✈️",
+          "method": "goToBestRun",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=travel"
+        },
+        {
+          "id": "market",
+          "label": "MARKET",
+          "icon": "📈",
+          "method": "goToMarket",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket"
+        },
+        {
+          "id": "museum",
+          "label": "MUSEUM",
+          "icon": "🏛️",
+          "method": "goToMuseum",
+          "fallbackUrl": "https://www.torn.com/museum.php"
+        }
+      ]
+    },
+    {
+      "id": "elimination-assistant",
+      "type": "addon",
+      "active": true,
+      "name": "Elimination Assistant",
+      "icon": "⚔️",
+      "category": "Combat",
+      "version": "1.3.38",
+      "description": "Eliminations advisor with unified Torn + FFScouter API setup, rotating 500-player batches, availability status, TornPDA export and PC-safe attack routing.",
+      "info": "Elimination Assistant is a combat-target advisor for Torn Eliminations. It combines Torn data with optional FFScouter information, loads large teams in rotating batches of up to 500 players, tracks availability, supports SAFE/RISKY filtering, calibration, FF scans, TornPDA export and PC-safe attack routing. It can test or create the required Torn API key, remembers relevant settings locally, and helps open targets without automatically attacking them.",
+      "release": {
+        "version": "1.3.38",
+        "date": "2026-09-17",
+        "notes": [
+          "Excludes Script Hub and its subtree from shared styling/fullscreen rules; footer routines are restricted to native module roots."
+        ]
+      },
+      "greasyForkId": "594921",
+      "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js",
+      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
+      "apiGlobal": "SakaLuXEliminationAssistant",
+      "buttonSelector": "#slx-elim-btn",
+      "quickActions": [
+        {
+          "id": "toggle",
+          "label": "POWER",
+          "icon": "⏻",
+          "method": "toggleEnabled"
+        },
+        {
+          "id": "open",
+          "label": "OPEN",
+          "icon": "⚔️",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        },
+        {
+          "id": "ffscan",
+          "label": "FF SCAN",
+          "icon": "📊",
+          "method": "scanFF"
+        },
+        {
+          "id": "export-targets",
+          "label": "EXPORT TARGETS",
+          "icon": "📤",
+          "method": "exportTargets"
+        },
+        {
+          "id": "calibrate",
+          "label": "CALIBRATE",
+          "icon": "🎯",
+          "method": "calibrate"
+        },
+        {
+          "id": "test-key",
+          "label": "TEST KEY",
+          "icon": "🧪",
+          "method": "testTornKey"
+        },
+        {
+          "id": "create-key",
+          "label": "API KEY",
+          "icon": "🔑",
+          "method": "createRequiredTornKey"
+        },
+        {
+          "id": "event",
+          "label": "ELIMS",
+          "icon": "🏆",
+          "method": "goToEliminations",
+          "fallbackUrl": "https://www.torn.com/page.php?sid=elimination"
+        }
+      ]
+    },
+    {
+      "id": "company-intelligence",
+      "type": "addon",
+      "active": true,
+      "name": "Company Intelligence",
+      "icon": "🏢",
+      "category": "Company",
+      "version": "1.8.25",
+      "description": "Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.",
+      "info": "Company Intelligence provides separate Employee and Director views for company analysis. Employee tools cover work stats, position suitability, personal progress, trains, offers and advice. Director tools cover star and growth direction, staff effectiveness and inactivity flags, position optimization, training commitments, train contracts, payroll and balance views, stock intelligence, benchmarks, timeline/history and advisory insights. It uses Torn company/user API data where permitted, supports the shared Script Hub API key, stores planning data locally, and never performs automated company actions.",
+      "release": {
+        "version": "1.8.25",
+        "date": "2026-09-17",
+        "notes": [
+          "Excludes Script Hub and its subtree from shared styling/fullscreen rules; footer routines are restricted to native module roots."
+        ]
+      },
+      "greasyForkId": "595873",
+      "metaUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js",
+      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
+      "apiGlobal": "SakaLuXCompanyIntelligence",
+      "buttonSelector": "",
+      "quickActions": [
+        {
+          "id": "toggle",
+          "label": "POWER",
+          "icon": "⏻",
+          "method": "toggleEnabled"
+        },
+        {
+          "id": "open",
+          "label": "OPEN",
+          "icon": "🏢",
+          "method": "open"
+        },
+        {
+          "id": "refresh",
+          "label": "REFRESH",
+          "icon": "🔄",
+          "method": "refresh"
+        }
+      ]
+    }
+  ]
+}
