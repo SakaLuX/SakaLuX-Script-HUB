@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.56
+// @version      1.9.57
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.56';
+    const VERSION = '1.9.57';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,10 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {version:'1.9.57',date:'2026-09-17',changes:[
+            'Fixes Hub Settings switch dimensions and centers the thumb in both ON and OFF states.',
+            'Keeps switch thumbs inside their tracks despite older shared/mobile styles.'
+        ]},
         {version:'1.9.56',date:'2026-09-17',changes:[
             'UI refinement: full-height mobile Hub, compact author footer and rounded donation/footer outer corners.',
             'Keeps SEND MONEY and SEND ITEMS visible while Managed Modules scroll independently.',
@@ -2159,3 +2163,25 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
   (document.head||document.documentElement).appendChild(s);
 })();
 
+
+/* Hub v1.9.57: scoped Settings switch geometry overrides legacy styles. */
+(()=>{
+ const s=document.createElement('style');s.id='sakalux-hub-settings-switch-1957';
+ s.textContent=`
+#sakalux-hub-panel#sakalux-hub-panel .slh-settings .slh-setting-toggle{
+ position:relative!important;display:block!important;box-sizing:border-box!important;
+ flex:0 0 38px!important;width:38px!important;min-width:38px!important;max-width:38px!important;
+ height:22px!important;min-height:22px!important;max-height:22px!important;
+ margin:0!important;padding:0!important;border-width:1px!important;border-radius:999px!important;overflow:hidden!important;
+}
+#sakalux-hub-panel#sakalux-hub-panel .slh-settings .slh-setting-toggle i{
+ position:absolute!important;display:block!important;box-sizing:border-box!important;
+ left:2px!important;right:auto!important;top:50%!important;bottom:auto!important;
+ width:16px!important;min-width:16px!important;max-width:16px!important;
+ height:16px!important;min-height:16px!important;max-height:16px!important;
+ margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;
+ transform:translate(0,-50%)!important;
+}
+#sakalux-hub-panel#sakalux-hub-panel .slh-settings .slh-setting-toggle.on i{transform:translate(16px,-50%)!important}
+`;(document.head||document.documentElement).appendChild(s);
+})();

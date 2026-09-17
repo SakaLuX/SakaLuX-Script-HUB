@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.56**
+**v1.9.57**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.56** refines the UI and applies performance tweaks. The mobile Hub fills the available height, keeps SEND MONEY / SEND ITEMS visible, uses a compact author footer and rounds the marked outer corners to 10px. Lightweight rendering and reduced global DOM scanning keep navigation and scrolling responsive.
+**v1.9.57** fixes the Hub Settings ON/OFF switches: consistent dimensions, vertically centered thumbs and correct end positions inside each track. The validated panel layout is preserved.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,6 +54,12 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+
+### v1.9.57 — Settings switch fix
+- Fixes switch dimensions and centers the thumb in ON and OFF states.
+- Keeps thumbs inside the track despite older shared/mobile styles.
+- Preserves the validated Hub panel layout.
+
 
 ### v1.9.56 — UI refinement and performance tweaks
 - Refines mobile panel height, donation controls and compact author-footer placement.
