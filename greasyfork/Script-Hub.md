@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.47**
+**v1.9.48**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.47** Right-side 2x2 module controls, compact Settings toggles, top-aligned SakaLuX sheets and corrected Company footer/scroll behavior.
+**v1.9.48** makes Hub a true top-to-bottom mobile sheet, adds translucent blur, enforces the module 2x2 controls at runtime, and introduces the shared mobile surface contract.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,6 +54,10 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.48 — Mobile full-height + blur contract
+- Opens the active mobile sheet from top to bottom of the available viewport.
+- Adds the shared translucent SakaLuX blur treatment.
+
 ### v1.9.47 — Global mobile top alignment
 
 - Applies top alignment directly in Hub, managed modules and Chat Intelligence.

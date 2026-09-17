@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.11
+// @version      1.2.10
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -67,7 +67,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
   })();
 
-const V='1.2.11',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+const V='1.2.10',ID='chat-intelligence',API='SakaLuXChatIntelligence';
 const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
 const D={enabled:true,search:true,quickActions:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
 const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
@@ -115,48 +115,4 @@ function css(){const s=document.createElement('style');s.textContent=`
 addEventListener('scroll',()=>{hideMenu();document.querySelectorAll('.slx-search').forEach(p=>p._place?.())},true);addEventListener('resize',()=>document.querySelectorAll('.slx-search').forEach(p=>p._place?.()));
 function init(){css();bridge();window[API]={id:ID,version:V,open:settings,refresh:scan,setEnabled:enable,toggleEnabled:()=>enable(!S.enabled),isEnabled:()=>S.enabled,health:()=>({version:V,roots:roots().length,favorites:F.size,muted:M.size})};if(S.enabled){start();scan();setTimeout(scan,700)}dispatchEvent(new CustomEvent('SakaLuX:ModuleReady',{detail:{id:ID,version:V,apiGlobal:API}}))}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:true}):init();
-})();
-
-
-/* SakaLuX Mobile Surface Contract v2 — full-height + blur */
-(()=>{
-  'use strict';
-  if(window.__SakaLuXMobileSurfaceV2)return;
-  window.__SakaLuXMobileSurfaceV2=1;
-  const MOBILE=()=>matchMedia('(max-width: 820px)').matches;
-  const TITLES=['Script Hub','Enhancer Guard','Bazaar Thanker','Mission Rewards','Market Intelligence','Elimination Assistant','Company Intelligence','Account Auditor','SakaLuX Suite','Chat Intelligence'];
-  const style=document.createElement('style');
-  style.id='sakalux-mobile-surface-v2';
-  style.textContent=`@media(max-width:820px){
-    [data-slx-fullsheet-v2="1"]{position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}
-    [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important}
-    [data-slx-fullsheet-v2="1"] input,[data-slx-fullsheet-v2="1"] textarea,[data-slx-fullsheet-v2="1"] select{scroll-margin-bottom:38vh}
-  }`;
-  (document.head||document.documentElement).appendChild(style);
-  const visible=e=>{if(!e||!e.isConnected)return false;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&r.width>240&&r.height>180};
-  const findSheet=title=>{
-    const candidates=[];
-    for(const e of document.querySelectorAll('div,section,main,aside')){
-      if(!visible(e))continue;
-      const txt=e.innerText||''; if(!txt.includes(title))continue;
-      if(title!=='Script Hub'&&e.closest('#sakalux-hub-panel'))continue;
-      const s=getComputedStyle(e); if(!['fixed','absolute'].includes(s.position))continue;
-      const r=e.getBoundingClientRect(); candidates.push([r.width*r.height,e]);
-    }
-    candidates.sort((a,b)=>a[0]-b[0]); return candidates[0]?.[1]||null;
-  };
-  const apply=()=>{
-    if(!MOBILE())return;
-    for(const t of TITLES){
-      const p=findSheet(t); if(!p)continue;
-      p.dataset.slxFullsheetV2='1';
-      let a=p.parentElement;
-      for(let i=0;a&&i<3;i++,a=a.parentElement){
-        const s=getComputedStyle(a),r=a.getBoundingClientRect();
-        if(['fixed','absolute'].includes(s.position)&&r.width>=innerWidth*.9&&r.height>=innerHeight*.7){a.dataset.slxBackdropV2='1';break}
-      }
-    }
-  };
-  new MutationObserver(()=>requestAnimationFrame(apply)).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
-  addEventListener('resize',apply,{passive:true});setTimeout(apply,0);setTimeout(apply,350);setTimeout(apply,1200);
 })();

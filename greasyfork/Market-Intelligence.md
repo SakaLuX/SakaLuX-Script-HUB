@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.24**
+**v1.17.25**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,7 +20,7 @@
 
 ## Current release note
 
-**v1.17.24** PDA/mobile top-aligned sheet and compact Hub integration refinement.
+**v1.17.25** adds the shared top-to-bottom mobile sheet and translucent blur contract.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -44,6 +44,10 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history
+### v1.17.25 — Mobile full-height + blur contract
+- Opens the active mobile sheet from top to bottom of the available viewport.
+- Adds the shared translucent SakaLuX blur treatment.
+
 ### v1.17.24 — Mobile top alignment
 - Opens the script panel from the top of the TornPDA viewport.
 - Uses the shared SakaLuX top-alignment contract.

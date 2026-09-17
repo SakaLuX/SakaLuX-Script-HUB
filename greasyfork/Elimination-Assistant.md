@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.34**
+**v1.3.35**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -21,7 +21,7 @@
 
 ## Current release note
 
-**v1.3.34** PDA/mobile top-aligned sheet and compact Hub integration refinement.
+**v1.3.35** adds the shared top-to-bottom mobile sheet and translucent blur contract.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -39,6 +39,10 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 **All Rights Reserved**
 
 ## Release history
+### v1.3.35 — Mobile full-height + blur contract
+- Opens the active mobile sheet from top to bottom of the available viewport.
+- Adds the shared translucent SakaLuX blur treatment.
+
 ### v1.3.34 — Mobile top alignment
 - Opens the script panel from the top of the TornPDA viewport.
 - Uses the shared SakaLuX top-alignment contract.
