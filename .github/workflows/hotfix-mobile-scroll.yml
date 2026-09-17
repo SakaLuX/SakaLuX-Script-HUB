@@ -1,3 +1,4 @@
+# trigger: 2026-09-17 mobile scroll hotfix
 name: Hotfix mobile sheet scroll
 
 on:
@@ -43,12 +44,12 @@ jobs:
           fullsheet_new = '[data-slx-fullsheet-v2=\\"1\\"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}'
 
           def bump_runtime(text, old, new):
-              text = re.sub(r'(^// @version\\s+)' + re.escape(old) + r'(\\s*$)', rf'\\g<1>{new}\\2', text, count=1, flags=re.M)
+              text = re.sub(r'(^// @version\s+)' + re.escape(old) + r'(\s*$)', rf'\g<1>{new}\2', text, count=1, flags=re.M)
               pats = [
-                  (r"(const\\s+VERSION\\s*=\\s*['\\\"])"+re.escape(old)+r"(['\\\"])", rf"\\g<1>{new}\\2"),
-                  (r"(const\\s+V\\s*=\\s*['\\\"])"+re.escape(old)+r"(['\\\"])", rf"\\g<1>{new}\\2"),
-                  (r"(VERSION\\s*:\\s*['\\\"])"+re.escape(old)+r"(['\\\"])", rf"\\g<1>{new}\\2"),
-                  (r"(version\\s*:\\s*['\\\"])"+re.escape(old)+r"(['\\\"])", rf"\\g<1>{new}\\2"),
+                  (r"(const\s+VERSION\s*=\s*['\"])"+re.escape(old)+r"(['\"])", rf"\g<1>{new}\2"),
+                  (r"(const\s+V\s*=\s*['\"])"+re.escape(old)+r"(['\"])", rf"\g<1>{new}\2"),
+                  (r"(VERSION\s*:\s*['\"])"+re.escape(old)+r"(['\"])", rf"\g<1>{new}\2"),
+                  (r"(version\s*:\s*['\"])"+re.escape(old)+r"(['\"])", rf"\g<1>{new}\2"),
               ]
               for pat, rep in pats:
                   text = re.sub(pat, rep, text, count=1)
@@ -66,7 +67,7 @@ jobs:
               if fn=='SakaLuX-Script-Hub.user.js':
                   text=text.replace(
                       "{ version: '1.9.48', date: '2026-09-17', changes: ['Makes Hub a true top-to-bottom mobile sheet with translucent blur.'",
-                      "{ version: '1.9.49', date: '2026-09-17', changes: ['Fixes TornPDA scrolling by sizing Hub to its actual host viewport instead of forcing physical 100dvh.','Makes the whole Hub sheet a reliable pan-y scroll surface and keeps footer/actions reachable above TornPDA navigation.','Changes the shared mobile surface contract from physical fullscreen to container-full-height while preserving blur.'] },\\n        { version: '1.9.48', date: '2026-09-17', changes: ['Makes Hub a true top-to-bottom mobile sheet with translucent blur.'",
+                      "{ version: '1.9.49', date: '2026-09-17', changes: ['Fixes TornPDA scrolling by sizing Hub to its actual host viewport instead of forcing physical 100dvh.','Makes the whole Hub sheet a reliable pan-y scroll surface and keeps footer/actions reachable above TornPDA navigation.','Changes the shared mobile surface contract from physical fullscreen to container-full-height while preserving blur.'] },\n        { version: '1.9.48', date: '2026-09-17', changes: ['Makes Hub a true top-to-bottom mobile sheet with translucent blur.'",
                       1)
                   oldhub="#sakalux-hub-panel{inset:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important;margin:0!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important}"
                   newhub="#sakalux-hub-panel{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;border-radius:0!important;margin:0!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}#sakalux-hub-panel>.slh-list,#sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{overflow:visible!important;flex:0 0 auto!important;min-height:auto!important}#sakalux-hub-panel>.slh-bottom,#sakalux-hub-panel>.slh-footer{flex:0 0 auto!important}"
@@ -90,7 +91,6 @@ jobs:
 
               p.write_text(text,encoding='utf-8')
 
-          # Registry versions + release notes
           rp=root/'scripts.json'
           shutil.copy2(rp, backup/'scripts.json')
           data=json.loads(rp.read_text(encoding='utf-8'))
@@ -109,7 +109,6 @@ jobs:
                   item['release']={'version':v,'date':'2026-09-17','notes':notes}
           rp.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
 
-          # Documentation current-version synchronization.
           docs={
               'greasyfork/Script-Hub.md':('1.9.49','Fixes TornPDA scrolling by sizing the Hub to the available host viewport, makes the whole Hub panel a reliable vertical scroll surface, and keeps the blur treatment without forcing physical 100dvh.'),
               'greasyfork/Enhancer-Guard.md':('1.3.38','Replaces physical 100dvh forcing with container-height mobile sizing so TornPDA scrolling remains native while blur is preserved.'),
