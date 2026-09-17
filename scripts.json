@@ -126,15 +126,15 @@
         }
       ],
       "release": {
-        "version": "1.0.33",
+        "version": "1.0.34",
         "date": "2026-09-17",
         "notes": [
-          "Pins the 50px donation/author footer across the full panel width while settings scroll independently. Adds dedicated API Access with required Items/Ammo permissions, local-key save/test/clear and active Hub/TornPDA key source."
+          "Removes the duplicate lower API ACCESS button. Dedicated API Access remains available through the header key button."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.33"
+      "version": "1.0.34"
     },
     {
       "active": true,
