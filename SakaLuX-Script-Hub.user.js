@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.59
+// @version      1.9.60
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.59';
+    const VERSION = '1.9.60';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {version:'1.9.60',date:'2026-09-17',changes:['Shrinks INSTALLED / HEALTHY / UPDATES / ISSUES status cards to 38px.','Sets CHECK / UPDATE / HEALTH / NEW / SETTINGS buttons to 32px, matching module INFO / NEW controls.']},
         {version:'1.9.59',date:'2026-09-17',changes:['Uses Elimination mobile panel geometry: rounded 14px corners, 4px side gaps and 36px bottom clearance for chat.','Shrinks SEND MONEY / SEND ITEMS buttons to 20px.']},
         {version:'1.9.58',date:'2026-09-17',changes:['Reduces SEND MONEY / SEND ITEMS buttons to 40px and donation section to 48px.','Shares the same compact donation and author footer with SakaLuX module panels.']},
         {version:'1.9.57',date:'2026-09-17',changes:[
@@ -2199,3 +2200,22 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 (()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;padding:0!important;background:transparent!important;overflow:hidden!important;border-radius:14px!important;align-items:stretch!important;justify-content:stretch!important;}\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay #sakalux-hub-panel#sakalux-hub-panel{position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;align-self:stretch!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;max-width:100%!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border:1px solid #3c4652!important;border-radius:14px!important;}\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay #sakalux-hub-panel#sakalux-hub-panel{display:flex!important;flex-direction:column!important;overflow:hidden!important;}\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay #sakalux-hub-panel#sakalux-hub-panel>.slh-list{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;}\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay #sakalux-hub-panel#sakalux-hub-panel>.slh-settings{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;}\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay #sakalux-hub-panel#sakalux-hub-panel>.slh-view{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;}\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom{flex:0 0 28px!important;height:28px!important;min-height:28px!important}\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom .slh-bottom-grid{height:20px!important}\n#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom .slh-bottom-btn{height:20px!important;min-height:20px!important;padding:0 4px!important;font-size:8px!important;line-height:1.2!important}\n\n}";(document.head||document.documentElement).appendChild(s)})();
 
 (()=>{const s=document.createElement('style');s.textContent='#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom{flex:0 0 28px!important;height:28px!important;min-height:28px!important}#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom .slh-bottom-grid{height:20px!important}#sakalux-hub-overlay#sakalux-hub-overlay#sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom .slh-bottom-btn{height:20px!important;min-height:20px!important;padding:0 4px!important;font-size:8px!important;line-height:1.2!important}';(document.head||document.documentElement).appendChild(s)})();
+
+/* Hub v1.9.60 compact summary and toolbar. */
+(()=>{const s=document.createElement('style');s.textContent=`
+#sakalux-hub-panel#sakalux-hub-panel .slh-stats{gap:5px!important}
+#sakalux-hub-panel#sakalux-hub-panel .slh-stat{
+ box-sizing:border-box!important;height:38px!important;min-height:38px!important;max-height:38px!important;
+ padding:4px 6px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;
+}
+#sakalux-hub-panel#sakalux-hub-panel .slh-stat strong{font-size:13px!important;line-height:14px!important}
+#sakalux-hub-panel#sakalux-hub-panel .slh-stat span{margin-top:2px!important;font-size:6.5px!important;line-height:9px!important}
+#sakalux-hub-panel#sakalux-hub-panel .slh-stat small{display:none!important}
+#sakalux-hub-panel#sakalux-hub-panel .slh-tools{gap:5px!important}
+#sakalux-hub-panel#sakalux-hub-panel .slh-tool{
+ box-sizing:border-box!important;height:32px!important;min-height:32px!important;max-height:32px!important;
+ padding:3px 4px!important;margin:0!important;font-size:8px!important;line-height:1!important;gap:3px!important;border-radius:9px!important;
+}
+#sakalux-hub-panel#sakalux-hub-panel .slh-tool span{font-size:11px!important;line-height:1!important}
+@media(max-width:520px){#sakalux-hub-panel#sakalux-hub-panel .slh-tool{font-size:7px!important}}
+`;(document.head||document.documentElement).appendChild(s)})();
