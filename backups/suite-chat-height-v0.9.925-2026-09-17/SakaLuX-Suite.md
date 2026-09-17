@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.925**
+**v0.9.924**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -35,8 +35,6 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.925** extends Master Control to 36px above the viewport bottom on mobile and TornPDA desktop-width touch layouts. Explicit viewport heights keep the module list scrollable and the footer at the bottom. The launcher and close behavior remain controlled by the existing open class.
-
 **v0.9.924** emergency hotfix restores the last working Master Control runtime after v0.9.923 prevented the Suite launcher from opening in TornPDA. The v0.9.923 coarse-pointer full-height override has been removed completely; launcher behavior is restored first, while the mobile-height adjustment will be reworked separately without touching the open path.
 
 **v0.9.922** Fixes Master Control scrolling by bounding the flex content area on desktop and TornPDA; keeps header/toolbar and footer outside the scrolling module list. Renders the 20px SEND MONEY / SEND ITEMS controls and orange Made with ❤️ author line directly inside every panel render, with rounded lower corners. Preserves module switches and scroll position, and removes the separate document-wide footer repair observer.
@@ -59,16 +57,6 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v0.9.925 — Master Control height near chat
-
-- Uses explicit viewport heights for the outer shell and Suite window, with 36px bottom clearance matching Elimination.
-- Supports TornPDA touch layouts up to 1100 CSS pixels wide as well as standard mobile layouts.
-- Keeps the module list scrollable while the header, actions and 50px donation footer stay outside the list.
-- Removes the mobile override that forced the closed panel to remain displayed; visibility follows the existing open class.
-- Preserves a complete v0.9.924 script and description backup before the update.
-- JavaScript syntax validated locally. Actual TornPDA device confirmation remains pending.
-
 
 
 ### v0.9.922 — Master Control scroll and native footer
