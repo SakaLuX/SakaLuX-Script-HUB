@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.63**
+**v1.9.64**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.63** Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW details. Stocks uses its main GitHub source for installation and update checks.
+**v1.9.64** Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW details. Stocks uses its main GitHub source for installation and update checks.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.

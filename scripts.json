@@ -340,6 +340,12 @@
       "name": "Stock Manager & Advisor",
       "quickActions": [
         {
+          "icon": "⏻",
+          "id": "toggle",
+          "label": "POWER",
+          "method": "toggleEnabled"
+        },
+        {
           "icon": "📊",
           "id": "open",
           "label": "OPEN",
