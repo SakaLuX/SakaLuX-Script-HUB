@@ -1,0 +1,31 @@
+name: Fullscreen Performance 1.9.54
+
+on:
+  push:
+    paths:
+      - '.github/scripts/fullscreen_perf_1954.py'
+      - '.github/workflows/fullscreen-perf-1954.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply full-screen performance patch
+        run: python .github/scripts/fullscreen_perf_1954.py
+      - name: Validate userscripts and registry
+        run: |
+          for f in SakaLuX-*.user.js; do node --check "$f"; done
+          python -m json.tool scripts.json >/dev/null
+      - name: Commit full-screen performance release
+        run: |
+          git config user.name "SakaLuX Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-*.user.js scripts.json greasyfork backups/fullscreen-performance-2026-09-17
+          git commit -m "perf: make SakaLuX panels full-screen and remove blur"
+          git push
