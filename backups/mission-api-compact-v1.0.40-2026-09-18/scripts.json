@@ -127,15 +127,16 @@
       ],
       "release": {
         "date": "2026-09-18",
-        "version": "1.0.40",
+        "version": "1.0.39",
         "notes": [
-          "Matches Mission API buttons more closely to the compact Enhancer sizing.",
-          "Removes the extra blank spacing between Exact permissions required and User: Ammo."
+          "Removes the duplicate inline API Missing/key input from Mission settings.",
+          "Rebuilds dedicated Mission API Access to match Enhancer API Access layout and button geometry.",
+          "Keeps Mission Items/Ammo read-only permissions and existing save/check/clear behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.40"
+      "version": "1.0.39"
     },
     {
       "active": true,

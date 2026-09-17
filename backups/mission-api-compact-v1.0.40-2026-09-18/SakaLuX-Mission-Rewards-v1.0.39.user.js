@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.40
+// @version      1.0.39
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,7 +73,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.40'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.39'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -243,7 +243,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.0.40';
+    const VERSION = '1.0.39';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -745,7 +745,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
           <button type="button" class="sl-mr-api-close" id="sl-mr-api-close">×</button>
         </div>
         <div class="sl-mr-api-body">
-          <div class="sl-mr-api-required"><b>Exact permissions required</b>User: Ammo<br>Torn: Items<br>No write permission is requested.</div>
+          <div class="sl-mr-api-required"><b>Exact permissions required</b><br>User: Ammo<br>Torn: Items<br>No write permission is requested.</div>
           <button type="button" class="sl-mr-api-primary sl-mr-api-create" id="sl-mr-api-create">🔑 CREATE MISSION API KEY</button>
           <div class="sl-mr-api-card">
             <div class="sl-mr-api-status"><b>API ACCESS</b><span id="sl-mr-api-result" role="status" aria-live="polite">Not checked yet</span></div>
@@ -1187,10 +1187,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 #sl-mr-api-sheet .sl-mr-api-sub{margin-top:4px!important;font-size:10px!important;font-weight:500!important;color:#8f9cad!important}
 #sl-mr-api-sheet .sl-mr-api-close{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;max-width:40px!important;max-height:40px!important;padding:0!important;border-radius:12px!important;border:1px solid #34465b!important;background:#172331!important;color:#e6edf5!important;font-size:22px!important;font-weight:700!important;display:grid!important;place-items:center!important}
 #sl-mr-api-sheet .sl-mr-api-body{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;padding:12px 16px 24px!important;display:flex!important;flex-direction:column!important;gap:12px!important;box-sizing:border-box!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
-#sl-mr-api-sheet .sl-mr-api-required{padding:10px 14px!important;border:1px solid #7d6920!important;border-radius:10px!important;background:#211c08!important;color:#d8bc55!important;font-size:11px!important;line-height:1.5!important}
-#sl-mr-api-sheet .sl-mr-api-required b{display:block!important;margin-bottom:0!important;color:#f2dc72!important}
+#sl-mr-api-sheet .sl-mr-api-required{padding:12px 14px!important;border:1px solid #7d6920!important;border-radius:10px!important;background:#211c08!important;color:#d8bc55!important;font-size:11px!important;line-height:1.5!important}
+#sl-mr-api-sheet .sl-mr-api-required b{display:block!important;margin-bottom:2px!important;color:#f2dc72!important}
 #sl-mr-api-sheet button{font-family:Inter,Arial,sans-serif!important;font-weight:900!important}
-#sl-mr-api-sheet .sl-mr-api-primary,#sl-mr-api-sheet .sl-mr-api-danger{width:100%!important;min-height:38px!important;height:38px!important;margin:0!important;padding:0 10px!important;border-radius:10px!important;font-size:10px!important;line-height:1.1!important;box-sizing:border-box!important}
+#sl-mr-api-sheet .sl-mr-api-primary,#sl-mr-api-sheet .sl-mr-api-danger{width:100%!important;min-height:44px!important;height:44px!important;margin:0!important;padding:0 10px!important;border-radius:10px!important;font-size:11px!important;line-height:1.1!important;box-sizing:border-box!important}
 #sl-mr-api-sheet .sl-mr-api-create{background:linear-gradient(180deg,#3a84d8,#2866ad)!important;border:1px solid #4b8ed9!important;color:#fff!important}
 #sl-mr-api-sheet .sl-mr-api-card{padding:10px!important;border:1px solid #2e4055!important;border-radius:11px!important;background:#121b25!important;display:flex!important;flex-direction:column!important;gap:8px!important;box-sizing:border-box!important}
 #sl-mr-api-sheet .sl-mr-api-status{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;padding:8px!important;border-radius:8px!important;background:#151e29!important;font-size:10px!important;color:#e8eef5!important}
@@ -1198,7 +1198,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 #sl-mr-api-sheet .sl-mr-api-status span{font-weight:500!important;color:#e8eef5!important;text-align:right!important}
 #sl-mr-api-sheet .sl-mr-api-source{font-size:10px!important;color:#aab6c5!important;line-height:1.35!important}
 #sl-mr-api-sheet label{display:block!important;margin:0!important;font-size:10px!important;color:#c5cfdb!important}
-#sl-mr-api-sheet input#sl-mr-api-local{width:100%!important;height:40px!important;min-height:40px!important;margin:0!important;padding:8px 10px!important;box-sizing:border-box!important;border:1px solid #3a4d63!important;border-radius:9px!important;background:#0d1622!important;color:#f4f7fb!important;font-size:11px!important}
+#sl-mr-api-sheet input#sl-mr-api-local{width:100%!important;height:44px!important;min-height:44px!important;margin:0!important;padding:8px 10px!important;box-sizing:border-box!important;border:1px solid #3a4d63!important;border-radius:9px!important;background:#0d1622!important;color:#f4f7fb!important;font-size:11px!important}
 #sl-mr-api-sheet .sl-mr-api-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;margin:0!important}
 #sl-mr-api-sheet .sl-mr-api-actions .sl-mr-api-primary{min-width:0!important;background:linear-gradient(180deg,#3a84d8,#2866ad)!important;border:1px solid #4b8ed9!important;color:#fff!important}
 #sl-mr-api-sheet .sl-mr-api-danger{background:linear-gradient(180deg,#8b394d,#6b293a)!important;border:1px solid #9f4a60!important;color:#ffe4ea!important}
@@ -1208,16 +1208,5 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  #sl-mr-api-sheet .sl-mr-api-title{font-size:16px!important}
  #sl-mr-api-sheet .sl-mr-api-body{padding:10px 14px 18px!important;gap:10px!important}
 }
-`;(document.head||document.documentElement).appendChild(st);
-})();
-
-
-/* SAKALUX_MISSION_API_COMPACT_V1040 */
-(()=>{
- const st=document.createElement('style');st.id='sakalux-mission-api-compact-v1040';st.textContent=`
-#sl-mr-api-sheet .sl-mr-api-required b{margin-bottom:0!important}
-#sl-mr-api-sheet .sl-mr-api-primary,#sl-mr-api-sheet .sl-mr-api-danger{height:38px!important;min-height:38px!important;font-size:10px!important}
-#sl-mr-api-sheet input#sl-mr-api-local{height:40px!important;min-height:40px!important}
-#sl-mr-api-sheet .sl-mr-api-actions{gap:8px!important}
 `;(document.head||document.documentElement).appendChild(st);
 })();
