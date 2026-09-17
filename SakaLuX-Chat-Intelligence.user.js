@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.14
+// @version      1.2.15
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -67,7 +67,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-const V='1.2.14',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+const V='1.2.15',ID='chat-intelligence',API='SakaLuXChatIntelligence';
 const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
 const D={enabled:true,search:true,quickActions:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
 const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
@@ -158,3 +158,29 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
   (document.head||document.documentElement).appendChild(s);
 })();
 
+
+/* SakaLuX Hub footer v3: native module root only; compact donation controls. */
+(()=>{
+ const selector="#sakalux-chat-settings-overlay > section",id="sakalux-inline-footer-chat-intelligence",profile='https://www.torn.com/profiles.php?XID=2380374';
+ const st=document.createElement('style');st.textContent=`
+ #${id}#${id}{position:sticky!important;bottom:0!important;inset-inline:auto!important;display:block!important;flex:0 0 70px!important;width:100%!important;height:70px!important;min-height:70px!important;max-height:70px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;z-index:5!important;font-family:Arial,sans-serif!important;overflow:hidden!important;border-radius:10px!important}
+ #${id}#${id} *{box-sizing:border-box!important}
+ #${id}#${id} .slh-bottom{height:48px!important;margin:0!important;padding:4px 14px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;border-radius:10px 10px 0 0!important;overflow:hidden!important}
+ #${id}#${id} .slh-bottom-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;height:40px!important}
+ #${id}#${id} .slh-bottom-btn{display:block!important;width:100%!important;min-width:0!important;height:40px!important;min-height:40px!important;max-height:40px!important;margin:0!important;padding:6px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#151f2a!important;color:#b9c7d6!important;font:900 8px/1.2 Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important;cursor:pointer!important}
+ #${id}#${id} .slh-footer{height:22px!important;min-height:22px!important;max-height:22px!important;margin:0!important;padding:0 6px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;border-top:1px solid rgba(223,154,55,.52)!important;border-radius:0 0 10px 10px!important;background:#080d13!important;color:#df9a37!important;font:400 9px/20px Arial,sans-serif!important;white-space:nowrap!important;overflow:hidden!important}
+ #${id}#${id} .slh-author{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}
+ `;(document.head||document.documentElement).appendChild(st);
+ function ensure(){
+  const panel=document.querySelector(selector);if(!panel||panel.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return;
+  if(panel.querySelector('#'+id))return;
+  const f=document.createElement('div');f.id=id;
+  f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+profile+'">SakaLuX [2380374]</a></div>';
+  f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>{location.href=profile});panel.appendChild(f);
+ }
+ function start(){ensure();let scheduled=false;new MutationObserver(records=>{
+  if(scheduled||!records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&!n.closest?.('[id^="sakalux-inline-footer-"]'))))return;
+  scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
+ }).observe(document.body,{childList:true,subtree:true});}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();

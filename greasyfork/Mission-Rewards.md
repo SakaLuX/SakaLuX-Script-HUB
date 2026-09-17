@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.29**
+**v1.0.31**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,7 +17,8 @@
 
 ## Current release note
 
-**v1.0.29** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
+
+**v1.0.31** Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -34,6 +35,10 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history
+
+### v1.0.31 — Compact Hub footer
+- Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
 
 ### v1.0.29 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.

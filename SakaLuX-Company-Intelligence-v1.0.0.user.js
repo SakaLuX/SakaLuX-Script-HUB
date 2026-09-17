@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.25
+// @version      1.8.26
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -83,7 +83,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.25',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.26',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -610,7 +610,7 @@ function render(){
  let root=$('#ci-root');if(!S.open){root?.remove();return}
  if(!root){root=document.createElement('div');root.id='ci-root';document.body.appendChild(root)}
  const oldShell=$('.ci-shell',root),oldTabs=$('.ci-tabs',root),scrollTop=oldShell?.scrollTop||0,tabsLeft=oldTabs?.scrollLeft||0;
- root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button type="button" data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button type="button" data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button type="button" class="ci-icon" data-act="refresh" title="Refresh">↻</button><button type="button" class="ci-icon api" data-act="settings" title="API Access">🔑</button><button type="button" class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button type="button" data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div><div class="ci-footer">Made with ❤️ by <a href="${PROFILE_URL}" target="_self">SakaLuX [2380374]</a></div></div>`;
+ root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button type="button" data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button type="button" data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button type="button" class="ci-icon" data-act="refresh" title="Refresh">↻</button><button type="button" class="ci-icon api" data-act="settings" title="API Access">🔑</button><button type="button" class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button type="button" data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div></div>`;
  const shell=$('.ci-shell',root),tabBar=$('.ci-tabs',root);if(shell) shell.scrollTop=scrollTop;if(tabBar)tabBar.scrollLeft=tabsLeft;
  $$('button',root).forEach(b=>{if(!b.type)b.type='button'});
  $$('[data-mode]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
@@ -695,8 +695,6 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
       if(e===p)continue;const r=e.getBoundingClientRect(),s=getComputedStyle(e);
       if((s.overflowY==='auto'||s.overflowY==='scroll')&&e.scrollHeight>e.clientHeight+24&&r.height>120){e.style.setProperty('overflow-y','visible','important');e.style.setProperty('max-height','none','important');e.style.setProperty('height','auto','important')}
     }
-    const candidates=[...p.querySelectorAll('div,a,span')].filter(e=>(e.textContent||'').includes('Made with')&&(e.textContent||'').includes('SakaLuX'));
-    if(candidates.length){const f=candidates.sort((a,b)=>a.children.length-b.children.length)[0];f.innerHTML=`<span style="color:#f59e0b;font-weight:800">Made with <span style="color:#ff5b6e">❤️</span> by</span> <a href="${profile}" target="_self" rel="noopener" style="color:#ff9f43!important;font-weight:900;text-decoration:none">SakaLuX [2380374]</a>`;f.style.setProperty('display','block','important');f.style.setProperty('width','100%','important');f.style.setProperty('text-align','center','important');f.style.setProperty('padding','12px 8px calc(12px + env(safe-area-inset-bottom))','important');f.style.setProperty('border-top','1px solid rgba(245,158,11,.32)','important');f.style.setProperty('background','rgba(8,13,19,.82)','important')}
     if(!p.dataset.slxScrollBound){p.dataset.slxScrollBound='1';p.addEventListener('touchstart',e=>{touchY=e.touches?.[0]?.clientY||0},{passive:true});p.addEventListener('touchmove',e=>{const y=e.touches?.[0]?.clientY;if(!y)return;const d=touchY-y;touchY=y;if(Math.abs(d)>1)p.scrollTop+=d},{passive:true})}
   };
   new MutationObserver(()=>requestAnimationFrame(repair)).observe(document.documentElement,{childList:true,subtree:true});setInterval(repair,900);repair();
@@ -751,3 +749,29 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   (document.head||document.documentElement).appendChild(s);
 })();
 
+
+/* SakaLuX Hub footer v3: native module root only; compact donation controls. */
+(()=>{
+ const selector="#ci-root > .ci-shell",id="sakalux-inline-footer-company-intelligence",profile='https://www.torn.com/profiles.php?XID=2380374';
+ const st=document.createElement('style');st.textContent=`
+ #${id}#${id}{position:sticky!important;bottom:0!important;inset-inline:auto!important;display:block!important;flex:0 0 70px!important;width:100%!important;height:70px!important;min-height:70px!important;max-height:70px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;z-index:5!important;font-family:Arial,sans-serif!important;overflow:hidden!important;border-radius:10px!important}
+ #${id}#${id} *{box-sizing:border-box!important}
+ #${id}#${id} .slh-bottom{height:48px!important;margin:0!important;padding:4px 14px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;border-radius:10px 10px 0 0!important;overflow:hidden!important}
+ #${id}#${id} .slh-bottom-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;height:40px!important}
+ #${id}#${id} .slh-bottom-btn{display:block!important;width:100%!important;min-width:0!important;height:40px!important;min-height:40px!important;max-height:40px!important;margin:0!important;padding:6px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#151f2a!important;color:#b9c7d6!important;font:900 8px/1.2 Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important;cursor:pointer!important}
+ #${id}#${id} .slh-footer{height:22px!important;min-height:22px!important;max-height:22px!important;margin:0!important;padding:0 6px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;border-top:1px solid rgba(223,154,55,.52)!important;border-radius:0 0 10px 10px!important;background:#080d13!important;color:#df9a37!important;font:400 9px/20px Arial,sans-serif!important;white-space:nowrap!important;overflow:hidden!important}
+ #${id}#${id} .slh-author{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}
+ `;(document.head||document.documentElement).appendChild(st);
+ function ensure(){
+  const panel=document.querySelector(selector);if(!panel||panel.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return;
+  if(panel.querySelector('#'+id))return;
+  const f=document.createElement('div');f.id=id;
+  f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+profile+'">SakaLuX [2380374]</a></div>';
+  f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>{location.href=profile});panel.appendChild(f);
+ }
+ function start(){ensure();let scheduled=false;new MutationObserver(records=>{
+  if(scheduled||!records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&!n.closest?.('[id^="sakalux-inline-footer-"]'))))return;
+  scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
+ }).observe(document.body,{childList:true,subtree:true});}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();

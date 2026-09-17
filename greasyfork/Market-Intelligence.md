@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.30**
+**v1.17.32**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,7 +20,8 @@
 
 ## Current release note
 
-**v1.17.30** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
+
+**v1.17.32** Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -44,6 +45,10 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history
+
+### v1.17.32 — Compact Hub footer
+- Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
 
 ### v1.17.30 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.

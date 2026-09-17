@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.39**
+**v1.3.40**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -21,7 +21,8 @@
 
 ## Current release note
 
-**v1.3.39** refines the mobile UI: aligned TARGETS switches, a taller target panel, an opaque SAFE sheet, correctly sized API/manual battle-stat fields and a fully visible manual save button. Target calculations, API behavior and saved data are unchanged.
+
+**v1.3.40** Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -39,6 +40,10 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 **All Rights Reserved**
 
 ## Release history
+
+### v1.3.40 — Compact Hub footer
+- Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
 
 ### v1.3.39 — Mobile UI refinement
 - Refines TARGETS switches with consistent sizing and alignment.
