@@ -172,7 +172,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = "0.9.915";
+  const VERSION = '0.9.916';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
