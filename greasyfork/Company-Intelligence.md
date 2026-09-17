@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.29**
+**v1.8.30**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -23,7 +23,8 @@
 
 
 
-**v1.8.29** Refresh prioritizes fresh job status over cached company profiles. Confirmed departure clears current company, employee, stock and effectiveness caches while preserving historical snapshots and planning records.
+
+**v1.8.30** Routes vertical touch gestures from the header, tabs, content and footer into the main content scroll area. Preserves horizontal tab swipes and taps, and forwards header/footer mouse-wheel scrolling.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -48,6 +49,10 @@
 **All Rights Reserved**
 
 ## Release history
+
+### v1.8.30 — Scroll gestures across the panel
+- Routes vertical touch gestures from the header, tabs, content and footer into the main content scroll area. Preserves horizontal tab swipes and taps, and forwards header/footer mouse-wheel scrolling.
+
 
 ### v1.8.29 — Current employment refresh
 - Refresh prioritizes fresh job status over cached company profiles. Confirmed departure clears current company, employee, stock and effectiveness caches while preserving historical snapshots and planning records.
