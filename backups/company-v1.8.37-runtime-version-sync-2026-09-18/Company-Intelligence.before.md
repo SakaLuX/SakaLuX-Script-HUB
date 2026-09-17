@@ -21,7 +21,6 @@
 ## Current release note
 
 **v1.8.37 — Professional TornPDA header + shared standalone integration**
-- Synchronizes the internal runtime version used by the Hub from stale v1.8.35 to v1.8.37.
 - Rebuilds the mobile header so the Company title uses the available width cleanly.
 - Keeps Refresh, API Key and Close grouped tightly on the right and inside the viewport.
 - Moves Employee / Director to a dedicated full-width second row with equal-width buttons.
@@ -53,7 +52,6 @@
 ## Release history / Changelog
 
 ### v1.8.37 — Professional TornPDA header layout
-- Synchronizes runtime `APP.version` with `@version`, standalone registration, Hub bridge, ModuleReady event and local installed-version marker at v1.8.37, removing the false UPDATE AVAILABLE state.
 - Rebuilds the Company mobile header into a stable two-row layout.
 - Gives the title the remaining width instead of squeezing it between controls.
 - Groups Refresh, API Key and Close tightly on the right and keeps all three inside the viewport.
