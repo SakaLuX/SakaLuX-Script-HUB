@@ -1,0 +1,142 @@
+name: Fix Stocks and Company standalone v2
+
+on:
+  push:
+    paths:
+      - '.github/fix-stock-company-v2.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch Stocks and Company
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, json, shutil
+
+          root=Path('.')
+          backup=root/'backups'/'stocks-company-followup-2026-09-18'
+          backup.mkdir(parents=True,exist_ok=True)
+
+          stock=root/'SakaLuX-Stock-Manager-Advisor.user.js'
+          company=root/'SakaLuX-Company-Intelligence-v1.0.0.user.js'
+          for p in (stock,company,root/'scripts.json'):
+              if p.exists(): shutil.copy2(p,backup/p.name)
+
+          # STOCKS v0.7.15
+          s=stock.read_text()
+          s=s.replace('// @version      0.7.14','// @version      0.7.15',1)
+          s=s.replace("version: '0.7.14'","version: '0.7.15'",1)
+          s=s.replace("version:'0.7.14'","version:'0.7.15'")
+          s=s.replace("version:'0.7.14'});","version:'0.7.15'});")
+
+          # Panic must stay visible independently of opening/closing the standalone dock/panel.
+          old="""  function panicButton() {\n    if(!bool(K.enabled,true)||$('#slx-stock-panic')) return;"""
+          new="""  function panicButton() {\n    if($('#slx-stock-panic')) return;"""
+          if old not in s: raise SystemExit('Stocks panicButton signature not found')
+          s=s.replace(old,new,1)
+
+          old="""    $('#slx-stock-open')?.remove();$('#slx-stock-panic')?.remove();$('#slx-stock-inline')?.remove();"""
+          new="""    $('#slx-stock-open')?.remove();$('#slx-stock-inline')?.remove();"""
+          if old not in s: raise SystemExit('Stocks stopRuntime panic removal not found')
+          s=s.replace(old,new,1)
+
+          old="""  async function init() {\n    if(!bool(K.enabled,true)||runtimeObserver)return;\n    style(); premiumStyle(); restoreCache(); panicButton(); managerLauncher();"""
+          new="""  async function init() {\n    style(); panicButton();\n    if(!bool(K.enabled,true)||runtimeObserver)return;\n    premiumStyle(); restoreCache(); managerLauncher();"""
+          if old not in s: raise SystemExit('Stocks init signature not found')
+          s=s.replace(old,new,1)
+
+          # Hide the legacy API block in the main panel; API access is only through the key button/sheet.
+          old="""  function openPanel() { style(); premiumStyle(); const p=panel(); normalizeStockPanelChrome(); p.dataset.open='1';"""
+          new="""  function openPanel() { style(); premiumStyle(); const p=panel(); normalizeStockPanelChrome(); const legacyApi=p.querySelector('#slx-stock-api')?.closest('.section'); if(legacyApi) legacyApi.style.setProperty('display','none','important'); p.dataset.open='1';"""
+          if old not in s: raise SystemExit('Stocks openPanel signature not found')
+          s=s.replace(old,new,1)
+
+          # Add CSS fallback for WebViews where the old API section can flash before JS normalization.
+          css_marker='#slx-stock-panel .api-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}'
+          if css_marker in s and ':has(#slx-stock-api)' not in s:
+              s=s.replace(css_marker, '#slx-stock-panel .section:has(#slx-stock-api){display:none!important}\n'+css_marker,1)
+
+          # Force shared standalone dock to notice Stocks registration immediately by re-appending it once.
+          needle="""    Object.assign(entry.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:APP.stocksUrl,version:APP.version});"""
+          repl=needle+"""\n    setTimeout(()=>{try{const e=document.querySelector('[data-slx-standalone-registration=\"stock-manager-advisor\"]');if(e?.isConnected){const parent=e.parentNode;e.remove();(parent||document.body||document.documentElement).appendChild(e);}}catch{}},80);"""
+          if needle not in s: raise SystemExit('Stocks registration assignment not found')
+          s=s.replace(needle,repl,1)
+
+          # Keep global fallback registration on the new version.
+          s=s.replace("version:'0.7.14'});","version:'0.7.15'});")
+          if 'SAKALUX_STOCKS_FOLLOWUP_V0715' not in s:
+              s += """\n\n/* SAKALUX_STOCKS_FOLLOWUP_V0715 */\n(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration=\"stock-manager-advisor\"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.7.15'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();\n"""
+          stock.write_text(s)
+
+          # COMPANY v1.8.33 — standalone clicks must default to OPEN when no action is pre-set.
+          c=company.read_text()
+          c=c.replace('// @version      1.8.32','// @version      1.8.33',1)
+          c=c.replace("version:'1.8.32'","version:'1.8.33'")
+          c=c.replace("version:'1.8.32'});","version:'1.8.33'});")
+          c=c.replace('/* Company Intelligence is Hub-managed. No standalone dock/launcher is created. */','/* Company Intelligence supports the shared SakaLuX standalone dock and Script Hub. */',1)
+          old="""b.onclick=()=>{const a=b.dataset.action;if(a==='open'){"""
+          new="""b.onclick=()=>{const a=b.dataset.action||'open';if(a==='open'){"""
+          if old not in c: raise SystemExit('Company bridge click handler not found')
+          c=c.replace(old,new,1)
+          c=c.replace("e.dataset.version='1.8.32'","e.dataset.version='1.8.33'")
+          if 'SAKALUX_COMPANY_STANDALONE_CLICK_V1833' not in c:
+              c += """\n\n/* SAKALUX_COMPANY_STANDALONE_CLICK_V1833 */\n(()=>{const fix=()=>{try{let e=document.querySelector('[data-slx-standalone-registration=\"company-intelligence\"]');if(e){Object.assign(e.dataset,{id:'company-intelligence',name:'Company',icon:'🏢',selector:'#sakalux-module-bridge-company-intelligence',fallback:'https://www.torn.com/joblist.php',version:'1.8.33'});}}catch{}};fix();setTimeout(fix,100);setTimeout(fix,800);setInterval(fix,5000);})();\n"""
+          company.write_text(c)
+
+          # Registry metadata only; Hub source code remains untouched.
+          jp=root/'scripts.json'
+          if jp.exists():
+              data=json.loads(jp.read_text())
+              def walk(x):
+                  if isinstance(x,dict):
+                      if x.get('id')=='stock-manager-advisor': x['version']='0.7.15'
+                      if x.get('id')=='company-intelligence': x['version']='1.8.33'
+                      for v in x.values(): walk(v)
+                  elif isinstance(x,list):
+                      for v in x: walk(v)
+              walk(data)
+              jp.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
+
+          # Update Greasy Fork documentation versions if present.
+          for fn,oldv,newv in [
+              ('greasyfork/Stock-Manager-Advisor.md','0.7.14','0.7.15'),
+              ('greasyfork/Company-Intelligence.md','1.8.32','1.8.33')]:
+              p=root/fn
+              if p.exists():
+                  txt=p.read_text().replace(oldv,newv)
+                  p.write_text(txt)
+          PY
+
+      - name: Validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          node --check SakaLuX-Company-Intelligence-v1.0.0.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q '@version      0.7.15' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'SAKALUX_STOCKS_FOLLOWUP_V0715' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "const a=b.dataset.action||'open'" SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q '@version      1.8.33' SakaLuX-Company-Intelligence-v1.0.0.user.js
+          git diff --exit-code -- SakaLuX-Script-Hub.user.js
+
+      - name: Commit and push
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js scripts.json greasyfork/ backups/stocks-company-followup-2026-09-18/
+          git commit -m 'Stocks v0.7.15 and Company v1.8.33 standalone fixes'
+          git push
