@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.63
+// @version      1.9.64
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.63';
+    const VERSION = '1.9.64';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {version:'1.9.64',date:'2026-09-17',changes:['Restores Hub launch controls defensively when Torn replaces native topbar/mobile navigation nodes.','Adds explicit Stock Manager POWER action to the Hub registry/fallback in addition to the generic ON/OFF switch.']},
         {version:'1.9.63',date:'2026-09-17',changes:['Moves Stock Manager & Advisor v0.7.8 public install/update checks to Greasy Fork script 596192 while retaining GitHub as source.']},
         {version:'1.9.62',date:'2026-09-17',changes:['Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW release details.','Stocks installs and checks updates from its main GitHub source.']},
         {version:'1.9.61',date:'2026-09-17',changes:["Synchronizes module INFO/NEW fallback details and versions with the registry.","Updates release histories and registered-module documentation after the UI and performance audit."]},
@@ -633,6 +634,12 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "metaUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "name": "Stock Manager & Advisor",
                 "quickActions": [
+                {
+                    "icon": "⏻",
+                    "id": "toggle",
+                    "label": "POWER",
+                    "method": "toggleEnabled"
+                },
                     {
                         "icon": "📊",
                         "id": "open",
@@ -1479,6 +1486,22 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         button.style.setProperty('display', nativeReady ? 'none' : 'flex', 'important');
     }
 
+    let launcherRepairTimer = null;
+    function startLauncherRepair() {
+        if (launcherRepairTimer) return;
+        launcherRepairTimer = setInterval(() => {
+            if (document.hidden || document.getElementById(IDS.overlay)) return;
+            try {
+                createTopbarSkull();
+                createNavSkull();
+                createHubButton();
+                syncFloatingButtonVisibility();
+            } catch (error) {
+                console.debug('[SakaLuX Hub] launcher repair retry', error);
+            }
+        }, 1500);
+    }
+
     function createTopbarSkull() {
         const existing = document.getElementById(IDS.topSkull);
         if (!settings.showTopbarSkull) {
@@ -2109,7 +2132,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
     function ensureEverything() {
         suppressStandaloneDock();
-        injectCss(); createTopbarSkull(); createNavSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility();
+        injectCss(); createTopbarSkull(); createNavSkull(); createHubButton(); updateHiddenButtons(); updateBadge(); syncFloatingButtonVisibility(); startLauncherRepair();
     }
 
     function queueEnsure() {
