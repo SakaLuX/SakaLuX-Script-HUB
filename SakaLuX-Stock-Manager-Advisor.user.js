@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.9
+// @version      0.7.10
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -53,7 +53,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.9',
+    version: '0.7.10',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -1454,8 +1454,25 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
       <div class="section"><div class="title">Rebalance Preview</div><div class="rebalance-controls"><label>Cash reserve <input id="slx-rebalance-reserve" value="${esc(get(K.rebalanceReserve,'0'))}" placeholder="e.g. 10m"></label><button id="slx-rebalance-preview-btn" type="button">Build Preview</button></div><div class="api-help">Preview only: proposes which excess shares could be released and where capital could move. It never executes SELL/BUY automatically.</div><div id="slx-stock-rebalance-body" class="muted">Press Build Preview after syncing API and benefit values.</div></div>
       <div class="section"><div class="title">Trade Assistant</div><div id="slx-stock-trade-body" class="trade-list muted">Waiting for ROI data…</div></div>
       <div id="slx-stock-status">Ready · open from Script Hub or Stock Manager.</div>
-    </div><div class="slx-stock-footer">Made with ❤️ by <a href="${APP.profile}" target="_self">SakaLuX [2380374]</a></div></div>`;
-    document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
+    </div>
+<div id="slx-stock-donation-wrap">
+  <div id="slx-stock-donation-row">
+    <button type="button" id="slx-stock-send-money">💸 SEND MONEY</button>
+    <button type="button" id="slx-stock-send-items">🎁 SEND ITEMS</button>
+  </div>
+</div>
+<div id="slx-stock-author-footer">Made with ❤️ by&nbsp;<a href="https://www.torn.com/profiles.php?XID=2380374" target="_blank" rel="noopener noreferrer">SakaLuX [2380374]</a></div>
+</div>`;
+    
+const slxStockFooterStyle=document.createElement('style'); slxStockFooterStyle.textContent=`
+#slx-stock-donation-wrap{flex:0 0 auto;background:#0b1118;border-top:1px solid #243447;padding:8px 10px 0}
+#slx-stock-donation-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#slx-stock-donation-row button{height:40px;min-height:40px;border:1px solid #34465b;border-radius:10px;background:#111a24;color:#edf3fa;font-weight:700;font-size:12px;letter-spacing:.02em}
+#slx-stock-author-footer{height:34px;display:flex;align-items:center;justify-content:center;border-top:1px solid #243447;background:#0b1118;color:#93a4b7;font-size:12px;flex:0 0 auto}
+#slx-stock-author-footer a{color:#4f8fe8;text-decoration:none;font-weight:700}
+@media(max-width:700px){#slx-stock-donation-wrap{padding:8px 10px 0}#slx-stock-donation-row{gap:8px}#slx-stock-donation-row button{height:38px;min-height:38px;font-size:11px}#slx-stock-author-footer{height:32px;font-size:11px}}
+`; document.head.appendChild(slxStockFooterStyle);
+document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     $('.close',p).onclick=()=>p.dataset.open='0';
     $('#slx-stock-api',p).value=get(K.api);
     $('#slx-stock-api-badge',p).dataset.kind=get(K.api)?'idle':'idle';
@@ -1492,6 +1509,9 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     $('#slx-withdraw-all',p).onclick=()=>withdrawAll().then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     return p;
   }
+
+  document.getElementById('slx-stock-send-money')?.addEventListener('click',()=>{ location.href='https://www.torn.com/sendcash.php#/XID=2380374'; });
+  document.getElementById('slx-stock-send-items')?.addEventListener('click',()=>{ location.href='https://www.torn.com/item.php#giveItems'; });
 
   function refreshTargetSelect() {
     if(!S.panel?.isConnected) return;

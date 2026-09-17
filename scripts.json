@@ -366,17 +366,16 @@
         }
       ],
       "release": {
-        "version": "0.7.9",
+        "version": "0.7.10",
         "date": "2026-09-17",
         "notes": [
-          "Matches the shared SakaLuX full-sheet panel geometry used by the other managed modules.",
-          "Makes the full Stocks panel body scroll independently while header and author footer stay visible.",
-          "Adds a stable Made with ❤️ by SakaLuX [2380374] footer at the bottom of the panel."
+          "Matches Script Hub bottom donation panel with SEND MONEY and SEND ITEMS controls.",
+          "Keeps the SakaLuX author footer as a separate stable bottom row."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.7.9"
+      "version": "0.7.10"
     }
   ]
 }
