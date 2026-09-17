@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.35
+// @version      1.8.34
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -17,217 +17,7 @@
 // @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 // ==/UserScript==
 
-/* SakaLuX Standalone Dock Bootstrap — BEGIN */
-(() => {
-  'use strict';
-  // SakaLuX shared mobile top-alignment contract.
-  (() => {
-    const id='sakalux-global-top-align-v3';
-    if(document.getElementById(id)) return;
-    const st=document.createElement('style');
-    st.id=id;
-    st.textContent=`@media(max-width:700px){
-body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="overlay"],body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"],
-body [id^="slx-"][id*="overlay"],body [id^="slx-"][id*="modal"],
-body [id^="sl-"][id*="overlay"],body [id^="sl-"][id*="modal"],
-#sl-eg-overlay,#sl-mr-settings-overlay,#sl-mi-overlay,#ci-root{
- align-items:flex-start!important;justify-content:center!important;padding-top:0!important;margin-top:0!important;
-}
-body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"],body [id^="slx-"][id*="panel"],body [id^="sl-"][id*="panel"],
-#sl-eg-panel,#sl-mr-settings-panel,#sl-mi-panel,#ci-root .ci-shell{
- margin-top:0!important;align-self:flex-start!important;
-}
-}`;
-    (document.head||document.documentElement).appendChild(st);
-  })();
-
-
-  // Shared SakaLuX performance + Hub-style UI foundation.
-  (() => {
-    const g = window;
-    if (!g.SakaLuXPerf) {
-      const timers = new Map();
-      g.SakaLuXPerf = {
-        debounce(key, fn, wait=220) {
-          const old = timers.get(key); if (old) clearTimeout(old);
-          const id = setTimeout(() => { timers.delete(key); fn(); }, Math.max(120, wait));
-          timers.set(key,id); return id;
-        },
-        idle(fn, timeout=700) {
-          if ('requestIdleCallback' in g) return g.requestIdleCallback(fn,{timeout});
-          return setTimeout(fn,32);
-        }
-      };
-    }
-    if (!document.getElementById('sakalux-shared-hub-skin')) {
-      const st=document.createElement('style');
-      st.id='sakalux-shared-hub-skin';
-      st.textContent=`
-:root{--slx-bg:#0b1118;--slx-card:#111a24;--slx-card2:#172331;--slx-border:#34465b;--slx-border-soft:rgba(255,255,255,.09);--slx-text:#edf3fa;--slx-muted:#93a4b7;--slx-blue:#4f8fe8;--slx-gold:#dfbd61;--slx-green:#55d98a;--slx-red:#ff6b78;--slx-shadow:0 16px 40px rgba(0,0,0,.46)}
-body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button,body [id^="slx-"] button,body [class^="sakalux-"] button,body [class*=" sakalux-"] button{border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);font-family:Inter,Arial,sans-serif;transition:border-color .15s ease,background .15s ease,transform .08s ease,opacity .15s ease}
-body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button:active,body [id^="slx-"] button:active{transform:scale(.985)}
-body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) input,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) select,body [id^="slx-"] input,body [id^="slx-"] select{border-radius:10px;border-color:#3a4d63;background:#151f2b;color:var(--slx-text);font-family:Inter,Arial,sans-serif}
-body [id*="sakalux"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"],body [id*="sakalux"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"],body [id*="slx"][id*="panel"],body [id*="slx"][id*="modal"],body #slx-stock-inline{font-family:Inter,Arial,sans-serif;color:var(--slx-text);border-color:var(--slx-border);box-shadow:var(--slx-shadow)}
-body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .header,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .head,body [id^="slx-"] .header,body [id^="slx-"] .head{background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 42%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-color:var(--slx-border-soft)}
-body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .card,body [id^="slx-"] .card{border-color:var(--slx-border-soft);background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(11,17,24,.98))}
-@media(max-width:700px){body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button,body [id^="slx-"] button{min-height:36px}body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) input,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) select,body [id^="slx-"] input,body [id^="slx-"] select{min-height:36px}}
-`;
-      (document.head||document.documentElement).appendChild(st);
-    }
-  })();
-
-  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.35'});
-  const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
-  const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
-  const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
-  const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
-  const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
-  const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];
-  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
-
-  function registerSelf(){
-    let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
-    if(!m){m=document.createElement('span');m.setAttribute(REG_ATTR,SELF.id);m.hidden=true;(document.body||document.documentElement).appendChild(m);}
-    Object.assign(m.dataset,SELF);
-  }
-
-  function addStyle(){
-    if(document.getElementById(STYLE_ID)) return;
-    const s=document.createElement('style');
-    s.id=STYLE_ID;
-    s.textContent=`
-#${DOCK_ID}{position:fixed;right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:2147483000;width:min(220px,calc(100vw - 20px));max-height:calc(100dvh - 190px);overflow:hidden;padding:10px;background:linear-gradient(180deg,rgba(10,14,20,.992),rgba(7,10,15,.992));border:1px solid rgba(255,255,255,.09);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:none!important;font-family:Inter,Arial,sans-serif;display:none;flex-direction:column;box-sizing:border-box}
-#${DOCK_ID}[data-open="1"]{display:flex}
-#${DOCK_ID} .slx-dock-head{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;padding:4px 6px 10px;margin-bottom:7px;border-bottom:1px solid rgba(255,255,255,.055)}
-#${DOCK_ID} .slx-dock-mark{width:30px;height:30px;display:grid;place-items:center;padding:0;margin:0;border-radius:10px;background:linear-gradient(180deg,#293545,#1a2430);border:1px solid rgba(223,189,97,.38);color:#dfbd61;font:900 16px/30px Arial,sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 10px rgba(0,0,0,.2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}#${DOCK_ID} .slx-dock-mark:active{transform:scale(.92);background:linear-gradient(180deg,#344256,#202b39)}
-#${DOCK_ID} .slx-dock-title{color:#f4f7fb;font-size:11px;font-weight:900;line-height:1.15;letter-spacing:.01em;text-align:center}
-#${DOCK_ID} .slx-dock-sub{color:#8693a3;font-size:8px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;text-align:center}
-#${DOCK_ID} .slx-dock-items{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;gap:7px;overflow-y:auto;overflow-x:hidden;padding:2px 2px 4px;overscroll-behavior:contain;scrollbar-width:thin}
-#${DOCK_ID} .slx-dock-row{position:relative!important;display:flex!important;align-items:center!important;width:100%!important;min-height:44px!important;flex:0 0 auto!important;margin:0!important;padding:0 12px!important;box-sizing:border-box!important;inset:auto!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:14px!important;background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(13,20,29,.98))!important;color:#f5f7fa!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 4px 10px rgba(0,0,0,.14)!important;overflow:hidden!important;transform:none!important}
-#${DOCK_ID} .slx-dock-row:active{transform:scale(.985)!important;background:linear-gradient(180deg,#1b2531,#141c26)!important}
-#${DOCK_ID} .slx-left{width:22px;height:22px;min-width:22px;display:grid;place-items:center;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#202b38,#151d27);box-shadow:inset 0 1px 0 rgba(255,255,255,.03);z-index:1}
-#${DOCK_ID} .slx-left .i{font-size:13px;line-height:1}
-#${DOCK_ID} .slx-title{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font:800 10px/1 Arial,sans-serif;letter-spacing:.01em;pointer-events:none}
-#${DOCK_ID} .slx-right-pad{margin-left:auto;width:22px;min-width:22px;height:22px;opacity:0;pointer-events:none}
-#${DOCK_ID} .slx-dock-install{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;width:100%!important;min-height:42px!important;box-sizing:border-box!important;margin-top:9px!important;padding:9px 12px!important;border-radius:13px!important;background:linear-gradient(180deg,#9a741f,#6d5015)!important;border:1px solid rgba(240,196,78,.72)!important;color:#fff7d6!important;text-align:center!important;text-decoration:none!important;font:900 11px/1.2 Arial,sans-serif!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px rgba(0,0,0,.22)!important;white-space:nowrap!important;overflow:visible!important}
-#${DOCK_ID} .slx-dock-install:active{transform:scale(.985)}
-#${NATIVE_ID}{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;list-style:none!important;background:none!important;box-shadow:none!important}#${NATIVE_ID}::before,#${NATIVE_ID}::after{content:none!important;display:none!important}#${NATIVE_ID} .slx-s-link{display:grid!important;place-items:center!important;width:17px!important;height:17px!important;margin:0!important;padding:0!important;border:0!important;background:none!important;text-decoration:none!important;color:#dfbd61!important;font:900 15px/17px Arial,sans-serif!important;text-shadow:0 1px 1px rgba(0,0,0,.72),0 0 4px rgba(223,189,97,.18)!important}#${NATIVE_ID} .slx-s-link:active{transform:scale(.9)!important}
-#${FALLBACK_ID}{position:fixed;right:10px;bottom:78px;z-index:2147483001;width:32px;height:32px;padding:0;border:1px solid #64748b;border-radius:9px;background:linear-gradient(145deg,#202b39,#111923);color:#dfbd61;box-shadow:0 8px 22px rgba(0,0,0,.42);font:900 15px Arial;display:none;align-items:center;justify-content:center}
-body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-button,#sl-mri-button,#sl-mi-button,#slx-elim-btn){display:none!important}
-`;
-    (document.head||document.documentElement).appendChild(s);
-  }
-
-  function findStatusIconList(){
-    const selectors=['ul[class*="statusIcons"][class*="big"]','ul[class*="status-icons"][class*="big"]','ul[class*="statusIcons"]','ul[class*="status-icons"]'];
-    const lists=selectors.flatMap(q=>[...document.querySelectorAll(q)]);
-    return lists.find(list=>list.isConnected&&[...list.children].some(item=>item.querySelector?.('a')))||null;
-  }
-  function copyNativeCell(item,list){
-    const ref=[...list.children].find(x=>x!==item&&x.querySelector?.('a')); if(!ref) return;
-    const native=[...ref.classList].filter(x=>x&&!x.startsWith('slx-')&&!x.startsWith('sakalux-'));
-    item.className=[...native,'slx-standalone-native'].join(' ');
-  }
-  function toggleDock(force){
-    const d=ensureDock(); if(!d) return;
-    const next=typeof force==='boolean'?force:d.dataset.open!=='1';
-    d.dataset.open=next?'1':'0';
-    try{localStorage.setItem(OPEN_KEY,next?'1':'0')}catch{}
-  }
-  function ensureNativeLauncher(){
-    if(hubInstalled()){document.getElementById(NATIVE_ID)?.remove();document.getElementById(FALLBACK_ID)?.remove();return false;}
-    const list=findStatusIconList(); let item=document.getElementById(NATIVE_ID);
-    if(list){
-      if(!item){item=document.createElement('li');item.id=NATIVE_ID;item.innerHTML='<a href="#" class="slx-s-link" aria-label="SakaLuX Scripts" title="SakaLuX Scripts">S</a>';item.querySelector('a').onclick=e=>{e.preventDefault();e.stopPropagation();toggleDock();};}
-      copyNativeCell(item,list);
-      const children=[...list.children].filter(x=>x!==item);
-      const cashIndex=children.findIndex(x=>/\$|cash|money/i.test((x.textContent||'')+' '+(x.className||'')));
-      const anchor=cashIndex>=0?children[cashIndex]:children[0];
-      if(anchor) anchor.insertAdjacentElement('afterend',item); else list.appendChild(item);
-      document.getElementById(FALLBACK_ID)?.remove(); return true;
-    }
-    item?.remove();
-    let fb=document.getElementById(FALLBACK_ID);
-    if(!fb){fb=document.createElement('button');fb.id=FALLBACK_ID;fb.type='button';fb.textContent='S';fb.title='SakaLuX Scripts';fb.onclick=()=>toggleDock();(document.body||document.documentElement).appendChild(fb);}
-    fb.style.display='flex'; return false;
-  }
-  function ensureDock(){
-    if(hubInstalled()){document.body?.setAttribute('data-sakalux-hub-active','1');document.getElementById(DOCK_ID)?.remove();document.getElementById(PROMPT_ID)?.remove();document.getElementById(NATIVE_ID)?.remove();document.getElementById(FALLBACK_ID)?.remove();return null;}
-    document.body?.removeAttribute('data-sakalux-hub-active'); addStyle();
-    let d=document.getElementById(DOCK_ID); if(d) return d;
-    d=document.createElement('div'); d.id=DOCK_ID; d.dataset.open=localStorage.getItem(OPEN_KEY)==='1'?'1':'0';
-    d.innerHTML=`<div class="slx-dock-head"><button type="button" class="slx-dock-mark" aria-label="Close SakaLuX Scripts" title="Close SakaLuX Scripts">S</button><div class="slx-dock-title">SakaLuX Scripts</div><div class="slx-dock-sub">Standalone</div></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">Install SakaLuX Hub</a>`;
-    (document.body||document.documentElement).appendChild(d); const close=d.querySelector('.slx-dock-mark'); if(close) close.onclick=e=>{e.preventDefault();e.stopPropagation();toggleDock(false);}; return d;
-  }
-  function openEntry(data){const el=data.selector?document.querySelector(data.selector):null;if(el){el.click();return;}const bridge=document.getElementById('sakalux-module-bridge-'+data.id);if(bridge){bridge.dataset.action='open';bridge.click();return;}if(data.fallback)location.href=data.fallback;}
-  function render(){
-    const d=ensureDock(); if(!d) return;
-    const box=d.querySelector('.slx-dock-items');
-    const regs=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id);
-    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); box.replaceChildren();
-    for(const r of regs){
-      const b=document.createElement('button'); b.type='button'; b.className='slx-dock-row';
-      b.innerHTML=`<span class="slx-left"><span class="i">${r.icon||'•'}</span></span><span class="slx-title">${r.name||r.id}</span><span class="slx-right-pad"></span>`;
-      b.onclick=()=>openEntry(r); box.appendChild(b);
-    }
-    ensureNativeLauncher();
-  }
-  function maybePrompt(){
-    if(hubInstalled()||document.getElementById(PROMPT_ID)) return;
-    let last=0; try{last=Number(localStorage.getItem(LAST_KEY)||0)}catch{}
-    if(last&&Date.now()-last<INTERVAL) return;
-    try{localStorage.setItem(LAST_KEY,String(Date.now()))}catch{}
-    const p=document.createElement('div'); p.id=PROMPT_ID; p.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px';
-    p.innerHTML=`<div style="width:min(350px,100%);background:#111820;color:#fff;border:1px solid #394657;border-radius:14px;padding:16px;font:13px Arial,sans-serif;box-shadow:0 16px 48px #0008"><b style="display:block;text-align:center;font-size:16px">Install SakaLuX Script Hub?</b><div style="margin-top:7px;color:#cbd5e1;line-height:1.4;text-align:center">Manage every SakaLuX add-on from one place with shared settings and controls.</div><div style="display:flex;gap:7px;margin-top:12px"><button type="button" data-later style="flex:1;padding:9px;border-radius:8px;background:#202a36;color:#fff;border:1px solid #526174">Later</button><button type="button" data-install style="flex:1;padding:9px;border-radius:8px;background:#6a4d12;color:#fff4cf;border:1px solid #cda84e;font-weight:900">Install Hub</button></div></div>`;
-    (document.body||document.documentElement).appendChild(p);
-    p.querySelector('[data-later]').onclick=()=>p.remove();
-    p.querySelector('[data-install]').onclick=()=>location.href=HUB_URL;
-  }
-  function start(){
-    registerSelf();render();setTimeout(maybePrompt,1200);
-    let t=0, observer=null;
-    const refresh=()=>{registerSelf();render();};
-    const stopForHub=()=>{
-      clearTimeout(t);
-      if(observer){observer.disconnect();observer=null;}
-      render();
-    };
-    if(hubInstalled()){stopForHub();return;}
-    const queue=(wait=700)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
-    const root=document.body||document.documentElement;
-    observer=new MutationObserver(ms=>{
-      if(hubInstalled()){stopForHub();return;}
-      if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(700);
-    });
-    observer.observe(root,{childList:true,subtree:true});
-    addEventListener('SakaLuX:ScriptHubReady',stopForHub,{once:true});
-    addEventListener('hashchange',()=>queue(350),{passive:true});
-    addEventListener('popstate',()=>queue(350),{passive:true});
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
-})();
-(() => {
-  const id='sakalux-standalone-layer-style';
-  if(!document.getElementById(id)){
-    const style=document.createElement('style');
-    style.id=id;
-    style.textContent=`/* Keep managed add-on panels above the shared standalone dock. */
-:where(
-  [id^="sl-eg-"][id*="panel" i],
-  [id^="sakalux-bt-"][id*="settings" i],
-  [id^="sl-mr-"][id*="panel" i],
-  [id^="sl-mri-"][id*="panel" i],
-  [id^="sl-mi-"][id*="panel" i],
-  #slx-elim,
-  [id^="slx-elim-"][id*="panel" i],
-  #ci-root
-){z-index:2147483646!important;}
-#sakalux-standalone-dock{z-index:2147483500!important;}`;
-    (document.head||document.documentElement).appendChild(style);
-  }
-})();
-
-/* SakaLuX Standalone Dock Bootstrap — END */
+/* Company Intelligence supports the shared SakaLuX standalone dock and Script Hub. */
 
 
 
@@ -293,7 +83,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.35',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.34',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
