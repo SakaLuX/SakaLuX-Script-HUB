@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.34** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v5.3.34** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.

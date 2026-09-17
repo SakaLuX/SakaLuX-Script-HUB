@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.54** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.9.54** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.

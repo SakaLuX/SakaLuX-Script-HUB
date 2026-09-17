@@ -12,7 +12,7 @@
 
 ## Current release note
 
-**v1.2.13** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.2.13** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
 
 ## Recommended
 - Use together with SakaLuX Script Hub for consistent controls and status handling.
@@ -37,3 +37,13 @@ All Rights Reserved — SakaLuX [2380374].
 ### v1.2.9
 
 - Performance/UI optimization: reduces duplicate high-frequency DOM work and aligns Chat Intelligence surfaces with the shared SakaLuX Hub-style UI foundation.
+
+
+## Release history
+
+### v1.2.13 — Full-screen performance
+- Uses the full mobile viewport for SakaLuX panels.
+- Removes backdrop blur and other expensive mobile visual effects.
+- Reduces unnecessary observer/render work where applicable.
+- Improves TornPDA scroll and tap responsiveness.
+
