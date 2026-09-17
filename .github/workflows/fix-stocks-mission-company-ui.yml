@@ -3,6 +3,7 @@ name: Fix Stocks Mission Company UI
 on:
   push:
     paths:
+      - '.github/workflows/fix-stocks-mission-company-ui.yml'
       - '.github/fix-stocks-mission-company-ui.trigger'
 
 permissions:
