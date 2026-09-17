@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hubtest
 // @namespace    sakalux.script.hub.test
-// @version      1.9.57
+// @version      1.9.58
 // @description  Full TEST build of SakaLuX Script Hub with TornPDA fullscreen viewport sizing.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.57';
+    const VERSION = '1.9.58';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2224,6 +2224,61 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 #sakalux-hub-panel>.slh-bottom .slh-bottom-btn{height:50px!important;min-height:50px!important;box-shadow:none!important}
 #sakalux-hub-panel>.slh-footer{position:relative!important;inset:auto!important;flex:0 0 38px!important;height:38px!important;min-height:38px!important;margin:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;background:#080d13!important;border-top:1px solid rgba(223,154,55,.52)!important;z-index:3!important}
 #sakalux-hub-overlay *,#sakalux-hub-panel *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;animation:none!important;transition:none!important}
+}`;
+  (document.head||document.documentElement).appendChild(st);
+})();
+
+/* hubtest v1.9.58 — compact rounded bottom footer */
+(()=>{
+  const id='sakalux-hubtest-footer-1958';
+  if(document.getElementById(id)) return;
+  const st=document.createElement('style');
+  st.id=id;
+  st.textContent=`@media(max-width:820px){
+#sakalux-hub-panel{
+  padding-bottom:0!important;
+  border-radius:0 0 18px 18px!important;
+  overflow:hidden!important;
+}
+#sakalux-hub-panel>.slh-bottom{
+  position:relative!important;
+  flex:0 0 58px!important;
+  height:58px!important;
+  min-height:58px!important;
+  max-height:58px!important;
+  margin:0!important;
+  padding:4px 14px!important;
+  box-sizing:border-box!important;
+}
+#sakalux-hub-panel>.slh-bottom .slh-bottom-grid{
+  height:50px!important;
+  min-height:50px!important;
+  max-height:50px!important;
+}
+#sakalux-hub-panel>.slh-bottom .slh-bottom-btn{
+  height:50px!important;
+  min-height:50px!important;
+  max-height:50px!important;
+}
+#sakalux-hub-panel>.slh-footer{
+  position:relative!important;
+  inset:auto!important;
+  flex:0 0 30px!important;
+  height:30px!important;
+  min-height:30px!important;
+  max-height:30px!important;
+  margin:0!important;
+  padding:0 8px!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  line-height:30px!important;
+  overflow:hidden!important;
+  border-radius:0 0 18px 18px!important;
+  background:#080d13!important;
+  border-top:1px solid rgba(223,154,55,.52)!important;
+}
 }`;
   (document.head||document.documentElement).appendChild(st);
 })();
