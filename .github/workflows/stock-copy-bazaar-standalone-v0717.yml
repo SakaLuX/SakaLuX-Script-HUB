@@ -1,10 +1,9 @@
-name: Stock v0.7.17 shared standalone bootstrap
+name: Company v1.8.37 metadata synchronization
 
 on:
   push:
     paths:
       - '.github/workflows/stock-copy-bazaar-standalone-v0717.yml'
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,104 +17,120 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Backup and patch Stock
+      - name: Backup and synchronize Company metadata
         shell: python
         run: |
           from pathlib import Path
-          import re, json
+          import json, re
 
-          stock_path = Path('SakaLuX-Stock-Manager-Advisor.user.js')
-          bazaar_path = Path('SakaLuX-Bazaar-Thanker-PDA.user.js')
-          stock = stock_path.read_text(encoding='utf-8')
-          bazaar = bazaar_path.read_text(encoding='utf-8')
+          backup=Path('backups/company-v1.8.37-release-metadata-2026-09-18')
+          backup.mkdir(parents=True,exist_ok=True)
+          dp=Path('greasyfork/Company-Intelligence.md')
+          rp=Path('scripts.json')
+          sp=Path('SakaLuX-Company-Intelligence-v1.0.0.user.js')
+          doc=dp.read_text(encoding='utf-8')
+          raw=rp.read_text(encoding='utf-8')
+          script=sp.read_text(encoding='utf-8')
 
-          backup = Path('backups/stock-v0.7.17-bazaar-standalone-bootstrap-2026-09-18')
-          backup.mkdir(parents=True, exist_ok=True)
-          (backup / 'SakaLuX-Stock-Manager-Advisor-v0.7.16.user.js').write_text(stock, encoding='utf-8')
+          (backup/'Company-Intelligence.before.md').write_text(doc,encoding='utf-8')
+          (backup/'scripts.before.json').write_text(raw,encoding='utf-8')
+          (backup/'SakaLuX-Company-Intelligence-v1.8.37.user.js').write_text(script,encoding='utf-8')
 
-          begin = '/* SakaLuX Standalone Dock Bootstrap — BEGIN */'
-          end = '/* SakaLuX Standalone Dock Bootstrap — END */'
-          b0 = bazaar.index(begin)
-          b1 = bazaar.index(end, b0) + len(end)
-          block = bazaar[b0:b1]
+          if '// @version      1.8.37' not in script:
+              raise SystemExit('Company userscript is not v1.8.37')
 
-          # Stock gets the exact Bazaar shared bootstrap, changing only module identity/version.
-          block = re.sub(
-              r'const SELF=Object\.assign\([^\n]+\);',
-              "const SELF=Object.assign({\"id\":\"stock-manager-advisor\",\"name\":\"Stocks\",\"icon\":\"📊\",\"selector\":\"#sakalux-module-bridge-stock-manager-advisor\",\"fallback\":\"https://www.torn.com/page.php?sid=stocks\"},{version:'0.7.17'});",
-              block,
-              count=1,
-          )
+          current='''## Current release note
 
-          # Remove any previous copied bootstrap before inserting the Bazaar source-of-truth block.
-          if begin in stock and end in stock:
-              s0 = stock.index(begin)
-              s1 = stock.index(end, s0) + len(end)
-              stock = stock[:s0] + stock[s1:]
+**v1.8.37 — Professional TornPDA header + shared standalone integration**
+- Rebuilds the mobile header so the Company title uses the available width cleanly.
+- Keeps Refresh, API Key and Close grouped tightly on the right and inside the viewport.
+- Moves Employee / Director to a dedicated full-width second row with equal-width buttons.
+- Preserves the shared Bazaar-style Standalone Dock bootstrap: Company registers as a module in the common dock instead of creating a second standalone.
+- Keeps Company opening through its module bridge above the shared Standalone Dock.
+'''
+          doc=re.sub(r'## Current release note\n.*?(?=\n## Recommended)',current.rstrip()+'\n',doc,count=1,flags=re.S)
+          doc=re.sub(r'- The userscript header, runtime `APP\.version`, Hub registry entry and this information page are synchronized at \*\*v[^*]+\*\*\.', '- The userscript header, runtime version, `scripts.json` registry entry and this information page are synchronized at **v1.8.37**.', doc, count=1)
+          doc=re.sub(r'\n## Current release note — v1\.8\.33\n.*?Shared standalone dock behavior is unchanged\.\n?', '\n', doc, flags=re.S)
+          doc=re.sub(r'\n## Current release note — v1\.8\.34\n.*?balanced API action buttons\.\n?', '\n', doc, flags=re.S)
+          doc=re.sub(r'\n- v1\.8\.36: Fixed TornPDA/mobile Company header overflow\..*?unchanged\.\n?', '\n', doc, flags=re.S)
 
-          # Remove the old Stock-only standalone registration shim. The shared bootstrap now owns registration.
-          stock = re.sub(
-              r"\n\s*let entry=document\.querySelector\('\[data-slx-standalone-registration=\\\"stock-manager-advisor\\\"\]'\);\n\s*if\(!entry\)\{entry=document\.createElement\('span'\);entry\.hidden=true;entry\.setAttribute\('data-slx-standalone-registration','stock-manager-advisor'\);document\.body\.appendChild\(entry\);\}\n\s*Object\.assign\(entry\.dataset,\{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:APP\.stocksUrl,version:APP\.version\}\);(?:\n\s*setTimeout\([^\n]+\);)?",
-              '',
-              stock,
-              count=1,
-          )
+          h='## Release history / Changelog\n'
+          i=doc.find(h)
+          if i<0: raise SystemExit('changelog header missing')
+          s=i+len(h)
+          tail=doc[s:]
+          tail=re.sub(r'\n*### v1\.8\.37.*?(?=\n### v1\.8\.31)', '\n', tail, count=1, flags=re.S)
+          recent='''
+### v1.8.37 — Professional TornPDA header layout
+- Rebuilds the Company mobile header into a stable two-row layout.
+- Gives the title the remaining width instead of squeezing it between controls.
+- Groups Refresh, API Key and Close tightly on the right and keeps all three inside the viewport.
+- Places Employee / Director on a full-width second row with equal halves.
+- Keeps shared standalone behavior unchanged.
 
-          stock = stock.replace('// @version      0.7.16', '// @version      0.7.17', 1)
-          stock = stock.replace("version: '0.7.16'", "version: '0.7.17'", 1)
+### v1.8.36 — Mobile header overflow guard
+- Keeps Refresh, API Key and Close visible on narrow TornPDA screens.
+- Moves Employee / Director away from the action-button row to prevent right-side overflow.
 
-          header_end = '// ==/UserScript=='
-          pos = stock.index(header_end) + len(header_end)
-          stock = stock[:pos] + '\n\n' + block + '\n\n' + stock[pos:].lstrip('\n')
-          stock_path.write_text(stock, encoding='utf-8')
+### v1.8.35 — Shared Standalone Dock bootstrap
+- Copies the common Bazaar-style standalone bootstrap into Company.
+- Uses the shared `sakalux-standalone-dock`, style, launcher and registration IDs.
+- Registers Company as `company-intelligence`; whichever SakaLuX module loads first owns the common dock and later modules only join it.
+- Does not create a second Company-specific standalone menu.
 
-          # Registry: module version only. Script Hub userscript is intentionally untouched.
-          reg_path = Path('scripts.json')
-          reg = json.loads(reg_path.read_text(encoding='utf-8'))
-          for item in reg.get('scripts', []):
-              if item.get('id') == 'stock-manager-advisor':
-                  item['version'] = '0.7.17'
-                  rel = item.setdefault('release', {})
-                  rel['version'] = '0.7.17'
-                  rel['date'] = '2026-09-18'
-                  rel['notes'] = [
-                      'Copies the shared Standalone Dock bootstrap from Bazaar and registers Stocks as a module in the same common dock.',
-                      'Uses the common sakalux-standalone-dock, launcher, style and registration IDs; it does not create a Stock-specific standalone dock.',
-                      'Whichever SakaLuX module loads first owns the shared dock; Stocks only joins the existing dock when one is already present.'
-                  ]
-                  break
-          reg_path.write_text(json.dumps(reg, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+### v1.8.34 — Elimination-style controls
+- Aligns the Company header and API controls with the compact Elimination layout.
+- Normalizes action-button sizing, tabs and API action spacing.
 
-          doc_path = Path('greasyfork/Stock-Manager-Advisor.md')
-          doc = doc_path.read_text(encoding='utf-8')
-          doc = re.sub(r'(?m)^\*\*v0\.7\.\d+\*\*$', '**v0.7.17**', doc, count=1)
-          note = '''\n### v0.7.17 — Shared Bazaar standalone bootstrap\n- Copies the current Bazaar Standalone Dock bootstrap into Stock Manager.\n- Uses the same common dock/launcher/style/registration IDs as Bazaar and the other SakaLuX modules.\n- Stocks registers only as `stock-manager-advisor`; it does not create a separate Stock standalone menu.\n- The first loaded SakaLuX module creates the shared dock and all later modules attach to it.\n- Keeps the existing Stock module bridge as the Stocks row open target.\n'''
-          if '### v0.7.17' not in doc:
-              marker = '## Release history / Changelog'
-              if marker in doc:
-                  doc = doc.replace(marker, marker + '\n' + note, 1)
-              else:
-                  doc += note
-          doc_path.write_text(doc, encoding='utf-8')
+### v1.8.33 — Standalone bridge opening
+- Makes the Company standalone row open through the Company module bridge.
+- Layers the Company panel above the shared SakaLuX Scripts Standalone panel.
+
+### v1.8.32 — Footer and standalone compatibility
+- Keeps Company compatible with the shared compact donation footer and standalone registration flow used across SakaLuX modules.
+
+'''
+          doc=doc[:s]+recent+tail.lstrip('\n')
+          doc=re.sub(r'\n{3,}','\n\n',doc).rstrip()+'\n'
+          dp.write_text(doc,encoding='utf-8')
+
+          reg=json.loads(raw)
+          e=next((x for x in reg.get('scripts',[]) if x.get('id')=='company-intelligence'),None)
+          if not e: raise SystemExit('company-intelligence missing')
+          e['version']='1.8.37'
+          e['buttonSelector']='#sakalux-module-bridge-company-intelligence'
+          e['info']='Company Intelligence provides Employee and Director workspaces for Torn company analysis. Employee tools cover current employment, work stats, position suitability, progress, trains, offers and advice. Director tools cover staff effectiveness and inactivity flags, position optimization, company growth/star direction, training rotation and commitments, train contracts, payroll/balance views, stock intelligence, benchmarks, timeline/history and reports. It uses Torn company/user API data where permitted, stores planning data locally, opens through the Company module bridge, and participates in the shared Bazaar-style SakaLuX Standalone Dock without creating a second standalone menu. It is decision-support only and does not automate company gameplay actions.'
+          e['release']={
+            'version':'1.8.37',
+            'date':'2026-09-18',
+            'notes':[
+              'Rebuilds the TornPDA Company header so the title, Refresh, API Key and Close controls stay cleanly inside the viewport.',
+              'Moves Employee / Director to a dedicated full-width second row with equal-width controls.',
+              'Uses the shared Bazaar-style Standalone Dock bootstrap and registers Company as a module instead of creating a separate standalone.',
+              'Keeps Company opening through its module bridge above the shared Standalone Dock.'
+            ]
+          }
+          rp.write_text(json.dumps(reg,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
       - name: Validate
         shell: bash
         run: |
           set -euo pipefail
-          f='SakaLuX-Stock-Manager-Advisor.user.js'
-          node --check "$f"
+          node --check SakaLuX-Company-Intelligence-v1.0.0.user.js
           python3 -m json.tool scripts.json >/dev/null
-          grep -q '// @version      0.7.17' "$f"
-          grep -q "version: '0.7.17'" "$f"
-          grep -q 'SakaLuX Standalone Dock Bootstrap — BEGIN' "$f"
-          grep -q "DOCK_ID='sakalux-standalone-dock'" "$f"
-          grep -q "STYLE_ID='sakalux-standalone-dock-style'" "$f"
-          grep -q "REG_ATTR='data-slx-standalone-registration'" "$f"
-          grep -q 'stock-manager-advisor' "$f"
-          grep -q '#sakalux-module-bridge-stock-manager-advisor' "$f"
-          test "$(grep -c 'SakaLuX Standalone Dock Bootstrap — BEGIN' "$f")" -eq 1
-          test "$(grep -c 'SakaLuX Standalone Dock Bootstrap — END' "$f")" -eq 1
-          grep -q '### v0.7.17' greasyfork/Stock-Manager-Advisor.md
+          grep -q '^\*\*v1.8.37 — Professional TornPDA header + shared standalone integration\*\*$' greasyfork/Company-Intelligence.md
+          grep -q '^### v1.8.35 — Shared Standalone Dock bootstrap$' greasyfork/Company-Intelligence.md
+          grep -q 'synchronized at \*\*v1.8.37\*\*' greasyfork/Company-Intelligence.md
+          python3 - <<'PY'
+          import json
+          d=json.load(open('scripts.json',encoding='utf-8'))
+          e=next(x for x in d['scripts'] if x['id']=='company-intelligence')
+          assert e['version']=='1.8.37'
+          assert e['release']['version']=='1.8.37'
+          assert e['release']['date']=='2026-09-18'
+          assert e['buttonSelector']=='#sakalux-module-bridge-company-intelligence'
+          assert 'shared Bazaar-style SakaLuX Standalone Dock' in e['info']
+          PY
 
       - name: Commit
         shell: bash
@@ -123,6 +138,6 @@ jobs:
           set -euo pipefail
           git config user.name 'SakaLuX Release Bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add SakaLuX-Stock-Manager-Advisor.user.js scripts.json greasyfork/Stock-Manager-Advisor.md backups/stock-v0.7.17-bazaar-standalone-bootstrap-2026-09-18
-          git commit -m 'Stocks v0.7.17: use shared Bazaar standalone bootstrap'
+          git add greasyfork/Company-Intelligence.md scripts.json backups/company-v1.8.37-release-metadata-2026-09-18
+          git commit -m 'Company v1.8.37: synchronize info release and changelog'
           git push
