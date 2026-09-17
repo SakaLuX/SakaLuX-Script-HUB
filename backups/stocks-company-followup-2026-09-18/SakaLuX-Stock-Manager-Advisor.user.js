@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.15
+// @version      0.7.14
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -53,7 +53,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.15',
+    version: '0.7.14',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -1072,7 +1072,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
   function panicButton() {
-    if($('#slx-stock-panic')) return;
+    if(!bool(K.enabled,true)||$('#slx-stock-panic')) return;
     const b=document.createElement('button');
     b.id='slx-stock-panic'; b.type='button'; b.textContent='PANIC'; b.title='Panic v2 · preview and vault on-hand cash into the configured stock target';
     b.addEventListener('click', panic);
@@ -1412,7 +1412,6 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 #slx-stock-panel .primary{background:#194f86;border-color:#2e77b9} #slx-stock-panel .danger{background:#64131c;border-color:#a92c3b} #slx-stock-panel .good{color:#55d98a}.bad{color:#ff6b78}.muted{color:#8392a4} #slx-stock-panel .warn{color:#ffd36b} #slx-stock-panel button:disabled,#slx-stock-panic:disabled{opacity:.5;cursor:not-allowed} #slx-stock-panel[data-trading="1"] .card{outline:1px solid #8b6a1f}
 #slx-stock-panel #slx-stock-status{padding:8px;border-radius:8px;background:#111b26;font-size:11px;color:#9fb0c3} #slx-stock-panel #slx-stock-status[data-kind="ok"]{color:#61e291} #slx-stock-panel #slx-stock-status[data-kind="bad"]{color:#ff7a86} #slx-stock-panel #slx-stock-status[data-kind="warn"]{color:#ffd36b}
 #slx-stock-panel .adv-row{display:grid;grid-template-columns:70px 1fr 1fr 1.4fr 1fr;gap:7px;padding:7px 0;border-bottom:1px solid #1c2a38;font-size:10px;align-items:center}
-#slx-stock-panel .section:has(#slx-stock-api){display:none!important}
 #slx-stock-panel .api-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}#slx-stock-panel .api-head .title{margin:0;flex:1}
 #slx-stock-panel .api-badge{padding:4px 7px;border-radius:999px;border:1px solid #44566a;background:#121e2a;color:#98aabd;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
 #slx-stock-panel .api-badge[data-kind="ok"]{border-color:#267c52;color:#63df9a;background:#0d281d}#slx-stock-panel .api-badge[data-kind="warn"]{border-color:#8b6a1f;color:#ffd36b;background:#2a210d}
@@ -1699,7 +1698,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     sheet.querySelector('#slx-stock-api-clear').onclick=()=>{del(K.api);input.value='';result.textContent='Local API key cleared.';sheet.querySelector('#slx-stock-api-source').textContent='Active source: No key configured';refreshInlinePanel();};
   }
 
-  function openPanel() { style(); premiumStyle(); const p=panel(); normalizeStockPanelChrome(); const legacyApi=p.querySelector('#slx-stock-api')?.closest('.section'); if(legacyApi) legacyApi.style.setProperty('display','none','important'); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Transaction History',renderTransactionHistory); safeRender('Action Log',renderActionLog); }
+  function openPanel() { style(); premiumStyle(); const p=panel(); normalizeStockPanelChrome(); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Transaction History',renderTransactionHistory); safeRender('Action Log',renderActionLog); }
 
   function managerLauncher() { $('#slx-stock-open')?.remove(); }
 
@@ -1751,7 +1750,6 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     let entry=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');
     if(!entry){entry=document.createElement('span');entry.hidden=true;entry.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(entry);}
     Object.assign(entry.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:APP.stocksUrl,version:APP.version});
-    setTimeout(()=>{try{const e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(e?.isConnected){const parent=e.parentNode;e.remove();(parent||document.body||document.documentElement).appendChild(e);}}catch{}},80);
     window.SakaLuXStockManagerAdvisor={
       name:APP.name,version:APP.version,open:moduleOpen,refresh:moduleRefresh,setEnabled,
       toggleEnabled:()=>setEnabled(!bool(K.enabled,true)),isEnabled:()=>bool(K.enabled,true),
@@ -1775,7 +1773,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     runtimeObserver?.disconnect();runtimeObserver=null;
     clearTimeout(inlineMountTimer);clearInterval(stockPollTimer);clearTimeout(stockPollStop);
     stockPollTimer=0;stockPollStop=0;
-    $('#slx-stock-open')?.remove();$('#slx-stock-inline')?.remove();
+    $('#slx-stock-open')?.remove();$('#slx-stock-panic')?.remove();$('#slx-stock-inline')?.remove();
     $$('.slx-stock-row-tools').forEach(x=>x.remove());
     if(S.panel)S.panel.dataset.open='0';
   }
@@ -1790,9 +1788,8 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
   }
 
   async function init() {
-    style(); panicButton();
     if(!bool(K.enabled,true)||runtimeObserver)return;
-    premiumStyle(); restoreCache(); managerLauncher();
+    style(); premiumStyle(); restoreCache(); panicButton(); managerLauncher();
     if(isStocks()) setTimeout(()=>scheduleInlineMount(true),220);
     try { if(sessionStorage.getItem('SakaLuX_STOCK_KEY_SETUP_PENDING')==='1'){sessionStorage.removeItem('SakaLuX_STOCK_KEY_SETUP_PENDING');setTimeout(()=>{if(bool(K.enabled,true))openPanel();},700);} } catch {}
     if(isStocks()) {
@@ -1822,8 +1819,4 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 })();
 
 /* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 */
-(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.7.15'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
-
-
-/* SAKALUX_STOCKS_FOLLOWUP_V0715 */
-(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.7.15'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
+(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.7.14'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();

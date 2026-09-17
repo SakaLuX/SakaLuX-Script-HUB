@@ -166,5 +166,5 @@
 - Added CSV/report exports and complete JSON backup/restore.
 - Star predictions remain confidence-based and never invent an exact probability without comparison data.
 
-## Current release note — v1.8.32
+## Current release note — v1.8.33
 - Company now opens through the standalone module bridge and its panel is layered above SakaLuX Scripts Standalone.
