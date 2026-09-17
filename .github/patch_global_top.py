@@ -1,0 +1,151 @@
+from pathlib import Path
+import json, re
+
+versions = {
+    'enhancer': ('SakaLuX-Enhancer-Guard.user.js','1.3.35','1.3.36','VERSION','greasyfork/Enhancer-Guard.md'),
+    'bazaar': ('SakaLuX-Bazaar-Thanker-PDA.user.js','5.3.27','5.3.28','BAZAAR_VERSION','greasyfork/Bazaar-Thanker.md'),
+    'mission-rewards': ('SakaLuX-Mission-Rewards.user.js','1.0.22','1.0.23','VERSION','greasyfork/Mission-Rewards.md'),
+    'market-intelligence': ('SakaLuX-Market-Intelligence.user.js','1.17.23','1.17.24','VERSION','greasyfork/Market-Intelligence.md'),
+    'elimination-assistant': ('SakaLuX-Elimination-Assistant.user.js','1.3.33','1.3.34','VERSION','greasyfork/Elimination-Assistant.md'),
+}
+
+top_js = r'''
+  // SakaLuX shared mobile top-alignment contract.
+  (() => {
+    const id='sakalux-global-top-align-v3';
+    if(document.getElementById(id)) return;
+    const st=document.createElement('style');
+    st.id=id;
+    st.textContent=`@media(max-width:700px){
+body [id^="sakalux-"][id*="overlay"],body [id^="sakalux-"][id*="modal"],
+body [id^="slx-"][id*="overlay"],body [id^="slx-"][id*="modal"],
+body [id^="sl-"][id*="overlay"],body [id^="sl-"][id*="modal"],
+#sl-eg-overlay,#sl-mr-settings-overlay,#sl-mi-overlay,#ci-root{
+ align-items:flex-start!important;justify-content:center!important;padding-top:0!important;margin-top:0!important;
+}
+body [id^="sakalux-"][id*="panel"],body [id^="slx-"][id*="panel"],body [id^="sl-"][id*="panel"],
+#sl-eg-panel,#sl-mr-settings-panel,#sl-mi-panel,#ci-root .ci-shell{
+ margin-top:0!important;align-self:flex-start!important;
+}
+}`;
+    (document.head||document.documentElement).appendChild(st);
+  })();
+'''
+
+def bump_script(path, old, new, runtime):
+    p=Path(path); s=p.read_text(encoding='utf-8')
+    s,n=re.subn(r'(^// @version\s+)'+re.escape(old)+r'(\s*$)',lambda m:m.group(1)+new+m.group(2),s,count=1,flags=re.M)
+    if n!=1: raise SystemExit(f'{path}: @version baseline mismatch')
+    pat=re.compile(r'(const\s+'+re.escape(runtime)+r'\s*=\s*[\'\"])([^\'\"]+)([\'\"])')
+    if pat.search(s):
+        s=pat.sub(lambda m:m.group(1)+new+m.group(3),s,count=1)
+    else:
+        raise SystemExit(f'{path}: runtime version constant missing')
+    if 'sakalux-global-top-align-v3' not in s:
+        m=re.search(r'[\"\']use strict[\"\']\s*;?',s)
+        if not m: raise SystemExit(f'{path}: use strict marker missing')
+        s=s[:m.end()]+top_js+s[m.end():]
+    p.write_text(s,encoding='utf-8')
+
+for sid,(path,old,new,runtime,_) in versions.items():
+    bump_script(path,old,new,runtime)
+
+cp=Path('SakaLuX-Chat-Intelligence.user.js'); cs=cp.read_text(encoding='utf-8')
+cs,n=re.subn(r'(^// @version\s+)1\.2\.9(\s*$)',r'\g<1>1.2.10\g<2>',cs,count=1,flags=re.M)
+if n!=1: raise SystemExit('Chat metadata baseline mismatch')
+cs,n=re.subn(r"const V=['\"][^'\"]+['\"]","const V='1.2.10'",cs,count=1)
+if n!=1: raise SystemExit('Chat runtime version missing')
+if 'sakalux-global-top-align-v3' not in cs:
+    m=re.search(r'[\"\']use strict[\"\']\s*;?',cs)
+    if not m: raise SystemExit('Chat use strict marker missing')
+    cs=cs[:m.end()]+top_js+cs[m.end():]
+cp.write_text(cs,encoding='utf-8')
+
+hp=Path('SakaLuX-Script-Hub.user.js'); h=hp.read_text(encoding='utf-8')
+h=h.replace('// @version      1.9.46','// @version      1.9.47',1)
+h=h.replace("const VERSION = '1.9.46';","const VERSION = '1.9.47';",1)
+if '// @version      1.9.47' not in h or "const VERSION = '1.9.47';" not in h:
+    raise SystemExit('Hub version baseline mismatch')
+
+for sid,(_,old,new,_,_) in versions.items():
+    pat=re.compile(r"(id:\s*['\"]"+re.escape(sid)+r"['\"][\s\S]{0,500}?version:\s*['\"])("+re.escape(old)+r")(['\"])")
+    h,n=pat.subn(lambda m:m.group(1)+new+m.group(3),h,count=1)
+    if n!=1: raise SystemExit(f'Hub fallback mismatch: {sid}')
+
+final_css = r'''
+/* v1.9.47 FINAL PDA OVERRIDE */
+@media(max-width:700px){
+#${IDS.overlay}{align-items:flex-start!important;justify-content:center!important;padding:0!important;margin:0!important}
+#${IDS.panel}{margin:0 auto!important;align-self:flex-start!important;border-radius:0 0 18px 18px!important;max-height:calc(100dvh - 72px)!important}
+.slh-card{display:grid!important;grid-template-columns:42px minmax(0,1fr) 136px!important;grid-template-rows:auto!important;align-items:center!important;column-gap:8px!important;row-gap:0!important;padding:9px!important;min-height:78px!important}
+.slh-card .slh-icon{grid-column:1!important;grid-row:1!important;margin:0!important}
+.slh-card .slh-card-copy{grid-column:2!important;grid-row:1!important;min-width:0!important;margin:0!important}
+.slh-card .slh-module-controls{grid-column:3!important;grid-row:1!important;display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-rows:32px 32px!important;grid-template-areas:'info toggle' 'new primary'!important;gap:5px!important;width:136px!important;min-width:136px!important;margin:0!important;align-self:center!important}
+.slh-card .slh-card-tools{display:contents!important}
+.slh-card .slh-info-btn{grid-area:info!important}.slh-card .slh-new-btn{grid-area:new!important}.slh-card .slh-switch-wrap{grid-area:toggle!important}.slh-card .slh-primary{grid-area:primary!important}
+.slh-card .slh-info-btn,.slh-card .slh-new-btn,.slh-card .slh-switch-wrap,.slh-card .slh-primary{width:100%!important;min-width:0!important;height:32px!important;min-height:32px!important;padding:0 4px!important;margin:0!important;font-size:8px!important;border-radius:9px!important}
+.slh-settings .slh-setting-row{display:grid!important;grid-template-columns:minmax(0,1fr) 38px!important;align-items:center!important;gap:10px!important}
+.slh-settings .slh-setting-toggle{width:38px!important;min-width:38px!important;max-width:38px!important;height:22px!important;min-height:22px!important;padding:2px!important;border-radius:999px!important;justify-self:end!important}
+.slh-settings .slh-setting-toggle i{width:16px!important;height:16px!important;margin:0!important}.slh-settings .slh-setting-toggle.on i{transform:translateX(16px)!important}
+}
+'''
+if 'v1.9.47 FINAL PDA OVERRIDE' not in h:
+    start=h.find('function injectCss()')
+    if start<0: raise SystemExit('Hub injectCss missing')
+    anchor='document.head.appendChild(style);'
+    pos=h.find(anchor,start)
+    if pos<0: raise SystemExit('Hub injectCss append missing')
+    h=h[:pos]+"style.textContent += `"+final_css+"`;\n        "+h[pos:]
+
+entry = '''        {
+            version: '1.9.47',
+            date: '2026-09-17',
+            changes: [
+                'Applies the mobile top-alignment contract directly in every managed module and Chat Intelligence.',
+                'Forces module INFO, NEW, ON/OFF and OPEN/SETTINGS controls into the right-side 2x2 block after legacy CSS.',
+                'Normalizes compact Hub Settings switches after all older mobile rules.'
+            ]
+        },
+'''
+marker='    const HUB_CHANGELOG = [\n'
+if "version: '1.9.47'" not in h:
+    h=h.replace(marker,marker+entry,1)
+hp.write_text(h,encoding='utf-8')
+
+rp=Path('scripts.json'); data=json.loads(rp.read_text(encoding='utf-8'))
+for item in data['scripts']:
+    sid=item['id']
+    if sid in versions:
+        new=versions[sid][2]
+        item['version']=new
+        item['release']={'version':new,'date':'2026-09-17','notes':['Mobile panel now opens aligned to the top of the TornPDA viewport.','Top alignment is enforced by the module itself instead of relying only on Script Hub.']}
+rp.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+def update_doc(path, old, new):
+    p=Path(path); s=p.read_text(encoding='utf-8')
+    s,n1=re.subn(r'(## Current version\s*\n\s*\*\*v)'+re.escape(old)+r'(\*\*)',lambda m:m.group(1)+new+m.group(2),s,count=1,flags=re.I)
+    if not n1:
+        s,n1=re.subn(r'(\*\*Current version:\s*v)'+re.escape(old)+r'(\*\*)',lambda m:m.group(1)+new+m.group(2),s,count=1,flags=re.I)
+    s,n2=re.subn(r'(## Current release note\s*\n+\*\*v)'+re.escape(old)+r'(\*\*)',lambda m:m.group(1)+new+m.group(2),s,count=1,flags=re.I)
+    if not n1 or not n2: raise SystemExit(f'{path}: release headings mismatch')
+    if not re.search(r'^###\s+v'+re.escape(new)+r'\b',s,re.M):
+        m=re.search(r'^###\s+v\d',s,re.M)
+        add=f'### v{new} — Mobile top alignment\n- Opens the script panel from the top of the TornPDA viewport.\n- Uses the shared SakaLuX top-alignment contract.\n\n'
+        s=s[:m.start()]+add+s[m.start():] if m else s+'\n'+add
+    p.write_text(s,encoding='utf-8')
+
+for sid,(_,old,new,_,doc) in versions.items():
+    update_doc(doc,old,new)
+update_doc('greasyfork/Chat-Intelligence.md','1.2.9','1.2.10')
+
+p=Path('greasyfork/Script-Hub.md'); s=p.read_text(encoding='utf-8')
+s=s.replace('**v1.9.46**','**v1.9.47**',1)
+s,n=re.subn(r'(## Current release note\s*\n+\*\*v)1\.9\.46(\*\*)',r'\g<1>1.9.47\g<2>',s,count=1,flags=re.I)
+if n!=1: raise SystemExit('Hub release note baseline mismatch')
+for sid,(_,old,new,_,_) in versions.items():
+    s=s.replace(f'**v{old}**',f'**v{new}**',1)
+if '### v1.9.47 ' not in s:
+    mark='## Release history\n'
+    add='### v1.9.47 — Global mobile top alignment\n\n- Applies top alignment directly in Hub, managed modules and Chat Intelligence.\n- Enforces the compact right-side 2×2 Hub controls after legacy CSS.\n- Keeps Settings switches compact and uniform.\n\n'
+    s=s.replace(mark,mark+add,1)
+p.write_text(s,encoding='utf-8')
