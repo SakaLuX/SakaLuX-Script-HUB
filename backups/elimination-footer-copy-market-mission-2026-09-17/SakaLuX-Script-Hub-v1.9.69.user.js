@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.70
+// @version      1.9.69
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.70';
+    const VERSION = '1.9.69';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -92,7 +92,6 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
     const HUB_CHANGELOG = [
-        {version:'1.9.70',date:'2026-09-17',changes:['Synchronizes Market Intelligence v1.17.37 and Mission Rewards v1.0.36.','Both modules now use the complete working Elimination Assistant donation/footer implementation with their own panel selectors and footer IDs.']},
         {version:'1.9.69',date:'2026-09-17',changes:['Prevents Script Hub from injecting its legacy author-only fallback footer into Market Intelligence settings.','Market Intelligence keeps exactly one footer: SEND MONEY, SEND ITEMS, then Made with ❤️ by SakaLuX [2380374].','Preserves Market settings, calculations, cache controls and Suite launcher behavior unchanged.']},
         {version:'1.9.68',date:'2026-09-17',changes:['Synchronizes Stocks v0.7.12 and its full-width native-row layout release notes in the registry and offline INFO/NEW.']},
         {version:'1.9.67',date:'2026-09-17',changes:['Synchronizes Stocks v0.7.11 and its compact UI/footer release details in the registry and offline fallback.']},
@@ -569,7 +568,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.36',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.35',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -585,7 +584,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.37',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.36',
                 description: 'Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
