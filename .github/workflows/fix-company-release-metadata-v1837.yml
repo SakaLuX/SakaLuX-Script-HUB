@@ -42,7 +42,6 @@ jobs:
           if '// @version      1.8.37' not in script:
               raise SystemExit('Company userscript is not v1.8.37')
 
-          # Rebuild the current release section so it describes the real current release.
           current_release = '''## Current release note
 
 **v1.8.37 — Professional TornPDA header + shared standalone integration**
@@ -54,7 +53,6 @@ jobs:
 '''
           doc = re.sub(r'## Current release note\n.*?(?=\n## Recommended)', current_release.rstrip()+'\n', doc, count=1, flags=re.S)
 
-          # Keep the Important synchronization statement accurate.
           doc = re.sub(
               r'- The userscript header, runtime `APP\.version`, Hub registry entry and this information page are synchronized at \*\*v[^*]+\*\*\.',
               '- The userscript header, runtime version, `scripts.json` registry entry and this information page are synchronized at **v1.8.37**.',
@@ -62,19 +60,16 @@ jobs:
               count=1,
           )
 
-          # Remove stray release-note fragments that were appended outside the changelog.
           doc = re.sub(r'\n## Current release note — v1\.8\.33\n.*?Shared standalone dock behavior is unchanged\.\n?', '\n', doc, flags=re.S)
           doc = re.sub(r'\n## Current release note — v1\.8\.34\n.*?balanced API action buttons\.\n?', '\n', doc, flags=re.S)
           doc = re.sub(r'\n- v1\.8\.36: Fixed TornPDA/mobile Company header overflow\..*?unchanged\.\n?', '\n', doc, flags=re.S)
 
-          # Ensure the missing recent releases are represented in the changelog, in order.
           history_header = '## Release history / Changelog\n'
           idx = doc.find(history_header)
           if idx < 0:
               raise SystemExit('Release history header missing')
           start = idx + len(history_header)
           tail = doc[start:]
-          # Strip existing 1.8.37 block so we can write a complete recent sequence once.
           tail = re.sub(r'\n*### v1\.8\.37.*?(?=\n### v1\.8\.31)', '\n', tail, count=1, flags=re.S)
           recent = '''
 ### v1.8.37 — Professional TornPDA header layout
