@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.34
+// @version      1.8.33
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -83,7 +83,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.34',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.33',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -869,40 +869,8 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
 
 
 /* SAKALUX_COMPANY_ABOVE_STANDALONE_V1832 */
-(()=>{const st=document.createElement('style');st.textContent='#ci-root#ci-root{z-index:2147483646!important}';(document.head||document.documentElement).appendChild(st);const fix=()=>{const e=document.querySelector('[data-slx-standalone-registration="company-intelligence"]');if(e){e.dataset.selector='#sakalux-module-bridge-company-intelligence';e.dataset.version='1.8.34';}};fix();setTimeout(fix,100);setTimeout(fix,700);})();
+(()=>{const st=document.createElement('style');st.textContent='#ci-root#ci-root{z-index:2147483646!important}';(document.head||document.documentElement).appendChild(st);const fix=()=>{const e=document.querySelector('[data-slx-standalone-registration="company-intelligence"]');if(e){e.dataset.selector='#sakalux-module-bridge-company-intelligence';e.dataset.version='1.8.33';}};fix();setTimeout(fix,100);setTimeout(fix,700);})();
 
 
 /* SAKALUX_COMPANY_STANDALONE_CLICK_V1833 */
-(()=>{const fix=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="company-intelligence"]');if(e){Object.assign(e.dataset,{id:'company-intelligence',name:'Company',icon:'🏢',selector:'#sakalux-module-bridge-company-intelligence',fallback:'https://www.torn.com/joblist.php',version:'1.8.34'});}}catch{}};fix();setTimeout(fix,100);setTimeout(fix,800);setInterval(fix,5000);})();
-
-
-/* SAKALUX_COMPANY_ELIMINATION_LAYOUT_V1834 */
-(()=>{
- const st=document.createElement('style');st.id='sakalux-company-elimination-layout-v1834';st.textContent=`
-#ci-root#ci-root{z-index:2147483646!important}
-#ci-root .ci-head{display:grid!important;grid-template-columns:minmax(120px,1fr) auto 40px 40px 40px!important;align-items:center!important;gap:6px!important;padding:8px 10px!important;min-height:60px!important}
-#ci-root .ci-brand{min-width:0!important;overflow:hidden!important}
-#ci-root .ci-brand b{display:block!important;font-size:15px!important;line-height:1.1!important;white-space:normal!important}
-#ci-root .ci-brand small{display:block!important;margin-top:3px!important;font-size:9px!important;line-height:1.15!important;color:#8fa1b5!important;white-space:normal!important}
-#ci-root .ci-mode{display:grid!important;grid-template-columns:1fr 1fr!important;gap:0!important;min-width:190px!important;height:38px!important;border:1px solid #40536a!important;border-radius:10px!important;overflow:hidden!important}
-#ci-root .ci-mode button{height:38px!important;min-height:38px!important;padding:0 12px!important;border:0!important;border-radius:0!important;font-size:11px!important;white-space:nowrap!important}
-#ci-root .ci-head>.ci-icon{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;max-width:40px!important;max-height:40px!important;margin:0!important;padding:0!important;border-radius:10px!important;display:flex!important;align-items:center!important;justify-content:center!important}
-#ci-root .ci-head>.ci-icon.api{color:#f5d85f!important;background:#29240f!important;border-color:#78621b!important}
-#ci-root .ci-tabs{display:flex!important;gap:4px!important;padding:5px 7px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important}
-#ci-root .ci-tabs::-webkit-scrollbar{display:none!important}
-#ci-root .ci-tabs button{flex:0 0 auto!important;min-width:82px!important;min-height:34px!important;height:34px!important;padding:0 10px!important;border-radius:8px!important;font-size:10px!important;white-space:nowrap!important}
-#ci-root .ci-body{padding:10px!important}
-#ci-root .ci-body input#ci-api{width:100%!important;height:40px!important;min-height:40px!important;margin:5px 0 8px!important;padding:8px 10px!important;box-sizing:border-box!important;border-radius:9px!important}
-#ci-root .ci-body .ci-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;margin:8px 0!important}
-#ci-root .ci-body .ci-actions>.ci-btn{width:100%!important;min-width:0!important;min-height:40px!important;height:40px!important;margin:0!important;padding:0 8px!important;border-radius:10px!important;font-size:10px!important;line-height:1.1!important;white-space:normal!important}
-#ci-root .ci-body [data-act="save-key"],#ci-root .ci-body [data-act="test-key"]{background:linear-gradient(180deg,#377fcf,#275f9f)!important;border-color:#3d78bf!important;color:#fff!important}
-#ci-root .ci-body [data-act="clear-key"]{grid-column:1/-1!important;width:100%!important;min-height:40px!important;height:40px!important;margin:0!important;background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
-#ci-root .ci-body [data-act="create-key"]{width:100%!important;min-height:40px!important;height:40px!important;margin:0 0 8px!important;background:linear-gradient(180deg,#a87b17,#79550e)!important;border-color:#c79b34!important;color:#fff!important}
-@media(max-width:620px){
- #ci-root .ci-head{grid-template-columns:minmax(100px,1fr) 170px 38px 38px 38px!important;gap:5px!important;padding:7px!important}
- #ci-root .ci-mode{min-width:170px!important;height:36px!important}
- #ci-root .ci-mode button{height:36px!important;min-height:36px!important;padding:0 8px!important;font-size:10px!important}
- #ci-root .ci-head>.ci-icon{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;max-width:38px!important;max-height:38px!important}
-}
-`;(document.head||document.documentElement).appendChild(st);
-})();
+(()=>{const fix=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="company-intelligence"]');if(e){Object.assign(e.dataset,{id:'company-intelligence',name:'Company',icon:'🏢',selector:'#sakalux-module-bridge-company-intelligence',fallback:'https://www.torn.com/joblist.php',version:'1.8.33'});}}catch{}};fix();setTimeout(fix,100);setTimeout(fix,800);setInterval(fix,5000);})();

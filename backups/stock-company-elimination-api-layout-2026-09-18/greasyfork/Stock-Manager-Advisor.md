@@ -354,6 +354,3 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 **All Rights Reserved.**
 
 Copyright © 2026 SakaLuX [2380374].
-
-## Current release note — v0.7.16
-- Rebuilds API Access with compact Elimination-style geometry: aligned header controls, equal two-column actions, full-width create/clear controls and clean mobile scrolling.
