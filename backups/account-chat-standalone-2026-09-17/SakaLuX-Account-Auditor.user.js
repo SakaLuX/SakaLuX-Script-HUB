@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.14
+// @version      1.3.13
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -168,7 +168,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.14';
+    const VERSION = '1.3.13';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -557,14 +557,3 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 /* Compact donation controls and Elimination mobile panel geometry 1.3.12 */
 (()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sl-aa-overlay#sl-aa-overlay#sl-aa-overlay{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;padding:0!important;background:transparent!important;overflow:hidden!important;border-radius:14px!important;align-items:stretch!important;justify-content:stretch!important;}\n#sl-aa-overlay#sl-aa-overlay#sl-aa-overlay #sl-aa-panel#sl-aa-panel{position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;align-self:stretch!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;max-width:100%!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border:1px solid #3c4652!important;border-radius:14px!important;}\n#sl-aa-overlay#sl-aa-overlay#sl-aa-overlay #sl-aa-panel#sl-aa-panel{overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
-
-/* SAKALUX_GLOBAL_STANDALONE_ACCOUNT_AUDITOR */
-(()=>{
- const mount=()=>{
-  if(!document.body)return;
-  let e=document.querySelector('[data-slx-standalone-registration="account-auditor"]');
-  if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','account-auditor');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.14'});
- };
- if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
-})();
