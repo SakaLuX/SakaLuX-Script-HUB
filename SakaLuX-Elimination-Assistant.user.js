@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.38
+// @version      1.3.39
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,7 +73,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.38'});
+  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.39'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -221,7 +221,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  */
 (() => {
 'use strict';
-const VERSION = '1.3.38';
+const VERSION = '1.3.39';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -542,3 +542,104 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   (document.head||document.documentElement).appendChild(s);
 })();
 
+
+/* Elimination v1.3.39: scoped target controls and taller mobile panel. */
+(()=>{
+  const s=document.createElement('style');
+  s.id='slx-elim-ui-1339';
+  s.textContent=`
+#slx-elim #slx-targets-menu{box-sizing:border-box!important;width:206px!important;max-width:calc(100vw - 24px)!important;padding:8px!important}
+#slx-elim #slx-targets-menu .slx-target-option{min-height:42px!important;padding:7px 9px!important;gap:12px!important}
+#slx-elim #slx-targets-menu .slx-target-option span{font-size:11px!important;line-height:1.2!important}
+#slx-elim #slx-targets-menu input[type="checkbox"]{
+  appearance:none!important;-webkit-appearance:none!important;display:block!important;
+  flex:0 0 40px!important;width:40px!important;min-width:40px!important;max-width:40px!important;
+  height:22px!important;min-height:22px!important;max-height:22px!important;
+  box-sizing:border-box!important;margin:0!important;padding:0!important;border:1px solid #46576b!important;border-radius:999px!important;
+  background:radial-gradient(circle at 10px 50%,#cbd5e1 0 7px,transparent 7.5px),#25303d!important;
+  box-shadow:inset 0 1px 2px #0004!important;transform:none!important;cursor:pointer!important;
+}
+#slx-elim #slx-targets-menu input[type="checkbox"]::before,
+#slx-elim #slx-targets-menu input[type="checkbox"]::after{content:none!important;display:none!important}
+#slx-elim #slx-targets-menu input[type="checkbox"]:checked{background:radial-gradient(circle at 28px 50%,#fff 0 7px,transparent 7.5px),#2563eb!important;border-color:#3b82f6!important}
+#slx-elim #slx-targets-menu .safe-opt input:checked{background:radial-gradient(circle at 28px 50%,#fff 0 7px,transparent 7.5px),#198754!important;border-color:#2aa66a!important}
+#slx-elim #slx-targets-menu .risky-opt input:checked{background:radial-gradient(circle at 28px 50%,#fff 0 7px,transparent 7.5px),#8a6f16!important;border-color:#b69428!important}
+#slx-elim #slx-targets-clear{height:32px!important;min-height:32px!important;padding:6px 8px!important;line-height:1.2!important}
+@media(max-width:820px){
+  #slx-elim#slx-elim{top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-height:0!important;max-height:none!important;box-sizing:border-box!important}
+  #slx-elim>.slx-h,#slx-elim>.slx-t,#slx-elim>.slx-s{flex-shrink:0!important}
+  #slx-elim>.slx-body{flex:1 1 0!important;min-height:0!important;overflow:auto!important;overscroll-behavior:contain!important}
+  #slx-elim>#sakalux-inline-footer-elimination-assistant{flex:0 0 auto!important;margin-top:0!important}
+}
+`;
+  (document.head||document.documentElement).appendChild(s);
+})();
+
+/* Elimination v1.3.39: SAFE sheet stays inside its parent panel. */
+(()=>{
+ const s=document.createElement('style');s.id='slx-elim-safe-layout-1339';
+ s.textContent=`
+#slx-elim #slx-safe-list-modal#slx-safe-list-modal{
+ position:absolute!important;inset:0 0 32px!important;width:auto!important;height:auto!important;
+ min-height:0!important;max-height:none!important;max-width:none!important;
+ margin:0!important;padding:12px!important;box-sizing:border-box!important;
+ background:#0d1117!important;border-radius:0!important;overflow:hidden!important;
+ z-index:60!important;color:#e2e8f0!important;font:13px/1.4 Arial,sans-serif!important;
+}
+#slx-elim #slx-safe-list-modal.open{display:flex!important;flex-direction:column!important}
+#slx-elim #slx-safe-list-modal .slx-safe-head{flex:0 0 auto!important;align-items:center!important;gap:10px!important;padding:0 0 10px!important;border-bottom:1px solid #2d3742!important}
+#slx-elim #slx-safe-list-modal .slx-safe-head h3{flex:1!important;min-width:0!important;margin:0!important;padding:0!important;font:800 17px/1.25 Arial,sans-serif!important;color:#86efac!important}
+#slx-elim #slx-safe-list-modal .slx-a{box-sizing:border-box!important;margin:0!important;padding:8px 10px!important;min-height:36px!important;font:800 12px/1.2 Arial,sans-serif!important;border-radius:9px!important;text-align:center!important}
+#slx-elim #slx-safe-close{flex:0 0 auto!important;white-space:nowrap!important}
+#slx-elim #slx-safe-list-modal .slx-safe-note{flex:0 0 auto!important;margin:8px 0 0!important;font:12px/1.45 Arial,sans-serif!important;color:#a7b2c0!important}
+#slx-elim #slx-safe-total{font-weight:700!important;color:#cbd5e1!important}
+#slx-elim #slx-safe-list-modal .slx-safe-actions{flex:0 0 auto!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:12px 0!important}
+#slx-elim #slx-safe-list-modal .slx-safe-list{flex:1 1 auto!important;min-height:0!important;overflow:auto!important;overscroll-behavior:contain!important;background:#111821!important}
+#slx-elim #slx-safe-list-modal .slx-safe-empty{padding:20px 14px!important;font:13px/1.45 Arial,sans-serif!important}
+#slx-elim #slx-safe-list-modal .slx-safe-row{gap:10px!important;padding:10px!important}
+#slx-elim #slx-safe-list-modal .slx-safe-player a{font-size:13px!important;overflow-wrap:anywhere!important}
+#slx-elim #slx-safe-list-modal .slx-safe-player small{font:11px/1.4 Arial,sans-serif!important}
+`;(document.head||document.documentElement).appendChild(s);
+})();
+
+/* Elimination v1.3.39: API form fits within the panel and scrolls to manual save. */
+(()=>{
+ const s=document.createElement('style');s.id='slx-elim-api-layout-1339';
+ s.textContent=`
+#slx-elim #slx-settings#slx-settings{
+ position:absolute!important;inset:0 0 32px!important;width:auto!important;height:auto!important;
+ min-height:0!important;max-height:none!important;max-width:none!important;
+ margin:0!important;padding:12px 12px 18px!important;box-sizing:border-box!important;
+ background:#0d1117!important;border-radius:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+ overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+ z-index:60!important;color:#e2e8f0!important;font:13px/1.4 Arial,sans-serif!important;
+}
+#slx-elim #slx-settings *,#slx-elim #slx-settings *::before,#slx-elim #slx-settings *::after{box-sizing:border-box!important}
+#slx-elim #slx-settings .slx-api-head{align-items:center!important;gap:10px!important}
+#slx-elim #slx-settings .slx-api-head>div{min-width:0!important;flex:1!important}
+#slx-elim #slx-settings .slx-api-head h3{margin:0!important;font:800 17px/1.25 Arial,sans-serif!important}
+#slx-elim #slx-settings .slx-api-box,#slx-elim #slx-settings .slx-manual-box{min-width:0!important;max-width:100%!important}
+#slx-elim #slx-settings label{display:block!important;margin:8px 0 4px!important;font:12px/1.4 Arial,sans-serif!important}
+#slx-elim #slx-settings input{
+ display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;
+ height:40px!important;min-height:40px!important;margin:0 0 10px!important;padding:9px 10px!important;
+ font:13px/1.4 Arial,sans-serif!important;border-radius:8px!important;
+}
+#slx-elim #slx-settings button{
+ min-width:0!important;max-width:100%!important;min-height:38px!important;
+ margin:0!important;padding:9px 10px!important;font:800 12px/1.25 Arial,sans-serif!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;border-radius:8px!important;
+}
+#slx-elim #slx-settings #slx-cancel{flex:0 0 36px!important}
+#slx-elim #slx-settings .slx-api-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+#slx-elim #slx-settings .slx-api-clear{margin-top:8px!important}
+#slx-elim #slx-settings .slx-api-create{margin:10px 0!important}
+#slx-elim #slx-settings .slx-api-status{flex-wrap:wrap!important}
+#slx-elim #slx-settings .slx-api-status span{min-width:0!important;overflow-wrap:anywhere!important}
+#slx-elim #slx-settings #slx-save-manual{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:100%!important;min-height:42px!important;height:auto!important;margin:0!important;
+ padding:10px!important;line-height:1.3!important;
+}
+`;(document.head||document.documentElement).appendChild(s);
+})();
