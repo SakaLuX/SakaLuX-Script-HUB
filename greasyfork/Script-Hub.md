@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.49**
+**v1.9.50**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,16 +22,16 @@
 
 ## Current release note
 
-**v1.9.49** fixes TornPDA scrolling by fitting Hub to the available host container instead of forcing physical `100dvh`. The whole Hub panel is now the vertical scroll surface, while blur and the 2×2 module controls are preserved.
+**v1.9.50** restores the intended mobile layout: only Managed Modules scrolls while Hub controls stay fixed, and removes the shared panel geometry mutation that broke Standalone OPEN actions.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.38**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.30**
-- 🎯 SakaLuX Mission Rewards **v1.0.25**
-- 📈 SakaLuX Market Intelligence **v1.17.26**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.39**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.31**
+- 🎯 SakaLuX Mission Rewards **v1.0.26**
+- 📈 SakaLuX Market Intelligence **v1.17.27**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.36**
 - 🏢 SakaLuX Company Intelligence **v1.8.22**
 
@@ -54,6 +54,11 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.50 — List-only scroll + Standalone repair
+- Keeps Hub header, stats, controls and tabs fixed.
+- Makes only Managed Modules the main vertical scroll surface.
+- Restores Standalone module opening by removing shared forced panel dimensions.
+
 ### v1.9.49 — TornPDA host-scroll hotfix
 - Replaces the physical `100dvh` Hub override with host-container sizing.
 - Makes the complete Hub panel scrollable with native vertical touch gestures.

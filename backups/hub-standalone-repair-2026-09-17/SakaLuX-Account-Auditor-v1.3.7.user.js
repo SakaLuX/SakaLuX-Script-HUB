@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.8
+// @version      1.3.7
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -540,7 +540,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     if(!MOBILE())return;
     for(const t of TITLES){
       const p=findSheet(t); if(!p)continue;
-      p.removeAttribute('data-slx-fullsheet-v2');
+      p.dataset.slxFullsheetV2='1';
       let a=p.parentElement;
       for(let i=0;a&&i<3;i++,a=a.parentElement){
         const s=getComputedStyle(a),r=a.getBoundingClientRect();

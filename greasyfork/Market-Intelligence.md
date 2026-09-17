@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.26**
+**v1.17.27**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,7 +20,7 @@
 
 ## Current release note
 
-**v1.17.26** Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling works normally while the translucent blur surface is preserved.
+**v1.17.27** restores Standalone panel opening by removing the shared full-sheet geometry mutation and leaving panel sizing to the module itself.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -44,6 +44,12 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history
+
+### v1.17.27 — Standalone panel repair
+- Restores Standalone OPEN behavior.
+- Removes shared full-sheet dimension forcing from the module panel.
+- Keeps native module sizing and TornPDA touch behavior.
+
 
 ### v1.17.26 — TornPDA host-scroll contract
 - Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling works normally while the translucent blur surface is preserved.

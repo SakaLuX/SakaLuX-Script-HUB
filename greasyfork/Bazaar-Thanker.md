@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.30**
+**v5.3.31**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,7 @@
 
 ## Current release note
 
-**v5.3.30** Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling works normally while the translucent blur surface is preserved.
+**v5.3.31** restores Standalone panel opening by removing the shared full-sheet geometry mutation and leaving panel sizing to the module itself.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -29,6 +29,12 @@ Generated thank-you text should be reviewed before sending. The script assists w
 **All Rights Reserved**
 
 ## Release history
+
+### v5.3.31 — Standalone panel repair
+- Restores Standalone OPEN behavior.
+- Removes shared full-sheet dimension forcing from the module panel.
+- Keeps native module sizing and TornPDA touch behavior.
+
 
 ### v5.3.30 — TornPDA host-scroll contract
 - Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling works normally while the translucent blur surface is preserved.
