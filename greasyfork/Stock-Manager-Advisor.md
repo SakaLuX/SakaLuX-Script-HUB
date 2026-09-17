@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Distributed from GitHub.
 
 ## Current version
-**v0.7.7**
+**v0.7.8**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.7.7** Promotes Stock Manager & Advisor from experimental to the main script directory and registers it in Script Hub and the standalone dock. Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders. Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations.
+**v0.7.8** Promotes Stock Manager & Advisor from experimental to the main script directory and registers it in Script Hub and the standalone dock. Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders. Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations.
 
 ## Installation and Hub integration
 - Install the main `SakaLuX-Stock-Manager-Advisor.user.js` from GitHub. Use one installed copy; replace the old experimental copy with this version.

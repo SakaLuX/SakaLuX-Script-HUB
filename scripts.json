@@ -332,11 +332,11 @@
       "buttonSelector": "#sakalux-module-bridge-stock-manager-advisor",
       "category": "Trading",
       "description": "Stock portfolio, benefit advisor, vault controls, guided rebalance and manual Panic tools.",
-      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.user.js",
       "icon": "📊",
       "id": "stock-manager-advisor",
       "info": "Stock Manager & Advisor provides a portfolio dashboard, benefit-tier and ROI advice, vault/withdraw controls, optimizer and guided rebalance tools on Torn Stocks. It includes a dedicated local API key manager requiring user money/stocks and the Torn stock catalog. PANIC remains an explicit user action. Trading protections include Dry Run (ON by default for new installations), Benefit Lock and confirmations. Hub OPEN and REFRESH only display/synchronize data; they do not place orders.",
-      "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
+      "metaUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "name": "Stock Manager & Advisor",
       "quickActions": [
         {
@@ -360,17 +360,16 @@
         }
       ],
       "release": {
+        "version": "0.7.8",
         "date": "2026-09-17",
         "notes": [
-          "Promotes Stock Manager & Advisor from experimental to the main script directory and registers it in Script Hub and the standalone dock.",
-          "Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders.",
-          "Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations."
-        ],
-        "version": "0.7.7"
+          "Moves Stock Manager & Advisor public update delivery to Greasy Fork script 596192.",
+          "GitHub remains the source repository while Greasy Fork becomes the install/update channel used by Script Hub."
+        ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.7.7"
+      "version": "0.7.8"
     }
   ]
 }
