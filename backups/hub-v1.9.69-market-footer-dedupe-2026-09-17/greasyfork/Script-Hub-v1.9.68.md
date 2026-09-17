@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.69**
+**v1.9.68**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -21,8 +21,6 @@
 - Uses live module presence/bridges rather than stale installation markers for current status.
 
 ## Current release note
-
-**v1.9.69** fixes the duplicate author line in Market Intelligence settings. Script Hub no longer injects its generic author-only fallback into `#sl-mi-panel`; Market keeps its native compact footer with `SEND MONEY`, `SEND ITEMS`, and one `Made with ❤️ by SakaLuX [2380374]` line. Market logic and the restored Suite launcher are unchanged.
 
 **v1.9.68** Synchronizes Stocks v0.7.12 and its full-width native-row layout release notes in the registry and offline INFO/NEW.
 
