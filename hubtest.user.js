@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hubtest
 // @namespace    sakalux.script.hub.test
-// @version      1.9.61
+// @version      1.9.62
 // @description  Full TEST build of SakaLuX Script Hub with TornPDA fullscreen viewport sizing.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.61';
+    const VERSION = '1.9.62';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        { version: '1.9.62', date: '2026-09-17', changes: ['TEST: reverses the visualViewport height reduction and restores full 100dvh height.', 'Anchors the 22px author row directly to the panel bottom and reserves 80px for bottom controls.'] },
         { version: '1.9.61', date: '2026-09-17', changes: ['TEST: replaces stacked fullscreen/footer overrides with a single visual-viewport layout.', 'Keeps author attribution in a compact 22px row and reserves remaining height for scrolling modules.'] },
         { version: '1.9.55', date: '2026-09-17', changes: ['Makes Hub use the same reliable full-screen container model as Enhancer Guard and Market Intelligence.','The overlay owns the viewport with fixed inset:0 and maximum stacking; the Hub panel fills that container with flex instead of using a second fixed viewport.','Removes double-fixed geometry that could leave unused space at the bottom in TornPDA.','Keeps blur disabled and Managed Modules as the only primary scroll surface.'] },
         { version: '1.9.54', date: '2026-09-17', changes: ['Extends the TornPDA Hub sheet to the lower host edge and makes SEND MONEY / SEND ITEMS plus the author line a real non-overlapping flex footer.','Removes full-screen backdrop blur from the Hub scroll surface while keeping a subtle header blur for a smoother GPU path.','Disconnects Hub DOM observation while Hub sheets are open and removes the global language MutationObserver.','OPEN/SETTINGS now closes the Hub before awaiting a module API so taps feel immediate.','Managed standalone observers fully disconnect once Script Hub is detected.'] },
@@ -2120,21 +2121,14 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 })();
 
 
-/* hubtest v1.9.61 — one viewport owner and compact attribution */
+/* hubtest v1.9.62 — restored full height and bottom-anchored attribution */
 (()=>{
-  const sync=()=>{
-    const vv=window.visualViewport;
-    const height=vv?.height||window.innerHeight;
-    document.documentElement.style.setProperty('--slh-test-height',height+'px');
-    document.documentElement.style.setProperty('--slh-test-top',(vv?.offsetTop||0)+'px');
-  };
-  sync();
   const st=document.createElement('style');
-  st.id='sakalux-hubtest-layout-1961';
+  st.id='sakalux-hubtest-layout-1962';
   st.textContent=`
 #sakalux-hub-overlay{
-  position:fixed!important;inset:auto!important;top:var(--slh-test-top,0px)!important;left:0!important;
-  width:100%!important;height:var(--slh-test-height,100dvh)!important;min-height:0!important;max-height:var(--slh-test-height,100dvh)!important;
+  position:fixed!important;inset:0!important;top:0!important;bottom:0!important;left:0!important;right:0!important;
+  width:100%!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;
   display:flex!important;align-items:stretch!important;justify-content:stretch!important;
   margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;
   z-index:2147483647!important;background:#0b1118!important;transform:none!important;
@@ -2154,15 +2148,15 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
   overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;
   overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important
 }
-#sakalux-hub-panel>.slh-list{padding-bottom:8px!important;contain:layout paint!important}
+#sakalux-hub-panel>.slh-list{margin-bottom:80px!important;padding-bottom:8px!important;contain:layout paint!important}
 #sakalux-hub-panel>.slh-bottom{
-  position:relative!important;inset:auto!important;flex:0 0 58px!important;height:58px!important;min-height:58px!important;max-height:58px!important;
+  position:absolute!important;inset:auto 0 22px 0!important;z-index:3!important;flex:0 0 58px!important;height:58px!important;min-height:58px!important;max-height:58px!important;
   padding:4px 14px!important;margin:0!important;box-sizing:border-box!important;background:#0b1118!important
 }
 #sakalux-hub-panel>.slh-bottom .slh-bottom-grid{height:50px!important;min-height:0!important}
 #sakalux-hub-panel>.slh-bottom .slh-bottom-btn{height:50px!important;min-height:50px!important;max-height:50px!important}
 #sakalux-hub-panel>.slh-hub-attribution{
-  position:relative!important;inset:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;
+  position:absolute!important;inset:auto 0 0 0!important;z-index:3!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;
   overflow:hidden!important;white-space:nowrap!important;background:#080d13!important;
   border-top:1px solid rgba(223,154,55,.48)!important;color:#df9a37!important;font:700 9px/20px Arial,sans-serif!important
 }
@@ -2170,8 +2164,4 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 #sakalux-hub-overlay *,#sakalux-hub-panel *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 `;
   (document.head||document.documentElement).appendChild(st);
-  window.visualViewport?.addEventListener('resize',sync,{passive:true});
-  window.visualViewport?.addEventListener('scroll',sync,{passive:true});
-  window.addEventListener('resize',sync,{passive:true});
-  window.addEventListener('orientationchange',()=>requestAnimationFrame(sync),{passive:true});
 })();
