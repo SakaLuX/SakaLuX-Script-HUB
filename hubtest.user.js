@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hubtest
 // @namespace    sakalux.script.hub.test
-// @version      1.9.58
+// @version      1.9.59
 // @description  Full TEST build of SakaLuX Script Hub with TornPDA fullscreen viewport sizing.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.58';
+    const VERSION = '1.9.59';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2279,6 +2279,43 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
   background:#080d13!important;
   border-top:1px solid rgba(223,154,55,.52)!important;
 }
+}`;
+  (document.head||document.documentElement).appendChild(st);
+})();
+
+/* hubtest v1.9.59 — final compact bottom polish */
+(()=>{
+  const id='sakalux-hubtest-footer-1959';
+  if(document.getElementById(id)) return;
+  const st=document.createElement('style');
+  st.id=id;
+  st.textContent=`@media(max-width:820px){
+#sakalux-hub-panel{
+  padding-bottom:0!important;
+  border-radius:0 0 20px 20px!important;
+  overflow:hidden!important;
+}
+#sakalux-hub-panel>.slh-footer{
+  position:relative!important;
+  inset:auto!important;
+  flex:0 0 24px!important;
+  height:24px!important;
+  min-height:24px!important;
+  max-height:24px!important;
+  margin:0!important;
+  padding:0 6px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  line-height:24px!important;
+  font-size:9px!important;
+  border-radius:0 0 20px 20px!important;
+  overflow:hidden!important;
+  background:#080d13!important;
+  border-top:1px solid rgba(223,154,55,.48)!important;
+}
+#sakalux-hub-panel>.slh-footer .slh-author{font-size:9px!important;line-height:24px!important}
 }`;
   (document.head||document.documentElement).appendChild(st);
 })();
