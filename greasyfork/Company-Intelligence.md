@@ -37,7 +37,7 @@
 - Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
 - Company rating is comparative and evaluated by Torn.
 - Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
-- The active userscript, Hub registry entry and this information page are synchronized at **v1.8.18**.
+- The userscript header, runtime `APP.version`, Hub registry entry and this information page are synchronized at **v1.8.22**.
 - The Hub registry uses Greasy Fork script **595873** for public version checks, while the userscript retains its own raw-GitHub `@downloadURL` / `@updateURL` metadata.
 
 ## License
@@ -47,6 +47,7 @@
 
 ### v1.8.22 — TornPDA host-scroll contract
 - Makes the whole Company sheet the native vertical scroll surface, fits it to the available TornPDA host height, preserves blur, and styles the SakaLuX footer in orange like Elimination.
+- Synchronizes runtime `APP.version` with the userscript and registry at v1.8.22.
 
 ### v1.8.21 — Whole-sheet scroll and footer repair
 - Makes the complete Company sheet the mobile scroll surface.
