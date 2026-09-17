@@ -1,0 +1,23 @@
+name: Fix Hub Test event bridge
+on:
+  push:
+    paths:
+      - '.github/workflows/temp-fix-hubtest-event-bridge.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch Hub Test
+        run: python .migration/fix_hubtest_event_bridge.py
+      - name: Validate Hub Test
+        run: node --check hubtest.user.js
+      - name: Commit Hub Test
+        run: |
+          git config user.name 'SakaLuX Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add hubtest.user.js
+          git commit -m 'Fix Hub Test direct open bridge' || exit 0
+          git push origin HEAD:main
