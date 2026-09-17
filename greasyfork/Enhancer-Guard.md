@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.40**
+**v1.3.41**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.3.40** removes the periodic standalone render loop and throttles DOM reactions while Script Hub is active to improve TornPDA scrolling performance.
+**v1.3.41** disconnects standalone DOM observation completely once Script Hub is present, reducing TornPDA scroll and tap latency.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -36,6 +36,12 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history
+
+### v1.3.41 — Hub-aware observer shutdown
+- Stops the standalone document observer as soon as Script Hub is detected.
+- Keeps normal standalone behavior when Hub is absent.
+- Reduces unnecessary work during Hub scrolling and button taps.
+
 
 ### v1.3.40 — TornPDA performance
 - Removes the recurring standalone render interval.

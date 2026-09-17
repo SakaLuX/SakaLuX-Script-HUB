@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.53**
+**v1.9.52**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,16 +22,16 @@
 
 ## Current release note
 
-**v1.9.53** makes the TornPDA footer non-overlapping and truly bottom-aligned, removes expensive open-Hub observers, and makes module OPEN/SETTINGS react immediately before asynchronous work.
+**v1.9.52** fixes the mobile bottom actions/footer placement and reduces TornPDA scroll lag by cutting Hub and managed-module DOM observer work plus mobile compositor cost.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.41**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.33**
-- 🎯 SakaLuX Mission Rewards **v1.0.28**
-- 📈 SakaLuX Market Intelligence **v1.17.29**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.40**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.32**
+- 🎯 SakaLuX Mission Rewards **v1.0.27**
+- 📈 SakaLuX Market Intelligence **v1.17.28**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.36**
 - 🏢 SakaLuX Company Intelligence **v1.8.22**
 
@@ -54,15 +54,6 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
-
-### v1.9.53 — Bottom layout + input latency
-- Uses a real flex footer for SEND MONEY / SEND ITEMS and the author line, so nothing overlaps module cards.
-- Extends the Hub to the lower TornPDA host edge.
-- Disconnects Hub observers while Hub sheets are open.
-- Removes the global language MutationObserver.
-- Closes Hub before awaiting OPEN/SETTINGS module APIs for immediate tap feedback.
-- Coordinates managed modules that fully stop standalone observation while Hub is active.
-
 
 ### v1.9.52 — Scroll performance + bottom layout
 - Keeps SEND MONEY / SEND ITEMS fully visible.

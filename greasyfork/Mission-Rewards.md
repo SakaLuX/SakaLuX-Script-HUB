@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.27**
+**v1.0.28**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.0.27** removes the periodic standalone render loop and throttles DOM reactions while Script Hub is active to improve TornPDA scrolling performance.
+**v1.0.28** disconnects standalone DOM observation completely once Script Hub is present, reducing TornPDA scroll and tap latency.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -34,6 +34,12 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history
+
+### v1.0.28 — Hub-aware observer shutdown
+- Stops the standalone document observer as soon as Script Hub is detected.
+- Keeps normal standalone behavior when Hub is absent.
+- Reduces unnecessary work during Hub scrolling and button taps.
+
 
 ### v1.0.27 — TornPDA performance
 - Removes the recurring standalone render interval.
