@@ -1,0 +1,32 @@
+{
+  "active": true,
+  "apiGlobal": "SakaLuXCompanyIntelligence",
+  "buttonSelector": "",
+  "category": "Company",
+  "description": "Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.",
+  "downloadUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js",
+  "greasyForkId": "595873",
+  "icon": "🏢",
+  "id": "company-intelligence",
+  "info": "Company Intelligence provides separate Employee and Director views for company analysis. Employee tools cover work stats, position suitability, personal progress, trains, offers and advice. Director tools cover star and growth direction, staff effectiveness and inactivity flags, position optimization, training commitments, train contracts, payroll and balance views, stock intelligence, benchmarks, timeline/history and advisory insights. It uses Torn company/user API data where permitted, supports the shared Script Hub API key, stores planning data locally, and never performs automated company actions.",
+  "metaUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
+  "name": "Company Intelligence",
+  "quickActions": [
+    {"icon": "⏻", "id": "toggle", "label": "POWER", "method": "toggleEnabled"},
+    {"icon": "🏢", "id": "open", "label": "OPEN", "method": "open"},
+    {"icon": "🔄", "id": "refresh", "label": "REFRESH", "method": "refresh"}
+  ],
+  "release": {
+    "date": "2026-09-17",
+    "notes": [
+      "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
+      "Runs native position scraping only on visible Company/Job pages and ignores changes inside Company/Hub panels.",
+      "Prevents duplicate standalone placement timers after OFF/ON.",
+      "Clears employment caches through the same GM/local-storage abstraction used to save them."
+    ],
+    "version": "1.8.31"
+  },
+  "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
+  "type": "addon",
+  "version": "1.8.34"
+}
