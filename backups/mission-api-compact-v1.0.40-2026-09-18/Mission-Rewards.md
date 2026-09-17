@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.40**
+**v1.0.39**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,9 +17,10 @@
 
 ## Current release note
 
-**v1.0.40 — Compact API controls**
-- Reduces Mission API Access button height/font sizing to match Enhancer more closely.
-- Removes the extra blank gap between `Exact permissions required` and `User: Ammo`.
+**v1.0.39 — Enhancer-style API Access parity**
+- Removes the duplicate inline `API: Missing` status and API-key input from the normal Mission settings page.
+- Rebuilds the dedicated Mission API Access sheet to match Enhancer API Access: title/close header, exact-permissions card, full-width create button, API Access status card, two equal save/check buttons, full-width clear button and explanatory note.
+- Keeps Mission Rewards permissions read-only: `User: Ammo` and `Torn: Items`.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -36,10 +37,6 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.0.40 — Compact API controls
-- Makes the dedicated API buttons smaller to match Enhancer.
-- Removes the extra permissions-card spacing before `User: Ammo`.
 
 ### v1.0.39 — Enhancer-style API Access parity
 - Removes the duplicate inline API status/key field above SAVE.
