@@ -1,0 +1,127 @@
+name: Emergency footer standalone hotfix
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: contains(github.event.head_commit.message, 'footer standalone hotfix')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply hotfix
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p backups/footer-standalone-hotfix-2026-09-17/greasyfork
+          cp SakaLuX-Market-Intelligence.user.js backups/footer-standalone-hotfix-2026-09-17/
+          cp SakaLuX-Mission-Rewards.user.js backups/footer-standalone-hotfix-2026-09-17/
+          cp SakaLuX-Stock-Manager-Advisor.user.js backups/footer-standalone-hotfix-2026-09-17/
+          cp scripts.json backups/footer-standalone-hotfix-2026-09-17/
+          cp greasyfork/Market-Intelligence.md backups/footer-standalone-hotfix-2026-09-17/greasyfork/
+          cp greasyfork/Mission-Rewards.md backups/footer-standalone-hotfix-2026-09-17/greasyfork/
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, json
+
+          def bump_userscript(path, old, new):
+              p=Path(path); s=p.read_text()
+              s=s.replace(f'// @version      {old}',f'// @version      {new}',1)
+              s=s.replace(f"version:'{old}'",f"version:'{new}'",1)
+              s=s.replace(f"version: '{old}'",f"version: '{new}'",1)
+              p.write_text(s)
+
+          # Market
+          bump_userscript('SakaLuX-Market-Intelligence.user.js','1.17.37','1.17.38')
+          p=Path('SakaLuX-Market-Intelligence.user.js'); s=p.read_text()
+          s=s.replace("const panel=document.querySelector(selector);if(!panel||panel.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return;","const panel=document.querySelector(selector);if(!panel)return;",1)
+          if 'SAKALUX_FORCE_FOOTER_V5_MARKET' not in s:
+              s += '''\n/* SAKALUX_FORCE_FOOTER_V5_MARKET */\n(()=>{\n const PANEL='#sl-mi-panel',ID='sakalux-inline-footer-market-intelligence',PROFILE='https://www.torn.com/profiles.php?XID=2380374';\n function ensure(){const panel=document.querySelector(PANEL);if(!panel)return;let f=panel.querySelector('#'+ID);if(f)return;f=document.createElement('div');f.id=ID;f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+PROFILE+'">SakaLuX [2380374]</a></div>';f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>location.href=PROFILE);panel.appendChild(f);}\n const kick=()=>{ensure();requestAnimationFrame(ensure);setTimeout(ensure,100);setTimeout(ensure,300)};\n new MutationObserver(kick).observe(document.body||document.documentElement,{childList:true,subtree:true});\n kick();\n})();\n'''
+          p.write_text(s)
+
+          # Mission - fix actual panel selector
+          bump_userscript('SakaLuX-Mission-Rewards.user.js','1.0.36','1.0.37')
+          p=Path('SakaLuX-Mission-Rewards.user.js'); s=p.read_text()
+          s=s.replace('const selector="#sl-mr-settings",id="sakalux-inline-footer-mission-rewards"','const selector="#sl-mr-settings-panel",id="sakalux-inline-footer-mission-rewards"',1)
+          s=s.replace("const panel=document.querySelector(selector);if(!panel||panel.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return;","const panel=document.querySelector(selector);if(!panel)return;",1)
+          if 'SAKALUX_FORCE_FOOTER_V5_MISSION' not in s:
+              s += '''\n/* SAKALUX_FORCE_FOOTER_V5_MISSION */\n(()=>{\n const PANEL='#sl-mr-settings-panel',ID='sakalux-inline-footer-mission-rewards',PROFILE='https://www.torn.com/profiles.php?XID=2380374';\n function ensure(){const panel=document.querySelector(PANEL);if(!panel)return;let f=panel.querySelector('#'+ID);if(f)return;f=document.createElement('div');f.id=ID;f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+PROFILE+'">SakaLuX [2380374]</a></div>';f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>location.href=PROFILE);panel.appendChild(f);}\n const kick=()=>{ensure();requestAnimationFrame(ensure);setTimeout(ensure,100);setTimeout(ensure,300)};\n new MutationObserver(kick).observe(document.body||document.documentElement,{childList:true,subtree:true});\n kick();\n})();\n'''
+          p.write_text(s)
+
+          # Stock registration visible to shared standalone dock on every Torn page
+          bump_userscript('SakaLuX-Stock-Manager-Advisor.user.js','0.7.12','0.7.13')
+          p=Path('SakaLuX-Stock-Manager-Advisor.user.js'); s=p.read_text()
+          if 'SAKALUX_GLOBAL_STANDALONE_STOCK_V2' not in s:
+              s += '''\n/* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 */\n(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.7.13'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();\n'''
+          p.write_text(s)
+
+          # Ensure every shared standalone owner recognizes Stocks and all known modules.
+          canonical="const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];"
+          for p in Path('.').glob('SakaLuX-*.user.js'):
+              if p.name in ('SakaLuX-Script-Hub.user.js','SakaLuX-Suite.user.js','SakaLuX-Stock-Manager-Advisor.user.js'): continue
+              s=p.read_text()
+              if "const ORDER=['enhancer'" in s:
+                  s=re.sub(r"const ORDER=\['enhancer'[^;]+;",canonical,s,count=1)
+                  p.write_text(s)
+
+          # Audit current scripts
+          checks={
+            'SakaLuX-Account-Auditor.user.js':'account-auditor',
+            'SakaLuX-Bazaar-Thanker-PDA.user.js':'bazaar',
+            'SakaLuX-Chat-Intelligence.user.js':'chat-intelligence',
+            'SakaLuX-Company-Intelligence-v1.0.0.user.js':'company-intelligence',
+            'SakaLuX-Elimination-Assistant.user.js':'elimination-assistant',
+            'SakaLuX-Enhancer-Guard.user.js':'enhancer',
+            'SakaLuX-Market-Intelligence.user.js':'market-intelligence',
+            'SakaLuX-Mission-Rewards.user.js':'mission-rewards',
+            'SakaLuX-Stock-Manager-Advisor.user.js':'stock-manager-advisor'}
+          lines=['# SakaLuX Standalone audit — 2026-09-17','', '| Script | Registration |','|---|---|']
+          for fn,mid in checks.items():
+              txt=Path(fn).read_text() if Path(fn).exists() else ''
+              ok=('data-slx-standalone-registration' in txt and mid in txt)
+              lines.append(f'| {fn} | {"✅" if ok else "❌"} `{mid}` |')
+          lines += ['', 'Hub is not part of the standalone list. Suite keeps its own Master Control launcher.', 'Stock Manager now registers globally on every Torn page.']
+          Path('STANDALONE-AUDIT-2026-09-17.md').write_text('\n'.join(lines)+'\n')
+
+          # Registry only, Hub source/version untouched
+          data=json.loads(Path('scripts.json').read_text())
+          def walk(o):
+              if isinstance(o,dict):
+                  if o.get('id')=='market-intelligence': o['version']='1.17.38'
+                  if o.get('id')=='mission-rewards': o['version']='1.0.37'
+                  if o.get('id')=='stock-manager-advisor': o['version']='0.7.13'
+                  for v in o.values(): walk(v)
+              elif isinstance(o,list):
+                  for v in o: walk(v)
+          walk(data); Path('scripts.json').write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
+
+          # Release notes
+          docs=[('greasyfork/Market-Intelligence.md','1.17.37','1.17.38','Restores the Elimination-style footer in Market whether opened standalone or from Hub; removes the Hub suppression guard and force-mounts SEND MONEY / SEND ITEMS and the author line.'),('greasyfork/Mission-Rewards.md','1.0.36','1.0.37','Targets the real Mission settings panel (`#sl-mr-settings-panel`) and force-mounts the Elimination-style footer in standalone and Hub-launched settings.')]
+          for fn,old,new,note in docs:
+              p=Path(fn); d=p.read_text(); d=d.replace(f'**v{old}**',f'**v{new}**',1); d=d.replace('## Current release note\n','## Current release note\n\n**v'+new+'** '+note+'\n',1); p.write_text(d)
+          PY
+
+      - name: Validate and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Market-Intelligence.user.js
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q 'SAKALUX_FORCE_FOOTER_V5_MARKET' SakaLuX-Market-Intelligence.user.js
+          grep -q 'SAKALUX_FORCE_FOOTER_V5_MISSION' SakaLuX-Mission-Rewards.user.js
+          grep -q 'SAKALUX_GLOBAL_STANDALONE_STOCK_V2' SakaLuX-Stock-Manager-Advisor.user.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-*.user.js scripts.json greasyfork/Market-Intelligence.md greasyfork/Mission-Rewards.md STANDALONE-AUDIT-2026-09-17.md backups/footer-standalone-hotfix-2026-09-17/
+          git commit -m 'Market v1.17.38 Mission v1.0.37 Stocks v0.7.13 standalone footer fixes'
+          git push
