@@ -284,14 +284,14 @@
     {
       "active": true,
       "apiGlobal": "SakaLuXCompanyIntelligence",
-      "buttonSelector": "",
+      "buttonSelector": "#sakalux-module-bridge-company-intelligence",
       "category": "Company",
       "description": "Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.",
       "downloadUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js",
       "greasyForkId": "595873",
       "icon": "🏢",
       "id": "company-intelligence",
-      "info": "Company Intelligence provides separate Employee and Director views for company analysis. Employee tools cover work stats, position suitability, personal progress, trains, offers and advice. Director tools cover star and growth direction, staff effectiveness and inactivity flags, position optimization, training commitments, train contracts, payroll and balance views, stock intelligence, benchmarks, timeline/history and advisory insights. It uses Torn company/user API data where permitted, supports the shared Script Hub API key, stores planning data locally, and never performs automated company actions.",
+      "info": "Company Intelligence provides Employee and Director workspaces for Torn company analysis. Employee tools cover current employment, work stats, position suitability, progress, trains, offers and advice. Director tools cover staff effectiveness and inactivity flags, position optimization, company growth/star direction, training rotation and commitments, train contracts, payroll/balance views, stock intelligence, benchmarks, timeline/history and reports. It uses Torn company/user API data where permitted, stores planning data locally, opens through the Company module bridge, and participates in the shared Bazaar-style SakaLuX Standalone Dock without creating a second standalone menu. It is decision-support only and does not automate company gameplay actions.",
       "metaUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "name": "Company Intelligence",
       "quickActions": [
@@ -315,18 +315,18 @@
         }
       ],
       "release": {
-        "date": "2026-09-17",
+        "version": "1.8.37",
+        "date": "2026-09-18",
         "notes": [
-          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
-          "Runs native position scraping only on visible Company/Job pages and ignores changes inside Company/Hub panels.",
-          "Prevents duplicate standalone placement timers after OFF/ON.",
-          "Clears employment caches through the same GM/local-storage abstraction used to save them."
-        ],
-        "version": "1.8.31"
+          "Rebuilds the TornPDA Company header so the title, Refresh, API Key and Close controls stay cleanly inside the viewport.",
+          "Moves Employee / Director to a dedicated full-width second row with equal-width controls.",
+          "Uses the shared Bazaar-style Standalone Dock bootstrap and registers Company as a module instead of creating a separate standalone.",
+          "Keeps Company opening through its module bridge above the shared Standalone Dock."
+        ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.34"
+      "version": "1.8.37"
     },
     {
       "active": true,
