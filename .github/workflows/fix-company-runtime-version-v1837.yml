@@ -45,7 +45,6 @@ jobs:
               raise SystemExit('Expected stale APP.version 1.8.35 was not found')
           script = script.replace(old, new, 1)
 
-          # Keep v1.8.37 release notes accurate without creating a new release number.
           release_marker = '### v1.8.37 — Professional TornPDA header layout\n'
           runtime_note = '- Synchronizes runtime `APP.version` with `@version`, standalone registration, Hub bridge, ModuleReady event and local installed-version marker at v1.8.37, removing the false UPDATE AVAILABLE state.\n'
           if release_marker in doc and runtime_note not in doc:
@@ -56,7 +55,6 @@ jobs:
           if current_note_anchor in doc and current_runtime_note not in doc:
               doc = doc.replace(current_note_anchor, current_note_anchor + current_runtime_note, 1)
 
-          # Validate registry already points to 1.8.37; do not alter Hub or bump versions.
           reg = json.loads(reg_raw)
           company = next((x for x in reg.get('scripts', []) if x.get('id') == 'company-intelligence'), None)
           if not company:
@@ -107,3 +105,5 @@ jobs:
           fi
           git commit -m 'Company v1.8.37: synchronize runtime version surfaces'
           git push
+
+# trigger: 2026-09-18-runtime-sync
