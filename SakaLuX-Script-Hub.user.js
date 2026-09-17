@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.64
+// @version      1.9.65
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.64';
+    const VERSION = '1.9.65';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {version:'1.9.65',date:'2026-09-17',changes:['Keeps the floating Hub launcher visible whenever Torn/TornPDA leaves a native launcher mounted but not actually visible.','Makes launcher visibility checks use computed style and on-screen geometry instead of DOM presence only.','Synchronizes Stock Manager v0.7.9 panel/footer integration.']},
         {version:'1.9.64',date:'2026-09-17',changes:['Restores Hub launch controls defensively when Torn replaces native topbar/mobile navigation nodes.','Adds explicit Stock Manager POWER action to the Hub registry/fallback in addition to the generic ON/OFF switch.']},
         {version:'1.9.63',date:'2026-09-17',changes:['Moves Stock Manager & Advisor v0.7.8 public install/update checks to Greasy Fork script 596192 while retaining GitHub as source.']},
         {version:'1.9.62',date:'2026-09-17',changes:['Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW release details.','Stocks installs and checks updates from its main GitHub source.']},
@@ -668,11 +669,11 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                         "Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders.",
                         "Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations."
                     ],
-                    "version": "0.7.8"
+                    "version": "0.7.9"
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.7.7"
+                "version": "0.7.9"
             }
         ]
     };
@@ -1477,13 +1478,26 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         return svg;
     }
 
+    function isActuallyVisible(element) {
+        if (!element || !element.isConnected) return false;
+        try {
+            const cs = getComputedStyle(element);
+            if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity || 1) <= 0.01) return false;
+            const r = element.getBoundingClientRect();
+            return r.width > 4 && r.height > 4 && r.bottom > 0 && r.right > 0 && r.top < window.innerHeight && r.left < window.innerWidth;
+        } catch { return false; }
+    }
+
     function syncFloatingButtonVisibility() {
         const button = document.getElementById(IDS.button);
         if (!button) return;
-        const statusReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.topSkull));
-        const flyoutReady = settings.showTopbarSkull && Boolean(document.getElementById(IDS.navSkull));
-        const nativeReady = statusReady || flyoutReady;
-        button.style.setProperty('display', nativeReady ? 'none' : 'flex', 'important');
+        const top = document.getElementById(IDS.topSkull);
+        const nav = document.getElementById(IDS.navSkull);
+        const nativeVisible = settings.showTopbarSkull && (isActuallyVisible(top) || isActuallyVisible(nav));
+        button.style.setProperty('display', nativeVisible ? 'none' : 'flex', 'important');
+        button.style.setProperty('visibility', 'visible', 'important');
+        button.style.setProperty('opacity', '1', 'important');
+        button.style.setProperty('pointer-events', 'auto', 'important');
     }
 
     let launcherRepairTimer = null;

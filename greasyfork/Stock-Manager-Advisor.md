@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.7.8**
+**v0.7.9**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,7 +23,7 @@
 
 ## Current release note
 
-**v0.7.8** Moves public installation and automatic updates to Greasy Fork script 596192 while keeping GitHub as the canonical source repository. Hub integration, ON/OFF control and existing trading protections are preserved.
+**v0.7.9** Uses the shared SakaLuX full-sheet panel geometry, keeps the content as the scrollable area, and adds a stable Made with ❤️ by SakaLuX [2380374] footer at the bottom.
 
 ## Installation and Hub integration
 - Install/update the public release through Greasy Fork script 596192. GitHub remains the canonical source repository.
@@ -51,6 +51,12 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Hub integration is available from v0.7.7.
 
 ## Changelog
+
+### v0.7.9 — Shared panel geometry and stable footer
+
+- Matches the full-sheet shape used by the other SakaLuX managed modules.
+- Keeps the panel header and author footer visible while the body scrolls independently.
+- Adds `Made with ❤️ by SakaLuX [2380374]` as the stable bottom footer.
 
 ### v0.7.8 — Greasy Fork update channel
 

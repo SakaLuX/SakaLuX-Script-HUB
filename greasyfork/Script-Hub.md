@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.64**
+**v1.9.65**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.64** Restores Hub launch controls when Torn replaces native launcher nodes and adds an explicit Stock Manager POWER action. Stocks remains on Greasy Fork for public updates.
+**v1.9.65** Keeps a guaranteed Hub fallback launcher whenever native Torn/TornPDA launch controls are mounted but not actually visible, and synchronizes Stock Manager v0.7.9 panel/footer integration.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -34,7 +34,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 📈 SakaLuX Market Intelligence **v1.17.35**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.42**
 - 🏢 SakaLuX Company Intelligence **v1.8.31**
-- 📊 SakaLuX Stock Manager & Advisor **v0.7.8**
+- 📊 SakaLuX Stock Manager & Advisor **v0.7.9**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -55,6 +55,11 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history / Changelog
+
+### v1.9.65 — Visible launcher fallback + Stocks panel parity
+- Detects real launcher visibility with computed style and viewport geometry.
+- Keeps the floating Hub button available whenever native launchers are hidden, clipped or off-screen.
+- Synchronizes Stock Manager v0.7.9 with the shared full-sheet panel/footer layout.
 
 ### v1.9.64 — Launcher recovery
 - Recreates the Hub topbar/mobile launcher when Torn replaces the native navigation DOM.
