@@ -1,14 +1,16 @@
 // ==UserScript==
-// @name         SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
+// @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.6
-// @description  Experimental Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
+// @version      0.7.7
+// @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        none
 // @license      All Rights Reserved
 // @run-at       document-end
+// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
+// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 // ==/UserScript==
 
 (() => {
@@ -51,8 +53,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.6',
-    experimental: true,
+    version: '0.7.7',
+    experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
   };
@@ -61,6 +63,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const K = {
     api: 'SLX_STOCK_API_KEY',
+    enabled: 'SLX_STOCK_ENABLED',
     target: 'SLX_STOCK_TARGET',
     keep: 'SLX_STOCK_KEEP_CASH',
     withdraw: 'SLX_STOCK_WITHDRAW',
@@ -838,6 +841,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   }
 
   async function postTrade(sym, shares, step) {
+    if(!bool(K.enabled,true)) throw new Error('Stock Manager is disabled.');
     const stock=S.stocks.get(sym);
     if(!stock?.id) throw new Error(`Stock ID missing for ${sym}. Sync API or open Stocks.`);
     shares=Math.floor(Number(shares)||0);
@@ -1045,7 +1049,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
   function panicButton() {
-    if($('#slx-stock-panic')) return;
+    if(!bool(K.enabled,true)||$('#slx-stock-panic')) return;
     const b=document.createElement('button');
     b.id='slx-stock-panic'; b.type='button'; b.textContent='PANIC'; b.title='Panic v2 · preview and vault on-hand cash into the configured stock target';
     b.addEventListener('click', panic);
@@ -1204,7 +1208,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const card=document.createElement('section');
     card.id='slx-stock-inline';
     card.dataset.collapsed=bool(K.inlineCollapsed,false)?'1':'0';
-    card.innerHTML=`<div class="slx-inline-head"><div><b>📊 SakaLuX Stock Manager</b><small>v${APP.version} · EXPERIMENTAL</small></div><div class="slx-inline-head-actions"><button id="slx-inline-refresh" type="button" title="Refresh Stock Manager">↻</button><button id="slx-inline-api" type="button">API</button><button id="slx-inline-settings" type="button" title="Inline settings">⚙</button><button id="slx-inline-full" type="button">Full</button><button id="slx-inline-toggle" type="button">${card.dataset.collapsed==='1'?'＋':'−'}</button></div></div>
+    card.innerHTML=`<div class="slx-inline-head"><div><b>📊 SakaLuX Stock Manager</b><small>v${APP.version}</small></div><div class="slx-inline-head-actions"><button id="slx-inline-refresh" type="button" title="Refresh Stock Manager">↻</button><button id="slx-inline-api" type="button">API</button><button id="slx-inline-settings" type="button" title="Inline settings">⚙</button><button id="slx-inline-full" type="button">Full</button><button id="slx-inline-toggle" type="button">${card.dataset.collapsed==='1'?'＋':'−'}</button></div></div>
       <div class="slx-inline-body">
         <div class="slx-inline-summary"><div><span>Total invested <small id="slx-inline-coverage"></small></span><b id="slx-inline-total">—</b></div><div><span>Market value</span><b id="slx-inline-market">—</b></div><div><span>Unrealized P/L</span><b id="slx-inline-pl">—</b><small id="slx-inline-pl-pct"></small></div><div><span>Cash</span><b id="slx-inline-cash">—</b></div></div>
         <div class="slx-inline-nav"><button data-slx-inline-tab="advisor" type="button">★ Advisor</button><button data-slx-inline-tab="trade" type="button">📈 Trade Assistant</button><button data-slx-inline-tab="rebalance" type="button">⚖ Rebalance Preview</button><button id="slx-exec-rebalance" class="primary" type="button">⚡ Execute Rebalance</button></div>
@@ -1407,11 +1411,11 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   function panel() {
     if(S.panel?.isConnected) return S.panel;
     const p=document.createElement('div'); p.id='slx-stock-panel';
-    p.innerHTML=`<div class="card"><div class="head"><div>📊</div><h2>${APP.name} <span class="muted">v${APP.version} · EXPERIMENTAL</span></h2><button class="close" type="button">×</button></div><div class="body">
+    p.innerHTML=`<div class="card"><div class="head"><div>📊</div><h2>${APP.name} <span class="muted">v${APP.version}</span></h2><button class="close" type="button">×</button></div><div class="body">
       <div class="section"><div class="api-head"><div class="title">Torn API Key</div><span id="slx-stock-api-badge" class="api-badge">${get(K.api)?'Saved':'Not configured'}</span></div>
         <div class="api-key-row"><input id="slx-stock-api" type="password" autocomplete="off" placeholder="Paste Torn API key"><button id="slx-api-show" type="button" title="Show / hide API key">👁</button></div>
         <div class="actions"><button id="slx-api-save" class="primary" type="button">Save Key</button><button id="slx-api-test" type="button">Test & Sync</button><button id="slx-api-create" type="button">Create Required Key</button><button id="slx-api-clear" class="danger" type="button">Clear</button></div>
-        <div class="api-help">Required selections: <b>user → money, stocks</b> and <b>torn → stocks</b>. The key is stored locally in this experimental script.</div>
+        <div class="api-help">Required selections: <b>user → money, stocks</b> and <b>torn → stocks</b>. The key is stored locally in this script.</div>
       </div>
       <div class="section"><div class="title">Vault & Panic v2</div><div class="grid">
         <label>Primary target <select id="slx-stock-target"><option value="">Sync API or open Stocks to detect symbols</option></select></label>
@@ -1432,7 +1436,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
       <div class="section"><div class="title">Portfolio Optimizer</div><div class="optimizer-controls"><label>Bank APR % <input id="slx-bank-apr" inputmode="decimal" value="${esc(get(K.bankApr,'0'))}" placeholder="e.g. 70"></label><label>Minimum acceptable APR % <input id="slx-opt-min-apr" inputmode="decimal" value="${esc(get(K.optimizerMinApr,'0'))}" placeholder="e.g. 50"></label></div><div class="api-help">Bank APR is manual so the comparison uses your actual current bank return instead of a guessed rate.</div><div id="slx-stock-optimizer-body" class="muted">Waiting for portfolio data…</div></div>
       <div class="section"><div class="title">Rebalance Preview</div><div class="rebalance-controls"><label>Cash reserve <input id="slx-rebalance-reserve" value="${esc(get(K.rebalanceReserve,'0'))}" placeholder="e.g. 10m"></label><button id="slx-rebalance-preview-btn" type="button">Build Preview</button></div><div class="api-help">Preview only: proposes which excess shares could be released and where capital could move. It never executes SELL/BUY automatically.</div><div id="slx-stock-rebalance-body" class="muted">Press Build Preview after syncing API and benefit values.</div></div>
       <div class="section"><div class="title">Trade Assistant</div><div id="slx-stock-trade-body" class="trade-list muted">Waiting for ROI data…</div></div>
-      <div id="slx-stock-status">Experimental build. Not registered in SakaLuX Hub or Standalone.</div>
+      <div id="slx-stock-status">Ready · open from Script Hub or Stock Manager.</div>
     </div></div>`;
     document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     $('.close',p).onclick=()=>p.dataset.open='0';
@@ -1533,7 +1537,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   function openPanel() { style(); premiumStyle(); const p=panel(); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Transaction History',renderTransactionHistory); safeRender('Action Log',renderActionLog); }
 
   function managerLauncher() {
-    if($('#slx-stock-open')) return;
+    if(hubPresent()){ $('#slx-stock-open')?.remove(); return; }
+    if(!bool(K.enabled,true)||$('#slx-stock-open')) return;
     const b=document.createElement('button'); b.id='slx-stock-open'; b.type='button'; b.textContent='📊 Stock Manager';
     b.style.cssText='position:fixed;right:10px;bottom:44px;z-index:2147482499;border:1px solid #3c6c96;border-radius:10px;padding:8px 10px;background:#102335;color:#dceeff;font:800 11px Arial;';
     b.onclick=()=>{try{openPanel();}catch(e){console.error(`[${APP.name}] open panel failed`,e);const p=S.panel;if(p?.isConnected)p.dataset.open='1';}}; document.body.appendChild(b);
@@ -1544,8 +1549,10 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   let inlineMountTimer=0, lastSpaRefresh=0, lastHref=location.href;
   function scheduleInlineMount(force=false) {
     clearTimeout(inlineMountTimer);
+    if(!bool(K.enabled,true)) return;
     const delay=force?40:360;
     inlineMountTimer=setTimeout(()=>{
+      if(!bool(K.enabled,true)) return;
       const now=Date.now();
       if(!force && now-lastSpaRefresh<300) return;
       lastSpaRefresh=now;
@@ -1557,27 +1564,98 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         $('#slx-stock-inline')?.remove();
         $$('.slx-stock-row-tools').forEach(x=>x.remove());
       }
-      if(!$('#slx-stock-open')) managerLauncher();
+      managerLauncher();
       if(!$('#slx-stock-panic')) panicButton();
     },delay);
   }
 
+
+  let runtimeObserver=null, stockPollTimer=0, stockPollStop=0;
+  function hubPresent() {
+    return Boolean(window.SakaLuXScriptHub || document.documentElement?.getAttribute('data-sakalux-hub-installed')==='1');
+  }
+  function syncModuleBridge() {
+    const b=$('#sakalux-module-bridge-stock-manager-advisor');
+    if(b){b.dataset.version=APP.version;b.dataset.enabled=String(bool(K.enabled,true));}
+  }
+  function registerModule() {
+    let b=$('#sakalux-module-bridge-stock-manager-advisor');
+    if(!b){b=document.createElement('button');b.type='button';b.id='sakalux-module-bridge-stock-manager-advisor';b.hidden=true;document.body.appendChild(b);}
+    b.onclick=()=>{
+      const action=b.dataset.action||'open';b.dataset.action='';
+      if(action==='open') moduleOpen();
+      else if(action==='on'||action==='off') setEnabled(action==='on');
+      else if(action==='toggle') setEnabled(!bool(K.enabled,true));
+      else if(action==='refresh') moduleRefresh().catch(e=>status(e.message,'bad'));
+      syncModuleBridge();
+    };
+    let entry=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');
+    if(!entry){entry=document.createElement('span');entry.hidden=true;entry.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(entry);}
+    Object.assign(entry.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:APP.stocksUrl,version:APP.version});
+    window.SakaLuXStockManagerAdvisor={
+      name:APP.name,version:APP.version,open:moduleOpen,refresh:moduleRefresh,setEnabled,
+      toggleEnabled:()=>setEnabled(!bool(K.enabled,true)),isEnabled:()=>bool(K.enabled,true),
+      goToStocks:()=>{location.href=APP.stocksUrl;},
+      health:()=>({ready:true,version:APP.version,enabled:bool(K.enabled,true),apiConfigured:Boolean(get(K.api).trim()),dryRun:isDryRun(),tradeBusy:S.tradeBusy})
+    };
+    syncModuleBridge();
+    window.dispatchEvent(new CustomEvent('SakaLuX:ModuleReady',{detail:{id:'stock-manager-advisor',name:APP.name,version:APP.version,actions:['OPEN','REFRESH']}}));
+  }
+  function moduleOpen() {if(!bool(K.enabled,true))setEnabled(true);openPanel();}
+  async function moduleRefresh() {
+    if(!bool(K.enabled,true))return false;
+    scanStocks();
+    if(get(K.api).trim()) await syncAllApi();
+    if(!bool(K.enabled,true))return false;
+    if(isStocks()){mountInlinePanel();refreshInlinePanel();}
+    if(S.panel?.dataset.open==='1')openPanel();
+    return true;
+  }
+  function stopRuntime() {
+    runtimeObserver?.disconnect();runtimeObserver=null;
+    clearTimeout(inlineMountTimer);clearInterval(stockPollTimer);clearTimeout(stockPollStop);
+    stockPollTimer=0;stockPollStop=0;
+    $('#slx-stock-open')?.remove();$('#slx-stock-panic')?.remove();$('#slx-stock-inline')?.remove();
+    $$('.slx-stock-row-tools').forEach(x=>x.remove());
+    if(S.panel)S.panel.dataset.open='0';
+  }
+  function setEnabled(value) {
+    const enabled=Boolean(value);
+    if(enabled===bool(K.enabled,true)){syncModuleBridge();return enabled;}
+    set(K.enabled,enabled?'1':'0');
+    if(enabled)init();else stopRuntime();
+    syncModuleBridge();
+    window.dispatchEvent(new CustomEvent('SakaLuXStockManagerAdvisorStateChanged',{detail:{enabled,version:APP.version}}));
+    return enabled;
+  }
+
   async function init() {
+    if(!bool(K.enabled,true)||runtimeObserver)return;
     style(); premiumStyle(); restoreCache(); panicButton(); managerLauncher();
     if(isStocks()) setTimeout(()=>scheduleInlineMount(true),220);
-    try { if(sessionStorage.getItem('SakaLuX_STOCK_KEY_SETUP_PENDING')==='1'){sessionStorage.removeItem('SakaLuX_STOCK_KEY_SETUP_PENDING');setTimeout(openPanel,700);} } catch {}
+    try { if(sessionStorage.getItem('SakaLuX_STOCK_KEY_SETUP_PENDING')==='1'){sessionStorage.removeItem('SakaLuX_STOCK_KEY_SETUP_PENDING');setTimeout(()=>{if(bool(K.enabled,true))openPanel();},700);} } catch {}
     if(isStocks()) {
-      const wait=setInterval(()=>{ if(scanStocks().size){clearInterval(wait); scheduleInlineMount(true); if(S.panel?.dataset.open==='1'){refreshTargetSelect();renderAdvisor();} if(get(K.panicPending)==='1') panic();}},650);
-      setTimeout(()=>clearInterval(wait),10000);
+      stockPollTimer=setInterval(()=>{ if(!bool(K.enabled,true))return; if(scanStocks().size){clearInterval(stockPollTimer); scheduleInlineMount(true); if(S.panel?.dataset.open==='1'){refreshTargetSelect();renderAdvisor();} if(get(K.panicPending)==='1') panic();}},650);
+      stockPollStop=setTimeout(()=>clearInterval(stockPollTimer),10000);
     }
     const mo=new MutationObserver(records=>{
       const hrefChanged=location.href!==lastHref;
       if(hrefChanged) lastHref=location.href;
-      const relevant=hrefChanged || records.some(r=>r.addedNodes.length || r.removedNodes.length);
+      const own='#slx-stock-panel,#slx-stock-inline,#slx-stock-open,#slx-stock-panic,.slx-stock-row-tools,[id^="sakalux-module-bridge-"],[data-slx-standalone-registration]';
+      managerLauncher();
+      const relevant=hrefChanged || (isStocks() && records.some(r=>{
+        const target=r.target.nodeType===1?r.target:r.target.parentElement;
+        if(target?.closest?.(own))return false;
+        return [...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.matches?.(own));
+      }));
       if(relevant) scheduleInlineMount(hrefChanged);
     });
+    runtimeObserver=mo;
     mo.observe(document.body||document.documentElement,{subtree:true,childList:true});
   }
 
+  registerModule();
+  window.addEventListener('popstate',()=>scheduleInlineMount(true));
+  window.addEventListener('hashchange',()=>scheduleInlineMount(true));
   init();
 })();

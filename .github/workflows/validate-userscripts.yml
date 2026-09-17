@@ -90,7 +90,7 @@ jobs:
               'SakaLuX-Mission-Rewards.user.js': 'greasyfork/Mission-Rewards.md',
               'SakaLuX-Script-Hub.user.js': 'greasyfork/Script-Hub.md',
               'SakaLuX-Suite.user.js': 'greasyfork/SakaLuX-Suite.md',
-              'experimental/SakaLuX-Stock-Manager-Advisor.user.js': 'experimental/Stock-Manager-Advisor.md',
+              'SakaLuX-Stock-Manager-Advisor.user.js': 'greasyfork/Stock-Manager-Advisor.md',
           }
           for script_path, md_path in checks.items():
               source = Path(script_path).read_text(encoding='utf-8')
@@ -173,6 +173,31 @@ jobs:
               raise SystemExit('Script Hub version mismatch')
 
           print('All Hub, registry, userscript and documentation versions: synchronized')
+
+
+      - name: Validate Stocks promotion and Hub integration
+        shell: python
+        run: |
+          import json
+          import re
+          from pathlib import Path
+          source = Path('SakaLuX-Stock-Manager-Advisor.user.js').read_text(encoding='utf-8')
+          hub = Path('SakaLuX-Script-Hub.user.js').read_text(encoding='utf-8')
+          info = Path('greasyfork/Script-Hub.md').read_text(encoding='utf-8')
+          rows = json.loads(Path('scripts.json').read_text(encoding='utf-8'))['scripts']
+          stock = next(row for row in rows if row['id'] == 'stock-manager-advisor')
+          version = re.search(r'^// @version\s+(\S+)', source, re.M).group(1)
+          runtime = re.search(r"version:\s*'([^']+)'", source).group(1)
+          assert version == runtime == stock['version'] == stock['release']['version']
+          url = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js'
+          assert stock['sourceUrl'] == stock['downloadUrl'] == stock['metaUrl'] == url
+          assert url in source and stock['apiGlobal'] in source
+          assert not Path('experimental/SakaLuX-Stock-Manager-Advisor.user.js').exists()
+          assert not Path('experimental/Stock-Manager-Advisor.md').exists()
+          assert '[EXPERIMENTAL]' not in source and '· EXPERIMENTAL' not in source
+          assert 'Stock Manager & Advisor **v' + version + '**' in info
+          assert 'stock-manager-advisor' in hub and 'SakaLuXStockManagerAdvisor' in hub
+          print('Stocks metadata, distribution, Hub registration and promotion: OK')
 
       - name: Validate Suite metadata
         shell: python
