@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hubtest
 // @namespace    sakalux.script.hub.test
-// @version      1.9.65
+// @version      1.9.66
 // @description  Full TEST build of SakaLuX Script Hub with TornPDA fullscreen viewport sizing.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.65';
+    const VERSION = '1.9.66';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {version:'1.9.66',date:'2026-09-17',changes:['Rounds the donation section top corners and author footer bottom corners to the same 10px radius as SEND MONEY.']},
         {version:'1.9.65',date:'2026-09-17',changes:['Fills the fixed host viewport with auto height, removing the unused area below the author footer.','Makes the final mobile layout stronger than legacy Hub CSS regardless of asynchronous stylesheet load order.','Audits every current userscript and excludes Hub from add-on shared fullscreen/style selectors.']},
         { version:'1.9.64',date:'2026-09-17',changes:['Restores separate visible donation controls and a compact 22px author footer.','Requires Company Intelligence v1.8.24, which stops the Company repair routine from rewriting the Hub overlay.'] },
         { version: '1.9.55', date: '2026-09-17', changes: ['Makes Hub use the same reliable full-screen container model as Enhancer Guard and Market Intelligence.','The overlay owns the viewport with fixed inset:0 and maximum stacking; the Hub panel fills that container with flex instead of using a second fixed viewport.','Removes double-fixed geometry that could leave unused space at the bottom in TornPDA.','Keeps blur disabled and Managed Modules as the only primary scroll surface.'] },
@@ -2147,6 +2148,9 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     #sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom .slh-bottom-grid{height:50px!important}
     #sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom .slh-bottom-btn{height:50px!important;min-height:50px!important;box-shadow:none!important}
     #sakalux-hub-overlay>#sakalux-hub-panel>.slh-footer{position:relative!important;flex:0 0 22px!important;height:22px!important;min-height:22px!important;max-height:22px!important;margin:0!important;padding:0 6px!important;box-sizing:border-box!important;line-height:20px!important;font-size:9px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;background:#080d13!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel{border-radius:0 0 10px 10px!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom{border-radius:10px 10px 0 0!important;overflow:hidden!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-footer{border-radius:0 0 10px 10px!important;overflow:hidden!important}
     #sakalux-hub-overlay#sakalux-hub-overlay *,#sakalux-hub-overlay>#sakalux-hub-panel *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
     #sakalux-hub-overlay>#sakalux-hub-panel *{animation:none!important;transition:none!important}
   }`;
