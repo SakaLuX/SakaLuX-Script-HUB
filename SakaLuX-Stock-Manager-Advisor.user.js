@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.11
+// @version      0.7.12
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -53,7 +53,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.11',
+    version: '0.7.12',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -722,6 +722,12 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     return true;
   }
 
+  function stockRowTools(row, sym) {
+    const sibling=row?.nextElementSibling;
+    if(sibling?.matches?.('.slx-stock-row-tools') && sibling.dataset.sym===sym) return sibling;
+    return row?.querySelector?.('.slx-stock-row-tools') || document.querySelector('.slx-stock-row-tools[data-sym="'+sym+'"]');
+  }
+
   function applyStockView() {
     if(!isStocks()) return;
     scanStocks();
@@ -735,6 +741,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
       byParent.get(row.parentElement).push({sym,row,score:stockViewScore(sym,sort)});
       row.style.display=stockPassesFilter(sym,filter)?'':'none';
       row.dataset.slxViewVisible=row.style.display==='none'?'0':'1';
+      const tools=stockRowTools(row,sym);
+      if(tools) tools.hidden=row.dataset.slxViewVisible==='0';
     }
     if(sort==='default') return;
     for(const [parent,items] of byParent) {
@@ -743,10 +751,15 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
       visible.sort((a,b)=> sort==='loss' ? a.score-b.score : b.score-a.score || a.sym.localeCompare(b.sym));
       const ordered=[...visible,...hidden];
       if(ordered.length<2) continue;
+      if(ordered.every((item,index)=>item.row===items[index].row && (!stockRowTools(item.row,item.sym) || item.row.nextElementSibling===stockRowTools(item.row,item.sym)))) continue;
       const marker=document.createComment('slx-stock-sort');
       parent.insertBefore(marker,ordered[0].row);
       const frag=document.createDocumentFragment();
-      ordered.forEach(x=>frag.appendChild(x.row));
+      ordered.forEach(x=>{
+        const tools=stockRowTools(x.row,x.sym);
+        frag.appendChild(x.row);
+        if(tools)frag.appendChild(tools);
+      });
       marker.parentNode.insertBefore(frag,marker.nextSibling);
       marker.remove();
     }
@@ -767,25 +780,35 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   function enhanceStockRows() {
     if(!isStocks()) return;
     scanStocks();
+    const ranks=opportunityRanks(), favorites=favoriteStocks();
+    const quickOptions=stockRowQuickOptions().map(v=>`<option value="${esc(v)}">${esc(String(v).toUpperCase())}</option>`).join('');
+    for(const tools of $$('.slx-stock-row-tools')) {
+      if(!S.stocks.get(tools.dataset.sym)?.row?.isConnected)tools.remove();
+    }
     for(const [sym,st] of S.stocks) {
       const row=st?.row;
       if(!row?.isConnected) continue;
-      const old=$('.slx-stock-row-tools',row);
+      const old=stockRowTools(row,sym);
       const m=stockRowMetrics(sym);
       if(!m) continue;
-      const li=old||document.createElement('li');
+      const li=old?.tagName==='DIV'?old:document.createElement('div');
+      if(old && old!==li)old.remove();
+      li.setAttribute('data-slx-stock-companion','1');
       li.className='slx-stock-row-tools';
       li.dataset.sym=sym;
       const tierLabel=m.tier.tier?`Tier ${m.tier.tier}`:'No tier';
       const nextText=m.nextGap?`${m.nextGap.toLocaleString()} to next`:'No next gap';
       const plText=m.pl===null?'P/L n/a':`${m.pl>=0?'+':'-'}${money(Math.abs(m.pl))}${m.plPct===null?'':` (${m.plPct>=0?'+':''}${m.plPct.toFixed(2)}%)`}`;
       const progress=stockRowBenefitProgress(sym,m.owned);
-      const opp=opportunityRanks().get(sym);
-      const fav=favoriteStocks().has(sym);
+      const opp=ranks.get(sym);
+      const fav=favorites.has(sym);
       const near=nearBenefitInfo(sym);
-      const quickOptions=stockRowQuickOptions().map(v=>`<option value="${esc(v)}">${esc(String(v).toUpperCase())}</option>`).join('');
-      li.innerHTML=`<div class="slx-row-stock"><b>${esc(sym)}${opp?` <em class=\"slx-opp-badge\">#${opp.rank} ROI</em>`:''}</b><span>${money(m.price)}</span>${opp?`<small class=\"slx-opp-roi\">${opp.roi.toFixed(2)}% APR</small>`:''}</div><div class="slx-row-stat"><small>Owned</small><b>${m.owned.toLocaleString()}</b><span>${money(m.value)}</span></div><div class="slx-row-stat"><small>Avg buy</small><b>${m.avg?money(m.avg):'n/a'}</b><span class="${m.pl===null?'muted':m.pl>=0?'good':'bad'}">${plText}</span></div><div class="slx-row-stat"><small>Benefit</small><b>${tierLabel}</b><span>${nextText}</span><div class="slx-row-progress"><i style="width:${progress.pct.toFixed(2)}%"></i></div><small class="slx-row-progress-label">${esc(progress.label)}${near?.near?` · ⚡ ${near.gap.toLocaleString()} left`:''}</small></div><div class="slx-row-actions"><button type="button" class="slx-fav" data-row-fav="${sym}" title="Favorite">${fav?'★':'☆'}</button><button type="button" data-row-target="${sym}" ${bool(K.targetLock,false)&&get(K.target).toUpperCase()!==sym?'disabled':''}>Target</button><button type="button" class="primary" data-row-buy="${sym}" ${m.nextGap?'':'disabled'}>Buy gap</button><button type="button" class="danger" data-row-sell="${sym}" ${m.freeShares?'':'disabled'}>Sell excess</button></div><div class="slx-row-quick"><select data-row-quick-amount="${sym}" title="Quick trade amount">${quickOptions}</select><button type="button" class="primary" data-row-quick-buy="${sym}">BUY</button><button type="button" class="danger" data-row-quick-sell="${sym}" ${m.owned?'':'disabled'}>SELL</button></div>`;
-      if(!old) row.appendChild(li);
+      const markup=`<div class="slx-row-stock"><b>${esc(sym)}${opp?` <em class=\"slx-opp-badge\">#${opp.rank} ROI</em>`:''}</b><span>${money(m.price)}</span>${opp?`<small class=\"slx-opp-roi\">${opp.roi.toFixed(2)}% APR</small>`:''}</div><div class="slx-row-stat"><small>Owned</small><b>${m.owned.toLocaleString()}</b><span>${money(m.value)}</span></div><div class="slx-row-stat"><small>Avg buy</small><b>${m.avg?money(m.avg):'n/a'}</b><span class="${m.pl===null?'muted':m.pl>=0?'good':'bad'}">${plText}</span></div><div class="slx-row-stat"><small>Benefit</small><b>${tierLabel}</b><span>${nextText}</span><div class="slx-row-progress"><i style="width:${progress.pct.toFixed(2)}%"></i></div><small class="slx-row-progress-label">${esc(progress.label)}${near?.near?` · ⚡ ${near.gap.toLocaleString()} left`:''}</small></div><div class="slx-row-actions"><button type="button" class="slx-fav" data-row-fav="${sym}" title="Favorite">${fav?'★':'☆'}</button><button type="button" data-row-target="${sym}" ${bool(K.targetLock,false)&&get(K.target).toUpperCase()!==sym?'disabled':''}>Target</button><button type="button" class="primary" data-row-buy="${sym}" ${m.nextGap?'':'disabled'}>Buy gap</button><button type="button" class="danger" data-row-sell="${sym}" ${m.freeShares?'':'disabled'}>Sell excess</button></div><div class="slx-row-quick"><select data-row-quick-amount="${sym}" title="Quick trade amount">${quickOptions}</select><button type="button" class="primary" data-row-quick-buy="${sym}">BUY</button><button type="button" class="danger" data-row-quick-sell="${sym}" ${m.owned?'':'disabled'}>SELL</button></div>`;
+      const previousAmount=$('[data-row-quick-amount]',li)?.value;
+      if(li.__slxRowMarkup!==markup){li.innerHTML=markup;li.__slxRowMarkup=markup;}
+      if(row.nextElementSibling!==li)row.after(li);
+      const amountSelect=$('[data-row-quick-amount]',li);
+      if(previousAmount && amountSelect && [...amountSelect.options].some(o=>o.value===previousAmount)) amountSelect.value=previousAmount;
       const fb=$('[data-row-fav]',li); if(fb) fb.onclick=e=>{e.preventDefault();e.stopPropagation();toggleFavorite(sym);};
       $('[data-row-target]',li).onclick=e=>{e.preventDefault();e.stopPropagation();set(K.target,sym);refreshTargetSelect();refreshInlinePanel();enhanceStockRows();inlineStatus(`${sym} selected as target.`,'ok');};
       $('[data-row-buy]',li).onclick=e=>{e.preventDefault();e.stopPropagation();stockRowBuyGap(sym);};
@@ -1579,6 +1602,26 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 #slx-stock-panel#slx-stock-panel button,#slx-stock-inline#slx-stock-inline button{transition:none!important}
 }
 @media(max-width:340px){#slx-stock-panel#slx-stock-panel .grid{grid-template-columns:1fr!important}}
+
+
+/* Keep SakaLuX controls outside Torn's native stock-column list. */
+.slx-stock-row-tools[data-slx-stock-companion][data-slx-stock-companion]{position:static!important;inset:auto!important;float:none!important;clear:both!important;flex:0 0 100%!important;grid-column:1/-1!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;max-height:none!important;margin:6px 0 12px!important;padding:10px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;overflow:hidden!important;background:#101923!important;opacity:1!important;isolation:isolate;border:1px solid #34465b!important;border-radius:11px!important}
+.slx-stock-row-tools[data-slx-stock-companion][hidden]{display:none!important}
+.slx-stock-row-tools[data-slx-stock-companion] .slx-row-stock{grid-column:1/-1!important;display:flex!important;align-items:center;flex-wrap:wrap;gap:8px}
+.slx-stock-row-tools[data-slx-stock-companion] b{font-size:12px!important;line-height:1.3}
+.slx-stock-row-tools[data-slx-stock-companion] span,.slx-stock-row-tools[data-slx-stock-companion] small{font-size:10px!important;line-height:1.35!important;white-space:normal!important;overflow-wrap:anywhere}
+.slx-stock-row-tools[data-slx-stock-companion] .slx-row-actions{grid-column:1/-1!important;display:grid!important;grid-template-columns:32px repeat(3,minmax(0,1fr))!important;gap:6px!important}
+.slx-stock-row-tools[data-slx-stock-companion] .slx-row-quick{grid-column:1/-1!important;display:grid!important;grid-template-columns:minmax(0,1fr) repeat(2,minmax(60px,80px))!important;gap:6px!important;justify-content:stretch!important}
+.slx-stock-row-tools[data-slx-stock-companion] button,.slx-stock-row-tools[data-slx-stock-companion] select{box-sizing:border-box!important;min-width:0!important;width:100%!important;height:30px!important;min-height:30px!important;padding:4px 6px!important;font-size:10px!important;line-height:1.2!important}
+#slx-stock-inline#slx-stock-inline{position:static!important;float:none!important;clear:both!important;flex:0 0 100%!important;grid-column:1/-1!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+@media(max-width:820px){
+.slx-stock-row-tools[data-slx-stock-companion][data-slx-stock-companion]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.slx-stock-row-tools[data-slx-stock-companion] .slx-row-stat:nth-child(4){grid-column:1/-1!important}
+.slx-stock-row-tools[data-slx-stock-companion] .slx-row-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#slx-stock-inline#slx-stock-inline .slx-inline-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#slx-stock-inline#slx-stock-inline .slx-inline-summary span{font-size:10px!important}
+#slx-stock-inline#slx-stock-inline .slx-inline-summary b{font-size:12px!important}
+}
 
 `;
     document.head.appendChild(st);
