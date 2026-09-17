@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.34**
+**v1.17.35**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,10 +20,7 @@
 
 ## Current release note
 
-
-
-
-**v1.17.34** Extends the donation/author footer to the full panel width, compensates for the content padding and removes the bottom gap. Keeps 20px donation buttons and the mobile chat clearance.
+**v1.17.35** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -46,19 +43,22 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 ## License
 **All Rights Reserved**
 
-## Release history
+## Release history / Changelog
+
+### v1.17.35 — Performance and release metadata audit
+- Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
 ### v1.17.34 — Full-width footer
 - Extends the donation/author footer to the full panel width, compensates for the content padding and removes the bottom gap. Keeps 20px donation buttons and the mobile chat clearance.
 
-
 ### v1.17.33 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
-
 
 ### v1.17.32 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
 
+### v1.17.31 — Hub isolation
+- Excludes Script Hub and its subtree from shared module styling/fullscreen rules; restricts footer routines to native module roots.
 
 ### v1.17.30 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.
@@ -66,24 +66,20 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 - Disables the legacy document-scanning Mobile Surface observer where present.
 - Reduces mobile animation/transition cost for faster input and scrolling.
 
-
 ### v1.17.29 — Hub-aware observer shutdown
 - Stops the standalone document observer as soon as Script Hub is detected.
 - Keeps normal standalone behavior when Hub is absent.
 - Reduces unnecessary work during Hub scrolling and button taps.
-
 
 ### v1.17.28 — TornPDA performance
 - Removes the recurring standalone render interval.
 - Throttles DOM-driven standalone refreshes.
 - Avoids repeated work while Script Hub is active.
 
-
 ### v1.17.27 — Standalone panel repair
 - Restores Standalone OPEN behavior.
 - Removes shared full-sheet dimension forcing from the module panel.
 - Keeps native module sizing and TornPDA touch behavior.
-
 
 ### v1.17.26 — TornPDA host-scroll contract
 - Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling works normally while the translucent blur surface is preserved.
@@ -97,12 +93,13 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 - Uses the shared SakaLuX top-alignment contract.
 
 ### v1.17.23 — PDA top-aligned panel refinement
-
 - Opens the SakaLuX panel from the top of the available Torn viewport.
 - Improves compact Hub integration and mobile visibility.
 
-### v1.17.21 — Shared Standalone ordering fix
+### v1.17.22
+- Performance/UI optimization: tunes high-frequency DOM/update paths and applies the shared SakaLuX Hub-style UI foundation across standalone controls without changing market logic.
 
+### v1.17.21 — Shared Standalone ordering fix
 - Uses the canonical SakaLuX standalone order including Company Intelligence.
 - Unknown/new modules sort after known modules instead of before them.
 - Keeps the mobile dock layout and Install SakaLuX Hub button readable.
@@ -143,10 +140,3 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 
 ### v1.17.0 — Native Hub Power API
 - Added `setEnabled`, `toggleEnabled` and `isEnabled`, plus shared-Hub-key preference with standalone fallback.
-
-## Changelog
-
-### v1.17.22
-
-- Performance/UI optimization: tunes high-frequency DOM/update paths and applies the shared SakaLuX Hub-style UI foundation across standalone controls without changing market logic.
-

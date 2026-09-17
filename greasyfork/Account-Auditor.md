@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.12**
+**v1.3.13**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,9 +18,7 @@
 
 ## Current release note
 
-
-
-**v1.3.12** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+**v1.3.13** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
@@ -44,15 +42,19 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 ## License
 **MIT**
 
-## Release history
+## Release history / Changelog
+
+### v1.3.13 — Performance and release metadata audit
+- Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
 ### v1.3.12 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
-
 ### v1.3.11 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
 
+### v1.3.10 — Hub isolation
+- Excludes Script Hub and its subtree from shared module styling/fullscreen rules; restricts footer routines to native module roots.
 
 ### v1.3.9 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.
@@ -60,10 +62,8 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 - Disables the legacy document-scanning Mobile Surface observer where present.
 - Reduces mobile animation/transition cost for faster input and scrolling.
 
-
 ### v1.3.8 — Standalone panel repair
 - Removes shared full-sheet dimension forcing so the auditor panel opens normally again.
-
 
 ### v1.3.7 — TornPDA host-scroll contract
 - Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling and mobile interaction remain stable while blur is preserved.
@@ -71,6 +71,9 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 ### v1.3.6 — Mobile full-height + blur contract
 - Opens the active mobile sheet from top to bottom of the available viewport.
 - Adds the shared translucent SakaLuX blur treatment.
+
+### v1.3.5
+- Performance/UI optimization: adds the shared SakaLuX performance foundation, reduces duplicate high-frequency UI work, and aligns controls/cards with the Hub visual language.
 
 ### v1.3.2 — API diagnostics and readable merits
 - Saved Auditor API key takes priority over TornPDA injection.
@@ -103,10 +106,3 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 
 ### v1.2.0 — Split snapshots and explicit message capture
 - Added split snapshot files, explicit current-message capture, deduplication and safer API pacing.
-
-## Changelog
-
-### v1.3.5
-
-- Performance/UI optimization: adds the shared SakaLuX performance foundation, reduces duplicate high-frequency UI work, and aligns controls/cards with the Hub visual language.
-

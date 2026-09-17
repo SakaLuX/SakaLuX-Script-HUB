@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.919
+// @version      0.9.920
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -172,7 +172,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.919';
+  const VERSION = '0.9.920';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -44597,7 +44597,12 @@ function scan(){
   f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>{location.href=profile});panel.appendChild(f);
  }
  function start(){ensure();let scheduled=false;new MutationObserver(records=>{
-  if(scheduled||!records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&!n.closest?.('[id^="sakalux-inline-footer-"]'))))return;
+  const nativeRoot=selector.split(/[ >]/)[0];
+  const relevant=records.some(r=>{
+   if(r.target?.closest?.('[id^="sakalux-inline-footer-"]'))return false;
+   return r.target?.closest?.(nativeRoot)||[...r.addedNodes].some(n=>n.nodeType===1&&n.matches?.(nativeRoot));
+  });
+  if(scheduled||!relevant)return;
   scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
  }).observe(document.body,{childList:true,subtree:true});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

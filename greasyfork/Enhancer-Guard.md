@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.45**
+**v1.3.46**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,9 +17,7 @@
 
 ## Current release note
 
-
-
-**v1.3.45** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+**v1.3.46** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -37,15 +35,19 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 ## License
 **All Rights Reserved**
 
-## Release history
+## Release history / Changelog
+
+### v1.3.46 — Performance and release metadata audit
+- Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
 ### v1.3.45 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
 
-
 ### v1.3.44 — Compact Hub footer
 - Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
 
+### v1.3.43 — Hub isolation
+- Excludes Script Hub and its subtree from shared module styling/fullscreen rules; restricts footer routines to native module roots.
 
 ### v1.3.42 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.
@@ -53,24 +55,20 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 - Disables the legacy document-scanning Mobile Surface observer where present.
 - Reduces mobile animation/transition cost for faster input and scrolling.
 
-
 ### v1.3.41 — Hub-aware observer shutdown
 - Stops the standalone document observer as soon as Script Hub is detected.
 - Keeps normal standalone behavior when Hub is absent.
 - Reduces unnecessary work during Hub scrolling and button taps.
-
 
 ### v1.3.40 — TornPDA performance
 - Removes the recurring standalone render interval.
 - Throttles DOM-driven standalone refreshes.
 - Avoids repeated work while Script Hub is active.
 
-
 ### v1.3.39 — Standalone panel repair
 - Restores Standalone OPEN behavior.
 - Removes shared full-sheet dimension forcing from the module panel.
 - Keeps native module sizing and TornPDA touch behavior.
-
 
 ### v1.3.38 — TornPDA host-scroll contract
 - Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling works normally while the translucent blur surface is preserved.
@@ -84,12 +82,13 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 - Uses the shared SakaLuX top-alignment contract.
 
 ### v1.3.35 — PDA top-aligned panel refinement
-
 - Opens the SakaLuX panel from the top of the available Torn viewport.
 - Improves compact Hub integration and mobile visibility.
 
-### v1.3.33 — Shared Standalone ordering fix
+### v1.3.34
+- Performance/UI optimization: uses the shared single-instance SakaLuX performance helpers, reduces repeated observer/render work and aligns the standalone UI with the Hub visual system.
 
+### v1.3.33 — Shared Standalone ordering fix
 - Uses the canonical SakaLuX standalone order including Company Intelligence.
 - Unknown/new modules sort after known modules instead of before them.
 - Keeps the mobile dock layout and Install SakaLuX Hub button readable.
@@ -131,10 +130,3 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 
 ### v1.3.14 — Item Protector integration
 - Added reliable installation detection and full/partial/unlocked lock badges directly on Torn Items with local quantity editing.
-
-## Changelog
-
-### v1.3.34
-
-- Performance/UI optimization: uses the shared single-instance SakaLuX performance helpers, reduces repeated observer/render work and aligns the standalone UI with the Hub visual system.
-
