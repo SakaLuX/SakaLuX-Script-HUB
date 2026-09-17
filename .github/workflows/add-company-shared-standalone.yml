@@ -48,13 +48,11 @@ jobs:
               count=1,
           )
 
-          # Company panel must stay above the shared dock just like the other managed add-ons.
           block = block.replace(
               '  [id^="slx-elim-"][id*="panel" i]\n){z-index:2147483646!important;}',
               '  [id^="slx-elim-"][id*="panel" i],\n  #ci-root\n){z-index:2147483646!important;}'
           )
 
-          # If this workflow is ever rerun, replace the existing bootstrap instead of duplicating it.
           if begin in company and end in company:
               prefix = company.split(begin, 1)[0]
               suffix = company.split(end, 1)[1]
