@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.9**
+**v1.3.8**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,7 +18,7 @@
 
 ## Current release note
 
-**v1.3.9** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.3.8** restores the standalone auditor panel’s native geometry instead of forcing the shared full-sheet dimensions.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
@@ -43,13 +43,6 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 **MIT**
 
 ## Release history
-
-### v1.3.9 — Full-screen performance
-- Mobile SakaLuX panels use the full available viewport.
-- Removes backdrop blur and heavy mobile visual effects.
-- Disables the legacy document-scanning Mobile Surface observer where present.
-- Reduces mobile animation/transition cost for faster input and scrolling.
-
 
 ### v1.3.8 — Standalone panel repair
 - Removes shared full-sheet dimension forcing so the auditor panel opens normally again.

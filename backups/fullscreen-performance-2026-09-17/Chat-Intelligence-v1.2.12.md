@@ -3,7 +3,7 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.13**
+**v1.2.12**
 
 ## What it does
 - Enhances Torn chat with SakaLuX chat intelligence features.
@@ -12,7 +12,7 @@
 
 ## Current release note
 
-**v1.2.13** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.2.12** Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling and mobile interaction remain stable while blur is preserved.
 
 ## Recommended
 - Use together with SakaLuX Script Hub for consistent controls and status handling.

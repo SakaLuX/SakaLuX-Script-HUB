@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.23**
+**v1.8.22**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -19,7 +19,7 @@
 
 ## Current release note
 
-**v1.8.23** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.8.22** Makes the whole Company sheet the native vertical scroll surface, fits it to the available TornPDA host height, preserves blur, and styles the SakaLuX footer in orange like Elimination.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -44,13 +44,6 @@
 **All Rights Reserved**
 
 ## Release history
-
-### v1.8.23 — Full-screen performance
-- Mobile SakaLuX panels use the full available viewport.
-- Removes backdrop blur and heavy mobile visual effects.
-- Disables the legacy document-scanning Mobile Surface observer where present.
-- Reduces mobile animation/transition cost for faster input and scrolling.
-
 
 ### v1.8.22 — TornPDA host-scroll contract
 - Makes the whole Company sheet the native vertical scroll surface, fits it to the available TornPDA host height, preserves blur, and styles the SakaLuX footer in orange like Elimination.
