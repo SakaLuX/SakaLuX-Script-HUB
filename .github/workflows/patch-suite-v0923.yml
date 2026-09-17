@@ -1,0 +1,54 @@
+name: Apply Suite v0.9.923 TornPDA full-height fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/patch_suite_v0923.py'
+      - '.github/workflows/patch-suite-v0923.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Patch Suite
+        run: python .github/scripts/patch_suite_v0923.py
+
+      - name: Validate
+        shell: python
+        run: |
+          from pathlib import Path
+          s=Path('SakaLuX-Suite.user.js').read_text(encoding='utf-8')
+          checks=[
+            '// @version      0.9.923',
+            "const VERSION = '0.9.923';",
+            'Suite TornPDA coarse-pointer full-height contract 0.9.923',
+            '@media (pointer:coarse), (hover:none)',
+            'inset:0 4px 36px 4px!important',
+            'height:100%!important',
+            'flex:0 0 50px!important'
+          ]
+          missing=[x for x in checks if x not in s]
+          if missing:
+              raise SystemExit('Missing: '+repr(missing))
+          print('Suite v0.9.923 validation passed')
+
+      - name: Commit
+        run: |
+          git config user.name "SakaLuX Release Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md backups/suite-tornpda-fullheight-v0.9.923-2026-09-17/
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "Suite v0.9.923: fix TornPDA Master Control full-height layout"
+            git push
+          fi
