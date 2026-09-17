@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.23
+// @version      1.17.24
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -19,6 +19,27 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
+  // SakaLuX shared mobile top-alignment contract.
+  (() => {
+    const id='sakalux-global-top-align-v3';
+    if(document.getElementById(id)) return;
+    const st=document.createElement('style');
+    st.id=id;
+    st.textContent=`@media(max-width:700px){
+body [id^="sakalux-"][id*="overlay"],body [id^="sakalux-"][id*="modal"],
+body [id^="slx-"][id*="overlay"],body [id^="slx-"][id*="modal"],
+body [id^="sl-"][id*="overlay"],body [id^="sl-"][id*="modal"],
+#sl-eg-overlay,#sl-mr-settings-overlay,#sl-mi-overlay,#ci-root{
+ align-items:flex-start!important;justify-content:center!important;padding-top:0!important;margin-top:0!important;
+}
+body [id^="sakalux-"][id*="panel"],body [id^="slx-"][id*="panel"],body [id^="sl-"][id*="panel"],
+#sl-eg-panel,#sl-mr-settings-panel,#sl-mi-panel,#ci-root .ci-shell{
+ margin-top:0!important;align-self:flex-start!important;
+}
+}`;
+    (document.head||document.documentElement).appendChild(st);
+  })();
+
 
   // Shared SakaLuX performance + Hub-style UI foundation.
   (() => {
@@ -204,7 +225,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.17.23';
+    const VERSION = '1.17.24';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';

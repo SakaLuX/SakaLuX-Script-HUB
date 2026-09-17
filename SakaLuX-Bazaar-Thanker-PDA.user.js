@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.27
+// @version      5.3.28
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -15,6 +15,27 @@
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
   'use strict';
+  // SakaLuX shared mobile top-alignment contract.
+  (() => {
+    const id='sakalux-global-top-align-v3';
+    if(document.getElementById(id)) return;
+    const st=document.createElement('style');
+    st.id=id;
+    st.textContent=`@media(max-width:700px){
+body [id^="sakalux-"][id*="overlay"],body [id^="sakalux-"][id*="modal"],
+body [id^="slx-"][id*="overlay"],body [id^="slx-"][id*="modal"],
+body [id^="sl-"][id*="overlay"],body [id^="sl-"][id*="modal"],
+#sl-eg-overlay,#sl-mr-settings-overlay,#sl-mi-overlay,#ci-root{
+ align-items:flex-start!important;justify-content:center!important;padding-top:0!important;margin-top:0!important;
+}
+body [id^="sakalux-"][id*="panel"],body [id^="slx-"][id*="panel"],body [id^="sl-"][id*="panel"],
+#sl-eg-panel,#sl-mr-settings-panel,#sl-mi-panel,#ci-root .ci-shell{
+ margin-top:0!important;align-self:flex-start!important;
+}
+}`;
+    (document.head||document.documentElement).appendChild(st);
+  })();
+
 
   // Shared SakaLuX performance + Hub-style UI foundation.
   (() => {
@@ -1135,7 +1156,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.27';
+    const BAZAAR_VERSION='5.3.28';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);

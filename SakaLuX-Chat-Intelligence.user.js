@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.9
+// @version      1.2.10
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -11,6 +11,27 @@
 // @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 // ==/UserScript==
 (()=>{'use strict';
+  // SakaLuX shared mobile top-alignment contract.
+  (() => {
+    const id='sakalux-global-top-align-v3';
+    if(document.getElementById(id)) return;
+    const st=document.createElement('style');
+    st.id=id;
+    st.textContent=`@media(max-width:700px){
+body [id^="sakalux-"][id*="overlay"],body [id^="sakalux-"][id*="modal"],
+body [id^="slx-"][id*="overlay"],body [id^="slx-"][id*="modal"],
+body [id^="sl-"][id*="overlay"],body [id^="sl-"][id*="modal"],
+#sl-eg-overlay,#sl-mr-settings-overlay,#sl-mi-overlay,#ci-root{
+ align-items:flex-start!important;justify-content:center!important;padding-top:0!important;margin-top:0!important;
+}
+body [id^="sakalux-"][id*="panel"],body [id^="slx-"][id*="panel"],body [id^="sl-"][id*="panel"],
+#sl-eg-panel,#sl-mr-settings-panel,#sl-mi-panel,#ci-root .ci-shell{
+ margin-top:0!important;align-self:flex-start!important;
+}
+}`;
+    (document.head||document.documentElement).appendChild(st);
+  })();
+
 
   // Shared SakaLuX performance + Hub-style UI foundation.
   (() => {
@@ -46,7 +67,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
   })();
 
-const V='1.2.8',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+const V='1.2.10',ID='chat-intelligence',API='SakaLuXChatIntelligence';
 const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
 const D={enabled:true,search:true,quickActions:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
 const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};

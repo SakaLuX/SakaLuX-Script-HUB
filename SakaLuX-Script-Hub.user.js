@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.46
+// @version      1.9.47
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.46';
+    const VERSION = '1.9.47';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,15 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {
+            version: '1.9.47',
+            date: '2026-09-17',
+            changes: [
+                'Applies the mobile top-alignment contract directly in every managed module and Chat Intelligence.',
+                'Forces module INFO, NEW, ON/OFF and OPEN/SETTINGS controls into the right-side 2x2 block after legacy CSS.',
+                'Normalizes compact Hub Settings switches after all older mobile rules.'
+            ]
+        },
         {
             version: '1.9.46',
             date: '2026-09-16',
@@ -488,7 +497,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.35',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.36',
                 description: 'Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -504,7 +513,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'bazaar', type: 'addon', active: true,
-                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.27',
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.28',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
@@ -520,7 +529,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.22',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.23',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -536,7 +545,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.23',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.24',
                 description: 'Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
@@ -554,7 +563,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'elimination-assistant', type: 'addon', active: true,
-                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.33',
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.34',
                 description: 'Eliminations advisor with unified Torn + FFScouter API setup, rotating 500-player batches, availability status, TornPDA export and PC-safe attack routing.',
                 greasyForkId: '594921',
                 metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
@@ -1258,6 +1267,23 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
   #${IDS.panel} .slh-card .slh-name{font-size:12px!important;line-height:1.15!important}
   #${IDS.panel} .slh-card .slh-meta,#${IDS.panel} .slh-card .slh-badges{gap:3px!important}
   #${IDS.panel} .slh-setting{padding:7px 9px!important;margin-bottom:7px!important}
+}
+`;
+        style.textContent += `
+/* v1.9.47 FINAL PDA OVERRIDE */
+@media(max-width:700px){
+#${IDS.overlay}{align-items:flex-start!important;justify-content:center!important;padding:0!important;margin:0!important}
+#${IDS.panel}{margin:0 auto!important;align-self:flex-start!important;border-radius:0 0 18px 18px!important;max-height:calc(100dvh - 72px)!important}
+.slh-card{display:grid!important;grid-template-columns:42px minmax(0,1fr) 136px!important;grid-template-rows:auto!important;align-items:center!important;column-gap:8px!important;row-gap:0!important;padding:9px!important;min-height:78px!important}
+.slh-card .slh-icon{grid-column:1!important;grid-row:1!important;margin:0!important}
+.slh-card .slh-card-copy{grid-column:2!important;grid-row:1!important;min-width:0!important;margin:0!important}
+.slh-card .slh-module-controls{grid-column:3!important;grid-row:1!important;display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-rows:32px 32px!important;grid-template-areas:'info toggle' 'new primary'!important;gap:5px!important;width:136px!important;min-width:136px!important;margin:0!important;align-self:center!important}
+.slh-card .slh-card-tools{display:contents!important}
+.slh-card .slh-info-btn{grid-area:info!important}.slh-card .slh-new-btn{grid-area:new!important}.slh-card .slh-switch-wrap{grid-area:toggle!important}.slh-card .slh-primary{grid-area:primary!important}
+.slh-card .slh-info-btn,.slh-card .slh-new-btn,.slh-card .slh-switch-wrap,.slh-card .slh-primary{width:100%!important;min-width:0!important;height:32px!important;min-height:32px!important;padding:0 4px!important;margin:0!important;font-size:8px!important;border-radius:9px!important}
+.slh-settings .slh-setting-row{display:grid!important;grid-template-columns:minmax(0,1fr) 38px!important;align-items:center!important;gap:10px!important}
+.slh-settings .slh-setting-toggle{width:38px!important;min-width:38px!important;max-width:38px!important;height:22px!important;min-height:22px!important;padding:2px!important;border-radius:999px!important;justify-self:end!important}
+.slh-settings .slh-setting-toggle i{width:16px!important;height:16px!important;margin:0!important}.slh-settings .slh-setting-toggle.on i{transform:translateX(16px)!important}
 }
 `;
         document.head.appendChild(style);
