@@ -28,12 +28,12 @@
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.36**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.28**
-- 🎯 SakaLuX Mission Rewards **v1.0.23**
-- 📈 SakaLuX Market Intelligence **v1.17.24**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.34**
-- 🏢 SakaLuX Company Intelligence **v1.8.20**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.37**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.29**
+- 🎯 SakaLuX Mission Rewards **v1.0.24**
+- 📈 SakaLuX Market Intelligence **v1.17.25**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.35**
+- 🏢 SakaLuX Company Intelligence **v1.8.21**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
