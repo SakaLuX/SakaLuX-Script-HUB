@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.31
+// @version      5.3.30
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -71,7 +71,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
   })();
 
-  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.31'});
+  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.30'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -1156,7 +1156,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.31';
+    const BAZAAR_VERSION='5.3.30';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
@@ -1391,7 +1391,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     if(!MOBILE())return;
     for(const t of TITLES){
       const p=findSheet(t); if(!p)continue;
-      p.removeAttribute('data-slx-fullsheet-v2');
+      p.dataset.slxFullsheetV2='1';
       let a=p.parentElement;
       for(let i=0;a&&i<3;i++,a=a.parentElement){
         const s=getComputedStyle(a),r=a.getBoundingClientRect();
