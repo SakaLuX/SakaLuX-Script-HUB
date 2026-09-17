@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant TEST
 // @namespace    sakalux.elimination.assistant.test
-// @version      1.3.39
+// @version      1.3.40
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -221,7 +221,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  */
 (() => {
 'use strict';
-const VERSION = '1.3.39';
+const VERSION = '1.3.40';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -573,4 +573,31 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 }
 `;
   (document.head||document.documentElement).appendChild(s);
+})();
+
+/* Elimination TEST v1.3.40: SAFE sheet stays inside its parent panel. */
+(()=>{
+ const s=document.createElement('style');s.id='slx-elim-test-safe-1340';
+ s.textContent=`
+#slx-elim #slx-safe-list-modal#slx-safe-list-modal{
+ position:absolute!important;inset:0 0 32px!important;width:auto!important;height:auto!important;
+ min-height:0!important;max-height:none!important;max-width:none!important;
+ margin:0!important;padding:12px!important;box-sizing:border-box!important;
+ background:#0d1117!important;border-radius:0!important;overflow:hidden!important;
+ z-index:60!important;color:#e2e8f0!important;font:13px/1.4 Arial,sans-serif!important;
+}
+#slx-elim #slx-safe-list-modal.open{display:flex!important;flex-direction:column!important}
+#slx-elim #slx-safe-list-modal .slx-safe-head{flex:0 0 auto!important;align-items:center!important;gap:10px!important;padding:0 0 10px!important;border-bottom:1px solid #2d3742!important}
+#slx-elim #slx-safe-list-modal .slx-safe-head h3{flex:1!important;min-width:0!important;margin:0!important;padding:0!important;font:800 17px/1.25 Arial,sans-serif!important;color:#86efac!important}
+#slx-elim #slx-safe-list-modal .slx-a{box-sizing:border-box!important;margin:0!important;padding:8px 10px!important;min-height:36px!important;font:800 12px/1.2 Arial,sans-serif!important;border-radius:9px!important;text-align:center!important}
+#slx-elim #slx-safe-close{flex:0 0 auto!important;white-space:nowrap!important}
+#slx-elim #slx-safe-list-modal .slx-safe-note{flex:0 0 auto!important;margin:8px 0 0!important;font:12px/1.45 Arial,sans-serif!important;color:#a7b2c0!important}
+#slx-elim #slx-safe-total{font-weight:700!important;color:#cbd5e1!important}
+#slx-elim #slx-safe-list-modal .slx-safe-actions{flex:0 0 auto!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:12px 0!important}
+#slx-elim #slx-safe-list-modal .slx-safe-list{flex:1 1 auto!important;min-height:0!important;overflow:auto!important;overscroll-behavior:contain!important;background:#111821!important}
+#slx-elim #slx-safe-list-modal .slx-safe-empty{padding:20px 14px!important;font:13px/1.45 Arial,sans-serif!important}
+#slx-elim #slx-safe-list-modal .slx-safe-row{gap:10px!important;padding:10px!important}
+#slx-elim #slx-safe-list-modal .slx-safe-player a{font-size:13px!important;overflow-wrap:anywhere!important}
+#slx-elim #slx-safe-list-modal .slx-safe-player small{font:11px/1.4 Arial,sans-serif!important}
+`;(document.head||document.documentElement).appendChild(s);
 })();
