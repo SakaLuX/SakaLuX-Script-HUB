@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.59**
+**v1.9.60**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -24,7 +24,8 @@
 
 
 
-**v1.9.59** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
+**v1.9.60** Makes the Hub header more compact: 38px summary cards and 32px toolbar buttons matching module INFO / NEW controls. Preserves the rounded mobile panel and 20px donation buttons.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -56,6 +57,10 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+
+### v1.9.60 — Compact status cards and toolbar
+- Makes the Hub header more compact: 38px summary cards and 32px toolbar buttons matching module INFO / NEW controls. Preserves the rounded mobile panel and 20px donation buttons.
+
 
 ### v1.9.59 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
