@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.22
+// @version      1.8.21
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -681,7 +681,7 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   const style=document.createElement('style');
   style.id='sakalux-mobile-surface-v2';
   style.textContent=`@media(max-width:820px){
-    [data-slx-fullsheet-v2="1"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+    [data-slx-fullsheet-v2="1"]{position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}
     [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important}
     [data-slx-fullsheet-v2="1"] input,[data-slx-fullsheet-v2="1"] textarea,[data-slx-fullsheet-v2="1"] select{scroll-margin-bottom:38vh}
   }`;
@@ -744,19 +744,3 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   };
   new MutationObserver(()=>requestAnimationFrame(repair)).observe(document.documentElement,{childList:true,subtree:true});setInterval(repair,900);repair();
 })();
-
-
-/* slx-host-scroll-contract-v3 */
-(()=>{if(document.getElementById('slx-host-scroll-contract-v3'))return;const s=document.createElement('style');s.id='slx-host-scroll-contract-v3';s.textContent=`@media(max-width:820px){
-[data-slx-fullsheet-v2="1"]{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}
-}`;(document.head||document.documentElement).appendChild(s)})();
-
-
-/* slx-company-scroll-hotfix-1822 */
-(()=>{if(document.getElementById('slx-company-scroll-hotfix-1822'))return;const s=document.createElement('style');s.id='slx-company-scroll-hotfix-1822';s.textContent=`@media(max-width:820px){
-#ci-root{overflow:hidden!important;align-items:stretch!important;justify-content:stretch!important}
-#ci-root .ci-shell{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important}
-#ci-root .ci-body{overflow:visible!important;max-height:none!important;min-height:auto!important;flex:0 0 auto!important}
-#ci-root .ci-footer,#ci-root .sakalux-stable-module-footer{position:relative!important;inset:auto!important;width:100%!important;box-sizing:border-box!important;text-align:center!important;color:#f59e0b!important;font-weight:800!important;background:rgba(9,15,22,.96)!important;border-top:1px solid rgba(245,158,11,.24)!important;padding:10px 12px!important}
-#ci-root .ci-footer a,#ci-root .sakalux-stable-module-footer a{color:#f59e0b!important;font-weight:900!important}
-}`;(document.head||document.documentElement).appendChild(s)})();

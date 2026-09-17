@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.6**
+**v1.3.7**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,7 +18,7 @@
 
 ## Current release note
 
-**v1.3.6** adds the shared top-to-bottom mobile sheet and translucent blur contract where the script exposes a sheet/panel.
+**v1.3.7** Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling and mobile interaction remain stable while blur is preserved.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
@@ -43,6 +43,10 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 **MIT**
 
 ## Release history
+
+### v1.3.7 — TornPDA host-scroll contract
+- Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling and mobile interaction remain stable while blur is preserved.
+
 ### v1.3.6 — Mobile full-height + blur contract
 - Opens the active mobile sheet from top to bottom of the available viewport.
 - Adds the shared translucent SakaLuX blur treatment.

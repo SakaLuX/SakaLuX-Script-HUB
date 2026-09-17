@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.36
+// @version      1.3.35
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,7 +73,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
   })();
 
-  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.36'});
+  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.35'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -221,7 +221,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  */
 (() => {
 'use strict';
-const VERSION = '1.3.36';
+const VERSION = '1.3.35';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -512,7 +512,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const style=document.createElement('style');
   style.id='sakalux-mobile-surface-v2';
   style.textContent=`@media(max-width:820px){
-    [data-slx-fullsheet-v2="1"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+    [data-slx-fullsheet-v2="1"]{position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}
     [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important}
     [data-slx-fullsheet-v2="1"] input,[data-slx-fullsheet-v2="1"] textarea,[data-slx-fullsheet-v2="1"] select{scroll-margin-bottom:38vh}
   }`;
@@ -544,9 +544,3 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   new MutationObserver(()=>requestAnimationFrame(apply)).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
   addEventListener('resize',apply,{passive:true});setTimeout(apply,0);setTimeout(apply,350);setTimeout(apply,1200);
 })();
-
-
-/* slx-host-scroll-contract-v3 */
-(()=>{if(document.getElementById('slx-host-scroll-contract-v3'))return;const s=document.createElement('style');s.id='slx-host-scroll-contract-v3';s.textContent=`@media(max-width:820px){
-[data-slx-fullsheet-v2="1"]{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}
-}`;(document.head||document.documentElement).appendChild(s)})();
