@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.48**
+**v1.9.49**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.48** makes Hub a true top-to-bottom mobile sheet, adds translucent blur, enforces the module 2x2 controls at runtime, and introduces the shared mobile surface contract.
+**v1.9.49** fixes TornPDA scrolling by fitting Hub to the available host container instead of forcing physical `100dvh`. The whole Hub panel is now the vertical scroll surface, while blur and the 2×2 module controls are preserved.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,6 +54,11 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+### v1.9.49 — TornPDA host-scroll hotfix
+- Replaces the physical `100dvh` Hub override with host-container sizing.
+- Makes the complete Hub panel scrollable with native vertical touch gestures.
+- Keeps bottom actions/footer reachable and preserves blur plus 2×2 module controls.
+
 ### v1.9.48 — Mobile full-height + blur contract
 - Opens the active mobile sheet from top to bottom of the available viewport.
 - Adds the shared translucent SakaLuX blur treatment.
