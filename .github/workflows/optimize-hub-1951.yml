@@ -1,0 +1,31 @@
+name: Optimize Hub 1.9.51
+
+on:
+  push:
+    paths:
+      - '.github/scripts/optimize_hub_1951.py'
+      - '.github/workflows/optimize-hub-1951.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply Hub optimization
+        run: python .github/scripts/optimize_hub_1951.py
+      - name: Validate syntax
+        run: |
+          node --check SakaLuX-Script-Hub.user.js
+          python -m json.tool scripts.json >/dev/null
+      - name: Commit optimization
+        run: |
+          git config user.name "SakaLuX Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md backups/hub-performance-2026-09-17
+          git commit -m "perf: reduce Hub TornPDA DOM overhead and compact footer"
+          git push
