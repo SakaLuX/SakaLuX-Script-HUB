@@ -1,0 +1,31 @@
+name: Fix Hub list scroll and Standalone
+
+on:
+  push:
+    paths:
+      - '.github/scripts/fix_hub_standalone_1950.py'
+      - '.github/workflows/fix-hub-standalone-1950.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply repair
+        run: python .github/scripts/fix_hub_standalone_1950.py
+      - name: Validate syntax and registry
+        run: |
+          for f in SakaLuX-*.user.js; do node --check "$f"; done
+          python -m json.tool scripts.json >/dev/null
+      - name: Commit repair
+        run: |
+          git config user.name "SakaLuX Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-*.user.js scripts.json greasyfork backups/hub-standalone-repair-2026-09-17
+          git commit -m "fix: restore Hub list-only scroll and Standalone opening"
+          git push
