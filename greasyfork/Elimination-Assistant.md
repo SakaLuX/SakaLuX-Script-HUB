@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.37**
+**v1.3.39**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -21,7 +21,7 @@
 
 ## Current release note
 
-**v1.3.37** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
+**v1.3.39** refines the mobile UI: aligned TARGETS switches, a taller target panel, an opaque SAFE sheet, correctly sized API/manual battle-stat fields and a fully visible manual save button. Target calculations, API behavior and saved data are unchanged.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -39,6 +39,18 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 **All Rights Reserved**
 
 ## Release history
+
+### v1.3.39 — Mobile UI refinement
+- Refines TARGETS switches with consistent sizing and alignment.
+- Extends the mobile panel closer to the chat controls while keeping the target list independently scrollable.
+- Fits the opaque SAFE sheet inside the panel with a visible title, aligned buttons and a scrollable saved-target list.
+- Fits Torn/FFScouter API-key and manual battle-stat inputs within the panel; keeps SAVE MANUAL BS fully visible and reachable by scrolling.
+- UI-only release: preserves target calculations, API behavior, saved data and manual attack controls.
+
+### v1.3.38 — Hub isolation
+- Excludes Script Hub and its subtree from shared styling/fullscreen rules.
+- Restricts the author footer to the native Elimination panel.
+
 
 ### v1.3.37 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.
@@ -116,6 +128,15 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 - Added the dedicated Torn/FFScouter API Access panel, exact Torn read-only permissions and calibration fallback.
 
 ## Changelog
+
+### v1.3.39
+
+- Refines TARGETS switches with consistent sizing and alignment.
+- Extends the mobile panel closer to the chat controls while keeping the target list independently scrollable.
+- Fits the opaque SAFE sheet inside the panel with a visible title, aligned buttons and a scrollable saved-target list.
+- Fits Torn/FFScouter API-key and manual battle-stat inputs within the panel; keeps SAVE MANUAL BS fully visible and reachable by scrolling.
+- UI-only release: preserves target calculations, API behavior, saved data and manual attack controls.
+
 
 ### v1.3.32
 
