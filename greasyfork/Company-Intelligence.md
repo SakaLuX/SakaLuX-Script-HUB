@@ -16,10 +16,16 @@
 - Weekly finance and balance view using only known API and locally logged values.
 - Stock intelligence and competitor benchmark workspace.
 - Company timeline, report export, diagnostics and actionable advice.
+- Shared Bazaar-style SakaLuX Standalone Dock integration: Company registers as a module and never creates a second standalone menu.
 
 ## Current release note
 
-**v1.8.37** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs. Runs native position scraping only on visible Company/Job pages and ignores changes inside Company/Hub panels. Prevents duplicate standalone placement timers after OFF/ON. Clears employment caches through the same GM/local-storage abstraction used to save them.
+**v1.8.37 — Professional TornPDA header + shared standalone integration**
+- Rebuilds the mobile header so the Company title uses the available width cleanly.
+- Keeps Refresh, API Key and Close grouped tightly on the right and inside the viewport.
+- Moves Employee / Director to a dedicated full-width second row with equal-width buttons.
+- Preserves the shared Bazaar-style Standalone Dock bootstrap: Company registers as a module in the common dock instead of creating a second standalone.
+- Keeps Company opening through its module bridge above the shared Standalone Dock.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -37,7 +43,7 @@
 - Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
 - Company rating is comparative and evaluated by Torn.
 - Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
-- The userscript header, runtime `APP.version`, Hub registry entry and this information page are synchronized at **v1.8.22**.
+- The userscript header, runtime version, `scripts.json` registry entry and this information page are synchronized at **v1.8.37**.
 - The Hub registry uses Greasy Fork script **595873** for public version checks, while the userscript retains its own raw-GitHub `@downloadURL` / `@updateURL` metadata.
 
 ## License
@@ -46,12 +52,32 @@
 ## Release history / Changelog
 
 ### v1.8.37 — Professional TornPDA header layout
-- Fixes the Company header overflow caused by the older one-row override.
-- Keeps Refresh, API and Close grouped tightly at the top-right and permanently inside the viewport.
-- Gives the Company title the remaining header width for cleaner typography.
-- Moves Employee/Director to a dedicated full-width second row with equal-width controls.
-- Leaves shared standalone behavior unchanged.
+- Rebuilds the Company mobile header into a stable two-row layout.
+- Gives the title the remaining width instead of squeezing it between controls.
+- Groups Refresh, API Key and Close tightly on the right and keeps all three inside the viewport.
+- Places Employee / Director on a full-width second row with equal halves.
+- Keeps the shared standalone registration behavior intact.
 
+### v1.8.36 — Mobile header overflow guard
+- Keeps Refresh, API Key and Close visible on narrow TornPDA screens.
+- Moves Employee / Director away from the action-button row to prevent right-side overflow.
+
+### v1.8.35 — Shared Standalone Dock bootstrap
+- Copies the common Bazaar-style standalone bootstrap into Company.
+- Uses the shared `sakalux-standalone-dock`, style, launcher and registration IDs.
+- Registers Company as `company-intelligence`; whichever SakaLuX module loads first owns the common dock and later modules only join it.
+- Does not create a second Company-specific standalone menu.
+
+### v1.8.34 — Elimination-style controls
+- Aligns the Company header and API controls with the compact Elimination layout.
+- Normalizes action-button sizing, tabs and API action spacing.
+
+### v1.8.33 — Standalone bridge opening
+- Makes the Company standalone row open through the Company module bridge.
+- Layers the Company panel above the shared SakaLuX Scripts Standalone panel.
+
+### v1.8.32 — Footer and standalone compatibility
+- Keeps Company compatible with the shared compact donation footer and standalone registration flow used across SakaLuX modules.
 
 ### v1.8.31 — Performance and release metadata audit
 - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
@@ -173,11 +199,3 @@
 - Added reliable API v2/classic fallbacks, Employee Progress, Growth, Staff Optimizer, Smart Training, Contracts, Balance, Benchmark, Timeline and Advice.
 - Added CSV/report exports and complete JSON backup/restore.
 - Star predictions remain confidence-based and never invent an exact probability without comparison data.
-
-## Current release note — v1.8.33
-- Company now opens through the standalone module bridge and its panel is layered above SakaLuX Scripts Standalone.
-
-## Current release note — v1.8.34
-- Aligns the Company header and API controls with Elimination: compact Employee/Director selector, equal refresh/key/close buttons, tighter tabs and balanced API action buttons.
-
-- v1.8.36: Fixed TornPDA/mobile Company header overflow. Refresh, API key and Close buttons now stay permanently visible in the first header row, while Employee/Director uses a full-width second row. Shared standalone dock behavior is unchanged.
