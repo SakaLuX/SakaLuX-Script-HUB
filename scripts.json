@@ -310,15 +310,15 @@
         }
       ],
       "release": {
-        "version": "1.8.29",
+        "version": "1.8.30",
         "date": "2026-09-17",
         "notes": [
-          "Refresh prioritizes fresh job status over cached company profiles. Confirmed departure clears current company, employee, stock and effectiveness caches while preserving historical snapshots and planning records."
+          "Routes vertical touch gestures from the header, tabs, content and footer into the main content scroll area. Preserves horizontal tab swipes and taps, and forwards header/footer mouse-wheel scrolling."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.29"
+      "version": "1.8.30"
     }
   ]
 }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.29
+// @version      1.8.30
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -83,7 +83,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.29',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.30',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -814,3 +814,48 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
  #ci-root#ci-root#ci-root>.ci-shell{height:100%!important;max-height:100%!important;margin:0!important}
 }
 `;(document.head||document.documentElement).appendChild(s)})();
+
+/* Company v1.8.30: vertical gestures from anywhere in the shell scroll its body. */
+(()=>{
+ let gesture=null,suppressClickUntil=0;
+ const bodyFor=target=>{
+  const shell=target?.closest?.('#ci-root > .ci-shell');
+  if(!shell||target.closest('.ci-dialogback,[role="dialog"],input[type="range"]'))return null;
+  return shell.querySelector(':scope > .ci-body');
+ };
+ document.addEventListener('touchstart',e=>{
+  gesture=null;if(e.touches.length!==1)return;
+  const body=bodyFor(e.target);if(!body)return;
+  const t=e.touches[0];gesture={body,x:t.clientX,y:t.clientY,lastY:t.clientY,active:false};
+ },{capture:true,passive:true});
+ document.addEventListener('touchmove',e=>{
+  if(!gesture||e.touches.length!==1||!gesture.body.isConnected){gesture=null;return;}
+  const t=e.touches[0],dx=t.clientX-gesture.x,dy=t.clientY-gesture.y;
+  if(!gesture.active){
+   if(Math.abs(dy)<5||Math.abs(dy)<=Math.abs(dx))return;
+   gesture.active=true;
+  }
+  if(e.cancelable)e.preventDefault();
+  const body=gesture.body,max=Math.max(0,body.scrollHeight-body.clientHeight);
+  body.scrollTop=Math.max(0,Math.min(max,body.scrollTop+gesture.lastY-t.clientY));
+  gesture.lastY=t.clientY;suppressClickUntil=Date.now()+400;
+ },{capture:true,passive:false});
+ const end=()=>{gesture=null;};
+ document.addEventListener('touchend',end,{capture:true,passive:true});
+ document.addEventListener('touchcancel',end,{capture:true,passive:true});
+ document.addEventListener('click',e=>{
+  if(Date.now()<suppressClickUntil&&bodyFor(e.target)){e.preventDefault();e.stopImmediatePropagation();}
+ },true);
+ document.addEventListener('wheel',e=>{
+  if(e.ctrlKey||Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;
+  const body=bodyFor(e.target);if(!body||body.contains(e.target))return;
+  if(e.cancelable)e.preventDefault();
+  const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?body.clientHeight:1);
+  body.scrollTop=Math.max(0,Math.min(Math.max(0,body.scrollHeight-body.clientHeight),body.scrollTop+delta));
+ },{capture:true,passive:false});
+ const s=document.createElement('style');s.textContent=`
+#ci-root#ci-root#ci-root,#ci-root#ci-root#ci-root>.ci-shell,#ci-root#ci-root#ci-root>.ci-shell>.ci-head,
+#ci-root#ci-root#ci-root>.ci-shell>.ci-body,#ci-root#ci-root#ci-root>.ci-shell>#sakalux-inline-footer-company-intelligence{touch-action:pan-x!important}
+#ci-root#ci-root#ci-root>.ci-shell>.ci-body{overflow-y:auto!important;min-height:0!important;flex:1 1 0!important}
+`;(document.head||document.documentElement).appendChild(s);
+})();
