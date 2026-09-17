@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.18
+// @version      1.2.17
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -192,14 +192,3 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
 
 /* Compact donation controls and Elimination mobile panel geometry 1.2.16 */
 (()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sakalux-chat-settings-overlay#sakalux-chat-settings-overlay#sakalux-chat-settings-overlay{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;padding:0!important;background:transparent!important;overflow:hidden!important;border-radius:14px!important;align-items:stretch!important;justify-content:stretch!important;}\n#sakalux-chat-settings-overlay#sakalux-chat-settings-overlay#sakalux-chat-settings-overlay > section{position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;align-self:stretch!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;max-width:100%!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border:1px solid #3c4652!important;border-radius:14px!important;}\n#sakalux-chat-settings-overlay#sakalux-chat-settings-overlay#sakalux-chat-settings-overlay > section{display:flex!important;flex-direction:column!important;overflow:hidden!important;}\n#sakalux-chat-settings-overlay#sakalux-chat-settings-overlay#sakalux-chat-settings-overlay > section>main{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
-
-/* SAKALUX_GLOBAL_STANDALONE_CHAT_INTELLIGENCE */
-(()=>{
- const mount=()=>{
-  if(!document.body)return;
-  let e=document.querySelector('[data-slx-standalone-registration="chat-intelligence"]');
-  if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','chat-intelligence');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.18'});
- };
- if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
-})();

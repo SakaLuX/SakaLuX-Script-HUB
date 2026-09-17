@@ -2,9 +2,9 @@
 
 | Script | Registration |
 |---|---|
-| SakaLuX-Account-Auditor.user.js | ✅ `account-auditor` |
+| SakaLuX-Account-Auditor.user.js | ❌ `account-auditor` |
 | SakaLuX-Bazaar-Thanker-PDA.user.js | ✅ `bazaar` |
-| SakaLuX-Chat-Intelligence.user.js | ✅ `chat-intelligence` |
+| SakaLuX-Chat-Intelligence.user.js | ❌ `chat-intelligence` |
 | SakaLuX-Company-Intelligence-v1.0.0.user.js | ✅ `company-intelligence` |
 | SakaLuX-Elimination-Assistant.user.js | ✅ `elimination-assistant` |
 | SakaLuX-Enhancer-Guard.user.js | ✅ `enhancer` |
@@ -12,6 +12,5 @@
 | SakaLuX-Mission-Rewards.user.js | ✅ `mission-rewards` |
 | SakaLuX-Stock-Manager-Advisor.user.js | ✅ `stock-manager-advisor` |
 
-All current installable SakaLuX modules register in the shared standalone list.
-Hub is intentionally excluded. Suite keeps its own Master Control launcher.
-Stock Manager registers globally and appears as 📊 Stocks.
+Hub is not part of the standalone list. Suite keeps its own Master Control launcher.
+Stock Manager now registers globally on every Torn page.
