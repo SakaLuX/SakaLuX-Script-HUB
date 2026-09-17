@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.41
+// @version      1.3.40
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
   })();
 
-  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.41'});
+  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.40'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -181,24 +181,21 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
   }
   function start(){
     registerSelf();render();setTimeout(maybePrompt,1200);
-    let t=0, observer=null;
+    let t=0;
     const refresh=()=>{registerSelf();render();};
-    const stopForHub=()=>{
-      clearTimeout(t);
-      if(observer){observer.disconnect();observer=null;}
-      render();
-    };
-    if(hubInstalled()){stopForHub();return;}
-    const queue=(wait=700)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
+    const queue=(wait=650)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
     const root=document.body||document.documentElement;
-    observer=new MutationObserver(ms=>{
-      if(hubInstalled()){stopForHub();return;}
-      if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(700);
+    const observer=new MutationObserver(ms=>{
+      if(hubInstalled()){
+        const stale=document.getElementById(DOCK_ID)||document.getElementById(NATIVE_ID)||document.getElementById(FALLBACK_ID)||document.getElementById(PROMPT_ID);
+        if(stale)queue(120);
+        return;
+      }
+      if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(650);
     });
     observer.observe(root,{childList:true,subtree:true});
-    addEventListener('SakaLuX:ScriptHubReady',stopForHub,{once:true});
-    addEventListener('hashchange',()=>queue(350),{passive:true});
-    addEventListener('popstate',()=>queue(350),{passive:true});
+    addEventListener('hashchange',()=>queue(300),{passive:true});
+    addEventListener('popstate',()=>queue(300),{passive:true});
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
 })();
@@ -242,7 +239,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.3.41';
+    const VERSION = '1.3.40';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
