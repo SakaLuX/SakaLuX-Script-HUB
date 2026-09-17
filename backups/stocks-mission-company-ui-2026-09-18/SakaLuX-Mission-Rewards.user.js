@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.38
+// @version      1.0.37
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,7 +73,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.38'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.37'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -243,7 +243,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.0.38';
+    const VERSION = '1.0.36';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1141,29 +1141,4 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  const kick=()=>{ensure();requestAnimationFrame(ensure);setTimeout(ensure,100);setTimeout(ensure,300)};
  new MutationObserver(kick).observe(document.body||document.documentElement,{childList:true,subtree:true});
  kick();
-})();
-
-
-/* SAKALUX_MISSION_REAL_FOOTER_V1038 */
-(()=>{
- const ID='sakalux-inline-footer-mission-rewards',PROFILE='https://www.torn.com/profiles.php?XID=2380374';
- const css=document.createElement('style');css.textContent=`
- #sl-mr-settings#sl-mr-settings{display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important}
- #sl-mr-settings#sl-mr-settings>.sl-mr-settings-content{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important}
- #${ID}#${ID}{position:relative!important;display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;max-height:50px!important;margin:0!important;padding:0!important;z-index:50!important;overflow:hidden!important;background:#080d13!important}
- #${ID} .slh-bottom{height:28px!important;padding:4px 14px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important}
- #${ID} .slh-bottom-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;height:20px!important}
- #${ID} .slh-bottom-btn{display:block!important;width:100%!important;height:20px!important;min-height:20px!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#151f2a!important;color:#b9c7d6!important;font:900 8px/1.2 Arial,sans-serif!important}
- #${ID} .slh-footer{height:22px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;border-top:1px solid rgba(223,154,55,.52)!important;background:#080d13!important;color:#df9a37!important;font:400 9px/20px Arial,sans-serif!important;white-space:nowrap!important}
- #${ID} .slh-author{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}
- `;(document.head||document.documentElement).appendChild(css);
- function ensure(){
-  const panel=document.querySelector('#sl-mr-settings'); if(!panel)return;
-  let f=panel.querySelector('#'+ID);
-  if(!f){f=document.createElement('div');f.id=ID;f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-mr-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-mr-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+PROFILE+'">SakaLuX [2380374]</a></div>';f.querySelectorAll('[data-slx-mr-donate]').forEach(b=>b.onclick=()=>location.href=PROFILE);panel.appendChild(f);}
-  else if(f.parentElement!==panel)panel.appendChild(f);
- }
- const kick=()=>{ensure();requestAnimationFrame(ensure);setTimeout(ensure,60);setTimeout(ensure,220)};
- new MutationObserver(()=>kick()).observe(document.documentElement,{childList:true,subtree:true});
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',kick,{once:true});else kick();
 })();

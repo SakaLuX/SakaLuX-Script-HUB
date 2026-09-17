@@ -135,7 +135,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.38"
+      "version": "1.0.37"
     },
     {
       "active": true,
@@ -326,7 +326,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.32"
+      "version": "1.8.31"
     },
     {
       "active": true,
@@ -378,7 +378,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.7.14"
+      "version": "0.7.13"
     }
   ]
 }

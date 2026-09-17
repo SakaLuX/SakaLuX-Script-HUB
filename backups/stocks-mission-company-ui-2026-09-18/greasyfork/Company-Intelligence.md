@@ -165,6 +165,3 @@
 - Added reliable API v2/classic fallbacks, Employee Progress, Growth, Staff Optimizer, Smart Training, Contracts, Balance, Benchmark, Timeline and Advice.
 - Added CSV/report exports and complete JSON backup/restore.
 - Star predictions remain confidence-based and never invent an exact probability without comparison data.
-
-## Current release note — v1.8.32
-- Company now opens through the standalone module bridge and its panel is layered above SakaLuX Scripts Standalone.
