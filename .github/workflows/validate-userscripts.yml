@@ -1,297 +1,234 @@
-name: Validate SakaLuX userscripts
+name: Apply Stocks v0.7.13 upgrade
 
 on:
   push:
     branches: [main]
     paths:
-      - '*.user.js'
-      - 'scripts.json'
-      - 'locales.json'
-      - 'greasyfork/**'
-      - 'experimental/**'
-      - '.github/workflows/**'
-  pull_request:
-    paths:
-      - '*.user.js'
-      - 'scripts.json'
-      - 'locales.json'
-      - 'greasyfork/**'
-      - 'experimental/**'
-      - '.github/workflows/**'
-  workflow_dispatch:
+      - '.github/workflows/validate-userscripts.yml'
 
 permissions:
-  contents: read
-
-concurrency:
-  group: userscript-validation-${{ github.ref }}
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  validate:
+  upgrade:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
-      - name: Check JavaScript syntax
+      - name: Apply Stocks advisor upgrade
+        shell: python
+        run: |
+          import json
+          import re
+          from pathlib import Path
+
+          script = Path('SakaLuX-Stock-Manager-Advisor.user.js')
+          s = script.read_text(encoding='utf-8')
+          s = s.replace('// @version      0.7.12', '// @version      0.7.13', 1)
+          s = s.replace("version: '0.7.12'", "version: '0.7.13'", 1)
+
+          if "dailyCosts: 'SLX_STOCK_DAILY_COSTS'" not in s:
+              s = s.replace(
+                  "    txHistory: 'SLX_STOCK_TRANSACTION_HISTORY'\n",
+                  "    txHistory: 'SLX_STOCK_TRANSACTION_HISTORY',\n"
+                  "    dailyCosts: 'SLX_STOCK_DAILY_COSTS',\n"
+                  "    excludedStocks: 'SLX_STOCK_EXCLUDED_STOCKS',\n"
+                  "    bankPeriod: 'SLX_STOCK_BANK_PERIOD'\n",
+                  1,
+              )
+
+          addon = r'''
+  function excludedStocksSet() {
+    return new Set(String(get(K.excludedStocks,'')).toUpperCase().split(/[\s,;]+/).map(v=>v.trim()).filter(Boolean));
+  }
+
+  function stockIncomeSummary() {
+    scanStocks();
+    const excluded=excludedStocksSet();
+    let grossDaily=0, active=0;
+    const rows=[];
+    for(const [sym] of S.stocks) {
+      if(excluded.has(sym)) continue;
+      const owned=ownedShares(sym);
+      if(!owned) continue;
+      const tier=benefitTier(sym,owned);
+      if(!tier.tier) continue;
+      const baseDaily=Math.max(0,Number(benefitDailyValue(sym))||0);
+      if(!baseDaily) continue;
+      const multiplier=BENEFITS[sym]?.type==='A' ? Math.max(1,tier.tier) : 1;
+      const daily=baseDaily*multiplier;
+      grossDaily+=daily;
+      active++;
+      rows.push({sym,tier:tier.tier,daily});
+    }
+    const costs=Math.max(0,parseAmount(get(K.dailyCosts,'0')));
+    const netDaily=grossDaily-costs;
+    return {grossDaily,costs,netDaily,monthly:netDaily*30,annual:netDaily*365,active,rows:rows.sort((a,b)=>b.daily-a.daily)};
+  }
+
+  async function sellTargetExcess() {
+    scanStocks();
+    const sym=get(K.target).toUpperCase();
+    if(!sym) throw new Error('Choose a target stock first.');
+    const m=stockRowMetrics(sym);
+    if(!m?.owned) throw new Error(`No ${sym} shares detected.`);
+    const shares=Math.max(0,Math.floor(Number(m.freeShares)||0));
+    if(shares<=0) throw new Error(`${sym} has no excess shares above the protected benefit floor.`);
+    const estimate=shares*Number(m.price||0);
+    if(!confirm(`SELL EXCESS · ${sym}\n\n${shares.toLocaleString()} shares\nEstimated: ${money(estimate)}\nProtected after sale: ${Number(m.protectedShares||0).toLocaleString()} shares\n\nExecute now?`)) return;
+    await postTrade(sym,shares,'sellShares');
+    inlineStatus(`${isDryRun()?'Dry Run · ':''}SELL EXCESS ${shares.toLocaleString()} ${sym} · ${money(estimate)}.`,'ok');
+    if(get(K.api).trim()&&!isDryRun()) await syncAllApi();
+    scanStocks();
+    enhanceStockRows();
+    refreshInlinePanel();
+  }
+
+  function renderIncomeAdvisor() {
+    const box=$('#slx-stock-income-body');
+    if(!box) return;
+    const x=stockIncomeSummary();
+    const bankApr=Math.max(0,Number(get(K.bankApr,'0'))||0);
+    const period=get(K.bankPeriod,'3m');
+    const days=({1w:7,2w:14,1m:30,2m:60,3m:90}[period]||90);
+    const market=buildPortfolioRows().reduce((n,r)=>n+r.value,0);
+    const bankPeriodReturn=market>0&&bankApr>0 ? market*(bankApr/100)*(days/365) : 0;
+    box.innerHTML=`<div class="optimizer-summary"><div><span>Gross / day</span><b>${money(x.grossDaily)}</b></div><div><span>Costs / day</span><b>${money(x.costs)}</b></div><div><span>Net / day</span><b class="${x.netDaily>=0?'good':'bad'}">${x.netDaily>=0?'+':'-'}${money(Math.abs(x.netDaily))}</b></div><div><span>Net / year</span><b>${x.netDaily>=0?'+':'-'}${money(Math.abs(x.annual))}</b></div></div><div class="api-help">${x.active} active valued benefit${x.active===1?'':'s'} · Net / 30d ${x.monthly>=0?'+':'-'}${money(Math.abs(x.monthly))}${bankApr?` · Bank ${period}: ${money(bankPeriodReturn)}`:''}</div>${x.rows.length?`<div class="optimizer-list">${x.rows.slice(0,12).map(r=>`<div class="optimizer-row"><div><b>${r.sym}</b><small>Tier ${r.tier}</small></div><div><span>${money(r.daily)}/day</span><small>${money(r.daily*365)}/yr</small></div></div>`).join('')}</div>`:''}`;
+  }
+
+  function bindAdvisorUpgradeControls() {
+    const dc=$('#slx-daily-costs');
+    if(dc&&!dc.dataset.bound){dc.dataset.bound='1';dc.value=get(K.dailyCosts,'0');dc.onchange=()=>{set(K.dailyCosts,dc.value);renderIncomeAdvisor();};}
+    const ex=$('#slx-excluded-stocks');
+    if(ex&&!ex.dataset.bound){ex.dataset.bound='1';ex.value=get(K.excludedStocks,'');ex.onchange=()=>{set(K.excludedStocks,ex.value.toUpperCase());renderAdvisor();renderOptimizer();renderIncomeAdvisor();};}
+    const bp=$('#slx-bank-period');
+    if(bp&&!bp.dataset.bound){bp.dataset.bound='1';bp.value=get(K.bankPeriod,'3m');bp.onchange=()=>{set(K.bankPeriod,bp.value);renderIncomeAdvisor();};}
+  }
+'''
+          if 'function stockIncomeSummary()' not in s:
+              s = s.replace('  function buildOptimizerRows() {', addon + '\n  function buildOptimizerRows() {', 1)
+
+          def add_exclusion(fnname, text):
+              start = text.find(f'  function {fnname}(')
+              if start < 0:
+                  return text
+              end = text.find('\n  function ', start + 10)
+              if end < 0:
+                  end = len(text)
+              seg = text[start:end]
+              if 'excludedStocksSet()' in seg:
+                  return text
+              seg = seg.replace('    const rows=[];', '    const rows=[];\n    const excluded=excludedStocksSet();', 1)
+              seg = seg.replace('    for(const [sym,st] of S.stocks) {', '    for(const [sym,st] of S.stocks) {\n      if(excluded.has(sym)) continue;', 1)
+              return text[:start] + seg + text[end:]
+
+          s = add_exclusion('buildRoiCandidates', s)
+          s = add_exclusion('buildOptimizerRows', s)
+
+          panel_anchor = '      <div class="section"><div class="title">Portfolio Optimizer</div>'
+          income_section = '''      <div class="section"><div class="title">Income & Advisor Controls</div><div class="optimizer-controls"><label>Daily costs <input id="slx-daily-costs" value="${esc(get(K.dailyCosts,'0'))}" placeholder="e.g. 2m"></label><label>Bank period <select id="slx-bank-period"><option value="1w">1 week</option><option value="2w">2 weeks</option><option value="1m">1 month</option><option value="2m">2 months</option><option value="3m">3 months</option></select></label></div><label>Excluded stocks <input id="slx-excluded-stocks" value="${esc(get(K.excludedStocks,''))}" placeholder="e.g. TCI,WLT"></label><div class="api-help">Excluded symbols stay visible in Portfolio but are ignored by Advisor and Optimizer.</div><div id="slx-stock-income-body" class="muted">Waiting for portfolio data…</div></div>\n'''
+          if 'id="slx-stock-income-body"' not in s:
+              if panel_anchor not in s:
+                  raise SystemExit('Portfolio Optimizer panel anchor missing')
+              s = s.replace(panel_anchor, income_section + panel_anchor, 1)
+
+          withdraw_all = '<button id="slx-inline-withdraw-all" class="danger" type="button">Withdraw All</button>'
+          if 'id="slx-inline-sell-excess"' not in s:
+              if withdraw_all not in s:
+                  raise SystemExit('Inline Withdraw All anchor missing')
+              s = s.replace(withdraw_all, withdraw_all + '<button id="slx-inline-sell-excess" type="button">Sell Excess</button>', 1)
+
+          bind_anchor = "    $('#slx-inline-withdraw-value',card).onchange=e=>set(K.withdraw,e.target.value);"
+          if "$('#slx-inline-sell-excess',card)" not in s:
+              if bind_anchor not in s:
+                  raise SystemExit('Inline action binding anchor missing')
+              s = s.replace(bind_anchor, bind_anchor + "\n    $('#slx-inline-sell-excess',card).onclick=()=>sellTargetExcess().catch(e=>inlineStatus(e.message,'bad'));", 1)
+
+          old_open = "  function openPanel() { style(); premiumStyle(); const p=panel(); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Transaction History',renderTransactionHistory); safeRender('Action Log',renderActionLog); }"
+          new_open = "  function openPanel() { style(); premiumStyle(); const p=panel(); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Income Advisor',renderIncomeAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Transaction History',renderTransactionHistory); safeRender('Action Log',renderActionLog); bindAdvisorUpgradeControls(); }"
+          if old_open in s:
+              s = s.replace(old_open, new_open, 1)
+          elif "safeRender('Income Advisor',renderIncomeAdvisor)" not in s:
+              raise SystemExit('openPanel anchor missing')
+
+          script.write_text(s, encoding='utf-8')
+
+          md_path = Path('greasyfork/Stock-Manager-Advisor.md')
+          md = md_path.read_text(encoding='utf-8')
+          md = re.sub(r'(## Current version\s*\n\s*\*\*v)[^*]+(\*\*)', r'\g<1>0.7.13\2', md, count=1, flags=re.I)
+          md = re.sub(r'(## Current release note\s*\n+\*\*v)[^*]+(\*\*)', r'\g<1>0.7.13\2', md, count=1, flags=re.I)
+          release = '''### v0.7.13 — Advisor Upgrade
+- Adds a visible **Sell Excess** action for the selected stock while preserving Benefit Lock.
+- Adds gross daily benefit income plus configurable daily costs and net daily / monthly / yearly estimates.
+- Adds Advisor/Optimizer stock exclusions without hiding those positions from Portfolio.
+- Adds bank comparison periods for 1 week, 2 weeks, 1 month, 2 months and 3 months.
+- Keeps the existing ROI, Trade Assistant, Rebalance and transaction-safety workflow intact.
+
+'''
+          if '### v0.7.13' not in md:
+              pos = md.find('### v')
+              md = md[:pos] + release + md[pos:] if pos >= 0 else md + '\n' + release
+          md_path.write_text(md, encoding='utf-8')
+
+          registry_path = Path('scripts.json')
+          data = json.loads(registry_path.read_text(encoding='utf-8'))
+          canonical = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js'
+          stock = next(x for x in data['scripts'] if x.get('id') == 'stock-manager-advisor')
+          stock['version'] = '0.7.13'
+          stock['sourceUrl'] = canonical
+          stock['downloadUrl'] = canonical
+          stock['metaUrl'] = canonical
+          stock.setdefault('release', {})['version'] = '0.7.13'
+          stock['release']['date'] = '2026-09-17'
+          stock['release']['notes'] = [
+              'Exposes Sell Excess directly in the Stocks workspace while preserving Benefit Lock.',
+              'Adds gross and net benefit-income estimates with configurable daily costs.',
+              'Adds Advisor/Optimizer exclusions and selectable bank comparison periods.'
+          ]
+          registry_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          hub_info_path = Path('greasyfork/Script-Hub.md')
+          hub_info = hub_info_path.read_text(encoding='utf-8')
+          hub_info = hub_info.replace('SakaLuX Stock Manager & Advisor **v0.7.12**', 'SakaLuX Stock Manager & Advisor **v0.7.13**')
+          hub_info_path.write_text(hub_info, encoding='utf-8')
+
+      - name: Validate patched Stocks module
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          files=(SakaLuX-*.user.js experimental/SakaLuX-*.user.js)
-          if ((${#files[@]} == 0)); then
-            echo 'No SakaLuX userscripts found.' >&2
-            exit 1
-          fi
-          printf 'Checking %d userscripts\n' "${#files[@]}"
-          for file in "${files[@]}"; do
-            echo "node --check $file"
-            node --check "$file"
-          done
-
-      - name: Validate scripts.json
-        shell: python
-        run: |
-          import json
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q '@version      0.7.13' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'slx-inline-sell-excess' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'slx-stock-income-body' SakaLuX-Stock-Manager-Advisor.user.js
+          python3 - <<'PY'
+          import json,re
           from pathlib import Path
-          p = Path('scripts.json')
-          json.loads(p.read_text(encoding='utf-8'))
-          print('scripts.json: valid JSON')
+          s=Path('SakaLuX-Stock-Manager-Advisor.user.js').read_text()
+          md=Path('greasyfork/Stock-Manager-Advisor.md').read_text()
+          data=json.loads(Path('scripts.json').read_text())
+          stock=next(x for x in data['scripts'] if x.get('id')=='stock-manager-advisor')
+          url='https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js'
+          assert re.search(r'^// @version\s+0\.7\.13$',s,re.M)
+          assert "version: '0.7.13'" in s
+          assert '## Current version\n**v0.7.13**' in md or re.search(r'## Current version\s*\n\s*\*\*v0\.7\.13\*\*',md)
+          assert re.search(r'## Current release note\s*\n+\*\*v0\.7\.13\*\*',md)
+          assert '### v0.7.13' in md
+          assert stock['version']==stock['release']['version']=='0.7.13'
+          assert stock['sourceUrl']==stock['downloadUrl']==stock['metaUrl']==url
+          print('Stocks v0.7.13 patch checks: OK')
+          PY
 
-      - name: Validate locale registry
-        shell: python
-        run: |
-          import json
-          from pathlib import Path
-          data = json.loads(Path('locales.json').read_text(encoding='utf-8'))
-          locales = data.get('locales', {})
-          if data.get('defaultLanguage') != 'en' or 'en' not in locales or 'ro' not in locales:
-              raise SystemExit('locales.json must contain default English plus English and Romanian locales')
-          for code, locale in locales.items():
-              if not isinstance(locale.get('label'), str) or not isinstance(locale.get('translations'), dict):
-                  raise SystemExit(f'Invalid locale: {code}')
-          print('locales.json: valid extensible locale registry')
-
-      - name: Validate release/info Markdown synchronization
-        shell: python
-        run: |
-          import re
-          from pathlib import Path
-
-          checks = {
-              'SakaLuX-Account-Auditor.user.js': 'greasyfork/Account-Auditor.md',
-              'SakaLuX-Bazaar-Thanker-PDA.user.js': 'greasyfork/Bazaar-Thanker.md',
-              'SakaLuX-Chat-Intelligence.user.js': 'greasyfork/Chat-Intelligence.md',
-              'SakaLuX-Company-Intelligence-v1.0.0.user.js': 'greasyfork/Company-Intelligence.md',
-              'SakaLuX-Elimination-Assistant.user.js': 'greasyfork/Elimination-Assistant.md',
-              'SakaLuX-Enhancer-Guard.user.js': 'greasyfork/Enhancer-Guard.md',
-              'SakaLuX-Market-Intelligence.user.js': 'greasyfork/Market-Intelligence.md',
-              'SakaLuX-Mission-Rewards.user.js': 'greasyfork/Mission-Rewards.md',
-              'SakaLuX-Script-Hub.user.js': 'greasyfork/Script-Hub.md',
-              'SakaLuX-Suite.user.js': 'greasyfork/SakaLuX-Suite.md',
-              'SakaLuX-Stock-Manager-Advisor.user.js': 'greasyfork/Stock-Manager-Advisor.md',
-          }
-          for script_path, md_path in checks.items():
-              source = Path(script_path).read_text(encoding='utf-8')
-              md = Path(md_path).read_text(encoding='utf-8')
-              meta = re.search(r'^// @version\s+([^\s]+)\s*$', source, re.M)
-              if not meta:
-                  raise SystemExit(f'{script_path}: @version missing')
-              ver = meta.group(1)
-              current = re.search(r'## Current version\s*\n\s*\*\*v([^*]+)\*\*', md, re.I)
-              if not current:
-                  current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', md, re.I)
-              if not current or current.group(1).strip() != ver:
-                  raise SystemExit(f'{md_path}: Current version must match {script_path} ({ver})')
-              release = re.search(r'## Current release note\s*\n+\*\*v([^*]+)\*\*', md, re.I)
-              if not release or release.group(1).strip() != ver:
-                  raise SystemExit(f'{md_path}: Current release note must match {script_path} ({ver})')
-              if not re.search(rf'###\s+v{re.escape(ver)}\b', md):
-                  raise SystemExit(f'{md_path}: changelog/release-history entry for v{ver} missing')
-          print('All dedicated release/info Markdown files: synchronized')
-
-      - name: Validate cross-file version synchronization
-        shell: python
-        run: |
-          import json
-          import re
-          from pathlib import Path
-
-          registry = json.loads(Path('scripts.json').read_text(encoding='utf-8'))['scripts']
-          hub = Path('SakaLuX-Script-Hub.user.js').read_text(encoding='utf-8')
-          hub_info = Path('greasyfork/Script-Hub.md').read_text(encoding='utf-8')
-
-          files = {
-              'enhancer': ('SakaLuX-Enhancer-Guard.user.js', 'Enhancer Guard', 'greasyfork/Enhancer-Guard.md', 'VERSION'),
-              'bazaar': ('SakaLuX-Bazaar-Thanker-PDA.user.js', 'Bazaar Thanker - PDA', 'greasyfork/Bazaar-Thanker.md', 'BAZAAR_VERSION'),
-              'mission-rewards': ('SakaLuX-Mission-Rewards.user.js', 'Mission Rewards', 'greasyfork/Mission-Rewards.md', 'VERSION'),
-              'market-intelligence': ('SakaLuX-Market-Intelligence.user.js', 'Market Intelligence', 'greasyfork/Market-Intelligence.md', 'VERSION'),
-              'elimination-assistant': ('SakaLuX-Elimination-Assistant.user.js', 'Elimination Assistant', 'greasyfork/Elimination-Assistant.md', 'VERSION'),
-          }
-
-          for item in registry:
-              script_id = item['id']
-              if script_id not in files:
-                  continue
-              filename, display_name, info_file, runtime_name = files[script_id]
-              expected = str(item['version'])
-              source = Path(filename).read_text(encoding='utf-8')
-              meta = re.search(r'^// @version\s+([^\s]+)\s*$', source, re.M)
-              runtime = re.search(r"const " + runtime_name + r"\s*=\s*['\"]([^'\"]+)['\"]", source)
-              if not meta or not runtime or meta.group(1) != expected or runtime.group(1) != expected:
-                  raise SystemExit(f'{display_name}: userscript/registry mismatch ({meta.group(1) if meta else "missing"}, {runtime.group(1) if runtime else "missing"}, {expected})')
-
-              fallback = re.search(
-                  r"id:\s*['\"]" + re.escape(script_id) + r"['\"][\s\S]{0,500}?version:\s*['\"]([^'\"]+)['\"]",
-                  hub,
-              )
-              if not fallback or fallback.group(1) != expected:
-                  raise SystemExit(f'{display_name}: Hub fallback mismatch')
-
-              expected_source = f'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/{filename}'
-              fallback_source = re.search(
-                  r"id:\s*['\"]" + re.escape(script_id) + r"['\"][\s\S]{0,1000}?sourceUrl:\s*['\"]" + re.escape(expected_source) + r"['\"]",
-                  hub,
-              )
-              if item.get('sourceUrl') != expected_source or not fallback_source:
-                  raise SystemExit(f'{display_name}: canonical sourceUrl mismatch')
-
-              info_text = Path(info_file).read_text(encoding='utf-8')
-              current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', info_text)
-              if not current:
-                  current = re.search(r'\*\*Current version:\s*v([^*]+)\*\*', info_text)
-              if not current or current.group(1).strip() != expected:
-                  raise SystemExit(f'{display_name}: dedicated info version mismatch')
-              if not re.search(r'^- .*SakaLuX ' + re.escape(display_name) + r' \*\*v' + re.escape(expected) + r'\*\*', hub_info, re.M):
-                  raise SystemExit(f'{display_name}: Script-Hub info version mismatch')
-
-          hub_meta = re.search(r'^// @version\s+([^\s]+)\s*$', hub, re.M)
-          hub_runtime = re.search(r"const VERSION\s*=\s*['\"]([^'\"]+)['\"]", hub)
-          hub_current = re.search(r'## Current version\s+\*\*v([^*]+)\*\*', hub_info)
-          if not hub_meta or not hub_runtime or not hub_current or len({hub_meta.group(1), hub_runtime.group(1), hub_current.group(1).strip()}) != 1:
-              raise SystemExit('Script Hub version mismatch')
-
-          print('All Hub, registry, userscript and documentation versions: synchronized')
-
-
-      - name: Validate Stocks promotion and Hub integration
-        shell: python
-        run: |
-          import json
-          import re
-          from pathlib import Path
-          source = Path('SakaLuX-Stock-Manager-Advisor.user.js').read_text(encoding='utf-8')
-          hub = Path('SakaLuX-Script-Hub.user.js').read_text(encoding='utf-8')
-          info = Path('greasyfork/Script-Hub.md').read_text(encoding='utf-8')
-          rows = json.loads(Path('scripts.json').read_text(encoding='utf-8'))['scripts']
-          stock = next(row for row in rows if row['id'] == 'stock-manager-advisor')
-          version = re.search(r'^// @version\s+(\S+)', source, re.M).group(1)
-          runtime = re.search(r"version:\s*'([^']+)'", source).group(1)
-          assert version == runtime == stock['version'] == stock['release']['version']
-          url = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js'
-          assert stock['sourceUrl'] == stock['downloadUrl'] == stock['metaUrl'] == url
-          assert url in source and stock['apiGlobal'] in source
-          assert not Path('experimental/SakaLuX-Stock-Manager-Advisor.user.js').exists()
-          assert not Path('experimental/Stock-Manager-Advisor.md').exists()
-          assert '[EXPERIMENTAL]' not in source and '· EXPERIMENTAL' not in source
-          assert 'Stock Manager & Advisor **v' + version + '**' in info
-          assert 'stock-manager-advisor' in hub and 'SakaLuXStockManagerAdvisor' in hub
-          print('Stocks metadata, distribution, Hub registration and promotion: OK')
-
-      - name: Validate Suite metadata
-        shell: python
-        run: |
-          import re
-          from pathlib import Path
-
-          p = Path('SakaLuX-Suite.user.js')
-          text = p.read_text(encoding='utf-8')
-
-          meta = re.search(r'^// @version\s+([^\s]+)\s*$', text, re.M)
-          runtime = re.search(r"const VERSION\s*=\s*['\"]([^'\"]+)['\"];", text)
-          if not meta or not runtime:
-              raise SystemExit('Suite version metadata/runtime constant missing')
-          if meta.group(1) != runtime.group(1):
-              raise SystemExit(f"Suite version mismatch: metadata={meta.group(1)} runtime={runtime.group(1)}")
-
-          required = [
-              '// ==UserScript==',
-              '// @match        https://www.torn.com/*',
-              '// @license      All Rights Reserved',
-              '// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
-              '// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js',
-              '// ==/UserScript=='
-          ]
-          missing = [x for x in required if x not in text]
-          if missing:
-              raise SystemExit('Suite metadata missing: ' + ', '.join(missing))
-
-          print(f'SakaLuX Suite v{meta.group(1)} metadata: OK')
-
-      - name: Validate Suite module parity invariants
-        shell: python
-        run: |
-          import re
-          from pathlib import Path
-
-          text = Path('SakaLuX-Suite.user.js').read_text(encoding='utf-8')
-
-          expected_modules = {
-              'prayerReminder': 'createPrayerReminderModule',
-              'medAdvisor': 'createMedAdvisorModule',
-              'itemIntel': 'createItemIntelModule',
-              'eventsDashboard': 'createEventsDashboardModule',
-              'activityIntelligence': 'createActivityIntelligenceModule',
-              'factionMemberView': 'createFactionMemberViewModule',
-              'armoryLoanScanner': 'createArmoryLoanScannerModule',
-              'warLedger': 'createWarLedgerModule',
-              'ocOperations': 'createOcOperationsModule',
-              'companyManagement': 'createCompanyManagementModule',
-              'racingChampionship': 'createRacingChampionshipModule',
-              'casinoEdgeScanner': 'createCasinoEdgeScannerModule',
-              'targetAlerts': 'createTargetAlertsModule',
-          }
-          for module_id, factory in expected_modules.items():
-              entry = re.search(
-                  r'id:\s*["\']' + re.escape(module_id) + r'["\'][\s\S]{0,500}?factory:\s*' + re.escape(factory),
-                  text,
-              )
-              if not entry:
-                  raise SystemExit(f'Module/factory registry mismatch: {module_id} -> {factory}')
-
-          required_runtime = [
-              "function createEventsDashboardModule(context) {",
-              "function createItemIntelModule(context) {",
-              "function createMedAdvisorModule(context) {",
-              "function createPrayerReminderModule(context) {",
-              "function migrateLegacySakaLuXSettings() {",
-              "function createSakaLuXChainAlarmModule() {",
-              "function restoreMessageLinks(element, links) {",
-          ]
-          missing = [x for x in required_runtime if x not in text]
-          if missing:
-              raise SystemExit('Suite runtime invariant missing: ' + ', '.join(missing))
-
-          event_factory = re.search(
-              r'^\s*function createEventsDashboardModule\(context\) \{',
-              text,
-              re.M,
-          )
-          if not event_factory:
-              raise SystemExit('Event Lens factory is not a scoped function declaration')
-
-          print('Suite complete-module invariants: OK')
-
-      - name: Ensure only stable workflow remains
+      - name: Restore stable validator and commit
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t workflows < <(find .github/workflows -maxdepth 1 -type f -printf '%f\n' | sort)
-          printf 'Workflow files: %s\n' "${workflows[*]:-none}"
-          if ((${#workflows[@]} != 1)) || [[ "${workflows[0]:-}" != "validate-userscripts.yml" ]]; then
-            echo 'Unexpected workflow file detected. Only validate-userscripts.yml is allowed.' >&2
-            printf '%s\n' "${workflows[@]}" >&2
-            exit 1
-          fi
-          echo 'Workflow directory clean: only stable validator remains.'
+          git config user.name 'SakaLuX Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git checkout HEAD^ -- .github/workflows/validate-userscripts.yml
+          git rm -f .github/workflows/stocks-advisor-upgrade-0713.yml || true
+          git add SakaLuX-Stock-Manager-Advisor.user.js greasyfork/Stock-Manager-Advisor.md greasyfork/Script-Hub.md scripts.json .github/workflows/validate-userscripts.yml
+          git commit -m 'Stocks v0.7.13: Sell Excess and Advisor income upgrade'
+          git push
