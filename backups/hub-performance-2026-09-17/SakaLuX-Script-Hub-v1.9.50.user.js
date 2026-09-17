@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.51
+// @version      1.9.50
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.51';
+    const VERSION = '1.9.50';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,7 +81,6 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
-        { version: '1.9.51', date: '2026-09-17', changes: ['Moves SEND MONEY / SEND ITEMS and the author footer to a compact bottom overlay so more module cards remain visible.','Keeps only Managed Modules as the primary Hub scroll surface.','Removes the expensive document-wide Mobile Surface scan and the obsolete 1.2-second card repair timer.','Replaces the global managed-footer MutationObserver with a one-shot repair to reduce TornPDA DOM overhead.'] },
         { version: '1.9.50', date: '2026-09-17', changes: ['Restores list-only scrolling: Hub chrome stays fixed while Managed Modules scrolls independently.','Removes the shared full-sheet geometry mutation from add-on panels, restoring Standalone OPEN behavior.','Keeps TornPDA host sizing and blur without forcing add-on panel dimensions.'] },
         { version: '1.9.49', date: '2026-09-17', changes: ['Fixes TornPDA vertical scrolling by sizing Hub to the available host container instead of forcing physical 100dvh.','Makes the complete Hub panel the vertical pan-y scroll surface so footer and bottom actions remain reachable.','Keeps blur and the 2x2 module controls while removing the fixed fullscreen override that could extend under TornPDA navigation.'] },
         { version: '1.9.48', date: '2026-09-17', changes: ['Makes Hub a true top-to-bottom mobile sheet with translucent blur.','Enforces INFO / ON-OFF / NEW / OPEN-SETTINGS as a runtime 2x2 module control block.','Introduces the shared SakaLuX full-height + blur surface contract.','Company Intelligence now uses whole-sheet scrolling and orange SakaLuX attribution.'] },
@@ -1674,9 +1673,12 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     }
 
     function startManagedFooterObserver() {
-        // v1.9.51: one-shot footer repair only. A document-wide MutationObserver was
-        // expensive on TornPDA and unnecessary because module actions already call
-        // ensureManagedModuleFooters() after opening a panel.
+        if (managedFooterObserver) return;
+        managedFooterObserver = new MutationObserver(() => {
+            if (window.SakaLuXPerf?.debounce) window.SakaLuXPerf.debounce('hub-managed-footers', ensureManagedModuleFooters, 140);
+            else setTimeout(ensureManagedModuleFooters, 140);
+        });
+        managedFooterObserver.observe(document.documentElement, { childList: true, subtree: true });
         ensureManagedModuleFooters();
     }
 
@@ -2096,20 +2098,104 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 })();
 
 
-/* SakaLuX Hub lightweight mobile layout v1.9.51 */
+/* SakaLuX Mobile Surface Contract v2 — full-height + blur */
 (()=>{
-  if(document.getElementById('sakalux-hub-layout-1951')) return;
+  'use strict';
+  if(window.__SakaLuXMobileSurfaceV2)return;
+  window.__SakaLuXMobileSurfaceV2=1;
+  const MOBILE=()=>matchMedia('(max-width: 820px)').matches;
+  const TITLES=['Script Hub','Enhancer Guard','Bazaar Thanker','Mission Rewards','Market Intelligence','Elimination Assistant','Company Intelligence','Account Auditor','SakaLuX Suite','Chat Intelligence'];
+  const style=document.createElement('style');
+  style.id='sakalux-mobile-surface-v2';
+  style.textContent=`@media(max-width:820px){
+    [data-slx-fullsheet-v2="1"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+    [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important}
+    [data-slx-fullsheet-v2="1"] input,[data-slx-fullsheet-v2="1"] textarea,[data-slx-fullsheet-v2="1"] select{scroll-margin-bottom:38vh}
+  }`;
+  (document.head||document.documentElement).appendChild(style);
+  const visible=e=>{if(!e||!e.isConnected)return false;const r=e.getBoundingClientRect(),s=getComputedStyle(e);return s.display!=='none'&&s.visibility!=='hidden'&&r.width>240&&r.height>180};
+  const findSheet=title=>{
+    const candidates=[];
+    for(const e of document.querySelectorAll('div,section,main,aside')){
+      if(!visible(e))continue;
+      const txt=e.innerText||''; if(!txt.includes(title))continue;
+      if(title!=='Script Hub'&&e.closest('#sakalux-hub-panel'))continue;
+      const s=getComputedStyle(e); if(!['fixed','absolute'].includes(s.position))continue;
+      const r=e.getBoundingClientRect(); candidates.push([r.width*r.height,e]);
+    }
+    candidates.sort((a,b)=>a[0]-b[0]); return candidates[0]?.[1]||null;
+  };
+  const apply=()=>{
+    if(!MOBILE())return;
+    for(const t of TITLES){
+      const p=findSheet(t); if(!p)continue;
+      p.removeAttribute('data-slx-fullsheet-v2');
+      let a=p.parentElement;
+      for(let i=0;a&&i<3;i++,a=a.parentElement){
+        const s=getComputedStyle(a),r=a.getBoundingClientRect();
+        if(['fixed','absolute'].includes(s.position)&&r.width>=innerWidth*.9&&r.height>=innerHeight*.7){a.dataset.slxBackdropV2='1';break}
+      }
+    }
+  };
+  new MutationObserver(()=>requestAnimationFrame(apply)).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
+  addEventListener('resize',apply,{passive:true});setTimeout(apply,0);setTimeout(apply,350);setTimeout(apply,1200);
+})();
+
+
+/* SakaLuX Hub mobile card/runtime repair v1 */
+(()=>{
+  'use strict';
+  if(window.__SakaLuXHubCardRepairV1)return;window.__SakaLuXHubCardRepairV1=1;
+  const css=document.createElement('style');css.textContent=`@media(max-width:820px){
+    #sakalux-hub-panel{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;border-radius:0!important;margin:0!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+#sakalux-hub-panel>.slh-list,#sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{overflow:visible!important;flex:0 0 auto!important;min-height:auto!important}
+#sakalux-hub-panel>.slh-bottom,#sakalux-hub-panel>.slh-footer{flex:0 0 auto!important}
+    [data-slx-action-grid="1"]{display:grid!important;grid-template-columns:minmax(92px,1fr) minmax(92px,1fr)!important;grid-template-rows:auto auto!important;gap:8px!important;align-items:stretch!important;min-width:200px!important;max-width:238px!important}
+    [data-slx-action-grid="1"]>button,[data-slx-action-grid="1"]>*{min-width:0!important;width:100%!important;margin:0!important}
+  }`;(document.head||document.documentElement).appendChild(css);
+  const txt=b=>(b?.textContent||'').trim().toUpperCase();
+  const repair=()=>{
+    if(!matchMedia('(max-width:820px)').matches)return;
+    const hub=document.getElementById('sakalux-hub-panel');if(!hub)return;
+    hub.removeAttribute('data-slx-fullsheet-v2');
+    for(const info of [...hub.querySelectorAll('button')].filter(b=>txt(b)==='INFO')){
+      let a=info.parentElement;
+      for(let i=0;a&&i<5;i++,a=a.parentElement){
+        const bs=[...a.querySelectorAll(':scope > button, :scope > * > button')],labels=bs.map(txt);
+        if(labels.includes('INFO')&&labels.includes('NEW')&&labels.some(x=>x==='ON'||x==='OFF')&&labels.some(x=>x==='OPEN'||x==='SETTINGS')){a.dataset.slxActionGrid='1';break}
+      }
+    }
+  };
+  new MutationObserver(repair).observe(document.documentElement,{childList:true,subtree:true});setInterval(repair,1200);repair();
+})();
+
+
+/* SakaLuX Hub TornPDA host-scroll hotfix v1.9.49 */
+(()=>{
+  if(document.getElementById('sakalux-hub-scroll-1949')) return;
   const s=document.createElement('style');
-  s.id='sakalux-hub-layout-1951';
+  s.id='sakalux-hub-scroll-1949';
   s.textContent=`@media(max-width:820px){
-    #sakalux-hub-overlay{position:fixed!important;inset:0!important;overflow:hidden!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;box-sizing:border-box!important;background:rgba(3,7,12,.46)!important;-webkit-backdrop-filter:blur(10px)!important;backdrop-filter:blur(10px)!important}
-    #sakalux-hub-panel{position:relative!important;inset:auto!important;display:flex!important;flex-direction:column!important;flex:1 1 auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;overflow:hidden!important;touch-action:auto!important;overscroll-behavior:none!important;padding-bottom:0!important;background:rgba(9,15,22,.94)!important}
-    #sakalux-hub-panel>.slh-header{flex:0 0 auto!important;position:relative!important;z-index:20!important}
-    #sakalux-hub-panel>.slh-list{flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding-bottom:112px!important}
-    #sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;padding-bottom:112px!important}
-    #sakalux-hub-panel>.slh-bottom{position:absolute!important;left:0!important;right:0!important;bottom:34px!important;z-index:60!important;margin:0!important;padding:7px 20px!important;background:linear-gradient(180deg,rgba(11,17,24,.70),rgba(11,17,24,.97))!important;-webkit-backdrop-filter:blur(10px)!important;backdrop-filter:blur(10px)!important;border-top:1px solid rgba(255,255,255,.07)!important}
-    #sakalux-hub-panel>.slh-bottom .slh-bottom-btn{min-height:48px!important;height:48px!important}
-    #sakalux-hub-panel>.slh-footer{position:absolute!important;left:0!important;right:0!important;bottom:0!important;z-index:61!important;height:34px!important;min-height:34px!important;margin:0!important;padding:0 10px!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;background:rgba(8,13,19,.98)!important;border-top:1px solid rgba(223,154,55,.42)!important;-webkit-backdrop-filter:blur(10px)!important;backdrop-filter:blur(10px)!important}
+    #sakalux-hub-overlay{position:fixed!important;inset:0!important;overflow:hidden!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;box-sizing:border-box!important}
+    #sakalux-hub-panel{position:relative!important;inset:auto!important;flex:1 1 auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding-bottom:max(8px,env(safe-area-inset-bottom,0px))!important}
+    #sakalux-hub-panel>.slh-list,#sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{overflow:visible!important;flex:0 0 auto!important;min-height:auto!important;max-height:none!important}
+    #sakalux-hub-panel>.slh-bottom,#sakalux-hub-panel>.slh-footer{position:relative!important;flex:0 0 auto!important;bottom:auto!important}
+  }`;
+  (document.head||document.documentElement).appendChild(s);
+})();
+
+
+/* SakaLuX Hub list-only scrolling + standalone geometry repair v1.9.50 */
+(()=>{
+  if(document.getElementById('sakalux-hub-scroll-1950')) return;
+  const s=document.createElement('style');
+  s.id='sakalux-hub-scroll-1950';
+  s.textContent=`@media(max-width:820px){
+    #sakalux-hub-overlay{position:fixed!important;inset:0!important;overflow:hidden!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;box-sizing:border-box!important}
+    #sakalux-hub-panel{position:relative!important;inset:auto!important;display:flex!important;flex-direction:column!important;flex:1 1 auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;overflow:hidden!important;touch-action:auto!important;overscroll-behavior:none!important;padding-bottom:max(4px,env(safe-area-inset-bottom,0px))!important}
+    #sakalux-hub-panel>.slh-header,#sakalux-hub-panel>.slh-toolbar,#sakalux-hub-panel>.slh-tabs,#sakalux-hub-panel>.slh-bottom,#sakalux-hub-panel>.slh-footer{flex:0 0 auto!important;position:relative!important;bottom:auto!important}
+    #sakalux-hub-panel>.slh-list{flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+    #sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important}
   }`;
   (document.head||document.documentElement).appendChild(s);
 })();
