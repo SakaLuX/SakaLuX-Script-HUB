@@ -35,10 +35,23 @@ jobs:
           s=s.replace('// @version      1.9.69','// @version      1.9.70',1)
           s=s.replace("const VERSION = '1.9.69';","const VERSION = '1.9.70';",1)
 
-          needle="""                seen.add(panel);\n                let footer = panel.querySelector('[id^=\"sakalux-inline-footer-\"], .sakalux-stable-module-footer, .ci-footer');"""
-          repl="""                seen.add(panel);\n\n                // Market Intelligence owns its complete compact footer. Never inject\n                // the older generic author-only fallback into #sl-mi-panel.\n                if (panel.matches('#sl-mi-panel')) {\n                    const nativeMarketFooter = panel.querySelector('#sakalux-inline-footer-market-intelligence');\n                    if (nativeMarketFooter) nativeMarketFooter.classList.add('sakalux-stable-module-footer');\n                    return;\n                }\n\n                let footer = panel.querySelector('[id^=\"sakalux-inline-footer-\"], .sakalux-stable-module-footer, .ci-footer');"""
-          if needle not in s: raise SystemExit('footer ownership insertion point missing')
-          s=s.replace(needle,repl,1)
+          fn=s.find('function ensureManagedModuleFooters()')
+          if fn < 0: raise SystemExit('ensureManagedModuleFooters not found')
+          pos=s.find('seen.add(panel);',fn)
+          if pos < 0 or pos-fn > 5000: raise SystemExit('seen.add(panel) not found in managed footer function')
+          pos += len('seen.add(panel);')
+          guard="""
+
+                // Market Intelligence owns its complete compact footer. Never inject
+                // the older generic author-only fallback into #sl-mi-panel.
+                if (panel.matches('#sl-mi-panel')) {
+                    const nativeMarketFooter = panel.querySelector('#sakalux-inline-footer-market-intelligence');
+                    if (nativeMarketFooter) nativeMarketFooter.classList.add('sakalux-stable-module-footer');
+                    return;
+                }"""
+          if "panel.matches('#sl-mi-panel')" in s[fn:fn+6000]:
+              raise SystemExit('Market footer guard already present')
+          s=s[:pos]+guard+s[pos:]
 
           anchor='    const HUB_CHANGELOG = ['
           entry="\n        {version:'1.9.70',date:'2026-09-17',changes:['Prevents Script Hub from injecting its legacy author-only fallback footer into Market Intelligence settings.','Market Intelligence keeps exactly one footer: SEND MONEY, SEND ITEMS, then Made with ❤️ by SakaLuX [2380374].','Preserves Market settings, calculations, cache controls and Suite launcher behavior unchanged.']},"
@@ -58,8 +71,7 @@ jobs:
 
           p=Path('RELEASE-PERFORMANCE-AUDIT-2026-09-17.md')
           if p.exists():
-              a=p.read_text().replace('| SakaLuX-Script-Hub.user.js | 1.9.69 |','| SakaLuX-Script-Hub.user.js | 1.9.70 |')
-              p.write_text(a)
+              p.write_text(p.read_text().replace('| SakaLuX-Script-Hub.user.js | 1.9.69 |','| SakaLuX-Script-Hub.user.js | 1.9.70 |'))
           PY
 
       - name: Validate
