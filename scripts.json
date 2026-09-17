@@ -368,17 +368,17 @@
         }
       ],
       "release": {
-        "version": "0.7.12",
-        "date": "2026-09-17",
+        "version": "0.7.17",
+        "date": "2026-09-18",
         "notes": [
-          "Moves per-stock controls outside Torn's native stock-column list into full-width companion cards below each stock, preventing narrow right-column overlays.",
-          "Groups symbol, portfolio/benefit data and compact actions in a readable mobile layout; keeps companion cards paired with their stock during filtering and sorting.",
-          "Preserves quick-trade amount selections, skips rebuilding unchanged cards, computes opportunity rankings once per render and avoids redundant sorting mutations."
+          "Copies the shared Standalone Dock bootstrap from Bazaar and registers Stocks as a module in the same common dock.",
+          "Uses the common sakalux-standalone-dock, launcher, style and registration IDs; it does not create a Stock-specific standalone dock.",
+          "Whichever SakaLuX module loads first owns the shared dock; Stocks only joins the existing dock when one is already present."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.7.16"
+      "version": "0.7.17"
     }
   ]
 }
