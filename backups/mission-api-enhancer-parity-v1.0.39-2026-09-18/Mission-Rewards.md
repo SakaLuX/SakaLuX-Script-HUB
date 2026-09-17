@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.39**
+**v1.0.37**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,10 +17,11 @@
 
 ## Current release note
 
-**v1.0.39 — Enhancer-style API Access parity**
-- Removes the duplicate inline `API: Missing` status and API-key input from the normal Mission settings page.
-- Rebuilds the dedicated Mission API Access sheet to match Enhancer API Access: title/close header, exact-permissions card, full-width create button, API Access status card, two equal save/check buttons, full-width clear button and explanatory note.
-- Keeps Mission Rewards permissions read-only: `User: Ammo` and `Torn: Items`.
+**v1.0.37** Targets the real Mission settings panel (`#sl-mr-settings-panel`) and force-mounts the Elimination-style footer in standalone and Hub-launched settings.
+
+**v1.0.36** Copies the complete working Elimination Assistant donation/footer implementation into Mission Rewards, changing only the target panel selector/footer ID. Keeps one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.
+
+**v1.0.35** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs. Ignores Mission/Hub settings and self-generated reward decorations in the reward observer to avoid redundant scans.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -37,10 +38,6 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.0.39 — Enhancer-style API Access parity
-- Removes the duplicate inline API status/key field above SAVE.
-- Makes the dedicated API Access panel visually match Enhancer Guard while preserving Mission-specific permissions and behavior.
 
 ### v1.0.36 — Elimination footer parity
 - Copies the complete working Elimination Assistant donation/footer implementation into Mission Rewards, changing only the target panel selector/footer ID. Keeps one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.
