@@ -1,9 +1,9 @@
-# 📊 SakaLuX Stock Manager & Advisor [EXPERIMENTAL]
+# 📊 SakaLuX Stock Manager & Advisor
 
-> Experimental standalone build. **Not registered in SakaLuX Script Hub, Standalone dock, or GreasyFork.**
+> Main SakaLuX module, registered in Script Hub and the standalone dock. Distributed from GitHub.
 
 ## Current version
-**v0.7.6**
+**v0.7.7**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -15,7 +15,7 @@
 - Dedicated Torn API Key Manager with Save, Show/Hide, Test & Sync, Create Required Key and Clear controls.
 - Torn API sync for money, portfolio positions and the public stock catalog.
 - Portfolio dashboard with position count, market value, cash, known unrealized P/L, per-stock benefit tier and protected-share floor.
-- Experimental portfolio advisor showing owned shares, current benefit tier, estimated cost to the next benefit tier and unrealized P/L when transaction data is available.
+- Portfolio advisor showing owned shares, current benefit tier, estimated cost to the next benefit tier and unrealized P/L when transaction data is available.
 - Global **PANIC** button available from any Torn page.
 - PANIC uses the configured vault target and buys directly from the current Torn page without navigating to Stocks.
 - Optional Panic confirmation toggle.
@@ -23,33 +23,40 @@
 
 ## Current release note
 
-**v0.7.6** Performance/UI optimization: builds on the Stock Manager v0.7.5 SPA throttling with the shared SakaLuX performance/UI foundation so multiple SakaLuX scripts can coexist with less duplicate work and a consistent Hub-style interface.
+**v0.7.7** Promotes Stock Manager & Advisor from experimental to the main script directory and registers it in Script Hub and the standalone dock. Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders. Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations.
 
-## Experimental rules
-- Do **not** add this script to `scripts.json` yet.
-- Do **not** add it to the shared Standalone dock yet.
-- Do **not** publish it to GreasyFork yet.
-- Keep a backup branch before every update after v0.1.0.
-- Test stock-ID detection, Torn trade responses, benefit protection and Panic behavior before promotion to a public release.
+## Installation and Hub integration
+- Install the main `SakaLuX-Stock-Manager-Advisor.user.js` from GitHub. Use one installed copy; replace the old experimental copy with this version.
+- Namespace and existing local-storage keys are retained, preserving settings, API key and cached data.
+- Hub provides OPEN, REFRESH, ON/OFF, INFO and NEW. The standalone dock can open the same native panel.
+- The ordinary Stock Manager floating launcher is hidden while Hub is present; the explicit PANIC action remains available while Stocks is enabled.
+- OFF disconnects runtime observation, clears polling, removes inline/row controls and blocks new orders. An already submitted request is not cancelled.
+- This promotion was checked with code and mocked integration tests. Real Torn trade endpoints and live mobile behavior were not exercised during promotion.
 
 ## Design notes
-The feature set is inspired by publicly visible stock-vault/advisor workflows in **Stock Manager & Advisor v7.6** and the Panic workflow in **Smart Panic**. This SakaLuX implementation is written as a separate experimental codebase and does not register as either original script.
+The feature set is inspired by publicly visible stock-vault/advisor workflows in **Stock Manager & Advisor v7.6** and the Panic workflow in **Smart Panic**. This SakaLuX implementation is written as a separate codebase and does not register as either original script.
 
 The Panic behavior in this build means **cash → configured stock target**: it buys as many shares of the configured target as the available cash allows, optionally leaving the configured keep-cash amount on hand.
 
-## Known experimental limitations
+## Known limitations
 - Torn may change stock-page DOM classes or trade endpoints; detection must be tested on both desktop Torn and TornPDA.
 - Average buy price / unrealized P&L depends on the transaction fields returned by the user's Torn API response.
 - Advisor v0.1.0 ranks benefit progress and next-tier cost; a full ROI engine, benefit-value pricing, bank comparison and trade scoring are planned for later versions.
-- Direct trade endpoints and returned response shapes remain experimental and must be verified in TornPDA with small transactions first.
+- Direct trade endpoints and returned response shapes depend on Torn. Promotion does not constitute live transaction verification.
 
-## Planned roadmap
+## Historical roadmap
 - **v0.4.x:** refine benefit values, transaction history, withdrawal presets and Trade Assistant liquidity planning.
 - **v0.5.x:** refine optimizer, income/cost modelling, rebalance preview and capital-allocation scenarios.
 - **v0.6.x:** hardened Panic flow, target lock, optional second fallback target and action log.
-- Public/Hub integration only after the experimental build is stable.
+- Hub integration is available from v0.7.7.
 
 ## Changelog
+
+### v0.7.7 — Main module promotion and Hub integration
+
+- Promotes Stock Manager & Advisor from experimental to the main script directory and registers it in Script Hub and the standalone dock.
+- Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders.
+- Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations.
 
 ### v0.7.6
 

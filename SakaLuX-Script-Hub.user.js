@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.61
+// @version      1.9.62
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.61';
+    const VERSION = '1.9.62';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {version:'1.9.62',date:'2026-09-17',changes:['Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW release details.','Stocks installs and checks updates from its main GitHub source.']},
         {version:'1.9.61',date:'2026-09-17',changes:["Synchronizes module INFO/NEW fallback details and versions with the registry.","Updates release histories and registered-module documentation after the UI and performance audit."]},
         {version:'1.9.60',date:'2026-09-17',changes:['Shrinks INSTALLED / HEALTHY / UPDATES / ISSUES status cards to 38px.','Sets CHECK / UPDATE / HEALTH / NEW / SETTINGS buttons to 32px, matching module INFO / NEW controls.']},
         {version:'1.9.59',date:'2026-09-17',changes:['Uses Elimination mobile panel geometry: rounded 14px corners, 4px side gaps and 36px bottom clearance for chat.','Shrinks SEND MONEY / SEND ITEMS buttons to 20px.']},
@@ -617,20 +618,54 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     { id: 'open', label: 'OPEN', icon: '🏢', method: 'open' },
                     { id: 'refresh', label: 'REFRESH', icon: '🔄', method: 'refresh' }
                 ]
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXStockManagerAdvisor",
+                "buttonSelector": "#sakalux-module-bridge-stock-manager-advisor",
+                "category": "Trading",
+                "description": "Stock portfolio, benefit advisor, vault controls, guided rebalance and manual Panic tools.",
+                "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
+                "icon": "📊",
+                "id": "stock-manager-advisor",
+                "info": "Stock Manager & Advisor provides a portfolio dashboard, benefit-tier and ROI advice, vault/withdraw controls, optimizer and guided rebalance tools on Torn Stocks. It includes a dedicated local API key manager requiring user money/stocks and the Torn stock catalog. PANIC remains an explicit user action. Trading protections include Dry Run (ON by default for new installations), Benefit Lock and confirmations. Hub OPEN and REFRESH only display/synchronize data; they do not place orders.",
+                "metaUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
+                "name": "Stock Manager & Advisor",
+                "quickActions": [
+                    {
+                        "icon": "📊",
+                        "id": "open",
+                        "label": "OPEN",
+                        "method": "open"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=stocks",
+                        "icon": "📈",
+                        "id": "stocks",
+                        "label": "STOCKS",
+                        "method": "goToStocks"
+                    }
+                ],
+                "release": {
+                    "date": "2026-09-17",
+                    "notes": [
+                        "Promotes Stock Manager & Advisor from experimental to the main script directory and registers it in Script Hub and the standalone dock.",
+                        "Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders.",
+                        "Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations."
+                    ],
+                    "version": "0.7.7"
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
+                "type": "addon",
+                "version": "0.7.7"
             }
         ]
-    };
-
-    const IDS = {
-        button: 'sakalux-hub-button',
-        badge: 'sakalux-hub-badge',
-        topSkull: 'sakalux-hub-top-skull',
-        topBadge: 'sakalux-hub-top-badge',
-        navSkull: 'sakalux-hub-nav-skull',
-        navBadge: 'sakalux-hub-nav-badge',
-        overlay: 'sakalux-hub-overlay',
-        panel: 'sakalux-hub-panel',
-        style: 'sakalux-hub-style'
     };
 
     let registry = loadJson(STORAGE.registry, FALLBACK_REGISTRY);
@@ -787,7 +822,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         return script.downloadUrl || script.sourceUrl || '';
     }
 
-    const FALLBACK_MODULE_DETAILS = {"enhancer":{"info":"Enhancer Guard is the inventory-safety module for SakaLuX. It reads your Torn inventory through the configured API key, identifies Enhancer-related items, shows counts and status, and lets you protect important items from accidental sale through local protection rules. It exposes health/version state to Script Hub, supports refresh and hard-refresh actions, and includes dedicated API-key setup and TornPDA-friendly controls. It is informational and protective; it does not automate item sales or gameplay actions.","release":{"version":"1.3.46","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."]}},"bazaar":{"info":"Bazaar Thanker is a Bazaar management and customer-history module. It groups buyers from Bazaar sales, prepares reusable thank-you messages, keeps local buyer history and statistics, highlights larger or repeat buyers, and provides quick access to relevant Bazaar and event information. It is designed for TornPDA and desktop userscript managers, stores working data locally, and can be configured directly from Script Hub. Its core thank-you workflow does not require a Torn API key.","release":{"version":"5.3.39","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."]}},"mission-rewards":{"info":"Mission Rewards enhances Torn's Mission Shop with decision-support information. It calculates estimated market value and value per mission credit, shows reward context, tracks ammunition ownership, and helps identify weapon mods and other rewards you already own. It can use the shared Script Hub API key and refresh from the Hub while keeping normal Mission Shop interactions manual.","release":{"version":"1.0.35","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.","Ignores Mission/Hub settings and self-generated reward decorations in the reward observer to avoid redundant scans."]}},"market-intelligence":{"info":"Market Intelligence is the trading and travel analysis module. It provides Item Market price intelligence, comparisons and signals, Bazaar-flip support, loadout comparison, travel-profit tools, route and basket analysis, and API-access diagnostics. Market panels are scoped to relevant Torn pages and travel tools to travel pages. It is TornPDA-first and provides decision support rather than automated buying or selling.","release":{"version":"1.17.35","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."]}},"elimination-assistant":{"info":"Elimination Assistant is a combat-target advisor for Torn Eliminations. It combines Torn data with optional FFScouter information, loads large teams in rotating batches of up to 500 players, tracks availability, supports SAFE/RISKY filtering, calibration, FF scans, TornPDA export and PC-safe attack routing. It can test or create the required Torn API key, remembers relevant settings locally, and helps open targets without automatically attacking them.","release":{"version":"1.3.42","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.","Limits SAFE/persistence installation observers to top-level panel lifecycle changes.","Skips rebuilding the standalone dock when its module entries have not changed."]}},"company-intelligence":{"info":"Company Intelligence provides separate Employee and Director views for company analysis. Employee tools cover work stats, position suitability, personal progress, trains, offers and advice. Director tools cover star and growth direction, staff effectiveness and inactivity flags, position optimization, training commitments, train contracts, payroll and balance views, stock intelligence, benchmarks, timeline/history and advisory insights. It uses Torn company/user API data where permitted, supports the shared Script Hub API key, stores planning data locally, and never performs automated company actions.","release":{"version":"1.8.31","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.","Runs native position scraping only on visible Company/Job pages and ignores changes inside Company/Hub panels.","Prevents duplicate standalone placement timers after OFF/ON.","Clears employment caches through the same GM/local-storage abstraction used to save them."]}}};
+    const FALLBACK_MODULE_DETAILS = {"enhancer":{"info":"Enhancer Guard is the inventory-safety module for SakaLuX. It reads your Torn inventory through the configured API key, identifies Enhancer-related items, shows counts and status, and lets you protect important items from accidental sale through local protection rules. It exposes health/version state to Script Hub, supports refresh and hard-refresh actions, and includes dedicated API-key setup and TornPDA-friendly controls. It is informational and protective; it does not automate item sales or gameplay actions.","release":{"version":"1.3.46","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."]}},"bazaar":{"info":"Bazaar Thanker is a Bazaar management and customer-history module. It groups buyers from Bazaar sales, prepares reusable thank-you messages, keeps local buyer history and statistics, highlights larger or repeat buyers, and provides quick access to relevant Bazaar and event information. It is designed for TornPDA and desktop userscript managers, stores working data locally, and can be configured directly from Script Hub. Its core thank-you workflow does not require a Torn API key.","release":{"version":"5.3.39","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."]}},"mission-rewards":{"info":"Mission Rewards enhances Torn's Mission Shop with decision-support information. It calculates estimated market value and value per mission credit, shows reward context, tracks ammunition ownership, and helps identify weapon mods and other rewards you already own. It can use the shared Script Hub API key and refresh from the Hub while keeping normal Mission Shop interactions manual.","release":{"version":"1.0.35","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.","Ignores Mission/Hub settings and self-generated reward decorations in the reward observer to avoid redundant scans."]}},"market-intelligence":{"info":"Market Intelligence is the trading and travel analysis module. It provides Item Market price intelligence, comparisons and signals, Bazaar-flip support, loadout comparison, travel-profit tools, route and basket analysis, and API-access diagnostics. Market panels are scoped to relevant Torn pages and travel tools to travel pages. It is TornPDA-first and provides decision support rather than automated buying or selling.","release":{"version":"1.17.35","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."]}},"elimination-assistant":{"info":"Elimination Assistant is a combat-target advisor for Torn Eliminations. It combines Torn data with optional FFScouter information, loads large teams in rotating batches of up to 500 players, tracks availability, supports SAFE/RISKY filtering, calibration, FF scans, TornPDA export and PC-safe attack routing. It can test or create the required Torn API key, remembers relevant settings locally, and helps open targets without automatically attacking them.","release":{"version":"1.3.42","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.","Limits SAFE/persistence installation observers to top-level panel lifecycle changes.","Skips rebuilding the standalone dock when its module entries have not changed."]}},"company-intelligence":{"info":"Company Intelligence provides separate Employee and Director views for company analysis. Employee tools cover work stats, position suitability, personal progress, trains, offers and advice. Director tools cover star and growth direction, staff effectiveness and inactivity flags, position optimization, training commitments, train contracts, payroll and balance views, stock intelligence, benchmarks, timeline/history and advisory insights. It uses Torn company/user API data where permitted, supports the shared Script Hub API key, stores planning data locally, and never performs automated company actions.","release":{"version":"1.8.31","date":"2026-09-17","notes":["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.","Runs native position scraping only on visible Company/Job pages and ignores changes inside Company/Hub panels.","Prevents duplicate standalone placement timers after OFF/ON.","Clears employment caches through the same GM/local-storage abstraction used to save them."]}},"stock-manager-advisor":{"info":"Stock Manager & Advisor provides a portfolio dashboard, benefit-tier and ROI advice, vault/withdraw controls, optimizer and guided rebalance tools on Torn Stocks. It includes a dedicated local API key manager requiring user money/stocks and the Torn stock catalog. PANIC remains an explicit user action. Trading protections include Dry Run (ON by default for new installations), Benefit Lock and confirmations. Hub OPEN and REFRESH only display/synchronize data; they do not place orders.","release":{"version":"0.7.7","date":"2026-09-17","notes":["Promotes Stock Manager & Advisor from experimental to the main script directory and registers it in Script Hub and the standalone dock.","Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders.","Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations."]}}};
 
     function normalizeRegistry(data) {
         const rows = Array.isArray(data?.scripts) ? data.scripts : FALLBACK_REGISTRY.scripts;

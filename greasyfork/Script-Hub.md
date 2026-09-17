@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.61**
+**v1.9.62**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.61** Synchronizes module INFO/NEW fallback details and versions with the registry. Updates release histories and registered-module documentation after the UI and performance audit.
+**v1.9.62** Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW details. Stocks uses its main GitHub source for installation and update checks.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -34,6 +34,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 📈 SakaLuX Market Intelligence **v1.17.35**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.42**
 - 🏢 SakaLuX Company Intelligence **v1.8.31**
+- 📊 SakaLuX Stock Manager & Advisor **v0.7.7**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -54,6 +55,10 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history / Changelog
+
+### v1.9.62 — Stocks promotion
+- Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW release details.
+- Stocks installs and checks updates from its main GitHub source.
 
 ### v1.9.61 — Performance and release metadata audit
 - Synchronizes module INFO/NEW fallback details and versions with the registry.
