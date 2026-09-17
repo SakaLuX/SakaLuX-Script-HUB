@@ -1,0 +1,62 @@
+name: Publish Suite v0.9.925
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-suite-v0925.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suite-release-v0925
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply reviewed Suite patch with backup
+        run: |
+          set -euo pipefail
+          test "$(git hash-object SakaLuX-Suite.user.js)" = '7445fcc5508bef3e2c03ee24852cfba18b73a485'
+          mkdir -p backups/suite-chat-height-v0.9.925-2026-09-17
+          cp SakaLuX-Suite.user.js backups/suite-chat-height-v0.9.925-2026-09-17/SakaLuX-Suite.user.js
+          cp greasyfork/SakaLuX-Suite.md backups/suite-chat-height-v0.9.925-2026-09-17/SakaLuX-Suite.md
+          git apply --check releases/suite-v0.9.925.patch
+          git apply releases/suite-v0.9.925.patch
+      - name: Validate script and release metadata
+        run: |
+          node --check SakaLuX-Suite.user.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s = Path('SakaLuX-Suite.user.js').read_text()
+          assert re.search(r'^// @version\s+0\.9\.925$', s, re.M)
+          assert "const VERSION = '0.9.925';" in s
+          assert '### v0.9.925' in Path('greasyfork/SakaLuX-Suite.md').read_text()
+          assert '0.9.924' in Path('backups/suite-chat-height-v0.9.925-2026-09-17/SakaLuX-Suite.user.js').read_text()
+          PY
+      - name: Commit validated script, description and backup
+        run: |
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md backups/suite-chat-height-v0.9.925-2026-09-17/
+          git commit -m 'Suite v0.9.925: extend Master Control near chat'
+          git push origin HEAD:main
+      - name: Prepare release assets
+        run: |
+          mkdir -p dist
+          cp SakaLuX-Suite.user.js dist/SakaLuX-Suite-v0.9.925.user.js
+          cp releases/suite-v0.9.925.md dist/CHANGELOG-Suite-v0.9.925.md
+          zip -j dist/SakaLuX-Suite-v0.9.924-backup.zip backups/suite-chat-height-v0.9.925-2026-09-17/*
+          (cd dist && sha256sum *.user.js *.md *.zip > SHA256SUMS.txt)
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create suite-v0.9.925 dist/* --target "$(git rev-parse HEAD)" --title 'SakaLuX Suite v0.9.925 — Master Control height near chat' --notes-file releases/suite-v0.9.925.md --prerelease --latest=false
