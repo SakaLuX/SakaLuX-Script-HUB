@@ -1,0 +1,25 @@
+name: Stock footer parity patch
+on:
+  push:
+    paths:
+      - '.github/workflows/temp-stock-footer-parity.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply Stocks footer parity patch
+        run: python .migration/copy_hub_footer_to_stocks.py
+      - name: Validate Stocks JavaScript
+        run: node --check SakaLuX-Stock-Manager-Advisor.user.js
+      - name: Validate JSON
+        run: python -m json.tool scripts.json >/dev/null
+      - name: Commit patch
+        run: |
+          git config user.name 'SakaLuX Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js scripts.json greasyfork/Stock-Manager-Advisor.md
+          git commit -m 'Match Stocks footer to Script Hub donation panel' || exit 0
+          git push origin HEAD:main
