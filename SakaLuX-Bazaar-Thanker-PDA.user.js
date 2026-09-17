@@ -71,7 +71,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
   })();
 
-  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.25'});
+  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.29'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -948,7 +948,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
         panel.innerHTML = `
             <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;"><div style="font-size:21px;font-weight:900;letter-spacing:.01em;">⚙️ SakaLuX Bazaar Thanker</div><span style="padding:5px 8px;border:1px solid #334155;border-radius:999px;background:#172235;color:#93c5fd;font-size:10px;font-weight:900;">PDA</span></div>
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:15px;">Version 5.3.5 · buyer messages and bazaar analytics</div>
+            <div style="font-size:11px;color:#94a3b8;margin-bottom:15px;">Version 5.3.29 · buyer messages and bazaar analytics</div>
             <div id="sbtStats" style="background:linear-gradient(145deg,#172334,#111923);border:1px solid #334155;border-radius:12px;padding:12px;margin-bottom:15px;"></div>
             <label>Your Torn ID</label><input id="sbtSellerId" value="${escapeHtml(settings.sellerId)}" style="${inputStyle()}">
             <label>Bazaar URL</label><input id="sbtBazaarUrl" value="${escapeHtml(settings.bazaarUrl)}" style="${inputStyle()}">
@@ -1156,7 +1156,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.28';
+    const BAZAAR_VERSION='5.3.29';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);
