@@ -12,7 +12,7 @@ Reviewed all 12 current repository userscripts: ten main SakaLuX scripts, Apocal
 | SakaLuX-Company-Intelligence-v1.0.0.user.js | 1.8.31 |
 | SakaLuX-Elimination-Assistant.user.js | 1.3.42 |
 | SakaLuX-Enhancer-Guard.user.js | 1.3.46 |
-| SakaLuX-Market-Intelligence.user.js | 1.17.36 |
+| SakaLuX-Market-Intelligence.user.js | 1.17.35 |
 | SakaLuX-Mission-Rewards.user.js | 1.0.35 |
 | SakaLuX-Suite.user.js | 0.9.920 |
 | SakaLuX-Script-Hub.user.js | 1.9.61 |

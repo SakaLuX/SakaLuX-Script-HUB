@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.36**
+**v1.17.35**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -19,8 +19,6 @@
 - Exposes `window.SakaLuXMarketIntelligence` and supports persistent Hub ON/OFF control.
 
 ## Current release note
-
-**v1.17.36** restores the native Market footer when Market settings are opened from Script Hub. The over-broad Hub-subtree guard was removed, so the panel again shows `SEND MONEY`, `SEND ITEMS`, and one `Made with ❤️ by SakaLuX [2380374]` line. Hub still suppresses its generic fallback inside Market, preventing duplication.
 
 **v1.17.35** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
 
@@ -46,11 +44,6 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.17.36 — Restore native Market footer
-- Restores SEND MONEY / SEND ITEMS and the Made with ❤️ author line inside Market settings opened through Hub.
-- Removes the Market footer guard that incorrectly treated Hub-launched Market settings as a Hub-owned panel.
-- Keeps Hub generic footer suppression for Market, so only one footer remains.
 
 ### v1.17.35 — Performance and release metadata audit
 - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
