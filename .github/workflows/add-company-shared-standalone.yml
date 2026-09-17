@@ -1,0 +1,109 @@
+name: Add Company shared standalone dock
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-company-shared-standalone.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch Company standalone dock
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          bazaar_path = Path('SakaLuX-Bazaar-Thanker-PDA.user.js')
+          company_path = Path('SakaLuX-Company-Intelligence-v1.0.0.user.js')
+          backup_dir = Path('backups/company-shared-standalone-v1.8.35-2026-09-18')
+          backup_dir.mkdir(parents=True, exist_ok=True)
+
+          bazaar = bazaar_path.read_text(encoding='utf-8')
+          company = company_path.read_text(encoding='utf-8')
+          (backup_dir / 'SakaLuX-Company-Intelligence-v1.8.34.user.js').write_text(company, encoding='utf-8')
+
+          begin = '/* SakaLuX Standalone Dock Bootstrap — BEGIN */'
+          end = '/* SakaLuX Standalone Dock Bootstrap — END */'
+          if begin not in bazaar or end not in bazaar:
+              raise SystemExit('Bazaar standalone bootstrap markers not found')
+
+          block = bazaar.split(begin, 1)[1].split(end, 1)[0]
+          block = begin + block + end
+
+          block = re.sub(
+              r'const SELF=Object\.assign\([^\n]+\);',
+              "const SELF=Object.assign({\"id\":\"company-intelligence\",\"name\":\"Company\",\"icon\":\"🏢\",\"selector\":\"#sakalux-module-bridge-company-intelligence\",\"fallback\":\"https://www.torn.com/joblist.php\"},{version:'1.8.35'});",
+              block,
+              count=1,
+          )
+
+          # Company panel must stay above the shared dock just like the other managed add-ons.
+          block = block.replace(
+              '  [id^="slx-elim-"][id*="panel" i]\n){z-index:2147483646!important;}',
+              '  [id^="slx-elim-"][id*="panel" i],\n  #ci-root\n){z-index:2147483646!important;}'
+          )
+
+          # If this workflow is ever rerun, replace the existing bootstrap instead of duplicating it.
+          if begin in company and end in company:
+              prefix = company.split(begin, 1)[0]
+              suffix = company.split(end, 1)[1]
+              company = prefix + block + suffix
+          else:
+              marker = '/* Company Intelligence supports the shared SakaLuX standalone dock and Script Hub. */'
+              if marker in company:
+                  company = company.replace(marker, block, 1)
+              else:
+                  header_end = '// ==/UserScript=='
+                  company = company.replace(header_end, header_end + '\n\n' + block, 1)
+
+          company = company.replace('// @version      1.8.34', '// @version      1.8.35', 1)
+          company = company.replace("version:'1.8.34'", "version:'1.8.35'", 1)
+          company_path.write_text(company, encoding='utf-8')
+
+          doc = Path('greasyfork/SakaLuX-Company-Intelligence.md')
+          if doc.exists():
+              text = doc.read_text(encoding='utf-8')
+              text = text.replace('1.8.34', '1.8.35')
+              note = '\n- v1.8.35: Added the same shared standalone dock bootstrap used by Bazaar. The first installed SakaLuX module creates the single dock; Company and every other module only register into that same dock, so no duplicate standalone launcher is created.\n'
+              if 'v1.8.35:' not in text:
+                  text += note
+              doc.write_text(text, encoding='utf-8')
+
+      - name: Validate Company standalone contract
+        shell: bash
+        run: |
+          set -e
+          f='SakaLuX-Company-Intelligence-v1.0.0.user.js'
+          grep -q '// @version      1.8.35' "$f"
+          grep -q 'SakaLuX Standalone Dock Bootstrap — BEGIN' "$f"
+          grep -q 'const DOCK_ID=' "$f"
+          grep -q 'sakalux-standalone-dock' "$f"
+          grep -q 'data-slx-standalone-registration' "$f"
+          grep -q '"id":"company-intelligence"' "$f"
+          grep -q '#sakalux-module-bridge-company-intelligence' "$f"
+          grep -q "if(d) return d;" "$f"
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -e
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Company-Intelligence-v1.0.0.user.js greasyfork/SakaLuX-Company-Intelligence.md backups/company-shared-standalone-v1.8.35-2026-09-18 || true
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Company v1.8.35: add shared Bazaar-style standalone dock'
+          git push
