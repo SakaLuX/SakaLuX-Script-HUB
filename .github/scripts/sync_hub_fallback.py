@@ -18,12 +18,26 @@ for old,new in versions.items():
     block=block.replace("version: '"+old+"'", "version: '"+new+"'")
 p.write_text(head+block+tail,encoding='utf-8')
 
-# Bazaar uses a dedicated runtime constant, so keep metadata/bridge/runtime aligned.
+# Keep standalone registration metadata aligned with the actual userscript version.
+standalone_versions={
+  'SakaLuX-Enhancer-Guard.user.js':'1.3.37',
+  'SakaLuX-Bazaar-Thanker-PDA.user.js':'5.3.29',
+  'SakaLuX-Mission-Rewards.user.js':'1.0.24',
+  'SakaLuX-Market-Intelligence.user.js':'1.17.25',
+  'SakaLuX-Elimination-Assistant.user.js':'1.3.35',
+}
+for filename,version in standalone_versions.items():
+    fp=Path(filename)
+    if not fp.exists(): continue
+    text=fp.read_text(encoding='utf-8')
+    text=re.sub(r"(const\s+SELF\s*=\s*Object\.assign\([\s\S]{0,500}?\},\s*\{version:\s*')[^']+('\}\);)",r'\g<1>'+version+r'\g<2>',text,count=1)
+    fp.write_text(text,encoding='utf-8')
+
+# Bazaar uses a dedicated runtime constant too.
 bp=Path('SakaLuX-Bazaar-Thanker-PDA.user.js')
 if bp.exists():
     b=bp.read_text(encoding='utf-8')
     b=b.replace("const BAZAAR_VERSION='5.3.28';", "const BAZAAR_VERSION='5.3.29';")
-    b=b.replace("{version:'5.3.25'}", "{version:'5.3.29'}")
     b=b.replace('Version 5.3.5 · buyer messages and bazaar analytics', 'Version 5.3.29 · buyer messages and bazaar analytics')
     bp.write_text(b,encoding='utf-8')
 
