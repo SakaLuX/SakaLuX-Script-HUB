@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/one-shot-ui-contract-fix.yml'
       - '.github/scripts/ui_contract_patch.py'
+      - '.github/scripts/sync_hub_fallback.py'
 
 permissions:
   contents: write
@@ -17,7 +18,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Apply patch
-        run: python3 .github/scripts/ui_contract_patch.py
+        run: |
+          python3 .github/scripts/ui_contract_patch.py
+          python3 .github/scripts/sync_hub_fallback.py
       - name: Validate
         shell: bash
         run: |
@@ -32,5 +35,5 @@ jobs:
           git config user.name 'SakaLuX UI Repair Bot'
           git config user.email 'actions@users.noreply.github.com'
           git add -A
-          git commit -m 'fix: full-height blur surfaces and Company whole-sheet scroll'
+          git commit -m 'fix: sync Hub fallback registry after mobile UI repair'
           git push
