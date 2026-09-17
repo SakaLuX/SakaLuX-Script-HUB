@@ -1,0 +1,164 @@
+diff --git a/SakaLuX-Suite.user.js b/SakaLuX-Suite.user.js
+index cf659af..729c82a 100644
+--- a/SakaLuX-Suite.user.js
++++ b/SakaLuX-Suite.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Suite [EXPERIMENTAL]
+ // @namespace    sakalux.suite
+-// @version      0.9.925
++// @version      0.9.926
+ // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
+ // @author       SakaLuX [2380374]
+ // @copyright    2026 SakaLuX [2380374]
+@@ -172,7 +172,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+  * settings migration and TornPDA compatibility. */
+ (() => {
+   "use strict";
+-  const VERSION = '0.9.925';
++  const VERSION = '0.9.926';
+   const SUITE = Object.freeze({
+     name: "SakaLuX Suite",
+     version: VERSION,
+@@ -1202,50 +1202,65 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+         opacity: .35;
+         cursor: not-allowed;
+       }
+-      .sakalux-switch {
+-        position: relative;
+-        width: 46px;
+-        height: 25px;
+-        flex: 0 0 auto;
+-        margin: 0;
+-        padding: 0;
+-        border: 1px solid #404652;
+-        border-radius: 999px;
+-        background: #292d35;
++      /* Switch geometry must override shared button themes on TornPDA. */
++      #${SUITE.panelId} button.sakalux-switch {
++        box-sizing: border-box !important;
++        position: relative !important;
++        display: inline-block !important;
++        width: 46px !important;
++        min-width: 46px !important;
++        max-width: 46px !important;
++        height: 25px !important;
++        min-height: 25px !important;
++        max-height: 25px !important;
++        flex: 0 0 46px !important;
++        margin: 0 !important;
++        padding: 0 !important;
++        border: 1px solid #546276 !important;
++        border-radius: 999px !important;
++        background: #394554 !important;
+         cursor: pointer;
+-        appearance: none;
+-        box-shadow: none;
+-        transition:
+-          border-color .18s ease,
+-          background-color .18s ease;
++        appearance: none !important;
++        -webkit-appearance: none !important;
++        box-shadow: none !important;
++        transform: none !important;
++        overflow: hidden !important;
++        transition: border-color .18s ease, background-color .18s ease !important;
+       }
+-      .sakalux-switch::after {
+-        content: "";
+-        position: absolute;
+-        top: 3px;
+-        left: 3px;
+-        width: 17px;
+-        height: 17px;
+-        border-radius: 50%;
+-        background: #8c939e;
+-        transition:
+-          left .18s ease,
+-          background-color .18s ease;
++      #${SUITE.panelId} button.sakalux-switch::before {
++        content: none !important;
+       }
+-      .sakalux-switch[aria-checked="true"] {
+-        border-color: rgba(216,179,95,.72);
+-        background: rgba(216,179,95,.21);
++      #${SUITE.panelId} button.sakalux-switch::after {
++        content: "" !important;
++        position: absolute !important;
++        top: 3px !important;
++        left: 3px !important;
++        right: auto !important;
++        bottom: auto !important;
++        width: 17px !important;
++        height: 17px !important;
++        margin: 0 !important;
++        border: 0 !important;
++        border-radius: 50% !important;
++        background: #c5ced9 !important;
++        box-shadow: none !important;
++        transform: none !important;
++        transition: left .18s ease, background-color .18s ease !important;
+       }
+-      .sakalux-switch[aria-checked="true"]::after {
+-        left: 24px;
+-        background: var(--sakalux-gold-bright);
++      #${SUITE.panelId} button.sakalux-switch[aria-checked="true"] {
++        border-color: #bd9b4c !important;
++        background: #67562d !important;
+       }
+-      .sakalux-switch:focus-visible {
+-        outline: 2px solid rgba(216,179,95,.4);
+-        outline-offset: 2px;
++      #${SUITE.panelId} button.sakalux-switch[aria-checked="true"]::after {
++        left: 24px !important;
++        background: #f0d16f !important;
+       }
+-      .sakalux-switch:disabled {
+-        opacity: .35;
++      #${SUITE.panelId} button.sakalux-switch:focus-visible {
++        outline: 2px solid #f0d16f !important;
++        outline-offset: 2px !important;
++      }
++      #${SUITE.panelId} button.sakalux-switch:disabled {
++        opacity: .35 !important;
+         cursor: not-allowed;
+       }
+       .sakalux-suite-footer {
+diff --git a/greasyfork/SakaLuX-Suite.md b/greasyfork/SakaLuX-Suite.md
+index 97d717f..90f1655 100644
+--- a/greasyfork/SakaLuX-Suite.md
++++ b/greasyfork/SakaLuX-Suite.md
+@@ -3,7 +3,7 @@
+ > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
+ 
+ ## Current version
+-**v0.9.925**
++**v0.9.926**
+ 
+ ## What it does
+ SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
+@@ -35,6 +35,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
+ 
+ ## Current release note
+ 
++**v0.9.926** restores compact pill-shaped module switches. Scoped switch styles override shared blue button themes and mobile minimum heights; the thumb slides between the gray OFF and gold ON states. The confirmed v0.9.925 panel layout is preserved.
++
+ **v0.9.925** extends Master Control to 36px above the viewport bottom on mobile and TornPDA desktop-width touch layouts. Explicit viewport heights keep the module list scrollable and the footer at the bottom. The launcher and close behavior remain controlled by the existing open class.
+ 
+ **v0.9.924** emergency hotfix restores the last working Master Control runtime after v0.9.923 prevented the Suite launcher from opening in TornPDA. The v0.9.923 coarse-pointer full-height override has been removed completely; launcher behavior is restored first, while the mobile-height adjustment will be reworked separately without touching the open path.
+@@ -60,6 +62,15 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the
+ 
+ ## Release history / Changelog
+ 
++### v0.9.926 — Module switch styling
++
++- Restores 46×25px pill switches with a 17px thumb centered vertically.
++- Overrides generic blue button backgrounds, square corners, padding and mobile minimum heights only for Suite module switches.
++- Preserves aria-checked, disabled states, keyboard focus and the existing module toggle handlers.
++- Uses gray OFF and gold ON states with sliding thumb feedback.
++- Preserves the confirmed panel height, content scrolling and footer geometry.
++- Includes a complete v0.9.925 script/description backup; JavaScript syntax validated.
++
+ ### v0.9.925 — Master Control height near chat
+ 
+ - Uses explicit viewport heights for the outer shell and Suite window, with 36px bottom clearance matching Elimination.
