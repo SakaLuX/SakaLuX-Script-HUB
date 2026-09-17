@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.55
+// @version      1.9.54
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.55';
+    const VERSION = '1.9.54';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,7 +81,6 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
-        { version: '1.9.55', date: '2026-09-17', changes: ['Makes Hub use the same reliable full-screen container model as Enhancer Guard and Market Intelligence.','The overlay owns the viewport with fixed inset:0 and maximum stacking; the Hub panel fills that container with flex instead of using a second fixed viewport.','Removes double-fixed geometry that could leave unused space at the bottom in TornPDA.','Keeps blur disabled and Managed Modules as the only primary scroll surface.'] },
         { version: '1.9.54', date: '2026-09-17', changes: ['Extends the TornPDA Hub sheet to the lower host edge and makes SEND MONEY / SEND ITEMS plus the author line a real non-overlapping flex footer.','Removes full-screen backdrop blur from the Hub scroll surface while keeping a subtle header blur for a smoother GPU path.','Disconnects Hub DOM observation while Hub sheets are open and removes the global language MutationObserver.','OPEN/SETTINGS now closes the Hub before awaiting a module API so taps feel immediate.','Managed standalone observers fully disconnect once Script Hub is detected.'] },
         { version: '1.9.52', date: '2026-09-17', changes: ['Extends the mobile Hub lower into the available TornPDA area so the author footer sits closer to the bottom navigation.','Keeps SEND MONEY / SEND ITEMS fully visible above the author footer.','Reduces mobile blur/shadow compositor cost and contains module cards for smoother scrolling.','Hub DOM and language observers now ignore unrelated Torn mutations while the Hub is open.','Managed module standalone bootstraps no longer run periodic render loops while Script Hub is active.'] },
         { version: '1.9.51', date: '2026-09-17', changes: ['Moves SEND MONEY / SEND ITEMS and the author footer to a compact bottom overlay so more module cards remain visible.','Keeps only Managed Modules as the primary Hub scroll surface.','Removes the expensive document-wide Mobile Surface scan and the obsolete 1.2-second card repair timer.','Replaces the global managed-footer MutationObserver with a one-shot repair to reduce TornPDA DOM overhead.'] },
@@ -2118,35 +2117,23 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     else init();
 })();
 
-/* SakaLuX Hub mobile layout v1.9.55 — add-on parity full-screen */
+
+/* SakaLuX Hub mobile layout v1.9.54 — true viewport full screen */
 (()=>{
-  if(document.getElementById('sakalux-hub-layout-1955')) return;
+  if(document.getElementById('sakalux-hub-layout-1954')) return;
   const s=document.createElement('style');
-  s.id='sakalux-hub-layout-1955';
+  s.id='sakalux-hub-layout-1954';
   s.textContent=`@media(max-width:820px){
-    #sakalux-hub-overlay{
-      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
-      z-index:2147483647!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
-      margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;
-      display:flex!important;align-items:stretch!important;justify-content:stretch!important;
-      background:#0b1118!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important
-    }
-    #sakalux-hub-panel{
-      position:relative!important;inset:auto!important;flex:1 1 auto!important;align-self:stretch!important;
-      width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;
-      margin:0!important;padding:0!important;box-sizing:border-box!important;border-radius:0!important;
-      display:flex!important;flex-direction:column!important;overflow:hidden!important;
-      background:#0b1118!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important
-    }
+    #sakalux-hub-overlay{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#0b1118!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+    #sakalux-hub-panel{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:#0b1118!important;box-shadow:none!important}
     #sakalux-hub-panel>.slh-header{flex:0 0 auto!important;position:relative!important;background:#0d151f!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
     #sakalux-hub-panel>.slh-list{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding-bottom:8px!important;contain:layout paint style!important}
-    #sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+    #sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important}
     #sakalux-hub-panel>.slh-bottom{position:relative!important;flex:0 0 66px!important;height:66px!important;min-height:66px!important;margin:0!important;padding:8px 20px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important}
     #sakalux-hub-panel>.slh-bottom .slh-bottom-grid{height:50px!important}
     #sakalux-hub-panel>.slh-bottom .slh-bottom-btn{height:50px!important;min-height:50px!important;box-shadow:none!important}
     #sakalux-hub-panel>.slh-footer{position:relative!important;flex:0 0 38px!important;height:38px!important;min-height:38px!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#080d13!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important}
-    #sakalux-hub-overlay *,#sakalux-hub-panel *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-    #sakalux-hub-panel *{animation:none!important;transition:none!important}
+    #sakalux-hub-panel *{animation:none!important;transition:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   }`;
   (document.head||document.documentElement).appendChild(s);
 })();

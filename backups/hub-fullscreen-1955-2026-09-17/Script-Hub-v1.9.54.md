@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.55**
+**v1.9.54**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.55** uses the same proven full-screen container model as Enhancer Guard and Market Intelligence: one fixed viewport overlay and one flex-filled Hub panel, eliminating the double-fixed TornPDA height issue while keeping blur disabled and scrolling lightweight.
+**v1.9.54** uses full-screen mobile panels, removes blur and heavy visual effects, and reduces mobile rendering overhead for faster TornPDA scrolling and taps.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,14 +54,6 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
-
-### v1.9.55 — Add-on parity full-screen
-- Uses the same full-screen container structure as Enhancer Guard and Market Intelligence.
-- Makes the overlay own the viewport and lets the Hub panel fill it with flex.
-- Removes the double-fixed geometry that could leave unused space below the Hub in TornPDA.
-- Keeps blur disabled and only the Managed Modules area as the main scroll surface.
-
-
 
 ### v1.9.54 — Full-screen performance
 - Mobile SakaLuX panels use the full available viewport.
