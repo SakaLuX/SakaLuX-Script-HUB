@@ -1,5 +1,5 @@
 from pathlib import Path
-import json,re
+import json
 
 repo=Path('.')
 script=repo/'SakaLuX-Stock-Manager-Advisor.user.js'
@@ -57,8 +57,3 @@ if '### v1.9.63' not in hm:
     entry='### v1.9.63 — Stocks Greasy Fork update channel\n- Stock Manager & Advisor v0.7.8 now installs and checks updates through Greasy Fork script 596192.\n- GitHub remains the canonical source repository.\n\n'
     hm=hm.replace(marker,marker+entry,1)
 hubmd.write_text(hm,encoding='utf-8')
-
-vp=repo/'.github/workflows/validate-userscripts.yml'
-v=vp.read_text(encoding='utf-8')
-v=v.replace("url = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js'\n          assert stock['sourceUrl'] == stock['downloadUrl'] == stock['metaUrl'] == url\n          assert url in source and stock['apiGlobal'] in source","url = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js'\n          gf_user = 'https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.user.js'\n          gf_meta = 'https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js'\n          assert stock['sourceUrl'] == url\n          assert stock['downloadUrl'] == gf_user\n          assert stock['metaUrl'] == gf_meta\n          assert gf_user in source and gf_meta in source and stock['apiGlobal'] in source",1)
-vp.write_text(v,encoding='utf-8')
