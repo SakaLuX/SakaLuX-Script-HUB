@@ -185,15 +185,15 @@
         }
       ],
       "release": {
-        "version": "1.17.33",
+        "version": "1.17.34",
         "date": "2026-09-17",
         "notes": [
-          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
+          "Extends the donation/author footer to the full panel width, compensates for the content padding and removes the bottom gap. Keeps 20px donation buttons and the mobile chat clearance."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.33"
+      "version": "1.17.34"
     },
     {
       "active": true,
