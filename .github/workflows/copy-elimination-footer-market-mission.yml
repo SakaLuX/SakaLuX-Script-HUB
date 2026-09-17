@@ -1,0 +1,192 @@
+name: Copy Elimination footer to Market and Mission
+
+on:
+  push:
+    paths:
+      - '.github/copy-elimination-footer-market-mission.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Backup current releases
+        shell: bash
+        run: |
+          set -euo pipefail
+          B='backups/elimination-footer-copy-market-mission-2026-09-17'
+          mkdir -p "$B/greasyfork"
+          cp SakaLuX-Market-Intelligence.user.js "$B/SakaLuX-Market-Intelligence-v1.17.36.user.js"
+          cp SakaLuX-Mission-Rewards.user.js "$B/SakaLuX-Mission-Rewards-v1.0.35.user.js"
+          cp SakaLuX-Script-Hub.user.js "$B/SakaLuX-Script-Hub-v1.9.69.user.js"
+          cp scripts.json "$B/scripts.json"
+          cp greasyfork/Market-Intelligence.md "$B/greasyfork/Market-Intelligence.md"
+          cp greasyfork/Mission-Rewards.md "$B/greasyfork/Mission-Rewards.md"
+          cp greasyfork/Script-Hub.md "$B/greasyfork/Script-Hub.md"
+
+      - name: Copy Elimination footer code verbatim and adapt selectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, json
+
+          elim_path=Path('SakaLuX-Elimination-Assistant.user.js')
+          market_path=Path('SakaLuX-Market-Intelligence.user.js')
+          mission_path=Path('SakaLuX-Mission-Rewards.user.js')
+          elim=elim_path.read_text()
+
+          footer_re=re.compile(
+              r'/\* SakaLuX Hub footer v3: native module root only; compact donation controls\. \*/\s*'
+              r'\(\(\)=>\{.*?'
+              r"if\(document\.readyState==='loading'\)document\.addEventListener\('DOMContentLoaded',start,\{once:true\}\);else start\(\);\s*"
+              r'\}\)\(\);', re.S)
+          m=footer_re.search(elim)
+          if not m:
+              raise SystemExit('Elimination footer v3 block not found')
+          elim_footer=m.group(0)
+          ids=re.search(r'const selector=(["\'])(.*?)\1,id=(["\'])(.*?)\3,profile=',elim_footer,re.S)
+          if not ids:
+              raise SystemExit('Could not parse Elimination footer selector/id')
+          elim_selector,elim_id=ids.group(2),ids.group(4)
+
+          def transplant(path, selector, footer_id, old_ver, new_ver, self_old=None, self_new=None):
+              s=path.read_text()
+              before=s
+              # Remove every current footer-v3 block from target, then append the Elimination implementation.
+              s,n=footer_re.subn('',s)
+              if n < 1:
+                  raise SystemExit(f'No existing footer v3 block found in {path}')
+              block=elim_footer.replace(elim_selector,selector).replace(elim_id,footer_id)
+              s=s.rstrip()+"\n\n"+block+"\n"
+              s=s.replace(f'// @version      {old_ver}',f'// @version      {new_ver}',1)
+              # Runtime VERSION constants / standalone SELF version.
+              s=s.replace(f"const VERSION = '{old_ver}';",f"const VERSION = '{new_ver}';",1)
+              s=s.replace(f"const VERSION='{old_ver}';",f"const VERSION='{new_ver}';",1)
+              s=s.replace(f"version:'{old_ver}'",f"version:'{new_ver}'")
+              s=s.replace(f'"version":"{old_ver}"',f'"version":"{new_ver}"')
+              if before==s:
+                  raise SystemExit(f'{path} did not change')
+              path.write_text(s)
+
+          transplant(market_path,'#sl-mi-panel','sakalux-inline-footer-market-intelligence','1.17.36','1.17.37')
+          transplant(mission_path,'#sl-mr-settings','sakalux-inline-footer-mission-rewards','1.0.35','1.0.36')
+
+          # Registry versions + release notes.
+          p=Path('scripts.json'); data=json.loads(p.read_text())
+          found={'market':False,'mission':False}
+          def walk(x):
+              if isinstance(x,dict):
+                  ident=str(x.get('id','')).lower()
+                  name=str(x.get('name','')).lower()
+                  if ident=='market-intelligence' or name=='market intelligence':
+                      x['version']='1.17.37'; found['market']=True
+                      if isinstance(x.get('releases'),list):
+                          x['releases'].insert(0,{'version':'1.17.37','date':'2026-09-17','notes':['Copies the complete working Elimination Assistant donation/footer implementation into Market Intelligence, adapted only to the Market panel selector and footer ID.','Restores SEND MONEY, SEND ITEMS and Made with ❤️ as one native footer.']})
+                  if ident=='mission-rewards' or name in ('mission rewards','missions'):
+                      x['version']='1.0.36'; found['mission']=True
+                      if isinstance(x.get('releases'),list):
+                          x['releases'].insert(0,{'version':'1.0.36','date':'2026-09-17','notes':['Copies the complete working Elimination Assistant donation/footer implementation into Mission Rewards, adapted only to the Mission panel selector and footer ID.','Keeps SEND MONEY, SEND ITEMS and Made with ❤️ in the same footer behavior as Elimination.']})
+                  for v in x.values(): walk(v)
+              elif isinstance(x,list):
+                  for v in x: walk(v)
+          walk(data)
+          if not all(found.values()): raise SystemExit(f'Registry entries missing: {found}')
+          p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n")
+
+          # Docs.
+          docs=[
+              ('greasyfork/Market-Intelligence.md','1.17.36','1.17.37','Elimination footer parity','Copies the complete working Elimination Assistant donation/footer implementation into Market Intelligence, changing only the target panel selector/footer ID. Restores one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.'),
+              ('greasyfork/Mission-Rewards.md','1.0.35','1.0.36','Elimination footer parity','Copies the complete working Elimination Assistant donation/footer implementation into Mission Rewards, changing only the target panel selector/footer ID. Keeps one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.')
+          ]
+          for fn,old,new,title,note in docs:
+              p=Path(fn); d=p.read_text()
+              d=d.replace(f'**v{old}**',f'**v{new}**',1)
+              marker='## Current release note\n'
+              if marker not in d: raise SystemExit(f'{fn}: release note marker missing')
+              d=d.replace(marker,marker+f'\n**v{new}** {note}\n',1)
+              hist='## Release history / Changelog\n'
+              if hist not in d: raise SystemExit(f'{fn}: history marker missing')
+              d=d.replace(hist,hist+f'\n### v{new} — {title}\n- {note}\n',1)
+              p.write_text(d)
+
+          # Hub offline fallback/version sync + Hub changelog release.
+          p=Path('SakaLuX-Script-Hub.user.js'); h=p.read_text()
+          h=h.replace('// @version      1.9.69','// @version      1.9.70',1)
+          h=h.replace("const VERSION = '1.9.69';","const VERSION = '1.9.70';",1)
+          h=h.replace("version: '1.17.36'","version: '1.17.37'")
+          h=h.replace("version:'1.17.36'","version:'1.17.37'")
+          h=h.replace("version: '1.0.35'","version: '1.0.36'")
+          h=h.replace("version:'1.0.35'","version:'1.0.36'")
+          anchor='    const HUB_CHANGELOG = ['
+          entry="\n        {version:'1.9.70',date:'2026-09-17',changes:['Synchronizes Market Intelligence v1.17.37 and Mission Rewards v1.0.36.','Both modules now use the complete working Elimination Assistant donation/footer implementation with their own panel selectors and footer IDs.']},"
+          if anchor not in h: raise SystemExit('Hub changelog anchor missing')
+          h=h.replace(anchor,anchor+entry,1)
+          p.write_text(h)
+
+          p=Path('greasyfork/Script-Hub.md'); d=p.read_text()
+          d=d.replace('**v1.9.69**','**v1.9.70**',1)
+          marker='## Current release note\n'
+          d=d.replace(marker,marker+'\n**v1.9.70** Synchronizes Market Intelligence v1.17.37 and Mission Rewards v1.0.36 after copying the complete working Elimination Assistant donation/footer implementation into both modules.\n',1)
+          hist='## Release history / Changelog\n'
+          if hist in d:
+              d=d.replace(hist,hist+'\n### v1.9.70 — Market + Mission Elimination-footer parity\n- Synchronizes Market v1.17.37 and Mission v1.0.36.\n- Both use the complete working Elimination donation/footer implementation, adapted only to their own panel selector/footer ID.\n',1)
+          d=d.replace('Market Intelligence **v1.17.36**','Market Intelligence **v1.17.37**')
+          d=d.replace('Mission Rewards **v1.0.35**','Mission Rewards **v1.0.36**')
+          p.write_text(d)
+          PY
+
+      - name: Validate copied footer parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Elimination-Assistant.user.js
+          node --check SakaLuX-Market-Intelligence.user.js
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Script-Hub.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q '@version      1.17.37' SakaLuX-Market-Intelligence.user.js
+          grep -q '@version      1.0.36' SakaLuX-Mission-Rewards.user.js
+          grep -q '@version      1.9.70' SakaLuX-Script-Hub.user.js
+          grep -q 'const selector="#sl-mi-panel",id="sakalux-inline-footer-market-intelligence"' SakaLuX-Market-Intelligence.user.js
+          grep -q 'const selector="#sl-mr-settings",id="sakalux-inline-footer-mission-rewards"' SakaLuX-Mission-Rewards.user.js
+          grep -q '💸 SEND MONEY' SakaLuX-Market-Intelligence.user.js
+          grep -q '🎁 SEND ITEMS' SakaLuX-Market-Intelligence.user.js
+          grep -q 'Made with ❤️ by' SakaLuX-Market-Intelligence.user.js
+          grep -q '💸 SEND MONEY' SakaLuX-Mission-Rewards.user.js
+          grep -q '🎁 SEND ITEMS' SakaLuX-Mission-Rewards.user.js
+          grep -q 'Made with ❤️ by' SakaLuX-Mission-Rewards.user.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          elim=Path('SakaLuX-Elimination-Assistant.user.js').read_text()
+          market=Path('SakaLuX-Market-Intelligence.user.js').read_text()
+          mission=Path('SakaLuX-Mission-Rewards.user.js').read_text()
+          pat=re.compile(r'/\* SakaLuX Hub footer v3: native module root only; compact donation controls\. \*/\s*\(\(\)=>\{.*?if\(document\.readyState===\'loading\'\)document\.addEventListener\(\'DOMContentLoaded\',start,\{once:true\}\);else start\(\);\s*\}\)\(\);',re.S)
+          eb=pat.search(elim).group(0)
+          mb=pat.search(market).group(0)
+          rb=pat.search(mission).group(0)
+          def canon(b):
+              b=re.sub(r'const selector=(["\']).*?\1,id=(["\']).*?\2,profile=',"const selector='TARGET',id='TARGETID',profile=",b,count=1)
+              return b
+          if canon(eb)!=canon(mb): raise SystemExit('Market footer differs from Elimination after selector/id normalization')
+          if canon(eb)!=canon(rb): raise SystemExit('Mission footer differs from Elimination after selector/id normalization')
+          print('Exact Elimination footer parity confirmed for Market and Mission.')
+          PY
+
+      - name: Commit release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Market-Intelligence.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/Market-Intelligence.md greasyfork/Mission-Rewards.md greasyfork/Script-Hub.md backups/elimination-footer-copy-market-mission-2026-09-17/
+          git commit -m 'Market v1.17.37 + Mission v1.0.36: copy Elimination footer implementation'
+          git push
