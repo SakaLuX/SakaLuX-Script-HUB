@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.922**
+**v0.9.923**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -34,6 +34,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - `Alt + F` shortcut for the control interface.
 
 ## Current release note
+
+**v0.9.923** fixes TornPDA Master Control height detection. The previous mobile rule depended only on a `max-width:820px` media query, which may not match TornPDA's CSS viewport on phones. The new final override targets coarse-pointer/no-hover devices, forces the Master Control shell to the full usable viewport with 4px side gaps and 36px chat clearance, keeps header/actions/footer fixed, and leaves only the module list scrollable.
 
 **v0.9.922** Fixes Master Control scrolling by bounding the flex content area on desktop and TornPDA; keeps header/toolbar and footer outside the scrolling module list. Renders the 20px SEND MONEY / SEND ITEMS controls and orange Made with ❤️ author line directly inside every panel render, with rounded lower corners. Preserves module switches and scroll position, and removes the separate document-wide footer repair observer.
 
