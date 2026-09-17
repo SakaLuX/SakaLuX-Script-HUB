@@ -1,0 +1,20 @@
+from pathlib import Path
+p=Path('hubtest.user.js')
+s=p.read_text(encoding='utf-8')
+s=s.replace('// @version      1.9.65-test.2','// @version      1.9.65-test.3',1)
+s=s.replace("const VERSION = '1.9.65-test.2';","const VERSION = '1.9.65-test.3';",1)
+
+# Mark event listener readiness and capture openHub errors.
+old="""    document.addEventListener('sakalux-hub-test-open-request', () => {\n        try { openHub(); } catch (error) { console.error('[SakaLuX Hub TEST] direct open failed', error); }\n    });\n"""
+new="""    window.__SLX_HUBTEST_STATE = window.__SLX_HUBTEST_STATE || {version: VERSION, listenerReady:false, eventReceived:false, openCalled:false, openSucceeded:false, openError:null};\n    window.__SLX_HUBTEST_STATE.listenerReady = true;\n    document.addEventListener('sakalux-hub-test-open-request', () => {\n        const st = window.__SLX_HUBTEST_STATE;\n        st.eventReceived = true;\n        st.openCalled = true;\n        try {\n            openHub();\n            st.openSucceeded = true;\n            st.openError = null;\n        } catch (error) {\n            st.openSucceeded = false;\n            st.openError = String(error && (error.stack || error.message) || error);\n            console.error('[SakaLuX Hub TEST] direct open failed', error);\n        }\n    });\n"""
+if old not in s:
+    raise SystemExit('event listener block not found')
+s=s.replace(old,new,1)
+
+old2="""  function openRealHub(){\n    // TEST v2: direct same-script bridge. No dependency on Torn launchers or page globals.\n    document.dispatchEvent(new CustomEvent('sakalux-hub-test-open-request', {detail:{source:'forced-test-launcher'}}));\n  }\n"""
+new2="""  function showDiag(){\n    const prev=document.getElementById('sakalux-hubtest-diagnostic'); if(prev) prev.remove();\n    const st=window.__SLX_HUBTEST_STATE || {};\n    const overlays=[...document.querySelectorAll('[id*=hub][id*=overlay], .slh-overlay')].map(el=>{\n      const cs=getComputedStyle(el), r=el.getBoundingClientRect();\n      return {id:el.id||'', cls:el.className||'', display:cs.display, visibility:cs.visibility, opacity:cs.opacity, zIndex:cs.zIndex, width:r.width, height:r.height, top:r.top, left:r.left};\n    });\n    const box=document.createElement('div'); box.id='sakalux-hubtest-diagnostic';\n    box.style.cssText='position:fixed!important;inset:72px 8px 86px!important;z-index:2147483647!important;background:#07111c!important;color:#eef6ff!important;border:2px solid #ff9f32!important;border-radius:16px!important;padding:14px!important;overflow:auto!important;font:700 13px/1.45 monospace!important;white-space:pre-wrap!important;';\n    const api=window.SakaLuXScriptHub;\n    box.textContent='SakaLuX HUB TEST DIAGNOSTIC v1.9.65-test.3\\n\\n'+JSON.stringify({\n      state:st,\n      apiExists:!!api,\n      apiVersion:api?.version||null,\n      apiOpenType:typeof api?.open,\n      overlays,\n      url:location.href,\n      readyState:document.readyState,\n      innerWidth:innerWidth, innerHeight:innerHeight\n    },null,2);\n    const close=document.createElement('button'); close.textContent='CLOSE'; close.style.cssText='position:sticky;top:0;float:right;background:#17304b;color:#fff;border:1px solid #55708c;border-radius:8px;padding:8px 12px;margin:0 0 8px 8px;'; close.onclick=()=>box.remove(); box.prepend(close);\n    (document.body||document.documentElement).appendChild(box);\n  }\n\n  function openRealHub(){\n    const st=window.__SLX_HUBTEST_STATE || (window.__SLX_HUBTEST_STATE={});\n    st.buttonClicked=true; st.clickAt=Date.now();\n    document.dispatchEvent(new CustomEvent('sakalux-hub-test-open-request', {detail:{source:'forced-test-launcher'}}));\n    setTimeout(()=>{\n      const overlay=document.querySelector('[id*=hub][id*=overlay], .slh-overlay');\n      if(!overlay) showDiag();\n    },350);\n  }\n"""
+if old2 not in s:
+    raise SystemExit('openRealHub block not found')
+s=s.replace(old2,new2,1)
+p.write_text(s,encoding='utf-8')
+print('patched hubtest runtime diagnostic v3')
