@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.64** Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW details. Stocks uses its main GitHub source for installation and update checks.
+**v1.9.64** Restores Hub launch controls when Torn replaces native launcher nodes and adds an explicit Stock Manager POWER action. Stocks remains on Greasy Fork for public updates.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -34,7 +34,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 📈 SakaLuX Market Intelligence **v1.17.35**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.42**
 - 🏢 SakaLuX Company Intelligence **v1.8.31**
-- 📊 SakaLuX Stock Manager & Advisor **v0.7.7**
+- 📊 SakaLuX Stock Manager & Advisor **v0.7.8**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -55,6 +55,15 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history / Changelog
+
+### v1.9.64 — Launcher recovery
+- Recreates the Hub topbar/mobile launcher when Torn replaces the native navigation DOM.
+- Keeps the floating Hub button as a fallback when native launchers are unavailable.
+- Adds an explicit Stock Manager POWER action in the Hub registry/fallback.
+
+### v1.9.63 — Stocks Greasy Fork update channel
+- Moves Stock Manager & Advisor v0.7.8 install/update checks to Greasy Fork script 596192.
+- GitHub remains the canonical source repository.
 
 ### v1.9.62 — Stocks promotion
 - Adds Stock Manager & Advisor v0.7.7 to the managed modules, offline registry and INFO/NEW release details.
