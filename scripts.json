@@ -283,14 +283,14 @@
       "name": "Company Intelligence",
       "icon": "🏢",
       "category": "Company",
-      "version": "1.8.23",
+      "version": "1.8.24",
       "description": "Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.",
       "info": "Company Intelligence provides separate Employee and Director views for company analysis. Employee tools cover work stats, position suitability, personal progress, trains, offers and advice. Director tools cover star and growth direction, staff effectiveness and inactivity flags, position optimization, training commitments, train contracts, payroll and balance views, stock intelligence, benchmarks, timeline/history and advisory insights. It uses Torn company/user API data where permitted, supports the shared Script Hub API key, stores planning data locally, and never performs automated company actions.",
       "release": {
-        "version": "1.8.23",
+        "version": "1.8.24",
         "date": "2026-09-17",
         "notes": [
-          "Uses full-screen mobile panels with no blur and lower rendering overhead for faster TornPDA scrolling and taps."
+          "Restricts whole-sheet and footer repair to #ci-root, preventing Hub donation buttons from being overwritten when Company Intelligence appears in the module list."
         ]
       },
       "greasyForkId": "595873",
