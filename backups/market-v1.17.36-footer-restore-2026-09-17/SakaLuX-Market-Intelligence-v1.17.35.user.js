@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.36
+// @version      1.17.35
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -75,7 +75,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.36'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.35'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -245,7 +245,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.17.36';
+    const VERSION = '1.17.35';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -2150,7 +2150,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  #${id}#${id} .slh-author{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}
  `;(document.head||document.documentElement).appendChild(st);
  function ensure(){
-  const panel=document.querySelector(selector);if(!panel)return;
+  const panel=document.querySelector(selector);if(!panel||panel.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return;
   if(panel.querySelector('#'+id))return;
   const f=document.createElement('div');f.id=id;
   f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+profile+'">SakaLuX [2380374]</a></div>';

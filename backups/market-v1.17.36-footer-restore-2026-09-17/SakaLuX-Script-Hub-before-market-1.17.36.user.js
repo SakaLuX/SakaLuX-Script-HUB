@@ -584,7 +584,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.36',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.35',
                 description: 'Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
