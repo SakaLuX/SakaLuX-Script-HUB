@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.36
+// @version      1.8.37
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -76,7 +76,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.36'});
+  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.37'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -1115,4 +1115,35 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
  #ci-root .ci-head>.ci-icon{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;max-width:38px!important;max-height:38px!important}
 }
 `;(document.head||document.documentElement).appendChild(st);
+})();
+
+
+/* SAKALUX_COMPANY_PRO_HEADER_V1837 */
+(()=>{
+  const id='sakalux-company-pro-header-v1837';
+  document.getElementById(id)?.remove();
+  const st=document.createElement('style');
+  st.id=id;
+  st.textContent=`
+@media(max-width:720px){
+  #ci-root .ci-head{display:grid!important;grid-template-columns:minmax(0,1fr) 42px 42px 42px!important;grid-template-rows:auto auto!important;column-gap:6px!important;row-gap:8px!important;align-items:center!important;width:100%!important;box-sizing:border-box!important;padding:9px 10px 8px!important;min-height:0!important;overflow:hidden!important}
+  #ci-root .ci-brand{grid-column:1!important;grid-row:1!important;min-width:0!important;width:auto!important;overflow:hidden!important;padding-right:4px!important}
+  #ci-root .ci-brand b{display:block!important;width:100%!important;margin:0!important;font-size:15px!important;line-height:1.12!important;font-weight:900!important;white-space:normal!important;overflow-wrap:normal!important;word-break:normal!important;color:#f8fafc!important}
+  #ci-root .ci-brand small{display:block!important;width:100%!important;margin-top:4px!important;font-size:9.5px!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:#8fa1b5!important}
+  #ci-root .ci-head>.ci-icon{position:static!important;inset:auto!important;width:42px!important;min-width:42px!important;max-width:42px!important;height:42px!important;min-height:42px!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;justify-self:end!important;align-self:center!important;border-radius:12px!important;box-sizing:border-box!important;transform:none!important}
+  #ci-root .ci-head>.ci-icon[data-act="refresh"]{grid-column:2!important;grid-row:1!important}
+  #ci-root .ci-head>.ci-icon[data-act="settings"]{grid-column:3!important;grid-row:1!important}
+  #ci-root .ci-head>.ci-icon[data-act="close"]{grid-column:4!important;grid-row:1!important}
+  #ci-root .ci-mode{grid-column:1/-1!important;grid-row:2!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;border-radius:12px!important}
+  #ci-root .ci-mode button{width:100%!important;min-width:0!important;max-width:none!important;margin:0!important;padding:10px 8px!important;box-sizing:border-box!important;font-size:11px!important;line-height:1!important;white-space:nowrap!important;border-radius:0!important}
+  #ci-root .ci-tabs{top:108px!important}
+}
+@media(max-width:430px){
+  #ci-root .ci-head{grid-template-columns:minmax(0,1fr) 40px 40px 40px!important;column-gap:5px!important;padding-left:8px!important;padding-right:8px!important}
+  #ci-root .ci-head>.ci-icon{width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;min-height:40px!important}
+  #ci-root .ci-brand b{font-size:14px!important}
+  #ci-root .ci-brand small{font-size:9px!important}
+}
+`;
+  (document.head||document.documentElement).appendChild(st);
 })();
