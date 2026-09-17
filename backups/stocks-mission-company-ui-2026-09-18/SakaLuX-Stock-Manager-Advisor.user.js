@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.13
+// @version      0.7.14
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -53,7 +53,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.13',
+    version: '0.7.14',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -1249,7 +1249,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
     $('#slx-inline-toggle',card).onclick=()=>{const closed=card.dataset.collapsed!=='1';card.dataset.collapsed=closed?'1':'0';set(K.inlineCollapsed,closed?'1':'0');$('#slx-inline-toggle',card).textContent=closed?'＋':'−';};
     $('#slx-inline-full',card).onclick=openPanel;
-    $('#slx-inline-api',card).onclick=()=>openPanelAt('#slx-stock-api');
+    $('#slx-inline-api',card).onclick=()=>{openPanel();setTimeout(openStockApiSheet,25);};
     $('#slx-inline-refresh',card).onclick=async()=>{try{inlineStatus('Refreshing…','info');if(bool(K.inlineApiMode,true)&&get(K.api).trim())await syncAllApi();else{scanStocks();refreshInlinePanel();}inlineStatus('Refreshed.','ok');}catch(e){inlineStatus(e.message,'bad');}};
     $$('[data-slx-inline-tab]',card).forEach(b=>b.onclick=()=>toggleInlineWorkspace(b.dataset.slxInlineTab));
     $('#slx-inline-target',card).onchange=e=>{set(K.target,e.target.value);refreshTargetSelect();refreshInlinePanel();};
@@ -1627,15 +1627,80 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     document.head.appendChild(st);
   }
 
-  function openPanel() { style(); premiumStyle(); const p=panel(); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Transaction History',renderTransactionHistory); safeRender('Action Log',renderActionLog); }
 
-  function managerLauncher() {
-    if(hubPresent()){ $('#slx-stock-open')?.remove(); return; }
-    if(!bool(K.enabled,true)||$('#slx-stock-open')) return;
-    const b=document.createElement('button'); b.id='slx-stock-open'; b.type='button'; b.textContent='📊 Stock Manager';
-    b.style.cssText='position:fixed;right:10px;bottom:44px;z-index:2147482499;border:1px solid #3c6c96;border-radius:10px;padding:8px 10px;background:#102335;color:#dceeff;font:800 11px Arial;';
-    b.onclick=()=>{try{openPanel();}catch(e){console.error(`[${APP.name}] open panel failed`,e);const p=S.panel;if(p?.isConnected)p.dataset.open='1';}}; document.body.appendChild(b);
+  /* SAKALUX_STOCKS_PANEL_CHROME_V0714 */
+  function normalizeStockPanelChrome() {
+    const p=S.panel||$('#slx-stock-panel'); if(!p) return;
+    p.style.setProperty('z-index','2147483646','important');
+    const card=p.querySelector('.card');
+    const head=p.querySelector('.head');
+    if(head && !head.querySelector('#slx-stock-api-trigger')) {
+      const b=document.createElement('button');
+      b.id='slx-stock-api-trigger'; b.type='button'; b.title='API Access'; b.textContent='🔑';
+      b.className='slx-stock-api-trigger'; b.onclick=openStockApiSheet;
+      const close=head.querySelector('.close, [data-close], button:last-child');
+      if(close) head.insertBefore(b,close); else head.appendChild(b);
+    }
+    const oldInput=p.querySelector('.section #slx-stock-api');
+    const oldSection=oldInput?.closest('.section');
+    if(oldSection) oldSection.remove();
+    if(!document.getElementById('slx-stock-api-sheet-style')) {
+      const st=document.createElement('style'); st.id='slx-stock-api-sheet-style';
+      st.textContent=`
+#slx-stock-panel{z-index:2147483646!important}
+#slx-stock-panel .slx-stock-api-trigger{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;padding:0!important;border:1px solid #78621b!important;background:#29240f!important;color:#f5d85f!important;font-size:17px!important}
+#slx-stock-api-sheet{position:absolute!important;inset:0!important;z-index:20!important;background:#0b1118!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+#slx-stock-api-sheet .slx-api-sheet-head{display:flex!important;align-items:center!important;gap:8px!important;padding:12px!important;border-bottom:1px solid #34465b!important;background:linear-gradient(155deg,#18212d,#101720 72%)!important}
+#slx-stock-api-sheet .slx-api-sheet-head>div{flex:1!important}.slx-api-sheet-title{font-size:16px!important;font-weight:900!important}.slx-api-sheet-sub{font-size:9px!important;color:#93a4b7!important;margin-top:2px!important}
+#slx-stock-api-sheet .slx-api-sheet-close{width:36px!important;height:36px!important;padding:0!important;font-size:20px!important}
+#slx-stock-api-sheet .slx-api-sheet-body{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;padding:12px!important;display:grid!important;gap:9px!important}
+#slx-stock-api-sheet .slx-api-box{padding:10px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#111a24!important;font-size:11px!important;line-height:1.45!important}
+#slx-stock-api-sheet input{width:100%!important;box-sizing:border-box!important}.slx-api-sheet-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
+#slx-stock-api-sheet .slx-api-primary{background:#194f86!important;border-color:#2e77b9!important}.slx-api-sheet-result{font-size:10px!important;color:#93a4b7!important;min-height:18px!important}
+`;
+      (document.head||document.documentElement).appendChild(st);
+    }
+    if(card) card.style.position='relative';
   }
+
+  function openStockApiSheet() {
+    normalizeStockPanelChrome();
+    const p=S.panel||$('#slx-stock-panel'); const card=p?.querySelector('.card'); if(!card) return;
+    card.querySelector('#slx-stock-api-sheet')?.remove();
+    const sheet=document.createElement('div'); sheet.id='slx-stock-api-sheet';
+    const local=get(K.api,'');
+    sheet.innerHTML=`<div class="slx-api-sheet-head"><div><div class="slx-api-sheet-title">🔑 Stock Manager API Access</div><div class="slx-api-sheet-sub">v${APP.version}</div></div><button type="button" class="slx-api-sheet-close">×</button></div>
+      <div class="slx-api-sheet-body">
+        <div class="slx-api-box"><b>Exact read-only permissions required</b><br>User: Money, Stocks<br>Torn: Stocks</div>
+        <button type="button" class="slx-api-primary" id="slx-stock-api-create">🔑 CREATE REQUIRED API KEY</button>
+        <div class="slx-api-box"><div id="slx-stock-api-source">Active source: ${local?'Local standalone key':'No key configured'}</div><p>Use the key only for Stock Manager read-only data and portfolio calculations.</p><label>Replace / paste standalone Torn API key</label><input id="slx-stock-api-sheet-input" type="password" autocomplete="off" placeholder="Paste Torn API key here" value="${esc(local)}"></div>
+        <div class="slx-api-sheet-actions"><button type="button" class="slx-api-primary" id="slx-stock-api-save">SAVE & TEST</button><button type="button" id="slx-stock-api-check">CHECK ACCESS</button></div>
+        <button type="button" id="slx-stock-api-clear">CLEAR LOCAL KEY</button>
+        <div class="slx-api-sheet-result" id="slx-stock-api-result" role="status" aria-live="polite"></div>
+      </div>`;
+    card.appendChild(sheet);
+    const result=sheet.querySelector('#slx-stock-api-result'), input=sheet.querySelector('#slx-stock-api-sheet-input');
+    sheet.querySelector('.slx-api-sheet-close').onclick=()=>sheet.remove();
+    sheet.querySelector('#slx-stock-api-create').onclick=()=>{location.href=REQUIRED_API_KEY_URL;};
+    const run=async save=>{
+      const typed=String(input.value||'').trim();
+      if(save&&!typed){result.textContent='Paste a Torn API key first.';input.focus();return;}
+      if(save)set(K.api,typed);
+      const key=typed||String(get(K.api,'')).trim();
+      if(!key){result.textContent='No API key configured.';return;}
+      const buttons=[sheet.querySelector('#slx-stock-api-save'),sheet.querySelector('#slx-stock-api-check')];buttons.forEach(b=>b.disabled=true);result.textContent='Checking access…';
+      try{await apiSync();result.textContent=(save?'Key saved. ':'')+'Money: Access OK · Stocks: Access OK';refreshInlinePanel();if(S.panel?.dataset.open==='1'){renderPortfolio();renderAdvisor();}}
+      catch(e){result.textContent='API check failed: '+String(e?.message||e);}
+      finally{buttons.forEach(b=>b.disabled=false);}
+    };
+    sheet.querySelector('#slx-stock-api-save').onclick=()=>run(true);
+    sheet.querySelector('#slx-stock-api-check').onclick=()=>run(false);
+    sheet.querySelector('#slx-stock-api-clear').onclick=()=>{del(K.api);input.value='';result.textContent='Local API key cleared.';sheet.querySelector('#slx-stock-api-source').textContent='Active source: No key configured';refreshInlinePanel();};
+  }
+
+  function openPanel() { style(); premiumStyle(); const p=panel(); normalizeStockPanelChrome(); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Transaction History',renderTransactionHistory); safeRender('Action Log',renderActionLog); }
+
+  function managerLauncher() { $('#slx-stock-open')?.remove(); }
 
   function restoreCache() { try { S.portfolio=JSON.parse(get(K.tx,'{}'))||{}; } catch {} }
 
@@ -1754,4 +1819,4 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 })();
 
 /* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 */
-(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.7.13'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
+(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.7.14'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
