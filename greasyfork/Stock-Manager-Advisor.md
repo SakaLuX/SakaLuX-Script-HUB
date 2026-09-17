@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.7.12**
+**v0.7.17**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -357,3 +357,10 @@ Copyright © 2026 SakaLuX [2380374].
 
 ## Current release note — v0.7.16
 - Rebuilds API Access with compact Elimination-style geometry: aligned header controls, equal two-column actions, full-width create/clear controls and clean mobile scrolling.
+
+### v0.7.17 — Shared Bazaar standalone bootstrap
+- Copies the current Bazaar Standalone Dock bootstrap into Stock Manager.
+- Uses the same common dock/launcher/style/registration IDs as Bazaar and the other SakaLuX modules.
+- Stocks registers only as `stock-manager-advisor`; it does not create a separate Stock standalone menu.
+- The first loaded SakaLuX module creates the shared dock and all later modules attach to it.
+- Keeps the existing Stock module bridge as the Stocks row open target.
