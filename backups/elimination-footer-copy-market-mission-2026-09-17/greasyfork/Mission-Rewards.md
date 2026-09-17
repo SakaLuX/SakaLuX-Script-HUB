@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.36**
+**v1.0.35**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -16,8 +16,6 @@
 - Keeps Mission Shop-specific scanning inactive outside Missions.
 
 ## Current release note
-
-**v1.0.36** Copies the complete working Elimination Assistant donation/footer implementation into Mission Rewards, changing only the target panel selector/footer ID. Keeps one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.
 
 **v1.0.35** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs. Ignores Mission/Hub settings and self-generated reward decorations in the reward observer to avoid redundant scans.
 
@@ -36,9 +34,6 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.0.36 — Elimination footer parity
-- Copies the complete working Elimination Assistant donation/footer implementation into Mission Rewards, changing only the target panel selector/footer ID. Keeps one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.
 
 ### v1.2.0 — Experimental Mission Hints integration (ROLLED BACK)
 - Experimented with locally integrated Duke mission Task + Hint guidance.

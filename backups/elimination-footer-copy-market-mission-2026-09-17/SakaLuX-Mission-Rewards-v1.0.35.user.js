@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.36
+// @version      1.0.35
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -73,7 +73,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.36'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.35'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -243,7 +243,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.0.36';
+    const VERSION = '1.0.35';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1080,29 +1080,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 })();
 
 
-
-
-/* Compact donation controls and Elimination mobile panel geometry 1.0.32 */
-(()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sl-mr-settings-overlay#sl-mr-settings-overlay#sl-mr-settings-overlay{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;padding:0!important;background:transparent!important;overflow:hidden!important;border-radius:14px!important;align-items:stretch!important;justify-content:stretch!important;}\n#sl-mr-settings-overlay#sl-mr-settings-overlay#sl-mr-settings-overlay #sl-mr-settings#sl-mr-settings{position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;align-self:stretch!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;max-width:100%!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border:1px solid #3c4652!important;border-radius:14px!important;}\n#sl-mr-settings-overlay#sl-mr-settings-overlay#sl-mr-settings-overlay #sl-mr-settings#sl-mr-settings{overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
-
-/* Mission Rewards v1.0.33: full-width anchored footer and dedicated API sheet. */
-(()=>{const s=document.createElement('style');s.textContent=`
-#sl-mr-settings#sl-mr-settings#sl-mr-settings{display:flex!important;flex-direction:column!important;padding:0!important;overflow:hidden!important;position:relative}
-#sl-mr-settings#sl-mr-settings>.sl-mr-settings-content{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;padding:14px!important;overscroll-behavior:contain!important}
-#sl-mr-settings#sl-mr-settings>#sakalux-inline-footer-mission-rewards{position:relative!important;width:100%!important;flex:0 0 50px!important;border-radius:10px 10px 14px 14px!important}
-#sl-mr-settings .sl-mr-head-actions{display:flex;gap:7px;flex:0 0 auto}
-#sl-mr-settings #sl-mr-api-open,#sl-mr-settings #sl-mr-api-close{width:36px;height:36px;border:1px solid #526174;border-radius:9px;background:#272d35;color:#facc15;font-size:18px;flex-shrink:0}
-#sl-mr-settings#sl-mr-settings>#sl-mr-api-sheet{
- position:absolute!important;inset:0 0 50px!important;z-index:20!important;background:#101318!important;
- padding:14px!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;
-}
-#sl-mr-api-sheet *,#sl-mr-api-sheet *::before,#sl-mr-api-sheet *::after{box-sizing:border-box!important}
-#sl-mr-api-sheet input{width:100%!important;min-width:0!important;max-width:100%!important;height:40px!important;margin:7px 0!important;padding:9px!important;border:1px solid #526174!important;border-radius:8px!important;background:#0d141d!important;color:#fff!important}
-#sl-mr-api-sheet .sl-mr-api-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-#sl-mr-api-sheet button{min-width:0;white-space:normal}
-#sl-mr-api-sheet #sl-mr-api-result{margin-top:10px;line-height:1.5;overflow-wrap:anywhere}
-`;(document.head||document.documentElement).appendChild(s)})();
-
 /* SakaLuX Hub footer v3: native module root only; compact donation controls. */
 (()=>{
  const selector="#sl-mr-settings",id="sakalux-inline-footer-mission-rewards",profile='https://www.torn.com/profiles.php?XID=2380374';
@@ -1133,3 +1110,24 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  }).observe(document.body,{childList:true,subtree:true});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
+
+/* Compact donation controls and Elimination mobile panel geometry 1.0.32 */
+(()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sl-mr-settings-overlay#sl-mr-settings-overlay#sl-mr-settings-overlay{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;padding:0!important;background:transparent!important;overflow:hidden!important;border-radius:14px!important;align-items:stretch!important;justify-content:stretch!important;}\n#sl-mr-settings-overlay#sl-mr-settings-overlay#sl-mr-settings-overlay #sl-mr-settings#sl-mr-settings{position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;align-self:stretch!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;max-width:100%!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border:1px solid #3c4652!important;border-radius:14px!important;}\n#sl-mr-settings-overlay#sl-mr-settings-overlay#sl-mr-settings-overlay #sl-mr-settings#sl-mr-settings{overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
+
+/* Mission Rewards v1.0.33: full-width anchored footer and dedicated API sheet. */
+(()=>{const s=document.createElement('style');s.textContent=`
+#sl-mr-settings#sl-mr-settings#sl-mr-settings{display:flex!important;flex-direction:column!important;padding:0!important;overflow:hidden!important;position:relative}
+#sl-mr-settings#sl-mr-settings>.sl-mr-settings-content{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;padding:14px!important;overscroll-behavior:contain!important}
+#sl-mr-settings#sl-mr-settings>#sakalux-inline-footer-mission-rewards{position:relative!important;width:100%!important;flex:0 0 50px!important;border-radius:10px 10px 14px 14px!important}
+#sl-mr-settings .sl-mr-head-actions{display:flex;gap:7px;flex:0 0 auto}
+#sl-mr-settings #sl-mr-api-open,#sl-mr-settings #sl-mr-api-close{width:36px;height:36px;border:1px solid #526174;border-radius:9px;background:#272d35;color:#facc15;font-size:18px;flex-shrink:0}
+#sl-mr-settings#sl-mr-settings>#sl-mr-api-sheet{
+ position:absolute!important;inset:0 0 50px!important;z-index:20!important;background:#101318!important;
+ padding:14px!important;box-sizing:border-box!important;overflow-y:auto!important;overflow-x:hidden!important;
+}
+#sl-mr-api-sheet *,#sl-mr-api-sheet *::before,#sl-mr-api-sheet *::after{box-sizing:border-box!important}
+#sl-mr-api-sheet input{width:100%!important;min-width:0!important;max-width:100%!important;height:40px!important;margin:7px 0!important;padding:9px!important;border:1px solid #526174!important;border-radius:8px!important;background:#0d141d!important;color:#fff!important}
+#sl-mr-api-sheet .sl-mr-api-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#sl-mr-api-sheet button{min-width:0;white-space:normal}
+#sl-mr-api-sheet #sl-mr-api-result{margin-top:10px;line-height:1.5;overflow-wrap:anywhere}
+`;(document.head||document.documentElement).appendChild(s)})();
