@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.32**
+**v1.0.33**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -19,7 +19,8 @@
 
 
 
-**v1.0.32** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
+**v1.0.33** Pins the 50px donation/author footer across the full panel width while settings scroll independently. Adds dedicated API Access with required Items/Ammo permissions, local-key save/test/clear and active Hub/TornPDA key source.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -36,6 +37,10 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history
+
+### v1.0.33 — Full-width footer and dedicated API Access
+- Pins the 50px donation/author footer across the full panel width while settings scroll independently. Adds dedicated API Access with required Items/Ammo permissions, local-key save/test/clear and active Hub/TornPDA key source.
+
 
 ### v1.0.32 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.

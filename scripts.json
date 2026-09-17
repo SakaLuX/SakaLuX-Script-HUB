@@ -126,15 +126,15 @@
         }
       ],
       "release": {
-        "version": "1.0.32",
+        "version": "1.0.33",
         "date": "2026-09-17",
         "notes": [
-          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
+          "Pins the 50px donation/author footer across the full panel width while settings scroll independently. Adds dedicated API Access with required Items/Ammo permissions, local-key save/test/clear and active Hub/TornPDA key source."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.32"
+      "version": "1.0.33"
     },
     {
       "active": true,
