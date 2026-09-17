@@ -18,6 +18,15 @@ for old,new in versions.items():
     block=block.replace("version: '"+old+"'", "version: '"+new+"'")
 p.write_text(head+block+tail,encoding='utf-8')
 
+# Bazaar uses a dedicated runtime constant, so keep metadata/bridge/runtime aligned.
+bp=Path('SakaLuX-Bazaar-Thanker-PDA.user.js')
+if bp.exists():
+    b=bp.read_text(encoding='utf-8')
+    b=b.replace("const BAZAAR_VERSION='5.3.28';", "const BAZAAR_VERSION='5.3.29';")
+    b=b.replace("{version:'5.3.25'}", "{version:'5.3.29'}")
+    b=b.replace('Version 5.3.5 · buyer messages and bazaar analytics', 'Version 5.3.29 · buyer messages and bazaar analytics')
+    bp.write_text(b,encoding='utf-8')
+
 md=Path('greasyfork/Script-Hub.md')
 if md.exists():
     t=md.read_text(encoding='utf-8')
