@@ -1,6 +1,6 @@
 # 📊 SakaLuX Stock Manager & Advisor
 
-> Main SakaLuX module, registered in Script Hub and the standalone dock. Distributed from GitHub.
+> Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
 **v0.7.8**
@@ -23,10 +23,10 @@
 
 ## Current release note
 
-**v0.7.8** Promotes Stock Manager & Advisor from experimental to the main script directory and registers it in Script Hub and the standalone dock. Adds native OPEN, REFRESH, health and persistent ON/OFF controls; disabling removes launchers/inline tools, disconnects observers and blocks new orders. Preserves existing API settings, portfolio caches, Dry Run, Benefit Lock, confirmations and trading behavior; filters self-generated SPA mutations.
+**v0.7.8** Moves public installation and automatic updates to Greasy Fork script 596192 while keeping GitHub as the canonical source repository. Hub integration, ON/OFF control and existing trading protections are preserved.
 
 ## Installation and Hub integration
-- Install the main `SakaLuX-Stock-Manager-Advisor.user.js` from GitHub. Use one installed copy; replace the old experimental copy with this version.
+- Install/update the public release through Greasy Fork script 596192. GitHub remains the canonical source repository.
 - Namespace and existing local-storage keys are retained, preserving settings, API key and cached data.
 - Hub provides OPEN, REFRESH, ON/OFF, INFO and NEW. The standalone dock can open the same native panel.
 - The ordinary Stock Manager floating launcher is hidden while Hub is present; the explicit PANIC action remains available while Stocks is enabled.
@@ -51,6 +51,12 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Hub integration is available from v0.7.7.
 
 ## Changelog
+
+### v0.7.8 — Greasy Fork update channel
+
+- Moves public installs and automatic updates to Greasy Fork script 596192.
+- Keeps GitHub as the canonical source repository.
+- Preserves Script Hub integration, ON/OFF controls, Dry Run, Benefit Lock and existing trading safeguards.
 
 ### v0.7.7 — Main module promotion and Hub integration
 
