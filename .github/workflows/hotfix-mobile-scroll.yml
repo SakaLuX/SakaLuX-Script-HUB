@@ -1,0 +1,152 @@
+name: Hotfix mobile sheet scroll
+
+on:
+  push:
+    paths:
+      - '.github/workflows/hotfix-mobile-scroll.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch SakaLuX mobile scroll contract
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, json, shutil
+
+          root = Path('.')
+          backup = root / 'backups' / 'ui-scroll-hotfix-2026-09-17'
+          backup.mkdir(parents=True, exist_ok=True)
+
+          versions = {
+              'SakaLuX-Script-Hub.user.js': ('1.9.48','1.9.49'),
+              'SakaLuX-Enhancer-Guard.user.js': ('1.3.37','1.3.38'),
+              'SakaLuX-Bazaar-Thanker-PDA.user.js': ('5.3.29','5.3.30'),
+              'SakaLuX-Mission-Rewards.user.js': ('1.0.24','1.0.25'),
+              'SakaLuX-Market-Intelligence.user.js': ('1.17.25','1.17.26'),
+              'SakaLuX-Elimination-Assistant.user.js': ('1.3.35','1.3.36'),
+              'SakaLuX-Company-Intelligence-v1.0.0.user.js': ('1.8.21','1.8.22'),
+              'SakaLuX-Chat-Intelligence.user.js': ('1.2.11','1.2.12'),
+              'SakaLuX-Account-Auditor.user.js': ('1.3.6','1.3.7'),
+              'SakaLuX-Suite.user.js': ('0.9.914','0.9.915'),
+          }
+
+          fullsheet_old = '[data-slx-fullsheet-v2=\\"1\\"]{position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}'
+          fullsheet_new = '[data-slx-fullsheet-v2=\\"1\\"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}'
+
+          def bump_runtime(text, old, new):
+              text = re.sub(r'(^// @version\\s+)' + re.escape(old) + r'(\\s*$)', rf'\\g<1>{new}\\2', text, count=1, flags=re.M)
+              pats = [
+                  (r"(const\\s+VERSION\\s*=\\s*['\\\"])"+re.escape(old)+r"(['\\\"])", rf"\\g<1>{new}\\2"),
+                  (r"(const\\s+V\\s*=\\s*['\\\"])"+re.escape(old)+r"(['\\\"])", rf"\\g<1>{new}\\2"),
+                  (r"(VERSION\\s*:\\s*['\\\"])"+re.escape(old)+r"(['\\\"])", rf"\\g<1>{new}\\2"),
+                  (r"(version\\s*:\\s*['\\\"])"+re.escape(old)+r"(['\\\"])", rf"\\g<1>{new}\\2"),
+              ]
+              for pat, rep in pats:
+                  text = re.sub(pat, rep, text, count=1)
+              return text
+
+          for fn,(old,new) in versions.items():
+              p=root/fn
+              if not p.exists():
+                  continue
+              shutil.copy2(p, backup/fn)
+              text=p.read_text(encoding='utf-8')
+              text=bump_runtime(text,old,new)
+              text=text.replace(fullsheet_old,fullsheet_new)
+
+              if fn=='SakaLuX-Script-Hub.user.js':
+                  text=text.replace(
+                      "{ version: '1.9.48', date: '2026-09-17', changes: ['Makes Hub a true top-to-bottom mobile sheet with translucent blur.'",
+                      "{ version: '1.9.49', date: '2026-09-17', changes: ['Fixes TornPDA scrolling by sizing Hub to its actual host viewport instead of forcing physical 100dvh.','Makes the whole Hub sheet a reliable pan-y scroll surface and keeps footer/actions reachable above TornPDA navigation.','Changes the shared mobile surface contract from physical fullscreen to container-full-height while preserving blur.'] },\\n        { version: '1.9.48', date: '2026-09-17', changes: ['Makes Hub a true top-to-bottom mobile sheet with translucent blur.'",
+                      1)
+                  oldhub="#sakalux-hub-panel{inset:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important;margin:0!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important}"
+                  newhub="#sakalux-hub-panel{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;border-radius:0!important;margin:0!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}#sakalux-hub-panel>.slh-list,#sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{overflow:visible!important;flex:0 0 auto!important;min-height:auto!important}#sakalux-hub-panel>.slh-bottom,#sakalux-hub-panel>.slh-footer{flex:0 0 auto!important}"
+                  text=text.replace(oldhub,newhub)
+                  text=text.replace("hub.dataset.slxFullsheetV2='1';","hub.removeAttribute('data-slx-fullsheet-v2');",1)
+
+              if fn=='SakaLuX-Company-Intelligence-v1.0.0.user.js':
+                  extra = r'''
+
+/* SakaLuX Company whole-sheet scroll hotfix v1.8.22 */
+(()=>{if(document.getElementById('slx-company-scroll-hotfix-1822'))return;const s=document.createElement('style');s.id='slx-company-scroll-hotfix-1822';s.textContent=`@media(max-width:820px){
+#ci-root{overflow:hidden!important;align-items:stretch!important}
+#ci-root .ci-shell{width:100%!important;max-width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important}
+#ci-root .ci-body{overflow:visible!important;flex:0 0 auto!important;min-height:auto!important}
+#ci-root .ci-footer,#ci-root .ci-shell>.sakalux-stable-module-footer{position:relative!important;bottom:auto!important;width:100%!important;box-sizing:border-box!important;text-align:center!important;color:#f59e0b!important;font-weight:800!important;background:rgba(9,15,22,.96)!important}
+#ci-root .ci-footer a,#ci-root .ci-shell>.sakalux-stable-module-footer a{color:#f59e0b!important;font-weight:900!important}
+}`;(document.head||document.documentElement).appendChild(s)})();
+'''
+                  if 'slx-company-scroll-hotfix-1822' not in text:
+                      text += extra
+
+              p.write_text(text,encoding='utf-8')
+
+          # Registry versions + release notes
+          rp=root/'scripts.json'
+          shutil.copy2(rp, backup/'scripts.json')
+          data=json.loads(rp.read_text(encoding='utf-8'))
+          managed={
+              'enhancer':('1.3.38',['Uses container-height mobile sheets instead of forcing physical 100dvh.','Preserves blur while restoring native TornPDA vertical scrolling.']),
+              'bazaar':('5.3.30',['Uses container-height mobile sheets instead of forcing physical 100dvh.','Preserves blur while restoring native TornPDA vertical scrolling.']),
+              'mission-rewards':('1.0.25',['Uses container-height mobile sheets instead of forcing physical 100dvh.','Preserves blur while restoring native TornPDA vertical scrolling.']),
+              'market-intelligence':('1.17.26',['Uses container-height mobile sheets instead of forcing physical 100dvh.','Preserves blur while restoring native TornPDA vertical scrolling.']),
+              'elimination-assistant':('1.3.36',['Uses container-height mobile sheets instead of forcing physical 100dvh.','Preserves blur while restoring native TornPDA vertical scrolling.']),
+              'company-intelligence':('1.8.22',['Whole Company sheet now scrolls from any vertical drag area.','Uses the available TornPDA host height instead of physical 100dvh.','Keeps the orange SakaLuX author footer reachable at the bottom.'])
+          }
+          for item in data.get('scripts',[]):
+              if item.get('id') in managed:
+                  v,notes=managed[item['id']]
+                  item['version']=v
+                  item['release']={'version':v,'date':'2026-09-17','notes':notes}
+          rp.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+
+          # Documentation current-version synchronization.
+          docs={
+              'greasyfork/Script-Hub.md':('1.9.49','Fixes TornPDA scrolling by sizing the Hub to the available host viewport, makes the whole Hub panel a reliable vertical scroll surface, and keeps the blur treatment without forcing physical 100dvh.'),
+              'greasyfork/Enhancer-Guard.md':('1.3.38','Replaces physical 100dvh forcing with container-height mobile sizing so TornPDA scrolling remains native while blur is preserved.'),
+              'greasyfork/Bazaar-Thanker.md':('5.3.30','Replaces physical 100dvh forcing with container-height mobile sizing so TornPDA scrolling remains native while blur is preserved.'),
+              'greasyfork/Mission-Rewards.md':('1.0.25','Replaces physical 100dvh forcing with container-height mobile sizing so TornPDA scrolling remains native while blur is preserved.'),
+              'greasyfork/Market-Intelligence.md':('1.17.26','Replaces physical 100dvh forcing with container-height mobile sizing so TornPDA scrolling remains native while blur is preserved.'),
+              'greasyfork/Elimination-Assistant.md':('1.3.36','Replaces physical 100dvh forcing with container-height mobile sizing so TornPDA scrolling remains native while blur is preserved.'),
+              'greasyfork/Company-Intelligence.md':('1.8.22','Makes the entire Company sheet the mobile scroll surface, fits it to the available TornPDA host height, preserves blur, and keeps the orange SakaLuX footer reachable.'),
+              'greasyfork/Chat-Intelligence.md':('1.2.12','Uses container-height mobile sizing instead of physical 100dvh so TornPDA scrolling and keyboard behavior remain stable while blur is preserved.'),
+              'greasyfork/Account-Auditor.md':('1.3.7','Uses container-height mobile sizing instead of physical 100dvh so TornPDA scrolling remains stable while blur is preserved.'),
+              'greasyfork/SakaLuX-Suite.md':('0.9.915','Uses container-height mobile sizing instead of physical 100dvh so TornPDA scrolling remains stable while blur is preserved.'),
+          }
+          for path,(v,note) in docs.items():
+              p=root/path
+              if not p.exists(): continue
+              text=p.read_text(encoding='utf-8')
+              text=re.sub(r'(## Current version\s*\n\*\*v)[^*]+(\*\*)',rf'\g<1>{v}\g<2>',text,count=1)
+              text=re.sub(r'(## Current release note\s*\n+)(\*\*v[^\n]+)',rf'\g<1>**v{v}** {note}',text,count=1)
+              if f'### v{v}' not in text:
+                  marker='## Release history'
+                  if marker not in text: marker='## Changelog'
+                  if marker in text:
+                      text=text.replace(marker,marker+f'\n\n### v{v} — TornPDA scroll contract hotfix\n- {note}\n',1)
+              p.write_text(text,encoding='utf-8')
+
+          print('Patched mobile scroll contract and versions.')
+          PY
+
+          for f in SakaLuX-*.user.js; do
+            node --check "$f"
+          done
+          python -m json.tool scripts.json >/dev/null
+
+      - name: Commit hotfix
+        run: |
+          git config user.name "SakaLuX Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add SakaLuX-*.user.js scripts.json greasyfork backups/ui-scroll-hotfix-2026-09-17
+          git commit -m "fix: restore TornPDA sheet scrolling and host-height layout"
+          git push
