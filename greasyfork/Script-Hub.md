@@ -28,12 +28,12 @@
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.41**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.33**
-- 🎯 SakaLuX Mission Rewards **v1.0.28**
-- 📈 SakaLuX Market Intelligence **v1.17.29**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.36**
-- 🏢 SakaLuX Company Intelligence **v1.8.22**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.42**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.34**
+- 🎯 SakaLuX Mission Rewards **v1.0.29**
+- 📈 SakaLuX Market Intelligence **v1.17.30**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.37**
+- 🏢 SakaLuX Company Intelligence **v1.8.23**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -47,7 +47,7 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - `scripts.json` is the canonical registry/minimum version source used by Hub.
 - A **PUBLISHED / REGISTRY** mismatch means the configured public distribution source has not yet caught up with the registry; it does not automatically mean the installed script is broken.
 - Market Intelligence is distributed through Greasy Fork, so a registry version newer than its Greasy Fork meta version legitimately appears as publish pending until that Greasy Fork release is published.
-- Company Intelligence is currently registered at **v1.8.18** and uses Greasy Fork script **595873** for Hub public-version checks.
+- Company Intelligence is currently registered at **v1.8.23** and uses Greasy Fork script **595873** for Hub public-version checks.
 - Future complementary modules intended for Hub management must be added to `scripts.json` and keep their dedicated information page synchronized.
 
 ## License
@@ -61,7 +61,6 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - Disables the legacy document-scanning Mobile Surface observer where present.
 - Reduces mobile animation/transition cost for faster input and scrolling.
 
-
 ### v1.9.53 — Bottom layout + input latency
 - Uses a real flex footer for SEND MONEY / SEND ITEMS and the author line, so nothing overlaps module cards.
 - Extends the Hub to the lower TornPDA host edge.
@@ -70,14 +69,12 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - Closes Hub before awaiting OPEN/SETTINGS module APIs for immediate tap feedback.
 - Coordinates managed modules that fully stop standalone observation while Hub is active.
 
-
 ### v1.9.52 — Scroll performance + bottom layout
 - Keeps SEND MONEY / SEND ITEMS fully visible.
 - Moves the author footer lower in the available TornPDA area.
 - Reduces blur/shadow rendering cost while scrolling.
 - Ignores unrelated Torn DOM mutations while Hub is open.
 - Coordinates managed module standalone performance updates.
-
 
 ### v1.9.51 — TornPDA performance + compact footer
 - Keeps only Managed Modules as the main scroll surface.
@@ -100,20 +97,17 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - Adds the shared translucent SakaLuX blur treatment.
 
 ### v1.9.47 — Global mobile top alignment
-
 - Applies top alignment directly in Hub, managed modules and Chat Intelligence.
 - Enforces the compact right-side 2×2 Hub controls after legacy CSS.
 - Keeps Settings switches compact and uniform.
 
 ### v1.9.46 — Authoritative PDA layout correction
-
 - Keeps INFO, NEW, ON/OFF and OPEN/SETTINGS in a compact 2×2 block on the right side of managed module cards.
 - Makes Hub Settings switches smaller and uniform.
 - Opens Hub and managed SakaLuX panels from the top of the available Torn viewport.
 - Makes Company Intelligence scroll as a whole sheet and keeps only the fully visible SakaLuX author footer.
 
 ### v1.9.45 — Compact module cards and detailed INFO
-
 - Moves INFO, NEW, ON/OFF and OPEN/SETTINGS into a compact 2x2 block on the right side of each managed module card.
 - Aligns the Hub panel with the top of the available Torn viewport on mobile.
 - Refines Settings switches to smaller proportions.
@@ -121,14 +115,12 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - Updates Company Intelligence integration for whole-panel scrolling and a simplified footer.
 
 ### v1.9.44 — Mobile control and Company footer refinement
-
 - Uses two rows for managed module actions on narrow screens: INFO + ON/OFF, then NEW + OPEN/SETTINGS.
 - Keeps Company Intelligence content independently scrollable while its SakaLuX author footer stays visible at the bottom of the panel.
 - Reduces Hub Settings toggle dimensions for Torn launchers and automatic update checks.
 - Preserves the existing desktop layout.
 
 ### v1.9.43 — Native module information and release center
-
 - Adds INFO and NEW buttons directly to every managed module card.
 - Keeps only version, update state, ACTIVE/DISABLED state and last-check time on the compact card body.
 - INFO explains what each script does; NEW shows the current module release notes from `scripts.json`.
@@ -137,13 +129,11 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - Removes the temporary standalone Hub Card UX layer.
 
 ### v1.9.41 — Fallback registry synchronization
-
 - Synchronizes all Hub offline fallback add-on versions with `scripts.json`.
 - Fixes the stale Bazaar Thanker fallback version that caused CI cross-file synchronization failure.
 - Keeps the registered add-on information list synchronized with the canonical registry.
 
 ### v1.9.40 — Installed version reporting fix
-
 - Uses the newest valid live version signal instead of trusting the first bridge value.
 - Synchronizes runtime version constants with userscript headers.
 - Updates the Hub offline fallback registry to current add-on versions.
@@ -224,6 +214,4 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 ## Changelog
 
 ### v1.9.42
-
 - Performance/UI optimization release: adds the shared single-instance SakaLuX performance foundation used across compatible scripts, synchronizes optimized module versions, and keeps the Hub as the canonical visual design reference.
-
