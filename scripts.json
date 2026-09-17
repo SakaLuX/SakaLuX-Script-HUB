@@ -366,17 +366,17 @@
         }
       ],
       "release": {
-        "version": "0.7.11",
+        "version": "0.7.12",
         "date": "2026-09-17",
         "notes": [
-          "Rounds the full Stocks sheet and author footer at the bottom; uses the same orange author line and 20px donation buttons as Script Hub.",
-          "Compacts panel/inline action buttons to 32px, form fields to 34px and checkboxes to 18px; arranges vault/API controls in two columns.",
-          "Keeps header and footer fixed around scrolling content, sizes the sheet to the TornPDA host, removes mobile blur/transitions and installs footer styles once."
+          "Moves per-stock controls outside Torn's native stock-column list into full-width companion cards below each stock, preventing narrow right-column overlays.",
+          "Groups symbol, portfolio/benefit data and compact actions in a readable mobile layout; keeps companion cards paired with their stock during filtering and sorting.",
+          "Preserves quick-trade amount selections, skips rebuilding unchanged cards, computes opportunity rankings once per render and avoids redundant sorting mutations."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.7.11"
+      "version": "0.7.12"
     }
   ]
 }
