@@ -79,15 +79,15 @@
         }
       ],
       "release": {
-        "version": "5.3.37",
+        "version": "5.3.38",
         "date": "2026-09-17",
         "notes": [
-          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
+          "Keeps the title and full-width donation footer fixed while the settings form scrolls independently. Fixes the stale displayed version and keeps fields within the panel."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.37"
+      "version": "5.3.38"
     },
     {
       "active": true,

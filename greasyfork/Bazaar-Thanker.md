@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.37**
+**v5.3.38**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -16,7 +16,8 @@
 
 
 
-**v5.3.37** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
+**v5.3.38** Keeps the title and full-width donation footer fixed while the settings form scrolls independently. Fixes the stale displayed version and keeps fields within the panel.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -31,6 +32,10 @@ Generated thank-you text should be reviewed before sending. The script assists w
 **All Rights Reserved**
 
 ## Release history
+
+### v5.3.38 — Fixed header/footer and form scrolling
+- Keeps the title and full-width donation footer fixed while the settings form scrolls independently. Fixes the stale displayed version and keeps fields within the panel.
+
 
 ### v5.3.37 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
