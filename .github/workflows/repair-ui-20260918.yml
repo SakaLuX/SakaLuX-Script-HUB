@@ -20,7 +20,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 .github/scripts/repair_stocks_ui_patcher.py
           python3 .github/scripts/fix_stocks_mission_company_ui.py
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          node --check SakaLuX-Mission-Rewards.user.js
+          node --check SakaLuX-Company-Intelligence-v1.0.0.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          git diff --exit-code -- SakaLuX-Script-Hub.user.js
 
       - name: Commit
         shell: bash
