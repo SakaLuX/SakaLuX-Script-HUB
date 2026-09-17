@@ -89,3 +89,4 @@ jobs:
           git add SakaLuX-Stock-Manager-Advisor.user.js greasyfork/Stock-Manager-Advisor.md scripts.json
           git commit -m "feat(stocks): advisor upgrade v0.7.13"
           git push
+# trigger
