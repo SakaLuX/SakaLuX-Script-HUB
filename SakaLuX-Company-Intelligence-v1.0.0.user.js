@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.27
+// @version      1.8.28
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -83,7 +83,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.27',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.28',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -609,9 +609,9 @@ function css(){
 function render(){
  let root=$('#ci-root');if(!S.open){root?.remove();return}
  if(!root){root=document.createElement('div');root.id='ci-root';document.body.appendChild(root)}
- const oldShell=$('.ci-shell',root),oldTabs=$('.ci-tabs',root),scrollTop=oldShell?.scrollTop||0,tabsLeft=oldTabs?.scrollLeft||0;
+ const oldBody=$('.ci-shell > .ci-body',root),oldTabs=$('.ci-tabs',root),scrollTop=oldBody?.scrollTop||0,tabsLeft=oldTabs?.scrollLeft||0;
  root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button type="button" data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button type="button" data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button type="button" class="ci-icon" data-act="refresh" title="Refresh">↻</button><button type="button" class="ci-icon api" data-act="settings" title="API Access">🔑</button><button type="button" class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button type="button" data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div></div>`;
- const shell=$('.ci-shell',root),tabBar=$('.ci-tabs',root);if(shell) shell.scrollTop=scrollTop;if(tabBar)tabBar.scrollLeft=tabsLeft;
+ const content=$('.ci-shell > .ci-body',root),tabBar=$('.ci-tabs',root);if(content)content.scrollTop=scrollTop;if(tabBar)tabBar.scrollLeft=tabsLeft;
  $$('button',root).forEach(b=>{if(!b.type)b.type='button'});
  $$('[data-mode]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
  $$('[data-tab]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();if(S.tab===b.dataset.tab)return;S.tab=b.dataset.tab;set(KEY.tab,S.tab);render()});
@@ -671,34 +671,6 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
 })();
 
 
-
-
-/* SakaLuX Company whole-sheet scroll + footer repair v1 */
-(()=>{
-  'use strict';
-  if(window.__SakaLuXCompanySheetRepairV1)return;window.__SakaLuXCompanySheetRepairV1=1;
-  const profile='https://www.torn.com/profiles.php?XID=2380374';
-  const findPanel=()=>{
-    // Only the native Company root may be repaired; Hub can list this module too.
-    const root=document.getElementById('ci-root');
-    if(!root||root.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return null;
-    const rect=root.getBoundingClientRect(),style=getComputedStyle(root);
-    return rect.width>260&&rect.height>220&&style.display!=='none'&&style.visibility!=='hidden'?root:null;
-  };
-  let touchY=0;
-  const repair=()=>{
-    if(!matchMedia('(max-width:820px)').matches)return;
-    const p=findPanel();if(!p)return;
-    p.dataset.slxFullsheetV2='1';
-    p.style.setProperty('overflow-y','auto','important');p.style.setProperty('overflow-x','hidden','important');p.style.setProperty('overscroll-behavior','contain','important');p.style.setProperty('-webkit-overflow-scrolling','touch','important');p.style.setProperty('touch-action','pan-y','important');
-    for(const e of p.querySelectorAll('div,section,main')){
-      if(e===p)continue;const r=e.getBoundingClientRect(),s=getComputedStyle(e);
-      if((s.overflowY==='auto'||s.overflowY==='scroll')&&e.scrollHeight>e.clientHeight+24&&r.height>120){e.style.setProperty('overflow-y','visible','important');e.style.setProperty('max-height','none','important');e.style.setProperty('height','auto','important')}
-    }
-    if(!p.dataset.slxScrollBound){p.dataset.slxScrollBound='1';p.addEventListener('touchstart',e=>{touchY=e.touches?.[0]?.clientY||0},{passive:true});p.addEventListener('touchmove',e=>{const y=e.touches?.[0]?.clientY;if(!y)return;const d=touchY-y;touchY=y;if(Math.abs(d)>1)p.scrollTop+=d},{passive:true})}
-  };
-  new MutationObserver(()=>requestAnimationFrame(repair)).observe(document.documentElement,{childList:true,subtree:true});setInterval(repair,900);repair();
-})();
 
 
 /* slx-host-scroll-contract-v3 */
@@ -778,3 +750,29 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
 
 /* Compact donation controls and Elimination mobile panel geometry 1.8.27 */
 (()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#ci-root#ci-root#ci-root{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;padding:0!important;background:transparent!important;overflow:hidden!important;border-radius:14px!important;align-items:stretch!important;justify-content:stretch!important;}\n#ci-root#ci-root#ci-root > .ci-shell{position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;align-self:stretch!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;max-width:100%!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border:1px solid #3c4652!important;border-radius:14px!important;}\n#ci-root#ci-root#ci-root > .ci-shell{display:flex!important;flex-direction:column!important;overflow:hidden!important;}\n#ci-root#ci-root#ci-root > .ci-shell>.ci-body{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
+
+/* Company v1.8.28: fixed header/tabs/footer, native content-only scrolling. */
+(()=>{const s=document.createElement('style');s.textContent=`
+#ci-root#ci-root#ci-root>.ci-shell{
+ display:flex!important;flex-direction:column!important;padding:0!important;min-height:0!important;overflow:hidden!important;height:min(820px,calc(100vh - 32px))!important;
+}
+#ci-root#ci-root#ci-root>.ci-shell>.ci-head,
+#ci-root#ci-root#ci-root>.ci-shell>.ci-tabs{
+ position:relative!important;inset:auto!important;flex:0 0 auto!important;margin:0!important;
+}
+#ci-root#ci-root#ci-root>.ci-shell>.ci-tabs{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important}
+#ci-root#ci-root#ci-root>.ci-shell>.ci-body{
+ flex:1 1 0!important;min-height:0!important;max-height:none!important;
+ overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+ touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;
+}
+#ci-root#ci-root#ci-root>.ci-shell>#sakalux-inline-footer-company-intelligence{
+ position:relative!important;inset:auto!important;flex:0 0 50px!important;
+ width:100%!important;height:50px!important;min-height:50px!important;max-height:50px!important;
+ margin:0!important;padding:0!important;border-radius:10px 10px 14px 14px!important;
+}
+@media(max-width:820px){
+ #ci-root#ci-root#ci-root{inset:0 4px 36px!important;top:0!important;bottom:36px!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;overflow:hidden!important}
+ #ci-root#ci-root#ci-root>.ci-shell{height:100%!important;max-height:100%!important;margin:0!important}
+}
+`;(document.head||document.documentElement).appendChild(s)})();
