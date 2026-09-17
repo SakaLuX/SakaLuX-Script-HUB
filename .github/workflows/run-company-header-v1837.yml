@@ -3,6 +3,7 @@ name: Run Company header v1.8.37
 on:
   push:
     paths:
+      - '.github/workflows/run-company-header-v1837.yml'
       - '.github/run-company-header-v1837.trigger'
 
 permissions:
