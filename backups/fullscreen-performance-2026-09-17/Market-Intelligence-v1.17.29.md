@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.30**
+**v1.17.29**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,7 +20,7 @@
 
 ## Current release note
 
-**v1.17.30** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.17.29** disconnects standalone DOM observation completely once Script Hub is present, reducing TornPDA scroll and tap latency.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -44,13 +44,6 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history
-
-### v1.17.30 — Full-screen performance
-- Mobile SakaLuX panels use the full available viewport.
-- Removes backdrop blur and heavy mobile visual effects.
-- Disables the legacy document-scanning Mobile Surface observer where present.
-- Reduces mobile animation/transition cost for faster input and scrolling.
-
 
 ### v1.17.29 — Hub-aware observer shutdown
 - Stops the standalone document observer as soon as Script Hub is detected.

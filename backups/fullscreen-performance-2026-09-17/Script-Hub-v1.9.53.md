@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.54**
+**v1.9.53**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.54** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.9.53** makes the TornPDA footer non-overlapping and truly bottom-aligned, removes expensive open-Hub observers, and makes module OPEN/SETTINGS react immediately before asynchronous work.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -54,13 +54,6 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
-
-### v1.9.54 — Full-screen performance
-- Mobile SakaLuX panels use the full available viewport.
-- Removes backdrop blur and heavy mobile visual effects.
-- Disables the legacy document-scanning Mobile Surface observer where present.
-- Reduces mobile animation/transition cost for faster input and scrolling.
-
 
 ### v1.9.53 — Bottom layout + input latency
 - Uses a real flex footer for SEND MONEY / SEND ITEMS and the author line, so nothing overlaps module cards.

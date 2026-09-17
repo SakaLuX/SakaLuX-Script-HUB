@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.916
+// @version      0.9.915
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -926,7 +926,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         justify-content: center;
         padding: 14px;
         background: rgba(3,5,8,.76);
-        backdrop-filter:none!important;
+        backdrop-filter: blur(5px);
         box-sizing: border-box;
       }
       #${SUITE.panelId}.sakalux-open {
@@ -7720,7 +7720,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                     inset 0 1px 0 rgba(255,255,255,.03);
                 overflow: hidden;
                 transition: all .18s ease;
-                backdrop-filter:none!important;
+                backdrop-filter: blur(3px);
                 box-sizing: border-box;
             }
             .fse-panel *,
@@ -10651,7 +10651,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 inset: 0;
                 z-index: 99998;
                 background: rgba(0,0,0,.68);
-                backdrop-filter:none!important;
+                backdrop-filter: blur(2px);
             }
             #${IDS.settingsBackdrop}[hidden] {
                 display: none !important;
@@ -16169,7 +16169,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         #${APP_ID} .fmi-profile-options span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         #${APP_ID} .fmi-row.inactivity-highlight{background:color-mix(in srgb,var(--fmi-row-highlight) var(--fmi-row-opacity),var(--panel))!important;box-shadow:inset 5px 0 0 var(--fmi-row-highlight)}
         #${APP_ID} .fmi-empty{padding:24px;color:var(--muted);text-align:center;font-size:10px}
-        #${APP_ID} .fmi-modal{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.78);backdrop-filter:none!important;} #${APP_ID} .fmi-modal[hidden]{display:none!important} #${APP_ID} .fmi-modal>section{width:min(420px,calc(100vw - 28px));max-height:78vh;overflow:hidden;border:1px solid var(--border);border-radius:8px;background:var(--sakalux-panel)} #${APP_ID} .fmi-modal header,#${APP_ID} .fmi-modal footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--sakalux-panel-2)} #${APP_ID} .fmi-modal footer{justify-content:flex-end;border-top:1px solid var(--border);border-bottom:0} #${APP_ID} .fmi-modal header button,#${APP_ID} .fmi-modal footer button{min-height:30px;padding:0 9px;border:1px solid var(--border);border-radius:5px;color:var(--text);background:var(--sakalux-panel-2)}
+        #${APP_ID} .fmi-modal{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.78);backdrop-filter:blur(4px)} #${APP_ID} .fmi-modal[hidden]{display:none!important} #${APP_ID} .fmi-modal>section{width:min(420px,calc(100vw - 28px));max-height:78vh;overflow:hidden;border:1px solid var(--border);border-radius:8px;background:var(--sakalux-panel)} #${APP_ID} .fmi-modal header,#${APP_ID} .fmi-modal footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--sakalux-panel-2)} #${APP_ID} .fmi-modal footer{justify-content:flex-end;border-top:1px solid var(--border);border-bottom:0} #${APP_ID} .fmi-modal header button,#${APP_ID} .fmi-modal footer button{min-height:30px;padding:0 9px;border:1px solid var(--border);border-radius:5px;color:var(--text);background:var(--sakalux-panel-2)}
         #${APP_ID} .fmi-country-modal>section{width:min(430px,calc(100vw - 24px));max-height:82vh}
         #${APP_ID} .fmi-country-modal header>div{min-width:0}
         #${APP_ID} .fmi-country-modal header strong,#${APP_ID} .fmi-country-modal header small{display:block}
@@ -16183,7 +16183,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         #${APP_ID} .fmi-country-options span{overflow:hidden;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
         #${APP_ID} .fmi-country-options small{color:var(--muted);font-size:7px;text-align:right}
         #${APP_ID} .fmi-tag-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:calc(78vh - 108px);overflow:auto;padding:9px} #${APP_ID} .fmi-tag-options button{display:flex;min-height:44px;flex-direction:column;align-items:flex-start;justify-content:center;padding:7px 9px;border:1px solid color-mix(in srgb,var(--tag) 35%,transparent);border-radius:6px;color:var(--text);background:color-mix(in srgb,var(--tag) 7%,var(--sakalux-panel))} #${APP_ID} .fmi-tag-options button.active{background:color-mix(in srgb,var(--tag) 20%,var(--sakalux-panel));box-shadow:inset 0 0 0 1px var(--tag)} #${APP_ID} .fmi-tag-options b{color:var(--tag);font-size:9px} #${APP_ID} .fmi-tag-options small{margin-top:2px;color:var(--muted);font-size:7px}
-        #${SUITE.panelId} .sakalux-fmv-settings-layer{position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(3,5,8,.78);backdrop-filter:none!important;} #${SUITE.panelId} .sakalux-fmv-settings-card{width:min(680px,100%);max-height:calc(100vh - 70px);overflow:auto;border:1px solid rgba(216,179,95,.32);border-radius:14px;background:var(--sakalux-bg-soft);box-shadow:0 18px 55px rgba(0,0,0,.48)} #${SUITE.panelId} .sakalux-fmv-settings-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08)} #${SUITE.panelId} .sakalux-fmv-settings-head strong{display:block;font-size:14px;color:var(--sakalux-text)} #${SUITE.panelId} .sakalux-fmv-settings-head small{display:block;margin-top:3px;color:var(--sakalux-muted);font-size:9px} #${SUITE.panelId} .sakalux-fmv-settings-head button{width:32px;height:32px;border:1px solid var(--sakalux-border);border-radius:8px;color:var(--sakalux-text);background:var(--sakalux-panel-2)}
+        #${SUITE.panelId} .sakalux-fmv-settings-layer{position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(3,5,8,.78);backdrop-filter:blur(5px)} #${SUITE.panelId} .sakalux-fmv-settings-card{width:min(680px,100%);max-height:calc(100vh - 70px);overflow:auto;border:1px solid rgba(216,179,95,.32);border-radius:14px;background:var(--sakalux-bg-soft);box-shadow:0 18px 55px rgba(0,0,0,.48)} #${SUITE.panelId} .sakalux-fmv-settings-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08)} #${SUITE.panelId} .sakalux-fmv-settings-head strong{display:block;font-size:14px;color:var(--sakalux-text)} #${SUITE.panelId} .sakalux-fmv-settings-head small{display:block;margin-top:3px;color:var(--sakalux-muted);font-size:9px} #${SUITE.panelId} .sakalux-fmv-settings-head button{width:32px;height:32px;border:1px solid var(--sakalux-border);border-radius:8px;color:var(--sakalux-text);background:var(--sakalux-panel-2)}
         #${SUITE.panelId} .sakalux-fmv-settings-body{padding:12px} #${SUITE.panelId} .sakalux-fmv-section{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:var(--sakalux-bg)} #${SUITE.panelId} .sakalux-fmv-section+ .sakalux-fmv-section{margin-top:9px} #${SUITE.panelId} .sakalux-fmv-section-title{margin-bottom:8px;color:var(--sakalux-gold);font-size:10px;letter-spacing:.5px;text-transform:uppercase}
         #${SUITE.panelId} .sakalux-fmv-tag-row,#${SUITE.panelId} .sakalux-fmv-level-row{display:grid;grid-template-columns:minmax(120px,1.5fr) 80px 58px 54px 34px;gap:6px;align-items:center;margin-top:5px} #${SUITE.panelId} .sakalux-fmv-level-row{grid-template-columns:110px 58px minmax(100px,1fr) 34px} #${SUITE.panelId} .sakalux-fmv-tag-row input,#${SUITE.panelId} .sakalux-fmv-level-row input,#${SUITE.panelId} .sakalux-fmv-section textarea,#${SUITE.panelId} .sakalux-fmv-section select{width:100%;min-width:0;height:32px;padding:0 7px;border:1px solid var(--sakalux-border);border-radius:6px;color:var(--sakalux-text);background:var(--sakalux-panel-2);font-size:9px} #${SUITE.panelId} .sakalux-fmv-section textarea{height:72px;padding:7px;resize:vertical} #${SUITE.panelId} .sakalux-fmv-remove{height:32px;border:1px solid rgba(223,89,104,.34);border-radius:6px;color:#ff8490;background:rgba(223,89,104,.08)} #${SUITE.panelId} .sakalux-fmv-add{margin-top:8px;min-height:31px;padding:0 9px;border:1px solid rgba(87,155,213,.34);border-radius:6px;color:#8bc7f2;background:rgba(87,155,213,.09)} #${SUITE.panelId} .sakalux-fmv-settings-foot{display:flex;justify-content:flex-end;gap:8px;padding:12px 14px;border-top:1px solid rgba(255,255,255,.08)}
         .f-war-list.members-list > ul.table-body > li.table-row.sakalux-fmv-has-pc-tags,
@@ -16209,7 +16209,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
           justify-content:center !important;
           padding:20px !important;
           background:rgba(0,0,0,.74) !important;
-          backdrop-filter:none!important;
+          backdrop-filter:blur(3px);
         }
         .sakalux-fmv-pc-tag-card{
           width:min(480px,calc(100vw - 40px)) !important;
@@ -18125,7 +18125,7 @@ const STORAGE_KEY    = 'sakaluxFactionMemberCountries';
                     radial-gradient(circle at 85% 18%, rgba(184,138,53,.12), transparent 28%),
                     radial-gradient(circle at 50% 100%, rgba(89,217,142,.08), transparent 35%),
                     rgba(0,0,0,.88) !important;
-                backdrop-filter:none!important;
+                backdrop-filter: blur(8px) saturate(1.1);
             }
             .sakalux-map-modal-panel {
                 background:
@@ -22961,7 +22961,7 @@ const STYLE_ID = "sakalux-Armory-loan-style";
         inset: 0;
         z-index: 2147483646;
         background: rgba(5, 8, 12, 0.78);
-        backdrop-filter:none!important;
+        backdrop-filter: blur(4px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -28339,8 +28339,8 @@ function armoryLoanIconSvg() {
                   top: 0;
                   z-index: 30;
                   isolation: isolate;
-                  backdrop-filter:none!important;
-                  -webkit-backdrop-filter:none!important;
+                  backdrop-filter: blur(4px);
+                  -webkit-backdrop-filter: blur(4px);
                   box-shadow: 0 1px 0 var(--sakalux-border-soft);
               }
               .ax-date-group.ax-date-collapsed > .ax-date-header {
@@ -35626,7 +35626,7 @@ const STORAGE_KEY = "sakalux_war_tracker_v26_blank";
             justify-content: center;
             padding: 16px;
             background: rgba(0,0,0,.78);
-            backdrop-filter:none!important;
+            backdrop-filter: blur(4px);
         }
         .fw-guide-backdrop[hidden] { display: none !important; }
         .fw-guide-panel {
@@ -39235,7 +39235,7 @@ function scan(){
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.75);
-      backdrop-filter:none!important;
+      backdrop-filter: blur(4px);
       z-index: 99999;
       align-items: center;
       justify-content: center;
@@ -41975,7 +41975,7 @@ function scan(){
       const style=document.createElement("style");
       style.id=STYLE_ID;
       style.textContent=`
-        .sakalux-ii-badge{position:absolute;bottom:4px;display:inline-flex;align-items:center;gap:2px;min-height:15px;padding:1px 2px;border-radius:5px;background:color-mix(in srgb,var(--sakalux-bg) 88%,transparent);border:1px solid color-mix(in srgb,var(--sakalux-gold) 18%,transparent);box-sizing:border-box;z-index:10;overflow:visible;box-shadow:0 2px 5px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:none!important;}
+        .sakalux-ii-badge{position:absolute;bottom:4px;display:inline-flex;align-items:center;gap:2px;min-height:15px;padding:1px 2px;border-radius:5px;background:color-mix(in srgb,var(--sakalux-bg) 88%,transparent);border:1px solid color-mix(in srgb,var(--sakalux-gold) 18%,transparent);box-sizing:border-box;z-index:10;overflow:visible;box-shadow:0 2px 5px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:blur(2px)}
         .sakalux-ii-badge--left{left:4px}.sakalux-ii-badge--right{right:4px}
         .sakalux-ii-token{height:11px;min-width:11px;padding:0 3px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;font-size:7px;line-height:1;font-weight:400;color:var(--sakalux-text);cursor:default;user-select:none;border:1px solid rgba(255,255,255,.14);box-shadow:0 0 4px rgba(0,0,0,.22)}
         .sakalux-ii-token--oc{background:linear-gradient(180deg,var(--sakalux-blue-bright),var(--sakalux-blue))!important}.sakalux-ii-token--enh{background:linear-gradient(180deg,var(--sakalux-gold-bright),var(--sakalux-gold-deep))!important}.sakalux-ii-token--cr{background:linear-gradient(180deg,var(--sakalux-red-bright),var(--sakalux-red))!important}
@@ -44568,15 +44568,15 @@ function scan(){
 /* SakaLuX Mobile Surface Contract v2 — full-height + blur */
 (()=>{
   'use strict';
-  return; // legacy Mobile Surface observer disabled for performance
+  if(window.__SakaLuXMobileSurfaceV2)return;
   window.__SakaLuXMobileSurfaceV2=1;
   const MOBILE=()=>matchMedia('(max-width: 820px)').matches;
   const TITLES=['Script Hub','Enhancer Guard','Bazaar Thanker','Mission Rewards','Market Intelligence','Elimination Assistant','Company Intelligence','Account Auditor','SakaLuX Suite','Chat Intelligence'];
   const style=document.createElement('style');
   style.id='sakalux-mobile-surface-v2';
   style.textContent=`@media(max-width:820px){
-    [data-slx-fullsheet-v2="1"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
-    [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+    [data-slx-fullsheet-v2="1"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+    [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important}
     [data-slx-fullsheet-v2="1"] input,[data-slx-fullsheet-v2="1"] textarea,[data-slx-fullsheet-v2="1"] select{scroll-margin-bottom:38vh}
   }`;
   (document.head||document.documentElement).appendChild(style);
@@ -44611,39 +44611,5 @@ function scan(){
 
 /* slx-host-scroll-contract-v3 */
 (()=>{if(document.getElementById('slx-host-scroll-contract-v3'))return;const s=document.createElement('style');s.id='slx-host-scroll-contract-v3';s.textContent=`@media(max-width:820px){
-[data-slx-fullsheet-v2="1"]{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+[data-slx-fullsheet-v2="1"]{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}
 }`;(document.head||document.documentElement).appendChild(s)})();
-
-
-/* SakaLuX Mobile Full-Screen Performance Contract */
-(()=>{
-  if(document.getElementById('sakalux-fullscreen-performance-contract')) return;
-  const s=document.createElement('style');
-  s.id='sakalux-fullscreen-performance-contract';
-  s.textContent=`@media(max-width:820px){
-    [id^="sakalux-"][id*="overlay"],
-    [id^="slx-"][id*="overlay"],
-    [id^="sl-"][id*="overlay"]{
-      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
-      width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
-      margin:0!important;padding:0!important;border-radius:0!important;overflow:hidden!important;
-      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#0b1118!important;box-shadow:none!important
-    }
-    [data-slx-fullsheet-v2="1"],
-    [id^="sakalux-"][id*="panel"],[id^="slx-"][id*="panel"],[id^="sl-"][id*="panel"],
-    [id^="sakalux-"][id*="modal"],[id^="slx-"][id*="modal"],[id^="sl-"][id*="modal"]{
-      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
-      width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;max-height:none!important;
-      margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow:auto!important;
-      touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
-      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important
-    }
-    [id^="sakalux-"] *,[id^="slx-"] *,[id^="sl-"] *{ -webkit-backdrop-filter:none!important;backdrop-filter:none!important }
-    [id^="sakalux-"][id*="panel"] *,[id^="slx-"][id*="panel"] *,[id^="sl-"][id*="panel"] *,
-    [id^="sakalux-"][id*="modal"] *,[id^="slx-"][id*="modal"] *,[id^="sl-"][id*="modal"] *{
-      animation:none!important;transition:none!important
-    }
-  }`;
-  (document.head||document.documentElement).appendChild(s);
-})();
-

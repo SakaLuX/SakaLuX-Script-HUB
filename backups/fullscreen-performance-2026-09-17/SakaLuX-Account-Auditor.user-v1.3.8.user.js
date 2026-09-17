@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.9
+// @version      1.3.8
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -512,15 +512,15 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 /* SakaLuX Mobile Surface Contract v2 — full-height + blur */
 (()=>{
   'use strict';
-  return; // legacy Mobile Surface observer disabled for performance
+  if(window.__SakaLuXMobileSurfaceV2)return;
   window.__SakaLuXMobileSurfaceV2=1;
   const MOBILE=()=>matchMedia('(max-width: 820px)').matches;
   const TITLES=['Script Hub','Enhancer Guard','Bazaar Thanker','Mission Rewards','Market Intelligence','Elimination Assistant','Company Intelligence','Account Auditor','SakaLuX Suite','Chat Intelligence'];
   const style=document.createElement('style');
   style.id='sakalux-mobile-surface-v2';
   style.textContent=`@media(max-width:820px){
-    [data-slx-fullsheet-v2="1"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
-    [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+    [data-slx-fullsheet-v2="1"]{width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;z-index:2147483200!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+    [data-slx-backdrop-v2="1"]{background:rgba(3,7,12,.48)!important;-webkit-backdrop-filter:blur(12px)!important;backdrop-filter:blur(12px)!important}
     [data-slx-fullsheet-v2="1"] input,[data-slx-fullsheet-v2="1"] textarea,[data-slx-fullsheet-v2="1"] select{scroll-margin-bottom:38vh}
   }`;
   (document.head||document.documentElement).appendChild(style);
@@ -555,39 +555,5 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 /* slx-host-scroll-contract-v3 */
 (()=>{if(document.getElementById('slx-host-scroll-contract-v3'))return;const s=document.createElement('style');s.id='slx-host-scroll-contract-v3';s.textContent=`@media(max-width:820px){
-[data-slx-fullsheet-v2="1"]{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+[data-slx-fullsheet-v2="1"]{position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:blur(14px) saturate(1.08)!important;backdrop-filter:blur(14px) saturate(1.08)!important}
 }`;(document.head||document.documentElement).appendChild(s)})();
-
-
-/* SakaLuX Mobile Full-Screen Performance Contract */
-(()=>{
-  if(document.getElementById('sakalux-fullscreen-performance-contract')) return;
-  const s=document.createElement('style');
-  s.id='sakalux-fullscreen-performance-contract';
-  s.textContent=`@media(max-width:820px){
-    [id^="sakalux-"][id*="overlay"],
-    [id^="slx-"][id*="overlay"],
-    [id^="sl-"][id*="overlay"]{
-      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
-      width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
-      margin:0!important;padding:0!important;border-radius:0!important;overflow:hidden!important;
-      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#0b1118!important;box-shadow:none!important
-    }
-    [data-slx-fullsheet-v2="1"],
-    [id^="sakalux-"][id*="panel"],[id^="slx-"][id*="panel"],[id^="sl-"][id*="panel"],
-    [id^="sakalux-"][id*="modal"],[id^="slx-"][id*="modal"],[id^="sl-"][id*="modal"]{
-      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
-      width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;max-height:none!important;
-      margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow:auto!important;
-      touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
-      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important
-    }
-    [id^="sakalux-"] *,[id^="slx-"] *,[id^="sl-"] *{ -webkit-backdrop-filter:none!important;backdrop-filter:none!important }
-    [id^="sakalux-"][id*="panel"] *,[id^="slx-"][id*="panel"] *,[id^="sl-"][id*="panel"] *,
-    [id^="sakalux-"][id*="modal"] *,[id^="slx-"][id*="modal"] *,[id^="sl-"][id*="modal"] *{
-      animation:none!important;transition:none!important
-    }
-  }`;
-  (document.head||document.documentElement).appendChild(s);
-})();
-

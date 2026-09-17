@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.29**
+**v1.0.28**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.0.29** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.0.28** disconnects standalone DOM observation completely once Script Hub is present, reducing TornPDA scroll and tap latency.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -34,13 +34,6 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history
-
-### v1.0.29 — Full-screen performance
-- Mobile SakaLuX panels use the full available viewport.
-- Removes backdrop blur and heavy mobile visual effects.
-- Disables the legacy document-scanning Mobile Surface observer where present.
-- Reduces mobile animation/transition cost for faster input and scrolling.
-
 
 ### v1.0.28 — Hub-aware observer shutdown
 - Stops the standalone document observer as soon as Script Hub is detected.

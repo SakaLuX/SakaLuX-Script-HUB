@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.42**
+**v1.3.41**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,7 +17,7 @@
 
 ## Current release note
 
-**v1.3.42** full-screen mobile panels, removes all blur, disables the legacy Mobile Surface observer, and reduces rendering cost for faster TornPDA scrolling and taps.
+**v1.3.41** disconnects standalone DOM observation completely once Script Hub is present, reducing TornPDA scroll and tap latency.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -36,13 +36,6 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history
-
-### v1.3.42 — Full-screen performance
-- Mobile SakaLuX panels use the full available viewport.
-- Removes backdrop blur and heavy mobile visual effects.
-- Disables the legacy document-scanning Mobile Surface observer where present.
-- Reduces mobile animation/transition cost for faster input and scrolling.
-
 
 ### v1.3.41 — Hub-aware observer shutdown
 - Stops the standalone document observer as soon as Script Hub is detected.
