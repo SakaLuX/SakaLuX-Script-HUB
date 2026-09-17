@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.55**
+**v1.9.56**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,18 +22,18 @@
 
 ## Current release note
 
-**v1.9.55** uses the same proven full-screen container model as Enhancer Guard and Market Intelligence: one fixed viewport overlay and one flex-filled Hub panel, eliminating the double-fixed TornPDA height issue while keeping blur disabled and scrolling lightweight.
+**v1.9.56** refines the UI and applies performance tweaks. The mobile Hub fills the available height, keeps SEND MONEY / SEND ITEMS visible, uses a compact author footer and rounds the marked outer corners to 10px. Lightweight rendering and reduced global DOM scanning keep navigation and scrolling responsive.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.42**
-- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.34**
-- 🎯 SakaLuX Mission Rewards **v1.0.29**
-- 📈 SakaLuX Market Intelligence **v1.17.30**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.37**
-- 🏢 SakaLuX Company Intelligence **v1.8.23**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.43**
+- 💬 SakaLuX Bazaar Thanker - PDA **v5.3.35**
+- 🎯 SakaLuX Mission Rewards **v1.0.30**
+- 📈 SakaLuX Market Intelligence **v1.17.31**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.38**
+- 🏢 SakaLuX Company Intelligence **v1.8.25**
 
 Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -47,13 +47,20 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 - `scripts.json` is the canonical registry/minimum version source used by Hub.
 - A **PUBLISHED / REGISTRY** mismatch means the configured public distribution source has not yet caught up with the registry; it does not automatically mean the installed script is broken.
 - Market Intelligence is distributed through Greasy Fork, so a registry version newer than its Greasy Fork meta version legitimately appears as publish pending until that Greasy Fork release is published.
-- Company Intelligence is currently registered at **v1.8.23** and uses Greasy Fork script **595873** for Hub public-version checks.
+- Company Intelligence is currently registered at **v1.8.25** and uses Greasy Fork script **595873** for Hub public-version checks.
 - Future complementary modules intended for Hub management must be added to `scripts.json` and keep their dedicated information page synchronized.
 
 ## License
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history
+
+### v1.9.56 — UI refinement and performance tweaks
+- Refines mobile panel height, donation controls and compact author-footer placement.
+- Rounds donation/footer outer corners to match SEND MONEY.
+- Keeps Managed Modules as the primary scrolling area.
+- Applies lightweight rendering and reduces global DOM scanning.
+
 
 ### v1.9.55 — Add-on parity full-screen
 - Uses the same full-screen container structure as Enhancer Guard and Market Intelligence.

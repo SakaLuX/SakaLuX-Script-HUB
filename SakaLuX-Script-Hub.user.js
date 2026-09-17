@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.55
+// @version      1.9.56
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.55';
+    const VERSION = '1.9.56';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -81,6 +81,11 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const HUB_CHANGELOG = [
+        {version:'1.9.56',date:'2026-09-17',changes:[
+            'UI refinement: full-height mobile Hub, compact author footer and rounded donation/footer outer corners.',
+            'Keeps SEND MONEY and SEND ITEMS visible while Managed Modules scroll independently.',
+            'Performance tweaks: lightweight mobile rendering, disabled blur/animations and fewer global DOM scans.'
+        ]},
         { version: '1.9.55', date: '2026-09-17', changes: ['Makes Hub use the same reliable full-screen container model as Enhancer Guard and Market Intelligence.','The overlay owns the viewport with fixed inset:0 and maximum stacking; the Hub panel fills that container with flex instead of using a second fixed viewport.','Removes double-fixed geometry that could leave unused space at the bottom in TornPDA.','Keeps blur disabled and Managed Modules as the only primary scroll surface.'] },
         { version: '1.9.54', date: '2026-09-17', changes: ['Extends the TornPDA Hub sheet to the lower host edge and makes SEND MONEY / SEND ITEMS plus the author line a real non-overlapping flex footer.','Removes full-screen backdrop blur from the Hub scroll surface while keeping a subtle header blur for a smoother GPU path.','Disconnects Hub DOM observation while Hub sheets are open and removes the global language MutationObserver.','OPEN/SETTINGS now closes the Hub before awaiting a module API so taps feel immediate.','Managed standalone observers fully disconnect once Script Hub is detected.'] },
         { version: '1.9.52', date: '2026-09-17', changes: ['Extends the mobile Hub lower into the available TornPDA area so the author footer sits closer to the bottom navigation.','Keeps SEND MONEY / SEND ITEMS fully visible above the author footer.','Reduces mobile blur/shadow compositor cost and contains module cards for smoother scrolling.','Hub DOM and language observers now ignore unrelated Torn mutations while the Hub is open.','Managed module standalone bootstraps no longer run periodic render loops while Script Hub is active.'] },
@@ -504,7 +509,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         scripts: [
             {
                 id: 'enhancer', type: 'addon', active: true,
-                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.42',
+                name: 'Enhancer Guard', icon: '🛡️', category: 'Inventory', version: '1.3.43',
                 description: 'Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.',
                 greasyForkId: '592698',
                 metaUrl: 'https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js',
@@ -520,7 +525,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'bazaar', type: 'addon', active: true,
-                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.34',
+                name: 'Bazaar Thanker', icon: '💬', category: 'Trading', version: '5.3.35',
                 description: 'Bazaar buyer grouping, thank-you messages, statistics and history management.',
                 greasyForkId: '592388',
                 metaUrl: 'https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js',
@@ -536,7 +541,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'mission-rewards', type: 'addon', active: true,
-                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.29',
+                name: 'Mission Rewards', icon: '🎯', category: 'Missions', version: '1.0.30',
                 description: 'Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.',
                 greasyForkId: '592711',
                 metaUrl: 'https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js',
@@ -552,7 +557,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'market-intelligence', type: 'addon', active: true,
-                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.30',
+                name: 'Market Intelligence', icon: '📈', category: 'Trading', version: '1.17.31',
                 description: 'Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.',
                 greasyForkId: '592781',
                 metaUrl: 'https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js',
@@ -570,7 +575,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'elimination-assistant', type: 'addon', active: true,
-                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.37',
+                name: 'Elimination Assistant', icon: '⚔️', category: 'Combat', version: '1.3.38',
                 description: 'Eliminations advisor with unified Torn + FFScouter API setup, rotating 500-player batches, availability status, TornPDA export and PC-safe attack routing.',
                 greasyForkId: '594921',
                 metaUrl: 'https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js',
@@ -592,7 +597,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             },
             {
                 id: 'company-intelligence', type: 'addon', active: true,
-                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.23',
+                name: 'Company Intelligence', icon: '🏢', category: 'Company', version: '1.8.25',
                 description: 'Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.',
                 sourceUrl: 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js',
                 metaUrl: 'https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js',
@@ -2118,35 +2123,38 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     else init();
 })();
 
-/* SakaLuX Hub mobile layout v1.9.55 — add-on parity full-screen */
+/* SakaLuX Hub mobile layout v1.9.56 — validated UI and performance refinement */
 (()=>{
   if(document.getElementById('sakalux-hub-layout-1955')) return;
   const s=document.createElement('style');
   s.id='sakalux-hub-layout-1955';
   s.textContent=`@media(max-width:820px){
-    #sakalux-hub-overlay{
+    #sakalux-hub-overlay#sakalux-hub-overlay{
       position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
-      z-index:2147483647!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+      z-index:2147483647!important;width:auto!important;height:auto!important;min-height:0!important;max-width:none!important;max-height:none!important;
       margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;
       display:flex!important;align-items:stretch!important;justify-content:stretch!important;
       background:#0b1118!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important
     }
-    #sakalux-hub-panel{
+    #sakalux-hub-overlay>#sakalux-hub-panel{
       position:relative!important;inset:auto!important;flex:1 1 auto!important;align-self:stretch!important;
-      width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;
+      width:100%!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;
       margin:0!important;padding:0!important;box-sizing:border-box!important;border-radius:0!important;
       display:flex!important;flex-direction:column!important;overflow:hidden!important;
       background:#0b1118!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important
     }
-    #sakalux-hub-panel>.slh-header{flex:0 0 auto!important;position:relative!important;background:#0d151f!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-    #sakalux-hub-panel>.slh-list{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding-bottom:8px!important;contain:layout paint style!important}
-    #sakalux-hub-panel>.slh-view,#sakalux-hub-panel>.slh-settings{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
-    #sakalux-hub-panel>.slh-bottom{position:relative!important;flex:0 0 66px!important;height:66px!important;min-height:66px!important;margin:0!important;padding:8px 20px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important}
-    #sakalux-hub-panel>.slh-bottom .slh-bottom-grid{height:50px!important}
-    #sakalux-hub-panel>.slh-bottom .slh-bottom-btn{height:50px!important;min-height:50px!important;box-shadow:none!important}
-    #sakalux-hub-panel>.slh-footer{position:relative!important;flex:0 0 38px!important;height:38px!important;min-height:38px!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#080d13!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important}
-    #sakalux-hub-overlay *,#sakalux-hub-panel *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-    #sakalux-hub-panel *{animation:none!important;transition:none!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-header{flex:0 0 auto!important;position:relative!important;background:#0d151f!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-list{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding-bottom:8px!important;contain:layout paint style!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-view,#sakalux-hub-overlay>#sakalux-hub-panel>.slh-settings{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom{position:relative!important;flex:0 0 58px!important;height:58px!important;min-height:58px!important;margin:0!important;padding:4px 14px!important;box-sizing:border-box!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom .slh-bottom-grid{height:50px!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom .slh-bottom-btn{height:50px!important;min-height:50px!important;box-shadow:none!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-footer{position:relative!important;flex:0 0 22px!important;height:22px!important;min-height:22px!important;max-height:22px!important;margin:0!important;padding:0 6px!important;box-sizing:border-box!important;line-height:20px!important;font-size:9px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;background:#080d13!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel{border-radius:0 0 10px 10px!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-bottom{border-radius:10px 10px 0 0!important;overflow:hidden!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel>.slh-footer{border-radius:0 0 10px 10px!important;overflow:hidden!important}
+    #sakalux-hub-overlay#sakalux-hub-overlay *,#sakalux-hub-overlay>#sakalux-hub-panel *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+    #sakalux-hub-overlay>#sakalux-hub-panel *{animation:none!important;transition:none!important}
   }`;
   (document.head||document.documentElement).appendChild(s);
 })();
