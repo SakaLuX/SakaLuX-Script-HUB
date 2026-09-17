@@ -310,15 +310,15 @@
         }
       ],
       "release": {
-        "version": "1.8.27",
+        "version": "1.8.28",
         "date": "2026-09-17",
         "notes": [
-          "Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px."
+          "Fixes Company panel scrolling: header and Overview/other tabs remain fixed, only the body scrolls, and the full-width 50px footer stays at the bottom. Removes leftover shell bottom padding and the legacy whole-sheet scroll repair."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.27"
+      "version": "1.8.28"
     }
   ]
 }

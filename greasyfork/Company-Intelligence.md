@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.27**
+**v1.8.28**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -21,7 +21,8 @@
 
 
 
-**v1.8.27** Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
+**v1.8.28** Fixes Company panel scrolling: header and Overview/other tabs remain fixed, only the body scrolls, and the full-width 50px footer stays at the bottom. Removes leftover shell bottom padding and the legacy whole-sheet scroll repair.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -46,6 +47,10 @@
 **All Rights Reserved**
 
 ## Release history
+
+### v1.8.28 — Fixed navigation/footer and content scrolling
+- Fixes Company panel scrolling: header and Overview/other tabs remain fixed, only the body scrolls, and the full-width 50px footer stays at the bottom. Removes leftover shell bottom padding and the legacy whole-sheet scroll repair.
+
 
 ### v1.8.27 — Elimination panel layout and 20px donation buttons
 - Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
