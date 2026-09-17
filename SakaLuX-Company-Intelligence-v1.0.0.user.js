@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.23
+// @version      1.8.24
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -83,7 +83,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.23',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.24',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -721,12 +721,11 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   if(window.__SakaLuXCompanySheetRepairV1)return;window.__SakaLuXCompanySheetRepairV1=1;
   const profile='https://www.torn.com/profiles.php?XID=2380374';
   const findPanel=()=>{
-    const arr=[];
-    for(const e of document.querySelectorAll('div,section,main,aside')){
-      const r=e.getBoundingClientRect(),s=getComputedStyle(e),t=e.innerText||'';
-      if(t.includes('Company Intelligence')&&!e.closest('#sakalux-hub-panel')&&r.width>260&&r.height>220&&['fixed','absolute'].includes(s.position))arr.push([r.width*r.height,e]);
-    }
-    arr.sort((a,b)=>a[0]-b[0]);return arr[0]?.[1]||null;
+    // Only the native Company root may be repaired; Hub can list this module too.
+    const root=document.getElementById('ci-root');
+    if(!root||root.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return null;
+    const rect=root.getBoundingClientRect(),style=getComputedStyle(root);
+    return rect.width>260&&rect.height>220&&style.display!=='none'&&style.visibility!=='hidden'?root:null;
   };
   let touchY=0;
   const repair=()=>{
