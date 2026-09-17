@@ -1,0 +1,109 @@
+name: Fix Company runtime version v1.8.37
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-company-runtime-version-v1837.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Backup, audit and patch Company version surfaces
+        shell: python
+        run: |
+          from pathlib import Path
+          import json, re
+
+          script_path = Path('SakaLuX-Company-Intelligence-v1.0.0.user.js')
+          doc_path = Path('greasyfork/Company-Intelligence.md')
+          reg_path = Path('scripts.json')
+
+          script = script_path.read_text(encoding='utf-8')
+          doc = doc_path.read_text(encoding='utf-8')
+          reg_raw = reg_path.read_text(encoding='utf-8')
+
+          backup = Path('backups/company-v1.8.37-runtime-version-sync-2026-09-18')
+          backup.mkdir(parents=True, exist_ok=True)
+          (backup / 'SakaLuX-Company-Intelligence.before.user.js').write_text(script, encoding='utf-8')
+          (backup / 'Company-Intelligence.before.md').write_text(doc, encoding='utf-8')
+          (backup / 'scripts.before.json').write_text(reg_raw, encoding='utf-8')
+
+          old = "const APP={name:'SakaLuX Company Intelligence',version:'1.8.35'"
+          new = "const APP={name:'SakaLuX Company Intelligence',version:'1.8.37'"
+          if old not in script:
+              raise SystemExit('Expected stale APP.version 1.8.35 was not found')
+          script = script.replace(old, new, 1)
+
+          # Keep v1.8.37 release notes accurate without creating a new release number.
+          release_marker = '### v1.8.37 — Professional TornPDA header layout\n'
+          runtime_note = '- Synchronizes runtime `APP.version` with `@version`, standalone registration, Hub bridge, ModuleReady event and local installed-version marker at v1.8.37, removing the false UPDATE AVAILABLE state.\n'
+          if release_marker in doc and runtime_note not in doc:
+              doc = doc.replace(release_marker, release_marker + runtime_note, 1)
+
+          current_note_anchor = '**v1.8.37 — Professional TornPDA header + shared standalone integration**\n'
+          current_runtime_note = '- Synchronizes the internal runtime version used by the Hub from stale v1.8.35 to v1.8.37.\n'
+          if current_note_anchor in doc and current_runtime_note not in doc:
+              doc = doc.replace(current_note_anchor, current_note_anchor + current_runtime_note, 1)
+
+          # Validate registry already points to 1.8.37; do not alter Hub or bump versions.
+          reg = json.loads(reg_raw)
+          company = next((x for x in reg.get('scripts', []) if x.get('id') == 'company-intelligence'), None)
+          if not company:
+              raise SystemExit('Company registry entry missing')
+          if company.get('version') != '1.8.37':
+              raise SystemExit(f"scripts.json Company version is {company.get('version')} not 1.8.37")
+          if company.get('release', {}).get('version') != '1.8.37':
+              raise SystemExit(f"scripts.json Company release.version is {company.get('release', {}).get('version')} not 1.8.37")
+
+          script_path.write_text(script, encoding='utf-8')
+          doc_path.write_text(doc, encoding='utf-8')
+
+      - name: Validate every Company version surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          f='SakaLuX-Company-Intelligence-v1.0.0.user.js'
+          grep -q '^// @version      1.8.37$' "$f"
+          grep -q "const SELF=.*version:'1.8.37'" "$f"
+          grep -q "const APP={name:'SakaLuX Company Intelligence',version:'1.8.37'" "$f"
+          ! grep -q "const APP={name:'SakaLuX Company Intelligence',version:'1.8.35'" "$f"
+          grep -q 'b.dataset.version=APP.version' "$f"
+          grep -q "localStorage.setItem('SakaLuX_Installed_company-intelligence',APP.version)" "$f"
+          grep -q 'window.SakaLuX.companyIntelligence={name:APP.name,version:APP.version' "$f"
+          grep -q "SakaLuX:ModuleReady.*version:APP.version" "$f"
+          node --check "$f"
+          python3 - <<'PY'
+          import json
+          with open('scripts.json', encoding='utf-8') as fh:
+              data=json.load(fh)
+          c=next(x for x in data['scripts'] if x['id']=='company-intelligence')
+          assert c['version']=='1.8.37', c['version']
+          assert c['release']['version']=='1.8.37', c['release']['version']
+          assert c['buttonSelector']=='#sakalux-module-bridge-company-intelligence', c['buttonSelector']
+          print('Company registry OK:', c['version'], c['release']['version'], c['buttonSelector'])
+          PY
+
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Company-Intelligence-v1.0.0.user.js greasyfork/Company-Intelligence.md backups/company-v1.8.37-runtime-version-sync-2026-09-18
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Company v1.8.37: synchronize runtime version surfaces'
+          git push
