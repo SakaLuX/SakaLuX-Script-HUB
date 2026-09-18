@@ -378,18 +378,18 @@
         }
       ],
       "release": {
-        "version": "0.8.7",
+        "version": "0.8.6",
         "date": "2026-09-18",
         "notes": [
-          "Shares one active API synchronization across overlapping refresh requests.",
-          "Twenty concurrent refreshes use three requests instead of sixty in the synthetic network regression.",
-          "Recovers after offline, HTTP 429 and malformed JSON errors; portfolio data and explicit trading safeguards are preserved."
+          "Uses constant-time Hub detection and reuses unchanged standalone dock rows.",
+          "Ignores unrelated chat/dock/footer changes in standalone maintenance.",
+          "Preserves busy-page mounting, portfolio data and trading safeguards."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.7",
-      "detailsRevision": 3
+      "version": "0.8.6",
+      "detailsRevision": 2
     }
   ]
 }
