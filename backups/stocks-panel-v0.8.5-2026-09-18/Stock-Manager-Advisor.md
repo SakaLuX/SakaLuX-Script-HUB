@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.5**
+**v0.8.4**
 
 ## What it does
 - Stock vault target selection directly from Torn Stocks.
@@ -21,12 +21,6 @@
 - Shared Script Hub / Standalone Dock integration and TornPDA-first UI.
 
 ## Current release note
-
-**v0.8.5 — TornPDA panel recovery**
-- Prevents continuous page/chat mutations from postponing panel mounting indefinitely.
-- Skips hidden stock lists and relocates the panel when Torn loads or replaces content.
-- Preserves settings, profiles and trading safeguards.
-- Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation.
 
 **v0.8.4 — Rebalance Strategy Profiles**
 - Adds persistent **SAFE / BALANCED / AGGRESSIVE** Smart Rebalance profiles.
@@ -67,12 +61,6 @@
 **All Rights Reserved — SakaLuX [2380374]**
 
 ## Release history / Changelog
-
-### v0.8.5 — TornPDA panel recovery
-- Prevents continuous page/chat mutations from postponing panel mounting indefinitely.
-- Skips hidden stock lists and relocates the panel when Torn loads or replaces content.
-- Preserves settings, profiles and trading safeguards.
-- Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation.
 
 ### v0.8.4 — Rebalance Strategy Profiles
 - Added persistent SAFE, BALANCED and AGGRESSIVE Smart Rebalance profiles.
