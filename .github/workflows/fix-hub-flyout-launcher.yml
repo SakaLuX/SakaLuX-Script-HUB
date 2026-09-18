@@ -54,10 +54,6 @@ jobs:
             return true;
         }
 
-        // Torn keeps the fly-out menu as a separate navigation surface. Do not
-        // assume one CSS-module/hash or one Touchscreen Navigation mode. Instead,
-        // locate stable native rows by their actual destination/label and clone a
-        // Torn-owned row so spacing, typography and hover states stay native.
         const allClickable = [...document.querySelectorAll('a[href], button')];
         const labelOf = el => String(el.textContent || '').replace(/\s+/g, ' ').trim();
         const hrefOf = el => String(el.getAttribute?.('href') || '').toLowerCase();
@@ -116,7 +112,6 @@ jobs:
         click.setAttribute('title', 'SakaLuX Hub');
         click.setAttribute('aria-label', 'SakaLuX Hub');
 
-        // Keep the cloned native row structure but replace its visible content.
         const textNodes = [...click.querySelectorAll('span,div')].filter(el => {
             const t = labelOf(el);
             return t && el.children.length === 0 && /^(cat script|targets|enemies|friends)$/i.test(t);
@@ -127,7 +122,6 @@ jobs:
             click.textContent = '☠️  SakaLuX Hub';
         }
 
-        // Replace a cloned image/icon when possible, otherwise prepend our skull.
         const img = click.querySelector('img');
         if (img) {
             img.removeAttribute('src');
@@ -154,8 +148,6 @@ jobs:
             if (event.key === 'Enter' || event.key === ' ') open(event);
         }, true);
 
-        // Match CAT's useful behavior: when CAT exists, place Hub right beside it;
-        // otherwise place it after Targets/Enemies/Friends in the same native list.
         sourceRow.insertAdjacentElement('afterend', row);
         syncFloatingButtonVisibility();
         return true;
@@ -183,3 +175,4 @@ jobs:
           git add SakaLuX-Script-Hub.user.js
           git commit -m "Hub v1.9.76: support fly-out and legacy topbar launchers"
           git push
+# trigger-2026-09-18
