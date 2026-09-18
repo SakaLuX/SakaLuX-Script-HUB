@@ -1880,13 +1880,14 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             return false;
         }
 
-        const visible = el => {
+        const mounted = el => {
             if (!(el instanceof Element) || !el.isConnected) return false;
             try {
                 const cs = getComputedStyle(el);
                 const r = el.getBoundingClientRect();
+                // Persistent CAT-style mounting: viewport position is irrelevant.
                 return cs.display !== 'none' && cs.visibility !== 'hidden' && Number(cs.opacity || 1) > 0.01
-                    && r.width > 20 && r.height > 20 && r.bottom > 0 && r.right > 0;
+                    && r.width > 20 && r.height > 20;
             } catch { return false; }
         };
         const cleanLabel = el => String(el?.textContent || '')
@@ -1895,7 +1896,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             .trim()
             .toLowerCase();
         const clicks = [...document.querySelectorAll('a[href],button')]
-            .filter(el => !el.closest?.(`#${IDS.navSkull}`) && visible(el));
+            .filter(el => !el.closest?.(`#${IDS.navSkull}`) && mounted(el));
 
         const knownLabels = new Set([
             'home','items','travel agency','travel','raceway','city','item market','gym','properties',
@@ -1944,7 +1945,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
         const listParent = best.parent;
         const rows = best.rows
-            .filter(row => visible(row))
+            .filter(row => mounted(row))
             .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
         const firstRow = rows[0];
         if (!firstRow) {
@@ -1955,9 +1956,9 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
         const positionFirstVertical = row => {
             if (!row) return false;
-            const currentFirst = [...listParent.children].find(child => child !== row && visible(child));
-            const target = currentFirst || firstRow;
-            if (target && (row.parentElement !== listParent || row.nextElementSibling !== target)) {
+            // Always keep Hub as the first child of the vertical list.
+            const target = [...listParent.children].find(child => child !== row) || firstRow;
+            if (target && (row.parentElement !== listParent || listParent.firstElementChild !== row)) {
                 listParent.insertBefore(row, target);
             }
             row.dataset.sakaluxHubMode = 'flyout-first-vertical';
@@ -1965,7 +1966,10 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         };
 
         if (existing?.isConnected) {
-            positionFirstVertical(existing);
+            // Keep the exact mounted node permanently in Torn's vertical list.
+            // Scrolling must never remove/recreate it.
+            const parent = existing.parentElement;
+            if (parent && parent.firstElementChild !== existing) parent.insertBefore(existing, parent.firstElementChild);
             existing.querySelector(`#${IDS.navBadge}`)?.remove();
             existing.querySelectorAll('[data-sakalux-inherited-extra]').forEach(el => el.remove());
             updateTopbarSkullState();
