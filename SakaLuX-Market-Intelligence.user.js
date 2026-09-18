@@ -775,7 +775,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     }
 
     const fetchEquippedLoadoutPending=new Map();
-    function fetchEquippedLoadout(force=false){const pendingKey=getApiKey();if(fetchEquippedLoadoutPending.has(pendingKey))return fetchEquippedLoadoutPending.get(pendingKey);const pending=fetchEquippedLoadoutData(force).finally(()=>fetchEquippedLoadoutPending.delete(pendingKey));fetchEquippedLoadoutPending.set(pendingKey,pending);return pending;}
+    function fetchEquippedLoadout(force=false){if(!force){const cached=loadJson(STORAGE.loadoutCache,null);if(cached?.at&&Date.now()-Number(cached.at)<LOADOUT_CACHE_MS&&Array.isArray(cached.items))return fetchEquippedLoadoutData(false);}const pendingKey=getApiKey();if(fetchEquippedLoadoutPending.has(pendingKey))return fetchEquippedLoadoutPending.get(pendingKey);const pending=fetchEquippedLoadoutData(force).finally(()=>fetchEquippedLoadoutPending.delete(pendingKey));fetchEquippedLoadoutPending.set(pendingKey,pending);return pending;}
     async function fetchEquippedLoadoutData(force=false) {
         const cached=loadJson(STORAGE.loadoutCache,null);
         if(!force&&cached?.at&&Date.now()-Number(cached.at)<LOADOUT_CACHE_MS&&Array.isArray(cached.items)){
@@ -1093,7 +1093,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     function cachePeek(itemId,maxAge=TRAVEL_CACHE_MAX_STALE_MS) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>maxAge) return null; return row; }
     function cachePut(itemId,row) { marketCache[String(itemId)]=Object.assign({},row,{at:Date.now()}); saveJson(STORAGE.marketCache,marketCache); }
     const fetchMarketPending=new Map();
-    function fetchMarket(itemId,force=false){const pendingKey=String(itemId)+'|'+getApiKey();if(fetchMarketPending.has(pendingKey))return fetchMarketPending.get(pendingKey);const pending=fetchMarketData(itemId,force).finally(()=>fetchMarketPending.delete(pendingKey));fetchMarketPending.set(pendingKey,pending);return pending;}
+    function fetchMarket(itemId,force=false){if(!force){const cached=cacheGet(itemId);if(cached)return Promise.resolve(cached);}const pendingKey=String(itemId)+'|'+getApiKey();if(fetchMarketPending.has(pendingKey))return fetchMarketPending.get(pendingKey);const pending=fetchMarketData(itemId,force).finally(()=>fetchMarketPending.delete(pendingKey));fetchMarketPending.set(pendingKey,pending);return pending;}
     async function fetchMarketData(itemId,force=false) {
         if(!force){const c=cacheGet(itemId); if(c) return c;}
         const key=getApiKey(); if(!key) return null;
