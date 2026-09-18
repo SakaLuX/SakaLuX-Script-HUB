@@ -3,29 +3,27 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.0**
+**v0.7.17**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
-- Vault Max / Vault Keep, Withdraw / Withdraw All and Benefit Lock protected-share floors.
-- Torn API sync for money, portfolio positions and stock catalog, with dedicated API Access management.
-- Portfolio dashboard, cost-basis coverage, unrealized P/L, quick BUY/SELL, favorites, sort/filter and transaction history.
-- ROI / next-benefit Advisor with marginal APR, payback and bank comparison.
-- **Financial Advisor** with benefit income per day/month/year, configurable daily costs, net profit, Best ROI and Best Affordable cards, exclusions and bank-period comparison.
-- **Automatic bank-rate capture** when a Torn Bank page exposes supported 1w / 2w / 1m / 2m / 3m rates; manual APR remains the fallback.
-- **Technical Trade Assistant** using locally collected price history with 24H / 1W / 1M chart, RSI 14, EMA 20 / EMA 90 and Bollinger bands.
-- **Portfolio Simulator** for no-trade SELL-excess → BUY-target scenarios while preserving Benefit Lock.
-- Guided rebalance preview/execution, Dry Run, Target Lock, action log and global PANIC cash-to-stock workflow.
-- Shared Script Hub / Standalone Dock integration and TornPDA-first UI.
+- Vault Max to move available on-hand cash into the selected stock.
+- Vault (Keep) to preserve a configured cash amount while vaulting the rest.
+- Withdraw a chosen cash value from the selected stock.
+- Withdraw All with optional benefit-tier protection.
+- Benefit Lock prevents withdrawals that would drop the detected benefit tier.
+- Dedicated Torn API Key Manager with Save, Show/Hide, Test & Sync, Create Required Key and Clear controls.
+- Torn API sync for money, portfolio positions and the public stock catalog.
+- Portfolio dashboard with position count, market value, cash, known unrealized P/L, per-stock benefit tier and protected-share floor.
+- Portfolio advisor showing owned shares, current benefit tier, estimated cost to the next benefit tier and unrealized P/L when transaction data is available.
+- Global **PANIC** button available from any Torn page.
+- PANIC uses the configured vault target and buys directly from the current Torn page without navigating to Stocks.
+- Optional Panic confirmation toggle.
+- Mobile/TornPDA-first panel.
 
 ## Current release note
 
-**v0.8.0 — Advisor Suite**
-- Adds Financial Advisor with daily/monthly/yearly benefit income, configurable daily costs, net profit, Best ROI / Best Affordable, exclusions and bank-period comparison.
-- Captures supported Torn Bank rates when available on the Bank page and falls back to the existing manual APR setting.
-- Adds local Technical Trade Assistant: 24H / 1W / 1M history, RSI 14, EMA 20/90, Bollinger bands, trend/signal text and inline SVG chart. History is local and accumulates as Stocks is used.
-- Adds Portfolio Simulator for safe excess-share reallocation previews. It never trades and respects Benefit Lock on the simulated sell side.
-- Keeps all existing Vault, Withdraw, quick trade, Rebalance, Dry Run, Target Lock, PANIC, API and Hub/Standalone functionality.
+**v0.7.12** Moves per-stock controls outside Torn's native stock-column list into full-width companion cards below each stock, preventing narrow right-column overlays. Groups symbol, portfolio/benefit data and compact actions in a readable mobile layout; keeps companion cards paired with their stock during filtering and sorting. Preserves quick-trade amount selections, skips rebuilding unchanged cards, computes opportunity rankings once per render and avoids redundant sorting mutations.
 
 ## Installation and Hub integration
 - Install/update the public release through Greasy Fork script 596192. GitHub remains the canonical source repository.
@@ -53,14 +51,6 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Hub integration is available from v0.7.7.
 
 ## Changelog
-
-### v0.8.0 — Advisor Suite
-- Financial Advisor: benefit income/day/month/year, daily-cost modelling, net profit, Best ROI, Best Affordable, exclusions and bank-period comparison.
-- Best-effort Torn Bank rate capture with manual APR fallback.
-- Technical Trade Assistant with local 24H/1W/1M history, RSI 14, EMA 20/90, Bollinger bands and SVG chart.
-- Portfolio Simulator for SELL excess → BUY target what-if scenarios; simulation never submits orders.
-- `scripts.json`, INFO, release metadata, standalone/runtime version surfaces and documentation synchronized to v0.8.0.
-
 
 
 
