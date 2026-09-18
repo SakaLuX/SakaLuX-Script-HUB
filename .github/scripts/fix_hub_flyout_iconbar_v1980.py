@@ -1,3 +1,4 @@
+# trigger v1.9.80
 from pathlib import Path
 
 HUB = Path('SakaLuX-Script-Hub.user.js')
@@ -39,7 +40,6 @@ replacement = r'''    function createNavSkull() {
         const allClicks = [...document.querySelectorAll('a[href],button')]
             .filter(el => !el.closest?.(`#${IDS.navSkull}`) && visible(el));
 
-        // Anchor on the real fly-out sidebar by finding stable Torn rows visible in it.
         const gym = allClicks.find(el => labelOf(el) === 'gym');
         const home = allClicks.find(el => labelOf(el) === 'home');
         if (!gym || !home) {
@@ -65,10 +65,6 @@ replacement = r'''    function createNavSkull() {
         const gymRect = gym.getBoundingClientRect();
         const sidebarRect = sidebar.getBoundingClientRect();
         const sidebarClicks = allClicks.filter(el => sidebar.contains(el));
-
-        // TornPDA fly-out has a horizontal quick-action row above Home with three buttons.
-        // Detect it by geometry instead of relying on labels because current TornPDA renders
-        // Messages / Events / Awards as icon-only cells.
         const grouped = new Map();
         for (const el of sidebarClicks) {
             const r = el.getBoundingClientRect();
@@ -86,7 +82,6 @@ replacement = r'''    function createNavSkull() {
             const ys = unique.map(el => el.getBoundingClientRect());
             const aligned = unique.length >= 3 && Math.max(...ys.map(r => r.top)) - Math.min(...ys.map(r => r.top)) <= 8;
             if (!aligned) continue;
-            // Prefer the highest three-cell strip nearest the top of the sidebar.
             if (!quick || unique[0].getBoundingClientRect().top < quick[0].getBoundingClientRect().top) quick = unique;
         }
 
@@ -96,7 +91,6 @@ replacement = r'''    function createNavSkull() {
             return false;
         }
 
-        // Collapse nested click targets to siblings under their nearest shared parent.
         const directChildUnder = (el, parent) => {
             let node = el;
             while (node?.parentElement && node.parentElement !== parent) node = node.parentElement;
@@ -126,9 +120,7 @@ replacement = r'''    function createNavSkull() {
         const third = cells[2];
         const positionFourth = row => {
             if (!row || !third?.parentElement) return false;
-            if (row.parentElement !== rowParent || third.nextElementSibling !== row) {
-                third.insertAdjacentElement('afterend', row);
-            }
+            if (row.parentElement !== rowParent || third.nextElementSibling !== row) third.insertAdjacentElement('afterend', row);
             row.dataset.sakaluxHubMode = 'flyout-iconbar';
             return true;
         };
@@ -162,7 +154,6 @@ replacement = r'''    function createNavSkull() {
         click.setAttribute('title', 'SakaLuX Hub');
         click.setAttribute('aria-label', 'SakaLuX Hub');
 
-        // Remove inherited text, counters and extra icons. This fly-out cell is icon-only.
         [...click.querySelectorAll('span,div')].forEach(el => {
             if (el.children.length === 0 && String(el.textContent || '').trim()) el.textContent = '';
         });
