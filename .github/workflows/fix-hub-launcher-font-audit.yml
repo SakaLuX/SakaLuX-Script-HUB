@@ -154,3 +154,5 @@ jobs:
           git add SakaLuX-Script-Hub.user.js FONT-SAFETY-AUDIT-2026-09-18.md
           git commit -m "Hub v1.9.75: fix fallback launcher and audit native fonts"
           git push
+
+# Triggered after workflow creation so GitHub Actions sees this workflow on main.
