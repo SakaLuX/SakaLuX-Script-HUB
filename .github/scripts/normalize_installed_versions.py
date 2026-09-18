@@ -99,7 +99,15 @@ def sync_hub_fallback_registry(text: str, registry: dict) -> str:
         raise RuntimeError('Hub FALLBACK_REGISTRY boundaries not found')
     payload = json.dumps(registry, indent=4, ensure_ascii=False)
     replacement = start_token + payload.replace('\n', '\n    ')
-    return text[:start] + replacement + text[end:]
+    text = text[:start] + replacement + text[end:]
+    if 'const FALLBACK_MODULE_DETAILS =' not in text:
+        marker = '\n\n    let registry = '
+        pos = text.find(marker, start)
+        if pos < 0:
+            raise RuntimeError('Hub registry insertion marker missing')
+        details = "\n\n    const FALLBACK_MODULE_DETAILS = Object.fromEntries(\n        (FALLBACK_REGISTRY.scripts || []).map(s => [s.id, { info: s.info, release: s.release }])\n    );"
+        text = text[:pos] + details + text[pos:]
+    return text
 
 
 def ensure_hub_changelog(text: str, version: str) -> str:
@@ -224,17 +232,46 @@ for row in registry.get('scripts', []):
 
 # Hub's own MD follows the Hub userscript/changelog version as well.
 hub_notes = [
-    'Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.',
-    'Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata.'
+    "Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.",
+    'Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.',
+    'Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.'
 ]
-sync_release_doc(ROOT / 'greasyfork/Script-Hub.md', hub_new, hub_notes, 'Canonical release/version synchronization')
+hub_doc = ROOT / 'greasyfork/Script-Hub.md'
+sync_release_doc(hub_doc, hub_new, hub_notes, 'Persistent native Fly-out launcher + release synchronization')
 
-# Standalone Suite is not a Hub registry module, but keep its MD version label aligned.
-suite = ROOT / 'SakaLuX-Suite.user.js'
-suite_doc = ROOT / 'greasyfork/SakaLuX-Suite.md'
-if suite.exists() and suite_doc.exists():
-    suite_version = header_version(suite.read_text(encoding='utf-8'))
-    sync_release_doc(suite_doc, suite_version, ['Release documentation synchronized with the current Suite userscript version.'])
+# Keep the registered add-on list and version prose on the Hub page aligned too.
+if hub_doc.exists():
+    md = hub_doc.read_text(encoding='utf-8')
+    for row in registry.get('scripts', []):
+        name = re.escape(str(row.get('name') or ''))
+        if not name:
+            continue
+        md = re.sub(
+            rf'(?m)^(- .*?{name}.*?\*\*v)[^*]+(\*\*)$',
+            lambda m, v=str(row.get('version')): m.group(1) + v + m.group(2),
+            md, count=1
+        )
+    company = next((x for x in registry.get('scripts', []) if x.get('id') == 'company-intelligence'), None)
+    if company:
+        md = re.sub(
+            r'(Company Intelligence is currently registered at \*\*v)[^*]+(\*\*)',
+            lambda m: m.group(1) + str(company.get('version')) + m.group(2),
+            md, count=1
+        )
+    hub_doc.write_text(md, encoding='utf-8')
+
+# Standalone tools are not Hub registry modules, but their release docs still follow metadata.
+standalone_docs = [
+    ('SakaLuX-Chat-Intelligence.user.js', 'greasyfork/Chat-Intelligence.md', 'Chat Intelligence'),
+    ('SakaLuX-Account-Auditor.user.js', 'greasyfork/Account-Auditor.md', 'Account Auditor'),
+    ('SakaLuX-Suite.user.js', 'greasyfork/SakaLuX-Suite.md', 'Suite'),
+]
+for src_name, doc_name, label in standalone_docs:
+    src = ROOT / src_name
+    doc = ROOT / doc_name
+    if src.exists() and doc.exists():
+        v = header_version(src.read_text(encoding='utf-8'))
+        sync_release_doc(doc, v, [f'Release documentation synchronized with the current {label} userscript version.'])
 
 print('Canonical installed-version normalization complete.')
 print('Hub fallback registry and NEW release metadata synchronized.')

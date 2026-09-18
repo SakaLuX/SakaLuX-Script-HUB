@@ -12,8 +12,9 @@
 
 ## Current release note
 
-**v1.2.20 — Release metadata synchronization**
-- Release documentation synchronized with the current userscript version.
+**v1.2.20 — Release documentation synchronized with the current Chat Intelligence userscript version**
+- Release documentation synchronized with the current Chat Intelligence userscript version.
+
 ## Recommended
 - Use together with SakaLuX Script Hub for consistent controls and status handling.
 
