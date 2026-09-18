@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.0.1**
+**v0.8.0**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -20,13 +20,12 @@
 
 ## Current release note
 
-**v0.8.0.1 — Stabilization & TornPDA polish**
-- Stabilizes the v0.8.0 foundation before v0.8.1 Technical Trade Assistant and v0.8.2 Portfolio Simulator.
-- Hardens local history parsing/pruning/storage and makes technical calculations respect the selected 24H / 1W / 1M window.
-- Saves Daily Costs, exclusions and Simulator amount while typing with debounced rerenders.
-- Prevents identical Simulator source/target selections and tightens automatic Bank APR capture.
-- Isolates Advisor Suite render failures and adds TornPDA overflow/single-column polish without changing existing trading controls.
-
+**v0.8.0 — Advisor Suite**
+- Adds Financial Advisor with daily/monthly/yearly benefit income, configurable daily costs, net profit, Best ROI / Best Affordable, exclusions and bank-period comparison.
+- Captures supported Torn Bank rates when available on the Bank page and falls back to the existing manual APR setting.
+- Adds local Technical Trade Assistant: 24H / 1W / 1M history, RSI 14, EMA 20/90, Bollinger bands, trend/signal text and inline SVG chart. History is local and accumulates as Stocks is used.
+- Adds Portfolio Simulator for safe excess-share reallocation previews. It never trades and respects Benefit Lock on the simulated sell side.
+- Keeps all existing Vault, Withdraw, quick trade, Rebalance, Dry Run, Target Lock, PANIC, API and Hub/Standalone functionality.
 
 ## Installation and Hub integration
 - Install/update the public release through Greasy Fork script 596192. GitHub remains the canonical source repository.
@@ -54,15 +53,6 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Hub integration is available from v0.7.7.
 
 ## Changelog
-
-### v0.8.0.1 — Stabilization & TornPDA polish
-- Hardened local technical-history parsing, pruning, de-duplication and storage fallback.
-- Technical indicators now use the selected 24H / 1W / 1M sample window.
-- Daily Costs, exclusions and Simulator amount persist while typing with debounced rerenders.
-- Simulator avoids identical SELL/BUY symbols; Bank auto-capture rejects implausible percentages.
-- Financial, Technical and Simulator renders are isolated so one failure does not take down the full panel.
-- Added narrow-screen overflow protection and one-column TornPDA polish.
-- Synchronized userscript/runtime version surfaces, scripts.json, INFO, release note and changelog to v0.8.0.1.
 
 ### v0.8.0 — Advisor Suite
 - Financial Advisor: benefit income/day/month/year, daily-cost modelling, net profit, Best ROI, Best Affordable, exclusions and bank-period comparison.
