@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.81
+// @version      1.9.82
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -77,7 +77,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.81';
+    const VERSION = '1.9.82';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -97,6 +97,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.82", "date": "2026-09-19", "changes": ["Fly-out launcher no longer depends on Home being present.", "Detects the real vertical Torn navigation list from any available standard sidebar rows and inserts SakaLuX Hub as the first row of that list.", "Keeps the skull artwork and avoids inherited counters or chevrons."]},
         {"version": "1.9.81", "date": "2026-09-19", "changes": ["Corrects Fly-out placement: SakaLuX Hub is now the first item in the vertical navigation list, immediately before Home and below the three quick-action icons.", "Clones the simple Home row instead of expandable/contact rows, so no inherited counter or chevron appears.", "Keeps the skull launcher artwork and alert blink while Topbar legacy remains handled by the native topbar launcher."]},
         {"version": "1.9.80", "date": "2026-09-19", "changes": ["Fly-out launcher now mounts in Torn's three-icon quick-action strip as the fourth button, after Messages, Events and Awards/Merits.", "Uses the actual visible icon row instead of text labels, fixing TornPDA layouts where those three buttons have no text nodes.", "Keeps the blinking skull artwork and removes inherited badges/labels from the cloned quick-action button."]},
         {"version": "1.9.79", "date": "2026-09-19", "changes": ["Corrects Fly-out placement: SakaLuX Hub is the fourth navigation button, immediately after Messages, Events and Awards/Merits.", "Removes inherited counters and chevrons from the Hub launcher.", "Topbar legacy keeps the Hub launcher immediately before Messages."]},
@@ -1888,15 +1889,21 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     && r.width > 20 && r.height > 20 && r.bottom > 0 && r.right > 0;
             } catch { return false; }
         };
-        const labelOf = el => String(el?.textContent || '').replace(/\s+/g, ' ').trim();
-        const cleanLabel = el => labelOf(el).replace(/\b\d+\b/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+        const cleanLabel = el => String(el?.textContent || '')
+            .replace(/\b\d+\b/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
         const clicks = [...document.querySelectorAll('a[href],button')]
             .filter(el => !el.closest?.(`#${IDS.navSkull}`) && visible(el));
 
-        const home = clicks.find(el => cleanLabel(el) === 'home');
-        const items = clicks.find(el => cleanLabel(el) === 'items');
-        const gym = clicks.find(el => cleanLabel(el) === 'gym');
-        if (!home || !items || !gym) {
+        const knownLabels = new Set([
+            'home','items','travel agency','travel','raceway','city','item market','gym','properties',
+            'education','crimes','missions','newspaper','jail','hospital','casino','forums','calendar',
+            'elimination','community events','friends','enemies','targets'
+        ]);
+        const anchors = clicks.filter(el => knownLabels.has(cleanLabel(el)));
+        if (anchors.length < 2) {
             existing?.remove();
             syncFloatingButtonVisibility();
             return false;
@@ -1915,20 +1922,32 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             return node?.parentElement === parent ? node : null;
         };
 
-        let listParent = null;
-        let homeRow = null;
-        for (const parent of ancestors(home)) {
-            if (!parent || parent === document.body || parent === document.documentElement) continue;
-            const hr = directChildUnder(home, parent);
-            const ir = directChildUnder(items, parent);
-            const gr = directChildUnder(gym, parent);
-            if (hr && ir && gr && new Set([hr, ir, gr]).size === 3) {
-                listParent = parent;
-                homeRow = hr;
-                break;
+        let best = null;
+        for (const anchor of anchors) {
+            for (const parent of ancestors(anchor)) {
+                if (!parent || parent === document.body || parent === document.documentElement) continue;
+                const rows = [...new Set(anchors.map(el => directChildUnder(el, parent)).filter(Boolean))];
+                if (rows.length < 3) continue;
+                const rects = rows.map(row => row.getBoundingClientRect());
+                const verticalSpread = Math.max(...rects.map(r => r.top)) - Math.min(...rects.map(r => r.top));
+                if (verticalSpread < 80) continue; // reject the horizontal 3-icon quick bar
+                const score = rows.length * 100 + verticalSpread;
+                if (!best || score > best.score) best = { parent, rows, score };
             }
         }
-        if (!listParent || !homeRow) {
+
+        if (!best) {
+            existing?.remove();
+            syncFloatingButtonVisibility();
+            return false;
+        }
+
+        const listParent = best.parent;
+        const rows = best.rows
+            .filter(row => visible(row))
+            .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+        const firstRow = rows[0];
+        if (!firstRow) {
             existing?.remove();
             syncFloatingButtonVisibility();
             return false;
@@ -1936,8 +1955,10 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
         const positionFirstVertical = row => {
             if (!row) return false;
-            if (row.parentElement !== listParent || row.nextElementSibling !== homeRow) {
-                listParent.insertBefore(row, homeRow);
+            const currentFirst = [...listParent.children].find(child => child !== row && visible(child));
+            const target = currentFirst || firstRow;
+            if (target && (row.parentElement !== listParent || row.nextElementSibling !== target)) {
+                listParent.insertBefore(row, target);
             }
             row.dataset.sakaluxHubMode = 'flyout-first-vertical';
             return true;
@@ -1952,7 +1973,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             return true;
         }
 
-        const row = homeRow.cloneNode(true);
+        const row = firstRow.cloneNode(true);
         row.id = IDS.navSkull;
         row.setAttribute('data-sakalux-hub-launcher', 'flyout-first-vertical');
         row.dataset.sakaluxHubMode = 'flyout-first-vertical';
@@ -1974,17 +1995,15 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         click.setAttribute('title', 'SakaLuX Hub');
         click.setAttribute('aria-label', 'SakaLuX Hub');
 
+        const sourceLabel = cleanLabel(firstRow);
         const leaves = [...click.querySelectorAll('span,div')].filter(el => el.children.length === 0);
-        const labelNode = leaves.find(el => cleanLabel(el) === 'home') || leaves.find(el => cleanLabel(el));
+        const labelNode = leaves.find(el => cleanLabel(el) === sourceLabel) || leaves.find(el => cleanLabel(el));
         if (labelNode) labelNode.textContent = 'SAKALUX HUB';
 
         for (const el of [...click.querySelectorAll('span,div')]) {
             if (el === labelNode) continue;
             const t = String(el.textContent || '').trim();
-            if (/^\d+$/.test(t) || /^[›»▶►→]+$/.test(t)) {
-                el.setAttribute('data-sakalux-inherited-extra', '1');
-                el.remove();
-            }
+            if (/^\d+$/.test(t) || /^[›»▶►→]+$/.test(t)) el.remove();
         }
 
         const svgs = [...click.querySelectorAll('svg')];
