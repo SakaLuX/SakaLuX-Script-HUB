@@ -31,6 +31,9 @@ jobs:
           # Synchronize legacy standalone registration literals so Hub/Standalone never report an old installed version.
           s=s.replace("version:'0.7.16'", "version:'0.8.0'")
           s=s.replace('version:"0.7.16"', 'version:"0.8.0"')
+          # JS object keys that begin with digits must be quoted.
+          s=s.replace('{24h:86400000,1w:604800000,1m:2592000000}', "{'24h':86400000,'1w':604800000,'1m':2592000000}")
+          s=s.replace('({1w:7,2w:14,1m:30,2m:60,3m:90}', "({'1w':7,'2w':14,'1m':30,'2m':60,'3m':90}")
           p.write_text(s)
           PY
           cmp -s SakaLuX-Company-Intelligence-v1.0.0.user.js /tmp/company.before
