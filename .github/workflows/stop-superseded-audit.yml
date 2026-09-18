@@ -1,0 +1,21 @@
+name: Stop superseded audit
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/stop-superseded-audit.yml']
+permissions:
+  actions: write
+  contents: read
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Stop obsolete audit with missing output directory
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          state=$(gh api repos/SakaLuX/SakaLuX-Script-HUB/actions/runs/35367436353 --jq .status)
+          if [ "$state" != completed ]; then
+            gh api -X POST repos/SakaLuX/SakaLuX-Script-HUB/actions/runs/35367436353/cancel
+          fi
