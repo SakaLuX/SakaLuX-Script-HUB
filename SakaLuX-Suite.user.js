@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.930
+// @version      0.9.931
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -178,7 +178,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.930';
+  const VERSION = '0.9.931';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -24262,6 +24262,15 @@ function armoryLoanIconSvg() {
   }
   function createEventsDashboardModule(context) {
   'use strict';
+      function cleanEventMessageNode(node) {
+          if (!node) return '';
+          const clone = node.cloneNode(true);
+          clone.querySelectorAll(
+              '.sakalux-bt-ui, .sakalux-thanks-button, .sakalux-bt-details-button, .sakalux-bt-info, .ax-bazaar-suite-toolbar'
+          ).forEach(el => el.remove());
+          return cleanText(clone.textContent || '');
+      }
+
       const ROOT_ID = 'sakalux-events-dashboard';
       const state = {
           filter: 'all',
@@ -25216,7 +25225,7 @@ function armoryLoanIconSvg() {
               return null;
           }
           const message =
-              cleanText(messageEl.textContent);
+              cleanEventMessageNode(messageEl);
           const timeText =
               cleanText(
                   timeEl.innerText ||
@@ -26932,9 +26941,7 @@ function armoryLoanIconSvg() {
                           return false;
                       }
                       const rowMessage =
-                          cleanText(
-                              msgEl.textContent
-                          );
+                          cleanEventMessageNode(msgEl);
                       const rowTimeText =
                           cleanText(
                               timeEl.innerText ||
