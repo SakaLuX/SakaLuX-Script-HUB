@@ -1,0 +1,46 @@
+name: Sync all release surfaces
+
+on:
+  push:
+    paths:
+      - '.github/release-surfaces-sync.trigger'
+      - '.github/scripts/sync_all_release_surfaces.py'
+      - '.github/workflows/sync-all-release-surfaces.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Synchronize versions, release metadata and Greasy Fork docs
+        run: python3 .github/scripts/sync_all_release_surfaces.py
+
+      - name: Validate JSON and userscript syntax
+        run: |
+          python3 -m json.tool scripts.json >/dev/null
+          for f in SakaLuX-*.user.js; do
+            if [ "$f" = "SakaLuX-Suite.user.js" ]; then
+              continue
+            fi
+            node --check "$f"
+          done
+
+      - name: Commit synchronized surfaces
+        run: |
+          if git diff --quiet && [ -z "$(git status --porcelain --untracked-files=all)" ]; then
+            echo 'No synchronization changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add scripts.json greasyfork backups/all-release-surfaces-sync-2026-09-18 RELEASE-SURFACE-AUDIT-2026-09-18.md
+          git commit -m 'Sync release surfaces across all SakaLuX scripts'
+          git push
