@@ -31,7 +31,7 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 ## Important
 - Market values and value-per-credit calculations are estimates.
 - Weapon-mod ranges are learned locally from offers seen by the script and are guidance, not guaranteed future Mission Shop prices.
-- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is the current v1.0.42 line.
+- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is the current v1.0.41 line.
 
 ## License
 **All Rights Reserved**
