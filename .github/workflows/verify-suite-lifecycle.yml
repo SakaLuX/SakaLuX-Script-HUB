@@ -63,7 +63,16 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add SakaLuX-Suite.user.js reports/extended-performance-2026-09-18
+          preserved="$RUNNER_TEMP/validated-suite"
+          mkdir -p "$preserved/reports/extended-performance-2026-09-18"
+          cp SakaLuX-Suite.user.js "$preserved/"
+          for name in suite-stability suite-stability-before interactive; do
+            cp "reports/extended-performance-2026-09-18/$name.json" "$preserved/reports/extended-performance-2026-09-18/"
+          done
+          git fetch origin main
+          git reset --hard origin/main
+          cp "$preserved/SakaLuX-Suite.user.js" .
+          cp "$preserved/reports/extended-performance-2026-09-18/"*.json reports/extended-performance-2026-09-18/
+          git add SakaLuX-Suite.user.js reports/extended-performance-2026-09-18/suite-stability.json reports/extended-performance-2026-09-18/suite-stability-before.json reports/extended-performance-2026-09-18/interactive.json
           git commit -m 'Fix native Suite listener lifecycle and record verified global-handler cleanup'
-          git pull --rebase origin main
           git push origin HEAD:main
