@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.38
+// @version      1.8.37
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -76,7 +76,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.38'});
+  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.37'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -293,7 +293,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.38',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.37',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1143,41 +1143,6 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   #ci-root .ci-head>.ci-icon{width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;min-height:40px!important}
   #ci-root .ci-brand b{font-size:14px!important}
   #ci-root .ci-brand small{font-size:9px!important}
-}
-`;
-  (document.head||document.documentElement).appendChild(st);
-})();
-
-
-/* SAKALUX_COMPANY_API_FINAL_V1838 */
-(()=>{
-  if(document.getElementById('sakalux-company-api-final-v1838')) return;
-  const st=document.createElement('style');
-  st.id='sakalux-company-api-final-v1838';
-  st.textContent=`
-#ci-root .ci-head{overflow:hidden!important}
-#ci-root .ci-head>.ci-icon{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;max-width:38px!important;max-height:38px!important;padding:0!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:10px!important}
-#ci-root .ci-head>.ci-icon.api{color:#f5d85f!important;background:#29240f!important;border-color:#78621b!important}
-#ci-root .ci-tabs{display:flex!important;gap:4px!important;padding:5px 7px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:none!important}
-#ci-root .ci-tabs::-webkit-scrollbar{display:none!important}
-#ci-root .ci-tabs button{flex:0 0 auto!important;min-width:82px!important;height:34px!important;min-height:34px!important;padding:0 10px!important;border-radius:8px!important;font-size:10px!important;white-space:nowrap!important}
-#ci-root .ci-body{padding:10px!important}
-#ci-root .ci-body input#ci-api{width:100%!important;height:40px!important;min-height:40px!important;margin:5px 0 8px!important;padding:8px 10px!important;box-sizing:border-box!important;border-radius:9px!important}
-#ci-root .ci-body .ci-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;margin:8px 0!important;align-items:stretch!important}
-#ci-root .ci-body .ci-actions>.ci-btn,#ci-root .ci-body .ci-actions>button{width:100%!important;min-width:0!important;height:40px!important;min-height:40px!important;margin:0!important;padding:0 8px!important;border-radius:10px!important;font-size:10px!important;line-height:1.1!important;white-space:normal!important}
-#ci-root .ci-body [data-act="create-key"]{display:block!important;width:100%!important;height:40px!important;min-height:40px!important;margin:0 0 8px!important;background:linear-gradient(180deg,#a87b17,#79550e)!important;border-color:#c79b34!important;color:#fff!important}
-#ci-root .ci-body [data-act="save-key"],#ci-root .ci-body [data-act="test-key"]{background:linear-gradient(180deg,#377fcf,#275f9f)!important;border-color:#3d78bf!important;color:#fff!important}
-#ci-root .ci-body [data-act="clear-key"]{grid-column:1/-1!important;width:100%!important;height:40px!important;min-height:40px!important;margin:0!important;background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
-#ci-root .ci-body button[id*="create"][id*="key"],#ci-root .ci-body button[id*="api-create"]{width:100%!important}
-#ci-root .ci-body button[id*="clear"][id*="key"],#ci-root .ci-body button[id*="api-clear"]{width:100%!important}
-@media(max-width:700px){
- #ci-root .ci-head{grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto auto!important;gap:7px!important;padding:8px!important}
- #ci-root .ci-brand{grid-column:1!important;grid-row:1!important;min-width:0!important}
- #ci-root .ci-brand b{display:block!important;font-size:14px!important;line-height:1.12!important;white-space:normal!important}
- #ci-root .ci-brand small{display:block!important;margin-top:2px!important;font-size:9px!important;line-height:1.15!important;white-space:normal!important}
- #ci-root .ci-head-actions{grid-column:2!important;grid-row:1!important;display:flex!important;gap:5px!important;align-items:center!important;justify-content:flex-end!important}
- #ci-root .ci-mode{grid-column:1/-1!important;grid-row:2!important;display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important;min-width:0!important;height:36px!important}
- #ci-root .ci-mode button{width:100%!important;height:36px!important;min-height:36px!important;margin:0!important;padding:0 8px!important;font-size:10px!important;white-space:nowrap!important}
 }
 `;
   (document.head||document.documentElement).appendChild(st);
