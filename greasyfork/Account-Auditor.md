@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.13**
+**v1.3.14**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,7 +18,10 @@
 
 ## Current release note
 
-**v1.3.13** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+**v1.3.14 — Complete standalone registration**
+- Registers Account Auditor globally in the shared SakaLuX standalone module list as `account-auditor`.
+- Publishes the current standalone version as v1.3.14 while keeping Auditor intentionally outside the Script Hub registry.
+- Preserves the existing Auditor panel, API collection and privacy behavior.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
@@ -43,6 +46,11 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 **MIT**
 
 ## Release history / Changelog
+
+### v1.3.14 — Complete standalone registration
+- Added global shared-standalone registration for `account-auditor`.
+- Synchronized metadata/runtime version surfaces to v1.3.14.
+- Kept Account Auditor standalone and excluded from `scripts.json`.
 
 ### v1.3.13 — Performance and release metadata audit
 - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
