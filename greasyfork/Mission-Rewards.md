@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.42**
+**v1.0.43**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,7 +17,8 @@
 
 ## Current release note
 
-**v1.0.42 — Performance and TornPDA smoothness**
+**v1.0.43 — Release metadata synchronization**
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
 - Scopes legacy footer repair to the Mission settings panel and batches it once.
 - Ignores unrelated chat changes in reward scanning and standalone dock maintenance.
 - Preserves reward annotations, API controls and footer restoration.
@@ -37,6 +38,13 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+
+### v1.0.43 — Release metadata synchronization
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Scopes legacy footer repair to the Mission settings panel and batches it once.
+- Ignores unrelated chat changes in reward scanning and standalone dock maintenance.
+- Preserves reward annotations, API controls and footer restoration.
 
 ### v1.0.42 — Performance and TornPDA smoothness
 

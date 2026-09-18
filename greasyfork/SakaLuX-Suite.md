@@ -35,8 +35,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.929 — Extended performance validation**
-- Removes the Member Travel Map tag-edit listener and aborts Target Alerts global listeners when the native modules are disabled.
+**v0.9.929 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.38**
+**v1.8.39**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -20,7 +20,8 @@
 
 ## Current release note
 
-**v1.8.38 — Performance and TornPDA smoothness**
+**v1.8.39 — Release metadata synchronization**
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
 - Ignores unrelated chat changes in Company page scraping and dock maintenance.
 - Removes duplicate legacy registration timers that overwrote current module metadata.
 - Preserves Company panel stacking and current standalone registration.
@@ -48,6 +49,13 @@
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+
+### v1.8.39 — Release metadata synchronization
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Ignores unrelated chat changes in Company page scraping and dock maintenance.
+- Removes duplicate legacy registration timers that overwrote current module metadata.
+- Preserves Company panel stacking and current standalone registration.
 
 ### v1.8.38 — Performance and TornPDA smoothness
 
