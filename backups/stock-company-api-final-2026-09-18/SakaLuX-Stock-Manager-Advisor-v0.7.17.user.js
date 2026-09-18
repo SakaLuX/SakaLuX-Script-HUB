@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.7.18
+// @version      0.7.17
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.7.18'});
+  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.7.17'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -264,7 +264,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.7.18',
+    version: '0.7.17',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -2067,37 +2067,4 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 #slx-stock-api-sheet .slx-api-sheet-result{min-height:16px!important;margin:0!important;font-size:10px!important;color:#93a4b7!important;overflow-wrap:anywhere!important}
 @media(max-width:820px){#slx-stock-api-sheet#slx-stock-api-sheet{inset:6px!important;max-height:calc(100% - 12px)!important}}
 `;(document.head||document.documentElement).appendChild(st);
-})();
-
-
-/* SAKALUX_STOCK_API_FINAL_V0718 */
-(()=>{
-  if(document.getElementById('sakalux-stock-api-final-v0718')) return;
-  const st=document.createElement('style');
-  st.id='sakalux-stock-api-final-v0718';
-  st.textContent=`
-#slx-stock-panel .head{display:flex!important;align-items:center!important;gap:7px!important;padding:8px 10px!important}
-#slx-stock-panel .head>div:first-child,#slx-stock-panel .head>h2{min-width:0!important;flex:1 1 auto!important}
-#slx-stock-panel .head button,#slx-stock-panel .slx-stock-api-trigger{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;max-width:38px!important;max-height:38px!important;padding:0!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:10px!important}
-#slx-stock-api-sheet#slx-stock-api-sheet{position:absolute!important;inset:6px!important;z-index:2147483647!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;max-height:calc(100% - 12px)!important;border:1px solid #3b4654!important;border-radius:14px!important;background:#0b1118!important;box-shadow:0 18px 48px rgba(0,0,0,.55)!important}
-#slx-stock-api-sheet .slx-api-sheet-head{display:flex!important;align-items:center!important;gap:8px!important;flex:0 0 58px!important;height:58px!important;padding:8px 10px!important;border-bottom:1px solid #2d3d50!important;background:linear-gradient(155deg,#18212d,#101720 72%)!important}
-#slx-stock-api-sheet .slx-api-sheet-head>div{min-width:0!important;flex:1 1 auto!important}
-#slx-stock-api-sheet .slx-api-sheet-title{font-size:15px!important;font-weight:900!important;line-height:1.15!important}
-#slx-stock-api-sheet .slx-api-sheet-sub{font-size:9px!important;color:#93a4b7!important;margin-top:2px!important}
-#slx-stock-api-sheet .slx-api-sheet-close{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;padding:0!important;margin:0!important;border-radius:10px!important;font-size:20px!important}
-#slx-stock-api-sheet .slx-api-sheet-body{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:10px!important;display:flex!important;flex-direction:column!important;gap:8px!important}
-#slx-stock-api-sheet .slx-api-box{margin:0!important;padding:10px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#111a24!important;font-size:11px!important;line-height:1.45!important}
-#slx-stock-api-sheet .slx-api-box p{margin:5px 0!important;color:#93a4b7!important}
-#slx-stock-api-sheet label{display:block!important;margin:5px 0 4px!important;font-size:10px!important;color:#c7d2df!important}
-#slx-stock-api-sheet input{width:100%!important;height:40px!important;min-height:40px!important;margin:0!important;padding:8px 10px!important;box-sizing:border-box!important;border-radius:9px!important}
-#slx-stock-api-sheet button{height:40px!important;min-height:40px!important;margin:0!important;border-radius:10px!important;font-size:11px!important;font-weight:900!important;line-height:1.1!important}
-#slx-stock-api-sheet #slx-stock-api-create{width:100%!important;background:linear-gradient(180deg,#a87b17,#79550e)!important;border-color:#c79b34!important;color:#fff!important}
-#slx-stock-api-sheet .slx-api-sheet-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;margin:0!important}
-#slx-stock-api-sheet .slx-api-sheet-actions>button{width:100%!important;min-width:0!important}
-#slx-stock-api-sheet #slx-stock-api-save,#slx-stock-api-sheet #slx-stock-api-check{background:linear-gradient(180deg,#377fcf,#275f9f)!important;border-color:#3d78bf!important;color:#fff!important}
-#slx-stock-api-sheet #slx-stock-api-clear{width:100%!important;background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
-#slx-stock-api-sheet .slx-api-sheet-result{min-height:16px!important;margin:0!important;font-size:10px!important;color:#93a4b7!important;overflow-wrap:anywhere!important}
-@media(max-width:520px){#slx-stock-api-sheet .slx-api-sheet-actions{grid-template-columns:1fr 1fr!important}#slx-stock-api-sheet button{font-size:10px!important}}
-`;
-  (document.head||document.documentElement).appendChild(st);
 })();

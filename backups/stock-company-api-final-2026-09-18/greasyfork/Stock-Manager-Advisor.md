@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.7.18**
+**v0.7.17**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -23,13 +23,8 @@
 
 ## Current release note
 
-**v0.7.18 — Elimination-style API panel finalization**
-- Finalizes the Stocks API sheet so it follows the same compact visual contract as Elimination.
-- Keeps **CREATE REQUIRED API KEY** full width.
-- Keeps **SAVE & TEST** and **CHECK ACCESS** balanced on the same row.
-- Keeps **CLEAR LOCAL KEY** full width below the primary actions.
-- Normalizes header icon size, spacing, password field geometry and TornPDA scrolling.
-- Preserves the shared standalone dock, PANIC behavior, trading safeguards and existing stock logic.
+**v0.7.12** Moves per-stock controls outside Torn's native stock-column list into full-width companion cards below each stock, preventing narrow right-column overlays. Groups symbol, portfolio/benefit data and compact actions in a readable mobile layout; keeps companion cards paired with their stock during filtering and sorting. Preserves quick-trade amount selections, skips rebuilding unchanged cards, computes opportunity rankings once per render and avoids redundant sorting mutations.
+
 ## Installation and Hub integration
 - Install/update the public release through Greasy Fork script 596192. GitHub remains the canonical source repository.
 - Namespace and existing local-storage keys are retained, preserving settings, API key and cached data.
@@ -56,15 +51,6 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Hub integration is available from v0.7.7.
 
 ## Changelog
-
-### v0.7.18 — Elimination-style API panel finalization
-- Finalized the dedicated Stocks API sheet using the compact Elimination visual contract.
-- Full-width Create action; equal Save/Test actions; full-width Clear action.
-- Unified header/API icon sizing, field geometry, spacing and mobile scroll behavior.
-- No trading logic, PANIC flow or API permission requirements were changed.
-
-### v0.7.17 — Shared standalone bootstrap
-- Preserved the Bazaar-style shared standalone dock registration and current Stocks module bridge behavior.
 
 
 
