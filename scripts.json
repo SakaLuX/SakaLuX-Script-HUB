@@ -333,11 +333,11 @@
       "apiGlobal": "SakaLuXStockManagerAdvisor",
       "buttonSelector": "#sakalux-module-bridge-stock-manager-advisor",
       "category": "Trading",
-      "description": "Torn stock vault, ROI/benefit advisor, Financial Advisor and Technical Trade Assistant with 24H/1W/1M local charts, RSI, Bollinger, EMA20/90 and multi-factor technical signals.",
+      "description": "Torn stock vault and advisor with Financial Advisor, Technical Trade Assistant, Portfolio Simulator and Smart Rebalance strategy profiles.",
       "downloadUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.user.js",
       "icon": "📊",
       "id": "stock-manager-advisor",
-      "info": "Stock Manager & Advisor is the SakaLuX stock decision-support and protected-trading module. It provides stock-vault targets, Vault Max/Keep, Withdraw/Withdraw All, Benefit Lock, portfolio and cost-basis views, ROI and next-benefit analysis, quick BUY/SELL tools, favorites, filters, guided rebalance, transaction history and a global PANIC cash-to-stock workflow. v0.8.0 adds a Financial Advisor with daily/monthly income and cost modelling, Best ROI and Best Affordable cards, bank-period comparison with best-effort automatic rate capture from Torn Bank pages, a local Technical Trade Assistant with 24H/1W/1M history, RSI 14, EMA 20/90, Bollinger bands and an SVG chart, plus a no-trade Portfolio Simulator that previews safe excess-share reallocation while respecting Benefit Lock. Technical history is stored locally and grows as the module is used; no external market-history service is required. v0.8.3 adds a portfolio-wide Smart Rebalance Engine that builds preview-only SELL → BUY plans from free shares while respecting Benefit Lock and combining local technical signals with benefit context.",
+      "info": "Stock Manager & Advisor is the SakaLuX stock decision-support and protected-trading module. It provides stock-vault targets, Vault Max/Keep, Withdraw/Withdraw All, Benefit Lock, portfolio and cost-basis views, ROI and next-benefit analysis, quick BUY/SELL tools, favorites, filters, guided rebalance, transaction history and a global PANIC cash-to-stock workflow. v0.8.0 adds a Financial Advisor with daily/monthly income and cost modelling, Best ROI and Best Affordable cards, bank-period comparison with best-effort automatic rate capture from Torn Bank pages, a local Technical Trade Assistant with 24H/1W/1M history, RSI 14, EMA 20/90, Bollinger bands and an SVG chart, plus a no-trade Portfolio Simulator that previews safe excess-share reallocation while respecting Benefit Lock. Technical history is stored locally and grows as the module is used; no external market-history service is required. v0.8.3 adds a portfolio-wide Smart Rebalance Engine that builds preview-only SELL → BUY plans from free shares while respecting Benefit Lock and combining local technical signals with benefit context. v0.8.4 adds persistent SAFE, BALANCED and AGGRESSIVE Smart Rebalance profiles that tune turnover caps, score thresholds and technical/benefit weighting while preserving Benefit Lock and preview-only behavior.",
       "metaUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "name": "Stock Manager & Advisor",
       "quickActions": [
@@ -368,17 +368,17 @@
         }
       ],
       "release": {
-        "version": "0.8.3",
+        "version": "0.8.4",
         "date": "2026-09-18",
         "notes": [
-          "Adds a portfolio-wide Smart Rebalance plan using only free shares as sell sources.",
-          "Ranks source and target positions with local technical score, benefit yield and benefit-tier context.",
-          "Shows up to four preview-only SELL → BUY moves with capital, share, technical, benefit and tier deltas."
+          "Adds persistent SAFE, BALANCED and AGGRESSIVE Smart Rebalance strategy profiles.",
+          "Profiles adjust per-move portfolio caps, score thresholds, maximum suggested moves and technical/benefit weighting.",
+          "Benefit Lock remains enforced and every rebalance plan remains preview-only with no automatic trades."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.3"
+      "version": "0.8.4"
     }
   ]
 }

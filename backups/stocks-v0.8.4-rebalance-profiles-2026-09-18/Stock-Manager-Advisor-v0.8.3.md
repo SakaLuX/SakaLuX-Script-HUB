@@ -4,15 +4,6 @@
 
 
 
-
-## v0.8.4 — Rebalance Strategy Profiles
-- Adds persistent SAFE, BALANCED and AGGRESSIVE Smart Rebalance profiles.
-- SAFE limits each proposed move to 10% of portfolio value, requires a larger score gap and suggests up to 2 moves.
-- BALANCED keeps the v0.8.3 behavior as the default: 20% per move and up to 4 moves.
-- AGGRESSIVE raises the cap to 35%, accepts smaller score gaps and can suggest up to 6 moves.
-- Each profile changes technical, benefit, tier and affordability weighting while preserving Benefit Lock and preview-only execution.
-- The selected profile is saved locally and restored automatically on TornPDA/desktop.
-
 ## v0.8.3 — Smart Rebalance Engine
 - Adds a portfolio-wide Smart Rebalance plan beneath the What-if simulator.
 - Uses only free/protected-safe shares as sell sources, preserving Benefit Lock.
