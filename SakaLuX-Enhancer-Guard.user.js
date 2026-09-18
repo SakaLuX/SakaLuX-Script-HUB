@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.47
+// @version      1.3.48
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -12,6 +12,23 @@
 // @downloadURL https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js
 // @updateURL https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js
 // ==/UserScript==
+
+/* SakaLuX Canonical Installed Version — BEGIN */
+(() => {
+  'use strict';
+  let v = '1.3.48';
+  try {
+    const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
+    if (meta) v = String(meta);
+  } catch {}
+  const g = globalThis;
+  g.__SakaLuXInstalledVersions = g.__SakaLuXInstalledVersions || Object.create(null);
+  g.__SakaLuXInstalledVersions['enhancer'] = v;
+  try {
+    document.documentElement?.setAttribute('data-sakalux-installed-enhancer', v);
+  } catch {}
+})();
+/* SakaLuX Canonical Installed Version — END */
 
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
@@ -77,7 +94,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.47'});
+  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.48'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -248,7 +265,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.3.47';
+    const VERSION = '1.3.48';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
