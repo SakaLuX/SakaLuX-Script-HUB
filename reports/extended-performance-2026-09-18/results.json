@@ -1,0 +1,2169 @@
+{
+  "fixture": "Offline synthetic Chromium touch viewport 412x915. 30-minute wall-clock soak; no authenticated Torn/PDA, actual battery or FPS measurement. API error/slow modes cover exercised requests only; missing-key code paths remain inactive.",
+  "results": [
+    {
+      "file": "private-module.user.js",
+      "version": "0.7.2",
+      "before": {
+        "nodes": 20,
+        "timeouts": 0,
+        "intervals": 1,
+        "observers": 1,
+        "listenerRegistrations": 8
+      },
+      "after": {
+        "nodes": 98,
+        "timeouts": 0,
+        "intervals": 1,
+        "observers": 1,
+        "listenerRegistrations": 8
+      },
+      "final": {
+        "nodes": 98,
+        "timeouts": 0,
+        "intervals": 1,
+        "observers": 1,
+        "listenerRegistrations": 8
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 2.8999999999941792
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 98,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 1,
+          "listenerRegistrations": 8
+        },
+        {
+          "state": "visible",
+          "nodes": 98,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 1,
+          "listenerRegistrations": 8
+        },
+        {
+          "state": "hidden",
+          "nodes": 98,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 1,
+          "listenerRegistrations": 8
+        },
+        {
+          "state": "visible",
+          "nodes": 98,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 1,
+          "listenerRegistrations": 8
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Account-Auditor.user.js",
+      "version": "1.3.15",
+      "before": {
+        "nodes": 35,
+        "timeouts": 1,
+        "intervals": 1,
+        "observers": 2,
+        "listenerRegistrations": 1
+      },
+      "after": {
+        "nodes": 113,
+        "timeouts": 0,
+        "intervals": 1,
+        "observers": 2,
+        "listenerRegistrations": 1
+      },
+      "final": {
+        "nodes": 113,
+        "timeouts": 0,
+        "intervals": 1,
+        "observers": 2,
+        "listenerRegistrations": 1
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 3
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 113,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 2,
+          "listenerRegistrations": 1
+        },
+        {
+          "state": "visible",
+          "nodes": 113,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 2,
+          "listenerRegistrations": 1
+        },
+        {
+          "state": "hidden",
+          "nodes": 113,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 2,
+          "listenerRegistrations": 1
+        },
+        {
+          "state": "visible",
+          "nodes": 113,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 2,
+          "listenerRegistrations": 1
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Bazaar-Thanker-PDA.user.js",
+      "version": "5.3.40",
+      "before": {
+        "nodes": 110,
+        "timeouts": 3,
+        "intervals": 0,
+        "observers": 3,
+        "listenerRegistrations": 3
+      },
+      "after": {
+        "nodes": 188,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 3,
+        "listenerRegistrations": 3
+      },
+      "final": {
+        "nodes": 188,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 3,
+        "listenerRegistrations": 3
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 2.7999999999883585
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 188,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 3,
+          "listenerRegistrations": 3
+        },
+        {
+          "state": "visible",
+          "nodes": 188,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 3,
+          "listenerRegistrations": 3
+        },
+        {
+          "state": "hidden",
+          "nodes": 188,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 3,
+          "listenerRegistrations": 3
+        },
+        {
+          "state": "visible",
+          "nodes": 188,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 3,
+          "listenerRegistrations": 3
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Chat-Intelligence.user.js",
+      "version": "1.2.20",
+      "before": {
+        "nodes": 33,
+        "timeouts": 0,
+        "intervals": 0,
+        "observers": 2,
+        "listenerRegistrations": 9,
+        "chatCache": 1
+      },
+      "after": {
+        "nodes": 111,
+        "timeouts": 0,
+        "intervals": 0,
+        "observers": 2,
+        "listenerRegistrations": 9,
+        "chatCache": 101
+      },
+      "final": {
+        "nodes": 153,
+        "timeouts": 4,
+        "intervals": 0,
+        "observers": 2,
+        "listenerRegistrations": 149,
+        "chatCache": 110
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 20,
+        "panels": 1
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 4.199999999982538
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 144,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 2,
+          "listenerRegistrations": 149,
+          "chatCache": 102
+        },
+        {
+          "state": "visible",
+          "nodes": 147,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 2,
+          "listenerRegistrations": 149,
+          "chatCache": 103
+        },
+        {
+          "state": "hidden",
+          "nodes": 150,
+          "timeouts": 3,
+          "intervals": 0,
+          "observers": 2,
+          "listenerRegistrations": 149,
+          "chatCache": 104
+        },
+        {
+          "state": "visible",
+          "nodes": 153,
+          "timeouts": 4,
+          "intervals": 0,
+          "observers": 2,
+          "listenerRegistrations": 149,
+          "chatCache": 105
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Company-Intelligence-v1.0.0.user.js",
+      "version": "1.8.38",
+      "before": {
+        "nodes": 51,
+        "timeouts": 2,
+        "intervals": 2,
+        "observers": 3,
+        "listenerRegistrations": 9
+      },
+      "after": {
+        "nodes": 129,
+        "timeouts": 2,
+        "intervals": 2,
+        "observers": 3,
+        "listenerRegistrations": 9
+      },
+      "final": {
+        "nodes": 129,
+        "timeouts": 2,
+        "intervals": 2,
+        "observers": 3,
+        "listenerRegistrations": 9
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 3.1000000000058208
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 129,
+          "timeouts": 2,
+          "intervals": 2,
+          "observers": 3,
+          "listenerRegistrations": 9
+        },
+        {
+          "state": "visible",
+          "nodes": 129,
+          "timeouts": 1,
+          "intervals": 2,
+          "observers": 3,
+          "listenerRegistrations": 9
+        },
+        {
+          "state": "hidden",
+          "nodes": 129,
+          "timeouts": 1,
+          "intervals": 2,
+          "observers": 3,
+          "listenerRegistrations": 9
+        },
+        {
+          "state": "visible",
+          "nodes": 129,
+          "timeouts": 2,
+          "intervals": 2,
+          "observers": 3,
+          "listenerRegistrations": 9
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Elimination-Assistant.user.js",
+      "version": "1.3.44",
+      "before": {
+        "nodes": 136,
+        "timeouts": 1,
+        "intervals": 2,
+        "observers": 5,
+        "listenerRegistrations": 4
+      },
+      "after": {
+        "nodes": 214,
+        "timeouts": 1,
+        "intervals": 2,
+        "observers": 5,
+        "listenerRegistrations": 4
+      },
+      "final": {
+        "nodes": 214,
+        "timeouts": 1,
+        "intervals": 2,
+        "observers": 5,
+        "listenerRegistrations": 4
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 3
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 214,
+          "timeouts": 1,
+          "intervals": 2,
+          "observers": 5,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "visible",
+          "nodes": 214,
+          "timeouts": 1,
+          "intervals": 2,
+          "observers": 5,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "hidden",
+          "nodes": 214,
+          "timeouts": 1,
+          "intervals": 2,
+          "observers": 5,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "visible",
+          "nodes": 214,
+          "timeouts": 1,
+          "intervals": 2,
+          "observers": 5,
+          "listenerRegistrations": 4
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Enhancer-Guard.user.js",
+      "version": "1.3.47",
+      "before": {
+        "nodes": 45,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 4,
+        "listenerRegistrations": 4
+      },
+      "after": {
+        "nodes": 123,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 4,
+        "listenerRegistrations": 4
+      },
+      "final": {
+        "nodes": 123,
+        "timeouts": 1,
+        "intervals": 0,
+        "observers": 4,
+        "listenerRegistrations": 4
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 2.8999999999941792
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 123,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 4,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "visible",
+          "nodes": 123,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 4,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "hidden",
+          "nodes": 123,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 4,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "visible",
+          "nodes": 123,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 4,
+          "listenerRegistrations": 4
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Market-Intelligence.user.js",
+      "version": "1.17.39",
+      "before": {
+        "nodes": 46,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 4,
+        "listenerRegistrations": 4
+      },
+      "after": {
+        "nodes": 124,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 4,
+        "listenerRegistrations": 4
+      },
+      "final": {
+        "nodes": 124,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 4,
+        "listenerRegistrations": 4
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 3.1000000000349246
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 124,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 4,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "visible",
+          "nodes": 124,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 4,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "hidden",
+          "nodes": 124,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 4,
+          "listenerRegistrations": 4
+        },
+        {
+          "state": "visible",
+          "nodes": 124,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 4,
+          "listenerRegistrations": 4
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Mission-Rewards.user.js",
+      "version": "1.0.42",
+      "before": {
+        "nodes": 50,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 5,
+        "listenerRegistrations": 3
+      },
+      "after": {
+        "nodes": 128,
+        "timeouts": 2,
+        "intervals": 0,
+        "observers": 5,
+        "listenerRegistrations": 3
+      },
+      "final": {
+        "nodes": 128,
+        "timeouts": 1,
+        "intervals": 0,
+        "observers": 5,
+        "listenerRegistrations": 3
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 3
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 128,
+          "timeouts": 2,
+          "intervals": 0,
+          "observers": 5,
+          "listenerRegistrations": 3
+        },
+        {
+          "state": "visible",
+          "nodes": 128,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 5,
+          "listenerRegistrations": 3
+        },
+        {
+          "state": "hidden",
+          "nodes": 128,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 5,
+          "listenerRegistrations": 3
+        },
+        {
+          "state": "visible",
+          "nodes": 128,
+          "timeouts": 1,
+          "intervals": 0,
+          "observers": 5,
+          "listenerRegistrations": 3
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Script-Hub.user.js",
+      "version": "1.9.73",
+      "before": {
+        "nodes": 44,
+        "timeouts": 2,
+        "intervals": 1,
+        "observers": 1,
+        "listenerRegistrations": 11
+      },
+      "after": {
+        "nodes": 122,
+        "timeouts": 0,
+        "intervals": 1,
+        "observers": 1,
+        "listenerRegistrations": 11
+      },
+      "final": {
+        "nodes": 311,
+        "timeouts": 0,
+        "intervals": 1,
+        "observers": 0,
+        "listenerRegistrations": 11
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 1
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 2.900000000023283
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 311,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 0,
+          "listenerRegistrations": 11
+        },
+        {
+          "state": "visible",
+          "nodes": 311,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 0,
+          "listenerRegistrations": 11
+        },
+        {
+          "state": "hidden",
+          "nodes": 311,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 0,
+          "listenerRegistrations": 11
+        },
+        {
+          "state": "visible",
+          "nodes": 311,
+          "timeouts": 0,
+          "intervals": 1,
+          "observers": 0,
+          "listenerRegistrations": 11
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 8
+        },
+        {
+          "mode": "offline",
+          "requests": 8
+        },
+        {
+          "mode": "429",
+          "requests": 8
+        },
+        {
+          "mode": "malformed",
+          "requests": 8
+        },
+        {
+          "mode": "ok",
+          "requests": 17
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Stock-Manager-Advisor.user.js",
+      "version": "0.8.7",
+      "before": {
+        "nodes": 169,
+        "timeouts": 3,
+        "intervals": 2,
+        "observers": 2,
+        "listenerRegistrations": 6
+      },
+      "after": {
+        "nodes": 247,
+        "timeouts": 2,
+        "intervals": 1,
+        "observers": 2,
+        "listenerRegistrations": 6
+      },
+      "final": {
+        "nodes": 571,
+        "timeouts": 2,
+        "intervals": 2,
+        "observers": 2,
+        "listenerRegistrations": 6
+      },
+      "routes": 100,
+      "stockReturns": 97,
+      "ui": {
+        "toggles": 20,
+        "panels": 1
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 5
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 571,
+          "timeouts": 3,
+          "intervals": 2,
+          "observers": 2,
+          "listenerRegistrations": 6
+        },
+        {
+          "state": "visible",
+          "nodes": 571,
+          "timeouts": 2,
+          "intervals": 2,
+          "observers": 2,
+          "listenerRegistrations": 6
+        },
+        {
+          "state": "hidden",
+          "nodes": 571,
+          "timeouts": 3,
+          "intervals": 2,
+          "observers": 2,
+          "listenerRegistrations": 6
+        },
+        {
+          "state": "visible",
+          "nodes": 571,
+          "timeouts": 2,
+          "intervals": 2,
+          "observers": 2,
+          "listenerRegistrations": 6
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "version": "0.9.928",
+      "before": {
+        "nodes": 47,
+        "timeouts": 0,
+        "intervals": 3,
+        "observers": 2,
+        "listenerRegistrations": 10
+      },
+      "after": {
+        "nodes": 125,
+        "timeouts": 0,
+        "intervals": 3,
+        "observers": 2,
+        "listenerRegistrations": 10
+      },
+      "final": {
+        "nodes": 125,
+        "timeouts": 0,
+        "intervals": 3,
+        "observers": 2,
+        "listenerRegistrations": 10
+      },
+      "routes": 100,
+      "ui": {
+        "toggles": 0,
+        "panels": 0
+      },
+      "large": {
+        "rows": 10000,
+        "insertMs": 3.099999999976717
+      },
+      "visibility": [
+        {
+          "state": "hidden",
+          "nodes": 125,
+          "timeouts": 0,
+          "intervals": 3,
+          "observers": 2,
+          "listenerRegistrations": 10
+        },
+        {
+          "state": "visible",
+          "nodes": 125,
+          "timeouts": 0,
+          "intervals": 3,
+          "observers": 2,
+          "listenerRegistrations": 10
+        },
+        {
+          "state": "hidden",
+          "nodes": 125,
+          "timeouts": 0,
+          "intervals": 3,
+          "observers": 2,
+          "listenerRegistrations": 10
+        },
+        {
+          "state": "visible",
+          "nodes": 125,
+          "timeouts": 0,
+          "intervals": 3,
+          "observers": 2,
+          "listenerRegistrations": 10
+        }
+      ],
+      "network": [
+        {
+          "mode": "slow",
+          "requests": 0
+        },
+        {
+          "mode": "offline",
+          "requests": 0
+        },
+        {
+          "mode": "429",
+          "requests": 0
+        },
+        {
+          "mode": "malformed",
+          "requests": 0
+        },
+        {
+          "mode": "ok",
+          "requests": 0
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "errors": [],
+  "assertions": [
+    {
+      "label": "private-module.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "private-module.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "private-module.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "private-module.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "private-module.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Account-Auditor.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Account-Auditor.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Account-Auditor.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Account-Auditor.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Account-Auditor.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Bazaar-Thanker-PDA.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Bazaar-Thanker-PDA.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Bazaar-Thanker-PDA.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Bazaar-Thanker-PDA.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Bazaar-Thanker-PDA.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Elimination-Assistant.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Elimination-Assistant.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Elimination-Assistant.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Elimination-Assistant.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Elimination-Assistant.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Enhancer-Guard.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Enhancer-Guard.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Enhancer-Guard.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Enhancer-Guard.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Enhancer-Guard.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Market-Intelligence.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Market-Intelligence.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Market-Intelligence.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Market-Intelligence.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Market-Intelligence.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Mission-Rewards.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Mission-Rewards.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Mission-Rewards.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Mission-Rewards.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Mission-Rewards.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Script-Hub.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Script-Hub.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Script-Hub.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Script-Hub.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Script-Hub.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Stock-Manager-Advisor.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Stock-Manager-Advisor.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Stock-Manager-Advisor.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Stock-Manager-Advisor.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "Stocks remounts once on each of 100 return routes",
+      "passed": false
+    },
+    {
+      "label": "SakaLuX-Stock-Manager-Advisor.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js actual layout viewport is 412px",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js observers remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js intervals remain bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js DOM remains bounded after 100 routes",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "combined 30-minute post-GC heap growth <=8 MB after warm-up",
+      "passed": true
+    },
+    {
+      "label": "combined 30-minute observers bounded",
+      "passed": true
+    },
+    {
+      "label": "combined 30-minute intervals bounded",
+      "passed": true
+    },
+    {
+      "label": "combined 30-minute DOM bounded",
+      "passed": true
+    },
+    {
+      "label": "combined 30-minute soak no uncaught JS errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js 30-minute post-GC heap growth <=8 MB after warm-up",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js 30-minute observers bounded",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js 30-minute intervals bounded",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js 30-minute DOM bounded",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js 30-minute soak no uncaught JS errors",
+      "passed": true
+    }
+  ],
+  "soak": [
+    {
+      "file": "combined",
+      "minute": 0,
+      "elapsedSeconds": 0,
+      "heapMB": 7.87,
+      "nodes": 352,
+      "timeouts": 2,
+      "intervals": 9,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 0,
+      "elapsedSeconds": 0,
+      "heapMB": 5.93,
+      "nodes": 325,
+      "timeouts": 14,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 1,
+      "elapsedSeconds": 60,
+      "heapMB": 8.25,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 121,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 1,
+      "elapsedSeconds": 60,
+      "heapMB": 6.18,
+      "nodes": 403,
+      "timeouts": 7,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 2,
+      "elapsedSeconds": 120,
+      "heapMB": 8.29,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 241,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 2,
+      "elapsedSeconds": 120,
+      "heapMB": 6.21,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 3,
+      "elapsedSeconds": 180,
+      "heapMB": 8.33,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 361,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 3,
+      "elapsedSeconds": 180,
+      "heapMB": 6.22,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 4,
+      "elapsedSeconds": 240,
+      "heapMB": 8.34,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 481,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 4,
+      "elapsedSeconds": 240,
+      "heapMB": 6.23,
+      "nodes": 403,
+      "timeouts": 7,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 5,
+      "elapsedSeconds": 300,
+      "heapMB": 8.3,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 601,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 5,
+      "elapsedSeconds": 300,
+      "heapMB": 6.24,
+      "nodes": 403,
+      "timeouts": 4,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 6,
+      "elapsedSeconds": 360,
+      "heapMB": 8.33,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 721,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 6,
+      "elapsedSeconds": 360,
+      "heapMB": 5.61,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 7,
+      "elapsedSeconds": 420,
+      "heapMB": 8.35,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 841,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 7,
+      "elapsedSeconds": 420,
+      "heapMB": 5.61,
+      "nodes": 403,
+      "timeouts": 4,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 8,
+      "elapsedSeconds": 480,
+      "heapMB": 8.36,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 961,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 8,
+      "elapsedSeconds": 480,
+      "heapMB": 5.62,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 9,
+      "elapsedSeconds": 540,
+      "heapMB": 8.43,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1081,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 9,
+      "elapsedSeconds": 540,
+      "heapMB": 5.62,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 10,
+      "elapsedSeconds": 600,
+      "heapMB": 8.44,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1201,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 10,
+      "elapsedSeconds": 600,
+      "heapMB": 5.62,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 11,
+      "elapsedSeconds": 660,
+      "heapMB": 8.44,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1321,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 11,
+      "elapsedSeconds": 660,
+      "heapMB": 5.65,
+      "nodes": 403,
+      "timeouts": 6,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 12,
+      "elapsedSeconds": 720,
+      "heapMB": 8.45,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1441,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 12,
+      "elapsedSeconds": 720,
+      "heapMB": 5.64,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 13,
+      "elapsedSeconds": 780,
+      "heapMB": 8.45,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1561,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 13,
+      "elapsedSeconds": 780,
+      "heapMB": 5.65,
+      "nodes": 403,
+      "timeouts": 4,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 14,
+      "elapsedSeconds": 840,
+      "heapMB": 8.47,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1681,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 14,
+      "elapsedSeconds": 840,
+      "heapMB": 5.65,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 15,
+      "elapsedSeconds": 900,
+      "heapMB": 8.47,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1801,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 15,
+      "elapsedSeconds": 900,
+      "heapMB": 5.67,
+      "nodes": 403,
+      "timeouts": 6,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 16,
+      "elapsedSeconds": 960,
+      "heapMB": 8.47,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 1921,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 16,
+      "elapsedSeconds": 960,
+      "heapMB": 5.65,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 17,
+      "elapsedSeconds": 1020,
+      "heapMB": 8.48,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 2041,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 17,
+      "elapsedSeconds": 1020,
+      "heapMB": 5.65,
+      "nodes": 403,
+      "timeouts": 7,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 18,
+      "elapsedSeconds": 1080,
+      "heapMB": 8.51,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 2161,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 18,
+      "elapsedSeconds": 1080,
+      "heapMB": 5.65,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 19,
+      "elapsedSeconds": 1140,
+      "heapMB": 8.51,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 2281,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 19,
+      "elapsedSeconds": 1140,
+      "heapMB": 5.67,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 20,
+      "elapsedSeconds": 1200,
+      "heapMB": 8.51,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 2401,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 20,
+      "elapsedSeconds": 1200,
+      "heapMB": 5.7,
+      "nodes": 403,
+      "timeouts": 7,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 21,
+      "elapsedSeconds": 1260,
+      "heapMB": 8.52,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 2521,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 21,
+      "elapsedSeconds": 1260,
+      "heapMB": 5.7,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 22,
+      "elapsedSeconds": 1320,
+      "heapMB": 8.53,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 2641,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 22,
+      "elapsedSeconds": 1320,
+      "heapMB": 5.71,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 23,
+      "elapsedSeconds": 1380,
+      "heapMB": 8.53,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 2761,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 23,
+      "elapsedSeconds": 1380,
+      "heapMB": 5.71,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 24,
+      "elapsedSeconds": 1440,
+      "heapMB": 8.53,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 2881,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 24,
+      "elapsedSeconds": 1440,
+      "heapMB": 5.71,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 25,
+      "elapsedSeconds": 1500,
+      "heapMB": 8.54,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 3001,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 25,
+      "elapsedSeconds": 1500,
+      "heapMB": 5.71,
+      "nodes": 403,
+      "timeouts": 7,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 26,
+      "elapsedSeconds": 1560,
+      "heapMB": 8.54,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 3121,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 26,
+      "elapsedSeconds": 1560,
+      "heapMB": 5.74,
+      "nodes": 403,
+      "timeouts": 4,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 27,
+      "elapsedSeconds": 1620,
+      "heapMB": 8.55,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 3241,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 27,
+      "elapsedSeconds": 1620,
+      "heapMB": 5.72,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 28,
+      "elapsedSeconds": 1680,
+      "heapMB": 8.55,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 3361,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 28,
+      "elapsedSeconds": 1680,
+      "heapMB": 5.72,
+      "nodes": 403,
+      "timeouts": 7,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 29,
+      "elapsedSeconds": 1740,
+      "heapMB": 8.55,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 3481,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 29,
+      "elapsedSeconds": 1740,
+      "heapMB": 5.73,
+      "nodes": 403,
+      "timeouts": 8,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    },
+    {
+      "file": "combined",
+      "minute": 30,
+      "elapsedSeconds": 1800,
+      "heapMB": 8.55,
+      "nodes": 449,
+      "timeouts": 6,
+      "intervals": 8,
+      "observers": 23,
+      "listenerRegistrations": 44,
+      "chatCache": 3601,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "minute": 30,
+      "elapsedSeconds": 1800,
+      "heapMB": 5.73,
+      "nodes": 403,
+      "timeouts": 7,
+      "intervals": 13,
+      "observers": 16,
+      "listenerRegistrations": 112,
+      "errors": []
+    }
+  ]
+}
