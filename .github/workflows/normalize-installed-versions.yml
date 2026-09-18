@@ -1,0 +1,39 @@
+name: Normalize installed versions
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.user.js'
+      - 'scripts.json'
+      - '.github/scripts/normalize_installed_versions.py'
+      - '.github/workflows/normalize-installed-versions.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: normalize-installed-versions-main
+  cancel-in-progress: false
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Normalize module and Hub version signals
+        run: python3 .github/scripts/normalize_installed_versions.py
+      - name: Validate JavaScript syntax
+        run: |
+          for f in *.user.js; do node --check "$f"; done
+      - name: Commit normalization if needed
+        run: |
+          if git diff --quiet; then
+            echo "Version surfaces already normalized."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- '*.user.js' scripts.json
+          git commit -m "Normalize installed version signals"
+          git push
