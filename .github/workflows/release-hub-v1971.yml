@@ -1,0 +1,59 @@
+name: Publish Hub v1.9.71
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/release-hub-v1971.yml']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply reviewed information update with backup
+        run: |
+          set -euo pipefail
+          test "$(git hash-object SakaLuX-Script-Hub.user.js)" = '511560443f7b4b344a64d990d25512fae62ed2f8'
+          mkdir -p backups/hub-info-new-v1.9.71-2026-09-18
+          cp SakaLuX-Script-Hub.user.js scripts.json backups/hub-info-new-v1.9.71-2026-09-18/
+          cp greasyfork/Script-Hub.md backups/hub-info-new-v1.9.71-2026-09-18/
+          git apply --check releases/hub-v1.9.71.patch
+          git apply releases/hub-v1.9.71.patch
+      - name: Validate Hub and module information
+        run: |
+          node --check SakaLuX-Script-Hub.user.js
+          npm install --prefix "$RUNNER_TEMP/hub-tests" jsdom@30.1.0 --no-audit --no-fund
+          NODE_PATH="$RUNNER_TEMP/hub-tests/node_modules" node tests/hub-details-regression.cjs
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,re
+          s=Path('SakaLuX-Script-Hub.user.js').read_text()
+          assert re.search(r'^// @version\s+1\.9\.71$',s,re.M)
+          assert "const VERSION = '1.9.71';" in s
+          rows=json.loads(Path('scripts.json').read_text())['scripts']
+          assert len(rows)==7
+          for row in rows:
+              assert row['version']==row['release']['version']
+              assert len(row['info'])>1000 and row['release']['notes']
+              assert row['detailsRevision']==1
+          PY
+      - name: Commit validated information update
+        run: |
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Script-Hub.user.js greasyfork/Script-Hub.md scripts.json backups/hub-info-new-v1.9.71-2026-09-18/
+          git commit -m 'Hub v1.9.71: detailed INFO and current NEW for all registered modules'
+          git push origin HEAD:main
+      - name: Prepare release assets
+        run: |
+          mkdir -p dist
+          cp SakaLuX-Script-Hub.user.js dist/SakaLuX-Script-Hub-v1.9.71.user.js
+          cp scripts.json dist/scripts.json
+          cp releases/hub-v1.9.71.md dist/CHANGELOG-Hub-v1.9.71.md
+          zip -j dist/Hub-v1.9.70-backup.zip backups/hub-info-new-v1.9.71-2026-09-18/*
+          (cd dist && sha256sum *.user.js *.json *.md *.zip > SHA256SUMS.txt)
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create hub-v1.9.71 dist/* --target "$(git rev-parse HEAD)" --title 'Script Hub v1.9.71 — Detailed INFO and current NEW' --notes-file releases/hub-v1.9.71.md --latest=false
