@@ -194,18 +194,18 @@
         }
       ],
       "release": {
-        "version": "1.17.39",
+        "version": "1.17.40",
         "date": "2026-09-18",
         "notes": [
-          "Removes the multiple footer-repair timers scheduled for every page mutation.",
-          "Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.",
-          "Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged."
+          "Shares active market lookups for the same item and API key.",
+          "Shares active equipment fetches across overlapping loadout comparisons, including forced refreshes.",
+          "Clears pending operations on success and failure so later requests recover; price estimates and explicit trade controls remain unchanged."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.39",
-      "detailsRevision": 2
+      "version": "1.17.40",
+      "detailsRevision": 3
     },
     {
       "active": true,

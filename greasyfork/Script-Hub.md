@@ -23,7 +23,7 @@
 ## Current release note
 
 **v1.9.73 — Extended performance validation**
-- Synchronizes Stocks v0.8.7 and Elimination v1.3.44 performance notes and offline fallback.
+- Synchronizes Stocks v0.8.7, Market v1.17.40 and Elimination v1.3.44 performance notes and offline fallback.
 - Refreshes stale Stocks NEW information without replacing saved preferences.
 
 ## Recommended
@@ -33,7 +33,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 🛡️ SakaLuX Enhancer Guard **v1.3.47**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.40**
 - 🎯 SakaLuX Mission Rewards **v1.0.42**
-- 📈 SakaLuX Market Intelligence **v1.17.39**
+- 📈 SakaLuX Market Intelligence **v1.17.40**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.44**
 - 🏢 SakaLuX Company Intelligence **v1.8.38**
 - 📊 SakaLuX Stock Manager & Advisor **v0.8.7**
@@ -295,3 +295,5 @@ Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and
 - Rewrites INFO for all seven registered modules into detailed feature sections.
 - Synchronizes NEW with each module's actual current version and latest changes.
 - Synchronizes offline details and refreshes stale cached information while retaining newer metadata.
+
+Latest Hub refresh improvement: overlapping registry/update checks share one active operation.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.16
+// @version      1.3.15
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -174,7 +174,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.16';
+    const VERSION = '1.3.15';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -225,8 +225,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function getTornApiKey(){const saved=rawGet(STORAGE.apiKey);if(saved)return saved;return PDA_KEY && PDA_KEY!=='###PDA-APIKEY###' ? PDA_KEY : ''; }
 
     const RATE={minGapMs:1100,retryDelays:[3000,6000,12000],lastAt:0};
-    let rateQueue=Promise.resolve();
-    function rateGate(){const grant=rateQueue.then(async()=>{const wait=Math.max(0,RATE.minGapMs-(Date.now()-RATE.lastAt));if(wait)await sleep(wait);RATE.lastAt=Date.now();});rateQueue=grant.catch(()=>{});return grant;}
+    async function rateGate(){const wait=Math.max(0,RATE.minGapMs-(Date.now()-RATE.lastAt));if(wait)await sleep(wait);RATE.lastAt=Date.now();}
 
     function request(url,options={}){
         return new Promise((resolve,reject)=>{
@@ -318,9 +317,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return {complete:complete.map(id=>({id,name:names[Number(id)]||null})),current:root?.current?.id!=null?{...root.current,name:names[Number(root.current.id)]||null}:root?.current??null};
     }
 
-    let snapshotPending=null;
-    function collectSnapshot(){if(snapshotPending)return snapshotPending;snapshotPending=collectSnapshotData().finally(()=>{snapshotPending=null;});return snapshotPending;}
-    async function collectSnapshotData(){
+    async function collectSnapshot(){
         const key=getTornApiKey(); if(!key)throw new Error('Torn API key missing. Open AUDIT settings and add a key, or use Torn PDA API injection.');
         const data={keyInfo:null,v2:{},special:{},private:{}},errors={},unavailable={};let requested=0,successful=0;
         requested++;setStatus('Checking API key…');const ki=await keyInfo(key);if(ki.ok){data.keyInfo=sanitizeDeep(ki.data);successful++;}else errors['key:info']={error:ki.error,code:ki.code??null,httpStatus:ki.httpStatus??null};
@@ -573,7 +570,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   if(!document.body)return;
   let e=document.querySelector('[data-slx-standalone-registration="account-auditor"]');
   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','account-auditor');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.16'});
+  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.15'});
  };
  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
 })();

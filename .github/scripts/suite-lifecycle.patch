@@ -1,0 +1,110 @@
+diff --git a/SakaLuX-Suite.user.js b/SakaLuX-Suite.user.js
+index 0edbe7d..5a9afda 100644
+--- a/SakaLuX-Suite.user.js
++++ b/SakaLuX-Suite.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Suite [EXPERIMENTAL]
+ // @namespace    sakalux.suite
+-// @version      0.9.928
++// @version      0.9.929
+ // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
+ // @author       SakaLuX [2380374]
+ // @copyright    2026 SakaLuX [2380374]
+@@ -178,7 +178,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+  * settings migration and TornPDA compatibility. */
+ (() => {
+   "use strict";
+-  const VERSION = '0.9.928';
++  const VERSION = '0.9.929';
+   const SUITE = Object.freeze({
+     name: "SakaLuX Suite",
+     version: VERSION,
+@@ -10287,6 +10287,8 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+     };
+   }
+   function createTargetAlertsModule(context) {
++    const globalEventController=new AbortController();
++    function listenGlobal(target,type,listener,options){const opts=typeof options==="boolean"?{capture:options}:options||{};target.addEventListener(type,listener,{...opts,signal:globalEventController.signal});}
+     const SCRIPT_NAME = "SakaLuX Target & Enemy List Alerts";
+     const STORAGE_KEYS = {
+         settings: "sakalux_list_alert_settings_v4",
+@@ -13155,7 +13157,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+     function bindInteractionStatusChecks() {
+         if (interactionEventsBound) return;
+         interactionEventsBound = true;
+-        document.addEventListener(
++        listenGlobal(document,
+             "click",
+             event => {
+                 if (!moduleActive || !event.isTrusted) {
+@@ -13189,7 +13191,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+             },
+             true
+         );
+-        document.addEventListener(
++        listenGlobal(document,
+             "pointerup",
+             event => {
+                 if (
+@@ -13243,7 +13245,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+     function bindGlobalEvents() {
+         if (globalEventsBound) return;
+         globalEventsBound = true;
+-        document.addEventListener("click", event => {
++        listenGlobal(document,"click", event => {
+             if (!moduleActive) return;
+             const panel = document.getElementById(
+                 IDS.settingsPanel
+@@ -13257,7 +13259,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+             }
+             closeSettingsPanel();
+         });
+-        document.addEventListener("keydown", event => {
++        listenGlobal(document,"keydown", event => {
+             if (!moduleActive) return;
+             if (event.key === "Escape") {
+                 closeSettingsPanel();
+@@ -14485,6 +14487,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+         }
+     }
+     function destroy() {
++        globalEventController.abort();
+         moduleActive = false;
+         stopPolling();
+         clearTimeout(clickPollTimer);
+@@ -16487,6 +16490,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+         render();
+       }
+     }
++    let editTagsHandler=null;
+     function init() {
+       moduleActive = true;
+       moduleSettings();
+@@ -16499,14 +16503,15 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+ 
+       window.addEventListener("sakalux:war-ratings-updated", onWarRatingsUpdated);
+       window.addEventListener("storage", onStorage);
+-      window.addEventListener("sakalux:faction-member-edit-tags", event => {
++      editTagsHandler=event => {
+         const detail = event?.detail || {};
+         const member = {
+           id: Number(detail.userId || 0),
+           name: String(detail.name || `Player ${detail.userId || ""}`)
+         };
+         if (member.id) openPcTagEditor(member);
+-      });
++      };
++      window.addEventListener("sakalux:faction-member-edit-tags",editTagsHandler);
+       scheduleMount(0);
+ 
+     }
+@@ -16521,6 +16526,8 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
+       restoreNative();
+       window.removeEventListener("sakalux:war-ratings-updated", onWarRatingsUpdated);
+       window.removeEventListener("storage", onStorage);
++      if(editTagsHandler)window.removeEventListener("sakalux:faction-member-edit-tags",editTagsHandler);
++      editTagsHandler=null;
+       document.getElementById(STYLE_ID)?.remove();
+       document.querySelector(`#${SUITE.panelId} .sakalux-fmv-settings-layer`)?.remove();
+     }

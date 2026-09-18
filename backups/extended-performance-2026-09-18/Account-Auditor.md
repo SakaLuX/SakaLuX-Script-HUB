@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.16**
+**v1.3.15**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,8 +18,10 @@
 
 ## Current release note
 
-**v1.3.16 — Extended performance validation**
-- Serializes the API rate gate to preserve the 1,100ms minimum gap under concurrent callers. Overlapping read-only snapshots share one collection; API scopes, retries and privacy behavior are preserved.
+**v1.3.15 — Performance and TornPDA smoothness**
+- Ignores unrelated chat/dock/footer changes in standalone launcher collection.
+- Coalesces pending launcher refreshes instead of creating a timer per mutation.
+- Preserves user-controlled account collection, privacy and synchronization settings.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
@@ -44,9 +46,6 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 **MIT**
 
 ## Release history / Changelog
-
-### v1.3.16 — Extended performance validation
-- Serializes the API rate gate to preserve the 1,100ms minimum gap under concurrent callers. Overlapping read-only snapshots share one collection; API scopes, retries and privacy behavior are preserved.
 
 ### v1.3.15 — Performance and TornPDA smoothness
 
