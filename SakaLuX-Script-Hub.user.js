@@ -97,7 +97,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
     const HUB_CHANGELOG = [
-        {"version": "1.9.82", "date": "2026-09-19", "changes": ["Fly-out launcher no longer depends on Home being present.", "Detects the real vertical Torn navigation list from any available standard sidebar rows and inserts SakaLuX Hub as the first row of that list.", "Keeps the skull artwork and avoids inherited counters or chevrons."]},
+        {"version": "1.9.82", "date": "2026-09-19", "changes": ["Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.", "Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.", "Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions."]},
         {"version": "1.9.81", "date": "2026-09-19", "changes": ["Corrects Fly-out placement: SakaLuX Hub is now the first item in the vertical navigation list, immediately before Home and below the three quick-action icons.", "Clones the simple Home row instead of expandable/contact rows, so no inherited counter or chevron appears.", "Keeps the skull launcher artwork and alert blink while Topbar legacy remains handled by the native topbar launcher."]},
         {"version": "1.9.80", "date": "2026-09-19", "changes": ["Fly-out launcher now mounts in Torn's three-icon quick-action strip as the fourth button, after Messages, Events and Awards/Merits.", "Uses the actual visible icon row instead of text labels, fixing TornPDA layouts where those three buttons have no text nodes.", "Keeps the blinking skull artwork and removes inherited badges/labels from the cloned quick-action button."]},
         {"version": "1.9.79", "date": "2026-09-19", "changes": ["Corrects Fly-out placement: SakaLuX Hub is the fourth navigation button, immediately after Messages, Events and Awards/Merits.", "Removes inherited counters and chevrons from the Hub launcher.", "Topbar legacy keeps the Hub launcher immediately before Messages."]},
@@ -953,6 +953,10 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
             }
         ]
     }
+
+    const FALLBACK_MODULE_DETAILS = Object.fromEntries(
+        (FALLBACK_REGISTRY.scripts || []).map(s => [s.id, { info: s.info, release: s.release }])
+    );
 
     let registry = loadJson(STORAGE.registry, FALLBACK_REGISTRY);
     let SCRIPTS = normalizeRegistry(registry);

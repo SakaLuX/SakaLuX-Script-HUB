@@ -20,7 +20,6 @@
 - Uses constant-time Hub detection instead of document-wide marker searches on every mutation.
 - Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.
 - Preserves buyer grouping, cooldown and message preparation.
-
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
 

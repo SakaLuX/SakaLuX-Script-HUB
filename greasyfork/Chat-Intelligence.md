@@ -12,9 +12,8 @@
 
 ## Current release note
 
-**v1.2.20 — Extended performance validation**
-- Recent-message IDs are capped at 4,096. Weak per-element tracking preserves notification deduplication for messages still visible after cache eviction.
-
+**v1.2.20 — Release metadata synchronization**
+- Release documentation synchronized with the current userscript version.
 ## Recommended
 - Use together with SakaLuX Script Hub for consistent controls and status handling.
 
