@@ -1,0 +1,144 @@
+from pathlib import Path
+import json
+import re
+
+stock_p = Path('SakaLuX-Stock-Manager-Advisor.user.js')
+docs_p = Path('greasyfork/Stock-Manager-Advisor.md')
+reg_p = Path('scripts.json')
+
+stock = stock_p.read_text()
+docs = docs_p.read_text()
+reg = json.loads(reg_p.read_text())
+
+if '// @version      0.8.0.1' not in stock:
+    raise SystemExit('Expected Stocks v0.8.0.1 baseline not found')
+
+backup = Path('backups/stocks-v0.8.1-technical-trade-assistant-2026-09-18')
+backup.mkdir(parents=True, exist_ok=True)
+(backup / 'SakaLuX-Stock-Manager-Advisor-v0.8.0.1.user.js').write_text(stock)
+(backup / 'Stock-Manager-Advisor-v0.8.0.1.md').write_text(docs)
+stock_entry = next(x for x in reg['scripts'] if x.get('id') == 'stock-manager-advisor')
+(backup / 'scripts-stock-entry-v0.8.0.1.json').write_text(json.dumps(stock_entry, indent=2) + '\n')
+
+stock = stock.replace('// @version      0.8.0.1', '// @version      0.8.1', 1)
+stock = stock.replace("version:'0.8.0.1'", "version:'0.8.1'")
+stock = stock.replace("version: '0.8.0.1'", "version: '0.8.1'")
+
+engine_re = re.compile(r"  function emaV080\(values,period\)\{.*?\n  function ensureAdvisorSuiteHostV080\(\)\{", re.S)
+engine = r'''  function emaV080(values,period){if(!values.length)return null;const k=2/(period+1);let e=values[0];for(let i=1;i<values.length;i++)e=values[i]*k+e*(1-k);return e;}
+  function emaSeriesV081(values,period){if(!values.length)return [];const k=2/(period+1),out=[];let e=values[0];for(let i=0;i<values.length;i++){if(i)e=values[i]*k+e*(1-k);out.push(e);}return out;}
+  function rsiV080(values,period=14){if(values.length<period+1)return null;let gain=0,loss=0;for(let i=values.length-period;i<values.length;i++){const d=values[i]-values[i-1];if(d>=0)gain+=d;else loss-=d;}if(loss===0)return 100;const rs=(gain/period)/(loss/period);return 100-(100/(1+rs));}
+  function bollingerV080(values,period=20){if(values.length<period)return null;const v=values.slice(-period),mean=v.reduce((a,b)=>a+b,0)/v.length,sd=Math.sqrt(v.reduce((a,b)=>a+Math.pow(b-mean,2),0)/v.length);return {mid:mean,upper:mean+2*sd,lower:mean-2*sd};}
+  function bollingerSeriesV081(values,period=20){return values.map((_,i)=>{if(i+1<period)return null;const v=values.slice(i+1-period,i+1),mid=v.reduce((a,b)=>a+b,0)/v.length,sd=Math.sqrt(v.reduce((a,b)=>a+Math.pow(b-mid,2),0)/v.length);return {mid,upper:mid+2*sd,lower:mid-2*sd};});}
+  function technicalChartV081(points){
+    if(!points.length)return '<div class="slx-v080-empty">No local price history yet. Keep Stocks open periodically to build samples.</div>';
+    const vals=points.map(x=>Number(x.p)).filter(x=>x>0);if(!vals.length)return '';
+    const ema20=emaSeriesV081(vals,20),ema90=emaSeriesV081(vals,90),bbs=bollingerSeriesV081(vals,20),allVals=[...vals,...ema20,...ema90,...bbs.flatMap(b=>b?[b.lower,b.upper]:[])].filter(Number.isFinite);
+    const lo=Math.min(...allVals),hi=Math.max(...allVals),span=Math.max(1e-9,hi-lo),w=360,h=132,pad=8;
+    const xy=(v,i)=>`${(pad+(i/Math.max(1,vals.length-1))*(w-pad*2)).toFixed(1)},${(pad+(1-(v-lo)/span)*(h-pad*2)).toFixed(1)}`;
+    const line=(arr,cls)=>{const chunks=[];let cur=[];arr.forEach((v,i)=>{if(Number.isFinite(v))cur.push(xy(v,i));else if(cur.length){chunks.push(cur);cur=[];}});if(cur.length)chunks.push(cur);return chunks.map(c=>`<polyline class="${cls}" points="${c.join(' ')}" fill="none" vector-effect="non-scaling-stroke"/>`).join('');};
+    const upper=bbs.map(b=>b?.upper??null),lower=bbs.map(b=>b?.lower??null),mid=bbs.map(b=>b?.mid??null);
+    return `<div class="slx-v081-chart-wrap"><svg class="slx-v080-chart slx-v081-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-label="Technical price chart">${line(upper,'bb')}${line(lower,'bb')}${line(mid,'bb-mid')}${line(ema90,'ema90')}${line(ema20,'ema20')}${line(vals,'price')}</svg><div class="slx-v081-legend"><span class="price">Price</span><span class="ema20">EMA20</span><span class="ema90">EMA90</span><span class="bb">Bollinger</span></div><div class="slx-v080-range"><span>${money(lo)}</span><span>${money(hi)}</span></div></div>`;
+  }
+  function technicalSignalV081({price,rsi,ema20,ema90,bb,momentumPct,samples}){
+    let score=0;const reasons=[];
+    if(samples>=90&&Number.isFinite(ema20)&&Number.isFinite(ema90)){if(ema20>ema90){score+=2;reasons.push('EMA20 above EMA90');}else if(ema20<ema90){score-=2;reasons.push('EMA20 below EMA90');}}
+    else if(samples>=20) reasons.push('EMA90 warming up');
+    if(Number.isFinite(rsi)){if(rsi<=30){score+=2;reasons.push('RSI oversold');}else if(rsi>=70){score-=2;reasons.push('RSI overbought');}else if(rsi>=52&&rsi<=65){score+=1;reasons.push('RSI constructive');}else if(rsi>=35&&rsi<=48){score-=1;reasons.push('RSI weak');}}
+    if(bb&&price){if(price<bb.lower){score+=1;reasons.push('below lower Bollinger');}else if(price>bb.upper){score-=1;reasons.push('above upper Bollinger');}else if(price>bb.mid){score+=0.5;reasons.push('above Bollinger mid');}else{score-=0.5;reasons.push('below Bollinger mid');}}
+    if(Number.isFinite(momentumPct)){if(momentumPct>1){score+=1;reasons.push('positive window momentum');}else if(momentumPct<-1){score-=1;reasons.push('negative window momentum');}}
+    const limited=samples<20;
+    let label='NEUTRAL',cls='neutral';
+    if(score>=3){label='BUY BIAS';cls='buy';}else if(score<=-3){label='SELL BIAS';cls='sell';}else if(score>=1){label='WATCH BUY';cls='watch';}else if(score<=-1){label='WATCH SELL';cls='watch';}
+    if(limited){label='COLLECTING DATA';cls='neutral';}
+    return {score,label,cls,reasons,limited};
+  }
+  function technicalStatsV080(sym,windowKey){
+    const hist=recordTechnicalSnapshotV080(false),all=Array.isArray(hist[sym])?hist[sym]:[];
+    const now=Date.now(),safeWindow=['24h','1w','1m'].includes(windowKey)?windowKey:'24h',ms={'24h':86400000,'1w':604800000,'1m':2592000000}[safeWindow];
+    const points=all.filter(x=>now-Number(x.t)<=ms),values=points.map(x=>Number(x.p)).filter(x=>x>0);
+    const price=Number(S.stocks.get(sym)?.price||values[values.length-1]||0),rsi=rsiV080(values,14),ema20=values.length?emaV080(values,20):null,ema90=values.length?emaV080(values,90):null,bb=bollingerV080(values,20);
+    const first=values[0]||0,momentumPct=first>0&&price>0?((price-first)/first)*100:null;
+    const coverageMs=points.length>1?Number(points[points.length-1].t)-Number(points[0].t):0;
+    const signal=technicalSignalV081({price,rsi,ema20,ema90,bb,momentumPct,samples:values.length});
+    return {points,allCount:all.length,price,rsi,ema20,ema90,bb,momentumPct,coverageMs,signal,windowKey:safeWindow};
+  }
+
+  function ensureAdvisorSuiteHostV080(){'''
+stock, count = engine_re.subn(lambda m: engine, stock, count=1)
+if count != 1:
+    raise SystemExit('Technical engine anchor not found')
+
+render_re = re.compile(r"  function renderTechnicalAdvisorV080\(\)\{.*?\n  \}\n\n  function renderPortfolioSimulatorV080\(\)\{", re.S)
+render = r'''  function renderTechnicalAdvisorV080(){
+    const host=ensureAdvisorSuiteHostV080();if(!host)return;
+    const select=host.querySelector('#slx-v080-tech-symbol'),win=host.querySelector('#slx-v080-tech-window'),box=host.querySelector('#slx-v080-technical');
+    const syms=[...S.stocks.keys()].sort();if(!syms.length){box.innerHTML='<div class="slx-v080-empty">No stock prices detected yet.</div>';return;}
+    const wanted=get(K.techSymbol,syms[0]);if(select.options.length!==syms.length||![...select.options].every((o,i)=>o.value===syms[i]))select.innerHTML=syms.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    select.value=syms.includes(wanted)?wanted:syms[0];if(select.value!==wanted)set(K.techSymbol,select.value);
+    const wantedWindow=get(K.techWindow,'24h');win.value=['24h','1w','1m'].includes(wantedWindow)?wantedWindow:'24h';if(win.value!==wantedWindow)set(K.techWindow,win.value);
+    const st=technicalStatsV080(select.value,win.value),fmt=x=>x==null?'—':Number(x).toLocaleString(undefined,{maximumFractionDigits:2}),pct=x=>x==null?'—':`${x>=0?'+':''}${Number(x).toFixed(2)}%`,hours=st.coverageMs/3600000;
+    const sig=st.signal,reason=sig.reasons.length?sig.reasons.map(esc).join(' · '):'Waiting for enough local samples';
+    box.innerHTML=`<div class="slx-v080-summary slx-v081-summary"><div><span>Price</span><b>${money(st.price)}</b></div><div><span>Window momentum</span><b class="${Number(st.momentumPct)>=0?'good':'bad'}">${pct(st.momentumPct)}</b></div><div><span>RSI 14</span><b>${fmt(st.rsi)}</b></div><div><span>EMA 20 / 90</span><b>${st.ema20==null?'—':money(st.ema20)} / ${st.ema90==null?'—':money(st.ema90)}</b></div></div>${technicalChartV081(st.points)}<div class="slx-v081-signal ${sig.cls}"><div><span>Technical signal</span><b>${esc(sig.label)}</b></div><strong>${sig.limited?'Needs more samples':`Score ${sig.score>=0?'+':''}${sig.score.toFixed(1)}`}</strong><small>${reason}</small></div><div class="slx-v081-metrics"><span>Bollinger lower <b>${st.bb?money(st.bb.lower):'—'}</b></span><span>Mid <b>${st.bb?money(st.bb.mid):'—'}</b></span><span>Upper <b>${st.bb?money(st.bb.upper):'—'}</b></span></div><div class="api-help">${st.points.length} samples in selected ${String(st.windowKey).toUpperCase()} window · local coverage ${hours>=24?(hours/24).toFixed(1)+'d':hours.toFixed(1)+'h'} · samples are collected locally while the script is active. Signals are technical indicators, not automatic trades.</div>`;
+  }
+
+  function renderPortfolioSimulatorV080(){'''
+stock, count = render_re.subn(lambda m: render, stock, count=1)
+if count != 1:
+    raise SystemExit('Technical render anchor not found')
+
+css_marker = '/* SAKALUX_STOCK_STABILIZATION_V0801 */'
+css = r'''/* SAKALUX_STOCK_TECHNICAL_V081 */
+(()=>{const id='slx-stock-technical-v081-style';if(document.getElementById(id))return;const st=document.createElement('style');st.id=id;st.textContent=`
+#slx-stock-advisor-suite-v080 .slx-v081-chart-wrap{margin-top:10px;padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#0a1119}
+#slx-stock-advisor-suite-v080 .slx-v081-chart{height:132px!important;width:100%;display:block}
+#slx-stock-advisor-suite-v080 .slx-v081-chart .price{stroke:#f2f6fb;stroke-width:2.2}#slx-stock-advisor-suite-v080 .slx-v081-chart .ema20{stroke:#5aa7ff;stroke-width:1.6}#slx-stock-advisor-suite-v080 .slx-v081-chart .ema90{stroke:#dfbd61;stroke-width:1.6}#slx-stock-advisor-suite-v080 .slx-v081-chart .bb{stroke:#7c8da1;stroke-width:1;stroke-dasharray:3 3;opacity:.68}#slx-stock-advisor-suite-v080 .slx-v081-chart .bb-mid{stroke:#60758d;stroke-width:1;opacity:.5}
+#slx-stock-advisor-suite-v080 .slx-v081-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px;font-size:10px;font-weight:800;color:#9fb0c3}#slx-stock-advisor-suite-v080 .slx-v081-legend span:before{content:'•';font-size:18px;line-height:0;vertical-align:-2px;margin-right:3px}#slx-stock-advisor-suite-v080 .slx-v081-legend .price:before{color:#f2f6fb}#slx-stock-advisor-suite-v080 .slx-v081-legend .ema20:before{color:#5aa7ff}#slx-stock-advisor-suite-v080 .slx-v081-legend .ema90:before{color:#dfbd61}#slx-stock-advisor-suite-v080 .slx-v081-legend .bb:before{color:#7c8da1}
+#slx-stock-advisor-suite-v080 .slx-v081-signal{margin-top:9px;padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#101923;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center}#slx-stock-advisor-suite-v080 .slx-v081-signal div{min-width:0}#slx-stock-advisor-suite-v080 .slx-v081-signal span{display:block;color:#91a2b6;font-size:9px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}#slx-stock-advisor-suite-v080 .slx-v081-signal b{display:block;font-size:15px;margin-top:2px}#slx-stock-advisor-suite-v080 .slx-v081-signal strong{font-size:11px}#slx-stock-advisor-suite-v080 .slx-v081-signal small{grid-column:1/-1;color:#9fb0c3;line-height:1.35}#slx-stock-advisor-suite-v080 .slx-v081-signal.buy{border-color:rgba(85,217,138,.45)}#slx-stock-advisor-suite-v080 .slx-v081-signal.sell{border-color:rgba(255,107,120,.45)}#slx-stock-advisor-suite-v080 .slx-v081-signal.watch{border-color:rgba(223,189,97,.4)}
+#slx-stock-advisor-suite-v080 .slx-v081-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:7px}#slx-stock-advisor-suite-v080 .slx-v081-metrics span{padding:7px;border:1px solid rgba(255,255,255,.07);border-radius:9px;font-size:9px;color:#92a3b6}#slx-stock-advisor-suite-v080 .slx-v081-metrics b{display:block;margin-top:2px;color:#e9f0f8;font-size:10px}
+@media(max-width:700px){#slx-stock-advisor-suite-v080 .slx-v081-metrics{grid-template-columns:1fr}#slx-stock-advisor-suite-v080 .slx-v081-summary{grid-template-columns:1fr 1fr!important}#slx-stock-advisor-suite-v080 .slx-v081-chart{height:150px!important}}
+`;document.head.appendChild(st);})();
+
+'''
+if css_marker not in stock:
+    raise SystemExit('v0.8.0.1 CSS marker not found')
+stock = stock.replace(css_marker, css + css_marker, 1)
+stock_p.write_text(stock)
+
+stock_entry['version'] = '0.8.1'
+stock_entry['description'] = 'Torn stock vault, ROI/benefit advisor, Financial Advisor and Technical Trade Assistant with 24H/1W/1M local charts, RSI, Bollinger, EMA20/90 and multi-factor technical signals.'
+stock_entry['release'] = {
+    'date': '2026-09-18',
+    'version': '0.8.1',
+    'notes': [
+        'Technical Trade Assistant release with richer 24H / 1W / 1M local charting.',
+        'Adds visible Price, EMA20, EMA90 and Bollinger overlays plus RSI, window momentum and Bollinger metrics.',
+        'Adds a multi-factor technical signal score using EMA direction, RSI, Bollinger position and selected-window momentum.',
+        'Shows sample count and local time coverage so limited-history signals are clearly marked as Collecting Data.',
+        'Preserves v0.8.0.1 Financial Advisor, trading safeguards and Portfolio Simulator foundation unchanged.'
+    ]
+}
+reg_p.write_text(json.dumps(reg, indent=2, ensure_ascii=False) + '\n')
+
+docs = re.sub(r'## Current version\n\*\*v[^*]+\*\*', '## Current version\n**v0.8.1**', docs, count=1)
+release = '''## Current release note
+
+**v0.8.1 — Technical Trade Assistant**
+- Upgrades the 24H / 1W / 1M local chart with visible Price, EMA20, EMA90 and Bollinger overlays.
+- Adds selected-window momentum, RSI 14, Bollinger lower/mid/upper metrics and sample/coverage diagnostics.
+- Adds a multi-factor technical signal score based on EMA direction, RSI, Bollinger position and window momentum.
+- Clearly returns **COLLECTING DATA** when local history is too short instead of presenting a strong signal from too few samples.
+- Keeps all existing Financial Advisor, Benefit Lock, Dry Run, PANIC and trade safeguards intact; v0.8.2 remains reserved for the smarter Portfolio Simulator.
+'''
+docs = re.sub(r'## Current release note\n.*?(?=\n## Installation and Hub integration)', release + '\n', docs, count=1, flags=re.S)
+changelog = '''### v0.8.1 — Technical Trade Assistant
+- Added richer 24H / 1W / 1M SVG chart with Price, EMA20, EMA90 and Bollinger overlays.
+- Added selected-window momentum and Bollinger lower/mid/upper readouts.
+- Added a multi-factor technical score and BUY BIAS / SELL BIAS / WATCH / NEUTRAL states.
+- Added sample-count and local-history coverage diagnostics; short histories are marked COLLECTING DATA.
+- Preserved v0.8.0.1 Financial Advisor, safety controls and Portfolio Simulator foundation.
+- Synchronized userscript/runtime version surfaces, scripts.json, INFO/release metadata and changelog to v0.8.1.
+
+'''
+docs = docs.replace('## Changelog\n\n', '## Changelog\n\n' + changelog, 1)
+docs_p.write_text(docs)
