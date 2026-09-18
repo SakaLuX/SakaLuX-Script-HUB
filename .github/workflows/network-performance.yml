@@ -1,0 +1,38 @@
+name: Network performance audit
+on:
+  push:
+    branches: [main]
+    paths: ['tests/performance/network-browser.cjs', '.github/workflows/network-performance.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  network:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/browser-tests" playwright@1.62.1 --no-audit --no-fund
+          "$RUNNER_TEMP/browser-tests/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Exercise network-bearing public methods with synthetic keys
+        env:
+          NODE_PATH: ${{ runner.temp }}/browser-tests/node_modules
+        run: node tests/performance/network-browser.cjs
+      - name: Preserve all network findings
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/extended-performance-2026-09-18/network-browser.json
+          git commit -m 'Record browser API bursts and simulated network failure recovery'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: network-performance-findings
+          path: reports/extended-performance-2026-09-18/network-browser.json
