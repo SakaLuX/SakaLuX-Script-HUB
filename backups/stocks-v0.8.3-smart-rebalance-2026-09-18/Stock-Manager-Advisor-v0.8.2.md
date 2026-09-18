@@ -3,15 +3,6 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 
-
-## v0.8.3 — Smart Rebalance Engine
-- Adds a portfolio-wide Smart Rebalance plan beneath the What-if simulator.
-- Uses only free/protected-safe shares as sell sources, preserving Benefit Lock.
-- Ranks source and target stocks from local technical score, benefit yield and benefit-tier context.
-- Produces up to four preview-only SELL → BUY moves with capital, share counts, score delta, technical delta, benefit delta and tier movement.
-- Adds a Recalculate action that refreshes the local technical snapshot before rebuilding the plan.
-- No trade is submitted automatically.
-
 ## v0.8.2 — Portfolio Simulator
 - BEFORE → AFTER What-if comparison.
 - Safe reallocatable coverage with Benefit Lock respected.
