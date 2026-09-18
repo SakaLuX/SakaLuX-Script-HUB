@@ -15,7 +15,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          state=$(gh api repos/SakaLuX/SakaLuX-Script-HUB/actions/runs/35367436353 --jq .status)
-          if [ "$state" != completed ]; then
-            gh api -X POST repos/SakaLuX/SakaLuX-Script-HUB/actions/runs/35367436353/cancel
-          fi
+          for run_id in 35367436353 35368165358; do
+            state=$(gh api repos/SakaLuX/SakaLuX-Script-HUB/actions/runs/$run_id --jq .status)
+            if [ "$state" != completed ]; then
+              gh api -X POST repos/SakaLuX/SakaLuX-Script-HUB/actions/runs/$run_id/cancel
+            fi
+          done
