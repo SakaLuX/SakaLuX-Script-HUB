@@ -1,0 +1,167 @@
+{
+  "assertions": [
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js all-native-enabled current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js all-native-enabled actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "__combined-SakaLuX__ normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "__combined-SakaLuX__ normal actual 412px viewport",
+      "passed": true
+    }
+  ],
+  "fixture": "Chromium; 412x915 touch viewport; CPU throttling 6x; 400 rows; 40 unrelated chat mutations at 20ms; 1400ms startup settle and 450ms drain; offline APIs. Counts include pending startup/UI work. Not actual phone FPS.",
+  "results": [
+    {
+      "file": "SakaLuX-Chat-Intelligence.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.2.19",
+      "layoutWidth": 412,
+      "queries": 228,
+      "timersScheduled": 47,
+      "observerCalls": 94,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 55.17,
+      "layoutMs": 44.12,
+      "heapMB": 1.43,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Chat-Intelligence.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.2.20",
+      "layoutWidth": 412,
+      "queries": 230,
+      "timersScheduled": 47,
+      "observerCalls": 94,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 64.02,
+      "layoutMs": 36.29,
+      "heapMB": 1.34,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "0.9.928",
+      "layoutWidth": 412,
+      "queries": 1,
+      "timersScheduled": 0,
+      "observerCalls": 80,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 6.09,
+      "layoutMs": 15.93,
+      "heapMB": 6.49,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "variant": "before",
+      "mode": "all-native-enabled",
+      "version": "0.9.928",
+      "layoutWidth": 412,
+      "queries": 400,
+      "timersScheduled": 76,
+      "observerCalls": 992,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 200.34,
+      "layoutMs": 21.56,
+      "heapMB": 9.82,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "0.9.929",
+      "layoutWidth": 412,
+      "queries": 1,
+      "timersScheduled": 0,
+      "observerCalls": 80,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 4.31,
+      "layoutMs": 11.81,
+      "heapMB": 6.49,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "variant": "after",
+      "mode": "all-native-enabled",
+      "version": "0.9.929",
+      "layoutWidth": 412,
+      "queries": 410,
+      "timersScheduled": 76,
+      "observerCalls": 994,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 202.58,
+      "layoutMs": 20.6,
+      "heapMB": 9.82,
+      "errors": []
+    },
+    {
+      "file": "__combined-SakaLuX__",
+      "variant": "before",
+      "mode": "normal",
+      "version": "combined",
+      "layoutWidth": 412,
+      "queries": 900,
+      "timersScheduled": 81,
+      "observerCalls": 1060,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 355.82,
+      "layoutMs": 81.01,
+      "heapMB": 13.21,
+      "errors": []
+    },
+    {
+      "file": "__combined-SakaLuX__",
+      "variant": "after",
+      "mode": "normal",
+      "version": "combined",
+      "layoutWidth": 412,
+      "queries": 938,
+      "timersScheduled": 81,
+      "observerCalls": 1060,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 336.34,
+      "layoutMs": 70.42,
+      "heapMB": 12.91,
+      "errors": []
+    }
+  ]
+}
