@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.77
+// @version      1.9.78
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -77,7 +77,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.77';
+    const VERSION = '1.9.78';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -97,6 +97,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.78", "date": "2026-09-19", "changes": ["Fly-out launcher now mounts as the first native sidebar row, directly before Gym, instead of cloning expandable contact rows near the bottom.", "Removes inherited counters and chevrons from the Hub fly-out row so no stray 1 or arrow appears.", "Keeps the blinking skull artwork and native Torn row styling."]},
         {"version": "1.9.77", "date": "2026-09-19", "changes": ["Restores the original blinking skull artwork for the native Hub navigation launcher.", "In Topbar (legacy) mode the Hub launcher is mounted immediately before Messages; in Fly-out mode it is mounted immediately after Messages, Events and Awards/Merits.", "Keeps the launcher inside Torn native navigation rows so sizing, spacing and scrolling match the selected navigation mode."]},
         {"version": "1.9.76", "date": "2026-09-18", "changes": ["Makes the Hub launcher independent of Torn Touchscreen Navigation mode: the fly-out menu gets a native Hub row whenever that menu exists, while the normal topbar S remains available in legacy topbar mode.", "Uses a cloned native Torn navigation row, matching the robust CAT-style approach instead of depending on one hashed menu container."]},
         {"version": "1.9.75", "date": "2026-09-18", "changes": ["Floating fallback launcher now appears only when neither native Hub launcher is actually mounted; scrolling the Torn header off-screen no longer triggers it.", "Audited all current top-level SakaLuX userscripts so none changes the font size of Torn native Points or Merits counters."]},
@@ -1883,8 +1884,6 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             .replace(/\s+/g, ' ')
             .trim()
             .toLowerCase();
-        const hrefOf = el => String(el?.getAttribute?.('href') || '').toLowerCase();
-        const named = (el, names) => names.includes(cleanLabel(el));
 
         const findNativeRow = start => {
             if (!start) return null;
@@ -1902,80 +1901,47 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             return start.closest?.('li,[role="menuitem"]') || start.parentElement;
         };
 
-        const firstNamed = names => allClickable.find(el => named(el, names));
-        const messagesAnchor = firstNamed(['messages', 'message']);
-        const eventsAnchor = firstNamed(['events', 'event']);
-        const awardsAnchor = firstNamed(['awards', 'award', 'merits', 'merit']);
+        const names = ['gym', 'properties', 'education', 'crimes', 'missions', 'newspaper', 'jail', 'hospital', 'casino'];
+        const anchors = names
+            .map(name => allClickable.find(el => cleanLabel(el) === name))
+            .filter(Boolean);
+        const rows = anchors.map(findNativeRow).filter(Boolean);
 
-        const messagesRow = findNativeRow(messagesAnchor);
-        const eventsRow = findNativeRow(eventsAnchor);
-        const awardsRow = findNativeRow(awardsAnchor);
-
-        let navParent = null;
-        if (messagesRow?.parentElement && eventsRow?.parentElement === messagesRow.parentElement) {
-            navParent = messagesRow.parentElement;
-        } else if (messagesRow?.parentElement && awardsRow?.parentElement === messagesRow.parentElement) {
-            navParent = messagesRow.parentElement;
-        }
-
-        let mode = 'flyout';
-        let insertTarget = null;
-        let insertBefore = false;
+        let sidebarParent = null;
         let templateRow = null;
-
-        if (navParent) {
-            const navText = cleanLabel(navParent);
-            const legacySignals = ['home', 'items', 'travel', 'raceway', 'city'];
-            mode = legacySignals.some(token => navText.includes(token)) ? 'topbar' : 'flyout';
-
-            if (mode === 'topbar') {
-                insertTarget = messagesRow || eventsRow || awardsRow;
-                insertBefore = true;
-                templateRow = messagesRow || eventsRow || awardsRow;
-            } else {
-                insertTarget = awardsRow || eventsRow || messagesRow;
-                insertBefore = false;
-                templateRow = awardsRow || eventsRow || messagesRow;
+        let insertTarget = null;
+        for (const row of rows) {
+            const parent = row.parentElement;
+            if (!parent) continue;
+            const sameParentCount = rows.filter(candidate => candidate.parentElement === parent).length;
+            if (sameParentCount >= 3) {
+                sidebarParent = parent;
+                templateRow = rows.find(candidate => candidate.parentElement === parent && cleanLabel(candidate).includes('gym'))
+                    || rows.find(candidate => candidate.parentElement === parent)
+                    || row;
+                insertTarget = templateRow;
+                break;
             }
         }
 
-        if (!insertTarget || !templateRow) {
-            const catAnchor = allClickable.find(el => /^cat script$/i.test(labelOf(el)));
-            const targetAnchor = allClickable.find(el => named(el, ['targets', 'target']) || hrefOf(el).includes('target'));
-            const enemyAnchor = allClickable.find(el => named(el, ['enemies', 'enemy']) || hrefOf(el).includes('enemies'));
-            const friendAnchor = allClickable.find(el => named(el, ['friends', 'friend']) || hrefOf(el).includes('friends'));
-            const fallbackAnchor = catAnchor || targetAnchor || enemyAnchor || friendAnchor;
-            templateRow = findNativeRow(fallbackAnchor);
-            insertTarget = templateRow;
-            insertBefore = Boolean(catAnchor && templateRow);
-            mode = 'flyout';
-        }
-
-        if (!insertTarget?.parentElement || !templateRow?.parentElement) {
+        if (!sidebarParent || !templateRow || !insertTarget) {
+            existing?.remove();
             syncFloatingButtonVisibility();
             return false;
         }
 
-        const positionExisting = row => {
-            const parent = insertTarget.parentElement;
-            if (!parent || !row) return false;
-            if (insertBefore) {
-                if (row.parentElement !== parent || row.nextElementSibling !== insertTarget) {
-                    parent.insertBefore(row, insertTarget);
-                }
-            } else {
-                if (row.parentElement !== parent || insertTarget.nextElementSibling !== row) {
-                    insertTarget.insertAdjacentElement('afterend', row);
-                }
+        const positionAtTop = row => {
+            if (!row) return false;
+            if (row.parentElement !== sidebarParent || row.nextElementSibling !== insertTarget) {
+                sidebarParent.insertBefore(row, insertTarget);
             }
-            row.dataset.sakaluxHubMode = mode;
+            row.dataset.sakaluxHubMode = 'flyout';
             return true;
         };
 
         if (existing?.isConnected) {
-            positionExisting(existing);
-            const icon = existing.querySelector('.slh-native-skull-icon');
-            if (icon) icon.style.animation = '';
+            positionAtTop(existing);
+            existing.querySelectorAll('[data-sakalux-inherited-extra]').forEach(el => el.remove());
             updateTopbarSkullState();
             syncFloatingButtonVisibility();
             return true;
@@ -1983,8 +1949,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
         const row = templateRow.cloneNode(true);
         row.id = IDS.navSkull;
-        row.setAttribute('data-sakalux-hub-launcher', mode);
-        row.dataset.sakaluxHubMode = mode;
+        row.setAttribute('data-sakalux-hub-launcher', 'flyout');
+        row.dataset.sakaluxHubMode = 'flyout';
         row.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
         row.querySelectorAll('[data-testid],[aria-current]').forEach(el => {
             el.removeAttribute('data-testid');
@@ -2004,15 +1970,20 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         click.setAttribute('title', 'SakaLuX Hub');
         click.setAttribute('aria-label', 'SakaLuX Hub');
 
-        const sourceText = cleanLabel(templateRow);
-        const textLeaves = [...click.querySelectorAll('span,div')].filter(el => {
-            const t = cleanLabel(el);
-            return t && el.children.length === 0;
-        });
-        const labelNode = textLeaves.find(el => cleanLabel(el) === sourceText)
-            || textLeaves.find(el => ['messages','message','events','event','awards','award','merits','merit','cat script','targets','target','enemies','enemy','friends','friend'].includes(cleanLabel(el)))
-            || textLeaves[textLeaves.length - 1];
-        if (labelNode) labelNode.textContent = mode === 'topbar' ? 'HUB' : 'SAKALUX HUB';
+        const leafText = [...click.querySelectorAll('span,div')].filter(el => el.children.length === 0);
+        const labelNode = leafText.find(el => cleanLabel(el) === 'gym')
+            || leafText.find(el => cleanLabel(el) === cleanLabel(templateRow))
+            || leafText.find(el => cleanLabel(el));
+        if (labelNode) labelNode.textContent = 'SAKALUX HUB';
+
+        for (const el of leafText) {
+            if (el === labelNode) continue;
+            const t = String(el.textContent || '').trim();
+            if (/^\d+$/.test(t) || /^[›»▶►→]+$/.test(t)) {
+                el.setAttribute('data-sakalux-inherited-extra', '1');
+                el.remove();
+            }
+        }
 
         const makeSkullSvg = nativeSvg => {
             if (!nativeSvg) return null;
@@ -2038,7 +2009,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             g.setAttribute('stroke-linecap', 'round');
             g.setAttribute('stroke-linejoin', 'round');
             g.innerHTML = `
-                <path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-6.4 0-4.4-3.3-7.6-8.1-7.6Z"/>
+                <path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-7.6-8.1-7.6Z"/>
                 <circle cx="8.8" cy="10.5" r="1.65"/>
                 <circle cx="15.2" cy="10.5" r="1.65"/>
                 <path d="m12 12.7-1 1.8h2l-1-1.8Z"/>
@@ -2051,6 +2022,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if (nativeSvg) {
             const skullSvg = makeSkullSvg(nativeSvg);
             if (skullSvg) nativeSvg.replaceWith(skullSvg);
+            [...click.querySelectorAll('svg')].slice(1).forEach(svg => svg.remove());
         } else {
             const img = click.querySelector('img');
             if (img) img.style.display = 'none';
@@ -2062,8 +2034,6 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             click.prepend(icon);
         }
 
-        const oldBadges = row.querySelectorAll(`#${IDS.navBadge}`);
-        oldBadges.forEach(badge => badge.remove());
         const badge = document.createElement('span');
         badge.id = IDS.navBadge;
         click.appendChild(badge);
@@ -2078,7 +2048,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             if (event.key === 'Enter' || event.key === ' ') open(event);
         }, true);
 
-        positionExisting(row);
+        positionAtTop(row);
         updateTopbarSkullState();
         syncFloatingButtonVisibility();
         return true;
