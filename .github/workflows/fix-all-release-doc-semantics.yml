@@ -3,6 +3,7 @@ name: Fix all release documentation semantics
 on:
   push:
     paths:
+      - '.github/release-doc-semantics.trigger'
       - '.github/workflows/fix-all-release-doc-semantics.yml'
   workflow_dispatch:
 
@@ -11,6 +12,7 @@ permissions:
 
 jobs:
   fix:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,8 +32,6 @@ jobs:
           from pathlib import Path
           import re
 
-          # Stocks: Current release note must describe the actual v0.8.4 release,
-          # not the old v0.8.1 Technical Trade Assistant release relabelled as 0.8.4.
           p=Path('greasyfork/Stock-Manager-Advisor.md'); s=p.read_text()
           release='''## Current release note
 
@@ -63,13 +63,11 @@ jobs:
               s=s.replace('## Changelog\n\n','## Changelog\n\n'+block,1)
           p.write_text(s)
 
-          # Mission: remove obsolete statement that v1.0.18 is still canonical.
           p=Path('greasyfork/Mission-Rewards.md'); s=p.read_text()
           s=s.replace('- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is v1.0.18.',
                       '- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is the current v1.0.41 line.')
           p.write_text(s)
 
-          # Market: remove obsolete hard-coded registry/public version example and add the missing current changelog entry.
           p=Path('greasyfork/Market-Intelligence.md'); s=p.read_text()
           s=re.sub(r'- Market Intelligence is distributed through Greasy Fork\. If Hub shows `PUBLISHED vX · REGISTRY v1\.17\.19`,.*?clear that legitimate pending state\.',
                    '- Market Intelligence is distributed through Greasy Fork. If Hub shows different **PUBLISHED** and **REGISTRY** versions, the public Greasy Fork metadata has not yet caught up with the registry; publish the matching current release to clear that pending state.',
