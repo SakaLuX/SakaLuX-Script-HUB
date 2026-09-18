@@ -35,18 +35,25 @@ def main():
             raise SystemExit('HUB_CHANGELOG marker not found')
         text = text.replace(marker, marker + entry, 1)
 
+    # Scope the replacement to the genuine launcher section. The file contains
+    # helper/template text elsewhere, so anchor after createTopbarSkull().
+    topbar_marker = '    function createTopbarSkull() {'
     start_marker = '    function createNavSkull() {'
-    next_marker = '\n    function syncFloatingButtonVisibility()'
-    start = text.find(start_marker)
+    next_marker = '\n    function updateTopbarSkullState()'
+
+    topbar = text.find(topbar_marker)
+    if topbar < 0:
+        raise SystemExit('createTopbarSkull start not found')
+    start = text.find(start_marker, topbar)
     if start < 0:
-        raise SystemExit('createNavSkull start not found')
+        raise SystemExit('createNavSkull start not found after createTopbarSkull')
     end = text.find(next_marker, start)
     if end < 0:
-        raise SystemExit('syncFloatingButtonVisibility marker not found')
+        raise SystemExit('updateTopbarSkullState marker not found after createNavSkull')
 
-    text = text[:start] + replacement.rstrip() + '\n' + text[end:]
+    text = text[:start] + replacement.rstrip() + '\n\n' + text[end + 1:]
     HUB.write_text(text, encoding='utf-8')
-    print('Patched Hub v1.9.77 with robust function-boundary replacement')
+    print('Patched Hub v1.9.77 with scoped function-boundary replacement')
 
 
 if __name__ == '__main__':
