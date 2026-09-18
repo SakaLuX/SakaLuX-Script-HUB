@@ -34,16 +34,18 @@
         }
       ],
       "release": {
-        "date": "2026-09-17",
+        "version": "1.3.47",
+        "date": "2026-09-18",
         "notes": [
-          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
-        ],
-        "version": "1.3.46"
+          "Stops repeated inventory badge replacement when protection state is unchanged.",
+          "Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.",
+          "Preserves sale blocking, reserved quantities and protection controls."
+        ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.46",
-      "detailsRevision": 1
+      "version": "1.3.47",
+      "detailsRevision": 2
     },
     {
       "active": true,
@@ -80,16 +82,18 @@
         }
       ],
       "release": {
-        "date": "2026-09-17",
+        "version": "5.3.40",
+        "date": "2026-09-18",
         "notes": [
-          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
-        ],
-        "version": "5.3.39"
+          "Uses constant-time Hub detection instead of document-wide marker searches on every mutation.",
+          "Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.",
+          "Preserves buyer grouping, cooldown and message preparation."
+        ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.39",
-      "detailsRevision": 1
+      "version": "5.3.40",
+      "detailsRevision": 2
     },
     {
       "active": true,
@@ -128,17 +132,18 @@
         }
       ],
       "release": {
+        "version": "1.0.42",
         "date": "2026-09-18",
-        "version": "1.0.41",
         "notes": [
-          "Copies the Enhancer Guard API Access structure and CSS exactly, changing only Mission-specific text, IDs and permissions.",
-          "Mission API permissions remain User: Ammo and Torn: Items."
+          "Scopes legacy footer repair to the Mission settings panel and batches it once.",
+          "Ignores unrelated chat changes in reward scanning and standalone dock maintenance.",
+          "Preserves reward annotations, API controls and footer restoration."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.41",
-      "detailsRevision": 1
+      "version": "1.0.42",
+      "detailsRevision": 2
     },
     {
       "active": true,
@@ -189,18 +194,18 @@
         }
       ],
       "release": {
+        "version": "1.17.39",
         "date": "2026-09-18",
         "notes": [
-          "Restores the native Market donation/author footer when Market settings are opened from Script Hub.",
-          "Keeps exactly one footer: SEND MONEY, SEND ITEMS, and Made with ❤️ by SakaLuX [2380374].",
-          "Removes the over-broad Hub-subtree guard that suppressed the Market-owned footer."
-        ],
-        "version": "1.17.38"
+          "Removes the multiple footer-repair timers scheduled for every page mutation.",
+          "Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.",
+          "Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged."
+        ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.38",
-      "detailsRevision": 1
+      "version": "1.17.39",
+      "detailsRevision": 2
     },
     {
       "active": true,
@@ -273,18 +278,18 @@
         }
       ],
       "release": {
-        "date": "2026-09-17",
+        "version": "1.3.43",
+        "date": "2026-09-18",
         "notes": [
-          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
-          "Limits SAFE/persistence installation observers to top-level panel lifecycle changes.",
-          "Skips rebuilding the standalone dock when its module entries have not changed."
-        ],
-        "version": "1.3.42"
+          "Uses constant-time Hub detection in standalone maintenance.",
+          "Batches standalone refreshes and ignores chat/dock/footer mutations.",
+          "Preserves target settings, learning records and attack links."
+        ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.42",
-      "detailsRevision": 1
+      "version": "1.3.43",
+      "detailsRevision": 2
     },
     {
       "active": true,
@@ -320,20 +325,18 @@
         }
       ],
       "release": {
-        "version": "1.8.37",
+        "version": "1.8.38",
         "date": "2026-09-18",
         "notes": [
-          "Synchronizes the runtime version, Hub bridge and installed-version marker to v1.8.37, removing the false update warning.",
-          "Rebuilds the TornPDA Company header so the title, Refresh, API Key and Close controls stay cleanly inside the viewport.",
-          "Moves Employee / Director to a dedicated full-width second row with equal-width controls.",
-          "Uses the shared Bazaar-style Standalone Dock bootstrap and registers Company as a module instead of creating a separate standalone.",
-          "Keeps Company opening through its module bridge above the shared Standalone Dock."
+          "Ignores unrelated chat changes in Company page scraping and dock maintenance.",
+          "Removes duplicate legacy registration timers that overwrote current module metadata.",
+          "Preserves Company panel stacking and current standalone registration."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.37",
-      "detailsRevision": 1
+      "version": "1.8.38",
+      "detailsRevision": 2
     },
     {
       "active": true,
@@ -375,19 +378,18 @@
         }
       ],
       "release": {
-        "version": "0.8.5",
+        "version": "0.8.6",
         "date": "2026-09-18",
         "notes": [
-          "Prevents continuous page/chat mutations from postponing panel mounting indefinitely.",
-          "Skips hidden stock lists and relocates the panel when Torn loads or replaces content.",
-          "Preserves settings, profiles and trading safeguards.",
-          "Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation."
+          "Uses constant-time Hub detection and reuses unchanged standalone dock rows.",
+          "Ignores unrelated chat/dock/footer changes in standalone maintenance.",
+          "Preserves busy-page mounting, portfolio data and trading safeguards."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.5",
-      "detailsRevision": 1
+      "version": "0.8.6",
+      "detailsRevision": 2
     }
   ]
 }

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.39**
+**v5.3.40**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,10 @@
 
 ## Current release note
 
-**v5.3.39** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+**v5.3.40 — Performance and TornPDA smoothness**
+- Uses constant-time Hub detection instead of document-wide marker searches on every mutation.
+- Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.
+- Preserves buyer grouping, cooldown and message preparation.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -29,6 +32,14 @@ Generated thank-you text should be reviewed before sending. The script assists w
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v5.3.40 — Performance and TornPDA smoothness
+
+- Uses constant-time Hub detection instead of document-wide marker searches on every mutation.
+- Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.
+- Preserves buyer grouping, cooldown and message preparation.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v5.3.39 — Performance and release metadata audit
 - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.

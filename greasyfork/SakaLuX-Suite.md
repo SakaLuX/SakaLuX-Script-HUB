@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.927**
+**v0.9.928**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -35,13 +35,11 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.927** completes the nine standalone SakaLuX launch bridges. It preserves the compact pill-shaped module switches. Scoped switch styles override shared blue button themes and mobile minimum heights; the thumb slides between the gray OFF and gold ON states. The confirmed v0.9.925 panel layout is preserved.
-
-**v0.9.925** extends Master Control to 36px above the viewport bottom on mobile and TornPDA desktop-width touch layouts. Explicit viewport heights keep the module list scrollable and the footer at the bottom. The launcher and close behavior remain controlled by the existing open class.
-
-**v0.9.924** emergency hotfix restores the last working Master Control runtime after v0.9.923 prevented the Suite launcher from opening in TornPDA. The v0.9.923 coarse-pointer full-height override has been removed completely; launcher behavior is restored first, while the mobile-height adjustment will be reworked separately without touching the open path.
-
-**v0.9.922** Fixes Master Control scrolling by bounding the flex content area on desktop and TornPDA; keeps header/toolbar and footer outside the scrolling module list. Renders the 20px SEND MONEY / SEND ITEMS controls and orange Made with ❤️ author line directly inside every panel render, with rounded lower corners. Preserves module switches and scroll position, and removes the separate document-wide footer repair observer.
+**v0.9.928 — Performance and TornPDA smoothness**
+- Stops Recovery Planner from recreating its identical SVG icon on every observer pass.
+- Gates Member Travel Map repair to relevant faction/profile views and ignores chat in unrelated modules.
+- Coalesces OC, activity and armory scans; Company scanning stays on Company/Jobs pages.
+- Preserves all 23 module entries, settings, panel height and switch styling.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
@@ -61,6 +59,15 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v0.9.928 — Performance and TornPDA smoothness
+
+- Stops Recovery Planner from recreating its identical SVG icon on every observer pass.
+- Gates Member Travel Map repair to relevant faction/profile views and ignores chat in unrelated modules.
+- Coalesces OC, activity and armory scans; Company scanning stays on Company/Jobs pages.
+- Preserves all 23 module entries, settings, panel height and switch styling.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v0.9.927 — Complete SakaLuX tool bridges
 

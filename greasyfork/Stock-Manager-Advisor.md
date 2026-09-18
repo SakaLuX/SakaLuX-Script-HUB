@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.5**
+**v0.8.6**
 
 ## What it does
 - Stock vault target selection directly from Torn Stocks.
@@ -22,20 +22,10 @@
 
 ## Current release note
 
-**v0.8.5 — TornPDA panel recovery**
-- Prevents continuous page/chat mutations from postponing panel mounting indefinitely.
-- Skips hidden stock lists and relocates the panel when Torn loads or replaces content.
-- Preserves settings, profiles and trading safeguards.
-- Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation.
-
-**v0.8.4 — Rebalance Strategy Profiles**
-- Adds persistent **SAFE / BALANCED / AGGRESSIVE** Smart Rebalance profiles.
-- **SAFE:** limits each proposed move to 10% of portfolio value, requires a larger score gap and suggests up to 2 moves.
-- **BALANCED:** keeps the v0.8.3 behavior as the default, with 20% per move and up to 4 moves.
-- **AGGRESSIVE:** raises the cap to 35%, accepts smaller score gaps and can suggest up to 6 moves.
-- Profiles tune technical-score, benefit-yield, benefit-tier and affordability weighting.
-- The selected profile is stored locally and restored automatically on TornPDA/desktop.
-- Benefit Lock remains enforced, sell sources remain limited to free shares, and Smart Rebalance remains preview-only.
+**v0.8.6 — Performance and TornPDA smoothness**
+- Uses constant-time Hub detection and reuses unchanged standalone dock rows.
+- Ignores unrelated chat/dock/footer changes in standalone maintenance.
+- Preserves busy-page mounting, portfolio data and trading safeguards.
 
 ## Recommended
 - Keep **Dry Run ON** while checking a new configuration.
@@ -67,6 +57,14 @@
 **All Rights Reserved — SakaLuX [2380374]**
 
 ## Release history / Changelog
+
+### v0.8.6 — Performance and TornPDA smoothness
+
+- Uses constant-time Hub detection and reuses unchanged standalone dock rows.
+- Ignores unrelated chat/dock/footer changes in standalone maintenance.
+- Preserves busy-page mounting, portfolio data and trading safeguards.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v0.8.5 — TornPDA panel recovery
 - Prevents continuous page/chat mutations from postponing panel mounting indefinitely.

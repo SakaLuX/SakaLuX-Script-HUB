@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.37**
+**v1.8.38**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -20,13 +20,10 @@
 
 ## Current release note
 
-**v1.8.37 — Professional TornPDA header + shared standalone integration**
-- Synchronizes the internal runtime version used by the Hub from stale v1.8.35 to v1.8.37.
-- Rebuilds the mobile header so the Company title uses the available width cleanly.
-- Keeps Refresh, API Key and Close grouped tightly on the right and inside the viewport.
-- Moves Employee / Director to a dedicated full-width second row with equal-width buttons.
-- Preserves the shared Bazaar-style Standalone Dock bootstrap: Company registers as a module in the common dock instead of creating a second standalone.
-- Keeps Company opening through its module bridge above the shared Standalone Dock.
+**v1.8.38 — Performance and TornPDA smoothness**
+- Ignores unrelated chat changes in Company page scraping and dock maintenance.
+- Removes duplicate legacy registration timers that overwrote current module metadata.
+- Preserves Company panel stacking and current standalone registration.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -51,6 +48,14 @@
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.8.38 — Performance and TornPDA smoothness
+
+- Ignores unrelated chat changes in Company page scraping and dock maintenance.
+- Removes duplicate legacy registration timers that overwrote current module metadata.
+- Preserves Company panel stacking and current standalone registration.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v1.8.37 — Professional TornPDA header layout
 - Synchronizes runtime `APP.version` with `@version`, standalone registration, Hub bridge, ModuleReady event and local installed-version marker at v1.8.37, removing the false UPDATE AVAILABLE state.

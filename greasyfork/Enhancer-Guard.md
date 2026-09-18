@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.46**
+**v1.3.47**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,7 +17,10 @@
 
 ## Current release note
 
-**v1.3.46** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+**v1.3.47 — Performance and TornPDA smoothness**
+- Stops repeated inventory badge replacement when protection state is unchanged.
+- Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.
+- Preserves sale blocking, reserved quantities and protection controls.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -36,6 +39,14 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.3.47 — Performance and TornPDA smoothness
+
+- Stops repeated inventory badge replacement when protection state is unchanged.
+- Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.
+- Preserves sale blocking, reserved quantities and protection controls.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v1.3.46 — Performance and release metadata audit
 - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.

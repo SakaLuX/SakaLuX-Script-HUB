@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.71
+// @version      1.9.72
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -48,6 +48,11 @@
         }
       };
     }
+    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
+    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
+    });
     if (!document.getElementById('sakalux-shared-hub-skin')) {
       const st=document.createElement('style');
       st.id='sakalux-shared-hub-skin';
@@ -72,7 +77,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.71';
+    const VERSION = '1.9.72';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -92,6 +97,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.72", "date": "2026-09-18", "changes": ["Avoids rewriting badge text when its value is unchanged, preventing self-triggered observer work.", "Ignores unrelated chat/dock/footer changes and coalesces launcher maintenance.", "Synchronizes current performance release notes for all seven registered modules."]},
         {"version": "1.9.71", "date": "2026-09-18", "changes": ["Expands INFO for all seven registered modules with readable feature sections.", "Synchronizes NEW with each current module release, including Stocks v0.8.5, Company v1.8.37, Mission v1.0.41 and Market v1.17.38.", "Updates offline details and refreshes stale cached module information without overriding newer release metadata."]},
         {version:'1.9.70',date:'2026-09-17',changes:['Synchronizes Market Intelligence v1.17.37 and Mission Rewards v1.0.36.','Both modules now use the complete working Elimination Assistant donation/footer implementation with their own panel selectors and footer IDs.']},
         {version:'1.9.69',date:'2026-09-17',changes:['Prevents Script Hub from injecting its legacy author-only fallback footer into Market Intelligence settings.','Market Intelligence keeps exactly one footer: SEND MONEY, SEND ITEMS, then Made with ❤️ by SakaLuX [2380374].','Preserves Market settings, calculations, cache controls and Suite launcher behavior unchanged.']},
@@ -570,16 +576,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 }
             ],
             "release": {
-                "date": "2026-09-17",
+                "version": "1.3.47",
+                "date": "2026-09-18",
                 "notes": [
-                    "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
-                ],
-                "version": "1.3.46"
+                    "Stops repeated inventory badge replacement when protection state is unchanged.",
+                    "Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.",
+                    "Preserves sale blocking, reserved quantities and protection controls."
+                ]
             },
             "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
             "type": "addon",
-            "version": "1.3.46",
-            "detailsRevision": 1
+            "version": "1.3.47",
+            "detailsRevision": 2
         },
         {
             "active": true,
@@ -616,16 +624,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 }
             ],
             "release": {
-                "date": "2026-09-17",
+                "version": "5.3.40",
+                "date": "2026-09-18",
                 "notes": [
-                    "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
-                ],
-                "version": "5.3.39"
+                    "Uses constant-time Hub detection instead of document-wide marker searches on every mutation.",
+                    "Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.",
+                    "Preserves buyer grouping, cooldown and message preparation."
+                ]
             },
             "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
             "type": "addon",
-            "version": "5.3.39",
-            "detailsRevision": 1
+            "version": "5.3.40",
+            "detailsRevision": 2
         },
         {
             "active": true,
@@ -664,17 +674,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 }
             ],
             "release": {
+                "version": "1.0.42",
                 "date": "2026-09-18",
-                "version": "1.0.41",
                 "notes": [
-                    "Copies the Enhancer Guard API Access structure and CSS exactly, changing only Mission-specific text, IDs and permissions.",
-                    "Mission API permissions remain User: Ammo and Torn: Items."
+                    "Scopes legacy footer repair to the Mission settings panel and batches it once.",
+                    "Ignores unrelated chat changes in reward scanning and standalone dock maintenance.",
+                    "Preserves reward annotations, API controls and footer restoration."
                 ]
             },
             "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
             "type": "addon",
-            "version": "1.0.41",
-            "detailsRevision": 1
+            "version": "1.0.42",
+            "detailsRevision": 2
         },
         {
             "active": true,
@@ -725,18 +736,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 }
             ],
             "release": {
+                "version": "1.17.39",
                 "date": "2026-09-18",
                 "notes": [
-                    "Restores the native Market donation/author footer when Market settings are opened from Script Hub.",
-                    "Keeps exactly one footer: SEND MONEY, SEND ITEMS, and Made with ❤️ by SakaLuX [2380374].",
-                    "Removes the over-broad Hub-subtree guard that suppressed the Market-owned footer."
-                ],
-                "version": "1.17.38"
+                    "Removes the multiple footer-repair timers scheduled for every page mutation.",
+                    "Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.",
+                    "Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged."
+                ]
             },
             "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
             "type": "addon",
-            "version": "1.17.38",
-            "detailsRevision": 1
+            "version": "1.17.39",
+            "detailsRevision": 2
         },
         {
             "active": true,
@@ -809,18 +820,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 }
             ],
             "release": {
-                "date": "2026-09-17",
+                "version": "1.3.43",
+                "date": "2026-09-18",
                 "notes": [
-                    "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
-                    "Limits SAFE/persistence installation observers to top-level panel lifecycle changes.",
-                    "Skips rebuilding the standalone dock when its module entries have not changed."
-                ],
-                "version": "1.3.42"
+                    "Uses constant-time Hub detection in standalone maintenance.",
+                    "Batches standalone refreshes and ignores chat/dock/footer mutations.",
+                    "Preserves target settings, learning records and attack links."
+                ]
             },
             "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
             "type": "addon",
-            "version": "1.3.42",
-            "detailsRevision": 1
+            "version": "1.3.43",
+            "detailsRevision": 2
         },
         {
             "active": true,
@@ -856,20 +867,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 }
             ],
             "release": {
-                "version": "1.8.37",
+                "version": "1.8.38",
                 "date": "2026-09-18",
                 "notes": [
-                    "Synchronizes the runtime version, Hub bridge and installed-version marker to v1.8.37, removing the false update warning.",
-                    "Rebuilds the TornPDA Company header so the title, Refresh, API Key and Close controls stay cleanly inside the viewport.",
-                    "Moves Employee / Director to a dedicated full-width second row with equal-width controls.",
-                    "Uses the shared Bazaar-style Standalone Dock bootstrap and registers Company as a module instead of creating a separate standalone.",
-                    "Keeps Company opening through its module bridge above the shared Standalone Dock."
+                    "Ignores unrelated chat changes in Company page scraping and dock maintenance.",
+                    "Removes duplicate legacy registration timers that overwrote current module metadata.",
+                    "Preserves Company panel stacking and current standalone registration."
                 ]
             },
             "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
             "type": "addon",
-            "version": "1.8.37",
-            "detailsRevision": 1
+            "version": "1.8.38",
+            "detailsRevision": 2
         },
         {
             "active": true,
@@ -911,24 +920,23 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 }
             ],
             "release": {
-                "version": "0.8.5",
+                "version": "0.8.6",
                 "date": "2026-09-18",
                 "notes": [
-                    "Prevents continuous page/chat mutations from postponing panel mounting indefinitely.",
-                    "Skips hidden stock lists and relocates the panel when Torn loads or replaces content.",
-                    "Preserves settings, profiles and trading safeguards.",
-                    "Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation."
+                    "Uses constant-time Hub detection and reuses unchanged standalone dock rows.",
+                    "Ignores unrelated chat/dock/footer changes in standalone maintenance.",
+                    "Preserves busy-page mounting, portfolio data and trading safeguards."
                 ]
             },
             "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
             "type": "addon",
-            "version": "0.8.5",
-            "detailsRevision": 1
+            "version": "0.8.6",
+            "detailsRevision": 2
         }
     ]
 };
 
-    const FALLBACK_MODULE_DETAILS = {"enhancer": {"info": "Purpose\nEnhancer Guard helps you track Enhancers and Enhancer Relics in your Torn inventory and protect items you want to keep. It combines an inventory dashboard with Item Protector integration directly on Torn Items.\n\nInventory dashboard\nShows which tracked items you own, which are missing and the quantities available. Search locates individual items; filters and sorting narrow the list; favorites keep important items easy to find. Compact mode reduces space used on TornPDA. Refresh and hard refresh update the information, and optional auto-refresh can periodically refresh inventory data.\n\nItem protection\nDisplays lock badges for fully protected, partially protected and unlocked items. Partial protection lets you retain a chosen quantity instead of locking the entire item stack. Local protection settings and Item Protector state are used to keep the display consistent. Fully protected items are hidden or blocked in supported Bazaar sale-selection flows so they do not enter the selection accidentally.\n\nAPI and saved settings\nUses Torn API v2 inventory/item data and includes a dedicated API Access panel for creating, testing, saving or clearing the required key. Favorites, display preferences, protection quantities and cached inventory state are saved locally. Compatible Hub key integration is available; the module also works standalone.\n\nHow to use\nRefresh after inventory changes, search or filter for the item, then review its protection state and retained quantity. Inventory data can lag until refreshed. Protection is a local browser safeguard, so review Torn's final sale list before confirming any sale.", "release": {"date": "2026-09-17", "notes": ["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."], "version": "1.3.46"}}, "bazaar": {"info": "Purpose\nBazaar Thanker organizes purchases from your Bazaar and helps prepare personal thank-you messages for customers. It reads Events and assists on Messages; Hub can detect and open its settings from other Torn pages.\n\nBuyer grouping and purchase details\nDetects supported Bazaar purchase events and groups purchases by buyer. Buyer details let you review the purchase information before preparing a message. Copy tools help reuse purchase or message information. Configurable big-buyer thresholds highlight customers by item count or amount spent.\n\nMessage customization\nUses a custom Bazaar name when supplied and automatic name detection when no custom name is configured. Message text is configurable so you can include your preferred greeting and Bazaar information. The thank-you workflow prepares text for Torn's messaging flow; review the recipient and final message before sending.\n\nHistory and repeat-message control\nKeeps local buyer/message history, statistics and processed-event state. A configurable cooldown avoids repeatedly thanking the same buyer too soon; the default is four hours. History-management controls help inspect or clear the records stored on the device.\n\nAccess and persistence\nDoes not need a Torn API key. Settings and working records are stored locally in TornPDA or the userscript environment. Script Hub provides detection, settings access and ON/OFF integration; the shared standalone dock can open the module when Hub is absent. Core purchase and message processing remains limited to the relevant Events and Messages pages.", "release": {"date": "2026-09-17", "notes": ["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."], "version": "5.3.39"}}, "mission-rewards": {"info": "Purpose\nMission Rewards adds practical purchase information to Torn's Mission Shop, helping compare rewards before spending mission credits. It decorates supported reward cards and provides a more detailed reward panel.\n\nReward value\nShows estimated market value and value per mission credit, so offers with different prices can be compared on the same basis. Values are estimates based on available item data; they are guidance rather than guaranteed resale prices.\n\nSpecial ammunition\nReads currently owned special ammunition through the configured API key and shows ownership context alongside relevant rewards. This helps distinguish ammunition you already have from offers you may want to buy.\n\nWeapon-mod price learning\nTracks normal and special weapon-mod credit ranges from offers seen locally. Learned ranges build up as you use the script on the device. They describe observed offers and do not guarantee the price of future Mission Shop rewards.\n\nAPI and refresh\nDedicated API Access uses User: Ammo and Torn: Items permissions. Includes key setup and validation, refresh controls and local item/ammo caches. Compatible shared Hub key access can be used where available. No API write permission is required for reward information.\n\nWhere it runs\nRegisters with Hub on every Torn page, but Mission Shop scanning only runs on Missions. Settings and learned ranges are stored locally. The current stable branch is v1.0.41; the rolled-back experimental Mission Hints branch is not part of the active feature set. Reward purchases remain normal player actions.", "release": {"date": "2026-09-18", "version": "1.0.41", "notes": ["Copies the Enhancer Guard API Access structure and CSS exactly, changing only Mission-specific text, IDs and permissions.", "Mission API permissions remain User: Ammo and Torn: Items."]}}, "market-intelligence": {"info": "Purpose\nMarket Intelligence combines item-price analysis, Bazaar-flip estimates, travel purchasing plans, Museum set analysis and equipment comparisons. It provides decision support on the relevant Torn market and travel pages.\n\nItem Market and watchlists\nShows live or cached item-price information, locally collected price history and trends. BUY NOW, FAIR, WAIT and LEARNING signals summarize the available price context. Watchlists help keep selected items under review. Limited history is identified as learning rather than treated as a reliable long-term trend.\n\nBazaar Flip Intelligence\nCompares available price information to estimate net profit and return on investment for possible flips. Estimates depend on the prices and stock visible to the module; an apparent opportunity is not a guaranteed sale or profit.\n\nTravel purchasing\nBest Travel Run compares possible runs; Best Route Basket and the Travel Buy Planner help allocate carrying capacity across purchases. In-country Best Buys evaluates available buying opportunities. Arrival Stock and Arrival Basket support planning while flying. Local travel-session estimates, recent plans and stock/restock observations improve the context collected on the device.\n\nMuseum and equipment\nMuseum Set Intelligence adds set-oriented item context. The Loadout Comparator helps compare weapon and armor options using supported equipment data, alongside the trading/travel workspace.\n\nData and settings\nUses Torn API data and YATA public travel data where needed. Keeps local caches, price/travel history, watchlists and preferences. Dedicated API diagnostics help identify missing data access. The optional SakaLuX Price Network client is disabled by default and can be configured separately.\n\nHub and manual actions\nSupports persistent Hub ON/OFF and native settings access, with the shared standalone dock available separately. Market features run on relevant market pages and travel tools on relevant travel pages. It does not automatically buy or sell items; prices, stocks and travel estimates should be checked before acting.", "release": {"date": "2026-09-18", "notes": ["Restores the native Market donation/author footer when Market settings are opened from Script Hub.", "Keeps exactly one footer: SEND MONEY, SEND ITEMS, and Made with ❤️ by SakaLuX [2380374].", "Removes the over-broad Hub-subtree guard that suppressed the Market-owned footer."], "version": "1.17.38"}}, "elimination-assistant": {"info": "Purpose\nElimination Assistant helps find and review combat targets during Torn Eliminations. It loads team members and target availability, ranks candidates and organizes targets you want to revisit.\n\nTeams and batch loading\nUses Torn API v2 to load Elimination teams and target data. Large teams are processed in rotating groups of up to 500 players, with LOAD NEXT to continue through the membership. Player search, filters and sorting help narrow the current results.\n\nTarget recommendations\nSAFE, RISKY and SKIP recommendations and Smart Target Score summarize the data available for each target. Optional FFScouter Fair Fight/battle-stat estimates can be compared with your calibrated or manually entered battle stats. These are estimates, not a guarantee that an attack will be won.\n\nCalibration and target learning\nSupports calibration and optional FF scans. Manually recorded WIN/LOSS outcomes add local per-target learning, so results you record can contribute context on later visits.\n\nAvailability and navigation\nAttackable-state checks help distinguish targets currently suitable to open. PROFILE and ATTACK actions take you to the selected player or attack page, including routing suitable for PC and TornPDA. The script never attacks automatically.\n\nSaved SAFE targets and export\nRemembers SAFE targets across batches and sessions. Saved targets can be reviewed, copied, exported, removed individually or cleared. SAFE/RISKY attackable targets can be exported in TornPDA Chain Targets format.\n\nAPI and settings\nIncludes dedicated Torn API Access and optional FFScouter key controls. Target/filter preferences and local saved-target state persist across normal use. Hub provides persistent ON/OFF and module access; the shared standalone dock remains available when Hub is absent.", "release": {"date": "2026-09-17", "notes": ["Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.", "Limits SAFE/persistence installation observers to top-level panel lifecycle changes.", "Skips rebuilding the standalone dock when its module entries have not changed."], "version": "1.3.42"}}, "company-intelligence": {"info": "Purpose\nCompany Intelligence provides Employee and Director workspaces for understanding your job, staff, training commitments and company development. It combines permitted Torn company/user data with local history and manually recorded planning data.\n\nEmployee workspace\nShows work stats and position suitability, personal progress, train tracking, employment offers and actionable advice. Employee Progress compares changes in work stats and train compliance and provides 30/90-day projections based on the available history. Offer comparison helps review the information recorded for possible jobs.\n\nCompany Growth Center\nBuilds daily company snapshots, shows the Sunday rating countdown and presents a star outlook. Growth direction and star predictions are advisory: Torn ratings are comparative, and missing competitor or historical data limits confidence.\n\nDirector staff planning\nProvides staff overview, effectiveness and position analysis, position-optimization advice and actionable employee flags. Smart training rotation, training debt and per-employee train history help track commitments and plan future training. Director-only API data requires the key owner to be the company director.\n\nTrain-sale contracts\nTracks contracts, delivered and remaining trains, balances and employee training history. CSV/report export supports reviewing records outside the panel. Local contract records are planning data and should be kept current with actual deliveries.\n\nFinance, stock and benchmarks\nWeekly finance and balance views use known API values and locally logged amounts. Unknown costs are not silently converted into real zeroes. Stock intelligence, competitor benchmarks, company timeline, diagnostics and advice add broader context. Same-type competitor samples and regular snapshots improve comparisons.\n\nAPI and employment state\nSupports Torn API v2 with classic API and local company-cache fallbacks. Fresh job data is prioritized when refreshing employment status; historical planning records can remain available after job changes. Dedicated API controls manage the data needed by the selected workspace.\n\nPersistence and access\nCompany notes, contracts, benchmarks, snapshots and history are stored locally. Uses the shared Bazaar-style Standalone Dock registration and Hub module bridge rather than a second Company menu. The module provides analysis and planning; it does not perform automated company actions. Refresh after the daily company report to build useful history.", "release": {"version": "1.8.37", "date": "2026-09-18", "notes": ["Synchronizes the runtime version, Hub bridge and installed-version marker to v1.8.37, removing the false update warning.", "Rebuilds the TornPDA Company header so the title, Refresh, API Key and Close controls stay cleanly inside the viewport.", "Moves Employee / Director to a dedicated full-width second row with equal-width controls.", "Uses the shared Bazaar-style Standalone Dock bootstrap and registers Company as a module instead of creating a separate standalone.", "Keeps Company opening through its module bridge above the shared Standalone Dock."]}}, "stock-manager-advisor": {"info": "Purpose\nStock Manager & Advisor adds a stock workspace directly to Torn Stocks and provides a full dashboard through Hub. It combines portfolio tracking, benefit-block analysis, financial and technical advice, simulations and explicit player-triggered trade controls.\n\nPortfolio and inline workspace\nShows invested capital when cost basis is known, market value, unrealized profit/loss, cash and holdings. Per-stock companion cards expose portfolio/benefit context and compact actions. Search, sorting, filters, favorites, favorite targets and Compact mode help organize the list. Transaction history and action logs keep local activity records.\n\nVault and withdrawal controls\nVault Max and Vault Keep calculate purchases for the selected target using the configured cash amount or retained-cash preference. Withdrawal controls calculate shares to sell for a chosen amount; Withdraw All, Sell Excess and Sell to Cash Target support explicit stock-management workflows where available. Target Lock helps prevent accidental target changes. PANIC is an explicit cash-to-stock action using its configured primary/fallback target and preview flow.\n\nBenefit and ROI advice\nAnalyzes benefit tiers, protected benefit floors, distance to the next benefit, estimated yield, marginal APR and payback. Best ROI and Best Affordable candidates help compare potential purchases. Benefit values and adviser scores are estimates rather than guaranteed returns.\n\nFinancial Advisor\nModels gross benefit income per day, month and year, configurable costs and net income. Exclusions keep chosen stocks out of adviser comparisons. Bank comparison supports different deposit periods, with best-effort automatic rate capture on supported Bank pages and a manual APR fallback.\n\nTechnical Trade Assistant\nCollects price history locally and compares 24H, 1W and 1M windows. Provides a chart with price, EMA20, EMA90 and Bollinger overlays, RSI14, momentum and technical-score context. BUY BIAS, SELL BIAS, WATCH and NEUTRAL states summarize the local signals. History grows with use on the device; the module does not depend on an external historical-price service.\n\nPortfolio Simulator\nShows before/after what-if reallocations, safely reallocatable coverage, benefit-yield and technical-score changes, target-tier movement and unused cash/share-rounding effects. Simulator results are previews and do not submit trades.\n\nSmart Rebalance and profiles\nBuilds portfolio-wide SELL-to-BUY proposals using free shares above protected benefit floors. SAFE, BALANCED and AGGRESSIVE profiles tune turnover caps, score thresholds, weighting and suggested-move limits. Recalculation updates the local technical context. Plans remain preview-only until the separate guided execution controls are deliberately used.\n\nTrading safeguards and API\nDry Run, Benefit Lock, confirmations and cooldown checks protect the trade workflow. A dedicated API Access panel manages money, portfolio and stock-catalogue data. Hub OPEN and REFRESH display or synchronize data; they do not place orders. Review a proposed trade before confirming it.\n\nPersistence and TornPDA behavior\nSettings, targets, profiles, caches, local price history, favorites and transaction records persist during normal updates. Export/import excludes the API key. The inline workspace mounts without waiting for page/chat mutations to stop, skips hidden stock containers and recovers after Stocks content is replaced. Disabling the module stops its runtime controls and blocks new orders; an already submitted request is not cancelled.", "release": {"version": "0.8.5", "date": "2026-09-18", "notes": ["Prevents continuous page/chat mutations from postponing panel mounting indefinitely.", "Skips hidden stock lists and relocates the panel when Torn loads or replaces content.", "Preserves settings, profiles and trading safeguards.", "Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation."]}}};
+    const FALLBACK_MODULE_DETAILS = {"enhancer": {"info": "Purpose\nEnhancer Guard helps you track Enhancers and Enhancer Relics in your Torn inventory and protect items you want to keep. It combines an inventory dashboard with Item Protector integration directly on Torn Items.\n\nInventory dashboard\nShows which tracked items you own, which are missing and the quantities available. Search locates individual items; filters and sorting narrow the list; favorites keep important items easy to find. Compact mode reduces space used on TornPDA. Refresh and hard refresh update the information, and optional auto-refresh can periodically refresh inventory data.\n\nItem protection\nDisplays lock badges for fully protected, partially protected and unlocked items. Partial protection lets you retain a chosen quantity instead of locking the entire item stack. Local protection settings and Item Protector state are used to keep the display consistent. Fully protected items are hidden or blocked in supported Bazaar sale-selection flows so they do not enter the selection accidentally.\n\nAPI and saved settings\nUses Torn API v2 inventory/item data and includes a dedicated API Access panel for creating, testing, saving or clearing the required key. Favorites, display preferences, protection quantities and cached inventory state are saved locally. Compatible Hub key integration is available; the module also works standalone.\n\nHow to use\nRefresh after inventory changes, search or filter for the item, then review its protection state and retained quantity. Inventory data can lag until refreshed. Protection is a local browser safeguard, so review Torn's final sale list before confirming any sale.", "release": {"version": "1.3.47", "date": "2026-09-18", "notes": ["Stops repeated inventory badge replacement when protection state is unchanged.", "Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.", "Preserves sale blocking, reserved quantities and protection controls."]}}, "bazaar": {"info": "Purpose\nBazaar Thanker organizes purchases from your Bazaar and helps prepare personal thank-you messages for customers. It reads Events and assists on Messages; Hub can detect and open its settings from other Torn pages.\n\nBuyer grouping and purchase details\nDetects supported Bazaar purchase events and groups purchases by buyer. Buyer details let you review the purchase information before preparing a message. Copy tools help reuse purchase or message information. Configurable big-buyer thresholds highlight customers by item count or amount spent.\n\nMessage customization\nUses a custom Bazaar name when supplied and automatic name detection when no custom name is configured. Message text is configurable so you can include your preferred greeting and Bazaar information. The thank-you workflow prepares text for Torn's messaging flow; review the recipient and final message before sending.\n\nHistory and repeat-message control\nKeeps local buyer/message history, statistics and processed-event state. A configurable cooldown avoids repeatedly thanking the same buyer too soon; the default is four hours. History-management controls help inspect or clear the records stored on the device.\n\nAccess and persistence\nDoes not need a Torn API key. Settings and working records are stored locally in TornPDA or the userscript environment. Script Hub provides detection, settings access and ON/OFF integration; the shared standalone dock can open the module when Hub is absent. Core purchase and message processing remains limited to the relevant Events and Messages pages.", "release": {"version": "5.3.40", "date": "2026-09-18", "notes": ["Uses constant-time Hub detection instead of document-wide marker searches on every mutation.", "Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.", "Preserves buyer grouping, cooldown and message preparation."]}}, "mission-rewards": {"info": "Purpose\nMission Rewards adds practical purchase information to Torn's Mission Shop, helping compare rewards before spending mission credits. It decorates supported reward cards and provides a more detailed reward panel.\n\nReward value\nShows estimated market value and value per mission credit, so offers with different prices can be compared on the same basis. Values are estimates based on available item data; they are guidance rather than guaranteed resale prices.\n\nSpecial ammunition\nReads currently owned special ammunition through the configured API key and shows ownership context alongside relevant rewards. This helps distinguish ammunition you already have from offers you may want to buy.\n\nWeapon-mod price learning\nTracks normal and special weapon-mod credit ranges from offers seen locally. Learned ranges build up as you use the script on the device. They describe observed offers and do not guarantee the price of future Mission Shop rewards.\n\nAPI and refresh\nDedicated API Access uses User: Ammo and Torn: Items permissions. Includes key setup and validation, refresh controls and local item/ammo caches. Compatible shared Hub key access can be used where available. No API write permission is required for reward information.\n\nWhere it runs\nRegisters with Hub on every Torn page, but Mission Shop scanning only runs on Missions. Settings and learned ranges are stored locally. The current stable branch is v1.0.41; the rolled-back experimental Mission Hints branch is not part of the active feature set. Reward purchases remain normal player actions.", "release": {"version": "1.0.42", "date": "2026-09-18", "notes": ["Scopes legacy footer repair to the Mission settings panel and batches it once.", "Ignores unrelated chat changes in reward scanning and standalone dock maintenance.", "Preserves reward annotations, API controls and footer restoration."]}}, "market-intelligence": {"info": "Purpose\nMarket Intelligence combines item-price analysis, Bazaar-flip estimates, travel purchasing plans, Museum set analysis and equipment comparisons. It provides decision support on the relevant Torn market and travel pages.\n\nItem Market and watchlists\nShows live or cached item-price information, locally collected price history and trends. BUY NOW, FAIR, WAIT and LEARNING signals summarize the available price context. Watchlists help keep selected items under review. Limited history is identified as learning rather than treated as a reliable long-term trend.\n\nBazaar Flip Intelligence\nCompares available price information to estimate net profit and return on investment for possible flips. Estimates depend on the prices and stock visible to the module; an apparent opportunity is not a guaranteed sale or profit.\n\nTravel purchasing\nBest Travel Run compares possible runs; Best Route Basket and the Travel Buy Planner help allocate carrying capacity across purchases. In-country Best Buys evaluates available buying opportunities. Arrival Stock and Arrival Basket support planning while flying. Local travel-session estimates, recent plans and stock/restock observations improve the context collected on the device.\n\nMuseum and equipment\nMuseum Set Intelligence adds set-oriented item context. The Loadout Comparator helps compare weapon and armor options using supported equipment data, alongside the trading/travel workspace.\n\nData and settings\nUses Torn API data and YATA public travel data where needed. Keeps local caches, price/travel history, watchlists and preferences. Dedicated API diagnostics help identify missing data access. The optional SakaLuX Price Network client is disabled by default and can be configured separately.\n\nHub and manual actions\nSupports persistent Hub ON/OFF and native settings access, with the shared standalone dock available separately. Market features run on relevant market pages and travel tools on relevant travel pages. It does not automatically buy or sell items; prices, stocks and travel estimates should be checked before acting.", "release": {"version": "1.17.39", "date": "2026-09-18", "notes": ["Removes the multiple footer-repair timers scheduled for every page mutation.", "Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.", "Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged."]}}, "elimination-assistant": {"info": "Purpose\nElimination Assistant helps find and review combat targets during Torn Eliminations. It loads team members and target availability, ranks candidates and organizes targets you want to revisit.\n\nTeams and batch loading\nUses Torn API v2 to load Elimination teams and target data. Large teams are processed in rotating groups of up to 500 players, with LOAD NEXT to continue through the membership. Player search, filters and sorting help narrow the current results.\n\nTarget recommendations\nSAFE, RISKY and SKIP recommendations and Smart Target Score summarize the data available for each target. Optional FFScouter Fair Fight/battle-stat estimates can be compared with your calibrated or manually entered battle stats. These are estimates, not a guarantee that an attack will be won.\n\nCalibration and target learning\nSupports calibration and optional FF scans. Manually recorded WIN/LOSS outcomes add local per-target learning, so results you record can contribute context on later visits.\n\nAvailability and navigation\nAttackable-state checks help distinguish targets currently suitable to open. PROFILE and ATTACK actions take you to the selected player or attack page, including routing suitable for PC and TornPDA. The script never attacks automatically.\n\nSaved SAFE targets and export\nRemembers SAFE targets across batches and sessions. Saved targets can be reviewed, copied, exported, removed individually or cleared. SAFE/RISKY attackable targets can be exported in TornPDA Chain Targets format.\n\nAPI and settings\nIncludes dedicated Torn API Access and optional FFScouter key controls. Target/filter preferences and local saved-target state persist across normal use. Hub provides persistent ON/OFF and module access; the shared standalone dock remains available when Hub is absent.", "release": {"version": "1.3.43", "date": "2026-09-18", "notes": ["Uses constant-time Hub detection in standalone maintenance.", "Batches standalone refreshes and ignores chat/dock/footer mutations.", "Preserves target settings, learning records and attack links."]}}, "company-intelligence": {"info": "Purpose\nCompany Intelligence provides Employee and Director workspaces for understanding your job, staff, training commitments and company development. It combines permitted Torn company/user data with local history and manually recorded planning data.\n\nEmployee workspace\nShows work stats and position suitability, personal progress, train tracking, employment offers and actionable advice. Employee Progress compares changes in work stats and train compliance and provides 30/90-day projections based on the available history. Offer comparison helps review the information recorded for possible jobs.\n\nCompany Growth Center\nBuilds daily company snapshots, shows the Sunday rating countdown and presents a star outlook. Growth direction and star predictions are advisory: Torn ratings are comparative, and missing competitor or historical data limits confidence.\n\nDirector staff planning\nProvides staff overview, effectiveness and position analysis, position-optimization advice and actionable employee flags. Smart training rotation, training debt and per-employee train history help track commitments and plan future training. Director-only API data requires the key owner to be the company director.\n\nTrain-sale contracts\nTracks contracts, delivered and remaining trains, balances and employee training history. CSV/report export supports reviewing records outside the panel. Local contract records are planning data and should be kept current with actual deliveries.\n\nFinance, stock and benchmarks\nWeekly finance and balance views use known API values and locally logged amounts. Unknown costs are not silently converted into real zeroes. Stock intelligence, competitor benchmarks, company timeline, diagnostics and advice add broader context. Same-type competitor samples and regular snapshots improve comparisons.\n\nAPI and employment state\nSupports Torn API v2 with classic API and local company-cache fallbacks. Fresh job data is prioritized when refreshing employment status; historical planning records can remain available after job changes. Dedicated API controls manage the data needed by the selected workspace.\n\nPersistence and access\nCompany notes, contracts, benchmarks, snapshots and history are stored locally. Uses the shared Bazaar-style Standalone Dock registration and Hub module bridge rather than a second Company menu. The module provides analysis and planning; it does not perform automated company actions. Refresh after the daily company report to build useful history.", "release": {"version": "1.8.38", "date": "2026-09-18", "notes": ["Ignores unrelated chat changes in Company page scraping and dock maintenance.", "Removes duplicate legacy registration timers that overwrote current module metadata.", "Preserves Company panel stacking and current standalone registration."]}}, "stock-manager-advisor": {"info": "Purpose\nStock Manager & Advisor adds a stock workspace directly to Torn Stocks and provides a full dashboard through Hub. It combines portfolio tracking, benefit-block analysis, financial and technical advice, simulations and explicit player-triggered trade controls.\n\nPortfolio and inline workspace\nShows invested capital when cost basis is known, market value, unrealized profit/loss, cash and holdings. Per-stock companion cards expose portfolio/benefit context and compact actions. Search, sorting, filters, favorites, favorite targets and Compact mode help organize the list. Transaction history and action logs keep local activity records.\n\nVault and withdrawal controls\nVault Max and Vault Keep calculate purchases for the selected target using the configured cash amount or retained-cash preference. Withdrawal controls calculate shares to sell for a chosen amount; Withdraw All, Sell Excess and Sell to Cash Target support explicit stock-management workflows where available. Target Lock helps prevent accidental target changes. PANIC is an explicit cash-to-stock action using its configured primary/fallback target and preview flow.\n\nBenefit and ROI advice\nAnalyzes benefit tiers, protected benefit floors, distance to the next benefit, estimated yield, marginal APR and payback. Best ROI and Best Affordable candidates help compare potential purchases. Benefit values and adviser scores are estimates rather than guaranteed returns.\n\nFinancial Advisor\nModels gross benefit income per day, month and year, configurable costs and net income. Exclusions keep chosen stocks out of adviser comparisons. Bank comparison supports different deposit periods, with best-effort automatic rate capture on supported Bank pages and a manual APR fallback.\n\nTechnical Trade Assistant\nCollects price history locally and compares 24H, 1W and 1M windows. Provides a chart with price, EMA20, EMA90 and Bollinger overlays, RSI14, momentum and technical-score context. BUY BIAS, SELL BIAS, WATCH and NEUTRAL states summarize the local signals. History grows with use on the device; the module does not depend on an external historical-price service.\n\nPortfolio Simulator\nShows before/after what-if reallocations, safely reallocatable coverage, benefit-yield and technical-score changes, target-tier movement and unused cash/share-rounding effects. Simulator results are previews and do not submit trades.\n\nSmart Rebalance and profiles\nBuilds portfolio-wide SELL-to-BUY proposals using free shares above protected benefit floors. SAFE, BALANCED and AGGRESSIVE profiles tune turnover caps, score thresholds, weighting and suggested-move limits. Recalculation updates the local technical context. Plans remain preview-only until the separate guided execution controls are deliberately used.\n\nTrading safeguards and API\nDry Run, Benefit Lock, confirmations and cooldown checks protect the trade workflow. A dedicated API Access panel manages money, portfolio and stock-catalogue data. Hub OPEN and REFRESH display or synchronize data; they do not place orders. Review a proposed trade before confirming it.\n\nPersistence and TornPDA behavior\nSettings, targets, profiles, caches, local price history, favorites and transaction records persist during normal updates. Export/import excludes the API key. The inline workspace mounts without waiting for page/chat mutations to stop, skips hidden stock containers and recovers after Stocks content is replaced. Disabling the module stops its runtime controls and blocks new orders; an already submitted request is not cancelled.", "release": {"version": "0.8.6", "date": "2026-09-18", "notes": ["Uses constant-time Hub detection and reuses unchanged standalone dock rows.", "Ignores unrelated chat/dock/footer changes in standalone maintenance.", "Preserves busy-page mounting, portfolio data and trading safeguards."]}}};
 
     let registry = loadJson(STORAGE.registry, FALLBACK_REGISTRY);
     let SCRIPTS = normalizeRegistry(registry);
@@ -1914,7 +1922,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             skull.classList.toggle('slh-alert', total > 0);
             if (badge) {
                 badge.style.display = total > 0 ? 'flex' : 'none';
-                badge.textContent = total > 99 ? '99+' : String(total);
+                { const label = total > 99 ? '99+' : String(total); if (badge.textContent !== label) badge.textContent = label; }
             }
         }
     }
@@ -1924,7 +1932,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const badge = document.getElementById(IDS.badge);
         if (badge) {
             badge.style.display = total > 0 ? 'flex' : 'none';
-            if (total > 0) badge.textContent = total > 99 ? '99+' : String(total);
+            if (total > 0) { const label = total > 99 ? '99+' : String(total); if (badge.textContent !== label) badge.textContent = label; }
         }
         updateTopbarSkullState();
     }
@@ -2419,13 +2427,14 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     }
 
     function queueEnsure() {
-        if (observerTimer) clearTimeout(observerTimer);
+        if (observerTimer) return;
         observerTimer = setTimeout(() => { observerTimer = null; ensureEverything(); }, 300);
     }
 
     function startObserver() {
         if (observer || document.getElementById(IDS.overlay)) return;
         observer = new MutationObserver(mutations => {
+            if (window.SakaLuXPerf?.unrelated?.(mutations)) return;
             if (!mutations.some(mutation => mutation.addedNodes.length || mutation.removedNodes.length)) return;
             queueEnsure();
         });
