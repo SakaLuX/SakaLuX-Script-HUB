@@ -28,3 +28,5 @@ jobs:
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/stocks-panel-regression.cjs
       - name: Verify Hub INFO and NEW
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/hub-details-regression.cjs
+      - name: Verify all Suite tool bridges
+        run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/suite-modules-regression.cjs
