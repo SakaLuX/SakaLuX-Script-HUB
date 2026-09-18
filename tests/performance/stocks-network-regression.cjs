@@ -1,5 +1,6 @@
 // Execute production API functions with synthetic responses; no real keys or accounts.
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+fs.mkdirSync('reports/extended-performance-2026-09-18',{recursive:true});
 function extract(source,name){const match=new RegExp('\\n  (?:async )?function '+name+'\\(').exec(source);assert(match,name);const start=match.index+1,next=/\n  (?:async )?function \w+\(/g;next.lastIndex=start+match[0].length;const end=next.exec(source)?.index||source.length;return source.slice(start,end);}
 async function run(source,label){const requests=[];let mode='ok',active=0,maxActive=0;const context=vm.createContext({console,AbortController,Date,Map,Promise,Error,setTimeout,clearTimeout,K:{api:'key',tx:'tx'},S:{money:0,portfolio:{},stocks:new Map},get:()=> 'SYNTHETIC-NOT-A-REAL-KEY',set:()=>{},setApiBadge:()=>{},status:()=>{},money:x=>String(x)});
 for(const name of ['refreshTargetSelect','renderPortfolio','renderBenefitValues','renderAdvisor','renderOptimizer','renderTradeAssistant','refreshInlinePanel'])context[name]=()=>{};

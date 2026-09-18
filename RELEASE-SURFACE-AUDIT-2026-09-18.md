@@ -10,10 +10,10 @@ Canonical rule: each userscript `@version` is the source of truth. Registered `s
 | market-intelligence | `SakaLuX-Market-Intelligence.user.js` | 1.17.39 | 1.17.39 / release 1.17.39 | Current version/release 1.17.39 — OK |
 | elimination-assistant | `SakaLuX-Elimination-Assistant.user.js` | 1.3.43 | 1.3.43 / release 1.3.43 | Current version/release 1.3.43 — OK |
 | company-intelligence | `SakaLuX-Company-Intelligence-v1.0.0.user.js` | 1.8.38 | 1.8.38 / release 1.8.38 | Current version/release 1.8.38 — OK |
-| stock-manager-advisor | `SakaLuX-Stock-Manager-Advisor.user.js` | 0.8.6 | 0.8.6 / release 0.8.6 | Current version/release 0.8.6 — OK |
-| chat-intelligence | `SakaLuX-Chat-Intelligence.user.js` | 1.2.19 | intentionally standalone / not registered | Current version/release 1.2.19 — OK |
+| stock-manager-advisor | `SakaLuX-Stock-Manager-Advisor.user.js` | 0.8.7 | 0.8.7 / release 0.8.7 | Current version/release 0.8.7 — OK |
+| chat-intelligence | `SakaLuX-Chat-Intelligence.user.js` | 1.2.20 | intentionally standalone / not registered | Current version/release 1.2.20 — OK |
 | account-auditor | `SakaLuX-Account-Auditor.user.js` | 1.3.15 | intentionally standalone / not registered | Current version/release 1.3.15 — OK |
-| script-hub | `SakaLuX-Script-Hub.user.js` | 1.9.72 | core manager / not a module entry | Current version/release 1.9.72 — OK |
+| script-hub | `SakaLuX-Script-Hub.user.js` | 1.9.73 | core manager / not a module entry | Current version/release 1.9.73 — OK |
 | suite | `SakaLuX-Suite.user.js` | 0.9.928 | intentionally standalone / not registered | Current version/release 0.9.928 — OK |
 
 ## Validation
@@ -23,4 +23,4 @@ Canonical rule: each userscript `@version` is the source of truth. Registered `s
 - Script Hub registered-module version list is synchronized with the seven actual registry modules.
 - Mission and Company stale prose references to older “current” versions were corrected.
 - Chat Intelligence, Account Auditor and SakaLuX Suite remain intentionally outside the Hub registry.
-- No userscript feature code or userscript version was changed by this release-surface synchronization pass.
+- Extended performance follow-up: Chat bounds its recent-message cache, Stocks coalesces overlapping API syncs and Hub synchronizes the updated Stocks notes.

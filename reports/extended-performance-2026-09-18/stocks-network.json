@@ -1,0 +1,70 @@
+{
+  "before": {
+    "label": "before",
+    "burst": 20,
+    "burstRequests": 60,
+    "maxConcurrentRequests": 40,
+    "burstSuccesses": 20,
+    "scenarios": [
+      {
+        "mode": "offline",
+        "rejected": true,
+        "message": "Fixture offline",
+        "requests": 2
+      },
+      {
+        "mode": "429",
+        "rejected": true,
+        "message": "User / money: HTTP 429 · Fixture rate limit",
+        "requests": 2
+      },
+      {
+        "mode": "malformed",
+        "rejected": true,
+        "message": "User / money: invalid JSON response (HTTP 200).",
+        "requests": 2
+      },
+      {
+        "mode": "ok",
+        "rejected": false,
+        "requests": 3
+      }
+    ],
+    "storedCash": 1000000,
+    "catalogSize": 1
+  },
+  "after": {
+    "label": "after",
+    "burst": 20,
+    "burstRequests": 3,
+    "maxConcurrentRequests": 3,
+    "burstSuccesses": 20,
+    "scenarios": [
+      {
+        "mode": "offline",
+        "rejected": true,
+        "message": "Fixture offline",
+        "requests": 2
+      },
+      {
+        "mode": "429",
+        "rejected": true,
+        "message": "User / money: HTTP 429 · Fixture rate limit",
+        "requests": 2
+      },
+      {
+        "mode": "malformed",
+        "rejected": true,
+        "message": "User / money: invalid JSON response (HTTP 200).",
+        "requests": 2
+      },
+      {
+        "mode": "ok",
+        "rejected": false,
+        "requests": 3
+      }
+    ],
+    "storedCash": 1000000,
+    "catalogSize": 1
+  }
+}

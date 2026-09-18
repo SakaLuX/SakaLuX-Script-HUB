@@ -8,7 +8,7 @@ permissions:
   contents: write
 concurrency:
   group: extended-performance-audit
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   extended:
     runs-on: ubuntu-latest

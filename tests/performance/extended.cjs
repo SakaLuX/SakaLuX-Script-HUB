@@ -1,5 +1,6 @@
 // Offline Chromium stress suite. No real Torn accounts, keys or trades.
 const fs=require('node:fs'),assert=require('node:assert/strict');
+fs.mkdirSync('reports/extended-performance-2026-09-18',{recursive:true});
 const {chromium}=require('playwright');
 const files=fs.readdirSync('.').filter(x=>x.endsWith('.user.js')).sort();
 const registry=JSON.parse(fs.readFileSync('scripts.json','utf8'));

@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.72**
+**v1.9.73**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,10 +22,9 @@
 
 ## Current release note
 
-**v1.9.72 — Performance and TornPDA smoothness**
-- Avoids rewriting badge text when its value is unchanged, preventing self-triggered observer work.
-- Ignores unrelated chat/dock/footer changes and coalesces launcher maintenance.
-- Synchronizes current performance release notes for all seven registered modules.
+**v1.9.73 — Extended performance validation**
+- Synchronizes Stocks v0.8.7 API request-coalescing notes and offline fallback.
+- Refreshes stale Stocks NEW information without replacing saved preferences.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -37,7 +36,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 📈 SakaLuX Market Intelligence **v1.17.39**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.43**
 - 🏢 SakaLuX Company Intelligence **v1.8.38**
-- 📊 SakaLuX Stock Manager & Advisor **v0.8.6**
+- 📊 SakaLuX Stock Manager & Advisor **v0.8.7**
 
 Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -58,6 +57,9 @@ Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history / Changelog
+
+### v1.9.73 — Stocks synchronization
+- Updates Stocks to v0.8.7 in the registry, offline fallback and cached NEW details.
 
 ### v1.9.72 — Performance and TornPDA smoothness
 
