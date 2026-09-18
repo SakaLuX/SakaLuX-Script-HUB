@@ -1,3 +1,4 @@
+# trigger v1.9.79
 from pathlib import Path
 
 HUB = Path('SakaLuX-Script-Hub.user.js')
@@ -139,7 +140,6 @@ replacement = r'''    function createNavSkull() {
             || leaves.find(el => cleanLabel(el));
         if (labelNode) labelNode.textContent = mode === 'topbar' ? 'HUB' : 'SAKALUX HUB';
 
-        // Remove inherited counters / chevrons from the cloned Torn row.
         for (const el of [...click.querySelectorAll('span,div')]) {
             if (el === labelNode) continue;
             const t = String(el.textContent || '').trim();
