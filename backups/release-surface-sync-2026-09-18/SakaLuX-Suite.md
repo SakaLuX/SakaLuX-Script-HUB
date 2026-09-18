@@ -1,0 +1,164 @@
+# 🧰 SakaLuX Suite [EXPERIMENTAL]
+
+> Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
+
+## Current version
+**v0.9.928**
+
+## What it does
+SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
+
+### Included modules
+- Daily Prayer Bell
+- Recovery Planner
+- Item Signal
+- Event Lens
+- Faction Pulse
+- Member Travel Map
+- Armory Loan Radar
+- War Performance
+- OC Role Match + Readiness
+- Company Console
+- Race League Board
+- Odds Scout
+- Target Alerts
+
+### Additional SakaLuX tools
+- Chain Alarm with persistent thresholds and panel position.
+- Launch bridges for Enhancer Guard, Bazaar Thanker, Market Intelligence, Mission Rewards, Elimination Assistant, Company Intelligence, Stock Manager & Advisor, Chat Intelligence and Account Auditor.
+- Automatic migration of previous Suite module states and shared Torn API key.
+- Master Control with sliding ON/OFF switches and module-specific settings.
+- Persistent control-window and scroll position while toggling modules.
+- Shared Torn API-key storage.
+- Settings import/export with the API key excluded.
+- `Alt + F` shortcut for the control interface.
+
+## Current release note
+
+**v0.9.928 — Performance and TornPDA smoothness**
+- Stops Recovery Planner from recreating its identical SVG icon on every observer pass.
+- Gates Member Travel Map repair to relevant faction/profile views and ignores chat in unrelated modules.
+- Coalesces OC, activity and armory scans; Company scanning stays on Company/Jobs pages.
+- Preserves all 23 module entries, settings, panel height and switch styling.
+
+## Recommended
+Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
+
+## Privacy
+- The shared Torn API key used by Suite is stored locally.
+- Exported Suite settings intentionally exclude the API key.
+- Module preferences and local runtime state are stored in the userscript/browser environment.
+- Individual modules can access Torn data required for their functions; review enabled modules and API permissions before use.
+
+## Important
+- SakaLuX Suite is **EXPERIMENTAL**. Its modules share one large runtime, so a regression in one area can affect other Suite modules more broadly than standalone add-ons.
+- Suite does not automate attacks, crimes, bets, item consumption or race entry. Recommendations, alerts and analysis remain advisory/user-triggered.
+- Suite is intentionally **not registered in `scripts.json`** and must not appear as a required Hub module unless that product decision changes intentionally.
+
+## License
+**All Rights Reserved**
+
+## Release history / Changelog
+
+### v0.9.928 — Performance and TornPDA smoothness
+
+- Stops Recovery Planner from recreating its identical SVG icon on every observer pass.
+- Gates Member Travel Map repair to relevant faction/profile views and ignores chat in unrelated modules.
+- Coalesces OC, activity and armory scans; Company scanning stays on Company/Jobs pages.
+- Preserves all 23 module entries, settings, panel height and switch styling.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
+
+### v0.9.927 — Complete SakaLuX tool bridges
+
+- Adds Company Intelligence, Stock Manager & Advisor, Chat Intelligence and Account Auditor to Master Control.
+- All nine complementary SakaLuX tools now have saved bridge switches and Settings buttons.
+- Settings opens the installed module through its public API, with its launch button as fallback. Missing standalone scripts produce a clear message.
+- New bridges are OFF by default; existing module preferences remain intact. A bridge switch controls Suite access to the standalone tool, not the standalone script runtime.
+- Keeps the built-in Company Console separate from standalone Company Intelligence.
+- Preserves v0.9.926 switch styling and panel height; includes a complete previous-version backup.
+- Validates rendered entries, API/button launching, missing modules and saved preferences with a DOM regression test.
+
+### v0.9.926 — Module switch styling
+
+- Restores 46×25px pill switches with a 17px thumb centered vertically.
+- Overrides generic blue button backgrounds, square corners, padding and mobile minimum heights only for Suite module switches.
+- Preserves aria-checked, disabled states, keyboard focus and the existing module toggle handlers.
+- Uses gray OFF and gold ON states with sliding thumb feedback.
+- Preserves the confirmed panel height, content scrolling and footer geometry.
+- Includes a complete v0.9.925 script/description backup; JavaScript syntax validated.
+
+### v0.9.925 — Master Control height near chat
+
+- Uses explicit viewport heights for the outer shell and Suite window, with 36px bottom clearance matching Elimination.
+- Supports TornPDA touch layouts up to 1100 CSS pixels wide as well as standard mobile layouts.
+- Keeps the module list scrollable while the header, actions and 50px donation footer stay outside the list.
+- Removes the mobile override that forced the closed panel to remain displayed; visibility follows the existing open class.
+- Preserves a complete v0.9.924 script and description backup before the update.
+- JavaScript syntax validated locally. Actual TornPDA device confirmation remains pending.
+
+
+
+### v0.9.922 — Master Control scroll and native footer
+
+- Fixes Master Control scrolling by bounding the flex content area on desktop and TornPDA; keeps header/toolbar and footer outside the scrolling module list.
+- Renders the 20px SEND MONEY / SEND ITEMS controls and orange Made with ❤️ author line directly inside every panel render, with rounded lower corners.
+- Preserves module switches and scroll position, and removes the separate document-wide footer repair observer.
+### v0.9.920 — Performance and release metadata audit
+- Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+
+### v0.9.919 — Elimination panel layout and 20px donation buttons
+- Uses Elimination mobile panel sizing: top aligned, 4px side gaps, 36px bottom clearance for chat and 14px rounded corners. SEND MONEY / SEND ITEMS buttons are 20px high; the donation/author footer totals 50px.
+
+### v0.9.918 — Compact Hub footer
+- Uses the same compact footer as Script Hub: SEND MONEY, SEND ITEMS and Made with ❤️, with 40px donation buttons. Removes the legacy signature footer and reserves space for module dialogs where needed.
+
+### v0.9.917 — Hub isolation
+- Excludes Script Hub and its subtree from shared module styling/fullscreen rules; restricts footer routines to native module roots.
+
+### v0.9.916 — Full-screen performance
+- Mobile SakaLuX panels use the full available viewport.
+- Removes backdrop blur and heavy mobile visual effects.
+- Disables the legacy document-scanning Mobile Surface observer where present.
+- Reduces mobile animation/transition cost for faster input and scrolling.
+
+### v0.9.915 — TornPDA host-scroll contract
+- Replaces physical 100dvh forcing with host-container sizing so TornPDA vertical scrolling and mobile interaction remain stable while blur is preserved.
+
+### v0.9.914 — Mobile full-height + blur contract
+- Opens the active mobile sheet from top to bottom of the available viewport.
+- Adds the shared translucent SakaLuX blur treatment.
+
+### v0.9.913
+- Performance/UI optimization: introduces the shared SakaLuX performance/UI foundation, reduces duplicate high-frequency rendering work and aligns Suite surfaces with the Hub visual language.
+
+### v0.9.912 — Current experimental build
+- Maintains the current experimental all-in-one Suite architecture and standalone status.
+- Remains intentionally outside the Script Hub registry.
+
+### v0.9.910 — Suite panel layout repair
+- Restored the complete Suite module interface on TornPDA and desktop.
+- Moved the author signature inside the Suite window.
+- Restored the full-screen overlay as a backdrop while limiting panel styling to the actual Suite window.
+- Preserved module settings and saved states during the UI repair.
+
+### v0.9.909 — Inline panel signature
+- Moved the SakaLuX author signature inside the Suite panel.
+
+### v0.9.908 — Persistent SakaLuX signature
+- Added the persistent linked author footer.
+
+### v0.9.907 — Unified Control Center visual system
+- Adopted the shared SakaLuX interface style without changing module logic/saved data.
+
+### v0.9.905 — SakaLuX naming and module compatibility baseline
+- Restored established SakaLuX names for visible modules/panels.
+- Preserved Item Signal rules and working Event Lens TornPDA compatibility.
+- Improved Event Lens readability and trade continuation links.
+- Preserved standalone launch bridges and Chain Alarm.
+- Added automated checks for the principal module/factory pairs.
+
+
+## Current release notes
+
+**v0.9.922** aligns Master Control with the Elimination mobile panel geometry: 4px side gaps, 36px bottom chat clearance, 14px rounded shell, compact fixed header/actions, scroll-only middle content and the existing 50px donation footer.

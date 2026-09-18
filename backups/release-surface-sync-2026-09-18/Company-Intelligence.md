@@ -41,7 +41,7 @@
 - Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
 - Company rating is comparative and evaluated by Torn.
 - Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
-- The userscript header, runtime version, `scripts.json` registry entry and this information page are synchronized at **v1.8.38**.
+- The userscript header, runtime version, `scripts.json` registry entry and this information page are synchronized at **v1.8.37**.
 - The Hub registry uses Greasy Fork script **595873** for public version checks, while the userscript retains its own raw-GitHub `@downloadURL` / `@updateURL` metadata.
 
 ## License
