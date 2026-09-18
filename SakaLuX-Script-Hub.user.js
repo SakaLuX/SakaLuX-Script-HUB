@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.78
+// @version      1.9.79
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -77,7 +77,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.78';
+    const VERSION = '1.9.79';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -97,6 +97,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.79", "date": "2026-09-19", "changes": ["Corrects Fly-out placement: SakaLuX Hub is the fourth navigation button, immediately after Messages, Events and Awards/Merits.", "Removes inherited counters and chevrons from the Hub launcher.", "Topbar legacy keeps the Hub launcher immediately before Messages."]},
         {"version": "1.9.78", "date": "2026-09-19", "changes": ["Fly-out launcher now mounts as the first native sidebar row, directly before Gym, instead of cloning expandable contact rows near the bottom.", "Removes inherited counters and chevrons from the Hub fly-out row so no stray 1 or arrow appears.", "Keeps the blinking skull artwork and native Torn row styling."]},
         {"version": "1.9.77", "date": "2026-09-19", "changes": ["Restores the original blinking skull artwork for the native Hub navigation launcher.", "In Topbar (legacy) mode the Hub launcher is mounted immediately before Messages; in Fly-out mode it is mounted immediately after Messages, Events and Awards/Merits.", "Keeps the launcher inside Torn native navigation rows so sizing, spacing and scrolling match the selected navigation mode."]},
         {"version": "1.9.76", "date": "2026-09-18", "changes": ["Makes the Hub launcher independent of Torn Touchscreen Navigation mode: the fly-out menu gets a native Hub row whenever that menu exists, while the normal topbar S remains available in legacy topbar mode.", "Uses a cloned native Torn navigation row, matching the robust CAT-style approach instead of depending on one hashed menu container."]},
@@ -1884,59 +1885,77 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             .replace(/\s+/g, ' ')
             .trim()
             .toLowerCase();
+        const named = (el, names) => names.includes(cleanLabel(el));
 
-        const findNativeRow = start => {
-            if (!start) return null;
-            let node = start;
-            for (let depth = 0; node && depth < 8; depth += 1) {
-                const parent = node.parentElement;
-                if (!parent) break;
-                const siblings = [...parent.children].filter(child => {
-                    const click = child.matches?.('a[href],button') ? child : child.querySelector?.('a[href],button');
-                    return Boolean(click);
-                });
-                if (siblings.length >= 3) return node;
-                node = parent;
-            }
-            return start.closest?.('li,[role="menuitem"]') || start.parentElement;
+        const messages = allClickable.filter(el => named(el, ['messages', 'message']));
+        const events = allClickable.filter(el => named(el, ['events', 'event']));
+        const awards = allClickable.filter(el => named(el, ['awards', 'award', 'merits', 'merit']));
+
+        const ancestors = el => {
+            const out = [];
+            let node = el;
+            for (let i = 0; node && i < 10; i += 1, node = node.parentElement) out.push(node);
+            return out;
+        };
+        const commonAncestor = (a, b, c) => {
+            if (!a || !b || !c) return null;
+            const bSet = new Set(ancestors(b));
+            const cSet = new Set(ancestors(c));
+            return ancestors(a).find(node => bSet.has(node) && cSet.has(node)) || null;
+        };
+        const directChildUnder = (el, parent) => {
+            if (!el || !parent) return null;
+            let node = el;
+            while (node?.parentElement && node.parentElement !== parent) node = node.parentElement;
+            return node?.parentElement === parent ? node : null;
         };
 
-        const names = ['gym', 'properties', 'education', 'crimes', 'missions', 'newspaper', 'jail', 'hospital', 'casino'];
-        const anchors = names.map(name => allClickable.find(el => cleanLabel(el) === name)).filter(Boolean);
-        const rows = anchors.map(findNativeRow).filter(Boolean);
-
-        let sidebarParent = null;
-        let templateRow = null;
-        let insertTarget = null;
-        for (const row of rows) {
-            const parent = row.parentElement;
-            if (!parent) continue;
-            const sameParentCount = rows.filter(candidate => candidate.parentElement === parent).length;
-            if (sameParentCount >= 3) {
-                sidebarParent = parent;
-                templateRow = rows.find(candidate => candidate.parentElement === parent && cleanLabel(candidate).includes('gym'))
-                    || rows.find(candidate => candidate.parentElement === parent)
-                    || row;
-                insertTarget = templateRow;
-                break;
+        let match = null;
+        outer:
+        for (const m of messages) {
+            for (const e of events) {
+                for (const a of awards) {
+                    const container = commonAncestor(m, e, a);
+                    if (!container || container === document.body || container === document.documentElement) continue;
+                    const mr = directChildUnder(m, container);
+                    const er = directChildUnder(e, container);
+                    const ar = directChildUnder(a, container);
+                    if (!mr || !er || !ar || new Set([mr, er, ar]).size < 3) continue;
+                    match = { container, m, e, a, mr, er, ar };
+                    break outer;
+                }
             }
         }
 
-        if (!sidebarParent || !templateRow || !insertTarget) {
+        if (!match) {
             existing?.remove();
             syncFloatingButtonVisibility();
             return false;
         }
 
-        const positionAtTop = row => {
-            if (!row) return false;
-            if (row.parentElement !== sidebarParent || row.nextElementSibling !== insertTarget) sidebarParent.insertBefore(row, insertTarget);
-            row.dataset.sakaluxHubMode = 'flyout';
+        const containerText = cleanLabel(match.container);
+        const isLegacyTopbar = ['home', 'items', 'travel', 'raceway', 'city']
+            .filter(token => containerText.includes(token)).length >= 2;
+        const mode = isLegacyTopbar ? 'topbar' : 'flyout';
+        const insertTarget = isLegacyTopbar ? match.mr : match.ar;
+        const templateRow = isLegacyTopbar ? match.mr : match.ar;
+        const insertBefore = isLegacyTopbar;
+
+        const position = row => {
+            if (!row || !insertTarget?.parentElement) return false;
+            const parent = insertTarget.parentElement;
+            if (insertBefore) {
+                if (row.parentElement !== parent || row.nextElementSibling !== insertTarget) parent.insertBefore(row, insertTarget);
+            } else {
+                if (row.parentElement !== parent || insertTarget.nextElementSibling !== row) insertTarget.insertAdjacentElement('afterend', row);
+            }
+            row.dataset.sakaluxHubMode = mode;
             return true;
         };
 
         if (existing?.isConnected) {
-            positionAtTop(existing);
+            position(existing);
+            existing.querySelectorAll('[data-sakalux-inherited-extra]').forEach(el => el.remove());
             updateTopbarSkullState();
             syncFloatingButtonVisibility();
             return true;
@@ -1944,8 +1963,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
         const row = templateRow.cloneNode(true);
         row.id = IDS.navSkull;
-        row.setAttribute('data-sakalux-hub-launcher', 'flyout');
-        row.dataset.sakaluxHubMode = 'flyout';
+        row.setAttribute('data-sakalux-hub-launcher', mode);
+        row.dataset.sakaluxHubMode = mode;
         row.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
         row.querySelectorAll('[data-testid],[aria-current]').forEach(el => {
             el.removeAttribute('data-testid');
@@ -1953,7 +1972,10 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         });
 
         const click = row.matches('a[href],button') ? row : row.querySelector('a[href],button');
-        if (!click) return false;
+        if (!click) {
+            syncFloatingButtonVisibility();
+            return false;
+        }
         if (click.tagName === 'A') click.setAttribute('href', '#sakalux-hub');
         click.removeAttribute('target');
         click.removeAttribute('rel');
@@ -1961,19 +1983,28 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         click.setAttribute('title', 'SakaLuX Hub');
         click.setAttribute('aria-label', 'SakaLuX Hub');
 
-        const leafText = [...click.querySelectorAll('span,div')].filter(el => el.children.length === 0);
-        const labelNode = leafText.find(el => cleanLabel(el) === 'gym') || leafText.find(el => cleanLabel(el));
-        if (labelNode) labelNode.textContent = 'SAKALUX HUB';
-        for (const el of leafText) {
+        const sourceLabel = cleanLabel(templateRow);
+        const leaves = [...click.querySelectorAll('span,div')].filter(el => el.children.length === 0);
+        const labelNode = leaves.find(el => cleanLabel(el) === sourceLabel)
+            || leaves.find(el => named(el, ['messages','message','events','event','awards','award','merits','merit']))
+            || leaves.find(el => cleanLabel(el));
+        if (labelNode) labelNode.textContent = mode === 'topbar' ? 'HUB' : 'SAKALUX HUB';
+
+        for (const el of [...click.querySelectorAll('span,div')]) {
             if (el === labelNode) continue;
             const t = String(el.textContent || '').trim();
-            if (/^\d+$/.test(t) || /^[›»▶►→]+$/.test(t)) el.remove();
+            if (/^\d+$/.test(t) || /^[›»▶►→]+$/.test(t)) {
+                el.setAttribute('data-sakalux-inherited-extra', '1');
+                el.remove();
+            }
         }
+        const svgList = [...click.querySelectorAll('svg')];
+        const nativeSvg = svgList[0] || null;
 
-        const makeSkullSvg = nativeSvg => {
-            if (!nativeSvg) return null;
-            const svg = nativeSvg.cloneNode(false);
-            const vb = (nativeSvg.getAttribute('viewBox') || '0 0 24 24').split(/\s+/).map(Number);
+        const makeSkullSvg = sourceSvg => {
+            if (!sourceSvg) return null;
+            const svg = sourceSvg.cloneNode(false);
+            const vb = (sourceSvg.getAttribute('viewBox') || '0 0 24 24').split(/\s+/).map(Number);
             const vbW = vb[2] || 24;
             const vbH = vb[3] || 24;
             const ART_INK = 20;
@@ -1997,7 +2028,6 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             return svg;
         };
 
-        const nativeSvg = click.querySelector('svg');
         if (nativeSvg) {
             const skullSvg = makeSkullSvg(nativeSvg);
             if (skullSvg) nativeSvg.replaceWith(skullSvg);
@@ -2017,13 +2047,17 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         badge.id = IDS.navBadge;
         click.appendChild(badge);
 
-        const open = event => { event.preventDefault(); event.stopPropagation(); openHub(); };
+        const open = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            openHub();
+        };
         click.addEventListener('click', open, true);
         click.addEventListener('keydown', event => {
             if (event.key === 'Enter' || event.key === ' ') open(event);
         }, true);
 
-        positionAtTop(row);
+        position(row);
         updateTopbarSkullState();
         syncFloatingButtonVisibility();
         return true;
