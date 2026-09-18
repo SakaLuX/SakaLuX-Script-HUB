@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.927**
+**v0.9.926**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -25,7 +25,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ### Additional SakaLuX tools
 - Chain Alarm with persistent thresholds and panel position.
-- Launch bridges for Enhancer Guard, Bazaar Thanker, Market Intelligence, Mission Rewards, Elimination Assistant, Company Intelligence, Stock Manager & Advisor, Chat Intelligence and Account Auditor.
+- Launch bridges for Enhancer Guard, Bazaar Thanker, Market Intelligence, Mission Rewards and Elimination Assistant.
 - Automatic migration of previous Suite module states and shared Torn API key.
 - Master Control with sliding ON/OFF switches and module-specific settings.
 - Persistent control-window and scroll position while toggling modules.
@@ -35,7 +35,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.927** completes the nine standalone SakaLuX launch bridges. It preserves the compact pill-shaped module switches. Scoped switch styles override shared blue button themes and mobile minimum heights; the thumb slides between the gray OFF and gold ON states. The confirmed v0.9.925 panel layout is preserved.
+**v0.9.926** restores compact pill-shaped module switches. Scoped switch styles override shared blue button themes and mobile minimum heights; the thumb slides between the gray OFF and gold ON states. The confirmed v0.9.925 panel layout is preserved.
 
 **v0.9.925** extends Master Control to 36px above the viewport bottom on mobile and TornPDA desktop-width touch layouts. Explicit viewport heights keep the module list scrollable and the footer at the bottom. The launcher and close behavior remain controlled by the existing open class.
 
@@ -61,16 +61,6 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v0.9.927 — Complete SakaLuX tool bridges
-
-- Adds Company Intelligence, Stock Manager & Advisor, Chat Intelligence and Account Auditor to Master Control.
-- All nine complementary SakaLuX tools now have saved bridge switches and Settings buttons.
-- Settings opens the installed module through its public API, with its launch button as fallback. Missing standalone scripts produce a clear message.
-- New bridges are OFF by default; existing module preferences remain intact. A bridge switch controls Suite access to the standalone tool, not the standalone script runtime.
-- Keeps the built-in Company Console separate from standalone Company Intelligence.
-- Preserves v0.9.926 switch styling and panel height; includes a complete previous-version backup.
-- Validates rendered entries, API/button launching, missing modules and saved preferences with a DOM regression test.
 
 ### v0.9.926 — Module switch styling
 

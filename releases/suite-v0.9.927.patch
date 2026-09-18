@@ -1,0 +1,94 @@
+diff --git a/.github/workflows/validate-userscripts.yml b/.github/workflows/validate-userscripts.yml
+index 562a62b..423b6bc 100644
+--- a/.github/workflows/validate-userscripts.yml
++++ b/.github/workflows/validate-userscripts.yml
+@@ -28,3 +28,5 @@ jobs:
+         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/stocks-panel-regression.cjs
+       - name: Verify Hub INFO and NEW
+         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/hub-details-regression.cjs
++      - name: Verify all Suite tool bridges
++        run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/suite-modules-regression.cjs
+diff --git a/SakaLuX-Suite.user.js b/SakaLuX-Suite.user.js
+index 729c82a..69ceae6 100644
+--- a/SakaLuX-Suite.user.js
++++ b/SakaLuX-Suite.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Suite [EXPERIMENTAL]
+ // @namespace    sakalux.suite
+-// @version      0.9.926
++// @version      0.9.927
+ // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
+ // @author       SakaLuX [2380374]
+ // @copyright    2026 SakaLuX [2380374]
+@@ -172,7 +172,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+  * settings migration and TornPDA compatibility. */
+ (() => {
+   "use strict";
+-  const VERSION = '0.9.926';
++  const VERSION = '0.9.927';
+   const SUITE = Object.freeze({
+     name: "SakaLuX Suite",
+     version: VERSION,
+@@ -216,7 +216,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+       bazaar: false,
+       market: false,
+       missions: false,
+-      elimination: false
++      elimination: false,
++      company: false,
++      stocks: false,
++      chat: false,
++      auditor: false
+     }
+   });
+   const state = {
+@@ -581,6 +585,26 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+       id: "elimination", name: "Elimination Assistant", category: "SakaLuX Modules",
+       description: "Opens the installed standalone SakaLuX Elimination Assistant.", warning: "Requires the standalone SakaLuX script.",
+       ready: true, requiresReload: false, factory: context => createSakaLuXBridgeModule(context, "elimination")
++    },
++    {
++      id: "company", name: "Company Intelligence", category: "SakaLuX Modules",
++      description: "Company dashboard with employee analysis, training recommendations and saved snapshots.", warning: "Requires the standalone SakaLuX script.",
++      ready: true, requiresReload: false, factory: context => createSakaLuXBridgeModule(context, "company")
++    },
++    {
++      id: "stocks", name: "Stock Manager & Advisor", category: "SakaLuX Modules",
++      description: "Stocks portfolio, benefit blocks, ROI advice and rebalancing tools.", warning: "Requires the standalone SakaLuX script.",
++      ready: true, requiresReload: false, factory: context => createSakaLuXBridgeModule(context, "stocks")
++    },
++    {
++      id: "chat", name: "Chat Intelligence", category: "SakaLuX Modules",
++      description: "Chat search, message exports, favorites, mute controls and notification settings.", warning: "Requires the standalone SakaLuX script.",
++      ready: true, requiresReload: false, factory: context => createSakaLuXBridgeModule(context, "chat")
++    },
++    {
++      id: "auditor", name: "Account Auditor", category: "SakaLuX Modules",
++      description: "Account snapshots, captured messages and user-configured GitHub synchronization.", warning: "Requires the standalone SakaLuX script.",
++      ready: true, requiresReload: false, factory: context => createSakaLuXBridgeModule(context, "auditor")
+     }
+   ];
+   const SAKALUX_BRIDGES = Object.freeze({
+@@ -588,7 +612,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+     bazaar: ["SakaLuXBazaarThanker", "#sakalux-bt-settings-button"],
+     market: ["SakaLuXMarketIntelligence", "#sl-mi-button"],
+     missions: ["SakaLuXMissionRewards", "#sl-mri-button"],
+-    elimination: ["SakaLuXEliminationAssistant", "#slx-elim-btn"]
++    elimination: ["SakaLuXEliminationAssistant", "#slx-elim-btn"],
++    company: ["SakaLuXCompanyIntelligence", "#sakalux-module-bridge-company-intelligence"],
++    stocks: ["SakaLuXStockManagerAdvisor", "#sakalux-module-bridge-stock-manager-advisor"],
++    chat: ["SakaLuXChatIntelligence", "#sakalux-module-bridge-chat-intelligence"],
++    auditor: ["SakaLuXAccountAuditor", "#sl-aa-button"]
+   });
+   function createSakaLuXBridgeModule(context, moduleId) {
+     const open = () => {
+@@ -1912,7 +1940,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+                       ` : ""}
+                     </div>
+                     <div class="sakalux-module-controls">
+-                      ${["companyManagement", "ocOperations", "medAdvisor", "targetAlerts", "factionMemberView", "chainAlarm", "enhancer", "bazaar", "market", "missions", "elimination"].includes(module.id) ? `
++                      ${["companyManagement", "ocOperations", "medAdvisor", "targetAlerts", "factionMemberView", "chainAlarm", "enhancer", "bazaar", "market", "missions", "elimination", "company", "stocks", "chat", "auditor"].includes(module.id) ? `
+                         <button
+                           class="sakalux-module-settings-btn"
+                           type="button"
