@@ -1,3 +1,4 @@
+# trigger release surface synchronization
 from pathlib import Path
 from urllib.parse import urlparse, unquote
 import json, re
@@ -94,7 +95,6 @@ HUB.write_text(hub_text, encoding='utf-8')
 
 hub_doc = ROOT / 'greasyfork/Script-Hub.md'
 sync_doc(hub_doc, hub_version, HUB_NOTES, 'Persistent native Fly-out launcher + release synchronization')
-# Registered module list in Hub MD must mirror scripts.json.
 text = hub_doc.read_text(encoding='utf-8')
 for item in registry.get('scripts', []):
     name = re.escape(item['name'])
@@ -107,7 +107,6 @@ for sid, (src_name, doc_name) in STANDALONE.items():
     sync_doc(ROOT / doc_name, v, ['Release documentation synchronized with the current userscript version.'])
     standalone_rows.append((sid, src_name, v, 'standalone / not registered', f'Current version/release {v} — OK'))
 
-# Build a current audit from the actual source files after synchronization.
 all_rows = rows + standalone_rows + [('script-hub', HUB.name, hub_version, 'core manager / not a module entry', f'Current version/release {hub_version} — OK')]
 lines = [
     '# Release Surface Audit — 2026-09-19', '',
@@ -126,7 +125,6 @@ lines += ['', '## Validation',
     '- Fly-out launcher remains a persistent first child of Torn vertical navigation and is not lifecycle-controlled by scroll position.', '']
 (ROOT / 'RELEASE-SURFACE-AUDIT-2026-09-19.md').write_text('\n'.join(lines), encoding='utf-8')
 
-# Mark the older audit as historical so its old versions cannot be mistaken for current release state.
 old_audit = ROOT / 'RELEASE-SURFACE-AUDIT-2026-09-18.md'
 if old_audit.exists():
     old = old_audit.read_text(encoding='utf-8')
