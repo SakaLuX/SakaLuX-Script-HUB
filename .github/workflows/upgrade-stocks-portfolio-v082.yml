@@ -2,8 +2,6 @@ name: Upgrade Stocks v0.8.2 Portfolio Simulator
 
 on:
   push:
-    paths:
-      - '.github/workflows/upgrade-stocks-portfolio-v082.yml'
   workflow_dispatch:
 
 permissions:
