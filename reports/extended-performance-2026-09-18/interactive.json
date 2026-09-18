@@ -9,27 +9,27 @@
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.599999999998545,
-      "frameInclusiveP95Ms": 16.700000000004366,
+      "frameInclusiveMedianMs": 16.599999999976717,
+      "frameInclusiveP95Ms": 16.79999999993015,
       "realFreezeResume": true,
       "file": "SakaLuX-Account-Auditor.user.js",
       "before": {
-        "nodes": 32,
+        "nodes": 35,
         "timeouts": 1,
         "intervals": 1,
         "observers": 2,
         "listenerRegistrations": 1
       },
       "after": {
-        "nodes": 74,
+        "nodes": 77,
         "timeouts": 0,
         "intervals": 1,
         "observers": 2,
         "listenerRegistrations": 1
       },
-      "heapBeforeMB": 0.8947410583496094,
-      "heapAfterMB": 0.9050788879394531,
-      "scriptMs": 1.671,
+      "heapBeforeMB": 0.8970947265625,
+      "heapAfterMB": 0.9051551818847656,
+      "scriptMs": 1.943,
       "errors": []
     },
     {
@@ -40,27 +40,27 @@
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.60000000000582,
-      "frameInclusiveP95Ms": 17.30000000000291,
+      "frameInclusiveMedianMs": 16.599999999976717,
+      "frameInclusiveP95Ms": 17.099999999976717,
       "realFreezeResume": true,
       "file": "SakaLuX-Bazaar-Thanker-PDA.user.js",
       "before": {
-        "nodes": 106,
+        "nodes": 110,
         "timeouts": 3,
         "intervals": 0,
         "observers": 3,
         "listenerRegistrations": 3
       },
       "after": {
-        "nodes": 106,
+        "nodes": 110,
         "timeouts": 2,
         "intervals": 0,
         "observers": 3,
         "listenerRegistrations": 3
       },
-      "heapBeforeMB": 0.9670639038085938,
-      "heapAfterMB": 0.9925651550292969,
-      "scriptMs": 19.494999999999997,
+      "heapBeforeMB": 0.979766845703125,
+      "heapAfterMB": 1.0032386779785156,
+      "scriptMs": 21.779,
       "errors": []
     },
     {
@@ -71,12 +71,12 @@
       "chatSearch": true,
       "chatMaximize": true,
       "chatMentions": true,
-      "frameInclusiveMedianMs": 16.59999999999127,
-      "frameInclusiveP95Ms": 16.69999999999709,
+      "frameInclusiveMedianMs": 16.5,
+      "frameInclusiveP95Ms": 16.70000000006985,
       "realFreezeResume": true,
       "file": "SakaLuX-Chat-Intelligence.user.js",
       "before": {
-        "nodes": 30,
+        "nodes": 33,
         "timeouts": 0,
         "intervals": 0,
         "observers": 2,
@@ -84,16 +84,16 @@
         "chatCache": 1
       },
       "after": {
-        "nodes": 70,
+        "nodes": 73,
         "timeouts": 0,
         "intervals": 0,
         "observers": 2,
         "listenerRegistrations": 149,
         "chatCache": 21
       },
-      "heapBeforeMB": 0.8681221008300781,
-      "heapAfterMB": 0.9441032409667969,
-      "scriptMs": 9.563,
+      "heapBeforeMB": 0.8704605102539062,
+      "heapAfterMB": 0.9441642761230469,
+      "scriptMs": 9.649,
       "errors": []
     },
     {
@@ -104,27 +104,27 @@
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.60000000000582,
-      "frameInclusiveP95Ms": 16.89999999999418,
+      "frameInclusiveMedianMs": 16.599999999976717,
+      "frameInclusiveP95Ms": 16.800000000046566,
       "realFreezeResume": true,
       "file": "SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "before": {
-        "nodes": 47,
-        "timeouts": 0,
+        "nodes": 51,
+        "timeouts": 2,
         "intervals": 2,
         "observers": 3,
         "listenerRegistrations": 9
       },
       "after": {
-        "nodes": 47,
-        "timeouts": 0,
+        "nodes": 51,
+        "timeouts": 2,
         "intervals": 2,
         "observers": 3,
         "listenerRegistrations": 9
       },
-      "heapBeforeMB": 1.0536842346191406,
-      "heapAfterMB": 1.1858711242675781,
-      "scriptMs": 3.91,
+      "heapBeforeMB": 1.0658683776855469,
+      "heapAfterMB": 1.2187767028808594,
+      "scriptMs": 6.283,
       "errors": []
     },
     {
@@ -135,27 +135,27 @@
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.59999999999127,
-      "frameInclusiveP95Ms": 16.70000000001164,
+      "frameInclusiveMedianMs": 16.599999999976717,
+      "frameInclusiveP95Ms": 16.800000000046566,
       "realFreezeResume": true,
       "file": "SakaLuX-Elimination-Assistant.user.js",
       "before": {
-        "nodes": 132,
-        "timeouts": 0,
+        "nodes": 136,
+        "timeouts": 1,
         "intervals": 2,
         "observers": 5,
         "listenerRegistrations": 4
       },
       "after": {
-        "nodes": 132,
-        "timeouts": 0,
+        "nodes": 136,
+        "timeouts": 1,
         "intervals": 2,
-        "observers": 25,
+        "observers": 5,
         "listenerRegistrations": 24
       },
-      "heapBeforeMB": 1.0476150512695312,
-      "heapAfterMB": 1.1124839782714844,
-      "scriptMs": 9.136,
+      "heapBeforeMB": 1.0611724853515625,
+      "heapAfterMB": 1.1070518493652344,
+      "scriptMs": 11.440999999999999,
       "errors": []
     },
     {
@@ -166,27 +166,32 @@
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.60000000000582,
-      "frameInclusiveP95Ms": 16.80000000000291,
+      "frameInclusiveMedianMs": 16.599999999976717,
+      "frameInclusiveP95Ms": 16.70000000006985,
+      "inventoryLoad": {
+        "rows": 5000,
+        "badges": 5000,
+        "scriptMs": 176.59
+      },
       "realFreezeResume": true,
       "file": "SakaLuX-Enhancer-Guard.user.js",
       "before": {
-        "nodes": 41,
-        "timeouts": 1,
+        "nodes": 45,
+        "timeouts": 2,
         "intervals": 0,
         "observers": 4,
         "listenerRegistrations": 4
       },
       "after": {
-        "nodes": 41,
-        "timeouts": 0,
+        "nodes": 45,
+        "timeouts": 1,
         "intervals": 0,
         "observers": 3,
-        "listenerRegistrations": 4
+        "listenerRegistrations": 20004
       },
-      "heapBeforeMB": 0.9972419738769531,
-      "heapAfterMB": 1.0603675842285156,
-      "scriptMs": 1.13,
+      "heapBeforeMB": 1.0092582702636719,
+      "heapAfterMB": 1.8372955322265625,
+      "scriptMs": 178.535,
       "errors": []
     },
     {
@@ -197,27 +202,27 @@
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.60000000000582,
-      "frameInclusiveP95Ms": 16.80000000000291,
+      "frameInclusiveMedianMs": 16.600000000093132,
+      "frameInclusiveP95Ms": 16.800000000046566,
       "realFreezeResume": true,
       "file": "SakaLuX-Market-Intelligence.user.js",
       "before": {
-        "nodes": 42,
-        "timeouts": 0,
+        "nodes": 46,
+        "timeouts": 2,
         "intervals": 0,
         "observers": 4,
         "listenerRegistrations": 4
       },
       "after": {
-        "nodes": 43,
-        "timeouts": 0,
+        "nodes": 47,
+        "timeouts": 2,
         "intervals": 0,
         "observers": 4,
         "listenerRegistrations": 504
       },
-      "heapBeforeMB": 1.2043418884277344,
-      "heapAfterMB": 1.2597198486328125,
-      "scriptMs": 4.417,
+      "heapBeforeMB": 1.2168502807617188,
+      "heapAfterMB": 1.3119125366210938,
+      "scriptMs": 6.002999999999999,
       "errors": []
     },
     {
@@ -228,27 +233,27 @@
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.60000000000582,
-      "frameInclusiveP95Ms": 17.20000000001164,
+      "frameInclusiveMedianMs": 16.599999999976717,
+      "frameInclusiveP95Ms": 17.199999999953434,
       "realFreezeResume": true,
       "file": "SakaLuX-Mission-Rewards.user.js",
       "before": {
-        "nodes": 46,
-        "timeouts": 1,
+        "nodes": 50,
+        "timeouts": 2,
         "intervals": 0,
         "observers": 5,
         "listenerRegistrations": 3
       },
       "after": {
-        "nodes": 46,
-        "timeouts": 0,
+        "nodes": 50,
+        "timeouts": 1,
         "intervals": 0,
         "observers": 5,
         "listenerRegistrations": 3
       },
-      "heapBeforeMB": 0.9714889526367188,
-      "heapAfterMB": 1.0098686218261719,
-      "scriptMs": 3.218,
+      "heapBeforeMB": 0.9866065979003906,
+      "heapAfterMB": 1.0511016845703125,
+      "scriptMs": 4.207,
       "errors": []
     },
     {
@@ -259,27 +264,27 @@
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.30000000000291,
-      "frameInclusiveP95Ms": 19.10000000000582,
+      "frameInclusiveMedianMs": 16.400000000023283,
+      "frameInclusiveP95Ms": 21.800000000046566,
       "realFreezeResume": true,
       "file": "SakaLuX-Script-Hub.user.js",
       "before": {
-        "nodes": 26,
+        "nodes": 44,
         "timeouts": 2,
         "intervals": 1,
         "observers": 1,
-        "listenerRegistrations": 9
+        "listenerRegistrations": 11
       },
       "after": {
-        "nodes": 27,
+        "nodes": 45,
         "timeouts": 0,
         "intervals": 1,
         "observers": 1,
-        "listenerRegistrations": 9
+        "listenerRegistrations": 11
       },
-      "heapBeforeMB": 1.4271049499511719,
-      "heapAfterMB": 1.5376014709472656,
-      "scriptMs": 169.66,
+      "heapBeforeMB": 1.4389762878417969,
+      "heapAfterMB": 1.5679168701171875,
+      "scriptMs": 144.748,
       "errors": []
     },
     {
@@ -291,62 +296,66 @@
       "chatMaximize": false,
       "chatMentions": false,
       "frameInclusiveMedianMs": 16.5,
-      "frameInclusiveP95Ms": 20.5,
+      "frameInclusiveP95Ms": 16.900000000023283,
       "realFreezeResume": true,
       "file": "SakaLuX-Stock-Manager-Advisor.user.js",
       "before": {
-        "nodes": 165,
-        "timeouts": 1,
+        "nodes": 169,
+        "timeouts": 3,
         "intervals": 2,
         "observers": 2,
         "listenerRegistrations": 6
       },
       "after": {
-        "nodes": 489,
-        "timeouts": 1,
+        "nodes": 493,
+        "timeouts": 3,
         "intervals": 2,
         "observers": 2,
         "listenerRegistrations": 6
       },
-      "heapBeforeMB": 1.3308372497558594,
-      "heapAfterMB": 1.6709213256835938,
-      "scriptMs": 5.266,
+      "heapBeforeMB": 1.3469276428222656,
+      "heapAfterMB": 1.7475738525390625,
+      "scriptMs": 10.814,
       "errors": []
     },
     {
       "apiGlobal": null,
       "opens": 30,
       "toggles": 0,
-      "suiteSwitches": 0,
+      "suiteSwitches": 460,
       "chatSearch": false,
       "chatMaximize": false,
       "chatMentions": false,
-      "frameInclusiveMedianMs": 16.69999999999709,
-      "frameInclusiveP95Ms": 16.70000000001164,
+      "frameInclusiveMedianMs": 16.5,
+      "frameInclusiveP95Ms": 16.70000000006985,
       "realFreezeResume": true,
       "file": "SakaLuX-Suite.user.js",
       "before": {
-        "nodes": 30,
+        "nodes": 47,
         "timeouts": 0,
         "intervals": 3,
         "observers": 2,
-        "listenerRegistrations": 5
+        "listenerRegistrations": 10
       },
       "after": {
-        "nodes": 30,
-        "timeouts": 0,
+        "nodes": 308,
+        "timeouts": 30,
         "intervals": 3,
         "observers": 2,
-        "listenerRegistrations": 5
+        "listenerRegistrations": 1078
       },
-      "heapBeforeMB": 4.467094421386719,
-      "heapAfterMB": 4.4516143798828125,
-      "scriptMs": 0.24600000000000002,
+      "heapBeforeMB": 4.476043701171875,
+      "heapAfterMB": 6.673824310302734,
+      "scriptMs": 138.377,
       "errors": []
     }
   ],
   "errors": [],
   "assertions": [
+    {
+      "label": "SakaLuX-Account-Auditor.user.js real 412px layout viewport",
+      "passed": true
+    },
     {
       "label": "SakaLuX-Account-Auditor.user.js repeated panels/toggles no uncaught errors",
       "passed": true
@@ -364,6 +373,10 @@
       "passed": true
     },
     {
+      "label": "SakaLuX-Bazaar-Thanker-PDA.user.js real 412px layout viewport",
+      "passed": true
+    },
+    {
       "label": "SakaLuX-Bazaar-Thanker-PDA.user.js repeated panels/toggles no uncaught errors",
       "passed": true
     },
@@ -377,6 +390,10 @@
     },
     {
       "label": "SakaLuX-Bazaar-Thanker-PDA.user.js repeated panels/toggles post-GC heap bounded",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js real 412px layout viewport",
       "passed": true
     },
     {
@@ -400,6 +417,10 @@
       "passed": true
     },
     {
+      "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js real 412px layout viewport",
+      "passed": true
+    },
+    {
       "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js repeated panels/toggles no uncaught errors",
       "passed": true
     },
@@ -416,12 +437,16 @@
       "passed": true
     },
     {
+      "label": "SakaLuX-Elimination-Assistant.user.js real 412px layout viewport",
+      "passed": true
+    },
+    {
       "label": "SakaLuX-Elimination-Assistant.user.js repeated panels/toggles no uncaught errors",
       "passed": true
     },
     {
       "label": "SakaLuX-Elimination-Assistant.user.js repeated panels/toggles observers bounded",
-      "passed": false
+      "passed": true
     },
     {
       "label": "SakaLuX-Elimination-Assistant.user.js repeated panels/toggles intervals bounded",
@@ -429,6 +454,14 @@
     },
     {
       "label": "SakaLuX-Elimination-Assistant.user.js repeated panels/toggles post-GC heap bounded",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Enhancer-Guard.user.js real 412px layout viewport",
+      "passed": true
+    },
+    {
+      "label": "Enhancer protects all 5000 actual inventory thumbnail rows",
       "passed": true
     },
     {
@@ -448,6 +481,10 @@
       "passed": true
     },
     {
+      "label": "SakaLuX-Market-Intelligence.user.js real 412px layout viewport",
+      "passed": true
+    },
+    {
       "label": "SakaLuX-Market-Intelligence.user.js repeated panels/toggles no uncaught errors",
       "passed": true
     },
@@ -461,6 +498,10 @@
     },
     {
       "label": "SakaLuX-Market-Intelligence.user.js repeated panels/toggles post-GC heap bounded",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Mission-Rewards.user.js real 412px layout viewport",
       "passed": true
     },
     {
@@ -480,6 +521,10 @@
       "passed": true
     },
     {
+      "label": "SakaLuX-Script-Hub.user.js real 412px layout viewport",
+      "passed": true
+    },
+    {
       "label": "SakaLuX-Script-Hub.user.js repeated panels/toggles no uncaught errors",
       "passed": true
     },
@@ -496,6 +541,10 @@
       "passed": true
     },
     {
+      "label": "SakaLuX-Stock-Manager-Advisor.user.js real 412px layout viewport",
+      "passed": true
+    },
+    {
       "label": "SakaLuX-Stock-Manager-Advisor.user.js repeated panels/toggles no uncaught errors",
       "passed": true
     },
@@ -509,6 +558,10 @@
     },
     {
       "label": "SakaLuX-Stock-Manager-Advisor.user.js repeated panels/toggles post-GC heap bounded",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js real 412px layout viewport",
       "passed": true
     },
     {
@@ -529,7 +582,7 @@
     },
     {
       "label": "Suite all 23 switches toggled 20 times",
-      "passed": false
+      "passed": true
     }
   ],
   "soak": []
