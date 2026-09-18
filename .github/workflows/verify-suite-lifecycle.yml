@@ -1,0 +1,69 @@
+name: Verify Suite lifecycle fix
+on:
+  push:
+    branches: [main]
+    paths: ['.github/scripts/suite-lifecycle.patch', '.github/workflows/verify-suite-lifecycle.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Apply reviewed lifecycle patch to the complete Suite
+        run: |
+          if head -10 SakaLuX-Suite.user.js | grep -q '@version.*0.9.928'; then
+            git apply --check .github/scripts/suite-lifecycle.patch
+            git apply .github/scripts/suite-lifecycle.patch
+          fi
+          node --check SakaLuX-Suite.user.js
+      - name: Install pinned test dependencies
+        run: |
+          python3 -m pip install PyYAML==6.0.3
+          npm install --prefix "$RUNNER_TEMP/audit-tests" jsdom@30.1.0 playwright@1.62.1 --no-audit --no-fund
+          "$RUNNER_TEMP/audit-tests/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify repository and all functional regressions
+        env:
+          NODE_PATH: ${{ runner.temp }}/audit-tests/node_modules
+        run: |
+          python3 .github/scripts/validate_repository.py
+          node tests/stocks-panel-regression.cjs
+          node tests/hub-details-regression.cjs
+          node tests/suite-modules-regression.cjs
+          node tests/performance/ui-regression.cjs
+          node tests/performance/chat-cache-regression.cjs --assert
+          node tests/performance/stocks-network-regression.cjs --assert
+          node tests/performance/elimination-lifecycle-regression.cjs
+          node tests/performance/auditor-rate-regression.cjs --assert
+          node tests/performance/run.cjs "$RUNNER_TEMP/performance-budget.json" --assert
+      - name: Measure correct retained-listener baseline
+        env:
+          NODE_PATH: ${{ runner.temp }}/audit-tests/node_modules
+          SUITE_TEST_SOURCE: backups/extended-performance-2026-09-18/SakaLuX-Suite.user.js
+        run: node tests/performance/suite-stability.cjs reports/extended-performance-2026-09-18/suite-stability-before.json
+      - name: Verify repaired listeners, callbacks and actual panels
+        env:
+          NODE_PATH: ${{ runner.temp }}/audit-tests/node_modules
+        run: |
+          node tests/performance/suite-stability.cjs
+          node tests/performance/interactive.cjs
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          for name in ['suite-stability','interactive']:
+              data=json.loads(Path('reports/extended-performance-2026-09-18/'+name+'.json').read_text())
+              assert all(x['passed'] for x in data['assertions']),name
+          PY
+      - name: Save validated complete Suite and corrected browser reports
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Suite.user.js reports/extended-performance-2026-09-18
+          git commit -m 'Fix native Suite listener lifecycle and record verified global-handler cleanup'
+          git pull --rebase origin main
+          git push origin HEAD:main

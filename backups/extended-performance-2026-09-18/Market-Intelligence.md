@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.40**
+**v1.17.39**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,8 +20,10 @@
 
 ## Current release note
 
-**v1.17.40 — Extended performance validation**
-- Coalesces overlapping per-item market requests and equipment fetches, including forced refresh calls.
+**v1.17.39 — Performance and TornPDA smoothness**
+- Removes the multiple footer-repair timers scheduled for every page mutation.
+- Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.
+- Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -45,9 +47,6 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.17.40 — Extended performance validation
-- Coalesces overlapping per-item market requests and equipment fetches, including forced refresh calls.
 
 ### v1.17.39 — Performance and TornPDA smoothness
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.40
+// @version      1.17.39
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -80,7 +80,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.40'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.39'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -774,9 +774,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         return out;
     }
 
-    const fetchEquippedLoadoutPending=new Map();
-    function fetchEquippedLoadout(force=false){const pendingKey=getApiKey();if(fetchEquippedLoadoutPending.has(pendingKey))return fetchEquippedLoadoutPending.get(pendingKey);const pending=fetchEquippedLoadoutData(force).finally(()=>fetchEquippedLoadoutPending.delete(pendingKey));fetchEquippedLoadoutPending.set(pendingKey,pending);return pending;}
-    async function fetchEquippedLoadoutData(force=false) {
+    async function fetchEquippedLoadout(force=false) {
         const cached=loadJson(STORAGE.loadoutCache,null);
         if(!force&&cached?.at&&Date.now()-Number(cached.at)<LOADOUT_CACHE_MS&&Array.isArray(cached.items)){
             state.loadoutReady=true;state.loadoutItems=cached.items.length;state.loadoutLastError='';return cached.items;
@@ -1092,9 +1090,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     function cacheGet(itemId) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>MARKET_CACHE_MS) return null; return row; }
     function cachePeek(itemId,maxAge=TRAVEL_CACHE_MAX_STALE_MS) { const row=marketCache[String(itemId)]; if(!row||!row.at||Date.now()-row.at>maxAge) return null; return row; }
     function cachePut(itemId,row) { marketCache[String(itemId)]=Object.assign({},row,{at:Date.now()}); saveJson(STORAGE.marketCache,marketCache); }
-    const fetchMarketPending=new Map();
-    function fetchMarket(itemId,force=false){const pendingKey=String(itemId)+'|'+getApiKey();if(fetchMarketPending.has(pendingKey))return fetchMarketPending.get(pendingKey);const pending=fetchMarketData(itemId,force).finally(()=>fetchMarketPending.delete(pendingKey));fetchMarketPending.set(pendingKey,pending);return pending;}
-    async function fetchMarketData(itemId,force=false) {
+    async function fetchMarket(itemId,force=false) {
         if(!force){const c=cacheGet(itemId); if(c) return c;}
         const key=getApiKey(); if(!key) return null;
         state.marketRequests++;

@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.929**
+**v0.9.928**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -35,8 +35,11 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.929 — Extended performance validation**
-- Removes the Member Travel Map tag-edit listener and aborts Target Alerts global listeners when the native modules are disabled.
+**v0.9.928 — Performance and TornPDA smoothness**
+- Stops Recovery Planner from recreating its identical SVG icon on every observer pass.
+- Gates Member Travel Map repair to relevant faction/profile views and ignores chat in unrelated modules.
+- Coalesces OC, activity and armory scans; Company scanning stays on Company/Jobs pages.
+- Preserves all 23 module entries, settings, panel height and switch styling.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
@@ -56,9 +59,6 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v0.9.929 — Extended performance validation
-- Removes the Member Travel Map tag-edit listener and aborts Target Alerts global listeners when the native modules are disabled.
 
 ### v0.9.928 — Performance and TornPDA smoothness
 
