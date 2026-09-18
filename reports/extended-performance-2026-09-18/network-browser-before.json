@@ -11,7 +11,7 @@
           "deadline": false,
           "rejected": 0,
           "reasons": [],
-          "requests": 92
+          "requests": 1840
         },
         {
           "mode": "offline",
@@ -115,7 +115,7 @@
           "reasons": [],
           "requests": 2,
           "health": {
-            "version": "1.3.44",
+            "version": "1.3.43",
             "enabled": true,
             "ready": true,
             "hasApiKey": true,
@@ -141,7 +141,7 @@
           "reasons": [],
           "requests": 4,
           "health": {
-            "version": "1.3.44",
+            "version": "1.3.43",
             "enabled": true,
             "ready": true,
             "hasApiKey": true,
@@ -167,7 +167,7 @@
           "reasons": [],
           "requests": 4,
           "health": {
-            "version": "1.3.44",
+            "version": "1.3.43",
             "enabled": true,
             "ready": true,
             "hasApiKey": true,
@@ -193,7 +193,7 @@
           "reasons": [],
           "requests": 4,
           "health": {
-            "version": "1.3.44",
+            "version": "1.3.43",
             "enabled": true,
             "ready": true,
             "hasApiKey": true,
@@ -219,7 +219,7 @@
           "reasons": [],
           "requests": 2,
           "health": {
-            "version": "1.3.44",
+            "version": "1.3.43",
             "enabled": true,
             "ready": true,
             "hasApiKey": true,
@@ -256,7 +256,7 @@
             "enabled": true,
             "loading": false,
             "error": null,
-            "lastUpdate": 1789749640787,
+            "lastUpdate": 1789749609378,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -285,7 +285,7 @@
             "enabled": true,
             "loading": false,
             "error": "Network request failed.",
-            "lastUpdate": 1789749640787,
+            "lastUpdate": 1789749609378,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -314,7 +314,7 @@
             "enabled": true,
             "loading": false,
             "error": "Items API: Fixture rate limit",
-            "lastUpdate": 1789749640787,
+            "lastUpdate": 1789749609378,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -343,7 +343,7 @@
             "enabled": true,
             "loading": false,
             "error": "Invalid JSON returned by Torn API.",
-            "lastUpdate": 1789749640787,
+            "lastUpdate": 1789749609378,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -372,7 +372,7 @@
             "enabled": true,
             "loading": false,
             "error": null,
-            "lastUpdate": 1789749641818,
+            "lastUpdate": 1789749610407,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -400,7 +400,7 @@
           "deadline": false,
           "rejected": 0,
           "reasons": [],
-          "requests": 2,
+          "requests": 40,
           "health": {
             "ready": true,
             "version": "1.17.37",
@@ -409,7 +409,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749644015,
+            "lastScan": 1789749612607,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 0,
@@ -493,7 +493,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749644179
+            "apiAccessCheckedAt": 1789749612774
           }
         },
         {
@@ -514,7 +514,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749644015,
+            "lastScan": 1789749612607,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 1,
@@ -598,7 +598,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749644179
+            "apiAccessCheckedAt": 1789749612774
           }
         },
         {
@@ -619,7 +619,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749644015,
+            "lastScan": 1789749612607,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 2,
@@ -703,7 +703,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749644179
+            "apiAccessCheckedAt": 1789749612774
           }
         },
         {
@@ -724,7 +724,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749644015,
+            "lastScan": 1789749612607,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 3,
@@ -808,7 +808,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749644179
+            "apiAccessCheckedAt": 1789749612774
           }
         },
         {
@@ -827,7 +827,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749644015,
+            "lastScan": 1789749612607,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 4,
@@ -911,7 +911,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749645215
+            "apiAccessCheckedAt": 1789749613808
           }
         }
       ],
@@ -938,7 +938,7 @@
             "catalogueItems": 2,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749647359,
+            "lastScan": 1789749615948,
             "learnedMods": 0
           }
         },
@@ -960,7 +960,7 @@
             "catalogueItems": 0,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749647616,
+            "lastScan": 1789749616206,
             "learnedMods": 0
           }
         },
@@ -982,7 +982,7 @@
             "catalogueItems": 0,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749647873,
+            "lastScan": 1789749616462,
             "learnedMods": 0
           }
         },
@@ -1004,7 +1004,7 @@
             "catalogueItems": 0,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749648129,
+            "lastScan": 1789749616719,
             "learnedMods": 0
           }
         },
@@ -1026,7 +1026,7 @@
             "catalogueItems": 2,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749648385,
+            "lastScan": 1789749616975,
             "learnedMods": 0
           }
         }
@@ -1043,10 +1043,10 @@
           "deadline": false,
           "rejected": 0,
           "reasons": [],
-          "requests": 8,
+          "requests": 27,
           "health": {
             "ready": true,
-            "version": "1.9.73",
+            "version": "1.9.72",
             "registryStatus": "online",
             "addOns": 7,
             "installed": 0,
@@ -1067,7 +1067,7 @@
           "requests": 8,
           "health": {
             "ready": true,
-            "version": "1.9.73",
+            "version": "1.9.72",
             "registryStatus": "fallback",
             "addOns": 7,
             "installed": 0,
@@ -1088,7 +1088,7 @@
           "requests": 8,
           "health": {
             "ready": true,
-            "version": "1.9.73",
+            "version": "1.9.72",
             "registryStatus": "fallback",
             "addOns": 7,
             "installed": 0,
@@ -1109,7 +1109,7 @@
           "requests": 8,
           "health": {
             "ready": true,
-            "version": "1.9.73",
+            "version": "1.9.72",
             "registryStatus": "fallback",
             "addOns": 7,
             "installed": 0,
@@ -1130,7 +1130,7 @@
           "requests": 8,
           "health": {
             "ready": true,
-            "version": "1.9.73",
+            "version": "1.9.72",
             "registryStatus": "online",
             "addOns": 7,
             "installed": 0,
@@ -1154,10 +1154,10 @@
           "deadline": false,
           "rejected": 0,
           "reasons": [],
-          "requests": 3,
+          "requests": 60,
           "health": {
             "ready": true,
-            "version": "0.8.7",
+            "version": "0.8.6",
             "enabled": true,
             "apiConfigured": true,
             "dryRun": true,
@@ -1176,7 +1176,7 @@
           "requests": 2,
           "health": {
             "ready": true,
-            "version": "0.8.7",
+            "version": "0.8.6",
             "enabled": true,
             "apiConfigured": true,
             "dryRun": true,
@@ -1195,7 +1195,7 @@
           "requests": 2,
           "health": {
             "ready": true,
-            "version": "0.8.7",
+            "version": "0.8.6",
             "enabled": true,
             "apiConfigured": true,
             "dryRun": true,
@@ -1214,7 +1214,7 @@
           "requests": 2,
           "health": {
             "ready": true,
-            "version": "0.8.7",
+            "version": "0.8.6",
             "enabled": true,
             "apiConfigured": true,
             "dryRun": true,
@@ -1231,7 +1231,7 @@
           "requests": 3,
           "health": {
             "ready": true,
-            "version": "0.8.7",
+            "version": "0.8.6",
             "enabled": true,
             "apiConfigured": true,
             "dryRun": true,
