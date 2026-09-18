@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.74
+// @version      1.9.75
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -77,7 +77,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.74';
+    const VERSION = '1.9.75';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -97,6 +97,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.75", "date": "2026-09-18", "changes": ["Floating fallback launcher now appears only when neither native Hub launcher is actually mounted; scrolling the Torn header off-screen no longer triggers it.", "Audited all current top-level SakaLuX userscripts so none changes the font size of Torn native Points or Merits counters."]},
         {"version": "1.9.74", "date": "2026-09-18", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.73", "date": "2026-09-18", "changes": ["Synchronizes Stocks v0.8.7, Market v1.17.40 and Elimination v1.3.44 performance details and offline fallback.", "Updates cached NEW details without replacing saved preferences; shares overlapping registry/update refreshes."]},
         {"version": "1.9.72", "date": "2026-09-18", "changes": ["Avoids rewriting badge text when its value is unchanged, preventing self-triggered observer work.", "Ignores unrelated chat/dock/footer changes and coalesces launcher maintenance.", "Synchronizes current performance release notes for all seven registered modules."]},
@@ -627,9 +628,10 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "5.3.41",
+                    "version": "5.3.42",
                     "date": "2026-09-18",
                     "notes": [
+                        "Integrates Bazaar Thanker actions with Suite Event Lens: removes the inline clipboard button and exposes Thanks/Details through the Suite action row when Bazaar Thanker is active.",
                         "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
                         "Uses constant-time Hub detection instead of document-wide marker searches on every mutation.",
                         "Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.",
@@ -638,7 +640,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.41",
+                "version": "5.3.42",
                 "detailsRevision": 2
             },
             {
@@ -1780,8 +1782,10 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if (!button) return;
         const top = document.getElementById(IDS.topSkull);
         const nav = document.getElementById(IDS.navSkull);
-        const nativeVisible = settings.showTopbarSkull && (isActuallyVisible(top) || isActuallyVisible(nav));
-        button.style.setProperty('display', nativeVisible ? 'none' : 'flex', 'important');
+        const nativeMounted = settings.showTopbarSkull && Boolean(
+            (top && top.isConnected) || (nav && nav.isConnected)
+        );
+        button.style.setProperty('display', nativeMounted ? 'none' : 'flex', 'important');
         button.style.setProperty('visibility', 'visible', 'important');
         button.style.setProperty('opacity', '1', 'important');
         button.style.setProperty('pointer-events', 'auto', 'important');

@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.74**
+**v1.9.75**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.74 — Canonical release/version synchronization**
+**v1.9.75 — Canonical release/version synchronization**
 - Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.
 - Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata.
 
@@ -58,6 +58,11 @@ Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and
 
 ## Release history / Changelog
 
+
+
+### v1.9.75 — Canonical release/version synchronization
+- Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.
+- Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata.
 
 ### v1.9.74 — Canonical release/version synchronization
 - Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.

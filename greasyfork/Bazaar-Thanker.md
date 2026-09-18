@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.41**
+**v5.3.42**
 
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
@@ -14,7 +14,8 @@
 
 ## Current release note
 
-**v5.3.41 — Release metadata synchronization**
+**v5.3.42 — Release metadata synchronization**
+- Integrates Bazaar Thanker actions with Suite Event Lens: removes the inline clipboard button and exposes Thanks/Details through the Suite action row when Bazaar Thanker is active.
 - Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
 - Uses constant-time Hub detection instead of document-wide marker searches on every mutation.
 - Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.
@@ -34,6 +35,14 @@ Generated thank-you text should be reviewed before sending. The script assists w
 
 ## Release history / Changelog
 
+
+
+### v5.3.42 — Release metadata synchronization
+- Integrates Bazaar Thanker actions with Suite Event Lens: removes the inline clipboard button and exposes Thanks/Details through the Suite action row when Bazaar Thanker is active.
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Uses constant-time Hub detection instead of document-wide marker searches on every mutation.
+- Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.
+- Preserves buyer grouping, cooldown and message preparation.
 
 ### v5.3.41 — Release metadata synchronization
 - Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
