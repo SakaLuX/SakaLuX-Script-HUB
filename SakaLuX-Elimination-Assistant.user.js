@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.44
+// @version      1.3.45
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -13,6 +13,23 @@
 // @downloadURL  https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js
 // @updateURL    https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js
 // ==/UserScript==
+
+/* SakaLuX Canonical Installed Version — BEGIN */
+(() => {
+  'use strict';
+  let v = '1.3.45';
+  try {
+    const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
+    if (meta) v = String(meta);
+  } catch {}
+  const g = globalThis;
+  g.__SakaLuXInstalledVersions = g.__SakaLuXInstalledVersions || Object.create(null);
+  g.__SakaLuXInstalledVersions['elimination-assistant'] = v;
+  try {
+    document.documentElement?.setAttribute('data-sakalux-installed-elimination-assistant', v);
+  } catch {}
+})();
+/* SakaLuX Canonical Installed Version — END */
 
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
@@ -78,7 +95,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.44'});
+  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.45'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -226,7 +243,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
  */
 (() => {
 'use strict';
-const VERSION = '1.3.44';
+const VERSION = '1.3.45';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';

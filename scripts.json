@@ -34,9 +34,10 @@
         }
       ],
       "release": {
-        "version": "1.3.47",
+        "version": "1.3.48",
         "date": "2026-09-18",
         "notes": [
+          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
           "Stops repeated inventory badge replacement when protection state is unchanged.",
           "Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.",
           "Preserves sale blocking, reserved quantities and protection controls."
@@ -44,7 +45,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.47",
+      "version": "1.3.48",
       "detailsRevision": 2
     },
     {
@@ -82,9 +83,10 @@
         }
       ],
       "release": {
-        "version": "5.3.40",
+        "version": "5.3.41",
         "date": "2026-09-18",
         "notes": [
+          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
           "Uses constant-time Hub detection instead of document-wide marker searches on every mutation.",
           "Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.",
           "Preserves buyer grouping, cooldown and message preparation."
@@ -92,7 +94,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.40",
+      "version": "5.3.41",
       "detailsRevision": 2
     },
     {
@@ -132,9 +134,10 @@
         }
       ],
       "release": {
-        "version": "1.0.42",
+        "version": "1.0.43",
         "date": "2026-09-18",
         "notes": [
+          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
           "Scopes legacy footer repair to the Mission settings panel and batches it once.",
           "Ignores unrelated chat changes in reward scanning and standalone dock maintenance.",
           "Preserves reward annotations, API controls and footer restoration."
@@ -142,7 +145,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.42",
+      "version": "1.0.43",
       "detailsRevision": 2
     },
     {
@@ -194,9 +197,10 @@
         }
       ],
       "release": {
-        "version": "1.17.40",
+        "version": "1.17.41",
         "date": "2026-09-18",
         "notes": [
+          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
           "Shares active market lookups for the same item and API key.",
           "Shares active equipment fetches across overlapping loadout comparisons, including forced refreshes.",
           "Clears pending operations on success and failure so later requests recover; price estimates and explicit trade controls remain unchanged."
@@ -204,7 +208,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.40",
+      "version": "1.17.41",
       "detailsRevision": 3
     },
     {
@@ -278,9 +282,10 @@
         }
       ],
       "release": {
-        "version": "1.3.44",
+        "version": "1.3.45",
         "date": "2026-09-18",
         "notes": [
+          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
           "Disconnects the panel-specific observer when the module is disabled.",
           "Removes the document click handler associated with the discarded panel.",
           "Prevents observer and detached-panel accumulation across disable/re-enable cycles; target preferences remain saved."
@@ -288,7 +293,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.44",
+      "version": "1.3.45",
       "detailsRevision": 3
     },
     {
@@ -325,9 +330,10 @@
         }
       ],
       "release": {
-        "version": "1.8.38",
+        "version": "1.8.39",
         "date": "2026-09-18",
         "notes": [
+          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
           "Ignores unrelated chat changes in Company page scraping and dock maintenance.",
           "Removes duplicate legacy registration timers that overwrote current module metadata.",
           "Preserves Company panel stacking and current standalone registration."
@@ -335,7 +341,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.38",
+      "version": "1.8.39",
       "detailsRevision": 2
     },
     {
@@ -378,9 +384,10 @@
         }
       ],
       "release": {
-        "version": "0.8.7",
+        "version": "0.8.8",
         "date": "2026-09-18",
         "notes": [
+          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
           "Shares one active API synchronization across overlapping refresh requests.",
           "Twenty concurrent refreshes use three requests instead of sixty in the synthetic network regression.",
           "Recovers after offline, HTTP 429 and malformed JSON errors; portfolio data and explicit trading safeguards are preserved."
@@ -388,7 +395,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.7",
+      "version": "0.8.8",
       "detailsRevision": 3
     }
   ]

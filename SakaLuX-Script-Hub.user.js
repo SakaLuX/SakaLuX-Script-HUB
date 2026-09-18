@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.73
+// @version      1.9.74
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -77,7 +77,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.73';
+    const VERSION = '1.9.74';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -1184,6 +1184,13 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     }
 
     function getInstalledVersion(script) {
+        // Canonical metadata marker: authoritative installed version.
+        try {
+            const canonical = globalThis.__SakaLuXInstalledVersions?.[script.id]
+                || document.documentElement?.getAttribute('data-sakalux-installed-' + script.id);
+            const v = String(canonical || '').trim();
+            if (/^\d+(?:\.\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?$/.test(v)) return v;
+        } catch {}
         const versions = [];
         const add = value => {
             const v = String(value || '').trim();
