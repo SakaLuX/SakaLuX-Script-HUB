@@ -1,0 +1,50 @@
+name: Rollback mistaken Stock Company update
+
+on:
+  push:
+    paths:
+      - '.github/rollback-stock-company-final.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore exact pre-update backups
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp backups/stock-company-api-final-2026-09-18/SakaLuX-Stock-Manager-Advisor-v0.7.17.user.js SakaLuX-Stock-Manager-Advisor.user.js
+          cp backups/stock-company-api-final-2026-09-18/SakaLuX-Company-Intelligence-v1.8.37.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js
+          cp backups/stock-company-api-final-2026-09-18/scripts.json scripts.json
+          cp backups/stock-company-api-final-2026-09-18/greasyfork/Stock-Manager-Advisor.md greasyfork/Stock-Manager-Advisor.md
+          cp backups/stock-company-api-final-2026-09-18/greasyfork/Company-Intelligence.md greasyfork/Company-Intelligence.md
+
+      - name: Validate restored versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          node --check SakaLuX-Company-Intelligence-v1.0.0.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q '@version      0.7.17' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "version: '0.7.17'" SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q '@version      1.8.37' SakaLuX-Company-Intelligence-v1.0.0.user.js
+          grep -q "version:'1.8.37'\|version: '1.8.37'" SakaLuX-Company-Intelligence-v1.0.0.user.js
+
+      - name: Commit rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js scripts.json greasyfork/Stock-Manager-Advisor.md greasyfork/Company-Intelligence.md
+          git commit -m 'Rollback mistaken Stocks v0.7.18 and Company v1.8.38 changes'
+          git push
