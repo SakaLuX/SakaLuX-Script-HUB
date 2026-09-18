@@ -3,7 +3,7 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.17**
+**v1.2.18**
 
 ## What it does
 - Enhances Torn chat with SakaLuX chat intelligence features.
@@ -12,7 +12,10 @@
 
 ## Current release note
 
-**v1.2.17** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+**v1.2.18 — Complete standalone registration**
+- Registers Chat Intelligence globally in the shared SakaLuX standalone module list as `chat-intelligence`.
+- Synchronizes the standalone/runtime version surface to v1.2.18.
+- Preserves the existing Chat Intelligence behavior and Hub integration.
 
 ## Recommended
 - Use together with SakaLuX Script Hub for consistent controls and status handling.
@@ -21,6 +24,11 @@
 All Rights Reserved — SakaLuX [2380374].
 
 ## Release history / Changelog
+
+### v1.2.18 — Complete standalone registration
+- Added global shared-standalone registration for `chat-intelligence`.
+- Synchronized metadata/runtime version surfaces to v1.2.18.
+- Kept existing Chat Intelligence behavior and Hub integration unchanged.
 
 ### v1.2.17 — Performance and release metadata audit
 - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
