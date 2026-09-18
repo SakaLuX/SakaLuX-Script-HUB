@@ -1,0 +1,567 @@
+{
+  "assertions": [
+    {
+      "label": "private-module.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "private-module.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Account-Auditor.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Account-Auditor.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Bazaar-Thanker-PDA.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Bazaar-Thanker-PDA.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Chat-Intelligence.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Elimination-Assistant.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Elimination-Assistant.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Enhancer-Guard.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Enhancer-Guard.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Market-Intelligence.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Market-Intelligence.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Mission-Rewards.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Mission-Rewards.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Script-Hub.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Script-Hub.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Stock-Manager-Advisor.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Stock-Manager-Advisor.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js normal actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js all-native-enabled current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "SakaLuX-Suite.user.js all-native-enabled actual 412px viewport",
+      "passed": true
+    },
+    {
+      "label": "__combined-SakaLuX__ normal current mobile CPU sample no errors",
+      "passed": true
+    },
+    {
+      "label": "__combined-SakaLuX__ normal actual 412px viewport",
+      "passed": true
+    }
+  ],
+  "fixture": "Chromium; 412x915 touch viewport; CPU throttling 6x; 400 rows; 40 unrelated chat mutations at 20ms; 1400ms startup settle and 450ms drain; offline APIs. Counts include pending startup/UI work. Not actual phone FPS.",
+  "results": [
+    {
+      "file": "private-module.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "0.7.2",
+      "layoutWidth": 412,
+      "queries": 98,
+      "timersScheduled": 18,
+      "observerCalls": 40,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 23.3,
+      "layoutMs": 9.83,
+      "heapMB": 0.98,
+      "errors": []
+    },
+    {
+      "file": "private-module.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "0.7.2",
+      "layoutWidth": 412,
+      "queries": 98,
+      "timersScheduled": 18,
+      "observerCalls": 40,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 26.03,
+      "layoutMs": 11.9,
+      "heapMB": 0.98,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Account-Auditor.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.3.15",
+      "layoutWidth": 412,
+      "queries": 1,
+      "timersScheduled": 0,
+      "observerCalls": 80,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 4.21,
+      "layoutMs": 8.8,
+      "heapMB": 1.12,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Account-Auditor.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.3.16",
+      "layoutWidth": 412,
+      "queries": 1,
+      "timersScheduled": 0,
+      "observerCalls": 80,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 4.18,
+      "layoutMs": 5.81,
+      "heapMB": 1.12,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Bazaar-Thanker-PDA.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "5.3.40",
+      "layoutWidth": 412,
+      "queries": 115,
+      "timersScheduled": 22,
+      "observerCalls": 186,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 39.73,
+      "layoutMs": 8.65,
+      "heapMB": 1.18,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Bazaar-Thanker-PDA.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "5.3.40",
+      "layoutWidth": 412,
+      "queries": 115,
+      "timersScheduled": 22,
+      "observerCalls": 186,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 41.44,
+      "layoutMs": 8.05,
+      "heapMB": 1.18,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Chat-Intelligence.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.2.19",
+      "layoutWidth": 412,
+      "queries": 203,
+      "timersScheduled": 46,
+      "observerCalls": 92,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 50.87,
+      "layoutMs": 28.68,
+      "heapMB": 1.36,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Chat-Intelligence.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.2.20",
+      "layoutWidth": 412,
+      "queries": 203,
+      "timersScheduled": 46,
+      "observerCalls": 92,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 40.54,
+      "layoutMs": 22.82,
+      "heapMB": 1.32,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Company-Intelligence-v1.0.0.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.8.38",
+      "layoutWidth": 412,
+      "queries": 15,
+      "timersScheduled": 2,
+      "observerCalls": 123,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 11.62,
+      "layoutMs": 11.91,
+      "heapMB": 1.29,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Company-Intelligence-v1.0.0.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.8.38",
+      "layoutWidth": 412,
+      "queries": 15,
+      "timersScheduled": 2,
+      "observerCalls": 123,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 12.72,
+      "layoutMs": 10.33,
+      "heapMB": 1.29,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Elimination-Assistant.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.3.43",
+      "layoutWidth": 412,
+      "queries": 57,
+      "timersScheduled": 6,
+      "observerCalls": 92,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 21.71,
+      "layoutMs": 17.4,
+      "heapMB": 1.28,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Elimination-Assistant.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.3.44",
+      "layoutWidth": 412,
+      "queries": 57,
+      "timersScheduled": 6,
+      "observerCalls": 92,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 18.53,
+      "layoutMs": 21.35,
+      "heapMB": 1.28,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Enhancer-Guard.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.3.47",
+      "layoutWidth": 412,
+      "queries": 31,
+      "timersScheduled": 6,
+      "observerCalls": 172,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 17.49,
+      "layoutMs": 23.83,
+      "heapMB": 1.89,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Enhancer-Guard.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.3.47",
+      "layoutWidth": 412,
+      "queries": 31,
+      "timersScheduled": 6,
+      "observerCalls": 172,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 20.02,
+      "layoutMs": 24.75,
+      "heapMB": 1.85,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Market-Intelligence.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.17.39",
+      "layoutWidth": 412,
+      "queries": 15,
+      "timersScheduled": 2,
+      "observerCalls": 164,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 20.63,
+      "layoutMs": 11.37,
+      "heapMB": 1.53,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Market-Intelligence.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.17.40",
+      "layoutWidth": 412,
+      "queries": 25,
+      "timersScheduled": 4,
+      "observerCalls": 168,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 24.63,
+      "layoutMs": 13.08,
+      "heapMB": 1.53,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Mission-Rewards.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.0.42",
+      "layoutWidth": 412,
+      "queries": 29,
+      "timersScheduled": 4,
+      "observerCalls": 210,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 9.65,
+      "layoutMs": 14.38,
+      "heapMB": 1.17,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Mission-Rewards.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.0.42",
+      "layoutWidth": 412,
+      "queries": 17,
+      "timersScheduled": 2,
+      "observerCalls": 205,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 9.84,
+      "layoutMs": 12.38,
+      "heapMB": 1.17,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Script-Hub.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "1.9.72",
+      "layoutWidth": 412,
+      "queries": 228,
+      "timersScheduled": 7,
+      "observerCalls": 40,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 10.89,
+      "layoutMs": 10.8,
+      "heapMB": 1.79,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Script-Hub.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "1.9.73",
+      "layoutWidth": 412,
+      "queries": 228,
+      "timersScheduled": 7,
+      "observerCalls": 40,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 14.37,
+      "layoutMs": 10.04,
+      "heapMB": 1.8,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Stock-Manager-Advisor.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "0.8.6",
+      "layoutWidth": 412,
+      "queries": 180,
+      "timersScheduled": 5,
+      "observerCalls": 90,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 28.21,
+      "layoutMs": 14.57,
+      "heapMB": 1.69,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Stock-Manager-Advisor.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "0.8.7",
+      "layoutWidth": 412,
+      "queries": 170,
+      "timersScheduled": 3,
+      "observerCalls": 88,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 31.52,
+      "layoutMs": 14.01,
+      "heapMB": 1.7,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "variant": "before",
+      "mode": "normal",
+      "version": "0.9.928",
+      "layoutWidth": 412,
+      "queries": 1,
+      "timersScheduled": 0,
+      "observerCalls": 80,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 2.3,
+      "layoutMs": 10.47,
+      "heapMB": 6.49,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "variant": "before",
+      "mode": "all-native-enabled",
+      "version": "0.9.928",
+      "layoutWidth": 412,
+      "queries": 377,
+      "timersScheduled": 70,
+      "observerCalls": 958,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 128.68,
+      "layoutMs": 11.64,
+      "heapMB": 9.8,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "variant": "after",
+      "mode": "normal",
+      "version": "0.9.929",
+      "layoutWidth": 412,
+      "queries": 1,
+      "timersScheduled": 0,
+      "observerCalls": 80,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 8.48,
+      "layoutMs": 31.51,
+      "heapMB": 6.49,
+      "errors": []
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "variant": "after",
+      "mode": "all-native-enabled",
+      "version": "0.9.929",
+      "layoutWidth": 412,
+      "queries": 382,
+      "timersScheduled": 70,
+      "observerCalls": 959,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 132.08,
+      "layoutMs": 13.15,
+      "heapMB": 9.84,
+      "errors": []
+    },
+    {
+      "file": "__combined-SakaLuX__",
+      "variant": "before",
+      "mode": "normal",
+      "version": "combined",
+      "layoutWidth": 412,
+      "queries": 807,
+      "timersScheduled": 80,
+      "observerCalls": 1040,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 194.24,
+      "layoutMs": 54.37,
+      "heapMB": 13,
+      "errors": []
+    },
+    {
+      "file": "__combined-SakaLuX__",
+      "variant": "after",
+      "mode": "normal",
+      "version": "combined",
+      "layoutWidth": 412,
+      "queries": 808,
+      "timersScheduled": 80,
+      "observerCalls": 1040,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "scriptMs": 209.07,
+      "layoutMs": 58.85,
+      "heapMB": 12.93,
+      "errors": []
+    }
+  ]
+}
