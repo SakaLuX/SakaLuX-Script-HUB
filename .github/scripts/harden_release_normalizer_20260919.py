@@ -1,3 +1,4 @@
+# trigger permanent release normalizer hardening
 from pathlib import Path
 
 p = Path('.github/scripts/normalize_installed_versions.py')
