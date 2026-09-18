@@ -26,6 +26,7 @@
 - Disconnects the panel-specific observer when the module is disabled.
 - Removes the document click handler associated with the discarded panel.
 - Prevents observer and detached-panel accumulation across disable/re-enable cycles; target preferences remain saved.
+
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
 

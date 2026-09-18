@@ -35,8 +35,9 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.931 — Release metadata synchronization**
-- Release documentation synchronized with the current userscript version.
+**v0.9.931 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
+
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
 

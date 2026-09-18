@@ -18,8 +18,9 @@
 
 ## Current release note
 
-**v1.3.16 — Release metadata synchronization**
-- Release documentation synchronized with the current userscript version.
+**v1.3.16 — Release documentation synchronized with the current Account Auditor userscript version**
+- Release documentation synchronized with the current Account Auditor userscript version.
+
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
 

@@ -25,6 +25,7 @@
 - Ignores unrelated chat changes in Company page scraping and dock maintenance.
 - Removes duplicate legacy registration timers that overwrote current module metadata.
 - Preserves Company panel stacking and current standalone registration.
+
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
 - Use the API-key button to create a key with the displayed selections.

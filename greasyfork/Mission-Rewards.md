@@ -22,6 +22,7 @@
 - Scopes legacy footer repair to the Mission settings panel and batches it once.
 - Ignores unrelated chat changes in reward scanning and standalone dock maintenance.
 - Preserves reward annotations, API controls and footer restoration.
+
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
 

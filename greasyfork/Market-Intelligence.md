@@ -25,6 +25,7 @@
 - Shares active market lookups for the same item and API key.
 - Shares active equipment fetches across overlapping loadout comparisons, including forced refreshes.
 - Clears pending operations on success and failure so later requests recover; price estimates and explicit trade controls remain unchanged.
+
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
 
