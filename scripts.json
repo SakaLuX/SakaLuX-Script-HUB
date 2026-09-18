@@ -315,13 +315,18 @@
         }
       ],
       "release": {
-        "version": "1.8.38",
+        "version": "1.8.37",
         "date": "2026-09-18",
-        "notes": "Keeps the v1.8.37 two-row TornPDA header and normalizes Refresh/API/Close controls. Aligns Company API controls with Elimination-style button geometry. Uses full-width Create/Clear actions and balanced Save/Test actions for narrow screens."
+        "notes": [
+          "Rebuilds the TornPDA Company header so the title, Refresh, API Key and Close controls stay cleanly inside the viewport.",
+          "Moves Employee / Director to a dedicated full-width second row with equal-width controls.",
+          "Uses the shared Bazaar-style Standalone Dock bootstrap and registers Company as a module instead of creating a separate standalone.",
+          "Keeps Company opening through its module bridge above the shared Standalone Dock."
+        ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.38"
+      "version": "1.8.37"
     },
     {
       "active": true,
@@ -363,13 +368,17 @@
         }
       ],
       "release": {
-        "version": "0.7.18",
+        "version": "0.7.17",
         "date": "2026-09-18",
-        "notes": "Finalizes the Stocks API sheet with the compact Elimination-style layout. Keeps Create Required Key full width, Save/Test side by side, and Clear Local Key full width below. Normalizes header icon sizing, input sizing, spacing and TornPDA scrolling."
+        "notes": [
+          "Copies the shared Standalone Dock bootstrap from Bazaar and registers Stocks as a module in the same common dock.",
+          "Uses the common sakalux-standalone-dock, launcher, style and registration IDs; it does not create a Stock-specific standalone dock.",
+          "Whichever SakaLuX module loads first owns the shared dock; Stocks only joins the existing dock when one is already present."
+        ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.7.18"
+      "version": "0.7.17"
     }
   ]
 }

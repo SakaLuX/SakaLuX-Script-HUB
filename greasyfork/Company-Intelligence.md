@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.38**
+**v1.8.37**
 
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
@@ -20,12 +20,14 @@
 
 ## Current release note
 
-**v1.8.38 — Elimination-style API controls + polished TornPDA buttons**
-- Keeps the professional two-row mobile header introduced in v1.8.37.
-- Normalizes **Refresh**, **API Key** and **Close** to the same compact square geometry.
-- Arranges Company API actions like Elimination: full-width Create, balanced Save/Test actions, then full-width Clear.
-- Tightens tab spacing and API input geometry for TornPDA without changing Company calculations or API permissions.
-- Preserves shared standalone registration, Hub integration and the fixed donation/author footer.
+**v1.8.37 — Professional TornPDA header + shared standalone integration**
+- Synchronizes the internal runtime version used by the Hub from stale v1.8.35 to v1.8.37.
+- Rebuilds the mobile header so the Company title uses the available width cleanly.
+- Keeps Refresh, API Key and Close grouped tightly on the right and inside the viewport.
+- Moves Employee / Director to a dedicated full-width second row with equal-width buttons.
+- Preserves the shared Bazaar-style Standalone Dock bootstrap: Company registers as a module in the common dock instead of creating a second standalone.
+- Keeps Company opening through its module bridge above the shared Standalone Dock.
+
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
 - Use the API-key button to create a key with the displayed selections.
@@ -42,21 +44,13 @@
 - Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
 - Company rating is comparative and evaluated by Torn.
 - Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
-- The userscript header, runtime version, `scripts.json` registry entry and this information page are synchronized at **v1.8.38**.
+- The userscript header, runtime version, `scripts.json` registry entry and this information page are synchronized at **v1.8.37**.
 - The Hub registry uses Greasy Fork script **595873** for public version checks, while the userscript retains its own raw-GitHub `@downloadURL` / `@updateURL` metadata.
 
 ## License
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.8.38 — Elimination-style API controls
-- Keeps the v1.8.37 two-row TornPDA header and equal Employee/Director selector.
-- Normalizes Refresh/API/Close button geometry and keeps the action group inside the viewport.
-- Makes Create and Clear full width and keeps Save/Test balanced side by side.
-- Tightens API field, tab and action spacing to match Elimination more closely.
-- Does not change company calculations, API permission requirements or stored data.
-
 
 ### v1.8.37 — Professional TornPDA header layout
 - Synchronizes runtime `APP.version` with `@version`, standalone registration, Hub bridge, ModuleReady event and local installed-version marker at v1.8.37, removing the false UPDATE AVAILABLE state.
