@@ -80,3 +80,5 @@ jobs:
           git add greasyfork/Stock-Manager-Advisor.md
           git commit -m 'Stocks v0.8.4: sync INFO release and changelog'
           git push
+
+# retrigger: 2026-09-18 release-surface audit
