@@ -1,3 +1,4 @@
+# trigger v1.9.81
 from pathlib import Path
 
 HUB = Path('SakaLuX-Script-Hub.user.js')
@@ -40,9 +41,6 @@ replacement = r'''    function createNavSkull() {
         const clicks = [...document.querySelectorAll('a[href],button')]
             .filter(el => !el.closest?.(`#${IDS.navSkull}`) && visible(el));
 
-        // The Fly-out vertical navigation always exposes Home plus several standard rows.
-        // Use Home itself as the template and insertion anchor so the Hub becomes the
-        // first vertical row directly below Torn's three icon quick-actions.
         const home = clicks.find(el => cleanLabel(el) === 'home');
         const items = clicks.find(el => cleanLabel(el) === 'items');
         const gym = clicks.find(el => cleanLabel(el) === 'gym');
@@ -95,7 +93,6 @@ replacement = r'''    function createNavSkull() {
 
         if (existing?.isConnected) {
             positionFirstVertical(existing);
-            // Never show a numerical Hub badge or inherited chevron in the Fly-out row.
             existing.querySelector(`#${IDS.navBadge}`)?.remove();
             existing.querySelectorAll('[data-sakalux-inherited-extra]').forEach(el => el.remove());
             updateTopbarSkullState();
@@ -129,7 +126,6 @@ replacement = r'''    function createNavSkull() {
         const labelNode = leaves.find(el => cleanLabel(el) === 'home') || leaves.find(el => cleanLabel(el));
         if (labelNode) labelNode.textContent = 'SAKALUX HUB';
 
-        // Home is a simple row, but strip any secondary text/badge/chevron defensively.
         for (const el of [...click.querySelectorAll('span,div')]) {
             if (el === labelNode) continue;
             const t = String(el.textContent || '').trim();
@@ -183,7 +179,6 @@ replacement = r'''    function createNavSkull() {
             click.prepend(icon);
         }
 
-        // No navBadge in Fly-out: the skull itself carries the alert blink state.
         const open = event => {
             event.preventDefault();
             event.stopPropagation();
