@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.7
+// @version      0.8.6
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -77,7 +77,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.7'});
+  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.6'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -275,7 +275,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.8.7',
+    version: '0.8.6',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -479,10 +479,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     status('API key cleared from local storage.','ok');
   }
 
-  let apiSyncPending=null;
-  function syncAllApi() {
-    if(apiSyncPending)return apiSyncPending;
-    apiSyncPending=(async()=>{
+  async function syncAllApi() {
     setApiBadge('Testing…','warn');
     const user=await apiSync();
     await syncStockCatalog();
@@ -496,8 +493,6 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     refreshInlinePanel();
     status(`API connected · cash ${money(S.money||0)} · ${Object.keys(S.portfolio||{}).length} stock positions detected.`,'ok');
     return user;
-    })().finally(()=>{apiSyncPending=null;});
-    return apiSyncPending;
   }
 
   function createRequiredApiKey() {
@@ -2364,11 +2359,11 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 })();
 
 /* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 */
-(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.7'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
+(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.6'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
 
 
 /* SAKALUX_STOCKS_FOLLOWUP_V0715 */
-(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.7'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
+(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.6'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
 
 
 /* SAKALUX_STOCK_API_ELIMINATION_LAYOUT_V0716 */

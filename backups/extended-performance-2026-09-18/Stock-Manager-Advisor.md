@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.7**
+**v0.8.6**
 
 ## What it does
 - Stock vault target selection directly from Torn Stocks.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v0.8.7 — Performance and TornPDA smoothness**
+**v0.8.6 — Performance and TornPDA smoothness**
 - Uses constant-time Hub detection and reuses unchanged standalone dock rows.
 - Ignores unrelated chat/dock/footer changes in standalone maintenance.
 - Preserves busy-page mounting, portfolio data and trading safeguards.
@@ -58,7 +58,7 @@
 
 ## Release history / Changelog
 
-### v0.8.7 — Performance and TornPDA smoothness
+### v0.8.6 — Performance and TornPDA smoothness
 
 - Uses constant-time Hub detection and reuses unchanged standalone dock rows.
 - Ignores unrelated chat/dock/footer changes in standalone maintenance.
@@ -136,6 +136,3 @@
 
 ### v0.6.x — Safety/watchlist foundation
 - Added Target Lock, favorites, near-benefit alerts and persistent safety controls.
-
-## Latest update
-Overlapping API refreshes share one synchronization. A synthetic burst of 20 refreshes needs three requests instead of sixty and recovers after offline, HTTP 429 and invalid JSON responses.
