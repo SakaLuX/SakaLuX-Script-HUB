@@ -4,16 +4,19 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 const files = fs.readdirSync('.').filter(x => x.endsWith('.user.js')).sort();
+const individualFiles = [...files];
+files.push('__combined-SakaLuX__');
 const registry = JSON.parse(fs.readFileSync('scripts.json','utf8'));
 const nativeIds = ['prayerReminder','medAdvisor','itemIntel','eventsDashboard','activityIntelligence','factionMemberView','armoryLoanScanner','warLedger','ocOperations','companyManagement','racingChampionship','casinoEdgeScanner','targetAlerts','chainAlarm'];
-const paths = { Enhancer:'item.php', Bazaar:'page.php?sid=events', Market:'imarket.php', Mission:'loader.php?sid=missions', Elimination:'competition.php', Company:'joblist.php', Stock:'page.php?sid=stocks', Poker:'loader.php?sid=poker', Chat:'index.php' };
+const paths = { Enhancer:'item.php', Bazaar:'page.php?sid=events', Market:'page.php?sid=ItemMarket', Mission:'loader.php?sid=missions', Elimination:'competition.php', Company:'joblist.php', Stock:'page.php?sid=stocks', Poker:'page.php?sid=holdem', Chat:'index.php' };
 const html = '<!doctype html><html><head><style>body{margin:0;background:#222;color:white}#chat-box{position:fixed;right:0;bottom:36px;width:310px;height:280px;overflow:hidden;background:#133}.chat-messages{height:200px;overflow:auto}textarea{width:280px}main{max-width:600px}li{height:28px}</style></head><body><header id="topHeader"><ul class="status-icons"></ul></header><main id="content"><div id="mainContainer"><ul id="stock-market-list">'+Array.from({length:400},(_,i)=>`<li class="item-row" data-item-name="Item ${i}"><div class="thumbnail-wrap"><img alt="Item ${i}"></div><a href="profiles.php?XID=${i+1000}">Player ${i}</a><span>${i}</span></li>`).join('')+'</ul></div></main><aside id="chat-box"><header>Global</header><div class="chat-messages"></div><textarea placeholder="Type your message"></textarea></aside></body></html>';
 (async()=>{
  const browser=await chromium.launch({headless:true});
  const results=[];
  try {
   for(const file of files) for(const variant of ['before','after']) {
-   const source=fs.readFileSync(path.join(variant==='before'?'backups/performance-audit-2026-09-18':'.',file),'utf8');
+   const dir=variant==='before'?'backups/performance-audit-2026-09-18':'.';
+   const source=file.startsWith('__combined')?individualFiles.filter(x=>x.startsWith('SakaLuX')).sort((a,b)=>Number(b.includes('Script-Hub'))-Number(a.includes('Script-Hub'))).map(x=>fs.readFileSync(path.join(dir,x),'utf8')).join('\n;\n'):fs.readFileSync(path.join(dir,file),'utf8');
    const modes=file.includes('Suite')?['normal','all-native-enabled']:['normal'];
    for(const mode of modes) {
     const context=await browser.newContext({viewport:{width:412,height:915},isMobile:true,hasTouch:true});
@@ -22,7 +25,7 @@ const html = '<!doctype html><html><head><style>body{margin:0;background:#222;co
     page.on('pageerror',e=>errors.push(e.message));
     await page.route('**/*',route=>route.request().isNavigationRequest()?route.fulfill({status:200,contentType:'text/html',body:html}):route.abort());
     const key=Object.keys(paths).find(x=>file.includes(x));
-    await page.goto('https://www.torn.com/'+(mode==='all-native-enabled'?'factions.php?step=your':paths[key]||'index.php'));
+    await page.goto('https://www.torn.com/'+(mode==='all-native-enabled'?'factions.php?step=your':file.startsWith('__combined')?'page.php?sid=stocks':paths[key]||'index.php'));
     const cdp=await context.newCDPSession(page);
     await cdp.send('Emulation.setCPUThrottlingRate',{rate:6});
     await cdp.send('Performance.enable');
@@ -30,7 +33,8 @@ const html = '<!doctype html><html><head><style>body{margin:0;background:#222;co
      window.fetch=async url=>{if(String(url).includes('scripts.json'))return {ok:true,json:async()=>registry};throw Error('Offline fixture')};
      window.GM_xmlhttpRequest=opts=>{setTimeout(()=>opts.onerror?.({status:0}),0);return {abort(){}}};
      window.GM_getValue=(key,value)=>value;window.GM_setValue=()=>{};
-     window.GM={getValue:async(k,v)=>v,setValue:async()=>{},xmlHttpRequest:window.GM_xmlhttpRequest};
+     window.GM_addStyle=css=>{const style=document.createElement('style');style.textContent=css;document.head.appendChild(style);return style};
+     window.GM={getValue:async(k,v)=>v,setValue:async()=>{},xmlHttpRequest:window.GM_xmlhttpRequest,addStyle:window.GM_addStyle};
      window.alert=()=>{};window.confirm=()=>false;window.prompt=()=>null;
      localStorage.setItem('SakaLuX_HUB_INSTALL_PROMPT_LAST',String(Date.now()));
      if(mode==='all-native-enabled')localStorage.setItem('sakalux_master_suite_settings_v1',JSON.stringify({modules:Object.fromEntries(nativeIds.map(id=>[id,true]))}));
