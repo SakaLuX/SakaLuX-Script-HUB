@@ -5,6 +5,7 @@ on:
     paths:
       - '*.user.js'
       - 'scripts.json'
+      - 'greasyfork/*.md'
       - '.github/scripts/normalize_installed_versions.py'
       - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
@@ -21,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Normalize module and Hub version signals
+      - name: Normalize module, Hub, NEW and release surfaces
         run: python3 .github/scripts/normalize_installed_versions.py
       - name: Validate JavaScript syntax
         run: |
@@ -29,11 +30,11 @@ jobs:
       - name: Commit normalization if needed
         run: |
           if git diff --quiet; then
-            echo "Version surfaces already normalized."
+            echo "Version and release surfaces already normalized."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- '*.user.js' scripts.json
-          git commit -m "Normalize installed version signals"
+          git add -- '*.user.js' scripts.json greasyfork/*.md
+          git commit -m "Synchronize version, NEW and release surfaces"
           git push
