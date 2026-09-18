@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.929
+// @version      0.9.930
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -178,7 +178,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.929';
+  const VERSION = '0.9.930';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -26958,6 +26958,26 @@ function armoryLoanIconSvg() {
                       );
                   }) || null;
           };
+          /* SakaLuX Bazaar ↔ Suite Event Actions — SUITE v1 */
+          const bazaarInstalled = () => Boolean(
+              document.documentElement?.getAttribute('data-sakalux-installed-bazaar') ||
+              document.querySelector('[data-slx-standalone-registration="bazaar"]') ||
+              document.getElementById('sakalux-module-bridge-bazaar')
+          );
+          const getBazaarThank = () =>
+              getLiveRow()?.querySelector('.sakalux-thanks-button') || null;
+          const getBazaarDetails = () =>
+              getLiveRow()?.querySelector('.sakalux-bt-details-button') || null;
+          const hasBazaarActions = () => Boolean(
+              bazaarInstalled() && getBazaarThank() && getBazaarDetails()
+          );
+          const clickBazaarAction = selector => {
+              const button = getLiveRow()?.querySelector(selector) || null;
+              if (!button) return false;
+              button.click();
+              button.blur?.();
+              return true;
+          };
           const getNativeActionGroup = () => {
               const liveRow =
                   getLiveRow();
@@ -27086,9 +27106,39 @@ function armoryLoanIconSvg() {
                       );
                   }
               );
-              target.appendChild(
-                  copyButton
-              );
+              if (hasBazaarActions()) {
+                  const thankProxy = document.createElement('button');
+                  thankProxy.className = 'ax-action-btn ax-bazaar-thanks';
+                  thankProxy.type = 'button';
+                  thankProxy.textContent = '🙏Thanks';
+                  thankProxy.title = 'Bazaar Thanker: Thanks';
+                  thankProxy.setAttribute('aria-label', 'Bazaar Thanker Thanks');
+                  thankProxy.style.cssText = 'width:38px;min-width:38px;padding:0 2px;font-size:7px;line-height:1;';
+                  thankProxy.addEventListener('click', event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      clickBazaarAction('.sakalux-thanks-button');
+                  });
+
+                  const detailsProxy = document.createElement('button');
+                  detailsProxy.className = 'ax-action-btn ax-bazaar-details';
+                  detailsProxy.type = 'button';
+                  detailsProxy.textContent = '📋Details';
+                  detailsProxy.title = 'Bazaar Thanker: Details';
+                  detailsProxy.setAttribute('aria-label', 'Bazaar Thanker Details');
+                  detailsProxy.style.cssText = 'width:43px;min-width:43px;padding:0 2px;font-size:7px;line-height:1;';
+                  detailsProxy.addEventListener('click', event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      clickBazaarAction('.sakalux-bt-details-button');
+                  });
+
+                  target.style.gap = '2px';
+                  target.appendChild(thankProxy);
+                  target.appendChild(detailsProxy);
+              } else {
+                  target.appendChild(copyButton);
+              }
               const saveButton =
                   document.createElement(
                       'button'
@@ -27205,6 +27255,70 @@ function armoryLoanIconSvg() {
                   liveRow.querySelector(
                       '[class*="buttonsGroup"]'
                   );
+              const removeBazaarToolbar = () => {
+                  slot.querySelector('.ax-bazaar-suite-toolbar')?.remove();
+                  liveRow.classList.remove('ax-suite-bazaar-linked');
+              };
+              const syncBazaarToolbar = () => {
+                  const thankNative = getBazaarThank();
+                  const detailsNative = getBazaarDetails();
+                  if (!bazaarInstalled() || !thankNative || !detailsNative) {
+                      removeBazaarToolbar();
+                      return false;
+                  }
+
+                  liveRow.classList.add('ax-suite-bazaar-linked');
+                  let toolbar = slot.querySelector('.ax-bazaar-suite-toolbar');
+                  if (!toolbar) {
+                      toolbar = document.createElement('div');
+                      toolbar.className = 'ax-bazaar-suite-toolbar';
+                      toolbar.style.cssText = 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;margin-top:8px;box-sizing:border-box;';
+                      toolbar.innerHTML = `
+                          <button type="button" class="ax-bazaar-suite-thanks">🙏 Thanks</button>
+                          <button type="button" class="ax-bazaar-suite-details">📋 Details</button>
+                          <button type="button" class="ax-bazaar-suite-save">☆ Save</button>
+                      `;
+                      toolbar.querySelectorAll('button').forEach(button => {
+                          button.style.cssText = 'min-width:0;height:40px;padding:0 7px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:#20262c;color:#d8dde2;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;gap:4px;';
+                      });
+                      toolbar.querySelector('.ax-bazaar-suite-thanks').addEventListener('click', event => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          clickBazaarAction('.sakalux-thanks-button');
+                          setTimeout(syncBazaarToolbar, 80);
+                      });
+                      toolbar.querySelector('.ax-bazaar-suite-details').addEventListener('click', event => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          clickBazaarAction('.sakalux-bt-details-button');
+                      });
+                      toolbar.querySelector('.ax-bazaar-suite-save').addEventListener('click', event => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          const nativeSave = getNativeSave();
+                          nativeSave?.click();
+                          nativeSave?.blur?.();
+                          [80, 250, 600].forEach(delay => setTimeout(syncBazaarToolbar, delay));
+                      });
+                      slot.appendChild(toolbar);
+                  }
+
+                  const thanksButton = toolbar.querySelector('.ax-bazaar-suite-thanks');
+                  const detailsButton = toolbar.querySelector('.ax-bazaar-suite-details');
+                  const saveButton = toolbar.querySelector('.ax-bazaar-suite-save');
+                  const nativeSave = getNativeSave();
+                  const saved = isSaved(nativeSave);
+                  const thanked = Boolean(thankNative.disabled) || /THANKED/i.test(thankNative.textContent || '');
+
+                  thanksButton.textContent = thanked ? '✓ Thanked' : '🙏 Thanks';
+                  thanksButton.disabled = thanked;
+                  thanksButton.style.opacity = thanked ? '.72' : '1';
+                  detailsButton.textContent = '📋 Details';
+                  saveButton.textContent = saved ? '★ Save' : '☆ Save';
+                  saveButton.style.color = saved ? '#f0c84b' : '#d8dde2';
+                  return true;
+              };
+
               const nativeIsExpanded = () => {
                   const rowClass =
                       cleanText(
@@ -27263,6 +27377,7 @@ function armoryLoanIconSvg() {
                           );
                       });
                   }
+                  syncBazaarToolbar();
               };
               const clearNativeRow = () => {
                   liveRow.classList.remove(
@@ -27283,6 +27398,7 @@ function armoryLoanIconSvg() {
                       ?.classList.remove(
                           'ax-pda-native-event-send'
                       );
+                  removeBazaarToolbar();
               };
               const moveWholeRowIntoPanel = () => {
                   if (
@@ -28816,6 +28932,9 @@ function armoryLoanIconSvg() {
                   overflow: visible !important;
               }
               .ax-pda-native-event-content {
+                  display: none !important;
+              }
+              .ax-suite-bazaar-linked .ax-pda-native-event-buttons {
                   display: none !important;
               }
               .ax-pda-native-event-buttons {
