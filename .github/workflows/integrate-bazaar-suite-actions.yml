@@ -1,0 +1,38 @@
+name: Integrate Bazaar Thanker with Suite Event Lens
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/integrate_bazaar_suite_actions.py'
+      - '.github/workflows/integrate-bazaar-suite-actions.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: integrate-bazaar-suite-actions-main
+  cancel-in-progress: false
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply Bazaar ↔ Suite Event Lens integration
+        run: python3 .github/scripts/integrate_bazaar_suite_actions.py
+      - name: Validate userscript syntax
+        run: |
+          node --check SakaLuX-Bazaar-Thanker-PDA.user.js
+          node --check SakaLuX-Suite.user.js
+      - name: Commit integration if needed
+        run: |
+          if git diff --quiet; then
+            echo "Integration already applied."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Suite.user.js scripts.json
+          git commit -m "Integrate Bazaar Thanker actions into Suite Event Lens"
+          git push
