@@ -1,0 +1,221 @@
+name: Stabilize Stocks v0.8.0.1
+
+on:
+  push:
+    paths:
+      - '.github/workflows/stabilize-stocks-v0801.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stabilize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Patch Stocks only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, re, shutil
+
+          stock_p=Path('SakaLuX-Stock-Manager-Advisor.user.js')
+          docs_p=Path('greasyfork/Stock-Manager-Advisor.md')
+          reg_p=Path('scripts.json')
+          stock=stock_p.read_text()
+          docs=docs_p.read_text()
+          reg=json.loads(reg_p.read_text())
+
+          # Hard scope guard: this release starts from the known Stocks v0.8.0 baseline only.
+          if '// @version      0.8.0' not in stock:
+              raise SystemExit('Expected Stocks v0.8.0 baseline not found; aborting without changes.')
+          if 'SakaLuX Company Intelligence' in stock:
+              raise SystemExit('Unexpected content in Stocks file.')
+
+          backup=Path('backups/stocks-v0.8.0.1-stabilization-2026-09-18')
+          backup.mkdir(parents=True, exist_ok=True)
+          (backup/'SakaLuX-Stock-Manager-Advisor-v0.8.0.user.js').write_text(stock)
+          (backup/'Stock-Manager-Advisor-v0.8.0.md').write_text(docs)
+          stock_entry=next(x for x in reg['scripts'] if x.get('id')=='stock-manager-advisor')
+          (backup/'scripts-stock-entry-v0.8.0.json').write_text(json.dumps(stock_entry,indent=2)+'\n')
+
+          # Version surfaces: keep v0.8.1 reserved for Technical Trade Assistant and v0.8.2 for Portfolio Simulator.
+          stock=stock.replace('// @version      0.8.0','// @version      0.8.0.1',1)
+          stock=stock.replace("version:'0.8.0'","version:'0.8.0.1'")
+          stock=stock.replace("version: '0.8.0'","version: '0.8.0.1'")
+
+          # Stabilize bank parsing: do not accept unrelated / implausible percentages from the whole Bank page.
+          stock=stock.replace(
+              "if(Number.isFinite(v)&&v>=0&&v<1000){saved[key]=v;changed=true;}",
+              "if(Number.isFinite(v)&&v>0&&v<100){if(Number(saved[key])!==v){saved[key]=v;changed=true;}}"
+          )
+
+          old="""  function loadTechHistoryV080(){try{return JSON.parse(get(K.techHistory,'{}')||'{}')}catch{return {}}}
+  function saveTechHistoryV080(x){try{set(K.techHistory,JSON.stringify(x))}catch{}}
+"""
+          new="""  function loadTechHistoryV080(){
+    try{
+      const raw=JSON.parse(get(K.techHistory,'{}')||'{}');
+      if(!raw||typeof raw!=='object'||Array.isArray(raw)) return {};
+      const now=Date.now(),cutoff=now-31*86400000,out={};
+      for(const [sym,list] of Object.entries(raw)){
+        if(!Array.isArray(list)) continue;
+        const clean=list.map(p=>({t:Number(p?.t),p:Number(p?.p)})).filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.p)&&p.t>=cutoff&&p.t<=now+300000&&p.p>0).sort((a,b)=>a.t-b.t);
+        const dedup=[]; for(const p of clean){const last=dedup[dedup.length-1]; if(last&&last.t===p.t) last.p=p.p; else dedup.push(p);}
+        if(dedup.length) out[String(sym).toUpperCase()]=dedup.slice(-1200);
+      }
+      return out;
+    }catch{return {}}
+  }
+  function saveTechHistoryV080(x){
+    try{set(K.techHistory,JSON.stringify(x));return true;}catch{}
+    try{
+      const slim={}; for(const [sym,list] of Object.entries(x||{})) if(Array.isArray(list)&&list.length) slim[sym]=list.slice(-600);
+      set(K.techHistory,JSON.stringify(slim)); return true;
+    }catch{return false;}
+  }
+"""
+          if old not in stock:
+              raise SystemExit('Tech history anchor not found')
+          stock=stock.replace(old,new,1)
+
+          old="""  function technicalStatsV080(sym,windowKey){
+    const hist=recordTechnicalSnapshotV080(false),all=Array.isArray(hist[sym])?hist[sym]:[];
+    const now=Date.now(),ms={'24h':86400000,'1w':604800000,'1m':2592000000}[windowKey]||86400000;
+    const points=all.filter(x=>now-Number(x.t)<=ms),values=all.map(x=>Number(x.p)).filter(x=>x>0);
+"""
+          new="""  function technicalStatsV080(sym,windowKey){
+    const hist=recordTechnicalSnapshotV080(false),all=Array.isArray(hist[sym])?hist[sym]:[];
+    const now=Date.now(),safeWindow=['24h','1w','1m'].includes(windowKey)?windowKey:'24h',ms={'24h':86400000,'1w':604800000,'1m':2592000000}[safeWindow];
+    const points=all.filter(x=>now-Number(x.t)<=ms),values=points.map(x=>Number(x.p)).filter(x=>x>0);
+"""
+          if old not in stock:
+              raise SystemExit('Technical stats anchor not found')
+          stock=stock.replace(old,new,1)
+
+          old="""    const wanted=get(K.techSymbol,syms[0]); if(select.options.length!==syms.length||![...select.options].every((o,i)=>o.value===syms[i]))select.innerHTML=syms.map(s=>`<option value=\"${esc(s)}\">${esc(s)}</option>`).join('');
+    select.value=syms.includes(wanted)?wanted:syms[0]; win.value=get(K.techWindow,'24h');
+"""
+          new="""    const wanted=get(K.techSymbol,syms[0]); if(select.options.length!==syms.length||![...select.options].every((o,i)=>o.value===syms[i]))select.innerHTML=syms.map(s=>`<option value=\"${esc(s)}\">${esc(s)}</option>`).join('');
+    select.value=syms.includes(wanted)?wanted:syms[0]; if(select.value!==wanted)set(K.techSymbol,select.value);
+    const wantedWindow=get(K.techWindow,'24h'); win.value=['24h','1w','1m'].includes(wantedWindow)?wantedWindow:'24h'; if(win.value!==wantedWindow)set(K.techWindow,win.value);
+"""
+          if old not in stock:
+              raise SystemExit('Technical select anchor not found')
+          stock=stock.replace(old,new,1)
+
+          old="""    costs.onchange=()=>{set(K.dailyCosts,costs.value);renderFinancialAdvisorV080();};
+    excluded.onchange=()=>{set(K.excludedStocks,excluded.value.toUpperCase());renderAdvisor();renderOptimizer();renderFinancialAdvisorV080();};
+    period.onchange=()=>{set(K.bankPeriod,period.value);renderFinancialAdvisorV080();};
+    sym.onchange=()=>{set(K.techSymbol,sym.value);renderTechnicalAdvisorV080();}; win.onchange=()=>{set(K.techWindow,win.value);renderTechnicalAdvisorV080();}; analyze.onclick=()=>{recordTechnicalSnapshotV080(true);renderTechnicalAdvisorV080();};
+    const sim=()=>{set(K.simFrom,from.value);set(K.simTo,to.value);set(K.simAmount,amount.value);renderPortfolioSimulatorV080();}; from.onchange=sim;to.onchange=sim;amount.onchange=sim;
+"""
+          new="""    const defer=(key,fn)=>window.SakaLuXPerf?.debounce?window.SakaLuXPerf.debounce('stocks-v0801-'+key,fn,260):setTimeout(fn,260);
+    const saveCosts=()=>{set(K.dailyCosts,costs.value);defer('costs',renderFinancialAdvisorV080);}; costs.oninput=saveCosts; costs.onchange=saveCosts;
+    const saveExcluded=()=>{excluded.value=excluded.value.toUpperCase();set(K.excludedStocks,excluded.value);defer('excluded',()=>{renderAdvisor();renderOptimizer();renderFinancialAdvisorV080();});}; excluded.oninput=saveExcluded; excluded.onchange=saveExcluded;
+    period.onchange=()=>{set(K.bankPeriod,period.value);renderFinancialAdvisorV080();};
+    sym.onchange=()=>{set(K.techSymbol,sym.value);renderTechnicalAdvisorV080();}; win.onchange=()=>{set(K.techWindow,win.value);renderTechnicalAdvisorV080();}; analyze.onclick=()=>{recordTechnicalSnapshotV080(true);renderTechnicalAdvisorV080();};
+    const sim=()=>{if(from.value===to.value){const alt=[...to.options].map(o=>o.value).find(v=>v!==from.value);if(alt)to.value=alt;}set(K.simFrom,from.value);set(K.simTo,to.value);set(K.simAmount,amount.value);defer('sim',renderPortfolioSimulatorV080);}; from.onchange=sim;to.onchange=sim;amount.oninput=sim;amount.onchange=sim;
+"""
+          if old not in stock:
+              raise SystemExit('Advisor controls anchor not found')
+          stock=stock.replace(old,new,1)
+
+          # Prevent one malformed or duplicated render from breaking the whole suite.
+          old="""  function renderAdvisorSuiteV080(){
+    recordTechnicalSnapshotV080(false); captureBankRatesFromDomV080(); ensureAdvisorSuiteHostV080(); bindAdvisorSuiteControlsV080(); renderFinancialAdvisorV080(); renderTechnicalAdvisorV080(); renderPortfolioSimulatorV080();
+  }
+"""
+          new="""  function renderAdvisorSuiteV080(){
+    try{recordTechnicalSnapshotV080(false);}catch(e){console.warn('[SakaLuX Stocks] technical snapshot skipped',e);}
+    try{captureBankRatesFromDomV080();}catch(e){console.warn('[SakaLuX Stocks] bank capture skipped',e);}
+    if(!ensureAdvisorSuiteHostV080()) return;
+    try{bindAdvisorSuiteControlsV080();}catch(e){console.warn('[SakaLuX Stocks] controls bind skipped',e);}
+    for(const [name,fn] of [['Financial',renderFinancialAdvisorV080],['Technical',renderTechnicalAdvisorV080],['Simulator',renderPortfolioSimulatorV080]]){try{fn();}catch(e){console.warn('[SakaLuX Stocks] '+name+' render skipped',e);}}
+  }
+"""
+          if old not in stock:
+              raise SystemExit('Advisor suite render anchor not found')
+          stock=stock.replace(old,new,1)
+
+          # Add mobile polish without changing the established panel structure.
+          css_marker='/* SAKALUX_STOCK_ADVISOR_SUITE_V080_CSS */'
+          polish="""
+/* SAKALUX_STOCK_STABILIZATION_V0801 */
+(()=>{const id='slx-stock-stabilization-v0801-style';if(document.getElementById(id))return;const st=document.createElement('style');st.id=id;st.textContent=`
+#slx-stock-advisor-suite-v080 input,#slx-stock-advisor-suite-v080 select{box-sizing:border-box!important;max-width:100%!important}
+#slx-stock-advisor-suite-v080 .slx-v080-summary>div,#slx-stock-advisor-suite-v080 .slx-v080-pick,#slx-stock-advisor-suite-v080 .slx-v080-sim-grid>div{min-width:0!important;overflow:hidden!important}
+#slx-stock-advisor-suite-v080 b,#slx-stock-advisor-suite-v080 span,#slx-stock-advisor-suite-v080 small{overflow-wrap:anywhere}
+@media(max-width:700px){#slx-stock-advisor-suite-v080 .slx-v080-controls,#slx-stock-advisor-suite-v080 .slx-v080-summary,#slx-stock-advisor-suite-v080 .slx-v080-picks,#slx-stock-advisor-suite-v080 .slx-v080-sim-grid{grid-template-columns:minmax(0,1fr)!important}#slx-stock-advisor-suite-v080 .slx-v080-chart{height:92px!important}#slx-stock-advisor-suite-v080 .api-help{line-height:1.45!important}}
+`;document.head.appendChild(st);})();
+
+"""
+          if 'SAKALUX_STOCK_STABILIZATION_V0801' not in stock:
+              if css_marker not in stock: raise SystemExit('CSS marker not found')
+              stock=stock.replace(css_marker,polish+css_marker,1)
+
+          stock_p.write_text(stock)
+
+          # Registry: only Stock entry.
+          stock_entry['version']='0.8.0.1'
+          stock_entry['description']='Torn stock vault, ROI/benefit advisor and stabilized Financial Advisor foundation with persistent settings, safer bank-rate capture, protected trading and global PANIC workflow.'
+          stock_entry['release']={
+            'date':'2026-09-18','version':'0.8.0.1','notes':[
+              'Stabilization and TornPDA polish pass before the staged v0.8.1 Technical Trade Assistant and v0.8.2 Portfolio Simulator releases.',
+              'Hardens local technical-history parsing, pruning and storage fallback and makes indicators respect the selected 24H / 1W / 1M window.',
+              'Persists typed Financial Advisor exclusions/costs and Simulator amount immediately with debounced rerenders; prevents identical simulator source/target selections.',
+              'Tightens automatic Bank APR capture to plausible positive rates and isolates Financial/Technical/Simulator rendering failures so one card cannot break the whole panel.',
+              'Adds narrow-screen overflow protection and single-column TornPDA layout polish without changing existing Stock trading controls.'
+            ]}
+          reg_p.write_text(json.dumps(reg,indent=2,ensure_ascii=False)+'\n')
+
+          # INFO / RELEASE / CHANGELOG.
+          docs=re.sub(r'## Current version\n\*\*v[^*]+\*\*', '## Current version\n**v0.8.0.1**', docs, count=1)
+          current_note="""## Current release note
+
+**v0.8.0.1 — Stabilization & TornPDA polish**
+- Stabilizes the v0.8.0 foundation before the staged v0.8.1 Technical Trade Assistant and v0.8.2 Portfolio Simulator releases.
+- Hardens local price-history parsing/pruning and storage fallback; technical calculations now respect the selected 24H / 1W / 1M window.
+- Saves typed Daily Costs, exclusions and Simulator amount immediately with debounced rerenders, so closing the panel does not lose the last edit.
+- Prevents identical Simulator source/target selections and tightens automatic Bank APR capture to plausible positive rates.
+- Isolates Advisor Suite render failures and adds TornPDA overflow/single-column polish without touching the established trading controls.
+"""
+          docs=re.sub(r'## Current release note\n.*?(?=\n## Installation and Hub integration)', current_note+'\n', docs, count=1, flags=re.S)
+          changelog="""### v0.8.0.1 — Stabilization & TornPDA polish
+- Hardened local technical-history parsing, pruning, de-duplication and storage fallback.
+- Technical indicators now use the selected 24H / 1W / 1M sample window instead of silently calculating from all retained history.
+- Daily Costs, exclusions and Simulator amount persist while typing with debounced rerenders.
+- Simulator avoids identical SELL/BUY symbols; Bank auto-capture rejects implausible percentages.
+- Financial, Technical and Simulator renders are isolated so one failure does not take down the full Stocks panel.
+- Added narrow-screen overflow protection and one-column TornPDA polish.
+- Synchronized userscript runtime/version surfaces, scripts.json, INFO, release notes and changelog to v0.8.0.1.
+
+"""
+          docs=docs.replace('## Changelog\n\n','## Changelog\n\n'+changelog,1)
+          docs_p.write_text(docs)
+          PY
+
+      - name: Validate Stocks release
+        run: |
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q '@version      0.8.0.1' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "version:'0.8.0.1'" SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'SAKALUX_STOCK_STABILIZATION_V0801' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'v0.8.0.1' greasyfork/Stock-Manager-Advisor.md
+          git diff --exit-code -- SakaLuX-Company-Intelligence-v1.0.0.user.js
+
+      - name: Commit Stocks stabilization
+        run: |
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js scripts.json greasyfork/Stock-Manager-Advisor.md backups/stocks-v0.8.0.1-stabilization-2026-09-18
+          git diff --cached --quiet && exit 0
+          git commit -m 'Stocks v0.8.0.1: stabilization and TornPDA polish'
+          git push
