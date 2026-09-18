@@ -1,0 +1,38 @@
+name: Repeat focused mobile CPU comparisons
+on:
+  push:
+    branches: [main]
+    paths: ['tests/performance/focused-cpu.cjs', '.github/workflows/focused-mobile-cpu.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned Chromium dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/repeated-cpu" playwright@1.62.1 --no-audit --no-fund
+          "$RUNNER_TEMP/repeated-cpu/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Measure five independent browser repetitions
+        env:
+          NODE_PATH: ${{ runner.temp }}/repeated-cpu/node_modules
+        run: node tests/performance/focused-cpu.cjs
+      - name: Save only repeated measurements against current main
+        run: |
+          preserved="$RUNNER_TEMP/focused-results"
+          mkdir -p "$preserved"
+          cp reports/extended-performance-2026-09-18/focused-sample-*.json reports/extended-performance-2026-09-18/browser-focused.json "$preserved/"
+          git fetch origin main
+          git reset --hard origin/main
+          cp "$preserved/"*.json reports/extended-performance-2026-09-18/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/extended-performance-2026-09-18/focused-sample-*.json reports/extended-performance-2026-09-18/browser-focused.json
+          git commit -m 'Record five independent focused mobile CPU repetitions and medians'
+          git push origin HEAD:main
