@@ -29,23 +29,26 @@
     {
       "file": "Apocalypse-Poker-Exit-Alert.user.js",
       "mode": "relevant",
-      "page": "loader.php?sid=poker",
-      "evalMs": 152.65,
+      "page": "page.php?sid=holdem",
+      "evalMs": 155.94,
       "observers": 1,
       "queries": 86,
-      "queryMs": 213.06,
+      "queryMs": 214.16,
       "observerCalls": 40,
-      "observerMs": 32.11,
-      "observerMaxMs": 3.73,
+      "observerMs": 31.11,
+      "observerMaxMs": 2.99,
       "timeoutsScheduled": 14,
       "timeoutsRun": 14,
       "intervalsRun": 1,
       "rafScheduled": 14,
+      "timeoutSources": {
+        "at eval (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:1667:13)": 14
+      },
       "observerStats": [
         {
-          "source": "at eval (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:2378:5)",
+          "source": "at eval (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:2378:5)",
           "calls": 40,
-          "ms": 32.11
+          "ms": 31.11
         }
       ],
       "errors": []
@@ -140,28 +143,37 @@
     {
       "file": "SakaLuX-Bazaar-Thanker-PDA.user.js",
       "mode": "relevant",
-      "page": "events.php",
-      "evalMs": 159.71,
-      "observers": 2,
-      "queries": 87,
-      "queryMs": 388.86,
-      "observerCalls": 82,
-      "observerMs": 354.17,
-      "observerMaxMs": 12.39,
-      "timeoutsScheduled": 41,
-      "timeoutsRun": 1,
+      "page": "page.php?sid=events",
+      "evalMs": 157.51,
+      "observers": 3,
+      "queries": 229,
+      "queryMs": 546.38,
+      "observerCalls": 183,
+      "observerMs": 537.88,
+      "observerMaxMs": 15.91,
+      "timeoutsScheduled": 81,
+      "timeoutsRun": 21,
       "intervalsRun": 0,
-      "rafScheduled": 0,
+      "rafScheduled": 20,
+      "timeoutSources": {
+        "at queue (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:191:48)": 61,
+        "at scheduleProcess (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:1149:29)": 20
+      },
       "observerStats": [
         {
-          "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:193:14)",
-          "calls": 41,
-          "ms": 349.79
+          "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:193:14)",
+          "calls": 61,
+          "ms": 531.88
         },
         {
-          "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:1419:48)",
-          "calls": 41,
-          "ms": 4.38
+          "source": "at startEventObserver (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:1158:25)",
+          "calls": 61,
+          "ms": 0.62
+        },
+        {
+          "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:1419:48)",
+          "calls": 61,
+          "ms": 5.38
         }
       ],
       "errors": []
@@ -500,38 +512,44 @@
     {
       "file": "SakaLuX-Market-Intelligence.user.js",
       "mode": "relevant",
-      "page": "imarket.php",
-      "evalMs": 158.88,
+      "page": "page.php?sid=ItemMarket",
+      "evalMs": 152.25,
       "observers": 4,
-      "queries": 344,
-      "queryMs": 462.2,
+      "queries": 262,
+      "queryMs": 369.44,
       "observerCalls": 168,
-      "observerMs": 476.87,
-      "observerMaxMs": 16.41,
+      "observerMs": 392.07,
+      "observerMaxMs": 10.89,
       "timeoutsScheduled": 167,
       "timeoutsRun": 88,
       "intervalsRun": 0,
       "rafScheduled": 42,
+      "timeoutSources": {
+        "at kick (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:2190:57)": 42,
+        "at kick (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:2190:80)": 42,
+        "at queue (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:195:48)": 42,
+        "at scheduleScan (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:1889:105)": 41
+      },
       "observerStats": [
         {
-          "source": "at eval (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:2191:2)",
+          "source": "at eval (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:2191:2)",
           "calls": 42,
-          "ms": 17.7
+          "ms": 20.06
         },
         {
-          "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:197:14)",
+          "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:197:14)",
           "calls": 42,
-          "ms": 341.58
+          "ms": 343.01
         },
         {
-          "source": "at startObserver (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:2025:89)",
+          "source": "at startObserver (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:2025:89)",
           "calls": 42,
-          "ms": 113.68
+          "ms": 25.78
         },
         {
-          "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:2174:48)",
+          "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:49:11), <anonymous>:2174:48)",
           "calls": 42,
-          "ms": 3.91
+          "ms": 3.22
         }
       ],
       "errors": []
