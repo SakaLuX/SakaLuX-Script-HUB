@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.0.1
+// @version      0.8.0
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.0.1'});
+  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.0'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -264,7 +264,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.8.0.1',
+    version: '0.8.0',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -1185,7 +1185,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const text=String(document.body?.innerText||'').replace(/\u00a0/g,' ');
     const specs=[['1w',/1\s*week[^\d]{0,35}(\d+(?:\.\d+)?)\s*%/i],['2w',/2\s*weeks?[^\d]{0,35}(\d+(?:\.\d+)?)\s*%/i],['1m',/1\s*month[^\d]{0,35}(\d+(?:\.\d+)?)\s*%/i],['2m',/2\s*months?[^\d]{0,35}(\d+(?:\.\d+)?)\s*%/i],['3m',/3\s*months?[^\d]{0,35}(\d+(?:\.\d+)?)\s*%/i]];
     let changed=false;
-    for(const [key,re] of specs){const m=text.match(re);if(m){const v=Number(m[1]);if(Number.isFinite(v)&&v>0&&v<100){if(Number(saved[key])!==v){saved[key]=v;changed=true;}}}}
+    for(const [key,re] of specs){const m=text.match(re);if(m){const v=Number(m[1]);if(Number.isFinite(v)&&v>=0&&v<1000){saved[key]=v;changed=true;}}}
     if(changed){saved.capturedAt=Date.now();set(K.bankRates,JSON.stringify(saved));}
     return saved;
   }
@@ -1218,24 +1218,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     return {grossDaily,costs,netDaily,monthly:netDaily*30,annual:netDaily*365,active,rows:rows.sort((a,b)=>b.daily-a.daily)};
   }
 
-  function loadTechHistoryV080(){
-    try{
-      const raw=JSON.parse(get(K.techHistory,'{}')||'{}');
-      if(!raw||typeof raw!=='object'||Array.isArray(raw)) return {};
-      const now=Date.now(),cutoff=now-31*86400000,out={};
-      for(const [sym,list] of Object.entries(raw)){
-        if(!Array.isArray(list)) continue;
-        const clean=list.map(p=>({t:Number(p?.t),p:Number(p?.p)})).filter(p=>Number.isFinite(p.t)&&Number.isFinite(p.p)&&p.t>=cutoff&&p.t<=now+300000&&p.p>0).sort((a,b)=>a.t-b.t);
-        const dedup=[]; for(const p of clean){const last=dedup[dedup.length-1];if(last&&last.t===p.t)last.p=p.p;else dedup.push(p);}
-        if(dedup.length) out[String(sym).toUpperCase()]=dedup.slice(-1200);
-      }
-      return out;
-    }catch{return {}}
-  }
-  function saveTechHistoryV080(x){
-    try{set(K.techHistory,JSON.stringify(x));return true;}catch{}
-    try{const slim={};for(const [sym,list] of Object.entries(x||{}))if(Array.isArray(list)&&list.length)slim[sym]=list.slice(-600);set(K.techHistory,JSON.stringify(slim));return true;}catch{return false;}
-  }
+  function loadTechHistoryV080(){try{return JSON.parse(get(K.techHistory,'{}')||'{}')}catch{return {}}}
+  function saveTechHistoryV080(x){try{set(K.techHistory,JSON.stringify(x))}catch{}}
   function recordTechnicalSnapshotV080(force=false){
     scanStocks();
     const now=Date.now(), cutoff=now-31*86400000, hist=loadTechHistoryV080();
@@ -1265,8 +1249,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   function technicalStatsV080(sym,windowKey){
     const hist=recordTechnicalSnapshotV080(false),all=Array.isArray(hist[sym])?hist[sym]:[];
-    const now=Date.now(),safeWindow=['24h','1w','1m'].includes(windowKey)?windowKey:'24h',ms={'24h':86400000,'1w':604800000,'1m':2592000000}[safeWindow];
-    const points=all.filter(x=>now-Number(x.t)<=ms),values=points.map(x=>Number(x.p)).filter(x=>x>0);
+    const now=Date.now(),ms={'24h':86400000,'1w':604800000,'1m':2592000000}[windowKey]||86400000;
+    const points=all.filter(x=>now-Number(x.t)<=ms),values=all.map(x=>Number(x.p)).filter(x=>x>0);
     const price=Number(S.stocks.get(sym)?.price||values[values.length-1]||0),rsi=rsiV080(values,14),ema20=values.length?emaV080(values.slice(-Math.max(20,Math.min(values.length,180))),20):null,ema90=values.length>=2?emaV080(values.slice(-Math.max(90,Math.min(values.length,360))),90):null,bb=bollingerV080(values,20);
     let trend='Collecting history',signal='Neutral / insufficient history';
     if(ema20!=null&&ema90!=null){trend=ema20>ema90?'Uptrend':'Downtrend';signal=ema20>ema90?'Momentum positive':'Momentum weak';}
@@ -1313,7 +1297,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const select=host.querySelector('#slx-v080-tech-symbol'),win=host.querySelector('#slx-v080-tech-window'),box=host.querySelector('#slx-v080-technical');
     const syms=[...S.stocks.keys()].sort(); if(!syms.length){box.innerHTML='<div class="slx-v080-empty">No stock prices detected yet.</div>';return;}
     const wanted=get(K.techSymbol,syms[0]); if(select.options.length!==syms.length||![...select.options].every((o,i)=>o.value===syms[i]))select.innerHTML=syms.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
-    select.value=syms.includes(wanted)?wanted:syms[0]; if(select.value!==wanted)set(K.techSymbol,select.value); const wantedWindow=get(K.techWindow,'24h'); win.value=['24h','1w','1m'].includes(wantedWindow)?wantedWindow:'24h'; if(win.value!==wantedWindow)set(K.techWindow,win.value);
+    select.value=syms.includes(wanted)?wanted:syms[0]; win.value=get(K.techWindow,'24h');
     const st=technicalStatsV080(select.value,win.value),fmt=x=>x==null?'—':Number(x).toLocaleString(undefined,{maximumFractionDigits:2});
     box.innerHTML=`<div class="slx-v080-summary"><div><span>Price</span><b>${money(st.price)}</b></div><div><span>RSI 14</span><b>${fmt(st.rsi)}</b></div><div><span>EMA 20</span><b>${st.ema20==null?'—':money(st.ema20)}</b></div><div><span>EMA 90</span><b>${st.ema90==null?'—':money(st.ema90)}</b></div></div>${sparklineV080(st.points)}<div class="slx-v080-signal"><b>${esc(st.trend)}</b><span>${esc(st.signal)}</span></div><div class="api-help">Bollinger: ${st.bb?`${money(st.bb.lower)} — ${money(st.bb.upper)}`:'needs 20 samples'} · Local samples: ${st.allCount}. History is collected locally at most once every 5 minutes while Stocks is used.</div>`;
   }
@@ -1334,20 +1318,15 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const host=ensureAdvisorSuiteHostV080(); if(!host||host.dataset.bound==='1')return; host.dataset.bound='1';
     const costs=host.querySelector('#slx-v080-daily-costs'),excluded=host.querySelector('#slx-v080-excluded'),period=host.querySelector('#slx-v080-bank-period'),sym=host.querySelector('#slx-v080-tech-symbol'),win=host.querySelector('#slx-v080-tech-window'),analyze=host.querySelector('#slx-v080-analyze'),from=host.querySelector('#slx-v080-sim-from'),to=host.querySelector('#slx-v080-sim-to'),amount=host.querySelector('#slx-v080-sim-amount');
     costs.value=get(K.dailyCosts,'0'); excluded.value=get(K.excludedStocks,''); period.value=get(K.bankPeriod,'3m');
-    const defer=(key,fn)=>window.SakaLuXPerf?.debounce?window.SakaLuXPerf.debounce('stocks-v0801-'+key,fn,260):setTimeout(fn,260);
-    const saveCosts=()=>{set(K.dailyCosts,costs.value);defer('costs',renderFinancialAdvisorV080);}; costs.oninput=saveCosts; costs.onchange=saveCosts;
-    const saveExcluded=()=>{excluded.value=excluded.value.toUpperCase();set(K.excludedStocks,excluded.value);defer('excluded',()=>{renderAdvisor();renderOptimizer();renderFinancialAdvisorV080();});}; excluded.oninput=saveExcluded; excluded.onchange=saveExcluded;
+    costs.onchange=()=>{set(K.dailyCosts,costs.value);renderFinancialAdvisorV080();};
+    excluded.onchange=()=>{set(K.excludedStocks,excluded.value.toUpperCase());renderAdvisor();renderOptimizer();renderFinancialAdvisorV080();};
     period.onchange=()=>{set(K.bankPeriod,period.value);renderFinancialAdvisorV080();};
     sym.onchange=()=>{set(K.techSymbol,sym.value);renderTechnicalAdvisorV080();}; win.onchange=()=>{set(K.techWindow,win.value);renderTechnicalAdvisorV080();}; analyze.onclick=()=>{recordTechnicalSnapshotV080(true);renderTechnicalAdvisorV080();};
-    const sim=()=>{if(from.value===to.value){const alt=[...to.options].map(o=>o.value).find(v=>v!==from.value);if(alt)to.value=alt;}set(K.simFrom,from.value);set(K.simTo,to.value);set(K.simAmount,amount.value);defer('sim',renderPortfolioSimulatorV080);}; from.onchange=sim;to.onchange=sim;amount.oninput=sim;amount.onchange=sim;
+    const sim=()=>{set(K.simFrom,from.value);set(K.simTo,to.value);set(K.simAmount,amount.value);renderPortfolioSimulatorV080();}; from.onchange=sim;to.onchange=sim;amount.onchange=sim;
   }
 
   function renderAdvisorSuiteV080(){
-    try{recordTechnicalSnapshotV080(false);}catch(e){console.warn('[SakaLuX Stocks] technical snapshot skipped',e);}
-    try{captureBankRatesFromDomV080();}catch(e){console.warn('[SakaLuX Stocks] bank capture skipped',e);}
-    if(!ensureAdvisorSuiteHostV080()) return;
-    try{bindAdvisorSuiteControlsV080();}catch(e){console.warn('[SakaLuX Stocks] controls bind skipped',e);}
-    for(const [name,fn] of [['Financial',renderFinancialAdvisorV080],['Technical',renderTechnicalAdvisorV080],['Simulator',renderPortfolioSimulatorV080]]){try{fn();}catch(e){console.warn('[SakaLuX Stocks] '+name+' render skipped',e);}}
+    recordTechnicalSnapshotV080(false); captureBankRatesFromDomV080(); ensureAdvisorSuiteHostV080(); bindAdvisorSuiteControlsV080(); renderFinancialAdvisorV080(); renderTechnicalAdvisorV080(); renderPortfolioSimulatorV080();
   }
 
   function buildOptimizerRows() {
@@ -2224,11 +2203,11 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 })();
 
 /* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 */
-(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.0.1'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
+(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.0'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
 
 
 /* SAKALUX_STOCKS_FOLLOWUP_V0715 */
-(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.0.1'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
+(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.0'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
 
 
 /* SAKALUX_STOCK_API_ELIMINATION_LAYOUT_V0716 */
@@ -2260,15 +2239,6 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 `;(document.head||document.documentElement).appendChild(st);
 })();
 
-
-
-/* SAKALUX_STOCK_STABILIZATION_V0801 */
-(()=>{const id='slx-stock-stabilization-v0801-style';if(document.getElementById(id))return;const st=document.createElement('style');st.id=id;st.textContent=`
-#slx-stock-advisor-suite-v080 input,#slx-stock-advisor-suite-v080 select{box-sizing:border-box!important;max-width:100%!important}
-#slx-stock-advisor-suite-v080 .slx-v080-summary>div,#slx-stock-advisor-suite-v080 .slx-v080-pick,#slx-stock-advisor-suite-v080 .slx-v080-sim-grid>div{min-width:0!important;overflow:hidden!important}
-#slx-stock-advisor-suite-v080 b,#slx-stock-advisor-suite-v080 span,#slx-stock-advisor-suite-v080 small{overflow-wrap:anywhere}
-@media(max-width:700px){#slx-stock-advisor-suite-v080 .slx-v080-controls,#slx-stock-advisor-suite-v080 .slx-v080-summary,#slx-stock-advisor-suite-v080 .slx-v080-picks,#slx-stock-advisor-suite-v080 .slx-v080-sim-grid{grid-template-columns:minmax(0,1fr)!important}#slx-stock-advisor-suite-v080 .slx-v080-chart{height:92px!important}#slx-stock-advisor-suite-v080 .api-help{line-height:1.45!important}}
-`;document.head.appendChild(st);})();
 
 /* SAKALUX_STOCK_ADVISOR_SUITE_V080_CSS */
 (()=>{
