@@ -1,0 +1,107 @@
+name: Fix all release documentation semantics
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-all-release-doc-semantics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Backup and repair stale release text
+        run: |
+          set -euo pipefail
+          B='backups/all-release-surfaces-sync-2026-09-18/semantic-doc-fix'
+          mkdir -p "$B"
+          cp greasyfork/Stock-Manager-Advisor.md "$B/Stock-Manager-Advisor.before.md"
+          cp greasyfork/Mission-Rewards.md "$B/Mission-Rewards.before.md"
+          cp greasyfork/Market-Intelligence.md "$B/Market-Intelligence.before.md"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          # Stocks: Current release note must describe the actual v0.8.4 release,
+          # not the old v0.8.1 Technical Trade Assistant release relabelled as 0.8.4.
+          p=Path('greasyfork/Stock-Manager-Advisor.md'); s=p.read_text()
+          release='''## Current release note
+
+**v0.8.4 — Rebalance Strategy Profiles**
+- Adds persistent **SAFE / BALANCED / AGGRESSIVE** Smart Rebalance profiles.
+- **SAFE:** up to 10% of portfolio value per move, stronger score threshold, maximum 2 suggested moves.
+- **BALANCED:** up to 20% per move, medium threshold, maximum 4 suggested moves; this remains the default behavior.
+- **AGGRESSIVE:** up to 35% per move, lower threshold, maximum 6 suggested moves.
+- Profiles tune technical-score, benefit-yield, benefit-tier and affordability weighting while using only free shares as sell sources.
+- The selected profile persists locally across TornPDA/desktop sessions.
+- Benefit Lock remains enforced and Smart Rebalance remains preview-only; no trade is submitted automatically.
+'''
+          s=re.sub(r'## Current release note\s*\n.*?(?=\n## Installation and Hub integration)',release+'\n',s,count=1,flags=re.S)
+          if '### v0.8.4 — Rebalance Strategy Profiles' not in s:
+              block='''### v0.8.4 — Rebalance Strategy Profiles
+- Added persistent SAFE, BALANCED and AGGRESSIVE Smart Rebalance profiles.
+- Added 10% / 20% / 35% per-move caps and 2 / 4 / 6 suggested-move limits by profile.
+- Added profile-specific score thresholds and technical/benefit/tier/affordability weighting.
+- Preserved Benefit Lock, free-share-only sell sources and preview-only execution.
+
+### v0.8.3 — Smart Rebalance Engine
+- Added portfolio-wide SELL → BUY planning with local technical and benefit context.
+- Added recalculation without automatic trade submission.
+
+### v0.8.2 — Portfolio Simulator
+- Added BEFORE → AFTER safe reallocation simulation with Benefit Lock respected.
+
+'''
+              s=s.replace('## Changelog\n\n','## Changelog\n\n'+block,1)
+          p.write_text(s)
+
+          # Mission: remove obsolete statement that v1.0.18 is still canonical.
+          p=Path('greasyfork/Mission-Rewards.md'); s=p.read_text()
+          s=s.replace('- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is v1.0.18.',
+                      '- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is the current v1.0.41 line.')
+          p.write_text(s)
+
+          # Market: remove obsolete hard-coded registry/public version example and add the missing current changelog entry.
+          p=Path('greasyfork/Market-Intelligence.md'); s=p.read_text()
+          s=re.sub(r'- Market Intelligence is distributed through Greasy Fork\. If Hub shows `PUBLISHED vX · REGISTRY v1\.17\.19`,.*?clear that legitimate pending state\.',
+                   '- Market Intelligence is distributed through Greasy Fork. If Hub shows different **PUBLISHED** and **REGISTRY** versions, the public Greasy Fork metadata has not yet caught up with the registry; publish the matching current release to clear that pending state.',
+                   s, count=1)
+          if '### v1.17.38 — Restore Elimination-style footer from Hub and standalone' not in s:
+              entry='''### v1.17.38 — Restore Elimination-style footer from Hub and standalone
+- Restores the Elimination-style Market footer whether Market is opened standalone or from Script Hub.
+- Removes the Hub suppression guard that could hide the Market-owned footer.
+- Force-mounts one SEND MONEY / SEND ITEMS row and the linked SakaLuX author line.
+
+'''
+              s=s.replace('## Release history / Changelog\n\n','## Release history / Changelog\n\n'+entry,1)
+          p.write_text(s)
+          PY
+
+      - name: Validate documentation semantics
+        run: |
+          grep -q 'v0.8.4 — Rebalance Strategy Profiles' greasyfork/Stock-Manager-Advisor.md
+          grep -q 'SAFE / BALANCED / AGGRESSIVE' greasyfork/Stock-Manager-Advisor.md
+          ! grep -q 'active/canonical release is v1.0.18' greasyfork/Mission-Rewards.md
+          grep -q 'active/canonical release is the current v1.0.41 line' greasyfork/Mission-Rewards.md
+          ! grep -q 'REGISTRY v1.17.19' greasyfork/Market-Intelligence.md
+          grep -q '### v1.17.38 — Restore Elimination-style footer from Hub and standalone' greasyfork/Market-Intelligence.md
+
+      - name: Commit documentation repairs
+        run: |
+          if git diff --quiet; then
+            echo 'No documentation repairs required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add greasyfork/Stock-Manager-Advisor.md greasyfork/Mission-Rewards.md greasyfork/Market-Intelligence.md backups/all-release-surfaces-sync-2026-09-18/semantic-doc-fix
+          git commit -m 'Repair stale release documentation across modules'
+          git push
