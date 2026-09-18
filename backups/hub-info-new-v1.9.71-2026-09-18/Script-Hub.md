@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.71**
+**v1.9.70**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -21,11 +21,6 @@
 - Uses live module presence/bridges rather than stale installation markers for current status.
 
 ## Current release note
-
-**v1.9.71 — Detailed INFO and current NEW**
-- Rewrites INFO for all seven registered modules into detailed feature sections.
-- Synchronizes NEW with each module's actual current version and latest changes.
-- Synchronizes offline details and refreshes stale cached information while retaining newer metadata.
 
 **v1.9.70** Synchronizes Market Intelligence v1.17.37 and Mission Rewards v1.0.36 after copying the complete working Elimination Assistant donation/footer implementation into both modules.
 
@@ -286,8 +281,3 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 
 ### v1.9.0 — Native module power control
 - Introduced the current module-card ON/OFF model and shared Hub API-key management.
-
-### v1.9.71 — Detailed INFO and current NEW
-- Rewrites INFO for all seven registered modules into detailed feature sections.
-- Synchronizes NEW with each module's actual current version and latest changes.
-- Synchronizes offline details and refreshes stale cached information while retaining newer metadata.
