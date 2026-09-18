@@ -23,7 +23,7 @@
 ## Current release note
 
 **v1.9.73 — Extended performance validation**
-- Synchronizes Stocks v0.8.7 API request-coalescing notes and offline fallback.
+- Synchronizes Stocks v0.8.7 and Elimination v1.3.44 performance notes and offline fallback.
 - Refreshes stale Stocks NEW information without replacing saved preferences.
 
 ## Recommended
@@ -34,7 +34,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.40**
 - 🎯 SakaLuX Mission Rewards **v1.0.42**
 - 📈 SakaLuX Market Intelligence **v1.17.39**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.43**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.44**
 - 🏢 SakaLuX Company Intelligence **v1.8.38**
 - 📊 SakaLuX Stock Manager & Advisor **v0.8.7**
 

@@ -8,7 +8,7 @@ Canonical rule: each userscript `@version` is the source of truth. Registered `s
 | bazaar | `SakaLuX-Bazaar-Thanker-PDA.user.js` | 5.3.40 | 5.3.40 / release 5.3.40 | Current version/release 5.3.40 — OK |
 | mission-rewards | `SakaLuX-Mission-Rewards.user.js` | 1.0.42 | 1.0.42 / release 1.0.42 | Current version/release 1.0.42 — OK |
 | market-intelligence | `SakaLuX-Market-Intelligence.user.js` | 1.17.39 | 1.17.39 / release 1.17.39 | Current version/release 1.17.39 — OK |
-| elimination-assistant | `SakaLuX-Elimination-Assistant.user.js` | 1.3.43 | 1.3.43 / release 1.3.43 | Current version/release 1.3.43 — OK |
+| elimination-assistant | `SakaLuX-Elimination-Assistant.user.js` | 1.3.44 | 1.3.44 / release 1.3.44 | Current version/release 1.3.44 — OK |
 | company-intelligence | `SakaLuX-Company-Intelligence-v1.0.0.user.js` | 1.8.38 | 1.8.38 / release 1.8.38 | Current version/release 1.8.38 — OK |
 | stock-manager-advisor | `SakaLuX-Stock-Manager-Advisor.user.js` | 0.8.7 | 0.8.7 / release 0.8.7 | Current version/release 0.8.7 — OK |
 | chat-intelligence | `SakaLuX-Chat-Intelligence.user.js` | 1.2.20 | intentionally standalone / not registered | Current version/release 1.2.20 — OK |
