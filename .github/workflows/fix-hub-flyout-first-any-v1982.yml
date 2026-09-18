@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/scripts/fix_hub_flyout_first_any_v1982.py'
+      - '.github/workflows/fix-hub-flyout-first-any-v1982.yml'
   workflow_dispatch: {}
 
 permissions:
