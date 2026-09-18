@@ -1,3 +1,4 @@
+# trigger v1.9.78
 from pathlib import Path
 
 HUB = Path('SakaLuX-Script-Hub.user.js')
@@ -51,8 +52,6 @@ replacement = r'''    function createNavSkull() {
             return start.closest?.('li,[role="menuitem"]') || start.parentElement;
         };
 
-        // Fly-out mode is identified by Torn's native main sidebar rows.
-        // The Hub belongs at the very top of this list: immediately before Gym.
         const names = ['gym', 'properties', 'education', 'crimes', 'missions', 'newspaper', 'jail', 'hospital', 'casino'];
         const anchors = names
             .map(name => allClickable.find(el => cleanLabel(el) === name))
@@ -128,7 +127,6 @@ replacement = r'''    function createNavSkull() {
             || leafText.find(el => cleanLabel(el));
         if (labelNode) labelNode.textContent = 'SAKALUX HUB';
 
-        // Remove any inherited numeric badges / right-side labels from the cloned row.
         for (const el of leafText) {
             if (el === labelNode) continue;
             const t = String(el.textContent || '').trim();
@@ -162,7 +160,7 @@ replacement = r'''    function createNavSkull() {
             g.setAttribute('stroke-linecap', 'round');
             g.setAttribute('stroke-linejoin', 'round');
             g.innerHTML = `
-                <path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-6.4 0-4.4-3.3-7.6-8.1-7.6Z"/>
+                <path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-7.6-8.1-7.6Z"/>
                 <circle cx="8.8" cy="10.5" r="1.65"/>
                 <circle cx="15.2" cy="10.5" r="1.65"/>
                 <path d="m12 12.7-1 1.8h2l-1-1.8Z"/>
@@ -175,7 +173,6 @@ replacement = r'''    function createNavSkull() {
         if (nativeSvg) {
             const skullSvg = makeSkullSvg(nativeSvg);
             if (skullSvg) nativeSvg.replaceWith(skullSvg);
-            // A fly-out row can contain a second SVG chevron. Keep only the skull.
             [...click.querySelectorAll('svg')].slice(1).forEach(svg => svg.remove());
         } else {
             const img = click.querySelector('img');
