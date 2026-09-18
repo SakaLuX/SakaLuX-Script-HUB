@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.44**
+**v1.3.45**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -21,8 +21,11 @@
 
 ## Current release note
 
-**v1.3.44 — Lifecycle cleanup**
-- Disconnects discarded panel observers and removes their document click handlers when disabling.
+**v1.3.45 — Release metadata synchronization**
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Disconnects the panel-specific observer when the module is disabled.
+- Removes the document click handler associated with the discarded panel.
+- Prevents observer and detached-panel accumulation across disable/re-enable cycles; target preferences remain saved.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -40,6 +43,13 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+
+### v1.3.45 — Release metadata synchronization
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Disconnects the panel-specific observer when the module is disabled.
+- Removes the document click handler associated with the discarded panel.
+- Prevents observer and detached-panel accumulation across disable/re-enable cycles; target preferences remain saved.
 
 ### v1.3.44 — Lifecycle cleanup
 - Prevents observer and detached-panel accumulation during disable/re-enable cycles.

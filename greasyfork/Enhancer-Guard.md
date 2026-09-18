@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.47**
+**v1.3.48**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,7 +17,8 @@
 
 ## Current release note
 
-**v1.3.47 — Performance and TornPDA smoothness**
+**v1.3.48 — Release metadata synchronization**
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
 - Stops repeated inventory badge replacement when protection state is unchanged.
 - Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.
 - Preserves sale blocking, reserved quantities and protection controls.
@@ -39,6 +40,13 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+
+### v1.3.48 — Release metadata synchronization
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Stops repeated inventory badge replacement when protection state is unchanged.
+- Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.
+- Preserves sale blocking, reserved quantities and protection controls.
 
 ### v1.3.47 — Performance and TornPDA smoothness
 

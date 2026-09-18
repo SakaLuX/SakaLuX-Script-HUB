@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.73**
+**v1.9.74**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,9 +22,9 @@
 
 ## Current release note
 
-**v1.9.73 — Extended performance validation**
-- Synchronizes Stocks v0.8.7, Market v1.17.40 and Elimination v1.3.44 performance notes and offline fallback.
-- Refreshes stale Stocks NEW information without replacing saved preferences.
+**v1.9.74 — Canonical release/version synchronization**
+- Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.
+- Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -57,6 +57,11 @@ Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history / Changelog
+
+
+### v1.9.74 — Canonical release/version synchronization
+- Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.
+- Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata.
 
 ### v1.9.73 — Stocks synchronization
 - Updates Stocks to v0.8.7 in the registry, offline fallback and cached NEW details.

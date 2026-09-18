@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.7**
+**v0.8.8**
 
 ## What it does
 - Stock vault target selection directly from Torn Stocks.
@@ -22,8 +22,11 @@
 
 ## Current release note
 
-**v0.8.7 — Extended performance validation**
-- Overlapping API refreshes share one synchronization. A synthetic burst of 20 refreshes needs three requests instead of sixty and recovers after offline, HTTP 429 and invalid JSON responses.
+**v0.8.8 — Release metadata synchronization**
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Shares one active API synchronization across overlapping refresh requests.
+- Twenty concurrent refreshes use three requests instead of sixty in the synthetic network regression.
+- Recovers after offline, HTTP 429 and malformed JSON errors; portfolio data and explicit trading safeguards are preserved.
 
 ## Recommended
 - Keep **Dry Run ON** while checking a new configuration.
@@ -55,6 +58,13 @@
 **All Rights Reserved — SakaLuX [2380374]**
 
 ## Release history / Changelog
+
+
+### v0.8.8 — Release metadata synchronization
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Shares one active API synchronization across overlapping refresh requests.
+- Twenty concurrent refreshes use three requests instead of sixty in the synthetic network regression.
+- Recovers after offline, HTTP 429 and malformed JSON errors; portfolio data and explicit trading safeguards are preserved.
 
 ### v0.8.7 — Extended performance validation
 - Overlapping API refreshes share one synchronization. A synthetic burst of 20 refreshes needs three requests instead of sixty and recovers after offline, HTTP 429 and invalid JSON responses.
