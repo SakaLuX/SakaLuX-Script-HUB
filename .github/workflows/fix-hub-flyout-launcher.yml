@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - '.github/scripts/fix_hub_dual_nav.py'
+      - '.github/scripts/fix_hub_dual_nav_v197.py'
   workflow_dispatch: {}
 
 permissions:
@@ -19,9 +20,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Patch Hub navigation
-        run: python3 .github/scripts/fix_hub_dual_nav.py
-      - name: Debug patched area
-        run: nl -ba SakaLuX-Script-Hub.user.js | sed -n '2055,2100p'
+        run: python3 .github/scripts/fix_hub_dual_nav_v197.py
       - name: Validate Hub JavaScript
         run: node --check SakaLuX-Script-Hub.user.js
       - name: Commit changes
