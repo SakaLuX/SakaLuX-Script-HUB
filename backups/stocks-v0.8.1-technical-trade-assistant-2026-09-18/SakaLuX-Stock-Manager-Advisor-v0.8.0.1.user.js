@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.1
+// @version      0.8.0.1
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.1'});
+  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.0.1'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -264,7 +264,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.8.1',
+    version: '0.8.0.1',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -1253,42 +1253,26 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   }
 
   function emaV080(values,period){if(!values.length)return null;const k=2/(period+1);let e=values[0];for(let i=1;i<values.length;i++)e=values[i]*k+e*(1-k);return e;}
-  function emaSeriesV081(values,period){if(!values.length)return [];const k=2/(period+1),out=[];let e=values[0];for(let i=0;i<values.length;i++){if(i)e=values[i]*k+e*(1-k);out.push(e);}return out;}
   function rsiV080(values,period=14){if(values.length<period+1)return null;let gain=0,loss=0;for(let i=values.length-period;i<values.length;i++){const d=values[i]-values[i-1];if(d>=0)gain+=d;else loss-=d;}if(loss===0)return 100;const rs=(gain/period)/(loss/period);return 100-(100/(1+rs));}
   function bollingerV080(values,period=20){if(values.length<period)return null;const v=values.slice(-period),mean=v.reduce((a,b)=>a+b,0)/v.length,sd=Math.sqrt(v.reduce((a,b)=>a+Math.pow(b-mean,2),0)/v.length);return {mid:mean,upper:mean+2*sd,lower:mean-2*sd};}
-  function bollingerSeriesV081(values,period=20){return values.map((_,i)=>{if(i+1<period)return null;const v=values.slice(i+1-period,i+1),mid=v.reduce((a,b)=>a+b,0)/v.length,sd=Math.sqrt(v.reduce((a,b)=>a+Math.pow(b-mid,2),0)/v.length);return {mid,upper:mid+2*sd,lower:mid-2*sd};});}
-  function technicalChartV081(points){
-    if(!points.length)return '<div class="slx-v080-empty">No local price history yet. Keep Stocks open periodically to build samples.</div>';
-    const vals=points.map(x=>Number(x.p)).filter(x=>x>0);if(!vals.length)return '';
-    const ema20=emaSeriesV081(vals,20),ema90=emaSeriesV081(vals,90),bbs=bollingerSeriesV081(vals,20),allVals=[...vals,...ema20,...ema90,...bbs.flatMap(b=>b?[b.lower,b.upper]:[])].filter(Number.isFinite);
-    const lo=Math.min(...allVals),hi=Math.max(...allVals),span=Math.max(1e-9,hi-lo),w=360,h=132,pad=8;
-    const xy=(v,i)=>`${(pad+(i/Math.max(1,vals.length-1))*(w-pad*2)).toFixed(1)},${(pad+(1-(v-lo)/span)*(h-pad*2)).toFixed(1)}`;
-    const line=(arr,cls)=>{const chunks=[];let cur=[];arr.forEach((v,i)=>{if(Number.isFinite(v))cur.push(xy(v,i));else if(cur.length){chunks.push(cur);cur=[];}});if(cur.length)chunks.push(cur);return chunks.map(c=>`<polyline class="${cls}" points="${c.join(' ')}" fill="none" vector-effect="non-scaling-stroke"/>`).join('');};
-    const upper=bbs.map(b=>b?.upper??null),lower=bbs.map(b=>b?.lower??null),mid=bbs.map(b=>b?.mid??null);
-    return `<div class="slx-v081-chart-wrap"><svg class="slx-v080-chart slx-v081-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-label="Technical price chart">${line(upper,'bb')}${line(lower,'bb')}${line(mid,'bb-mid')}${line(ema90,'ema90')}${line(ema20,'ema20')}${line(vals,'price')}</svg><div class="slx-v081-legend"><span class="price">Price</span><span class="ema20">EMA20</span><span class="ema90">EMA90</span><span class="bb">Bollinger</span></div><div class="slx-v080-range"><span>${money(lo)}</span><span>${money(hi)}</span></div></div>`;
+  function sparklineV080(points){
+    if(!points.length)return '<div class="slx-v080-empty">No local price history yet.</div>';
+    const vals=points.map(x=>Number(x.p)).filter(x=>x>0); if(!vals.length)return '';
+    const lo=Math.min(...vals),hi=Math.max(...vals),span=Math.max(1e-9,hi-lo),w=320,h=82,pad=4;
+    const coords=vals.map((v,i)=>`${pad+(i/Math.max(1,vals.length-1))*(w-pad*2)},${pad+(1-(v-lo)/span)*(h-pad*2)}`).join(' ');
+    return `<svg class="slx-v080-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-label="Local price history"><polyline points="${coords}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="slx-v080-range"><span>${money(lo)}</span><span>${money(hi)}</span></div>`;
   }
-  function technicalSignalV081({price,rsi,ema20,ema90,bb,momentumPct,samples}){
-    let score=0;const reasons=[];
-    if(samples>=90&&Number.isFinite(ema20)&&Number.isFinite(ema90)){if(ema20>ema90){score+=2;reasons.push('EMA20 above EMA90');}else if(ema20<ema90){score-=2;reasons.push('EMA20 below EMA90');}}
-    else if(samples>=20) reasons.push('EMA90 warming up');
-    if(Number.isFinite(rsi)){if(rsi<=30){score+=2;reasons.push('RSI oversold');}else if(rsi>=70){score-=2;reasons.push('RSI overbought');}else if(rsi>=52&&rsi<=65){score+=1;reasons.push('RSI constructive');}else if(rsi>=35&&rsi<=48){score-=1;reasons.push('RSI weak');}}
-    if(bb&&price){if(price<bb.lower){score+=1;reasons.push('below lower Bollinger');}else if(price>bb.upper){score-=1;reasons.push('above upper Bollinger');}else if(price>bb.mid){score+=0.5;reasons.push('above Bollinger mid');}else{score-=0.5;reasons.push('below Bollinger mid');}}
-    if(Number.isFinite(momentumPct)){if(momentumPct>1){score+=1;reasons.push('positive window momentum');}else if(momentumPct<-1){score-=1;reasons.push('negative window momentum');}}
-    const limited=samples<20;
-    let label='NEUTRAL',cls='neutral';
-    if(score>=3){label='BUY BIAS';cls='buy';}else if(score<=-3){label='SELL BIAS';cls='sell';}else if(score>=1){label='WATCH BUY';cls='watch';}else if(score<=-1){label='WATCH SELL';cls='watch';}
-    if(limited){label='COLLECTING DATA';cls='neutral';}
-    return {score,label,cls,reasons,limited};
-  }
+
   function technicalStatsV080(sym,windowKey){
     const hist=recordTechnicalSnapshotV080(false),all=Array.isArray(hist[sym])?hist[sym]:[];
     const now=Date.now(),safeWindow=['24h','1w','1m'].includes(windowKey)?windowKey:'24h',ms={'24h':86400000,'1w':604800000,'1m':2592000000}[safeWindow];
     const points=all.filter(x=>now-Number(x.t)<=ms),values=points.map(x=>Number(x.p)).filter(x=>x>0);
-    const price=Number(S.stocks.get(sym)?.price||values[values.length-1]||0),rsi=rsiV080(values,14),ema20=values.length?emaV080(values,20):null,ema90=values.length?emaV080(values,90):null,bb=bollingerV080(values,20);
-    const first=values[0]||0,momentumPct=first>0&&price>0?((price-first)/first)*100:null;
-    const coverageMs=points.length>1?Number(points[points.length-1].t)-Number(points[0].t):0;
-    const signal=technicalSignalV081({price,rsi,ema20,ema90,bb,momentumPct,samples:values.length});
-    return {points,allCount:all.length,price,rsi,ema20,ema90,bb,momentumPct,coverageMs,signal,windowKey:safeWindow};
+    const price=Number(S.stocks.get(sym)?.price||values[values.length-1]||0),rsi=rsiV080(values,14),ema20=values.length?emaV080(values.slice(-Math.max(20,Math.min(values.length,180))),20):null,ema90=values.length>=2?emaV080(values.slice(-Math.max(90,Math.min(values.length,360))),90):null,bb=bollingerV080(values,20);
+    let trend='Collecting history',signal='Neutral / insufficient history';
+    if(ema20!=null&&ema90!=null){trend=ema20>ema90?'Uptrend':'Downtrend';signal=ema20>ema90?'Momentum positive':'Momentum weak';}
+    if(rsi!=null){if(rsi<=30)signal='RSI oversold';else if(rsi>=70)signal='RSI overbought';}
+    if(bb&&price){if(price<bb.lower)signal='Below lower Bollinger band';else if(price>bb.upper)signal='Above upper Bollinger band';}
+    return {points,allCount:all.length,price,rsi,ema20,ema90,bb,trend,signal};
   }
 
   function ensureAdvisorSuiteHostV080(){
@@ -1325,15 +1309,13 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   }
 
   function renderTechnicalAdvisorV080(){
-    const host=ensureAdvisorSuiteHostV080();if(!host)return;
+    const host=ensureAdvisorSuiteHostV080(); if(!host)return;
     const select=host.querySelector('#slx-v080-tech-symbol'),win=host.querySelector('#slx-v080-tech-window'),box=host.querySelector('#slx-v080-technical');
-    const syms=[...S.stocks.keys()].sort();if(!syms.length){box.innerHTML='<div class="slx-v080-empty">No stock prices detected yet.</div>';return;}
-    const wanted=get(K.techSymbol,syms[0]);if(select.options.length!==syms.length||![...select.options].every((o,i)=>o.value===syms[i]))select.innerHTML=syms.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
-    select.value=syms.includes(wanted)?wanted:syms[0];if(select.value!==wanted)set(K.techSymbol,select.value);
-    const wantedWindow=get(K.techWindow,'24h');win.value=['24h','1w','1m'].includes(wantedWindow)?wantedWindow:'24h';if(win.value!==wantedWindow)set(K.techWindow,win.value);
-    const st=technicalStatsV080(select.value,win.value),fmt=x=>x==null?'—':Number(x).toLocaleString(undefined,{maximumFractionDigits:2}),pct=x=>x==null?'—':`${x>=0?'+':''}${Number(x).toFixed(2)}%`,hours=st.coverageMs/3600000;
-    const sig=st.signal,reason=sig.reasons.length?sig.reasons.map(esc).join(' · '):'Waiting for enough local samples';
-    box.innerHTML=`<div class="slx-v080-summary slx-v081-summary"><div><span>Price</span><b>${money(st.price)}</b></div><div><span>Window momentum</span><b class="${Number(st.momentumPct)>=0?'good':'bad'}">${pct(st.momentumPct)}</b></div><div><span>RSI 14</span><b>${fmt(st.rsi)}</b></div><div><span>EMA 20 / 90</span><b>${st.ema20==null?'—':money(st.ema20)} / ${st.ema90==null?'—':money(st.ema90)}</b></div></div>${technicalChartV081(st.points)}<div class="slx-v081-signal ${sig.cls}"><div><span>Technical signal</span><b>${esc(sig.label)}</b></div><strong>${sig.limited?'Needs more samples':`Score ${sig.score>=0?'+':''}${sig.score.toFixed(1)}`}</strong><small>${reason}</small></div><div class="slx-v081-metrics"><span>Bollinger lower <b>${st.bb?money(st.bb.lower):'—'}</b></span><span>Mid <b>${st.bb?money(st.bb.mid):'—'}</b></span><span>Upper <b>${st.bb?money(st.bb.upper):'—'}</b></span></div><div class="api-help">${st.points.length} samples in selected ${String(st.windowKey).toUpperCase()} window · local coverage ${hours>=24?(hours/24).toFixed(1)+'d':hours.toFixed(1)+'h'} · samples are collected locally while the script is active. Signals are technical indicators, not automatic trades.</div>`;
+    const syms=[...S.stocks.keys()].sort(); if(!syms.length){box.innerHTML='<div class="slx-v080-empty">No stock prices detected yet.</div>';return;}
+    const wanted=get(K.techSymbol,syms[0]); if(select.options.length!==syms.length||![...select.options].every((o,i)=>o.value===syms[i]))select.innerHTML=syms.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    select.value=syms.includes(wanted)?wanted:syms[0]; if(select.value!==wanted)set(K.techSymbol,select.value); const wantedWindow=get(K.techWindow,'24h'); win.value=['24h','1w','1m'].includes(wantedWindow)?wantedWindow:'24h'; if(win.value!==wantedWindow)set(K.techWindow,win.value);
+    const st=technicalStatsV080(select.value,win.value),fmt=x=>x==null?'—':Number(x).toLocaleString(undefined,{maximumFractionDigits:2});
+    box.innerHTML=`<div class="slx-v080-summary"><div><span>Price</span><b>${money(st.price)}</b></div><div><span>RSI 14</span><b>${fmt(st.rsi)}</b></div><div><span>EMA 20</span><b>${st.ema20==null?'—':money(st.ema20)}</b></div><div><span>EMA 90</span><b>${st.ema90==null?'—':money(st.ema90)}</b></div></div>${sparklineV080(st.points)}<div class="slx-v080-signal"><b>${esc(st.trend)}</b><span>${esc(st.signal)}</span></div><div class="api-help">Bollinger: ${st.bb?`${money(st.bb.lower)} — ${money(st.bb.upper)}`:'needs 20 samples'} · Local samples: ${st.allCount}. History is collected locally at most once every 5 minutes while Stocks is used.</div>`;
   }
 
   function renderPortfolioSimulatorV080(){
@@ -2242,11 +2224,11 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 })();
 
 /* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 */
-(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.1'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
+(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.0.1'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
 
 
 /* SAKALUX_STOCKS_FOLLOWUP_V0715 */
-(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.1'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
+(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.0.1'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
 
 
 /* SAKALUX_STOCK_API_ELIMINATION_LAYOUT_V0716 */
@@ -2279,17 +2261,6 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 })();
 
 
-
-/* SAKALUX_STOCK_TECHNICAL_V081 */
-(()=>{const id='slx-stock-technical-v081-style';if(document.getElementById(id))return;const st=document.createElement('style');st.id=id;st.textContent=`
-#slx-stock-advisor-suite-v080 .slx-v081-chart-wrap{margin-top:10px;padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#0a1119}
-#slx-stock-advisor-suite-v080 .slx-v081-chart{height:132px!important;width:100%;display:block}
-#slx-stock-advisor-suite-v080 .slx-v081-chart .price{stroke:#f2f6fb;stroke-width:2.2}#slx-stock-advisor-suite-v080 .slx-v081-chart .ema20{stroke:#5aa7ff;stroke-width:1.6}#slx-stock-advisor-suite-v080 .slx-v081-chart .ema90{stroke:#dfbd61;stroke-width:1.6}#slx-stock-advisor-suite-v080 .slx-v081-chart .bb{stroke:#7c8da1;stroke-width:1;stroke-dasharray:3 3;opacity:.68}#slx-stock-advisor-suite-v080 .slx-v081-chart .bb-mid{stroke:#60758d;stroke-width:1;opacity:.5}
-#slx-stock-advisor-suite-v080 .slx-v081-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:7px;font-size:10px;font-weight:800;color:#9fb0c3}#slx-stock-advisor-suite-v080 .slx-v081-legend span:before{content:'•';font-size:18px;line-height:0;vertical-align:-2px;margin-right:3px}#slx-stock-advisor-suite-v080 .slx-v081-legend .price:before{color:#f2f6fb}#slx-stock-advisor-suite-v080 .slx-v081-legend .ema20:before{color:#5aa7ff}#slx-stock-advisor-suite-v080 .slx-v081-legend .ema90:before{color:#dfbd61}#slx-stock-advisor-suite-v080 .slx-v081-legend .bb:before{color:#7c8da1}
-#slx-stock-advisor-suite-v080 .slx-v081-signal{margin-top:9px;padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#101923;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center}#slx-stock-advisor-suite-v080 .slx-v081-signal div{min-width:0}#slx-stock-advisor-suite-v080 .slx-v081-signal span{display:block;color:#91a2b6;font-size:9px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}#slx-stock-advisor-suite-v080 .slx-v081-signal b{display:block;font-size:15px;margin-top:2px}#slx-stock-advisor-suite-v080 .slx-v081-signal strong{font-size:11px}#slx-stock-advisor-suite-v080 .slx-v081-signal small{grid-column:1/-1;color:#9fb0c3;line-height:1.35}#slx-stock-advisor-suite-v080 .slx-v081-signal.buy{border-color:rgba(85,217,138,.45)}#slx-stock-advisor-suite-v080 .slx-v081-signal.sell{border-color:rgba(255,107,120,.45)}#slx-stock-advisor-suite-v080 .slx-v081-signal.watch{border-color:rgba(223,189,97,.4)}
-#slx-stock-advisor-suite-v080 .slx-v081-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:7px}#slx-stock-advisor-suite-v080 .slx-v081-metrics span{padding:7px;border:1px solid rgba(255,255,255,.07);border-radius:9px;font-size:9px;color:#92a3b6}#slx-stock-advisor-suite-v080 .slx-v081-metrics b{display:block;margin-top:2px;color:#e9f0f8;font-size:10px}
-@media(max-width:700px){#slx-stock-advisor-suite-v080 .slx-v081-metrics{grid-template-columns:1fr}#slx-stock-advisor-suite-v080 .slx-v081-summary{grid-template-columns:1fr 1fr!important}#slx-stock-advisor-suite-v080 .slx-v081-chart{height:150px!important}}
-`;document.head.appendChild(st);})();
 
 /* SAKALUX_STOCK_STABILIZATION_V0801 */
 (()=>{const id='slx-stock-stabilization-v0801-style';if(document.getElementById(id))return;const st=document.createElement('style');st.id=id;st.textContent=`
