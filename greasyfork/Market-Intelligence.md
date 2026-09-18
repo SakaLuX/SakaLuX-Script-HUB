@@ -20,13 +20,10 @@
 
 ## Current release note
 
-**v1.17.38** Restores the Elimination-style footer in Market whether opened standalone or from Hub; removes the Hub suppression guard and force-mounts SEND MONEY / SEND ITEMS and the author line.
-
-**v1.17.37** Copies the complete working Elimination Assistant donation/footer implementation into Market Intelligence, changing only the target panel selector/footer ID. Restores one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.
-
-**v1.17.36** restores the native Market footer when Market settings are opened from Script Hub. The over-broad Hub-subtree guard was removed, so the panel again shows `SEND MONEY`, `SEND ITEMS`, and one `Made with ❤️ by SakaLuX [2380374]` line. Hub still suppresses its generic fallback inside Market, preventing duplication.
-
-**v1.17.35** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+**v1.17.38 — Restore Elimination-style footer from Hub and standalone**
+- Restores the Elimination-style Market footer whether Market is opened standalone or from Script Hub.
+- Removes the Hub suppression guard that could hide the Market-owned footer.
+- Force-mounts one SEND MONEY / SEND ITEMS row and the linked SakaLuX author line.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -44,12 +41,17 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 - Displayed prices, profits, ROI, arrival-stock estimates, restock predictions, basket recommendations, Museum comparisons and loadout verdicts are decision-support estimates.
 - The script does not automatically purchase, sell, travel, trade or attack.
 - Arrival/restock prediction learns from observations and may remain LEARNING/low-confidence until sufficient history exists.
-- Market Intelligence is distributed through Greasy Fork. If Hub shows `PUBLISHED vX · REGISTRY v1.17.19`, the Greasy Fork public metadata is behind the registry. Publish v1.17.19 on Greasy Fork to clear that legitimate pending state.
+- Market Intelligence is distributed through Greasy Fork. If Hub shows different **PUBLISHED** and **REGISTRY** versions, the public Greasy Fork metadata has not yet caught up with the registry; publish the matching current release to clear that pending state.
 
 ## License
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.17.38 — Restore Elimination-style footer from Hub and standalone
+- Restores the Elimination-style Market footer whether Market is opened standalone or from Script Hub.
+- Removes the Hub suppression guard that could hide the Market-owned footer.
+- Force-mounts one SEND MONEY / SEND ITEMS row and the linked SakaLuX author line.
 
 ### v1.17.37 — Elimination footer parity
 - Copies the complete working Elimination Assistant donation/footer implementation into Market Intelligence, changing only the target panel selector/footer ID. Restores one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.
