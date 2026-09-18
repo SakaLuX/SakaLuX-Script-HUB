@@ -29,7 +29,7 @@
 - Preview-only; no trade is submitted.
 
 ## Current version
-**v0.8.4**
+**v0.8.2**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -46,7 +46,7 @@
 
 ## Current release note
 
-**v0.8.4 — Technical Trade Assistant**
+**v0.8.1 — Technical Trade Assistant**
 - Upgrades the 24H / 1W / 1M local chart with visible Price, EMA20, EMA90 and Bollinger overlays.
 - Adds selected-window momentum, RSI 14, Bollinger lower/mid/upper metrics and sample/coverage diagnostics.
 - Adds a multi-factor technical signal score based on EMA direction, RSI, Bollinger position and window momentum.

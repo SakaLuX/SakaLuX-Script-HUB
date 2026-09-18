@@ -186,14 +186,13 @@
         }
       ],
       "release": {
-        "date": "2026-09-18",
+        "date": "2026-09-17",
         "notes": [
-          "Release/version metadata synchronized with current userscript v1.17.38; existing feature notes retained.",
           "Restores the native Market donation/author footer when Market settings are opened from Script Hub.",
           "Keeps exactly one footer: SEND MONEY, SEND ITEMS, and Made with ❤️ by SakaLuX [2380374].",
           "Removes the over-broad Hub-subtree guard that suppressed the Market-owned footer."
         ],
-        "version": "1.17.38"
+        "version": "1.17.36"
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
