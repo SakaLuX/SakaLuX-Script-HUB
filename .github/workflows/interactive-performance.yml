@@ -20,7 +20,9 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/browser-tests" playwright@1.62.1 --no-audit --no-fund
           "$RUNNER_TEMP/browser-tests/node_modules/.bin/playwright" install --with-deps chromium
       - name: Verify production Stocks network recovery
-        run: node tests/performance/stocks-network-regression.cjs --assert
+        run: |
+          node tests/performance/stocks-network-regression.cjs --assert
+          node tests/performance/elimination-lifecycle-regression.cjs
       - name: Exercise actual panels, switches, search and maximize
         env:
           NODE_PATH: ${{ runner.temp }}/browser-tests/node_modules

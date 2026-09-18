@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.44**
+**v1.3.43**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -21,8 +21,10 @@
 
 ## Current release note
 
-**v1.3.44 — Lifecycle cleanup**
-- Disconnects discarded panel observers and removes their document click handlers when disabling.
+**v1.3.43 — Performance and TornPDA smoothness**
+- Uses constant-time Hub detection in standalone maintenance.
+- Batches standalone refreshes and ignores chat/dock/footer mutations.
+- Preserves target settings, learning records and attack links.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -40,9 +42,6 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.3.44 — Lifecycle cleanup
-- Prevents observer and detached-panel accumulation during disable/re-enable cycles.
 
 ### v1.3.43 — Performance and TornPDA smoothness
 
