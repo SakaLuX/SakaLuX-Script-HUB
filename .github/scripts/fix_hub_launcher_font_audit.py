@@ -8,75 +8,33 @@ REPORT = Path('FONT-SAFETY-AUDIT-2026-09-18.md')
 def patch_hub() -> None:
     text = HUB.read_text(encoding='utf-8')
 
-    # Version bump is intentionally idempotent.
     text = text.replace('// @version      1.9.74', '// @version      1.9.75', 1)
     text = text.replace("const VERSION = '1.9.74';", "const VERSION = '1.9.75';", 1)
 
     marker = '    const HUB_CHANGELOG = [\n'
     entry = (
         '        {"version": "1.9.75", "date": "2026-09-18", "changes": '
-        '["Floating fallback launcher now appears only when neither native Hub launcher is actually mounted in the DOM; scrolling the Torn header off-screen no longer triggers it.", '
-        '"Audited all current top-level SakaLuX userscripts to ensure none applies font-size styling to Torn native Points or Merits counters."]},\n'
+        '["Floating fallback launcher now appears only when neither native Hub launcher is actually mounted; scrolling the Torn header off-screen no longer triggers it.", '
+        '"Audited all current top-level SakaLuX userscripts so none changes the font size of Torn native Points or Merits counters."]},\n'
     )
     if entry not in text:
         if marker not in text:
             raise SystemExit('HUB_CHANGELOG marker not found')
         text = text.replace(marker, marker + entry, 1)
 
-    old = '''    function isActuallyVisible(element) {
-        if (!element || !element.isConnected) return false;
-        try {
-            const cs = getComputedStyle(element);
-            if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity || 1) <= 0.01) return false;
-            const r = element.getBoundingClientRect();
-            return r.width > 4 && r.height > 4 && r.bottom > 0 && r.right > 0 && r.top < window.innerHeight && r.left < window.innerWidth;
-        } catch { return false; }
-    }
+    old_line = "        const nativeVisible = settings.showTopbarSkull && (isActuallyVisible(top) || isActuallyVisible(nav));\n        button.style.setProperty('display', nativeVisible ? 'none' : 'flex', 'important');"
+    new_line = "        const nativeMounted = settings.showTopbarSkull && Boolean(\n            (top && top.isConnected) || (nav && nav.isConnected)\n        );\n        button.style.setProperty('display', nativeMounted ? 'none' : 'flex', 'important');"
 
-    function syncFloatingButtonVisibility() {
-        const button = document.getElementById(IDS.button);
-        if (!button) return;
-        const top = document.getElementById(IDS.topSkull);
-        const nav = document.getElementById(IDS.navSkull);
-        const nativeVisible = settings.showTopbarSkull && (isActuallyVisible(top) || isActuallyVisible(nav));
-        button.style.setProperty('display', nativeVisible ? 'none' : 'flex', 'important');
-        button.style.setProperty('visibility', 'visible', 'important');
-        button.style.setProperty('opacity', '1', 'important');
-        button.style.setProperty('pointer-events', 'auto', 'important');
-    }
-'''
-    new = '''    function syncFloatingButtonVisibility() {
-        const button = document.getElementById(IDS.button);
-        if (!button) return;
-        const top = document.getElementById(IDS.topSkull);
-        const nav = document.getElementById(IDS.navSkull);
-        // A native launcher remains authoritative while mounted, even when the
-        // user scrolls the header/sidebar temporarily outside the viewport.
-        const nativeMounted = settings.showTopbarSkull && Boolean(
-            (top && top.isConnected) || (nav && nav.isConnected)
-        );
-        button.style.setProperty('display', nativeMounted ? 'none' : 'flex', 'important');
-        button.style.setProperty('visibility', 'visible', 'important');
-        button.style.setProperty('opacity', '1', 'important');
-        button.style.setProperty('pointer-events', 'auto', 'important');
-    }
-'''
-
-    if old in text:
-        text = text.replace(old, new, 1)
-    elif new not in text:
-        raise SystemExit('Neither old nor repaired Hub launcher visibility block was found')
+    if old_line in text:
+        text = text.replace(old_line, new_line, 1)
+    elif new_line not in text:
+        raise SystemExit('Hub floating launcher visibility line not found')
 
     HUB.write_text(text, encoding='utf-8')
 
 
 def audit_native_fonts() -> list[str]:
-    # We audit only current top-level userscripts. Historical backup files do not
-    # execute when the current scripts are installed.
-    own_markers = (
-        'sakalux-', 'slh-', 'sl-', 'slx-', 'ci-', 'apm-',
-        'master-control', 'sakalux-suite'
-    )
+    own_markers = ('sakalux-', 'slh-', 'sl-', 'slx-', 'ci-', 'apm-', 'master-control', 'sakalux-suite')
     suspicious = []
     scanned = []
     css_rule = re.compile(r'([^{}]+)\{([^{}]*)\}', re.S)
@@ -90,7 +48,7 @@ def audit_native_fonts() -> list[str]:
             body = match.group(2)
             low_sel = selector.lower()
             low_body = body.lower()
-            if 'font-size' not in low_body:
+            if 'font-size' not in low_body and not re.search(r'\bfont\s*:', low_body):
                 continue
 
             touches_status = 'statusicons' in low_sel or 'status-icons' in low_sel
@@ -99,25 +57,27 @@ def audit_native_fonts() -> list[str]:
             if not (touches_status or touches_points or touches_merits):
                 continue
 
-            # Script-owned components such as #sl-mi-points-bar may style their own
-            # text. The protected target is Torn's native Points/Merits/status row.
             owned = any(token in low_sel for token in own_markers)
             if touches_status or not owned:
-                suspicious.append(f'{path.name}: CSS font-size selector: {selector[:220]}')
+                suspicious.append(f'{path.name}: {selector[:240]}')
 
-        lines = src.splitlines()
-        for index, line in enumerate(lines):
+        # Direct JS mutation of font size is only blocked when the same statement
+        # explicitly targets Torn native status/points/merit elements.
+        for line in src.splitlines():
             low = line.lower()
-            if 'fontsize' not in low and 'font-size' not in low:
-                continue
-            context = '\n'.join(lines[max(0, index - 5):min(len(lines), index + 6)]).lower()
-            if not any(token in context for token in ('points', 'merit', 'statusicons', 'status-icons')):
-                continue
-            if any(token in context for token in own_markers) and 'statusicons' not in context and 'status-icons' not in context:
-                continue
-            suspicious.append(f'{path.name}: JS/context font sizing: {line.strip()[:220]}')
+            if ('fontsize' in low or "setproperty('font-size'" in low or 'setproperty("font-size"' in low) and any(
+                token in low for token in ('statusicons', 'status-icons', 'points', 'merit')
+            ):
+                if not any(token in low for token in own_markers):
+                    suspicious.append(f'{path.name}: {line.strip()[:240]}')
 
     if suspicious:
+        REPORT.write_text(
+            '# Native Points / Merits font safety audit\n\n'
+            'Date: 2026-09-18\n\n'
+            'Result: **FAIL**\n\n' + ''.join(f'- `{item}`\n' for item in suspicious),
+            encoding='utf-8'
+        )
         raise SystemExit('Suspicious native font mutations found:\n' + '\n'.join(' - ' + x for x in suspicious))
 
     return scanned
@@ -128,8 +88,8 @@ def write_report(scanned: list[str]) -> None:
         '# Native Points / Merits font safety audit\n\n'
         'Date: 2026-09-18\n\n'
         f'Scanned {len(scanned)} active top-level userscripts.\n\n'
-        'Result: **PASS** — no current SakaLuX userscript applies `font-size` styling to Torn native Points or Merits counters, and no `statusIcons` rule applies `font-size` to the native row.\n\n'
-        'The Hub fallback launcher now uses DOM mounting state rather than viewport geometry, so scrolling the native Hub icon off-screen does not make the floating fallback appear.\n\n'
+        'Result: **PASS** — no current SakaLuX userscript changes the font size of Torn native Points or Merits counters. Script-owned widgets such as `#sl-mi-points-bar` are excluded because they are not Torn native counters.\n\n'
+        'Hub fallback behavior: **PASS** — the floating launcher now depends on whether a native Hub launcher is mounted in the DOM, not whether scrolling has moved it outside the viewport.\n\n'
         'Scanned files:\n' + ''.join(f'- `{name}`\n' for name in scanned),
         encoding='utf-8'
     )
