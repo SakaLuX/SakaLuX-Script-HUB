@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.41
+// @version      5.3.42
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -15,7 +15,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '5.3.41';
+  let v = '5.3.42';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -93,7 +93,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.41'});
+  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.42'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -922,18 +922,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
             showDetails(group);
         };
 
-        const copyButton = document.createElement('button');
-        copyButton.textContent = '📋';
-        copyButton.title = 'Copy buyer summary';
-        copyButton.style.cssText = 'padding:5px 7px;border-radius:6px;border:1px solid #555;background:#202020;color:#ddd;font-size:12px;cursor:pointer;';
-        copyButton.onclick = async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            const ok = await copyText(buildBuyerSummary(group));
-            copyButton.textContent = ok ? '✓' : '✕';
-            setTimeout(() => { if (copyButton) copyButton.textContent = '📋'; }, 1200);
-        };
-
+        /* SakaLuX Bazaar ↔ Suite Event Actions — BAZAAR v1 */
         const info = document.createElement('span');
         info.className = 'sakalux-bt-info';
         info.style.cssText = 'display:block;color:#aaa;font-size:11px;white-space:nowrap;padding-left:2px;';
@@ -946,7 +935,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
         topRow.appendChild(thankButton);
         topRow.appendChild(detailsButton);
-        topRow.appendChild(copyButton);
         wrapper.appendChild(topRow);
         wrapper.appendChild(info);
         firstParagraph.appendChild(wrapper);
@@ -1201,7 +1189,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.40';
+    const BAZAAR_VERSION='5.3.42';
 
     function openSettingsPanel() {
         if (!moduleEnabled) setEnabled(true);

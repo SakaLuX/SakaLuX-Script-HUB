@@ -83,9 +83,10 @@
         }
       ],
       "release": {
-        "version": "5.3.41",
+        "version": "5.3.42",
         "date": "2026-09-18",
         "notes": [
+          "Integrates Bazaar Thanker actions with Suite Event Lens: removes the inline clipboard button and exposes Thanks/Details through the Suite action row when Bazaar Thanker is active.",
           "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
           "Uses constant-time Hub detection instead of document-wide marker searches on every mutation.",
           "Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.",
@@ -94,7 +95,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.41",
+      "version": "5.3.42",
       "detailsRevision": 2
     },
     {
