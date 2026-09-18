@@ -39,7 +39,7 @@ jobs:
           if ! git diff --quiet; then
             git config user.name 'SakaLuX Release Bot'
             git config user.email 'actions@users.noreply.github.com'
-            git add SakaLuX-Suite.user.js .github/workflows/validate-userscripts.yml
+            git add SakaLuX-Suite.user.js
             git commit -m 'Suite v0.9.927: complete all nine SakaLuX tool bridges'
             git push origin HEAD:main
           fi
