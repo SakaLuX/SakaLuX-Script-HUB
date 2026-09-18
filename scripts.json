@@ -368,19 +368,17 @@
         }
       ],
       "release": {
+        "version": "0.8.2",
         "date": "2026-09-18",
-        "version": "0.8.1",
         "notes": [
-          "Technical Trade Assistant release with richer 24H / 1W / 1M local charting.",
-          "Adds visible Price, EMA20, EMA90 and Bollinger overlays plus RSI, window momentum and Bollinger metrics.",
-          "Adds a multi-factor technical signal score using EMA direction, RSI, Bollinger position and selected-window momentum.",
-          "Shows sample count and local time coverage so limited-history signals are clearly marked as Collecting Data.",
-          "Preserves v0.8.0.1 Financial Advisor, trading safeguards and Portfolio Simulator foundation unchanged."
+          "Portfolio Simulator now shows BEFORE → AFTER positions and safe reallocation coverage.",
+          "Adds benefit-yield and local technical-score deltas with target tier movement.",
+          "What-if remains preview-only and never submits a trade."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.1"
+      "version": "0.8.2"
     }
   ]
 }

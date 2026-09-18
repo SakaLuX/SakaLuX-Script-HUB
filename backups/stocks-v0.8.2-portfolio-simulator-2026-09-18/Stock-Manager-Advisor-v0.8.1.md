@@ -2,16 +2,8 @@
 
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
-
-## v0.8.2 — Portfolio Simulator
-- BEFORE → AFTER What-if comparison.
-- Safe reallocatable coverage with Benefit Lock respected.
-- Benefit-yield and local technical-score deltas.
-- Target benefit-tier movement and unused-cash/share-rounding visibility.
-- Preview-only; no trade is submitted.
-
 ## Current version
-**v0.8.2**
+**v0.8.1**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
