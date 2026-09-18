@@ -1,0 +1,75 @@
+name: Release Stocks v0.8.0 only
+
+on:
+  push:
+    paths:
+      - '.github/release-stocks-v080-only.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch Stock Manager only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp SakaLuX-Company-Intelligence-v1.0.0.user.js /tmp/company.before
+          cp greasyfork/Company-Intelligence.md /tmp/company-doc.before
+          python3 .github/scripts/upgrade_stocks_advisor_suite_v080.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('SakaLuX-Stock-Manager-Advisor.user.js')
+          s=p.read_text()
+          # Synchronize legacy standalone registration literals so Hub/Standalone never report an old installed version.
+          s=s.replace("version:'0.7.16'", "version:'0.8.0'")
+          s=s.replace('version:"0.7.16"', 'version:"0.8.0"')
+          p.write_text(s)
+          PY
+          cmp -s SakaLuX-Company-Intelligence-v1.0.0.user.js /tmp/company.before
+          cmp -s greasyfork/Company-Intelligence.md /tmp/company-doc.before
+
+      - name: Validate v0.8.0 and isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q '@version      0.8.0' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "version: '0.8.0'" SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "version:'0.8.0'" SakaLuX-Stock-Manager-Advisor.user.js
+          ! grep -q "version:'0.7.16'" SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'SAKALUX_STOCK_ADVISOR_SUITE_V080' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'Financial Advisor' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'Technical Trade Assistant' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'Portfolio Simulator' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q '\*\*v0.8.0\*\*' greasyfork/Stock-Manager-Advisor.md
+          grep -q '### v0.8.0 — Advisor Suite' greasyfork/Stock-Manager-Advisor.md
+          python3 - <<'PY'
+          import json
+          d=json.load(open('scripts.json'))
+          e=next(x for x in d['scripts'] if x.get('id')=='stock-manager-advisor')
+          assert e['version']=='0.8.0', e.get('version')
+          assert e['release']['version']=='0.8.0', e.get('release')
+          assert 'Financial Advisor' in e['info']
+          assert any('Technical Trade Assistant' in x for x in e['release']['notes'])
+          PY
+          git diff --exit-code -- SakaLuX-Company-Intelligence-v1.0.0.user.js greasyfork/Company-Intelligence.md
+
+      - name: Commit Stock v0.8.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js scripts.json greasyfork/Stock-Manager-Advisor.md backups/stocks-advisor-suite-v0.8.0-2026-09-18/
+          if [ -f greasyfork/Script-Hub.md ]; then git add greasyfork/Script-Hub.md; fi
+          git commit -m 'Stocks v0.8.0: Advisor Suite'
+          git push
