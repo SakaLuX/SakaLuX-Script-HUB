@@ -1,5 +1,5 @@
 {
-  "fixture": "Offline real-browser API error/recovery and burst tests. Synthetic fake key, stubbed fetch/GM responses, no real Torn or external-write actions. Production public read-only methods; N/A for DOM-only scripts.",
+  "fixture": "Offline real-browser API error/recovery and burst tests. Synthetic fake key, stubbed fetch/GM responses, no real Torn or external-write actions. Production public read-only methods; N/A for DOM-only scripts. Auditor fixture ONLY scales rate waits to 1ms and retry delays to 1ms; production stays at 1100ms and 3/6/12s, with independent rate-spacing regression.",
   "results": [
     {
       "file": "SakaLuX-Account-Auditor.user.js",
@@ -9,40 +9,45 @@
           "method": "snapshot",
           "callers": 20,
           "deadline": false,
-          "rejected": 20,
-          "requests": 0
+          "rejected": 0,
+          "reasons": [],
+          "requests": 92
         },
         {
           "mode": "offline",
           "method": "snapshot",
           "callers": 1,
           "deadline": false,
-          "rejected": 1,
-          "requests": 0
+          "rejected": 0,
+          "reasons": [],
+          "requests": 92
         },
         {
           "mode": "429",
           "method": "snapshot",
           "callers": 1,
           "deadline": false,
-          "rejected": 1,
-          "requests": 0
+          "rejected": 0,
+          "reasons": [],
+          "requests": 368
         },
         {
           "mode": "malformed",
           "method": "snapshot",
           "callers": 1,
           "deadline": false,
-          "rejected": 1,
-          "requests": 0
+          "rejected": 0,
+          "reasons": [],
+          "requests": 92
         },
         {
           "mode": "ok",
           "method": "snapshot",
           "callers": 1,
           "deadline": false,
-          "rejected": 1,
-          "requests": 0
+          "rejected": 0,
+          "reasons": [],
+          "requests": 92
         }
       ],
       "errors": []
@@ -56,6 +61,7 @@
           "callers": 20,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 5
         },
         {
@@ -64,6 +70,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 11
         },
         {
@@ -72,6 +79,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 11
         },
         {
@@ -80,6 +88,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 11
         },
         {
@@ -88,6 +97,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 5
         }
       ],
@@ -102,6 +112,7 @@
           "callers": 20,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "version": "1.3.44",
@@ -127,6 +138,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 4,
           "health": {
             "version": "1.3.44",
@@ -152,6 +164,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 4,
           "health": {
             "version": "1.3.44",
@@ -177,6 +190,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 4,
           "health": {
             "version": "1.3.44",
@@ -202,6 +216,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "version": "1.3.44",
@@ -233,6 +248,7 @@
           "callers": 20,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "ready": true,
@@ -240,7 +256,7 @@
             "enabled": true,
             "loading": false,
             "error": null,
-            "lastUpdate": 1789749031913,
+            "lastUpdate": 1789749457199,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -261,6 +277,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 1,
           "health": {
             "ready": true,
@@ -268,7 +285,7 @@
             "enabled": true,
             "loading": false,
             "error": "Network request failed.",
-            "lastUpdate": 1789749031913,
+            "lastUpdate": 1789749457199,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -289,6 +306,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 1,
           "health": {
             "ready": true,
@@ -296,7 +314,7 @@
             "enabled": true,
             "loading": false,
             "error": "Items API: Fixture rate limit",
-            "lastUpdate": 1789749031913,
+            "lastUpdate": 1789749457199,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -317,6 +335,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 1,
           "health": {
             "ready": true,
@@ -324,7 +343,7 @@
             "enabled": true,
             "loading": false,
             "error": "Invalid JSON returned by Torn API.",
-            "lastUpdate": 1789749031913,
+            "lastUpdate": 1789749457199,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -345,6 +364,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "ready": true,
@@ -352,7 +372,7 @@
             "enabled": true,
             "loading": false,
             "error": null,
-            "lastUpdate": 1789749032934,
+            "lastUpdate": 1789749458228,
             "inventoryEntries": 0,
             "catalogueEntries": 1,
             "categories": [
@@ -379,7 +399,8 @@
           "callers": 20,
           "deadline": false,
           "rejected": 0,
-          "requests": 40,
+          "reasons": [],
+          "requests": 2,
           "health": {
             "ready": true,
             "version": "1.17.37",
@@ -388,7 +409,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749035108,
+            "lastScan": 1789749460425,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 0,
@@ -472,7 +493,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749035271
+            "apiAccessCheckedAt": 1789749460590
           }
         },
         {
@@ -481,6 +502,9 @@
           "callers": 1,
           "deadline": false,
           "rejected": 1,
+          "reasons": [
+            "Network error"
+          ],
           "requests": 1,
           "health": {
             "ready": true,
@@ -490,7 +514,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749035108,
+            "lastScan": 1789749460425,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 1,
@@ -574,7 +598,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749035271
+            "apiAccessCheckedAt": 1789749460590
           }
         },
         {
@@ -583,6 +607,9 @@
           "callers": 1,
           "deadline": false,
           "rejected": 1,
+          "reasons": [
+            "Fixture rate limit"
+          ],
           "requests": 1,
           "health": {
             "ready": true,
@@ -592,7 +619,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749035108,
+            "lastScan": 1789749460425,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 2,
@@ -676,7 +703,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749035271
+            "apiAccessCheckedAt": 1789749460590
           }
         },
         {
@@ -685,6 +712,9 @@
           "callers": 1,
           "deadline": false,
           "rejected": 1,
+          "reasons": [
+            "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+          ],
           "requests": 1,
           "health": {
             "ready": true,
@@ -694,7 +724,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749035108,
+            "lastScan": 1789749460425,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 3,
@@ -778,7 +808,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749035271
+            "apiAccessCheckedAt": 1789749460590
           }
         },
         {
@@ -787,6 +817,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "ready": true,
@@ -796,7 +827,7 @@
             "apiMode": "SakaLuX Hub",
             "hasApiKey": true,
             "busy": false,
-            "lastScan": 1789749035108,
+            "lastScan": 1789749460425,
             "lastError": "",
             "scanCount": 3,
             "marketRequests": 4,
@@ -880,7 +911,7 @@
             "loadoutLastError": "API access OK, but no equipped combat items were returned",
             "apiAccessStatus": "ok",
             "apiAccessMessage": "API access OK · user/equipment available",
-            "apiAccessCheckedAt": 1789749036295
+            "apiAccessCheckedAt": 1789749461628
           }
         }
       ],
@@ -895,6 +926,7 @@
           "callers": 20,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "ready": true,
@@ -906,7 +938,7 @@
             "catalogueItems": 2,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749038418,
+            "lastScan": 1789749463780,
             "learnedMods": 0
           }
         },
@@ -916,6 +948,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "ready": true,
@@ -927,7 +960,7 @@
             "catalogueItems": 0,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749038675,
+            "lastScan": 1789749464038,
             "learnedMods": 0
           }
         },
@@ -937,6 +970,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "ready": true,
@@ -948,7 +982,7 @@
             "catalogueItems": 0,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749038931,
+            "lastScan": 1789749464296,
             "learnedMods": 0
           }
         },
@@ -958,6 +992,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "ready": true,
@@ -969,7 +1004,7 @@
             "catalogueItems": 0,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749039186,
+            "lastScan": 1789749464552,
             "learnedMods": 0
           }
         },
@@ -979,6 +1014,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 2,
           "health": {
             "ready": true,
@@ -990,7 +1026,7 @@
             "catalogueItems": 2,
             "ammoEntries": 0,
             "rewardCards": 0,
-            "lastScan": 1789749039441,
+            "lastScan": 1789749464809,
             "learnedMods": 0
           }
         }
@@ -1006,7 +1042,8 @@
           "callers": 20,
           "deadline": false,
           "rejected": 0,
-          "requests": 27,
+          "reasons": [],
+          "requests": 8,
           "health": {
             "ready": true,
             "version": "1.9.73",
@@ -1026,6 +1063,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 8,
           "health": {
             "ready": true,
@@ -1046,6 +1084,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 8,
           "health": {
             "ready": true,
@@ -1066,6 +1105,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 8,
           "health": {
             "ready": true,
@@ -1086,6 +1126,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 8,
           "health": {
             "ready": true,
@@ -1112,6 +1153,7 @@
           "callers": 20,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 3,
           "health": {
             "ready": true,
@@ -1128,6 +1170,9 @@
           "callers": 1,
           "deadline": false,
           "rejected": 1,
+          "reasons": [
+            "Fixture offline"
+          ],
           "requests": 2,
           "health": {
             "ready": true,
@@ -1144,6 +1189,9 @@
           "callers": 1,
           "deadline": false,
           "rejected": 1,
+          "reasons": [
+            "User / money: HTTP 429 · Fixture rate limit"
+          ],
           "requests": 2,
           "health": {
             "ready": true,
@@ -1160,6 +1208,9 @@
           "callers": 1,
           "deadline": false,
           "rejected": 1,
+          "reasons": [
+            "User / money: invalid JSON response (HTTP 200)."
+          ],
           "requests": 2,
           "health": {
             "ready": true,
@@ -1176,6 +1227,7 @@
           "callers": 1,
           "deadline": false,
           "rejected": 0,
+          "reasons": [],
           "requests": 3,
           "health": {
             "ready": true,
@@ -1202,7 +1254,7 @@
     },
     {
       "label": "SakaLuX-Account-Auditor.user.js actual production API requests exercised",
-      "passed": false
+      "passed": true
     },
     {
       "label": "SakaLuX-Company-Intelligence-v1.0.0.user.js network modes no uncaught JS errors",
