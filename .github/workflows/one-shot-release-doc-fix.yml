@@ -1,0 +1,125 @@
+name: One-shot release documentation repair
+
+on:
+  push:
+    paths:
+      - '.github/one-shot-release-doc-fix.trigger'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Repair release documentation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, shutil
+
+          backup = Path('backups/all-release-surfaces-sync-2026-09-18/final-doc-repair')
+          backup.mkdir(parents=True, exist_ok=True)
+
+          def save_backup(path):
+              path = Path(path)
+              dst = backup / path.name
+              if not dst.exists():
+                  shutil.copy2(path, dst)
+
+          # Stock Manager v0.8.4
+          p = Path('greasyfork/Stock-Manager-Advisor.md')
+          save_backup(p)
+          s = p.read_text(encoding='utf-8')
+          current = '''## Current release note
+
+**v0.8.4 — Rebalance Strategy Profiles**
+- Adds persistent **SAFE / BALANCED / AGGRESSIVE** Smart Rebalance profiles.
+- **SAFE:** up to 10% of portfolio value per move, stronger score threshold, maximum 2 suggested moves.
+- **BALANCED:** up to 20% per move, medium threshold, maximum 4 suggested moves; this remains the default behavior.
+- **AGGRESSIVE:** up to 35% per move, lower threshold, maximum 6 suggested moves.
+- Profiles tune technical-score, benefit-yield, benefit-tier and affordability weighting while using only free shares as sell sources.
+- The selected profile persists locally across TornPDA/desktop sessions.
+- Benefit Lock remains enforced and Smart Rebalance remains preview-only; no trade is submitted automatically.
+'''
+          s = re.sub(r'## Current release note\s*\n.*?(?=\n## Installation and Hub integration)', current + '\n', s, count=1, flags=re.S)
+          smart = '- **Smart Rebalance Strategy Profiles** with SAFE / BALANCED / AGGRESSIVE turnover caps, thresholds and weighting profiles; plans remain preview-only and Benefit Lock aware.\n'
+          anchor = '- **Portfolio Simulator** for no-trade SELL-excess → BUY-target scenarios while preserving Benefit Lock.\n'
+          if smart not in s and anchor in s:
+              s = s.replace(anchor, anchor + smart, 1)
+          if '### v0.8.4 — Rebalance Strategy Profiles' not in s:
+              block = '''### v0.8.4 — Rebalance Strategy Profiles
+- Added persistent SAFE, BALANCED and AGGRESSIVE Smart Rebalance profiles.
+- Added 10% / 20% / 35% per-move caps and 2 / 4 / 6 suggested-move limits by profile.
+- Added profile-specific score thresholds and technical/benefit/tier/affordability weighting.
+- Preserved Benefit Lock, free-share-only sell sources and preview-only execution.
+
+### v0.8.3 — Smart Rebalance Engine
+- Added portfolio-wide SELL → BUY planning with local technical and benefit context.
+- Added recalculation without automatic trade submission.
+
+### v0.8.2 — Portfolio Simulator
+- Added BEFORE → AFTER safe reallocation simulation with Benefit Lock respected.
+
+'''
+              s = s.replace('## Changelog\n\n', '## Changelog\n\n' + block, 1)
+          p.write_text(s, encoding='utf-8')
+
+          # Mission Rewards v1.0.41
+          p = Path('greasyfork/Mission-Rewards.md')
+          save_backup(p)
+          s = p.read_text(encoding='utf-8')
+          s = s.replace(
+              'The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is v1.0.18.',
+              'The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is the current v1.0.41 line.'
+          )
+          p.write_text(s, encoding='utf-8')
+
+          # Market Intelligence v1.17.38
+          p = Path('greasyfork/Market-Intelligence.md')
+          save_backup(p)
+          s = p.read_text(encoding='utf-8')
+          s = re.sub(
+              r'- Market Intelligence is distributed through Greasy Fork\. If Hub shows `PUBLISHED vX · REGISTRY v1\.17\.19`,.*?clear that legitimate pending state\.',
+              '- Market Intelligence is distributed through Greasy Fork. If Hub shows different **PUBLISHED** and **REGISTRY** versions, the public Greasy Fork metadata has not yet caught up with the registry; publish the matching current release to clear that pending state.',
+              s, count=1
+          )
+          if '### v1.17.38 — Restore Elimination-style footer from Hub and standalone' not in s:
+              entry = '''### v1.17.38 — Restore Elimination-style footer from Hub and standalone
+- Restores the Elimination-style Market footer whether Market is opened standalone or from Script Hub.
+- Removes the Hub suppression guard that could hide the Market-owned footer.
+- Force-mounts one SEND MONEY / SEND ITEMS row and the linked SakaLuX author line.
+
+'''
+              s = s.replace('## Release history / Changelog\n\n', '## Release history / Changelog\n\n' + entry, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Verify repaired text
+        shell: bash
+        run: |
+          grep -Fq '**v0.8.4 — Rebalance Strategy Profiles**' greasyfork/Stock-Manager-Advisor.md
+          grep -Fq '### v0.8.4 — Rebalance Strategy Profiles' greasyfork/Stock-Manager-Advisor.md
+          grep -Fq 'active/canonical release is the current v1.0.41 line' greasyfork/Mission-Rewards.md
+          ! grep -Fq 'active/canonical release is v1.0.18' greasyfork/Mission-Rewards.md
+          grep -Fq '### v1.17.38 — Restore Elimination-style footer from Hub and standalone' greasyfork/Market-Intelligence.md
+          ! grep -Fq 'REGISTRY v1.17.19' greasyfork/Market-Intelligence.md
+
+      - name: Commit repairs
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add greasyfork/Stock-Manager-Advisor.md greasyfork/Mission-Rewards.md greasyfork/Market-Intelligence.md backups/all-release-surfaces-sync-2026-09-18/final-doc-repair
+          if git diff --cached --quiet; then
+            echo 'No changes needed.'
+            exit 0
+          fi
+          git commit -m 'Finalize release documentation across SakaLuX modules'
+          git push
