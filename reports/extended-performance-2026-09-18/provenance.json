@@ -1,0 +1,144 @@
+{
+  "workflows": [
+    {
+      "name": "Extended performance audit",
+      "runId": 35368536227,
+      "url": "https://github.com/SakaLuX/SakaLuX-Script-HUB/actions/runs/35368536227",
+      "checkoutCommit": "9301210f7a021111f05fa48fbef04cfd3cd968d1",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Network performance audit",
+      "runId": 35369736495,
+      "url": "https://github.com/SakaLuX/SakaLuX-Script-HUB/actions/runs/35369736495",
+      "checkoutCommit": "b14e304df319e067df4640dad92aa5e3ce586dac",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify Suite lifecycle fix",
+      "runId": 35370256643,
+      "url": "https://github.com/SakaLuX/SakaLuX-Script-HUB/actions/runs/35370256643",
+      "checkoutCommit": "8327ebc4a5aa6b906a7fbc1d2cd7cedd6f14e573",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify final mobile CPU workload",
+      "runId": 35371222966,
+      "url": "https://github.com/SakaLuX/SakaLuX-Script-HUB/actions/runs/35371222966",
+      "checkoutCommit": "2f0a1e77ae27aa252e1e3193389d16c80f7ff957",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Repeat focused mobile CPU comparisons",
+      "runId": 35371397477,
+      "url": "https://github.com/SakaLuX/SakaLuX-Script-HUB/actions/runs/35371397477",
+      "checkoutCommit": "7574a9f6590988dc996b9b4349d40683bd5023d0",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify Stocks return deadline",
+      "runId": 35372143923,
+      "url": "https://github.com/SakaLuX/SakaLuX-Script-HUB/actions/runs/35372143923",
+      "checkoutCommit": "0e75f56e786940e3b61bf63e1b9c65add9a751ae",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "reportNotes": {
+    "results.json": "Original 30-minute run retained unchanged; 70/71 assertions passed. The sole 65ms Stocks observation miss is resolved by the explicit timed retest, not deleted.",
+    "suite-stability.json": "Suite lifecycle workflow applies .github/scripts/suite-lifecycle.patch before browser verification; source blob 5a9afda94cff816a6c76e78f511a12dc5941be2a.",
+    "network-browser.json": "After request-sharing fixes; the later same-turn forced-cache-read regression is separately verified by production-function tests and the final-source CPU runs.",
+    "stocks-route-verification.json": "All 100 returns mounted once; 99 early samples passed and max observed wall latency was 98ms. No production deadline changed."
+  },
+  "deliveredSources": [
+    {
+      "file": "private-module.user.js",
+      "version": "0.7.2",
+      "gitBlob": "c33290ffa7391367527e765bdd55f214f68ade80",
+      "sha256": "d8acab5a964ae9394fdb97b882b97d7b681a039511ac781c4194156ee04fee52",
+      "bytes": 53608
+    },
+    {
+      "file": "SakaLuX-Account-Auditor.user.js",
+      "version": "1.3.16",
+      "gitBlob": "6e1f16915c4d8abe782bc720d7aadcc43ae1ff1b",
+      "sha256": "d3f75392ea75db1fcaff5b11d64fdcffe0382837ecfbd745f21fa0a7fdb71ec5",
+      "bytes": 61408
+    },
+    {
+      "file": "SakaLuX-Bazaar-Thanker-PDA.user.js",
+      "version": "5.3.40",
+      "gitBlob": "dea116c236264533e82363d1ff5d8d2921608784",
+      "sha256": "c5099254c5eaa1788cdce975bd8b78e7b68f6bc64aa24ad66fa785df74578815",
+      "bytes": 81295
+    },
+    {
+      "file": "SakaLuX-Chat-Intelligence.user.js",
+      "version": "1.2.20",
+      "gitBlob": "a5994b57975ae4da0f4d70750a8c97a21b70a1af",
+      "sha256": "c875787d7f60191a8894799fefbc5d0e36d9b40960a0ef3fb59196fcfe0efe72",
+      "bytes": 35900
+    },
+    {
+      "file": "SakaLuX-Company-Intelligence-v1.0.0.user.js",
+      "version": "1.8.38",
+      "gitBlob": "59c65e32e0ed60e9a6c1859ac8f7cd504b120346",
+      "sha256": "5bd640de73701d5c44d8c657598201e06a1efb752f89f54ff75fc6e8132114e2",
+      "bytes": 134765
+    },
+    {
+      "file": "SakaLuX-Elimination-Assistant.user.js",
+      "version": "1.3.44",
+      "gitBlob": "4a9a5e38f5f623198dce7deaecc902e69d623350",
+      "sha256": "1a7417fa559beb1ca463b033b038a7c156e24cdbe96be0dfd607132c6f177e3e",
+      "bytes": 98469
+    },
+    {
+      "file": "SakaLuX-Enhancer-Guard.user.js",
+      "version": "1.3.47",
+      "gitBlob": "f5731045fd61b87f016c419745ec26e4a11729f9",
+      "sha256": "60a3aeb550b84d930ce9a3161813241f3ea9e0d0139d9786ff023362a67a1cb0",
+      "bytes": 103753
+    },
+    {
+      "file": "SakaLuX-Market-Intelligence.user.js",
+      "version": "1.17.40",
+      "gitBlob": "758648647ecd631e2531c06387602cb45ad30d7c",
+      "sha256": "e5538d26c5248826cf6855d4ccdcbaa906c6056935d9731082a654fb44c82bb5",
+      "bytes": 195723
+    },
+    {
+      "file": "SakaLuX-Mission-Rewards.user.js",
+      "version": "1.0.42",
+      "gitBlob": "6b7af2fa7dbbd887c7737b96bafb6302b1c8aede",
+      "sha256": "443ad9f205be68a67e22634b8e68fdd239bec33ec3e6b8efcc2e517e2e690e0e",
+      "bytes": 89893
+    },
+    {
+      "file": "SakaLuX-Script-Hub.user.js",
+      "version": "1.9.73",
+      "gitBlob": "cd0e011efb0b0823eefe4a4285e4389cec16dbfb",
+      "sha256": "413ae4a043eee211b6488d1d08d37b321a3aa57b8cf129ecc46fd40f2d5b79a2",
+      "bytes": 213497
+    },
+    {
+      "file": "SakaLuX-Stock-Manager-Advisor.user.js",
+      "version": "0.8.7",
+      "gitBlob": "a61f2dc4943918581c0dec725893472d616651ba",
+      "sha256": "8ee57c35ae03f758503dc01e661023be371da638040aa15f3a78155fee89851b",
+      "bytes": 227751
+    },
+    {
+      "file": "SakaLuX-Suite.user.js",
+      "version": "0.9.929",
+      "gitBlob": "5a9afda94cff816a6c76e78f511a12dc5941be2a",
+      "sha256": "db3f53bb20c59a2b5fcb14169ab894e1e2374147ac6ec5ef38121e8e8b41259b",
+      "bytes": 1902908
+    }
+  ]
+}

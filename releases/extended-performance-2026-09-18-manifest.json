@@ -1,0 +1,9 @@
+[
+ {"id":"chat-intelligence","file":"SakaLuX-Chat-Intelligence.user.js","version":"1.2.20","tag":"chat-intelligence-v1.2.20","notes":"releases/chat-intelligence-v1.2.20.md"},
+ {"id":"stock-manager-advisor","file":"SakaLuX-Stock-Manager-Advisor.user.js","version":"0.8.7","tag":"stock-manager-advisor-v0.8.7","notes":"releases/stock-manager-advisor-v0.8.7.md"},
+ {"id":"elimination-assistant","file":"SakaLuX-Elimination-Assistant.user.js","version":"1.3.44","tag":"elimination-assistant-v1.3.44","notes":"releases/elimination-assistant-v1.3.44.md"},
+ {"id":"market-intelligence","file":"SakaLuX-Market-Intelligence.user.js","version":"1.17.40","tag":"market-intelligence-v1.17.40","notes":"releases/market-intelligence-v1.17.40.md"},
+ {"id":"account-auditor","file":"SakaLuX-Account-Auditor.user.js","version":"1.3.16","tag":"account-auditor-v1.3.16","notes":"releases/account-auditor-v1.3.16.md"},
+ {"id":"script-hub","file":"SakaLuX-Script-Hub.user.js","version":"1.9.73","tag":"hub-v1.9.73","notes":"releases/hub-v1.9.73.md"},
+ {"id":"suite","file":"SakaLuX-Suite.user.js","version":"0.9.929","tag":"suite-v0.9.929","notes":"releases/suite-v0.9.929.md"}
+]
