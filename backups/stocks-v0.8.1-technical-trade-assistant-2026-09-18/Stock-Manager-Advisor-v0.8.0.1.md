@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. Source is maintained on GitHub; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.1**
+**v0.8.0.1**
 
 ## What it does
 - Stock vault target selection directly from the Torn Stocks page.
@@ -20,12 +20,12 @@
 
 ## Current release note
 
-**v0.8.1 — Technical Trade Assistant**
-- Upgrades the 24H / 1W / 1M local chart with visible Price, EMA20, EMA90 and Bollinger overlays.
-- Adds selected-window momentum, RSI 14, Bollinger lower/mid/upper metrics and sample/coverage diagnostics.
-- Adds a multi-factor technical signal score based on EMA direction, RSI, Bollinger position and window momentum.
-- Clearly returns **COLLECTING DATA** when local history is too short instead of presenting a strong signal from too few samples.
-- Keeps all existing Financial Advisor, Benefit Lock, Dry Run, PANIC and trade safeguards intact; v0.8.2 remains reserved for the smarter Portfolio Simulator.
+**v0.8.0.1 — Stabilization & TornPDA polish**
+- Stabilizes the v0.8.0 foundation before v0.8.1 Technical Trade Assistant and v0.8.2 Portfolio Simulator.
+- Hardens local history parsing/pruning/storage and makes technical calculations respect the selected 24H / 1W / 1M window.
+- Saves Daily Costs, exclusions and Simulator amount while typing with debounced rerenders.
+- Prevents identical Simulator source/target selections and tightens automatic Bank APR capture.
+- Isolates Advisor Suite render failures and adds TornPDA overflow/single-column polish without changing existing trading controls.
 
 
 ## Installation and Hub integration
@@ -54,14 +54,6 @@ The Panic behavior in this build means **cash → configured stock target**: it 
 - Hub integration is available from v0.7.7.
 
 ## Changelog
-
-### v0.8.1 — Technical Trade Assistant
-- Added richer 24H / 1W / 1M SVG chart with Price, EMA20, EMA90 and Bollinger overlays.
-- Added selected-window momentum and Bollinger lower/mid/upper readouts.
-- Added a multi-factor technical score and BUY BIAS / SELL BIAS / WATCH / NEUTRAL states.
-- Added sample-count and local-history coverage diagnostics; short histories are marked COLLECTING DATA.
-- Preserved v0.8.0.1 Financial Advisor, safety controls and Portfolio Simulator foundation.
-- Synchronized userscript/runtime version surfaces, scripts.json, INFO/release metadata and changelog to v0.8.1.
 
 ### v0.8.0.1 — Stabilization & TornPDA polish
 - Hardened local technical-history parsing, pruning, de-duplication and storage fallback.

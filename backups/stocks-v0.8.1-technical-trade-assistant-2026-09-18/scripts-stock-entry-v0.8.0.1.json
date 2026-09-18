@@ -1,0 +1,54 @@
+{
+  "active": true,
+  "apiGlobal": "SakaLuXStockManagerAdvisor",
+  "buttonSelector": "#sakalux-module-bridge-stock-manager-advisor",
+  "category": "Trading",
+  "description": "Torn stock vault, ROI/benefit advisor and stabilized Financial Advisor foundation with persistent settings, safer bank-rate capture, protected trading and global PANIC workflow.",
+  "downloadUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.user.js",
+  "icon": "\ud83d\udcca",
+  "id": "stock-manager-advisor",
+  "info": "Stock Manager & Advisor is the SakaLuX stock decision-support and protected-trading module. It provides stock-vault targets, Vault Max/Keep, Withdraw/Withdraw All, Benefit Lock, portfolio and cost-basis views, ROI and next-benefit analysis, quick BUY/SELL tools, favorites, filters, guided rebalance, transaction history and a global PANIC cash-to-stock workflow. v0.8.0 adds a Financial Advisor with daily/monthly income and cost modelling, Best ROI and Best Affordable cards, bank-period comparison with best-effort automatic rate capture from Torn Bank pages, a local Technical Trade Assistant with 24H/1W/1M history, RSI 14, EMA 20/90, Bollinger bands and an SVG chart, plus a no-trade Portfolio Simulator that previews safe excess-share reallocation while respecting Benefit Lock. Technical history is stored locally and grows as the module is used; no external market-history service is required.",
+  "metaUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
+  "name": "Stock Manager & Advisor",
+  "quickActions": [
+    {
+      "icon": "\u23fb",
+      "id": "toggle",
+      "label": "POWER",
+      "method": "toggleEnabled"
+    },
+    {
+      "icon": "\ud83d\udcca",
+      "id": "open",
+      "label": "OPEN",
+      "method": "open"
+    },
+    {
+      "icon": "\ud83d\udd04",
+      "id": "refresh",
+      "label": "REFRESH",
+      "method": "refresh"
+    },
+    {
+      "fallbackUrl": "https://www.torn.com/page.php?sid=stocks",
+      "icon": "\ud83d\udcc8",
+      "id": "stocks",
+      "label": "STOCKS",
+      "method": "goToStocks"
+    }
+  ],
+  "release": {
+    "date": "2026-09-18",
+    "version": "0.8.0.1",
+    "notes": [
+      "Stabilization and TornPDA polish before the staged v0.8.1 Technical Trade Assistant and v0.8.2 Portfolio Simulator releases.",
+      "Hardens local technical-history parsing, pruning and storage fallback; indicators respect the selected 24H / 1W / 1M window.",
+      "Persists typed Daily Costs, exclusions and Simulator amount immediately with debounced rerenders and prevents identical simulator source/target selections.",
+      "Tightens automatic Bank APR capture and isolates Advisor Suite card rendering failures.",
+      "Adds narrow-screen overflow protection and single-column TornPDA polish without changing established trading controls."
+    ]
+  },
+  "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
+  "type": "addon",
+  "version": "0.8.0.1"
+}
