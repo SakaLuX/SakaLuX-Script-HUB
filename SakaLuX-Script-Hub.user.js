@@ -1902,9 +1902,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         };
 
         const names = ['gym', 'properties', 'education', 'crimes', 'missions', 'newspaper', 'jail', 'hospital', 'casino'];
-        const anchors = names
-            .map(name => allClickable.find(el => cleanLabel(el) === name))
-            .filter(Boolean);
+        const anchors = names.map(name => allClickable.find(el => cleanLabel(el) === name)).filter(Boolean);
         const rows = anchors.map(findNativeRow).filter(Boolean);
 
         let sidebarParent = null;
@@ -1932,16 +1930,13 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
         const positionAtTop = row => {
             if (!row) return false;
-            if (row.parentElement !== sidebarParent || row.nextElementSibling !== insertTarget) {
-                sidebarParent.insertBefore(row, insertTarget);
-            }
+            if (row.parentElement !== sidebarParent || row.nextElementSibling !== insertTarget) sidebarParent.insertBefore(row, insertTarget);
             row.dataset.sakaluxHubMode = 'flyout';
             return true;
         };
 
         if (existing?.isConnected) {
             positionAtTop(existing);
-            existing.querySelectorAll('[data-sakalux-inherited-extra]').forEach(el => el.remove());
             updateTopbarSkullState();
             syncFloatingButtonVisibility();
             return true;
@@ -1958,11 +1953,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         });
 
         const click = row.matches('a[href],button') ? row : row.querySelector('a[href],button');
-        if (!click) {
-            syncFloatingButtonVisibility();
-            return false;
-        }
-
+        if (!click) return false;
         if (click.tagName === 'A') click.setAttribute('href', '#sakalux-hub');
         click.removeAttribute('target');
         click.removeAttribute('rel');
@@ -1971,18 +1962,12 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         click.setAttribute('aria-label', 'SakaLuX Hub');
 
         const leafText = [...click.querySelectorAll('span,div')].filter(el => el.children.length === 0);
-        const labelNode = leafText.find(el => cleanLabel(el) === 'gym')
-            || leafText.find(el => cleanLabel(el) === cleanLabel(templateRow))
-            || leafText.find(el => cleanLabel(el));
+        const labelNode = leafText.find(el => cleanLabel(el) === 'gym') || leafText.find(el => cleanLabel(el));
         if (labelNode) labelNode.textContent = 'SAKALUX HUB';
-
         for (const el of leafText) {
             if (el === labelNode) continue;
             const t = String(el.textContent || '').trim();
-            if (/^\d+$/.test(t) || /^[›»▶►→]+$/.test(t)) {
-                el.setAttribute('data-sakalux-inherited-extra', '1');
-                el.remove();
-            }
+            if (/^\d+$/.test(t) || /^[›»▶►→]+$/.test(t)) el.remove();
         }
 
         const makeSkullSvg = nativeSvg => {
@@ -2000,7 +1985,6 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             svg.style.setProperty('-webkit-filter', 'none', 'important');
             svg.setAttribute('aria-hidden', 'true');
             svg.classList.add('slh-native-skull-icon');
-
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             g.setAttribute('transform', `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${scale.toFixed(4)})`);
             g.setAttribute('fill', 'none');
@@ -2008,12 +1992,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             g.setAttribute('stroke-width', '1.75');
             g.setAttribute('stroke-linecap', 'round');
             g.setAttribute('stroke-linejoin', 'round');
-            g.innerHTML = `
-                <path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-7.6-8.1-7.6Z"/>
-                <circle cx="8.8" cy="10.5" r="1.65"/>
-                <circle cx="15.2" cy="10.5" r="1.65"/>
-                <path d="m12 12.7-1 1.8h2l-1-1.8Z"/>
-                <path d="M8.1 16.1h7.8M10.5 16.1v1.3M13.5 16.1v1.3"/>`;
+            g.innerHTML = `<path d="M12 2.4c-4.8 0-8.1 3.2-8.1 7.6 0 2.8 1.4 5.1 3.8 6.4v3.1h2.2v-2.1h1v2.1h2.2v-2.1h1v2.1h2.2v-3.1c2.4-1.3 3.8-3.6 3.8-6.4 0-4.4-3.3-7.6-8.1-7.6Z"/><circle cx="8.8" cy="10.5" r="1.65"/><circle cx="15.2" cy="10.5" r="1.65"/><path d="m12 12.7-1 1.8h2l-1-1.8Z"/><path d="M8.1 16.1h7.8M10.5 16.1v1.3M13.5 16.1v1.3"/>`;
             svg.appendChild(g);
             return svg;
         };
@@ -2038,11 +2017,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         badge.id = IDS.navBadge;
         click.appendChild(badge);
 
-        const open = event => {
-            event.preventDefault();
-            event.stopPropagation();
-            openHub();
-        };
+        const open = event => { event.preventDefault(); event.stopPropagation(); openHub(); };
         click.addEventListener('click', open, true);
         click.addEventListener('keydown', event => {
             if (event.key === 'Enter' || event.key === ' ') open(event);
