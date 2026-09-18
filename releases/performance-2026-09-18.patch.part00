@@ -1,0 +1,413 @@
+diff --git a/SakaLuX-Account-Auditor.user.js b/SakaLuX-Account-Auditor.user.js
+index bd1beb9..af97364 100644
+--- a/SakaLuX-Account-Auditor.user.js
++++ b/SakaLuX-Account-Auditor.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Account Auditor
+ // @namespace    sakalux.account.auditor
+-// @version      1.3.14
++// @version      1.3.15
+ // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
+ // @author       SakaLuX
+ // @match        https://www.torn.com/*
+@@ -37,6 +37,11 @@
+         }
+       };
+     }
++    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
++    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
++      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
++      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
++    });
+     if (!document.getElementById('sakalux-shared-hub-skin')) {
+       const st=document.createElement('style');
+       st.id='sakalux-shared-hub-skin';
+@@ -146,9 +151,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+     collectLaunchers();
+     setTimeout(maybePrompt, 1200);
+     let timer = 0;
+-    new MutationObserver(() => {
+-      clearTimeout(timer);
++    new MutationObserver(records => {
++      if(window.SakaLuXPerf?.unrelated?.(records)||timer)return;
+       timer = setTimeout(() => {
++        timer = 0;
+         if (hubInstalled()) {
+           document.getElementById(DOCK_ID)?.remove();
+           document.getElementById(PROMPT_ID)?.remove();
+@@ -168,7 +174,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+ (function () {
+     'use strict';
+ 
+-    const VERSION = '1.3.14';
++    const VERSION = '1.3.15';
+     const NAME = 'SakaLuX Account Auditor';
+     const PDA_KEY = '###PDA-APIKEY###';
+     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+@@ -564,7 +570,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+   if(!document.body)return;
+   let e=document.querySelector('[data-slx-standalone-registration="account-auditor"]');
+   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','account-auditor');document.body.appendChild(e);}
+-  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.14'});
++  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.15'});
+  };
+  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
+ })();
+diff --git a/SakaLuX-Bazaar-Thanker-PDA.user.js b/SakaLuX-Bazaar-Thanker-PDA.user.js
+index b836a75..dea116c 100644
+--- a/SakaLuX-Bazaar-Thanker-PDA.user.js
++++ b/SakaLuX-Bazaar-Thanker-PDA.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Bazaar Thanker - PDA
+ // @namespace    sakalux.bazaar.thanker
+-// @version      5.3.39
++// @version      5.3.40
+ // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
+ // @author       SakaLuX [2380374]
+ // @copyright    2026 SakaLuX [2380374]
+@@ -54,6 +54,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+         }
+       };
+     }
++    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
++    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
++      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
++      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
++    });
+     if (!document.getElementById('sakalux-shared-hub-skin')) {
+       const st=document.createElement('style');
+       st.id='sakalux-shared-hub-skin';
+@@ -71,14 +76,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+     }
+   })();
+ 
+-  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.39'});
++  const SELF=Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"},{version:'5.3.40'});
+   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
+   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
+   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
+   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
+   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];
+-  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
++  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.documentElement?.getAttribute('data-sakalux-hub-installed')==='1'||document.body?.getAttribute('data-sakalux-hub-installed')==='1'||document.documentElement?.getAttribute('data-sakalux-hub-active')==='1'||document.body?.getAttribute('data-sakalux-hub-active')==='1');
+ 
+   function registerSelf(){
+     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
+@@ -159,7 +164,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+     const d=ensureDock(); if(!d) return;
+     const box=d.querySelector('.slx-dock-items');
+     const regs=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id);
+-    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); box.replaceChildren();
++    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); const signature=JSON.stringify(regs.map(r=>[r.id,r.name,r.icon,r.selector,r.fallback,r.version]));if(box.dataset.slxEntries===signature){ensureNativeLauncher();return;}box.dataset.slxEntries=signature;box.replaceChildren();
+     for(const r of regs){
+       const b=document.createElement('button'); b.type='button'; b.className='slx-dock-row';
+       b.innerHTML=`<span class="slx-left"><span class="i">${r.icon||'•'}</span></span><span class="slx-title">${r.name||r.id}</span><span class="slx-right-pad"></span>`;
+@@ -188,9 +193,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+       render();
+     };
+     if(hubInstalled()){stopForHub();return;}
+-    const queue=(wait=700)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
++    const queue=(wait=700)=>{if(t)return;t=setTimeout(()=>{t=0;refresh();},wait);};
+     const root=document.body||document.documentElement;
+     observer=new MutationObserver(ms=>{
++      if(window.SakaLuXPerf?.unrelated?.(ms))return;
+       if(hubInstalled()){stopForHub();return;}
+       if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(700);
+     });
+@@ -1155,7 +1161,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+ 
+     function startEventObserver() {
+         if (!moduleEnabled || eventObserver) return;
+-        eventObserver = new MutationObserver(function () { scheduleProcess(); });
++        eventObserver = new MutationObserver(function (records) { if (!window.SakaLuXPerf?.unrelated?.(records)) scheduleProcess(); });
+         eventObserver.observe(document.body, { childList: true, subtree: true });
+     }
+ 
+@@ -1178,7 +1184,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+         setTimeout(fillMessageEditor, 2000);
+     }
+ 
+-    const BAZAAR_VERSION='5.3.39';
++    const BAZAAR_VERSION='5.3.40';
+ 
+     function openSettingsPanel() {
+         if (!moduleEnabled) setEnabled(true);
+diff --git a/SakaLuX-Chat-Intelligence.user.js b/SakaLuX-Chat-Intelligence.user.js
+index e0b84bc..c01775a 100644
+--- a/SakaLuX-Chat-Intelligence.user.js
++++ b/SakaLuX-Chat-Intelligence.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Chat Intelligence
+ // @namespace    sakalux.chat.intelligence
+-// @version      1.2.18
++// @version      1.2.19
+ // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
+ // @author       SakaLuX [2380374]
+ // @match        https://www.torn.com/*
+@@ -50,6 +50,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+         }
+       };
+     }
++    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
++    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
++      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
++      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
++    });
+     if (!document.getElementById('sakalux-shared-hub-skin')) {
+       const st=document.createElement('style');
+       st.id='sakalux-shared-hub-skin';
+@@ -67,7 +72,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+     }
+   })();
+ 
+-const V='1.2.17',ID='chat-intelligence',API='SakaLuXChatIntelligence';
++const V='1.2.19',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+ const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
+ const D={enabled:true,search:true,quickActions:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
+ const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
+@@ -101,9 +106,9 @@ function mentions(r){if(!S.mentionAutocomplete)return;const c=composer().find(x=
+ function enhance(r){controls(r);mentions(r);const first=!ROOTS.has(r);msgs(r).forEach(e=>decorate(r,e,first));ROOTS.add(r)}
+ function clean(){document.querySelectorAll('.slx-head-controls').forEach(x=>{if(!x._root?.isConnected)x.remove()})}
+ function scan(){if(!S.enabled)return;clean();roots().forEach(enhance);bridge()}
+-function start(){if(O)return;O=new MutationObserver(a=>{if(a.some(m=>m.addedNodes?.length)){clearTimeout(T);T=setTimeout(scan,120)}});O.observe(document.documentElement,{childList:true,subtree:true})}
++function start(){if(O)return;O=new MutationObserver(a=>{if(a.some(m=>m.addedNodes?.length&&!m.target?.closest?.(".slx-head-controls,.slx-toast-host,.slx-mentions,#slx-menu,#sakalux-chat-settings-overlay"))&&!T){T=setTimeout(()=>{T=null;scan()},120)}});O.observe(document.documentElement,{childList:true,subtree:true})}
+ function bridge(){let b=document.getElementById('sakalux-module-bridge-'+ID);if(!b){b=document.createElement('button');b.id='sakalux-module-bridge-'+ID;b.hidden=true;b.style.display='none';b.onclick=()=>{const a=b.dataset.action;if(a==='open')settings();else if(a==='on')enable(true);else if(a==='off')enable(false);else if(a==='toggle')enable(!S.enabled);b.dataset.action=''};document.documentElement.appendChild(b)}b.dataset.version=V;b.dataset.enabled=String(S.enabled);b.dataset.ready='true'}
+-function enable(v){S.enabled=!!v;save();if(S.enabled){start();scan()}else{O?.disconnect();O=null;document.querySelectorAll('.slx-head-controls,.slx-toast-host,.slx-mentions').forEach(e=>e.remove());closeSearch(true)}bridge();return S.enabled}
++function enable(v){S.enabled=!!v;save();if(S.enabled){start();scan()}else{clearTimeout(T);T=null;O?.disconnect();O=null;document.querySelectorAll('.slx-head-controls,.slx-toast-host,.slx-mentions').forEach(e=>e.remove());closeSearch(true)}bridge();return S.enabled}
+ function settings(){if(document.getElementById('sakalux-chat-settings-overlay'))return;const o=document.createElement('div');o.id='sakalux-chat-settings-overlay';const a=[['enabled','Module enabled'],['quickActions','Context actions'],['notifications','Notifications'],['notifyPM','Notify PM'],['notifyFaction','Notify Faction'],['notifyCompany','Notify Company'],['mentionAutocomplete','@mention autocomplete'],['exportSearch','Export search']];o.innerHTML='<section><header><b>💬 Chat Intelligence v'+V+'</b><button>×</button></header><main>'+a.map(([k,l])=>'<label>'+l+'<input type="checkbox" data-k="'+k+'" '+(S[k]?'checked':'')+'></label>').join('')+'</main></section>';document.body.appendChild(o);o.querySelector('header button').onclick=()=>o.remove();o.querySelectorAll('[data-k]').forEach(x=>x.onchange=()=>{S[x.dataset.k]=x.checked;save();if(x.dataset.k==='enabled')enable(x.checked);else scan()})}
+ function css(){const s=document.createElement('style');s.textContent=`
+ .slx-head-controls{position:absolute!important;right:52px!important;top:0!important;bottom:0!important;height:auto!important;display:flex!important;align-items:stretch!important;z-index:20!important;pointer-events:auto!important;margin:0!important;padding:0!important}.slx-head-controls button{all:unset!important;box-sizing:border-box!important;width:32px!important;min-width:32px!important;height:100%!important;display:grid!important;place-items:center!important;font-size:15px!important;line-height:1!important;color:#d9e0e6!important;background:transparent!important;border-left:1px solid rgba(255,255,255,.08)!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}.slx-head-controls button:active{background:rgba(255,255,255,.12)!important}.slx-head-controls button[hidden]{display:none!important}
+@@ -199,7 +204,7 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
+   if(!document.body)return;
+   let e=document.querySelector('[data-slx-standalone-registration="chat-intelligence"]');
+   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','chat-intelligence');document.body.appendChild(e);}
+-  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.18'});
++  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.19'});
+  };
+  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
+ })();
+diff --git a/SakaLuX-Company-Intelligence-v1.0.0.user.js b/SakaLuX-Company-Intelligence-v1.0.0.user.js
+index bfa32a9..59c65e3 100644
+--- a/SakaLuX-Company-Intelligence-v1.0.0.user.js
++++ b/SakaLuX-Company-Intelligence-v1.0.0.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Company Intelligence
+ // @namespace    sakalux.torn.company
+-// @version      1.8.37
++// @version      1.8.38
+ // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
+ // @author       SakaLuX [2380374]
+ // @copyright    2026 SakaLuX [2380374]
+@@ -59,6 +59,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+         }
+       };
+     }
++    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
++    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
++      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
++      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
++    });
+     if (!document.getElementById('sakalux-shared-hub-skin')) {
+       const st=document.createElement('style');
+       st.id='sakalux-shared-hub-skin';
+@@ -76,14 +81,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+     }
+   })();
+ 
+-  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.37'});
++  const SELF=Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"},{version:'1.8.38'});
+   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
+   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
+   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
+   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
+   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];
+-  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
++  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.documentElement?.getAttribute('data-sakalux-hub-installed')==='1'||document.body?.getAttribute('data-sakalux-hub-installed')==='1'||document.documentElement?.getAttribute('data-sakalux-hub-active')==='1'||document.body?.getAttribute('data-sakalux-hub-active')==='1');
+ 
+   function registerSelf(){
+     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
+@@ -164,7 +169,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+     const d=ensureDock(); if(!d) return;
+     const box=d.querySelector('.slx-dock-items');
+     const regs=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id);
+-    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); box.replaceChildren();
++    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); const signature=JSON.stringify(regs.map(r=>[r.id,r.name,r.icon,r.selector,r.fallback,r.version]));if(box.dataset.slxEntries===signature){ensureNativeLauncher();return;}box.dataset.slxEntries=signature;box.replaceChildren();
+     for(const r of regs){
+       const b=document.createElement('button'); b.type='button'; b.className='slx-dock-row';
+       b.innerHTML=`<span class="slx-left"><span class="i">${r.icon||'•'}</span></span><span class="slx-title">${r.name||r.id}</span><span class="slx-right-pad"></span>`;
+@@ -193,9 +198,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+       render();
+     };
+     if(hubInstalled()){stopForHub();return;}
+-    const queue=(wait=700)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
++    const queue=(wait=700)=>{if(t)return;t=setTimeout(()=>{t=0;refresh();},wait);};
+     const root=document.body||document.documentElement;
+     observer=new MutationObserver(ms=>{
++      if(window.SakaLuXPerf?.unrelated?.(ms))return;
+       if(hubInstalled()){stopForHub();return;}
+       if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(700);
+     });
+@@ -275,6 +281,11 @@ This is an information/decision-support tool. It never automates company actions
+         }
+       };
+     }
++    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
++    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
++      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
++      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
++    });
+     if (!document.getElementById('sakalux-shared-hub-skin')) {
+       const st=document.createElement('style');
+       st.id='sakalux-shared-hub-skin';
+@@ -293,7 +304,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+   })();
+ 
+ 
+-const APP={name:'SakaLuX Company Intelligence',version:'1.8.37',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
++const APP={name:'SakaLuX Company Intelligence',version:'1.8.38',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+ const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
+ const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
+ const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
+@@ -914,7 +925,7 @@ function init(){
+   window.dispatchEvent(new CustomEvent('SakaLuX:ModuleReady',{detail:{id:'company-intelligence',name:APP.name,version:APP.version,actions:['OPEN','REFRESH','EMPLOYEE','DIRECTOR']}}));
+  }catch{}
+ }
+-let ciPosTimer=0;new MutationObserver(records=>{if(document.hidden||!/(?:companies|joblist)\.php/i.test(location.pathname)||records.every(r=>(r.target.nodeType===1?r.target:r.target.parentElement)?.closest?.('#ci-root,#sakalux-hub-overlay,[id^="sakalux-inline-footer-"]')))return;clearTimeout(ciPosTimer);ciPosTimer=setTimeout(()=>{try{scrapePositionRequirements()}catch{}},300)}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
++let ciPosTimer=0;new MutationObserver(records=>{if(window.SakaLuXPerf?.unrelated?.(records)||document.hidden||!/(?:companies|joblist)\.php/i.test(location.pathname)||records.every(r=>(r.target.nodeType===1?r.target:r.target.parentElement)?.closest?.('#ci-root,#sakalux-hub-overlay,[id^="sakalux-inline-footer-"]')))return;clearTimeout(ciPosTimer);ciPosTimer=setTimeout(()=>{try{scrapePositionRequirements()}catch{}},300)}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+ setTimeout(()=>{try{scrapePositionRequirements()}catch{}},800);
+ setInterval(registerStandaloneEntry,15000);
+ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
+@@ -1078,14 +1089,15 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
+ })();
+ 
+ 
+-/* SAKALUX_COMPANY_ABOVE_STANDALONE_V1832 */
+-(()=>{const st=document.createElement('style');st.textContent='#ci-root#ci-root{z-index:2147483646!important}';(document.head||document.documentElement).appendChild(st);const fix=()=>{const e=document.querySelector('[data-slx-standalone-registration="company-intelligence"]');if(e){e.dataset.selector='#sakalux-module-bridge-company-intelligence';e.dataset.version='1.8.34';}};fix();setTimeout(fix,100);setTimeout(fix,700);})();
+ 
+ 
+-/* SAKALUX_COMPANY_STANDALONE_CLICK_V1833 */
+-(()=>{const fix=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="company-intelligence"]');if(e){Object.assign(e.dataset,{id:'company-intelligence',name:'Company',icon:'🏢',selector:'#sakalux-module-bridge-company-intelligence',fallback:'https://www.torn.com/joblist.php',version:'1.8.34'});}}catch{}};fix();setTimeout(fix,100);setTimeout(fix,800);setInterval(fix,5000);})();
+ 
+ 
++
++
++/* Preserve Company panel stacking without the obsolete periodic registration fixers. */
++(()=>{const st=document.createElement('style');st.textContent='#ci-root#ci-root{z-index:2147483646!important}';(document.head||document.documentElement).appendChild(st);})();
++
+ /* SAKALUX_COMPANY_ELIMINATION_LAYOUT_V1834 */
+ (()=>{
+  const st=document.createElement('style');st.id='sakalux-company-elimination-layout-v1834';st.textContent=`
+diff --git a/SakaLuX-Elimination-Assistant.user.js b/SakaLuX-Elimination-Assistant.user.js
+index 42ab7c1..37dfa8a 100644
+--- a/SakaLuX-Elimination-Assistant.user.js
++++ b/SakaLuX-Elimination-Assistant.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Elimination Assistant
+ // @namespace    sakalux.elimination.assistant
+-// @version      1.3.42
++// @version      1.3.43
+ // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
+ // @author       SakaLuX [2380374]
+ // @copyright    2026 SakaLuX [2380374]
+@@ -56,6 +56,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+         }
+       };
+     }
++    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
++    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
++      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
++      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
++    });
+     if (!document.getElementById('sakalux-shared-hub-skin')) {
+       const st=document.createElement('style');
+       st.id='sakalux-shared-hub-skin';
+@@ -73,14 +78,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+     }
+   })();
+ 
+-  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.42'});
++  const SELF=Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"},{version:'1.3.43'});
+   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
+   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
+   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
+   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
+   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];
+-  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
++  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.documentElement?.getAttribute('data-sakalux-hub-installed')==='1'||document.body?.getAttribute('data-sakalux-hub-installed')==='1'||document.documentElement?.getAttribute('data-sakalux-hub-active')==='1'||document.body?.getAttribute('data-sakalux-hub-active')==='1');
+ 
+   function registerSelf(){
+     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
+@@ -180,7 +185,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+     p.querySelector('[data-later]').onclick=()=>p.remove();
+     p.querySelector('[data-install]').onclick=()=>location.href=HUB_URL;
+   }
+-  function start(){registerSelf();render();setTimeout(maybePrompt,1200);let t=0;new MutationObserver(()=>{clearTimeout(t);t=setTimeout(()=>{registerSelf();render();},220);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(()=>{registerSelf();render();maybePrompt();},60000);}
++  function start(){registerSelf();render();setTimeout(maybePrompt,1200);let t=0;new MutationObserver(records=>{if(window.SakaLuXPerf?.unrelated?.(records)||t)return;t=setTimeout(()=>{t=0;registerSelf();render();},220);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(()=>{registerSelf();render();maybePrompt();},60000);}
+   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
+ })();
+ (() => {
+@@ -221,7 +226,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+  */
+ (() => {
+ 'use strict';
+-const VERSION = '1.3.42';
++const VERSION = '1.3.43';
+ const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+ const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
+ const HUB_PROMPT_ID='sakalux-hub-install-prompt';
+diff --git a/SakaLuX-Enhancer-Guard.user.js b/SakaLuX-Enhancer-Guard.user.js
+index 1b39ced..f573104 100644
+--- a/SakaLuX-Enhancer-Guard.user.js
++++ b/SakaLuX-Enhancer-Guard.user.js
+@@ -1,7 +1,7 @@
+ // ==UserScript==
+ // @name         SakaLuX Enhancer Guard
+ // @namespace    https://torn.com/
+-// @version      1.3.46
++// @version      1.3.47
+ // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
+ // @author       SakaLuX [2380374]
+ // @copyright    2026 SakaLuX [2380374]
+@@ -55,6 +55,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+         }
+       };
+     }
++    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
++    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
++      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
++      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
++    });
+     if (!document.getElementById('sakalux-shared-hub-skin')) {
+       const st=document.createElement('style');
+       st.id='sakalux-shared-hub-skin';
+@@ -72,14 +77,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
+     }
+   })();
+ 
+-  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.46'});
++  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.47'});
+   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
+   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
+   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
+   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
+   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
+   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];
+-  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
++  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.documentElement?.getAttribute('data-sakalux-hub-installed')==='1'||document.body?.getAttribute('data-sakalux-hub-installed')==='1'||document.documentElement?.getAttribute('data-sakalux-hub-active')==='1'||document.body?.getAttribute('data-sakalux-hub-active')==='1');
+ 
+   function registerSelf(){
+     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
+@@ -160,7 +165,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
+     const d=ensureDock(); if(!d) return;
+     const box=d.querySelector('.slx-dock-items');
+     const regs=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id);
+-    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); box.replaceChildren();
++    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); const signature=JSON.stringify(regs.map(r=>[r.id,r.name,r.icon,r.selector,r.fallback,r.ver

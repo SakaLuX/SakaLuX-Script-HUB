@@ -1,0 +1,475 @@
+mination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
+@@ -40,6 +43,14 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
+ 
+ ## Release history / Changelog
+ 
++### v1.3.43 — Performance and TornPDA smoothness
++
++- Uses constant-time Hub detection in standalone maintenance.
++- Batches standalone refreshes and ignores chat/dock/footer mutations.
++- Preserves target settings, learning records and attack links.
++- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
++
++
+ ### v1.3.42 — Performance and release metadata audit
+ - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+ - Limits SAFE/persistence installation observers to top-level panel lifecycle changes.
+diff --git a/greasyfork/Enhancer-Guard.md b/greasyfork/Enhancer-Guard.md
+index 1a4e434..4a14781 100644
+--- a/greasyfork/Enhancer-Guard.md
++++ b/greasyfork/Enhancer-Guard.md
+@@ -3,7 +3,7 @@
+ > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+ 
+ ## Current version
+-**v1.3.46**
++**v1.3.47**
+ 
+ ## What it does
+ - Tracks Enhancers and Enhancer Relics in Torn.
+@@ -17,7 +17,10 @@
+ 
+ ## Current release note
+ 
+-**v1.3.46** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
++**v1.3.47 — Performance and TornPDA smoothness**
++- Stops repeated inventory badge replacement when protection state is unchanged.
++- Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.
++- Preserves sale blocking, reserved quantities and protection controls.
+ 
+ ## Recommended
+ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
+@@ -37,6 +40,14 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
+ 
+ ## Release history / Changelog
+ 
++### v1.3.47 — Performance and TornPDA smoothness
++
++- Stops repeated inventory badge replacement when protection state is unchanged.
++- Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.
++- Preserves sale blocking, reserved quantities and protection controls.
++- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
++
++
+ ### v1.3.46 — Performance and release metadata audit
+ - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.
+ 
+diff --git a/greasyfork/Market-Intelligence.md b/greasyfork/Market-Intelligence.md
+index 4898184..c8eb900 100644
+--- a/greasyfork/Market-Intelligence.md
++++ b/greasyfork/Market-Intelligence.md
+@@ -3,7 +3,7 @@
+ > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+ 
+ ## Current version
+-**v1.17.38**
++**v1.17.39**
+ 
+ ## What it does
+ - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
+@@ -20,10 +20,10 @@
+ 
+ ## Current release note
+ 
+-**v1.17.38 — Restore Elimination-style footer from Hub and standalone**
+-- Restores the Elimination-style Market footer whether Market is opened standalone or from Script Hub.
+-- Removes the Hub suppression guard that could hide the Market-owned footer.
+-- Force-mounts one SEND MONEY / SEND ITEMS row and the linked SakaLuX author line.
++**v1.17.39 — Performance and TornPDA smoothness**
++- Removes the multiple footer-repair timers scheduled for every page mutation.
++- Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.
++- Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged.
+ 
+ ## Recommended
+ Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
+@@ -48,6 +48,14 @@ The optional SakaLuX Price Network is disabled by default and has no default end
+ 
+ ## Release history / Changelog
+ 
++### v1.17.39 — Performance and TornPDA smoothness
++
++- Removes the multiple footer-repair timers scheduled for every page mutation.
++- Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.
++- Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged.
++- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
++
++
+ ### v1.17.38 — Restore Elimination-style footer from Hub and standalone
+ - Restores the Elimination-style Market footer whether Market is opened standalone or from Script Hub.
+ - Removes the Hub suppression guard that could hide the Market-owned footer.
+diff --git a/greasyfork/Mission-Rewards.md b/greasyfork/Mission-Rewards.md
+index 59fa73e..91ef20c 100644
+--- a/greasyfork/Mission-Rewards.md
++++ b/greasyfork/Mission-Rewards.md
+@@ -3,7 +3,7 @@
+ > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
+ 
+ ## Current version
+-**v1.0.41**
++**v1.0.42**
+ 
+ ## What it does
+ - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
+@@ -17,9 +17,10 @@
+ 
+ ## Current release note
+ 
+-**v1.0.41 — Exact Enhancer API panel copy**
+-- Uses the same API overlay/panel structure, spacing, dimensions, button sizes, cards, colors and responsive behavior as Enhancer Guard.
+-- Only Mission-specific text and permissions differ: `User: Ammo` and `Torn: Items`.
++**v1.0.42 — Performance and TornPDA smoothness**
++- Scopes legacy footer repair to the Mission settings panel and batches it once.
++- Ignores unrelated chat changes in reward scanning and standalone dock maintenance.
++- Preserves reward annotations, API controls and footer restoration.
+ 
+ ## Recommended
+ Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
+@@ -37,6 +38,14 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
+ 
+ ## Release history / Changelog
+ 
++### v1.0.42 — Performance and TornPDA smoothness
++
++- Scopes legacy footer repair to the Mission settings panel and batches it once.
++- Ignores unrelated chat changes in reward scanning and standalone dock maintenance.
++- Preserves reward annotations, API controls and footer restoration.
++- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
++
++
+ ### v1.0.41 — Exact Enhancer API panel copy
+ - Copies Enhancer Guard API panel geometry/CSS exactly; only Mission labels, IDs and required permissions are changed.
+ 
+diff --git a/greasyfork/SakaLuX-Suite.md b/greasyfork/SakaLuX-Suite.md
+index 3448fb3..453573f 100644
+--- a/greasyfork/SakaLuX-Suite.md
++++ b/greasyfork/SakaLuX-Suite.md
+@@ -3,7 +3,7 @@
+ > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
+ 
+ ## Current version
+-**v0.9.927**
++**v0.9.928**
+ 
+ ## What it does
+ SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
+@@ -35,13 +35,11 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
+ 
+ ## Current release note
+ 
+-**v0.9.927** completes the nine standalone SakaLuX launch bridges. It preserves the compact pill-shaped module switches. Scoped switch styles override shared blue button themes and mobile minimum heights; the thumb slides between the gray OFF and gold ON states. The confirmed v0.9.925 panel layout is preserved.
+-
+-**v0.9.925** extends Master Control to 36px above the viewport bottom on mobile and TornPDA desktop-width touch layouts. Explicit viewport heights keep the module list scrollable and the footer at the bottom. The launcher and close behavior remain controlled by the existing open class.
+-
+-**v0.9.924** emergency hotfix restores the last working Master Control runtime after v0.9.923 prevented the Suite launcher from opening in TornPDA. The v0.9.923 coarse-pointer full-height override has been removed completely; launcher behavior is restored first, while the mobile-height adjustment will be reworked separately without touching the open path.
+-
+-**v0.9.922** Fixes Master Control scrolling by bounding the flex content area on desktop and TornPDA; keeps header/toolbar and footer outside the scrolling module list. Renders the 20px SEND MONEY / SEND ITEMS controls and orange Made with ❤️ author line directly inside every panel render, with rounded lower corners. Preserves module switches and scroll position, and removes the separate document-wide footer repair observer.
++**v0.9.928 — Performance and TornPDA smoothness**
++- Stops Recovery Planner from recreating its identical SVG icon on every observer pass.
++- Gates Member Travel Map repair to relevant faction/profile views and ignores chat in unrelated modules.
++- Coalesces OC, activity and armory scans; Company scanning stays on Company/Jobs pages.
++- Preserves all 23 module entries, settings, panel height and switch styling.
+ 
+ ## Recommended
+ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
+@@ -62,6 +60,15 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the
+ 
+ ## Release history / Changelog
+ 
++### v0.9.928 — Performance and TornPDA smoothness
++
++- Stops Recovery Planner from recreating its identical SVG icon on every observer pass.
++- Gates Member Travel Map repair to relevant faction/profile views and ignores chat in unrelated modules.
++- Coalesces OC, activity and armory scans; Company scanning stays on Company/Jobs pages.
++- Preserves all 23 module entries, settings, panel height and switch styling.
++- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
++
++
+ ### v0.9.927 — Complete SakaLuX tool bridges
+ 
+ - Adds Company Intelligence, Stock Manager & Advisor, Chat Intelligence and Account Auditor to Master Control.
+diff --git a/greasyfork/Script-Hub.md b/greasyfork/Script-Hub.md
+index ca5a328..7e3c9c4 100644
+--- a/greasyfork/Script-Hub.md
++++ b/greasyfork/Script-Hub.md
+@@ -3,7 +3,7 @@
+ > Core manager for the SakaLuX Torn script ecosystem.
+ 
+ ## Current version
+-**v1.9.71**
++**v1.9.72**
+ 
+ ## What it does
+ - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
+@@ -22,16 +22,10 @@
+ 
+ ## Current release note
+ 
+-**v1.9.71 — Detailed INFO and current NEW**
+-- Rewrites INFO for all seven registered modules into detailed feature sections.
+-- Synchronizes NEW with each module's actual current version and latest changes.
+-- Synchronizes offline details and refreshes stale cached information while retaining newer metadata.
+-
+-**v1.9.70** Synchronizes Market Intelligence v1.17.37 and Mission Rewards v1.0.36 after copying the complete working Elimination Assistant donation/footer implementation into both modules.
+-
+-**v1.9.69** fixes the duplicate author line in Market Intelligence settings. Script Hub no longer injects its generic author-only fallback into `#sl-mi-panel`; Market keeps its native compact footer with `SEND MONEY`, `SEND ITEMS`, and one `Made with ❤️ by SakaLuX [2380374]` line. Market logic and the restored Suite launcher are unchanged.
+-
+-**v1.9.68** Synchronizes Stocks v0.7.12 and its full-width native-row layout release notes in the registry and offline INFO/NEW.
++**v1.9.72 — Performance and TornPDA smoothness**
++- Avoids rewriting badge text when its value is unchanged, preventing self-triggered observer work.
++- Ignores unrelated chat/dock/footer changes and coalesces launcher maintenance.
++- Synchronizes current performance release notes for all seven registered modules.
+ 
+ ## Recommended
+ Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
+@@ -65,6 +59,14 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally
+ 
+ ## Release history / Changelog
+ 
++### v1.9.72 — Performance and TornPDA smoothness
++
++- Avoids rewriting badge text when its value is unchanged, preventing self-triggered observer work.
++- Ignores unrelated chat/dock/footer changes and coalesces launcher maintenance.
++- Synchronizes current performance release notes for all seven registered modules.
++- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
++
++
+ ### v1.9.70 — Market + Mission Elimination-footer parity
+ - Synchronizes Market v1.17.37 and Mission v1.0.36.
+ - Both use the complete working Elimination donation/footer implementation, adapted only to their own panel selector/footer ID.
+diff --git a/greasyfork/Stock-Manager-Advisor.md b/greasyfork/Stock-Manager-Advisor.md
+index 6eda551..f6e47ed 100644
+--- a/greasyfork/Stock-Manager-Advisor.md
++++ b/greasyfork/Stock-Manager-Advisor.md
+@@ -3,7 +3,7 @@
+ > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
+ 
+ ## Current version
+-**v0.8.5**
++**v0.8.6**
+ 
+ ## What it does
+ - Stock vault target selection directly from Torn Stocks.
+@@ -22,20 +22,10 @@
+ 
+ ## Current release note
+ 
+-**v0.8.5 — TornPDA panel recovery**
+-- Prevents continuous page/chat mutations from postponing panel mounting indefinitely.
+-- Skips hidden stock lists and relocates the panel when Torn loads or replaces content.
+-- Preserves settings, profiles and trading safeguards.
+-- Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation.
+-
+-**v0.8.4 — Rebalance Strategy Profiles**
+-- Adds persistent **SAFE / BALANCED / AGGRESSIVE** Smart Rebalance profiles.
+-- **SAFE:** limits each proposed move to 10% of portfolio value, requires a larger score gap and suggests up to 2 moves.
+-- **BALANCED:** keeps the v0.8.3 behavior as the default, with 20% per move and up to 4 moves.
+-- **AGGRESSIVE:** raises the cap to 35%, accepts smaller score gaps and can suggest up to 6 moves.
+-- Profiles tune technical-score, benefit-yield, benefit-tier and affordability weighting.
+-- The selected profile is stored locally and restored automatically on TornPDA/desktop.
+-- Benefit Lock remains enforced, sell sources remain limited to free shares, and Smart Rebalance remains preview-only.
++**v0.8.6 — Performance and TornPDA smoothness**
++- Uses constant-time Hub detection and reuses unchanged standalone dock rows.
++- Ignores unrelated chat/dock/footer changes in standalone maintenance.
++- Preserves busy-page mounting, portfolio data and trading safeguards.
+ 
+ ## Recommended
+ - Keep **Dry Run ON** while checking a new configuration.
+@@ -68,6 +58,14 @@
+ 
+ ## Release history / Changelog
+ 
++### v0.8.6 — Performance and TornPDA smoothness
++
++- Uses constant-time Hub detection and reuses unchanged standalone dock rows.
++- Ignores unrelated chat/dock/footer changes in standalone maintenance.
++- Preserves busy-page mounting, portfolio data and trading safeguards.
++- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
++
++
+ ### v0.8.5 — TornPDA panel recovery
+ - Prevents continuous page/chat mutations from postponing panel mounting indefinitely.
+ - Skips hidden stock lists and relocates the panel when Torn loads or replaces content.
+diff --git a/scripts.json b/scripts.json
+index a00684f..fc5ba05 100644
+--- a/scripts.json
++++ b/scripts.json
+@@ -34,16 +34,18 @@
+         }
+       ],
+       "release": {
+-        "date": "2026-09-17",
++        "version": "1.3.47",
++        "date": "2026-09-18",
+         "notes": [
+-          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
+-        ],
+-        "version": "1.3.46"
++          "Stops repeated inventory badge replacement when protection state is unchanged.",
++          "Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.",
++          "Preserves sale blocking, reserved quantities and protection controls."
++        ]
+       },
+       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
+       "type": "addon",
+-      "version": "1.3.46",
+-      "detailsRevision": 1
++      "version": "1.3.47",
++      "detailsRevision": 2
+     },
+     {
+       "active": true,
+@@ -80,16 +82,18 @@
+         }
+       ],
+       "release": {
+-        "date": "2026-09-17",
++        "version": "5.3.40",
++        "date": "2026-09-18",
+         "notes": [
+-          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs."
+-        ],
+-        "version": "5.3.39"
++          "Uses constant-time Hub detection instead of document-wide marker searches on every mutation.",
++          "Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.",
++          "Preserves buyer grouping, cooldown and message preparation."
++        ]
+       },
+       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
+       "type": "addon",
+-      "version": "5.3.39",
+-      "detailsRevision": 1
++      "version": "5.3.40",
++      "detailsRevision": 2
+     },
+     {
+       "active": true,
+@@ -128,17 +132,18 @@
+         }
+       ],
+       "release": {
++        "version": "1.0.42",
+         "date": "2026-09-18",
+-        "version": "1.0.41",
+         "notes": [
+-          "Copies the Enhancer Guard API Access structure and CSS exactly, changing only Mission-specific text, IDs and permissions.",
+-          "Mission API permissions remain User: Ammo and Torn: Items."
++          "Scopes legacy footer repair to the Mission settings panel and batches it once.",
++          "Ignores unrelated chat changes in reward scanning and standalone dock maintenance.",
++          "Preserves reward annotations, API controls and footer restoration."
+         ]
+       },
+       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
+       "type": "addon",
+-      "version": "1.0.41",
+-      "detailsRevision": 1
++      "version": "1.0.42",
++      "detailsRevision": 2
+     },
+     {
+       "active": true,
+@@ -189,18 +194,18 @@
+         }
+       ],
+       "release": {
++        "version": "1.17.39",
+         "date": "2026-09-18",
+         "notes": [
+-          "Restores the native Market donation/author footer when Market settings are opened from Script Hub.",
+-          "Keeps exactly one footer: SEND MONEY, SEND ITEMS, and Made with ❤️ by SakaLuX [2380374].",
+-          "Removes the over-broad Hub-subtree guard that suppressed the Market-owned footer."
+-        ],
+-        "version": "1.17.38"
++          "Removes the multiple footer-repair timers scheduled for every page mutation.",
++          "Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.",
++          "Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged."
++        ]
+       },
+       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
+       "type": "addon",
+-      "version": "1.17.38",
+-      "detailsRevision": 1
++      "version": "1.17.39",
++      "detailsRevision": 2
+     },
+     {
+       "active": true,
+@@ -273,18 +278,18 @@
+         }
+       ],
+       "release": {
+-        "date": "2026-09-17",
++        "version": "1.3.43",
++        "date": "2026-09-18",
+         "notes": [
+-          "Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.",
+-          "Limits SAFE/persistence installation observers to top-level panel lifecycle changes.",
+-          "Skips rebuilding the standalone dock when its module entries have not changed."
+-        ],
+-        "version": "1.3.42"
++          "Uses constant-time Hub detection in standalone maintenance.",
++          "Batches standalone refreshes and ignores chat/dock/footer mutations.",
++          "Preserves target settings, learning records and attack links."
++        ]
+       },
+       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
+       "type": "addon",
+-      "version": "1.3.42",
+-      "detailsRevision": 1
++      "version": "1.3.43",
++      "detailsRevision": 2
+     },
+     {
+       "active": true,
+@@ -320,20 +325,18 @@
+         }
+       ],
+       "release": {
+-        "version": "1.8.37",
++        "version": "1.8.38",
+         "date": "2026-09-18",
+         "notes": [
+-          "Synchronizes the runtime version, Hub bridge and installed-version marker to v1.8.37, removing the false update warning.",
+-          "Rebuilds the TornPDA Company header so the title, Refresh, API Key and Close controls stay cleanly inside the viewport.",
+-          "Moves Employee / Director to a dedicated full-width second row with equal-width controls.",
+-          "Uses the shared Bazaar-style Standalone Dock bootstrap and registers Company as a module instead of creating a separate standalone.",
+-          "Keeps Company opening through its module bridge above the shared Standalone Dock."
++          "Ignores unrelated chat changes in Company page scraping and dock maintenance.",
++          "Removes duplicate legacy registration timers that overwrote current module metadata.",
++          "Preserves Company panel stacking and current standalone registration."
+         ]
+       },
+       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
+       "type": "addon",
+-      "version": "1.8.37",
+-      "detailsRevision": 1
++      "version": "1.8.38",
++      "detailsRevision": 2
+     },
+     {
+       "active": true,
+@@ -375,19 +378,18 @@
+         }
+       ],
+       "release": {
+-        "version": "0.8.5",
++        "version": "0.8.6",
+         "date": "2026-09-18",
+         "notes": [
+-          "Prevents continuous page/chat mutations from postponing panel mounting indefinitely.",
+-          "Skips hidden stock lists and relocates the panel when Torn loads or replaces content.",
+-          "Preserves settings, profiles and trading safeguards.",
+-          "Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation."
++          "Uses constant-time Hub detection and reuses unchanged standalone dock rows.",
++          "Ignores unrelated chat/dock/footer changes in standalone maintenance.",
++          "Preserves busy-page mounting, portfolio data and trading safeguards."
+         ]
+       },
+       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
+       "type": "addon",
+-      "version": "0.8.5",
+-      "detailsRevision": 1
++      "version": "0.8.6",
++      "detailsRevision": 2
+     }
+   ]
+ }
