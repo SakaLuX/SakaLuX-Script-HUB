@@ -1,3 +1,4 @@
+# debug-trigger: inspect generated launcher syntax
 from pathlib import Path
 
 path = Path('SakaLuX-Script-Hub.user.js')
