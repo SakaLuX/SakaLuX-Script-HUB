@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.71**
+**v1.9.72**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,16 +22,10 @@
 
 ## Current release note
 
-**v1.9.71 — Detailed INFO and current NEW**
-- Rewrites INFO for all seven registered modules into detailed feature sections.
-- Synchronizes NEW with each module's actual current version and latest changes.
-- Synchronizes offline details and refreshes stale cached information while retaining newer metadata.
-
-**v1.9.70** Synchronizes Market Intelligence v1.17.37 and Mission Rewards v1.0.36 after copying the complete working Elimination Assistant donation/footer implementation into both modules.
-
-**v1.9.69** fixes the duplicate author line in Market Intelligence settings. Script Hub no longer injects its generic author-only fallback into `#sl-mi-panel`; Market keeps its native compact footer with `SEND MONEY`, `SEND ITEMS`, and one `Made with ❤️ by SakaLuX [2380374]` line. Market logic and the restored Suite launcher are unchanged.
-
-**v1.9.68** Synchronizes Stocks v0.7.12 and its full-width native-row layout release notes in the registry and offline INFO/NEW.
+**v1.9.72 — Performance and TornPDA smoothness**
+- Avoids rewriting badge text when its value is unchanged, preventing self-triggered observer work.
+- Ignores unrelated chat/dock/footer changes and coalesces launcher maintenance.
+- Synchronizes current performance release notes for all seven registered modules.
 
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
@@ -64,6 +58,14 @@ Account Auditor and SakaLuX Suite remain standalone tools and are intentionally 
 **All Rights Reserved — Copyright © 2026 SakaLuX [2380374].** Personal use and private modification are permitted. Public redistribution, republication, rebranding or publication of modified versions requires prior written permission.
 
 ## Release history / Changelog
+
+### v1.9.72 — Performance and TornPDA smoothness
+
+- Avoids rewriting badge text when its value is unchanged, preventing self-triggered observer work.
+- Ignores unrelated chat/dock/footer changes and coalesces launcher maintenance.
+- Synchronizes current performance release notes for all seven registered modules.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v1.9.70 — Market + Mission Elimination-footer parity
 - Synchronizes Market v1.17.37 and Mission v1.0.36.

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.42**
+**v1.3.43**
 
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
@@ -21,7 +21,10 @@
 
 ## Current release note
 
-**v1.3.42** Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs. Limits SAFE/persistence installation observers to top-level panel lifecycle changes. Skips rebuilding the standalone dock when its module entries have not changed.
+**v1.3.43 — Performance and TornPDA smoothness**
+- Uses constant-time Hub detection in standalone maintenance.
+- Batches standalone refreshes and ignores chat/dock/footer mutations.
+- Preserves target settings, learning records and attack links.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -39,6 +42,14 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.3.43 — Performance and TornPDA smoothness
+
+- Uses constant-time Hub detection in standalone maintenance.
+- Batches standalone refreshes and ignores chat/dock/footer mutations.
+- Preserves target settings, learning records and attack links.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v1.3.42 — Performance and release metadata audit
 - Restricts donation-footer updates to the native module root; unrelated Torn and other-module DOM changes no longer schedule footer repairs.

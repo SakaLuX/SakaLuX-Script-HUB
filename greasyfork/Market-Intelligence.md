@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.38**
+**v1.17.39**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,10 +20,10 @@
 
 ## Current release note
 
-**v1.17.38 — Restore Elimination-style footer from Hub and standalone**
-- Restores the Elimination-style Market footer whether Market is opened standalone or from Script Hub.
-- Removes the Hub suppression guard that could hide the Market-owned footer.
-- Force-mounts one SEND MONEY / SEND ITEMS row and the linked SakaLuX author line.
+**v1.17.39 — Performance and TornPDA smoothness**
+- Removes the multiple footer-repair timers scheduled for every page mutation.
+- Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.
+- Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -47,6 +47,14 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.17.39 — Performance and TornPDA smoothness
+
+- Removes the multiple footer-repair timers scheduled for every page mutation.
+- Scopes footer maintenance to the Market panel and ignores unrelated chat updates in scanning.
+- Caches unchanged standalone dock rows and keeps travel/trading analysis unchanged.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v1.17.38 — Restore Elimination-style footer from Hub and standalone
 - Restores the Elimination-style Market footer whether Market is opened standalone or from Script Hub.

@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.14**
+**v1.3.15**
 
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
@@ -18,10 +18,10 @@
 
 ## Current release note
 
-**v1.3.14 — Complete standalone registration**
-- Registers Account Auditor globally in the shared SakaLuX standalone module list as `account-auditor`.
-- Publishes the current standalone version as v1.3.14 while keeping Auditor intentionally outside the Script Hub registry.
-- Preserves the existing Auditor panel, API collection and privacy behavior.
+**v1.3.15 — Performance and TornPDA smoothness**
+- Ignores unrelated chat/dock/footer changes in standalone launcher collection.
+- Coalesces pending launcher refreshes instead of creating a timer per mutation.
+- Preserves user-controlled account collection, privacy and synchronization settings.
 
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
@@ -46,6 +46,14 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 **MIT**
 
 ## Release history / Changelog
+
+### v1.3.15 — Performance and TornPDA smoothness
+
+- Ignores unrelated chat/dock/footer changes in standalone launcher collection.
+- Coalesces pending launcher refreshes instead of creating a timer per mutation.
+- Preserves user-controlled account collection, privacy and synchronization settings.
+- Synthetic DOM and Chromium performance coverage; complete previous-version backup included.
+
 
 ### v1.3.14 — Complete standalone registration
 - Added global shared-standalone registration for `account-auditor`.

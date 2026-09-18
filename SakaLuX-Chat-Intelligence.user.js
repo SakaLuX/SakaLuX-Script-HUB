@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.18
+// @version      1.2.19
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -50,6 +50,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         }
       };
     }
+    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
+    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
+    });
     if (!document.getElementById('sakalux-shared-hub-skin')) {
       const st=document.createElement('style');
       st.id='sakalux-shared-hub-skin';
@@ -67,7 +72,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-const V='1.2.17',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+const V='1.2.19',ID='chat-intelligence',API='SakaLuXChatIntelligence';
 const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
 const D={enabled:true,search:true,quickActions:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
 const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
@@ -101,9 +106,9 @@ function mentions(r){if(!S.mentionAutocomplete)return;const c=composer().find(x=
 function enhance(r){controls(r);mentions(r);const first=!ROOTS.has(r);msgs(r).forEach(e=>decorate(r,e,first));ROOTS.add(r)}
 function clean(){document.querySelectorAll('.slx-head-controls').forEach(x=>{if(!x._root?.isConnected)x.remove()})}
 function scan(){if(!S.enabled)return;clean();roots().forEach(enhance);bridge()}
-function start(){if(O)return;O=new MutationObserver(a=>{if(a.some(m=>m.addedNodes?.length)){clearTimeout(T);T=setTimeout(scan,120)}});O.observe(document.documentElement,{childList:true,subtree:true})}
+function start(){if(O)return;O=new MutationObserver(a=>{if(a.some(m=>m.addedNodes?.length&&!m.target?.closest?.(".slx-head-controls,.slx-toast-host,.slx-mentions,#slx-menu,#sakalux-chat-settings-overlay"))&&!T){T=setTimeout(()=>{T=null;scan()},120)}});O.observe(document.documentElement,{childList:true,subtree:true})}
 function bridge(){let b=document.getElementById('sakalux-module-bridge-'+ID);if(!b){b=document.createElement('button');b.id='sakalux-module-bridge-'+ID;b.hidden=true;b.style.display='none';b.onclick=()=>{const a=b.dataset.action;if(a==='open')settings();else if(a==='on')enable(true);else if(a==='off')enable(false);else if(a==='toggle')enable(!S.enabled);b.dataset.action=''};document.documentElement.appendChild(b)}b.dataset.version=V;b.dataset.enabled=String(S.enabled);b.dataset.ready='true'}
-function enable(v){S.enabled=!!v;save();if(S.enabled){start();scan()}else{O?.disconnect();O=null;document.querySelectorAll('.slx-head-controls,.slx-toast-host,.slx-mentions').forEach(e=>e.remove());closeSearch(true)}bridge();return S.enabled}
+function enable(v){S.enabled=!!v;save();if(S.enabled){start();scan()}else{clearTimeout(T);T=null;O?.disconnect();O=null;document.querySelectorAll('.slx-head-controls,.slx-toast-host,.slx-mentions').forEach(e=>e.remove());closeSearch(true)}bridge();return S.enabled}
 function settings(){if(document.getElementById('sakalux-chat-settings-overlay'))return;const o=document.createElement('div');o.id='sakalux-chat-settings-overlay';const a=[['enabled','Module enabled'],['quickActions','Context actions'],['notifications','Notifications'],['notifyPM','Notify PM'],['notifyFaction','Notify Faction'],['notifyCompany','Notify Company'],['mentionAutocomplete','@mention autocomplete'],['exportSearch','Export search']];o.innerHTML='<section><header><b>💬 Chat Intelligence v'+V+'</b><button>×</button></header><main>'+a.map(([k,l])=>'<label>'+l+'<input type="checkbox" data-k="'+k+'" '+(S[k]?'checked':'')+'></label>').join('')+'</main></section>';document.body.appendChild(o);o.querySelector('header button').onclick=()=>o.remove();o.querySelectorAll('[data-k]').forEach(x=>x.onchange=()=>{S[x.dataset.k]=x.checked;save();if(x.dataset.k==='enabled')enable(x.checked);else scan()})}
 function css(){const s=document.createElement('style');s.textContent=`
 .slx-head-controls{position:absolute!important;right:52px!important;top:0!important;bottom:0!important;height:auto!important;display:flex!important;align-items:stretch!important;z-index:20!important;pointer-events:auto!important;margin:0!important;padding:0!important}.slx-head-controls button{all:unset!important;box-sizing:border-box!important;width:32px!important;min-width:32px!important;height:100%!important;display:grid!important;place-items:center!important;font-size:15px!important;line-height:1!important;color:#d9e0e6!important;background:transparent!important;border-left:1px solid rgba(255,255,255,.08)!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}.slx-head-controls button:active{background:rgba(255,255,255,.12)!important}.slx-head-controls button[hidden]{display:none!important}
@@ -199,7 +204,7 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
   if(!document.body)return;
   let e=document.querySelector('[data-slx-standalone-registration="chat-intelligence"]');
   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','chat-intelligence');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.18'});
+  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.19'});
  };
  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
 })();

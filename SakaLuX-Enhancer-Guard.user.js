@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.46
+// @version      1.3.47
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -55,6 +55,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         }
       };
     }
+    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
+    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
+    });
     if (!document.getElementById('sakalux-shared-hub-skin')) {
       const st=document.createElement('style');
       st.id='sakalux-shared-hub-skin';
@@ -72,14 +77,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.46'});
+  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.47'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];
-  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
+  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.documentElement?.getAttribute('data-sakalux-hub-installed')==='1'||document.body?.getAttribute('data-sakalux-hub-installed')==='1'||document.documentElement?.getAttribute('data-sakalux-hub-active')==='1'||document.body?.getAttribute('data-sakalux-hub-active')==='1');
 
   function registerSelf(){
     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
@@ -160,7 +165,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     const d=ensureDock(); if(!d) return;
     const box=d.querySelector('.slx-dock-items');
     const regs=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id);
-    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); box.replaceChildren();
+    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); const signature=JSON.stringify(regs.map(r=>[r.id,r.name,r.icon,r.selector,r.fallback,r.version]));if(box.dataset.slxEntries===signature){ensureNativeLauncher();return;}box.dataset.slxEntries=signature;box.replaceChildren();
     for(const r of regs){
       const b=document.createElement('button'); b.type='button'; b.className='slx-dock-row';
       b.innerHTML=`<span class="slx-left"><span class="i">${r.icon||'•'}</span></span><span class="slx-title">${r.name||r.id}</span><span class="slx-right-pad"></span>`;
@@ -189,9 +194,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
       render();
     };
     if(hubInstalled()){stopForHub();return;}
-    const queue=(wait=700)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
+    const queue=(wait=700)=>{if(t)return;t=setTimeout(()=>{t=0;refresh();},wait);};
     const root=document.body||document.documentElement;
     observer=new MutationObserver(ms=>{
+      if(window.SakaLuXPerf?.unrelated?.(ms))return;
       if(hubInstalled()){stopForHub();return;}
       if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(700);
     });
@@ -242,7 +248,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.3.46';
+    const VERSION = '1.3.47';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -448,6 +454,9 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         const font = settings.invisible ? 7 : settings.lockSize === 'large' ? 12 : 10;
         const qtyFont = settings.invisible ? 6 : settings.lockSize === 'small' ? 7 : settings.lockSize === 'large' ? 11 : 9;
         const badge = target.querySelector('[data-sl-eg-inventory-lock]') || document.createElement('button');
+        const signature = JSON.stringify([name, protection.full, protection.partial, size, font, qtyFont]);
+        if (badge.dataset.slEgSignature !== signature) {
+        badge.dataset.slEgSignature = signature;
         badge.type = 'button';
         badge.dataset.slEgInventoryLock = '1';
         badge.dataset.name = name;
@@ -456,6 +465,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
             ? `<span style="font-size:${qtyFont}px;font-weight:900">${protection.partial}</span><span style="font-size:${font}px">🔒</span>`
             : protection.full ? '🔒' : '🔓';
         badge.style.cssText = `position:absolute;top:1px;left:1px;width:${size}px;height:${size}px;padding:0;margin:0;border:0;border-radius:50%;background:${protection.full ? '#a00000' : protection.partial ? '#d07a00' : '#0a8f08'};color:#fff;display:flex;align-items:center;justify-content:center;gap:1px;z-index:2147483000;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.5);font:${font}px/1 Arial,sans-serif;touch-action:none;`;
+        }
         if (!badge.parentNode) target.appendChild(badge);
         if (!badge.dataset.bound) {
             badge.dataset.bound = '1';
@@ -497,9 +507,11 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     let inventoryProtectionTimer = null;
     function installInventoryProtection() {
         if (!document.body || inventoryProtectionObserver) return;
-        const refresh = () => {
-            clearTimeout(inventoryProtectionTimer);
-            inventoryProtectionTimer = setTimeout(refreshInventoryProtectionBadges, 80);
+        const refresh = records => {
+            if (records && (window.SakaLuXPerf?.unrelated?.(records) || records.every(r => (r.target.nodeType === 1 ? r.target : r.target.parentElement)?.closest?.("[data-sl-eg-inventory-lock]") || (r.addedNodes.length > 0 && !r.removedNodes.length && [...r.addedNodes].every(n => n.nodeType === 1 && n.matches("[data-sl-eg-inventory-lock]")))))) return;
+            if (records && !records.some(r => (r.target.nodeType === 1 ? r.target : r.target.parentElement)?.closest?.('.items-list,li,.item,.thumbnail-wrap,span.image-wrap') || [...r.addedNodes].some(n => n.nodeType === 1 && (n.matches('.thumbnail-wrap,span.image-wrap') || n.querySelector('.thumbnail-wrap,span.image-wrap'))))) return;
+            if (inventoryProtectionTimer) return;
+            inventoryProtectionTimer = setTimeout(() => { inventoryProtectionTimer = null; refreshInventoryProtectionBadges(); }, 80);
         };
         refresh();
         inventoryProtectionObserver = new MutationObserver(refresh);
@@ -620,9 +632,9 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     let saleObserver = null;
     function installSaleProtectionFallback() {
         if (saleObserver || !document.body) return;
-        saleObserver = new MutationObserver(() => {
-            clearTimeout(saleObserverTimer);
-            saleObserverTimer = setTimeout(hideProtectedSaleRows, 40);
+        saleObserver = new MutationObserver(records => {
+            if (window.SakaLuXPerf?.unrelated?.(records) || saleObserverTimer) return;
+            saleObserverTimer = setTimeout(() => { saleObserverTimer = null; hideProtectedSaleRows(); }, 40);
         });
         saleObserver.observe(document.body, { childList: true, subtree: true });
         document.addEventListener('click', event => {

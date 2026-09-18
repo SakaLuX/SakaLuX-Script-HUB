@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.41
+// @version      1.0.42
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -56,6 +56,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         }
       };
     }
+    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
+    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
+    });
     if (!document.getElementById('sakalux-shared-hub-skin')) {
       const st=document.createElement('style');
       st.id='sakalux-shared-hub-skin';
@@ -73,14 +78,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.41'});
+  const SELF=Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"},{version:'1.0.42'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
   const NATIVE_ID='sakalux-standalone-native-s', FALLBACK_ID='sakalux-standalone-fallback-s';
   const REG_ATTR='data-slx-standalone-registration', OPEN_KEY='SakaLuX_STANDALONE_DOCK_OPEN';
   const ORDER=['enhancer','bazaar','mission-rewards','market-intelligence','elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'];
-  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.querySelector('[data-sakalux-hub-installed="1"]')||document.querySelector('[data-sakalux-hub-active="1"]'));
+  const hubInstalled=()=>!!(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button')||document.getElementById('sakalux-hub-top-skull')||document.getElementById('sakalux-hub-nav-skull')||document.getElementById('sakalux-hub-panel')||document.getElementById('sakalux-hub-style')||document.documentElement?.getAttribute('data-sakalux-hub-installed')==='1'||document.body?.getAttribute('data-sakalux-hub-installed')==='1'||document.documentElement?.getAttribute('data-sakalux-hub-active')==='1'||document.body?.getAttribute('data-sakalux-hub-active')==='1');
 
   function registerSelf(){
     let m=document.querySelector(`[${REG_ATTR}="${SELF.id}"]`);
@@ -161,7 +166,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     const d=ensureDock(); if(!d) return;
     const box=d.querySelector('.slx-dock-items');
     const regs=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id);
-    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); box.replaceChildren();
+    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); const signature=JSON.stringify(regs.map(r=>[r.id,r.name,r.icon,r.selector,r.fallback,r.version]));if(box.dataset.slxEntries===signature){ensureNativeLauncher();return;}box.dataset.slxEntries=signature;box.replaceChildren();
     for(const r of regs){
       const b=document.createElement('button'); b.type='button'; b.className='slx-dock-row';
       b.innerHTML=`<span class="slx-left"><span class="i">${r.icon||'•'}</span></span><span class="slx-title">${r.name||r.id}</span><span class="slx-right-pad"></span>`;
@@ -190,9 +195,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
       render();
     };
     if(hubInstalled()){stopForHub();return;}
-    const queue=(wait=700)=>{clearTimeout(t);t=setTimeout(refresh,wait);};
+    const queue=(wait=700)=>{if(t)return;t=setTimeout(()=>{t=0;refresh();},wait);};
     const root=document.body||document.documentElement;
     observer=new MutationObserver(ms=>{
+      if(window.SakaLuXPerf?.unrelated?.(ms))return;
       if(hubInstalled()){stopForHub();return;}
       if(ms.some(m=>m.addedNodes.length||m.removedNodes.length))queue(700);
     });
@@ -243,7 +249,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (function () {
     'use strict';
 
-    const VERSION = '1.0.41';
+    const VERSION = '1.0.42';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -857,6 +863,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     function startObserver() {
         if (!state.enabled || !isMissionsPage() || state.observer) return;
         state.observer = new MutationObserver(mutations => {
+            if (window.SakaLuXPerf?.unrelated?.(mutations)) return;
             if (mutations.some(m => {
                 const root=m.target.nodeType===1?m.target:m.target.parentElement;
                 if(root?.closest?.('#sl-mr-settings-overlay,#sakalux-hub-overlay,[id^="sakalux-inline-footer-"],.sl-mr-card-info,.sl-mr-detail'))return false;
@@ -1145,8 +1152,12 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 (()=>{
  const PANEL='#sl-mr-settings-panel',ID='sakalux-inline-footer-mission-rewards',PROFILE='https://www.torn.com/profiles.php?XID=2380374';
  function ensure(){const panel=document.querySelector(PANEL);if(!panel)return;let f=panel.querySelector('#'+ID);if(f)return;f=document.createElement('div');f.id=ID;f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+PROFILE+'">SakaLuX [2380374]</a></div>';f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>location.href=PROFILE);panel.appendChild(f);}
- const kick=()=>{ensure();requestAnimationFrame(ensure);setTimeout(ensure,100);setTimeout(ensure,300)};
- new MutationObserver(kick).observe(document.body||document.documentElement,{childList:true,subtree:true});
+ let pending=false;
+ const kick=()=>{if(pending)return;pending=true;setTimeout(()=>{pending=false;ensure();},100)};
+ new MutationObserver(records=>{
+   if(window.SakaLuXPerf?.unrelated?.(records))return;
+   if(records.some(r=>r.target?.closest?.('#sl-mr-settings-panel')||[...r.addedNodes].some(n=>n.nodeType===1&&(n.matches('#sl-mr-settings-panel')||n.querySelector('#sl-mr-settings-panel')))))kick();
+  }).observe(document.body||document.documentElement,{childList:true,subtree:true});
  kick();
 })();
 
@@ -1170,8 +1181,12 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
   if(!f){f=document.createElement('div');f.id=ID;f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-mr-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-mr-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+PROFILE+'">SakaLuX [2380374]</a></div>';f.querySelectorAll('[data-slx-mr-donate]').forEach(b=>b.onclick=()=>location.href=PROFILE);panel.appendChild(f);}
   else if(f.parentElement!==panel)panel.appendChild(f);
  }
- const kick=()=>{ensure();requestAnimationFrame(ensure);setTimeout(ensure,60);setTimeout(ensure,220)};
- new MutationObserver(()=>kick()).observe(document.documentElement,{childList:true,subtree:true});
+ let pending=false;
+ const kick=()=>{if(pending)return;pending=true;setTimeout(()=>{pending=false;ensure();},100)};
+ new MutationObserver(records=>{
+   if(window.SakaLuXPerf?.unrelated?.(records))return;
+   if(records.some(r=>r.target?.closest?.('#sl-mr-settings')||[...r.addedNodes].some(n=>n.nodeType===1&&(n.matches('#sl-mr-settings')||n.querySelector('#sl-mr-settings')))))kick();
+  }).observe(document.documentElement,{childList:true,subtree:true});
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',kick,{once:true});else kick();
 })();
 

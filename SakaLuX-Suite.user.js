@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.927
+// @version      0.9.928
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -40,6 +40,11 @@
         }
       };
     }
+    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
+    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
+    });
     if (!document.getElementById('sakalux-shared-hub-skin')) {
       const st=document.createElement('style');
       st.id='sakalux-shared-hub-skin';
@@ -149,9 +154,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     collectLaunchers();
     setTimeout(maybePrompt, 1200);
     let timer = 0;
-    new MutationObserver(() => {
-      clearTimeout(timer);
+    new MutationObserver(records => {
+      if(window.SakaLuXPerf?.unrelated?.(records)||timer)return;
       timer = setTimeout(() => {
+        timer = 0;
         if (hubInstalled()) {
           document.getElementById(DOCK_ID)?.remove();
           document.getElementById(PROMPT_ID)?.remove();
@@ -172,7 +178,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.927';
+  const VERSION = '0.9.928';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -1827,7 +1833,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       }, 100);
     };
 
-    state.headerObserver = new MutationObserver(queueLauncherCheck);
+    state.headerObserver = new MutationObserver(records => {
+      if(window.SakaLuXPerf?.unrelated?.(records)) return;
+      queueLauncherCheck();
+    });
     state.headerObserver.observe(document.documentElement, {
       childList: true,
       subtree: true
@@ -6437,6 +6446,7 @@ const POPUP_ID = "sakalux-oco-popup";
   function startObserver() {
     if (observer) observer.disconnect();
     observer = new MutationObserver(mutations => {
+      if (window.SakaLuXPerf?.unrelated?.(mutations)) return;
       const onlyIntelUiChanges = mutations.every(mutation => {
         const target = mutation.target?.nodeType === Node.ELEMENT_NODE
           ? mutation.target
@@ -7596,12 +7606,12 @@ const SCRIPT = "SakaLuX OC Intelligence";
   }
   function queueScan() {
     if (!moduleActive) return;
-    clearTimeout(scanTimer);
-    scanTimer = setTimeout(scanPage, 180);
+    if (scanTimer) return;
+    scanTimer = setTimeout(() => { scanTimer = null; scanPage(); }, 180);
   }
   function startObserver() {
     if (!moduleActive || observer) return;
-    observer = new MutationObserver(queueScan);
+    observer = new MutationObserver(records => { if (!window.SakaLuXPerf?.unrelated?.(records)) queueScan(); });
     observer.observe(document.body, {
       childList: true,
       subtree: true,
@@ -10214,6 +10224,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         scanBookieValueRows(document);
         if (!bookieObserver && document.body) {
             bookieObserver = new MutationObserver(mutations => {
+      if (window.SakaLuXPerf?.unrelated?.(mutations)) return;
                 if (!moduleActive) return;
                 for (const mutation of mutations) {
                     for (const node of mutation.addedNodes) {
@@ -10238,7 +10249,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         runScanner();
         later(runScanner, 650);
         later(runScanner, 1500);
-        observer = new MutationObserver(queueScan);
+        observer = new MutationObserver(records => { if (!window.SakaLuXPerf?.unrelated?.(records)) queueScan(); });
         observer.observe(document.body, {
             childList: true,
             subtree: true
@@ -13207,7 +13218,8 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
     function watchPage() {
         pageObserver?.disconnect();
         clearInterval(pageWatchTimer);
-        pageObserver = new MutationObserver(() => {
+        pageObserver = new MutationObserver(records => {
+      if (window.SakaLuXPerf?.unrelated?.(records)) return;
             if (moduleActive) queueUiUpdate();
         });
         pageObserver.observe(document.body, {
@@ -16147,7 +16159,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
     }
     function startObserver() {
       if (observer || !pageContext() || !moduleActive || isPCStandardView()) return;
-      observer = new MutationObserver(() => scheduleMount(60));
+      observer = new MutationObserver(records => { if (!window.SakaLuXPerf?.unrelated?.(records)) scheduleMount(60); });
       observer.observe(document.body, { childList: true, subtree: true });
     }
     function stopObserver() {
@@ -21397,7 +21409,7 @@ const STORAGE_KEY    = 'sakaluxFactionMemberCountries';
         );
     }
     function scheduleStartupRetry(delay = 350) {
-        if (!moduleActive) return;
+        if (!moduleActive || (!isOnInfoTab() && !isOnProfilePage())) return;
         clearTimeout(startupRetryTimer);
         startupRetryTimer = setTimeout(() => {
             startupRetryTimer = null;
@@ -21709,10 +21721,11 @@ const STORAGE_KEY    = 'sakaluxFactionMemberCountries';
             },
             { signal: eventController.signal }
         );
-        observer = new MutationObserver(() => {
-            invalidateMemberCaches();
-            if (!moduleActive) return;
+        observer = new MutationObserver(records => {
+            if (!moduleActive || window.SakaLuXPerf?.unrelated?.(records)) return;
             if (Date.now() < suppressObserverUntil) return;
+            if (!isOnInfoTab() && !isOnProfilePage()) return;
+            invalidateMemberCaches();
             if (isPdaLayout()) {
                 stableMemberPasses = 0;
                 schedulePdaReinject("mutation-throttled");
@@ -21921,8 +21934,9 @@ const STORAGE_KEY    = 'sakaluxFactionMemberCountries';
     }
     function scheduleScan(delay = 700) {
         if (!moduleActive) return;
-        clearTimeout(scanTimer);
+        if (scanTimer) return;
         scanTimer = setTimeout(() => {
+            scanTimer = null;
             if (moduleActive) runScan();
         }, delay);
     }
@@ -22452,7 +22466,7 @@ const STORAGE_KEY    = 'sakaluxFactionMemberCountries';
             { signal }
         );
         observer = new MutationObserver(
-            () => scheduleScan(1300)
+            records => { if (!window.SakaLuXPerf?.unrelated?.(records)) scheduleScan(1300); }
         );
         observer.observe(document.body, {
             childList: true,
@@ -24115,13 +24129,14 @@ function armoryLoanIconSvg() {
   function startObserver() {
     if (observer) observer.disconnect();
     observer = new MutationObserver(mutations => {
+      if (window.SakaLuXPerf?.unrelated?.(mutations)) return;
       const onlyTooltipChanges = mutations.every(m => {
         const target = m.target instanceof Element ? m.target : null;
         return target?.closest?.(".view-item-info, .tooltip4, .item-info-content, .ui-tooltip");
       });
       if (onlyTooltipChanges) return;
-      clearTimeout(updateTimer);
-      updateTimer = setTimeout(() => onPageUpdate(false), 180);
+      if (updateTimer) return;
+      updateTimer = setTimeout(() => { updateTimer = null; onPageUpdate(false); }, 180);
     });
     observer.observe(document.body, { childList: true, subtree: true });
     const listenerSignal = eventController?.signal;
@@ -27896,7 +27911,8 @@ function armoryLoanIconSvg() {
               return;
           }
           state.observer =
-              new MutationObserver(() => {
+              new MutationObserver(records => {
+      if (window.SakaLuXPerf?.unrelated?.(records)) return;
                   if (
                       state.suppressNativeRefresh
                   ) {
@@ -36041,12 +36057,12 @@ const STORAGE_KEY = "sakalux_war_tracker_v26_blank";
         refreshInterval = setInterval(() => {
             if (moduleActive) render();
         }, REFRESH_MS);
-        rankTabObserver = new MutationObserver(() => {
-            clearTimeout(rankTabTimer);
-            rankTabTimer = setTimeout(
-                applyRankTabColour,
-                50
-            );
+        rankTabObserver = new MutationObserver(records => {
+            if (window.SakaLuXPerf?.unrelated?.(records) || rankTabTimer) return;
+            rankTabTimer = setTimeout(() => {
+                rankTabTimer = null;
+                applyRankTabColour();
+            }, 50);
         });
         rankTabObserver.observe(
             document.body,
@@ -38722,7 +38738,8 @@ function scan(){
         if(e.key==="Escape")hidePricingPopup();
     };
     const _companyScheduleScan = () => {
-        if(_companyScanTimer)clearTimeout(_companyScanTimer);
+        if(!onCompanies()&&!onJoblist())return;
+        if(_companyScanTimer)return;
         _companyScanTimer=setTimeout(()=>{
             _companyScanTimer=null;
             scan();
@@ -38785,6 +38802,7 @@ function scan(){
             true
         );
         _companyObserver=new MutationObserver(mutations=>{
+            if(window.SakaLuXPerf?.unrelated?.(mutations))return;
             for(const m of mutations){
                 if(m.addedNodes?.length){
                     _companyScheduleScan();
@@ -41699,7 +41717,8 @@ function scan(){
       'keydown',
       handleModuleKeydown
     );
-    moduleObserver = new MutationObserver(() => {
+    moduleObserver = new MutationObserver(records => {
+      if (window.SakaLuXPerf?.unrelated?.(records)) return;
       injectNavButton();
       injectScanButton();
     });
@@ -43821,12 +43840,11 @@ function scan(){
         IDS.statusIcon
       );
       if (!anchor) return;
-      const inHospital = Boolean(
-        document.querySelector(
-          'ul[class*="statusIcons"] a[aria-label^="Hospital:" i], ul[class*="status-icons"] a[aria-label^="Hospital:" i]'
-        )
-      );
-      anchor.innerHTML = buildMedicalIcon();
+      const markup = buildMedicalIcon();
+      if (anchor._sakaluxMedicalIconMarkup !== markup || !anchor.firstElementChild) {
+        anchor.innerHTML = markup;
+        anchor._sakaluxMedicalIconMarkup = markup;
+      }
       anchor.style.opacity = "1";
     }
     async function runScan(options = {}) {
@@ -44128,7 +44146,8 @@ function scan(){
     }
     function startObserver() {
       let queued = false;
-      moduleState.observer = new MutationObserver(() => {
+      moduleState.observer = new MutationObserver(records => {
+      if (window.SakaLuXPerf?.unrelated?.(records)) return;
         if (queued) return;
         queued = true;
         requestAnimationFrame(() => {
@@ -44464,7 +44483,8 @@ function scan(){
     }
     function startObserver() {
       let queued = false;
-      moduleState.observer = new MutationObserver(() => {
+      moduleState.observer = new MutationObserver(records => {
+      if (window.SakaLuXPerf?.unrelated?.(records)) return;
         if (queued) return;
         queued = true;
         requestAnimationFrame(() => {
