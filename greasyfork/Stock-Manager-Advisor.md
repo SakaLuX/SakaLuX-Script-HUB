@@ -27,7 +27,6 @@
 - Shares one active API synchronization across overlapping refresh requests.
 - Twenty concurrent refreshes use three requests instead of sixty in the synthetic network regression.
 - Recovers after offline, HTTP 429 and malformed JSON errors; portfolio data and explicit trading safeguards are preserved.
-
 ## Recommended
 - Keep **Dry Run ON** while checking a new configuration.
 - Keep **Benefit Lock ON** when benefit blocks must not be touched.

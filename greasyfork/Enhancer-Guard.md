@@ -22,7 +22,6 @@
 - Stops repeated inventory badge replacement when protection state is unchanged.
 - Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.
 - Preserves sale blocking, reserved quantities and protection controls.
-
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
 

@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.75**
+**v1.9.82**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,21 +22,21 @@
 
 ## Current release note
 
-**v1.9.75 — Canonical release/version synchronization**
-- Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.
-- Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata.
-
+**v1.9.82 — Persistent native Fly-out launcher + release synchronization**
+- Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
+- Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
+- Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
 ## Recommended
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.47**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.48**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.40**
-- 🎯 SakaLuX Mission Rewards **v1.0.42**
-- 📈 SakaLuX Market Intelligence **v1.17.40**
-- ⚔️ SakaLuX Elimination Assistant **v1.3.44**
-- 🏢 SakaLuX Company Intelligence **v1.8.38**
-- 📊 SakaLuX Stock Manager & Advisor **v0.8.7**
+- 🎯 SakaLuX Mission Rewards **v1.0.43**
+- 📈 SakaLuX Market Intelligence **v1.17.41**
+- ⚔️ SakaLuX Elimination Assistant **v1.3.45**
+- 🏢 SakaLuX Company Intelligence **v1.8.39**
+- 📊 SakaLuX Stock Manager & Advisor **v0.8.8**
 
 Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -59,6 +59,12 @@ Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and
 ## Release history / Changelog
 
 
+
+
+### v1.9.82 — Persistent native Fly-out launcher + release synchronization
+- Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
+- Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
+- Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
 
 ### v1.9.75 — Canonical release/version synchronization
 - Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.

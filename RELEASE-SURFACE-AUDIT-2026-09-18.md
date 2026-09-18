@@ -1,5 +1,7 @@
 # Release Surface Audit — 2026-09-18
 
+> Historical snapshot. Current release/version status is in `RELEASE-SURFACE-AUDIT-2026-09-19.md`.
+
 Canonical rule: each userscript `@version` is the source of truth. Registered `scripts.json` version/release surfaces and each documentation `Current version` / `Current release note` label are synchronized to that source. Standalone/core scripts are checked directly against their documentation.
 
 | Module | Source | Canonical @version | Registry status | Documentation |

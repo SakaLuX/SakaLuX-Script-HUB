@@ -18,9 +18,8 @@
 
 ## Current release note
 
-**v1.3.16 — Extended performance validation**
-- Serializes the API rate gate to preserve the 1,100ms minimum gap under concurrent callers. Overlapping read-only snapshots share one collection; API scopes, retries and privacy behavior are preserved.
-
+**v1.3.16 — Release metadata synchronization**
+- Release documentation synchronized with the current userscript version.
 ## Recommended
 Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
 
