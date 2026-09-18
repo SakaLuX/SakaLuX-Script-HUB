@@ -5,7 +5,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 const filename = process.argv[2], mode = process.argv[3] || 'standalone';
 const source = fs.readFileSync(path.join(process.env.PERF_SOURCE_ROOT || '.', filename), 'utf8');
 const specialized = mode === 'relevant';
-const paths = { 'Enhancer': 'item.php', 'Bazaar': 'events.php', 'Market': 'imarket.php', 'Mission': 'loader.php?sid=missions', 'Elimination': 'competition.php', 'Company': 'joblist.php', 'Stock': 'page.php?sid=stocks', 'Poker': 'loader.php?sid=poker', 'Chat': 'index.php' };
+const paths = { 'Enhancer': 'item.php', 'Bazaar': 'page.php?sid=events', 'Market': 'page.php?sid=ItemMarket', 'Mission': 'loader.php?sid=missions', 'Elimination': 'competition.php', 'Company': 'joblist.php', 'Stock': 'page.php?sid=stocks', 'Poker': 'page.php?sid=holdem', 'Chat': 'index.php' };
 const match = Object.keys(paths).find(x => filename.includes(x));
 const page = mode === 'suite-enabled' ? 'factions.php?step=your' : specialized ? paths[match] || 'index.php' : 'profiles.php?XID=2380374';
 const errors = [];

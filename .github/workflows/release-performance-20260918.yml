@@ -44,7 +44,7 @@ jobs:
           node tests/hub-details-regression.cjs
           node tests/performance/ui-regression.cjs
           node tests/performance/run.cjs "$RUNNER_TEMP/dom-current.json" --assert
-      - name: Benchmark all scripts in Chromium with limited CPU
+      - name: Benchmark individual and coinstalled scripts in Chromium with limited CPU
         env:
           NODE_PATH: ${{ runner.temp }}/perf-tests/node_modules
         run: node tests/performance/browser.cjs reports/performance-2026-09-18/browser.json
