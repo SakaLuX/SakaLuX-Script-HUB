@@ -1,0 +1,58 @@
+name: Upgrade Stocks Advisor Suite v0.8.0
+
+on:
+  push:
+    paths:
+      - '.github/stocks-advisor-suite-v080.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch Stocks v0.8.0
+        run: python3 .github/scripts/upgrade_stocks_advisor_suite_v080.py
+
+      - name: Validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q '@version      0.8.0' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "version:'0.8.0'" SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'SAKALUX_STOCK_ADVISOR_SUITE_V080' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'Financial Advisor' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'Technical Trade Assistant' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'Portfolio Simulator' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'RSI 14' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'EMA 90' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'v0.8.0 — Advisor Suite' greasyfork/Stock-Manager-Advisor.md
+          python3 - <<'PY'
+          import json
+          d=json.load(open('scripts.json'))
+          x=next(v for v in d['scripts'] if v.get('id')=='stock-manager-advisor')
+          assert x['version']=='0.8.0'
+          assert x['release']['version']=='0.8.0'
+          assert len(x['release']['notes'])>=5
+          assert 'Technical Trade Assistant' in x['info']
+          assert 'Portfolio Simulator' in x['info']
+          print('registry OK')
+          PY
+
+      - name: Commit release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js scripts.json greasyfork/Stock-Manager-Advisor.md greasyfork/Script-Hub.md backups/stocks-advisor-suite-v0.8.0-2026-09-18/
+          git commit -m 'Stocks v0.8.0: add financial technical and simulator advisor suite'
+          git push
