@@ -1,0 +1,54 @@
+name: Publish Stocks v0.8.5
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/release-stocks-v085.yml']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply reviewed patch with backup
+        run: |
+          set -euo pipefail
+          test "$(git hash-object SakaLuX-Stock-Manager-Advisor.user.js)" = '7ee7aec3d3ce42bd27a0459bd3192bff25d68b15'
+          mkdir -p backups/stocks-panel-v0.8.5-2026-09-18
+          cp SakaLuX-Stock-Manager-Advisor.user.js scripts.json backups/stocks-panel-v0.8.5-2026-09-18/
+          cp greasyfork/Stock-Manager-Advisor.md backups/stocks-panel-v0.8.5-2026-09-18/
+          git apply --check releases/stocks-v0.8.5.patch
+          git apply releases/stocks-v0.8.5.patch
+      - name: Validate full userscript
+        run: |
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          npm install --prefix "$RUNNER_TEMP/stocks-tests" jsdom@30.1.0 --no-audit --no-fund
+          NODE_PATH="$RUNNER_TEMP/stocks-tests/node_modules" node tests/stocks-panel-regression.cjs
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          s=Path('SakaLuX-Stock-Manager-Advisor.user.js').read_text()
+          assert re.search(r'^// @version\s+0\.8\.5$',s,re.M)
+          assert "version: '0.8.5'" in s
+          e=next(x for x in json.loads(Path('scripts.json').read_text())['scripts'] if x['id']=='stock-manager-advisor')
+          assert e['version']==e['release']['version']=='0.8.5'
+          PY
+      - name: Commit validated fix
+        run: |
+          git config user.name 'SakaLuX Release Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js greasyfork/Stock-Manager-Advisor.md scripts.json backups/stocks-panel-v0.8.5-2026-09-18/
+          git commit -m 'Stocks v0.8.5: restore inline panel on busy TornPDA pages'
+          git push origin HEAD:main
+      - name: Prepare assets
+        run: |
+          mkdir -p dist
+          cp SakaLuX-Stock-Manager-Advisor.user.js dist/SakaLuX-Stock-Manager-Advisor-v0.8.5.user.js
+          cp releases/stocks-v0.8.5.md dist/CHANGELOG-Stocks-v0.8.5.md
+          zip -j dist/Stocks-v0.8.4-backup.zip backups/stocks-panel-v0.8.5-2026-09-18/*
+          (cd dist && sha256sum *.user.js *.md *.zip > SHA256SUMS.txt)
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create stocks-v0.8.5 dist/* --target "$(git rev-parse HEAD)" --title 'Stocks v0.8.5 — TornPDA panel recovery' --notes-file releases/stocks-v0.8.5.md --latest=false
