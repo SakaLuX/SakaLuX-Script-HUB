@@ -30,7 +30,7 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 ## Important
 - Market values and value-per-credit calculations are estimates.
 - Weapon-mod ranges are learned locally from offers seen by the script and are guidance, not guaranteed future Mission Shop prices.
-- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is v1.0.18.
+- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is the current v1.0.41 line.
 
 ## License
 **All Rights Reserved**
@@ -47,6 +47,9 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 ### v1.0.39 — Enhancer-style API Access parity
 - Removes the duplicate inline API status/key field above SAVE.
 - Makes the dedicated API Access panel visually match Enhancer Guard while preserving Mission-specific permissions and behavior.
+
+### v1.0.38 — Footer mounting fix
+- Footer mounts on the real `#sl-mr-settings` panel and remains visible with SEND MONEY / SEND ITEMS / Made with ❤️.
 
 ### v1.0.36 — Elimination footer parity
 - Copies the complete working Elimination Assistant donation/footer implementation into Mission Rewards, changing only the target panel selector/footer ID. Keeps one native SEND MONEY / SEND ITEMS + Made with ❤️ footer.
@@ -140,6 +143,3 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 
 ### v1.0.4 — Hub power/API integration
 - Added reliable installation detection, `setEnabled`/`toggleEnabled`/`isEnabled`, shared-Hub-key preference and standalone required-key support.
-
-## Current release note — v1.0.38
-- Footer now mounts on the real `#sl-mr-settings` panel and stays visible with SEND MONEY / SEND ITEMS / Made with ❤️.
