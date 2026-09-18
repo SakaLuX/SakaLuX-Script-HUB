@@ -369,18 +369,17 @@
         }
       ],
       "release": {
-        "version": "0.8.5",
+        "version": "0.8.4",
         "date": "2026-09-18",
         "notes": [
-          "- Prevents continuous page/chat mutations from postponing panel mounting indefinitely.",
-          "- Skips hidden stock lists and relocates the panel when Torn loads or replaces content.",
-          "- Preserves settings, profiles and trading safeguards.",
-          "- Full-userscript DOM regression covers busy pages, hidden/delayed lists, replaced content and route navigation."
+          "Adds persistent SAFE, BALANCED and AGGRESSIVE Smart Rebalance strategy profiles.",
+          "Profiles adjust per-move portfolio caps, score thresholds, maximum suggested moves and technical/benefit weighting.",
+          "Benefit Lock remains enforced and every rebalance plan remains preview-only with no automatic trades."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.5"
+      "version": "0.8.4"
     }
   ]
 }
