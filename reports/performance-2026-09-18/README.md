@@ -35,3 +35,27 @@ Suite was also tested with all 14 built-in modules enabled. Its own Recovery Pla
 ## Chromium measurements
 
 `browser.json` contains before/after measurements for all 12 scripts plus Suite with all native modules enabled. Chromium uses a 412×915 touch viewport and CPU throttling at 6×, with offline APIs. Script duration, layout duration, long tasks and heap are measured. This simulates limited CPU capacity; it is not a measurement on the user's phone or an authenticated live Torn page. API latency, Torn's own scripts, real account data and sustained memory use require device/live-page verification.
+
+
+### Measured Chromium workload
+
+| Script / mode | Script execution, ms before → after | Scheduled timers before → after | Long tasks before → after |
+|---|---:|---:|---:|
+| Apocalypse-Poker-Exit-Alert | 24.14 → 22.82 | 18 → 18 | 0 → 0 |
+| SakaLuX-Account-Auditor | 9.87 → 5.6 | 40 → 0 | 0 → 0 |
+| SakaLuX-Bazaar-Thanker-PDA | 21.32 → 28.59 | 82 → 23 | 0 → 0 |
+| SakaLuX-Chat-Intelligence | 5.55 → 14.8 | 40 → 6 | 0 → 0 |
+| SakaLuX-Company-Intelligence-v1.0.0 | 15.62 → 8.87 | 80 → 0 | 0 → 0 |
+| SakaLuX-Elimination-Assistant | 6.68 → 3.28 | 40 → 0 | 0 → 0 |
+| SakaLuX-Enhancer-Guard | 534.56 → 2.54 | 129 → 0 | 4 → 0 |
+| SakaLuX-Market-Intelligence | 106.06 → 3.57 | 164 → 0 | 0 → 0 |
+| SakaLuX-Mission-Rewards | 14.98 → 8.56 | 240 → 0 | 0 → 0 |
+| SakaLuX-Script-Hub | 14.72 → 11.42 | 51 → 7 | 0 → 0 |
+| SakaLuX-Stock-Manager-Advisor | 36.49 → 31.51 | 47 → 5 | 0 → 0 |
+| SakaLuX-Suite | 17.26 → 1.05 | 47 → 0 | 0 → 0 |
+| SakaLuX-Suite — all native modules enabled | 514.38 → 136.58 | 1384 → 70 | 0 → 0 |
+| __combined-SakaLuX__ | 687.73 → 134.34 | 570 → 33 | 6 → 0 |
+
+All 28 browser samples completed without JavaScript errors. In the combined SakaLuX scenario, script execution fell from 687.73ms to 134.34ms, scheduled timers from 570 to 33, and long tasks from six to zero. With all 14 native Suite modules enabled, script execution fell from 514.38ms to 136.58ms and scheduled timers from 1384 to 70. These comparisons apply to this synthetic workload and CPU setting, not to general phone FPS.
+
+The browser report in the published release is the original verified run. The repository also contains corrected relevant-route DOM samples; those are supplementary to the Chromium measurements.

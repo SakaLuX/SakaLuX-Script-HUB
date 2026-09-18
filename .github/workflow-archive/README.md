@@ -20,3 +20,5 @@ Invalid historical files:
 - `sync-all-release-surfaces.yml`
 - `upgrade-stocks-portfolio-v082.yml`
 - `validate-userscripts.yml`
+
+Suite v0.9.927 and the 2026-09-18 performance release workflows were also archived after successful publication. The active workflow remains read-only validation and now includes all-script workload budgets and UI recovery checks.
