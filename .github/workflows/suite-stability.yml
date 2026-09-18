@@ -1,0 +1,38 @@
+name: Suite listener stability audit
+on:
+  push:
+    branches: [main]
+    paths: ['tests/performance/suite-stability.cjs', '.github/workflows/suite-stability.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/browser-tests" playwright@1.62.1 --no-audit --no-fund
+          "$RUNNER_TEMP/browser-tests/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Track native toggle listeners and delayed callback cleanup
+        env:
+          NODE_PATH: ${{ runner.temp }}/browser-tests/node_modules
+        run: node tests/performance/suite-stability.cjs
+      - name: Preserve listener and callback findings
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/extended-performance-2026-09-18/suite-stability.json
+          git commit -m 'Record active global Suite listeners and delayed callback drain'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: suite-listener-stability
+          path: reports/extended-performance-2026-09-18/suite-stability.json
