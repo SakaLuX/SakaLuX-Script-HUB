@@ -2,7 +2,7 @@ name: Verify final mobile CPU workload
 on:
   push:
     branches: [main]
-    paths: ['tests/performance/extended-browser.cjs', '.github/workflows/final-mobile-cpu.yml']
+    paths: ['tests/performance/extended-browser.cjs', '.github/workflows/final-mobile-cpu.yml', 'SakaLuX-Market-Intelligence.user.js']
   workflow_dispatch:
 permissions:
   contents: write
