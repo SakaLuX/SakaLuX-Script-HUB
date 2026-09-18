@@ -1,15 +1,29 @@
 #!/usr/bin/env python3
 from pathlib import Path
 from urllib.parse import unquote, urlparse
+from datetime import date
 import json
 import re
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / 'scripts.json'
 HUB = ROOT / 'SakaLuX-Script-Hub.user.js'
+TODAY = date.today().isoformat()
 
 MARK_BEGIN = '/* SakaLuX Canonical Installed Version — BEGIN */'
 MARK_END = '/* SakaLuX Canonical Installed Version — END */'
+
+DOC_BY_ID = {
+    'enhancer': 'greasyfork/Enhancer-Guard.md',
+    'bazaar': 'greasyfork/Bazaar-Thanker.md',
+    'mission-rewards': 'greasyfork/Mission-Rewards.md',
+    'market-intelligence': 'greasyfork/Market-Intelligence.md',
+    'elimination-assistant': 'greasyfork/Elimination-Assistant.md',
+    'company-intelligence': 'greasyfork/Company-Intelligence.md',
+    'chat-intelligence': 'greasyfork/Chat-Intelligence.md',
+    'stock-manager-advisor': 'greasyfork/Stock-Manager-Advisor.md',
+    'account-auditor': 'greasyfork/Account-Auditor.md',
+}
 
 
 def header_version(text: str) -> str:
@@ -54,14 +68,10 @@ def replace_header_version(text: str, version: str) -> str:
 
 
 def sync_obvious_runtime_constants(text: str, old: str, new: str) -> str:
-    # Keep the common runtime constants aligned too. The canonical marker remains
-    # authoritative for Hub detection, so unusual module internals cannot create
-    # false UPDATE AVAILABLE states.
     text = re.sub(
         r"(\bconst\s+VERSION\s*=\s*['\"])" + re.escape(old) + r"(['\"]\s*;)",
         lambda m: m.group(1) + new + m.group(2), text, count=1
     )
-    # Standalone dock SELF registration is another installed-version signal.
     text = re.sub(
         r"(\{\s*version\s*:\s*['\"])" + re.escape(old) + r"(['\"]\s*\}\s*\))",
         lambda m: m.group(1) + new + m.group(2), text, count=1
@@ -78,6 +88,73 @@ def ensure_hub_prefers_canonical(text: str) -> tuple[str, bool]:
         raise RuntimeError('Hub getInstalledVersion() not found')
     injected = needle + "        // Canonical metadata marker: authoritative installed version.\n        try {\n            const canonical = globalThis.__SakaLuXInstalledVersions?.[script.id]\n                || document.documentElement?.getAttribute('data-sakalux-installed-' + script.id);\n            const v = String(canonical || '').trim();\n            if (/^\\d+(?:\\.\\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?$/.test(v)) return v;\n        } catch {}\n"
     return text.replace(needle, injected, 1), True
+
+
+def sync_hub_fallback_registry(text: str, registry: dict) -> str:
+    start_token = '    const FALLBACK_REGISTRY = '
+    end_token = '\n\n    let registry = '
+    start = text.find(start_token)
+    end = text.find(end_token, start)
+    if start < 0 or end < 0:
+        raise RuntimeError('Hub FALLBACK_REGISTRY boundaries not found')
+    payload = json.dumps(registry, indent=4, ensure_ascii=False)
+    replacement = start_token + payload.replace('\n', '\n    ')
+    return text[:start] + replacement + text[end:]
+
+
+def ensure_hub_changelog(text: str, version: str) -> str:
+    if re.search(rf"[\"']version[\"']\s*:\s*[\"']{re.escape(version)}[\"']", text):
+        return text
+    needle = '    const HUB_CHANGELOG = [\n'
+    if needle not in text:
+        return text
+    notes = [
+        'Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.',
+        'Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata.'
+    ]
+    entry = '        ' + json.dumps({'version': version, 'date': TODAY, 'changes': notes}, ensure_ascii=False) + ',\n'
+    return text.replace(needle, needle + entry, 1)
+
+
+def release_title(notes: list[str]) -> str:
+    if not notes:
+        return 'Release metadata synchronization'
+    first = notes[0].strip().rstrip('.')
+    return first if len(first) <= 90 else 'Release metadata synchronization'
+
+
+def sync_release_doc(path: Path, version: str, notes: list[str], title: str | None = None) -> None:
+    if not path.exists():
+        return
+    text = path.read_text(encoding='utf-8')
+    notes = [str(n).strip() for n in notes if str(n).strip()]
+    if not notes:
+        notes = ['Release metadata synchronized with the current userscript.']
+    title = title or release_title(notes)
+    bullets = '\n'.join(f'- {n}' for n in notes)
+
+    current_version = f'## Current version\n**v{version}**'
+    if re.search(r'(?is)##\s+Current version\s*\n+\s*\*\*v?[^*\n]+\*\*', text):
+        text = re.sub(
+            r'(?is)##\s+Current version\s*\n+\s*\*\*v?[^*\n]+\*\*',
+            current_version,
+            text,
+            count=1,
+        )
+
+    release_block = f'## Current release note\n\n**v{version} — {title}**\n{bullets}\n'
+    m = re.search(r'(?is)##\s+Current release note\b.*?(?=\n##\s|\Z)', text)
+    if m:
+        text = text[:m.start()] + release_block.rstrip() + '\n' + text[m.end():]
+
+    heading = re.search(r'(?im)^##\s+Release history\s*/\s*Changelog\s*$', text)
+    entry_pat = re.compile(rf'(?im)^###\s+v?{re.escape(version)}(?:\s|—|-|$)')
+    if heading and not entry_pat.search(text):
+        insert_at = heading.end()
+        entry = f'\n\n### v{version} — {title}\n{bullets}\n'
+        text = text[:insert_at] + entry + text[insert_at:]
+
+    path.write_text(text, encoding='utf-8')
 
 
 registry = json.loads(REGISTRY.read_text(encoding='utf-8'))
@@ -102,6 +179,7 @@ for row in registry.get('scripts', []):
     row['version'] = new
     release = row.setdefault('release', {})
     release['version'] = new
+    release.setdefault('date', TODAY)
     if first_install:
         notes = release.get('notes') if isinstance(release.get('notes'), list) else []
         note = 'Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.'
@@ -122,7 +200,43 @@ if hub_detection_changed:
         lambda m: m.group(1) + hub_new + m.group(2), hub_text, count=1
     )
     changed_files.append(HUB.name)
+else:
+    hub_new = header_version(hub_text)
+
+# Keep Hub's offline registry identical to scripts.json. This also makes the NEW
+# buttons show the same release/version details even when the remote registry is
+# unavailable or a stale local registry would otherwise be used.
+hub_text = sync_hub_fallback_registry(hub_text, registry)
+hub_text = ensure_hub_changelog(hub_text, hub_new)
 HUB.write_text(hub_text, encoding='utf-8')
 
+# Synchronize all managed release markdowns from the exact metadata used by Hub NEW.
+for row in registry.get('scripts', []):
+    doc_name = DOC_BY_ID.get(row.get('id'))
+    if not doc_name:
+        continue
+    release = row.get('release') or {}
+    sync_release_doc(
+        ROOT / doc_name,
+        str(row.get('version') or release.get('version')),
+        release.get('notes') if isinstance(release.get('notes'), list) else [],
+    )
+
+# Hub's own MD follows the Hub userscript/changelog version as well.
+hub_notes = [
+    'Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.',
+    'Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata.'
+]
+sync_release_doc(ROOT / 'greasyfork/Script-Hub.md', hub_new, hub_notes, 'Canonical release/version synchronization')
+
+# Standalone Suite is not a Hub registry module, but keep its MD version label aligned.
+suite = ROOT / 'SakaLuX-Suite.user.js'
+suite_doc = ROOT / 'greasyfork/SakaLuX-Suite.md'
+if suite.exists() and suite_doc.exists():
+    suite_version = header_version(suite.read_text(encoding='utf-8'))
+    sync_release_doc(suite_doc, suite_version, ['Release documentation synchronized with the current Suite userscript version.'])
+
 print('Canonical installed-version normalization complete.')
+print('Hub fallback registry and NEW release metadata synchronized.')
+print('Release markdowns synchronized.')
 print('Initial migrations:', ', '.join(changed_files) if changed_files else 'none')
