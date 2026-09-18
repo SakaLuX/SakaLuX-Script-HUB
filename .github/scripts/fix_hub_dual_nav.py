@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 
 path = Path('SakaLuX-Script-Hub.user.js')
 text = path.read_text(encoding='utf-8')
@@ -18,13 +17,7 @@ if entry not in text:
         raise SystemExit('HUB_CHANGELOG marker not found')
     text = text.replace(marker, marker + entry, 1)
 
-pattern = re.compile(
-    r'\n    function createNavSkull\(\) \{.*?\n    \}\n\n    function syncFloatingButtonVisibility\(\)',
-    re.S,
-)
-
-replacement = r'''
-    function createNavSkull() {
+replacement = r'''    function createNavSkull() {
         const existing = document.getElementById(IDS.navSkull);
         if (!settings.showTopbarSkull) {
             existing?.remove();
@@ -42,8 +35,8 @@ replacement = r'''
         const isNamed = (el, name) => labelOf(el).toLowerCase() === name.toLowerCase();
         const isHref = (el, token) => hrefOf(el).includes(token);
 
-        // CAT is the best anchor when installed because it already lives in Torn's
-        // real fly-out list. Otherwise use stable native rows from the same menu.
+        // Prefer CAT when present because it proves we are inside Torn's real
+        // fly-out navigation list. Otherwise anchor to stable native contact rows.
         const catAnchor = allClickable.find(el => /^cat script$/i.test(labelOf(el)));
         const targetAnchor = allClickable.find(el => isNamed(el, 'Targets') || isHref(el, 'target'));
         const enemyAnchor = allClickable.find(el => isNamed(el, 'Enemies') || isHref(el, 'enemies'));
@@ -135,12 +128,43 @@ replacement = r'''
         syncFloatingButtonVisibility();
         return true;
     }
+'''
 
-    function syncFloatingButtonVisibility()'''
+needle = '    function createNavSkull() {'
+start = text.find(needle)
+if start < 0:
+    raise SystemExit('createNavSkull start not found')
+brace = text.find('{', start)
+if brace < 0:
+    raise SystemExit('createNavSkull opening brace not found')
 
-text, count = pattern.subn('\n' + replacement.lstrip('\n'), text, count=1)
-if count != 1:
-    raise SystemExit(f'createNavSkull replacement count was {count}, expected 1')
+depth = 0
+quote = None
+escape = False
+i = brace
+while i < len(text):
+    ch = text[i]
+    if quote:
+        if escape:
+            escape = False
+        elif ch == '\\':
+            escape = True
+        elif ch == quote:
+            quote = None
+    else:
+        if ch in ('\"', "'", '`'):
+            quote = ch
+        elif ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                end = i + 1
+                break
+    i += 1
+else:
+    raise SystemExit('createNavSkull closing brace not found')
 
+text = text[:start] + replacement + text[end:]
 path.write_text(text, encoding='utf-8')
 print('Patched Hub v1.9.76 dual navigation launcher')
