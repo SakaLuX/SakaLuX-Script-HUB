@@ -1,0 +1,101 @@
+{
+  "file": "SakaLuX-Suite.user.js",
+  "mode": "suite-enabled",
+  "page": "factions.php?step=your",
+  "evalMs": 1141.06,
+  "observers": 16,
+  "queries": 932,
+  "queryMs": 3290.44,
+  "observerCalls": 2022,
+  "observerMs": 1640.67,
+  "observerMaxMs": 35.61,
+  "timeoutsScheduled": 1046,
+  "timeoutsRun": 64,
+  "intervalsRun": 31,
+  "rafScheduled": 96,
+  "observerStats": [
+    {
+      "source": "at startHeaderWatcher (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:1830:28)",
+      "calls": 125,
+      "ms": 0.3
+    },
+    {
+      "source": "at startObserver (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:44467:30)",
+      "calls": 125,
+      "ms": 1.16
+    },
+    {
+      "source": "at startObserver (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:44131:30)",
+      "calls": 125,
+      "ms": 0.12
+    },
+    {
+      "source": "at Object.init (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:42075:104)",
+      "calls": 125,
+      "ms": 43.83
+    },
+    {
+      "source": "at Object.init (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:22454:20)",
+      "calls": 125,
+      "ms": 1.73
+    },
+    {
+      "source": "at Object.init (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:21712:20)",
+      "calls": 125,
+      "ms": 1557.01
+    },
+    {
+      "source": "at startObserver (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:24117:16)",
+      "calls": 125,
+      "ms": 7.01
+    },
+    {
+      "source": "at Object.init (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:36044:27)",
+      "calls": 147,
+      "ms": 1.83
+    },
+    {
+      "source": "at startObserver (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:7604:16)",
+      "calls": 125,
+      "ms": 0.49
+    },
+    {
+      "source": "at startObserver (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:6439:16)",
+      "calls": 125,
+      "ms": 9.46
+    },
+    {
+      "source": "at startCompanyManagement (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:38787:26)",
+      "calls": 125,
+      "ms": 1.53
+    },
+    {
+      "source": "at Object.init (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:41702:22)",
+      "calls": 125,
+      "ms": 1.91
+    },
+    {
+      "source": "at installBookieScoutValueLayer (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:10216:30)",
+      "calls": 125,
+      "ms": 12.82
+    },
+    {
+      "source": "at Object.init (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:10241:20)",
+      "calls": 125,
+      "ms": 0.17
+    },
+    {
+      "source": "at watchPage (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:13210:24)",
+      "calls": 125,
+      "ms": 0.24
+    },
+    {
+      "source": "at Proxy.start (eval at <anonymous> (/workspace/scratch/e09821264c8a/repo/tests/performance/worker.cjs:48:11), <anonymous>:152:5)",
+      "calls": 125,
+      "ms": 1.07
+    }
+  ],
+  "errors": [
+    "Could not parse CSS stylesheet"
+  ]
+}
