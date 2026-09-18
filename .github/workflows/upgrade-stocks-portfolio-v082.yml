@@ -19,138 +19,70 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Upgrade Stocks only
+      - name: Upgrade Stocks v0.8.2
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import json,re
-
-          stock_p=Path('SakaLuX-Stock-Manager-Advisor.user.js')
-          docs_p=Path('greasyfork/Stock-Manager-Advisor.md')
-          reg_p=Path('scripts.json')
-          stock=stock_p.read_text()
-          docs=docs_p.read_text()
-          reg=json.loads(reg_p.read_text())
-          if '// @version      0.8.1' not in stock:
-              raise SystemExit('Expected Stocks v0.8.1 baseline not found')
-
-          backup=Path('backups/stocks-v0.8.2-portfolio-simulator-2026-09-18')
-          backup.mkdir(parents=True,exist_ok=True)
-          (backup/'SakaLuX-Stock-Manager-Advisor-v0.8.1.user.js').write_text(stock)
-          (backup/'Stock-Manager-Advisor-v0.8.1.md').write_text(docs)
-          entry=next(x for x in reg['scripts'] if x.get('id')=='stock-manager-advisor')
-          (backup/'scripts-stock-entry-v0.8.1.json').write_text(json.dumps(entry,indent=2)+'\n')
-
-          stock=stock.replace('// @version      0.8.1','// @version      0.8.2',1)
-          stock=stock.replace("version:'0.8.1'","version:'0.8.2'")
-          stock=stock.replace("version: '0.8.1'","version: '0.8.2'")
-
+          sp=Path('SakaLuX-Stock-Manager-Advisor.user.js'); dp=Path('greasyfork/Stock-Manager-Advisor.md'); rp=Path('scripts.json')
+          s=sp.read_text(); d=dp.read_text(); r=json.loads(rp.read_text())
+          if '// @version      0.8.1' not in s: raise SystemExit('Expected v0.8.1 baseline')
+          b=Path('backups/stocks-v0.8.2-portfolio-simulator-2026-09-18'); b.mkdir(parents=True,exist_ok=True)
+          (b/'SakaLuX-Stock-Manager-Advisor-v0.8.1.user.js').write_text(s); (b/'Stock-Manager-Advisor-v0.8.1.md').write_text(d)
+          e=next(x for x in r['scripts'] if x.get('id')=='stock-manager-advisor'); (b/'scripts-stock-entry-v0.8.1.json').write_text(json.dumps(e,indent=2)+'\n')
+          s=s.replace('// @version      0.8.1','// @version      0.8.2',1).replace("version:'0.8.1'","version:'0.8.2'").replace("version: '0.8.1'","version: '0.8.2'")
           pat=r"  function renderPortfolioSimulatorV080\(\)\{.*?\n  \}\n\n  function bindAdvisorSuiteControlsV080\(\)\{"
-          m=re.search(pat,stock,flags=re.S)
+          m=re.search(pat,s,re.S)
           if not m: raise SystemExit('Portfolio simulator anchor not found')
-          new="""  function portfolioValueV082(){
-    let total=0; for(const [sym] of S.stocks){const m=stockRowMetrics(sym);if(m&&m.price>0)total+=Math.max(0,Number(m.owned)||ownedShares(sym))*m.price;} return total;
-  }
-  function annualBenefitValueV082(sym){
-    const p=BENEFITS?.[sym]||{}; const direct=Number(p.annualValue||p.yearlyValue||p.valueYear||0); if(Number.isFinite(direct)&&direct>0)return direct;
-    const weekly=Number(p.weeklyValue||p.valueWeek||0); if(Number.isFinite(weekly)&&weekly>0)return weekly*52;
-    const monthly=Number(p.monthlyValue||p.valueMonth||0); if(Number.isFinite(monthly)&&monthly>0)return monthly*12;
-    return 0;
-  }
-  function positionBenefitYieldV082(sym,owned,price){
-    if(!(price>0)||!(owned>0))return 0; const tier=benefitTier(sym,owned),keep=Math.max(0,Number(tier.keep)||0),annual=annualBenefitValueV082(sym); if(!(keep>0)||!(annual>0)||owned<keep)return 0; return annual/(keep*price);
-  }
-  function technicalBiasV082(sym){
-    try{const st=technicalStatsV080(sym,'1w'),score=Number(st?.signal?.score);return Number.isFinite(score)?score:0;}catch{return 0;}
-  }
+          block=r'''  function portfolioValueV082(){let total=0;for(const [sym] of S.stocks){const m=stockRowMetrics(sym);if(m&&m.price>0)total+=Math.max(0,Number(m.owned)||ownedShares(sym))*m.price;}return total;}
+  function annualBenefitValueV082(sym){const p=BENEFITS?.[sym]||{};const direct=Number(p.annualValue||p.yearlyValue||p.valueYear||0);if(direct>0)return direct;const weekly=Number(p.weeklyValue||p.valueWeek||0);if(weekly>0)return weekly*52;const monthly=Number(p.monthlyValue||p.valueMonth||0);return monthly>0?monthly*12:0;}
+  function positionBenefitYieldV082(sym,owned,price){if(!(price>0&&owned>0))return 0;const tier=benefitTier(sym,owned),keep=Math.max(0,Number(tier.keep)||0),annual=annualBenefitValueV082(sym);return keep>0&&annual>0&&owned>=keep?annual/(keep*price):0;}
+  function technicalBiasV082(sym){try{const x=Number(technicalStatsV080(sym,'1w')?.signal?.score);return Number.isFinite(x)?x:0;}catch{return 0;}}
   function renderPortfolioSimulatorV080(){
-    const host=ensureAdvisorSuiteHostV080(); if(!host)return;
+    const host=ensureAdvisorSuiteHostV080();if(!host)return;
     const fromSel=host.querySelector('#slx-v080-sim-from'),toSel=host.querySelector('#slx-v080-sim-to'),amountEl=host.querySelector('#slx-v080-sim-amount'),box=host.querySelector('#slx-v080-simulator');
-    const syms=[...S.stocks.keys()].sort(); if(!syms.length){box.innerHTML='<div class=\"slx-v080-empty\">No stocks detected.</div>';return;}
-    const fill=(el)=>{if(el.options.length!==syms.length||![...el.options].every((o,i)=>o.value===syms[i]))el.innerHTML=syms.map(s=>`<option value=\"${esc(s)}\">${esc(s)}</option>`).join('');}; fill(fromSel);fill(toSel);
-    const f=get(K.simFrom,syms[0]),t=get(K.simTo,syms.find(s=>s!==f)||syms[0]); fromSel.value=syms.includes(f)?f:syms[0]; toSel.value=syms.includes(t)?t:(syms.find(s=>s!==fromSel.value)||fromSel.value); amountEl.value=get(K.simAmount,'10m');
+    const syms=[...S.stocks.keys()].sort();if(!syms.length){box.innerHTML='<div class="slx-v080-empty">No stocks detected.</div>';return;}
+    const fill=el=>{if(el.options.length!==syms.length||![...el.options].every((o,i)=>o.value===syms[i]))el.innerHTML=syms.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');};fill(fromSel);fill(toSel);
+    const f=get(K.simFrom,syms[0]),t=get(K.simTo,syms.find(x=>x!==f)||syms[0]);fromSel.value=syms.includes(f)?f:syms[0];toSel.value=syms.includes(t)?t:(syms.find(x=>x!==fromSel.value)||fromSel.value);amountEl.value=get(K.simAmount,'10m');
     const from=stockRowMetrics(fromSel.value),to=stockRowMetrics(toSel.value),requested=Math.max(0,parseAmount(amountEl.value));
-    if(!from||!to||!(from.price>0)||!(to.price>0)){box.innerHTML='<div class=\"slx-v080-empty\">Waiting for live stock metrics.</div>';return;}
-    if(fromSel.value===toSel.value){box.innerHTML='<div class=\"slx-v080-empty\">Choose two different stocks for a meaningful simulation.</div>';return;}
-
+    if(!from||!to||!(from.price>0)||!(to.price>0)){box.innerHTML='<div class="slx-v080-empty">Waiting for live stock metrics.</div>';return;}if(fromSel.value===toSel.value){box.innerHTML='<div class="slx-v080-empty">Choose two different stocks.</div>';return;}
     const sellable=Math.max(0,Math.floor(Number(from.freeShares)||0)),maxSafeValue=sellable*from.price,amount=Math.min(requested,maxSafeValue),sellShares=Math.min(sellable,Math.floor(amount/from.price)),proceeds=sellShares*from.price,buyShares=Math.floor(proceeds/to.price),buyCost=buyShares*to.price,unused=Math.max(0,proceeds-buyCost);
     const fromOwned=Math.max(0,Number(from.owned)||ownedShares(fromSel.value)),toOwned=Math.max(0,Number(to.owned)||ownedShares(toSel.value)),fromAfter=Math.max(0,fromOwned-sellShares),toAfter=toOwned+buyShares;
     const beforeTier=benefitTier(toSel.value,toOwned),afterTier=benefitTier(toSel.value,toAfter),beforeGap=Math.max(0,(Number(beforeTier.next)||0)-toOwned),afterGap=Math.max(0,(Number(afterTier.next)||0)-toAfter);
     const beforePortfolio=portfolioValueV082(),afterPortfolio=Math.max(0,beforePortfolio-proceeds+buyCost+unused),portfolioDelta=afterPortfolio-beforePortfolio;
-    const fromYield=positionBenefitYieldV082(fromSel.value,fromOwned,from.price),toYieldBefore=positionBenefitYieldV082(toSel.value,toOwned,to.price),toYieldAfter=positionBenefitYieldV082(toSel.value,toAfter,to.price);
-    const annualBefore=fromYield*(fromOwned*from.price)+toYieldBefore*(toOwned*to.price),annualAfter=positionBenefitYieldV082(fromSel.value,fromAfter,from.price)*(fromAfter*from.price)+toYieldAfter*(toAfter*to.price),annualDelta=annualAfter-annualBefore;
-    const techFrom=technicalBiasV082(fromSel.value),techTo=technicalBiasV082(toSel.value),techDelta=techTo-techFrom;
-    const movedPct=beforePortfolio>0?(proceeds/beforePortfolio)*100:0,coverage=requested>0?(proceeds/requested)*100:0;
-    let verdict='NEUTRAL'; let cls='neutral';
-    const score=(annualDelta>0?2:annualDelta<0?-2:0)+(techDelta>1?1:techDelta<-1?-1:0)+(afterTier.tier>beforeTier.tier?1:0);
-    if(score>=3){verdict='STRONGER AFTER';cls='buy';}else if(score>=1){verdict='IMPROVED';cls='watch';}else if(score<=-2){verdict='WEAKER AFTER';cls='sell';}
-    const pct=x=>`${x>=0?'+':''}${Number(x||0).toFixed(2)}%`;
-    const yieldPct=x=>Number.isFinite(x)&&x>0?`${(x*100).toFixed(2)}%`:'—';
-    const reasons=[]; if(annualDelta)reasons.push(`estimated annual benefit ${annualDelta>=0?'+':''}${money(annualDelta)}`); if(techDelta)reasons.push(`technical score delta ${techDelta>=0?'+':''}${techDelta.toFixed(1)}`); if(afterTier.tier!==beforeTier.tier)reasons.push(`target benefit tier ${beforeTier.tier} → ${afterTier.tier}`); if(coverage<99&&requested>0)reasons.push(`only ${coverage.toFixed(1)}% of requested amount can be safely reallocated`);
-
-    box.innerHTML=`<div class=\"slx-v082-verdict ${cls}\"><div><span>What-if result</span><b>${verdict}</b></div><strong>${money(proceeds)} reallocated</strong><small>${reasons.length?reasons.map(esc).join(' · '):'No measurable advantage from current local data.'}</small></div>
-    <div class=\"slx-v082-before-after\"><div><span>BEFORE</span><b>${esc(fromSel.value)} ${fromOwned.toLocaleString()} sh</b><small>Benefit yield ${yieldPct(fromYield)} · Tech ${techFrom>=0?'+':''}${techFrom.toFixed(1)}</small></div><div><span>AFTER</span><b>${esc(toSel.value)} ${toAfter.toLocaleString()} sh</b><small>Benefit yield ${yieldPct(toYieldAfter)} · Tech ${techTo>=0?'+':''}${techTo.toFixed(1)}</small></div></div>
-    <div class=\"slx-v080-sim-grid slx-v082-grid\"><div><span>SELL</span><b>${sellShares.toLocaleString()} ${esc(fromSel.value)}</b><small>${money(proceeds)} · safe max ${money(maxSafeValue)}</small></div><div><span>BUY</span><b>${buyShares.toLocaleString()} ${esc(toSel.value)}</b><small>${money(buyCost)} · unused ${money(unused)}</small></div><div><span>Target tier</span><b>${beforeTier.tier} → ${afterTier.tier}</b><small>Next gap ${beforeGap.toLocaleString()} → ${afterGap.toLocaleString()} shares</small></div><div><span>Portfolio moved</span><b>${pct(movedPct)}</b><small>Requested coverage ${coverage.toFixed(1)}% · Benefit Lock respected</small></div><div><span>Est. annual benefit</span><b class=\"${annualDelta>=0?'good':'bad'}\">${annualDelta>=0?'+':''}${money(annualDelta)}</b><small>Benefit metadata only; unavailable benefits count as 0</small></div><div><span>Value after simulation</span><b>${money(afterPortfolio)}</b><small>Accounting delta ${portfolioDelta>=0?'+':''}${money(portfolioDelta)} from share rounding</small></div></div>
-    <div class=\"api-help\">Preview only — no trade is submitted. This models the current detected prices, protected/free shares, benefit tiers and locally collected technical history; it is decision support, not a guarantee of future return.</div>`;
+    const fy=positionBenefitYieldV082(fromSel.value,fromOwned,from.price),ty0=positionBenefitYieldV082(toSel.value,toOwned,to.price),ty1=positionBenefitYieldV082(toSel.value,toAfter,to.price),annualBefore=fy*(fromOwned*from.price)+ty0*(toOwned*to.price),annualAfter=positionBenefitYieldV082(fromSel.value,fromAfter,from.price)*(fromAfter*from.price)+ty1*(toAfter*to.price),annualDelta=annualAfter-annualBefore;
+    const tf=technicalBiasV082(fromSel.value),tt=technicalBiasV082(toSel.value),td=tt-tf,moved=beforePortfolio>0?proceeds/beforePortfolio*100:0,coverage=requested>0?proceeds/requested*100:0;
+    const score=(annualDelta>0?2:annualDelta<0?-2:0)+(td>1?1:td<-1?-1:0)+(afterTier.tier>beforeTier.tier?1:0);let verdict='NEUTRAL',cls='neutral';if(score>=3){verdict='STRONGER AFTER';cls='buy';}else if(score>=1){verdict='IMPROVED';cls='watch';}else if(score<=-2){verdict='WEAKER AFTER';cls='sell';}
+    const yp=x=>x>0?`${(x*100).toFixed(2)}%`:'—',reasons=[];if(annualDelta)reasons.push(`annual benefit ${annualDelta>=0?'+':''}${money(annualDelta)}`);if(td)reasons.push(`technical delta ${td>=0?'+':''}${td.toFixed(1)}`);if(afterTier.tier!==beforeTier.tier)reasons.push(`target tier ${beforeTier.tier} → ${afterTier.tier}`);if(coverage<99&&requested>0)reasons.push(`safe coverage ${coverage.toFixed(1)}%`);
+    box.innerHTML=`<div class="slx-v082-verdict ${cls}"><div><span>What-if result</span><b>${verdict}</b></div><strong>${money(proceeds)} reallocated</strong><small>${reasons.length?reasons.map(esc).join(' · '):'No measurable advantage from current local data.'}</small></div><div class="slx-v082-before-after"><div><span>BEFORE</span><b>${esc(fromSel.value)} ${fromOwned.toLocaleString()} sh</b><small>Benefit yield ${yp(fy)} · Tech ${tf>=0?'+':''}${tf.toFixed(1)}</small></div><div><span>AFTER</span><b>${esc(toSel.value)} ${toAfter.toLocaleString()} sh</b><small>Benefit yield ${yp(ty1)} · Tech ${tt>=0?'+':''}${tt.toFixed(1)}</small></div></div><div class="slx-v080-sim-grid slx-v082-grid"><div><span>SELL</span><b>${sellShares.toLocaleString()} ${esc(fromSel.value)}</b><small>${money(proceeds)} · safe max ${money(maxSafeValue)}</small></div><div><span>BUY</span><b>${buyShares.toLocaleString()} ${esc(toSel.value)}</b><small>${money(buyCost)} · unused ${money(unused)}</small></div><div><span>Target tier</span><b>${beforeTier.tier} → ${afterTier.tier}</b><small>Next gap ${beforeGap.toLocaleString()} → ${afterGap.toLocaleString()}</small></div><div><span>Portfolio moved</span><b>${moved.toFixed(2)}%</b><small>Requested coverage ${coverage.toFixed(1)}% · Benefit Lock respected</small></div><div><span>Est. annual benefit</span><b class="${annualDelta>=0?'good':'bad'}">${annualDelta>=0?'+':''}${money(annualDelta)}</b><small>Uses available benefit metadata</small></div><div><span>Value after simulation</span><b>${money(afterPortfolio)}</b><small>Rounding delta ${portfolioDelta>=0?'+':''}${money(portfolioDelta)}</small></div></div><div class="api-help">Preview only — no trade is submitted. Uses current detected prices, protected/free shares, benefit tiers and locally collected technical history.</div>`;
   }
 
-  function bindAdvisorSuiteControlsV080(){"""
-          stock=stock[:m.start()]+new+stock[m.end():]
-
+  function bindAdvisorSuiteControlsV080(){'''
+          s=s[:m.start()]+block+s[m.end():]
           marker='/* SAKALUX_STOCK_STABILIZATION_V0801 */'
-          if marker not in stock: raise SystemExit('Style marker not found')
-          css="""(()=>{const id='slx-stock-portfolio-v082-style';if(document.getElementById(id))return;const st=document.createElement('style');st.id=id;st.textContent=`
-#slx-stock-advisor-suite-v080 .slx-v082-verdict{margin-top:9px;padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#101923;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center}#slx-stock-advisor-suite-v080 .slx-v082-verdict span{display:block;color:#91a2b6;font-size:9px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}#slx-stock-advisor-suite-v080 .slx-v082-verdict b{display:block;font-size:15px;margin-top:2px}#slx-stock-advisor-suite-v080 .slx-v082-verdict strong{font-size:11px}#slx-stock-advisor-suite-v080 .slx-v082-verdict small{grid-column:1/-1;color:#9fb0c3;line-height:1.35}#slx-stock-advisor-suite-v080 .slx-v082-verdict.buy{border-color:rgba(85,217,138,.45)}#slx-stock-advisor-suite-v080 .slx-v082-verdict.sell{border-color:rgba(255,107,120,.45)}#slx-stock-advisor-suite-v080 .slx-v082-verdict.watch{border-color:rgba(223,189,97,.4)}
-#slx-stock-advisor-suite-v080 .slx-v082-before-after{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}#slx-stock-advisor-suite-v080 .slx-v082-before-after>div{padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:#0b121b;min-width:0}#slx-stock-advisor-suite-v080 .slx-v082-before-after span{display:block;color:#899bad;font-size:9px;font-weight:900}#slx-stock-advisor-suite-v080 .slx-v082-before-after b{display:block;margin-top:3px;font-size:12px}#slx-stock-advisor-suite-v080 .slx-v082-before-after small{display:block;margin-top:3px;color:#91a2b6;line-height:1.3}
-#slx-stock-advisor-suite-v080 .slx-v082-grid{margin-top:8px}#slx-stock-advisor-suite-v080 .slx-v082-grid .good{color:#55d98a}#slx-stock-advisor-suite-v080 .slx-v082-grid .bad{color:#ff6b78}
-@media(max-width:700px){#slx-stock-advisor-suite-v080 .slx-v082-before-after{grid-template-columns:1fr}#slx-stock-advisor-suite-v080 .slx-v082-verdict{grid-template-columns:1fr}}
-`;document.head.appendChild(st);})();
+          if marker not in s: raise SystemExit('Style marker not found')
+          css=r'''(()=>{const id='slx-stock-portfolio-v082-style';if(document.getElementById(id))return;const st=document.createElement('style');st.id=id;st.textContent=`#slx-stock-advisor-suite-v080 .slx-v082-verdict{margin-top:9px;padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:#101923;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center}#slx-stock-advisor-suite-v080 .slx-v082-verdict span,#slx-stock-advisor-suite-v080 .slx-v082-before-after span{display:block;color:#91a2b6;font-size:9px;text-transform:uppercase;font-weight:900}#slx-stock-advisor-suite-v080 .slx-v082-verdict b{display:block;font-size:15px}#slx-stock-advisor-suite-v080 .slx-v082-verdict small{grid-column:1/-1;color:#9fb0c3}#slx-stock-advisor-suite-v080 .slx-v082-verdict.buy{border-color:rgba(85,217,138,.45)}#slx-stock-advisor-suite-v080 .slx-v082-verdict.sell{border-color:rgba(255,107,120,.45)}#slx-stock-advisor-suite-v080 .slx-v082-verdict.watch{border-color:rgba(223,189,97,.4)}#slx-stock-advisor-suite-v080 .slx-v082-before-after{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}#slx-stock-advisor-suite-v080 .slx-v082-before-after>div{padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:#0b121b}#slx-stock-advisor-suite-v080 .slx-v082-grid{margin-top:8px}#slx-stock-advisor-suite-v080 .slx-v082-grid .good{color:#55d98a}#slx-stock-advisor-suite-v080 .slx-v082-grid .bad{color:#ff6b78}@media(max-width:700px){#slx-stock-advisor-suite-v080 .slx-v082-before-after,#slx-stock-advisor-suite-v080 .slx-v082-verdict{grid-template-columns:1fr}}`;document.head.appendChild(st);})();
 
 /* SAKALUX_STOCK_PORTFOLIO_V082 */
 
-"""
-          stock=stock.replace(marker,css+marker,1)
-
-          # docs: normalize current version and add release note near first current-version occurrence
-          docs=re.sub(r'(Current version[^\n]*?)0\.8\.1',r'\g<1>0.8.2',docs,count=1,flags=re.I)
-          if '## v0.8.2' not in docs:
-              insert='''\n## v0.8.2 — Portfolio Simulator\n- Upgrades What-if simulation with BEFORE → AFTER position comparison.\n- Adds safe reallocatable coverage, target tier movement, share-rounding accounting and unused-cash visibility.\n- Adds estimated benefit-yield change when benefit metadata is available.\n- Adds local technical-score comparison using the existing Technical Trade Assistant history.\n- Adds a compact IMPROVED / STRONGER AFTER / NEUTRAL / WEAKER AFTER decision-support verdict.\n- Simulation remains preview-only and never submits a trade.\n\n'''
-              pos=docs.find('\n## ')
-              docs=(docs[:pos+1]+insert+docs[pos+1:]) if pos>=0 else docs+insert
-          docs=docs.replace('0.8.1','0.8.2',1) if '0.8.2' not in docs[:300] else docs
-
-          entry['version']='0.8.2'
-          entry['release']={
-            'version':'0.8.2','date':'2026-09-18','notes':[
-              'Upgrades Portfolio Simulator with BEFORE → AFTER position comparison and safe reallocation coverage.',
-              'Adds benefit-yield and local technical-score deltas plus a compact simulation verdict.',
-              'Keeps the simulator preview-only; no trade is submitted from What-if mode.'
-            ]
-          }
-          info=entry.get('info','')
-          if 'v0.8.2' not in info:
-              entry['info']=info+' v0.8.2 upgrades the Portfolio Simulator with BEFORE → AFTER comparisons, safe reallocatable coverage, benefit-yield deltas and locally derived technical-score context while remaining preview-only.'
-
-          stock_p.write_text(stock)
-          docs_p.write_text(docs)
-          reg_p.write_text(json.dumps(reg,indent=2,ensure_ascii=False)+'\n')
+'''
+          s=s.replace(marker,css+marker,1)
+          if '## v0.8.2' not in d:
+              note='''\n## v0.8.2 — Portfolio Simulator\n- BEFORE → AFTER What-if comparison.\n- Safe reallocatable coverage with Benefit Lock respected.\n- Benefit-yield and local technical-score deltas.\n- Target benefit-tier movement and unused-cash/share-rounding visibility.\n- Preview-only; no trade is submitted.\n\n'''
+              p=d.find('\n## ');d=d[:p+1]+note+d[p+1:] if p>=0 else d+note
+          d=re.sub(r'0\.8\.1','0.8.2',d,count=1)
+          e['version']='0.8.2';e['release']={'version':'0.8.2','date':'2026-09-18','notes':['Portfolio Simulator now shows BEFORE → AFTER positions and safe reallocation coverage.','Adds benefit-yield and local technical-score deltas with target tier movement.','What-if remains preview-only and never submits a trade.']}
+          sp.write_text(s);dp.write_text(d);rp.write_text(json.dumps(r,indent=2,ensure_ascii=False)+'\n')
           PY
-
           node --check SakaLuX-Stock-Manager-Advisor.user.js
           python3 - <<'PY'
-          import json,re
           from pathlib import Path
-          s=Path('SakaLuX-Stock-Manager-Advisor.user.js').read_text()
-          assert '// @version      0.8.2' in s
-          assert "version:'0.8.2'" in s
-          assert 'SAKALUX_STOCK_PORTFOLIO_V082' in s
-          assert 'What-if result' in s
-          j=json.loads(Path('scripts.json').read_text())
-          e=next(x for x in j['scripts'] if x.get('id')=='stock-manager-advisor')
+          import json
+          s=Path('SakaLuX-Stock-Manager-Advisor.user.js').read_text();j=json.loads(Path('scripts.json').read_text());e=next(x for x in j['scripts'] if x.get('id')=='stock-manager-advisor')
+          assert '// @version      0.8.2' in s and 'SAKALUX_STOCK_PORTFOLIO_V082' in s and 'What-if result' in s
           assert e['version']=='0.8.2' and e['release']['version']=='0.8.2'
           print('Stocks v0.8.2 validation OK')
           PY
-
           git config user.name 'SakaLuX'
           git config user.email 'sakalutzu92@yahoo.com'
           git add SakaLuX-Stock-Manager-Advisor.user.js greasyfork/Stock-Manager-Advisor.md scripts.json backups/stocks-v0.8.2-portfolio-simulator-2026-09-18
