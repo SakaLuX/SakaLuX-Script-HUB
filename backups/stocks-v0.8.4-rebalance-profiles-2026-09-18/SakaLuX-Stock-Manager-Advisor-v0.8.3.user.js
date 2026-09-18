@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.4
+// @version      0.8.3
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -72,7 +72,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.4'});
+  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.3'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -264,7 +264,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.8.4',
+    version: '0.8.3',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -1360,15 +1360,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   }
 
   /* SAKALUX_STOCK_SMART_REBALANCE_V083 */
-  /* SAKALUX_STOCK_REBALANCE_PROFILES_V084 */
-  const REBALANCE_PROFILE_KEY_V084='slx_stock_rebalance_profile_v084';
-  const REBALANCE_PROFILES_V084={
-    safe:{id:'safe',label:'SAFE',maxPortfolioPct:.10,minScoreGap:.75,maxMoves:2,techWeight:.75,benefitWeight:.65,tierWeight:.55,affordWeight:.15},
-    balanced:{id:'balanced',label:'BALANCED',maxPortfolioPct:.20,minScoreGap:.35,maxMoves:4,techWeight:1.00,benefitWeight:1.00,tierWeight:.35,affordWeight:.25},
-    aggressive:{id:'aggressive',label:'AGGRESSIVE',maxPortfolioPct:.35,minScoreGap:.15,maxMoves:6,techWeight:1.20,benefitWeight:1.25,tierWeight:.20,affordWeight:.35}
-  };
-  function rebalanceProfileV084(){const id=String(get(REBALANCE_PROFILE_KEY_V084,'balanced')||'balanced').toLowerCase();return REBALANCE_PROFILES_V084[id]||REBALANCE_PROFILES_V084.balanced;}
-  function smartRebalanceScoreV083(sym,metrics,profile=rebalanceProfileV084()){
+  function smartRebalanceScoreV083(sym,metrics){
     if(!metrics||!(metrics.price>0))return -999;
     const owned=Math.max(0,Number(metrics.owned)||ownedShares(sym));
     const tech=technicalBiasV082(sym);
@@ -1377,27 +1369,27 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const nextGap=Math.max(0,(Number(tier.next)||0)-owned);
     const nextCost=nextGap*metrics.price;
     const affordability=nextGap>0&&nextCost>0?Math.max(-1,1-Math.min(1,nextCost/Math.max(1,portfolioValueV082()))):0;
-    return tech*profile.techWeight+(y*100)*profile.benefitWeight+(tier.tier>0?profile.tierWeight:0)+affordability*profile.affordWeight;
+    return tech+(y*100)+(tier.tier>0?0.35:0)+affordability*0.25;
   }
 
   function buildSmartRebalancePlanV083(){
-    const profile=rebalanceProfileV084(),rows=[];
+    const rows=[];
     for(const [sym] of S.stocks){
       const m=stockRowMetrics(sym); if(!m||!(m.price>0))continue;
       const owned=Math.max(0,Number(m.owned)||ownedShares(sym));
       const free=Math.max(0,Math.floor(Number(m.freeShares)||0));
       const value=owned*m.price,freeValue=free*m.price;
       const tier=benefitTier(sym,owned);
-      rows.push({sym,m,owned,free,value,freeValue,tier,tech:technicalBiasV082(sym),yield:positionBenefitYieldV082(sym,owned,m.price),score:smartRebalanceScoreV083(sym,m,profile)});
+      rows.push({sym,m,owned,free,value,freeValue,tier,tech:technicalBiasV082(sym),yield:positionBenefitYieldV082(sym,owned,m.price),score:smartRebalanceScoreV083(sym,m)});
     }
-    if(rows.length<2)return {moves:[],rows,total:portfolioValueV082(),profile,reason:'Need at least two detected stocks.'};
+    if(rows.length<2)return {moves:[],rows,total:portfolioValueV082(),reason:'Need at least two detected stocks.'};
     const sources=rows.filter(r=>r.free>0&&r.freeValue>0).sort((a,b)=>(a.score-b.score)||(b.freeValue-a.freeValue));
     const targets=[...rows].sort((a,b)=>(b.score-a.score)||(b.yield-a.yield)||(b.tech-a.tech));
-    const total=portfolioValueV082(); const maxMove=Math.max(1_000_000,total*profile.maxPortfolioPct);
-    const usedSource=new Map(),moves=[];
+    const total=portfolioValueV082(); const maxMove=Math.max(1_000_000,total*0.20);
+    const usedSource=new Map(); const moves=[];
     for(const src of sources){
-      if(moves.length>=profile.maxMoves)break;
-      const tgt=targets.find(t=>t.sym!==src.sym && t.score>src.score+profile.minScoreGap);
+      if(moves.length>=4)break;
+      const tgt=targets.find(t=>t.sym!==src.sym && t.score>src.score+0.35);
       if(!tgt)continue;
       const remainingShares=Math.max(0,src.free-(usedSource.get(src.sym)||0)); if(!remainingShares)continue;
       const available=remainingShares*src.m.price;
@@ -1414,7 +1406,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
       moves.push({from:src.sym,to:tgt.sym,sellShares,buyShares,proceeds,buyCost,unused,scoreDelta:tgt.score-src.score,techDelta:tgt.tech-src.tech,annualDelta:annualAfter-annualBefore,tierBefore:beforeTier.tier,tierAfter:afterTier.tier});
       usedSource.set(src.sym,(usedSource.get(src.sym)||0)+sellShares);
     }
-    return {moves,rows,total,profile,reason:moves.length?'':`No move cleared the ${profile.label} threshold.`};
+    return {moves,rows,total,reason:moves.length?'':'No positive rebalance move cleared the current safety threshold.'};
   }
 
   function renderSmartRebalanceV083(){
@@ -1422,17 +1414,13 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     let sec=host.querySelector('#slx-smart-rebalance-v083');
     if(!sec){
       sec=document.createElement('section'); sec.id='slx-smart-rebalance-v083'; sec.className='slx-v083-rebalance';
-      sec.innerHTML=`<div class="slx-v083-head"><div><span>SMART REBALANCE</span><b>Portfolio plan</b></div><button type="button" id="slx-v083-refresh">RECALCULATE</button></div><div class="slx-v084-profiles"><button data-profile="safe">SAFE</button><button data-profile="balanced">BALANCED</button><button data-profile="aggressive">AGGRESSIVE</button></div><div id="slx-v084-profile-help"></div><div id="slx-v083-summary"></div><div id="slx-v083-moves"></div><div class="api-help">Decision support only — the plan never submits trades. Protected/Benefit Lock shares remain excluded because only detected free shares are used as sell sources.</div>`;
+      sec.innerHTML=`<div class="slx-v083-head"><div><span>SMART REBALANCE</span><b>Portfolio plan</b></div><button type="button" id="slx-v083-refresh">RECALCULATE</button></div><div id="slx-v083-summary"></div><div id="slx-v083-moves"></div><div class="api-help">Decision support only — the plan never submits trades. Protected/Benefit Lock shares remain excluded because only detected free shares are used as sell sources.</div>`;
       host.appendChild(sec);
       sec.querySelector('#slx-v083-refresh').onclick=()=>{recordTechnicalSnapshotV080(true);renderSmartRebalanceV083();};
-      sec.querySelectorAll('[data-profile]').forEach(btn=>btn.onclick=()=>{set(REBALANCE_PROFILE_KEY_V084,btn.dataset.profile);renderSmartRebalanceV083();});
     }
-    const plan=buildSmartRebalancePlanV083(),profile=plan.profile,sum=sec.querySelector('#slx-v083-summary'),box=sec.querySelector('#slx-v083-moves'),help=sec.querySelector('#slx-v084-profile-help');
-    sec.querySelectorAll('[data-profile]').forEach(btn=>btn.classList.toggle('active',btn.dataset.profile===profile.id));
-    const descriptions={safe:'Lower turnover · max 10% per move · stronger score gap · up to 2 moves',balanced:'Default mix · max 20% per move · medium score gap · up to 4 moves',aggressive:'Higher turnover · max 35% per move · lower score gap · up to 6 moves'};
-    help.innerHTML=`<span>${profile.label}</span> ${descriptions[profile.id]}`;
+    const plan=buildSmartRebalancePlanV083(),sum=sec.querySelector('#slx-v083-summary'),box=sec.querySelector('#slx-v083-moves');
     const moved=plan.moves.reduce((a,x)=>a+x.proceeds,0),annual=plan.moves.reduce((a,x)=>a+x.annualDelta,0),tech=plan.moves.length?plan.moves.reduce((a,x)=>a+x.techDelta,0)/plan.moves.length:0;
-    sum.innerHTML=`<div class="slx-v083-summary-grid"><div><span>Profile</span><b>${profile.label}</b></div><div><span>Portfolio</span><b>${money(plan.total)}</b></div><div><span>Suggested moves</span><b>${plan.moves.length}</b></div><div><span>Capital moved</span><b>${money(moved)}</b></div><div><span>Avg tech delta</span><b>${tech>=0?'+':''}${tech.toFixed(1)}</b></div><div><span>Est. annual benefit delta</span><b class="${annual>=0?'good':'bad'}">${annual>=0?'+':''}${money(annual)}</b></div></div>`;
+    sum.innerHTML=`<div class="slx-v083-summary-grid"><div><span>Portfolio</span><b>${money(plan.total)}</b></div><div><span>Suggested moves</span><b>${plan.moves.length}</b></div><div><span>Capital moved</span><b>${money(moved)}</b></div><div><span>Avg tech delta</span><b>${tech>=0?'+':''}${tech.toFixed(1)}</b></div><div><span>Est. annual benefit delta</span><b class="${annual>=0?'good':'bad'}">${annual>=0?'+':''}${money(annual)}</b></div></div>`;
     if(!plan.moves.length){box.innerHTML=`<div class="slx-v080-empty">${esc(plan.reason)}</div>`;return;}
     box.innerHTML=plan.moves.map((x,i)=>`<div class="slx-v083-move"><div class="slx-v083-step">${i+1}</div><div class="slx-v083-route"><b>${esc(x.from)} → ${esc(x.to)}</b><small>SELL ${x.sellShares.toLocaleString()} · BUY ${x.buyShares.toLocaleString()} · ${money(x.proceeds)}</small></div><div class="slx-v083-metrics"><span>Score ${x.scoreDelta>=0?'+':''}${x.scoreDelta.toFixed(2)}</span><span>Tech ${x.techDelta>=0?'+':''}${x.techDelta.toFixed(1)}</span><span>Benefit ${x.annualDelta>=0?'+':''}${money(x.annualDelta)}/yr</span><span>Tier ${x.tierBefore} → ${x.tierAfter}</span></div><small class="slx-v083-unused">Unused after rounding: ${money(x.unused)}</small></div>`).join('');
   }
@@ -2331,11 +2319,11 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 })();
 
 /* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 */
-(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.4'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
+(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.3'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
 
 
 /* SAKALUX_STOCKS_FOLLOWUP_V0715 */
-(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.4'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
+(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.3'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
 
 
 /* SAKALUX_STOCK_API_ELIMINATION_LAYOUT_V0716 */
@@ -2386,7 +2374,6 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 #slx-stock-advisor-suite-v080 .slx-v083-rebalance{margin-top:10px;padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:#0b121b}#slx-stock-advisor-suite-v080 .slx-v083-head{display:flex;align-items:center;justify-content:space-between;gap:8px}#slx-stock-advisor-suite-v080 .slx-v083-head span{display:block;color:#91a2b6;font-size:9px;font-weight:900;letter-spacing:.08em}#slx-stock-advisor-suite-v080 .slx-v083-head b{display:block;margin-top:2px;font-size:14px}#slx-stock-advisor-suite-v080 .slx-v083-head button{border:1px solid rgba(255,255,255,.11);border-radius:9px;background:#111c28;color:#dce7f2;padding:7px 9px;font-size:9px;font-weight:900}
 #slx-stock-advisor-suite-v080 .slx-v083-summary-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:8px}#slx-stock-advisor-suite-v080 .slx-v083-summary-grid>div{padding:8px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:#101923;min-width:0}#slx-stock-advisor-suite-v080 .slx-v083-summary-grid span{display:block;color:#899bad;font-size:8px;font-weight:900;text-transform:uppercase}#slx-stock-advisor-suite-v080 .slx-v083-summary-grid b{display:block;margin-top:3px;font-size:11px;overflow:hidden;text-overflow:ellipsis}#slx-stock-advisor-suite-v080 .slx-v083-summary-grid .good{color:#55d98a}#slx-stock-advisor-suite-v080 .slx-v083-summary-grid .bad{color:#ff6b78}
 #slx-stock-advisor-suite-v080 .slx-v083-move{display:grid;grid-template-columns:26px minmax(0,1fr);gap:6px 8px;margin-top:7px;padding:8px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:#0e1721}#slx-stock-advisor-suite-v080 .slx-v083-step{grid-row:1/4;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#162332;font-weight:900;font-size:10px}#slx-stock-advisor-suite-v080 .slx-v083-route b{font-size:12px}#slx-stock-advisor-suite-v080 .slx-v083-route small,#slx-stock-advisor-suite-v080 .slx-v083-unused{display:block;color:#91a2b6;margin-top:2px;line-height:1.3}#slx-stock-advisor-suite-v080 .slx-v083-metrics{display:flex;flex-wrap:wrap;gap:5px}#slx-stock-advisor-suite-v080 .slx-v083-metrics span{padding:3px 6px;border-radius:999px;background:#162332;color:#b9c7d6;font-size:9px;font-weight:800}
-#slx-stock-advisor-suite-v080 .slx-v084-profiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}#slx-stock-advisor-suite-v080 .slx-v084-profiles button{min-height:32px;border:1px solid rgba(255,255,255,.10);border-radius:9px;background:#111b26;color:#91a2b6;font-size:9px;font-weight:900;letter-spacing:.04em}#slx-stock-advisor-suite-v080 .slx-v084-profiles button.active{border-color:rgba(223,189,97,.72);background:linear-gradient(180deg,#5b471b,#33290f);color:#ffe7a3}#slx-stock-advisor-suite-v080 #slx-v084-profile-help{margin-top:6px;padding:6px 8px;border-radius:9px;background:#0d1620;color:#8fa1b4;font-size:9px;line-height:1.35}#slx-stock-advisor-suite-v080 #slx-v084-profile-help span{color:#dfbd61;font-weight:900;margin-right:5px}
 @media(max-width:700px){#slx-stock-advisor-suite-v080 .slx-v083-summary-grid{grid-template-columns:1fr 1fr}#slx-stock-advisor-suite-v080 .slx-v083-summary-grid>div:last-child{grid-column:1/-1}}
 `;document.head.appendChild(st);})();
 
