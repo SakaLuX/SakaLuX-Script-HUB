@@ -33,3 +33,4 @@ else:
     raise SystemExit('stock-manager-advisor missing from scripts.json')
 reg.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
 print('Stock Manager v0.8.10 API buttons layout patched')
+# workflow trigger
