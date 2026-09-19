@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.935
+// @version      0.9.936
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -214,7 +214,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.935';
+  const VERSION = '0.9.936';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -6155,7 +6155,7 @@ const POPUP_ID = "sakalux-oco-popup";
     // schedule duplicate API calls while this request is in flight.
     lastObservedOcStage = stage;
 
-    markStageScanRequired(stage);
+    // Do NOT invalidate an already completed scan merely because the user revisited this stage.
     updateStageVisuals();
 
     const statusEl =
@@ -6177,11 +6177,16 @@ const POPUP_ID = "sakalux-oco-popup";
         `Scanning every ${stage} OC member, role and required item...`;
     }
 
-    const result =
+    let result =
       await scanAvailableCrimesViaApi(
         stage,
         true
       );
+
+    if (!result?.ok) {
+      const domResult = await scanCurrentCrimesStage();
+      if (domResult?.ok) result = domResult;
+    }
 
     if (
       result?.ok &&
@@ -6203,13 +6208,15 @@ const POPUP_ID = "sakalux-oco-popup";
     }
 
     if (statusEl) {
-      flashScanStatus(
-        statusEl,
-        result?.reason ||
-          "API refresh failed",
-        "error",
-        2200
-      );
+      const reason = String(result?.reason || "API refresh failed");
+      const factionAccessMissing = /incorrect id-entity relation|error\s*7|faction api access/i.test(reason);
+      if (factionAccessMissing) {
+        statusEl.classList.remove("is-scanning", "is-error", "is-success");
+        renderScanStatus(statusEl);
+        statusEl.title = "Faction API Access unavailable; Suite is using the visible-page OC scanner.";
+      } else {
+        flashScanStatus(statusEl, reason, "error", 3000);
+      }
     }
   }
 
