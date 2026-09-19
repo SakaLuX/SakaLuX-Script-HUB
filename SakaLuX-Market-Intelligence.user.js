@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.42
+// @version      1.17.43
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -19,7 +19,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.42';
+  let v = '1.17.43';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -97,7 +97,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.42'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.43'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -629,6 +629,8 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     setInterval(enforceTravelPanelScope,1500);
 
     function paintTravelSessionSummary(){
+        // v1.17.43: travel-only hard guard. These inline cards must never exist outside Travel.
+        if (detectPage() !== 'travel') { document.getElementById('sl-mi-session')?.remove(); return; }
         const existing=document.getElementById('sl-mi-session');
         if(!isTravelPanelPage()){existing?.remove();return;}
         if(!settings.sessionSummary){existing?.remove();return;}
@@ -1437,6 +1439,8 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     }
 
     async function renderArrivalStock(){
+        // v1.17.43: travel-only hard guard. These inline cards must never exist outside Travel.
+        if (detectPage() !== 'travel') { document.getElementById('sl-mi-arrival')?.remove(); return; }
         const previousArrival=document.getElementById('sl-mi-arrival');
         state.arrivalRows=0;state.flightDestination='';state.landingMins=null;
         state.arrivalBasketItems=0;state.arrivalBasketCost=0;state.arrivalBasketProfit=0;state.arrivalBasketSlots=0;state.arrivalBasketMode='';
@@ -1944,7 +1948,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     function mountTop(el){const host=document.querySelector('#mainContainer .content-wrapper')||document.querySelector('.content-wrapper')||document.querySelector('#mainContainer')||document.body;host.insertBefore(el,host.firstChild);}
 
     async function scan(force=false){
-        if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
+        if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();if(state.page!=='travel')document.querySelectorAll('#sl-mi-session,#sl-mi-arrival').forEach(n=>n.remove());state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
         try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());if(state.page!=='travel')document.querySelectorAll('.sl-mi-travel,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}if(state.page==='items'||state.page==='profile')document.getElementById('sl-mi-market-bar')?.remove();state.lastScan=Date.now();state.scanCount++;}
         catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;if(!settings.enabled)cleanupLiveFeature('enabled');}
     }
