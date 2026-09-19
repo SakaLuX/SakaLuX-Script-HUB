@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.42**
+**v1.17.43**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,11 +20,10 @@
 
 ## Current release note
 
-**v1.17.42 — Release metadata synchronization**
-- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
-- Shares active market lookups for the same item and API key.
-- Shares active equipment fetches across overlapping loadout comparisons, including forced refreshes.
-- Clears pending operations on success and failure so later requests recover; price estimates and explicit trade controls remain unchanged.
+**v1.17.43 — Hard-locks Travel Session Summary and Arrival Basket to Torn Travel pages only**
+- Hard-locks Travel Session Summary and Arrival Basket to Torn Travel pages only.
+- Removes stale travel cards immediately when Torn SPA navigation moves to Messages or any non-Travel page.
+- Adds render-time guards so mutations or delayed scans cannot recreate either panel outside Travel.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -48,6 +47,12 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.17.43 — Strict Travel-only inline panels
+- Travel Session Summary and Arrival Basket now have hard render guards and can only mount when `detectPage()` is `travel`.
+- Torn SPA navigation now removes stale travel cards immediately on Messages and every other non-Travel page.
+- Prevents delayed MutationObserver/scan callbacks from recreating either panel outside Travel.
+
 
 
 

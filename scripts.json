@@ -197,18 +197,17 @@
         }
       ],
       "release": {
-        "version": "1.17.42",
-        "date": "2026-09-18",
+        "version": "1.17.43",
+        "date": "2026-09-19",
         "notes": [
-          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-          "Shares active market lookups for the same item and API key.",
-          "Shares active equipment fetches across overlapping loadout comparisons, including forced refreshes.",
-          "Clears pending operations on success and failure so later requests recover; price estimates and explicit trade controls remain unchanged."
+          "Hard-locks Travel Session Summary and Arrival Basket to Torn Travel pages only.",
+          "Removes stale travel cards immediately when Torn SPA navigation moves to Messages or any non-Travel page.",
+          "Adds render-time guards so mutations or delayed scans cannot recreate either panel outside Travel."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.42",
+      "version": "1.17.43",
       "detailsRevision": 3
     },
     {
