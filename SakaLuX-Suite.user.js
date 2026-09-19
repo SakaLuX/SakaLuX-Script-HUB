@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.933
+// @version      0.9.934
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -214,7 +214,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.933';
+  const VERSION = '0.9.934';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -5819,62 +5819,81 @@ const POPUP_ID = "sakalux-oco-popup";
     const stage = getCrimesStageLabel();
     refreshNotInOCFromPage();
     if (stage !== "Recruiting" && stage !== "Planning") {
-      return { ok: false, stage, reason: "Not on Recruiting/Planning" };
+      return { ok: false, stage, reason: "Open Recruiting or Planning first" };
     }
-    const usersInOC = new Set();
-    const reqByUser = {};
-    const roleByUser = {};
-    const roots = findSlotRoots();
-    for (const root of roots) {
-      let xid = directSlotXid(root);
-      if (!xid) {
-        xid = await openMenuAndGetXid(root);
-      }
-      if (!xid) continue;
-      usersInOC.add(xid);
-      if (!reqByUser[xid]) {
-        reqByUser[xid] = [];
-      }
 
-      const roleName =
-        (
-          root.querySelector(
-            '[class*="title"], [class*="role"]'
-          )?.textContent ||
-          ""
-        )
-          .replace(/\s+/g, " ")
-          .trim();
-
-      if (roleName) {
-        roleByUser[xid] = roleName;
-      }
-
-      let itemId = directSlotItemId(root);
-      if (!itemId) {
-        const hoverHost =
-          root.querySelector(
-            'button[class*="slotHeader"],[class*="slotHeader"]'
-          ) ||
-          root.querySelector('[aria-describedby]') ||
-          root;
-        const tip = await hoverAndGetTooltip(hoverHost);
-        itemId = extractItemIdFromTooltip(tip);
-      }
-      if (isAllowedItemId(itemId)) {
-        const sid = String(itemId);
-        if (!reqByUser[xid].includes(sid)) {
-          reqByUser[xid].push(sid);
-        }
-      }
+    // Torn often paints the stage tabs before the OC role cards are actually mounted.
+    // Give the live DOM a short window to finish rendering instead of failing instantly.
+    let roots = findSlotRoots();
+    for (let attempt = 0; attempt < 8 && !roots.length; attempt += 1) {
+      await new Promise(resolve => setTimeout(resolve, 250));
+      roots = findSlotRoots();
     }
-    if (!roots.length || !usersInOC.size) {
+
+    if (!roots.length) {
       return {
         ok: false,
         stage,
-        reason: "No OC role slots found"
+        reason: `${stage} loaded, but no OC role slots are visible yet`
       };
     }
+
+    const usersInOC = new Set();
+    const reqByUser = {};
+    const roleByUser = {};
+    const rootErrors = [];
+
+    for (const root of roots) {
+      try {
+        let xid = directSlotXid(root);
+        if (!xid) {
+          try { xid = await openMenuAndGetXid(root); }
+          catch (error) { rootErrors.push(`member: ${error?.message || error}`); }
+        }
+        if (!xid) continue;
+
+        usersInOC.add(xid);
+        if (!reqByUser[xid]) reqByUser[xid] = [];
+
+        const roleName = (
+          root.querySelector('[class*="title"], [class*="role"]')?.textContent || ""
+        ).replace(/\s+/g, " ").trim();
+        if (roleName) roleByUser[xid] = roleName;
+
+        let itemId = directSlotItemId(root);
+        if (!itemId) {
+          try {
+            const hoverHost =
+              root.querySelector('button[class*="slotHeader"],[class*="slotHeader"]') ||
+              root.querySelector('[aria-describedby]') ||
+              root;
+            const tip = await hoverAndGetTooltip(hoverHost);
+            itemId = extractItemIdFromTooltip(tip);
+          } catch (error) {
+            // Required-item tooltip failure must not abort the entire stage scan.
+            rootErrors.push(`item: ${error?.message || error}`);
+          }
+        }
+
+        if (isAllowedItemId(itemId)) {
+          const sid = String(itemId);
+          if (!reqByUser[xid].includes(sid)) reqByUser[xid].push(sid);
+        }
+      } catch (error) {
+        rootErrors.push(error?.message || String(error));
+        log("OC slot scan skipped after error:", error);
+      }
+    }
+
+    if (!usersInOC.size) {
+      const suffix = rootErrors.length ? ` (${rootErrors[0]})` : "";
+      return {
+        ok: false,
+        stage,
+        reason: `Found ${roots.length} OC role slots but could not read members${suffix}`
+      };
+    }
+
     const scan = {
       stage,
       ts: now(),
@@ -5886,8 +5905,13 @@ const POPUP_ID = "sakalux-oco-popup";
     };
     writeScan(scan);
     sessionScanState[stage] = true;
-    log("Scan saved:", { stage, users: scan.usersInOC.length });
-    return { ok: true, stage, scan };
+    log("Scan saved:", {
+      stage,
+      users: scan.usersInOC.length,
+      roots: roots.length,
+      skippedErrors: rootErrors.length
+    });
+    return { ok: true, stage, scan, skippedErrors: rootErrors.length };
   }
   function ensureLegend() {
     const header =
@@ -6390,7 +6414,8 @@ const POPUP_ID = "sakalux-oco-popup";
         }
       } catch (err) {
         console.error("[SakaLuX OC Role Match + Readiness] Scan error:", err);
-        flashScanStatus(statusEl, "Scan failed", "error", 2200);
+        const detail = err?.message ? `Scan failed: ${err.message}` : "Scan failed: unexpected OC page error";
+        flashScanStatus(statusEl, detail, "error", 4200);
       } finally {
         btn.disabled = false;
       }

@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.933**
+**v0.9.934**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -35,7 +35,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.933 — Target Alerts runtime viewport lock**
+**v0.9.934 — OC Recruiting/Planning scan reliability**
 - Centers the Target Alerts Settings window inside the real browser viewport.
 - Prevents left/right clipping on TornPDA and keeps long settings scrollable inside the dialog.
 - Clears stale inline popover coordinates so Suite scrolling/navigation cannot push the dialog off-screen.
@@ -58,6 +58,12 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v0.9.934 — OC Recruiting/Planning scan reliability
+- Waits briefly for Torn to finish mounting OC role slots before a manual DOM scan.
+- Isolates member/menu and required-item tooltip failures per role, so one unreadable slot no longer aborts the whole scan.
+- Replaces the generic `Scan failed` message with the concrete runtime cause when an unexpected error remains.
+
 
 ### v0.9.933 — Target Alerts runtime viewport lock
 - Forces the Target Alerts Settings dialog geometry with inline `!important` properties when it is created and every time it opens.
