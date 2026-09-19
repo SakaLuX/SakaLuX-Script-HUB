@@ -1,14 +1,14 @@
 # API Key Architecture Audit — 2026-09-19
 
-Policy: each API-using module keeps its own create-key flow; Script Hub owns one shared superset key for shared modules; Account Auditor is isolated and must not use or contribute to the Hub shared key.
+Policy: each Torn-API data module keeps its own create-key flow; Script Hub owns one shared superset key for shared modules; Account Auditor is isolated and must not use or contribute to the Hub shared key. Suite is a manager/orchestration layer and does not own a Torn-data key contract.
 
 ## Active top-level userscripts
 
-| Script | API-ish | Own create URL | Create control | Reads Hub key | Create delegates to Hub |
+| Script | Torn-data API | Own create URL | Create control | Reads Hub key | Create delegates to Hub |
 |---|---:|---:|---:|---:|---:|
 | Apocalypse-Poker-Exit-Alert.user.js | no | no | no | no | no |
-| SakaLuX-Account-Auditor.user.js | yes | no | no | yes | no |
-| SakaLuX-Bazaar-Thanker-PDA.user.js | no | no | no | yes | no |
+| SakaLuX-Account-Auditor.user.js | yes | no | no | no | no |
+| SakaLuX-Bazaar-Thanker-PDA.user.js | no | no | no | no | no |
 | SakaLuX-Chat-Intelligence.user.js | no | no | no | no | no |
 | SakaLuX-Company-Intelligence-v1.0.0.user.js | yes | yes | yes | yes | no |
 | SakaLuX-Elimination-Assistant.user.js | yes | yes | yes | yes | no |
@@ -17,7 +17,7 @@ Policy: each API-using module keeps its own create-key flow; Script Hub owns one
 | SakaLuX-Mission-Rewards.user.js | yes | yes | yes | yes | YES |
 | SakaLuX-Script-Hub.user.js | yes | yes | yes | yes | no |
 | SakaLuX-Stock-Manager-Advisor.user.js | yes | yes | yes | yes | no |
-| SakaLuX-Suite.user.js | yes | no | no | yes | no |
+| SakaLuX-Suite.user.js | no | no | no | no | no |
 
 ## Discovered create-key permissions
 
@@ -38,14 +38,12 @@ Policy: each API-using module keeps its own create-key flow; Script Hub owns one
 
 ## Account Auditor isolation
 
-- Reads Hub key markers: **YES (problem)**
+- Reads Hub key markers: **no**
 - Own create URL discovered: **no**
 - Own create/API control detected: **no**
 
 ## Findings
 
 - ❌ Hub shared create URL is missing permissions used by one or more shared modules.
-- ❌ Account Auditor is coupled to Hub API state; it must be isolated.
-- ❌ Account Auditor uses API data but no create/API control was detected.
+- ❌ Account Auditor uses Torn API data but lacks its own create-key flow.
 - ❌ SakaLuX-Mission-Rewards.user.js delegates its module create-key button to Hub instead of creating its own module-specific key.
-- ❌ SakaLuX-Suite.user.js appears to use Torn API but no module-specific create-key URL was discovered.
