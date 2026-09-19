@@ -138,3 +138,5 @@ s=s.replace("health:()=>({ready:true,version:APP.version,enabled:bool(K.enabled,
 
 p.write_text(s,encoding='utf-8')
 print('Patched Stock Manager v0.8.9: complete API Access panel + Hub-first key source')
+
+# trigger workflow after workflow file exists
