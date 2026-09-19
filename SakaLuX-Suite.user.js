@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.931
+// @version      0.9.932
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -56,6 +56,42 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 body [id*="sakalux"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"],body [id*="sakalux"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"],body [id*="slx"][id*="panel"],body [id*="slx"][id*="modal"],body #slx-stock-inline{font-family:Inter,Arial,sans-serif;color:var(--slx-text);border-color:var(--slx-border);box-shadow:var(--slx-shadow)}
 body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .header,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .head,body [id^="slx-"] .header,body [id^="slx-"] .head{background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 42%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-color:var(--slx-border-soft)}
 body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .card,body [id^="slx-"] .card{border-color:var(--slx-border-soft);background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(11,17,24,.98))}
+/* Suite v0.9.932 — Target Alerts settings viewport lock */
+#sakalux-list-alert-settings-panel{
+ position:fixed!important;
+ top:max(8px,env(safe-area-inset-top,0px))!important;
+ left:50%!important;
+ right:auto!important;
+ bottom:auto!important;
+ transform:translateX(-50%)!important;
+ width:min(520px,calc(100vw - 16px))!important;
+ max-width:calc(100vw - 16px)!important;
+ min-width:0!important;
+ max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ margin:0!important;
+ box-sizing:border-box!important;
+ overscroll-behavior:contain!important;
+ z-index:2147483601!important;
+}
+#sakalux-list-alert-settings-backdrop{
+ position:fixed!important;
+ inset:0!important;
+ width:100vw!important;
+ height:100dvh!important;
+ margin:0!important;
+ z-index:2147483600!important;
+}
+@media(max-width:700px){
+ #sakalux-list-alert-settings-panel{
+  top:max(4px,env(safe-area-inset-top,0px))!important;
+  width:calc(100vw - 8px)!important;
+  max-width:calc(100vw - 8px)!important;
+  max-height:calc(100dvh - 8px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+  border-radius:12px!important;
+ }
+}
 @media(max-width:700px){body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button,body [id^="slx-"] button{min-height:36px}body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) input,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) select,body [id^="slx-"] input,body [id^="slx-"] select{min-height:36px}}
 `;
       (document.head||document.documentElement).appendChild(st);
@@ -178,7 +214,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.931';
+  const VERSION = '0.9.932';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -11175,6 +11211,12 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
     function createSettingsPanel() {
         const panel = document.createElement("div");
         panel.id = IDS.settingsPanel;
+        panel.style.removeProperty('left');
+        panel.style.removeProperty('right');
+        panel.style.removeProperty('top');
+        panel.style.removeProperty('bottom');
+        panel.style.removeProperty('transform');
+
         panel.hidden = true;
         const intervalOptions = INTERVAL_OPTIONS.map(option => `
             <option
