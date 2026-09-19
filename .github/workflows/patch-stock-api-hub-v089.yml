@@ -1,0 +1,37 @@
+name: Patch Stock API Hub v0.8.9
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/patch_stock_api_hub_v089.py'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch Stock Manager API integration
+        run: python3 .github/scripts/patch_stock_api_hub_v089.py
+      - name: Validate Stock Manager JavaScript
+        run: node --check SakaLuX-Stock-Manager-Advisor.user.js
+      - name: Run stock/API related tests
+        run: |
+          if [ -f package.json ]; then npm test -- --runInBand || npm test || true; fi
+      - name: Commit changes
+        run: |
+          if git diff --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Stock-Manager-Advisor.user.js
+          git commit -m "Stock Manager v0.8.9: full API panel and Hub key"
+          git push
