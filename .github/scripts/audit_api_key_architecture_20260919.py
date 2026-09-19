@@ -60,4 +60,4 @@ if problems: lines.extend(f'- ❌ {x}' for x in problems)
 else: lines.append('- ✅ Architecture matches the requested policy.')
 Path('API-KEY-ARCHITECTURE-AUDIT-2026-09-19.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
 print('\n'.join(lines[-max(20,len(problems)+4):]))
-# trigger audit workflow
+# trigger audit workflow 2
