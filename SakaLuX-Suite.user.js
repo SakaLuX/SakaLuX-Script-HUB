@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.934
+// @version      0.9.935
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -214,7 +214,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.934';
+  const VERSION = '0.9.935';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -2598,10 +2598,7 @@ const POPUP_ID = "sakalux-oco-popup";
   const STAGE_SCAN_STATE_KEY = "sakalux_oco_stage_scan_state_v1";
 
   function readStageScanState() {
-    const saved = store.get(
-      STAGE_SCAN_STATE_KEY,
-      {}
-    );
+    const saved = loadLS(STAGE_SCAN_STATE_KEY) || {};
 
     return {
       Recruiting: {
@@ -2624,10 +2621,7 @@ const POPUP_ID = "sakalux-oco-popup";
   }
 
   function writeStageScanState(stateValue) {
-    store.set(
-      STAGE_SCAN_STATE_KEY,
-      stateValue
-    );
+    saveLS(STAGE_SCAN_STATE_KEY, stateValue);
   }
 
   const sessionScanState = {
