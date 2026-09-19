@@ -25,3 +25,5 @@ registry_path.write_text(json.dumps(registry,indent=2,ensure_ascii=False)+'\n',e
 
 # Let the permanent normalizer copy registry data into Hub fallback + MD.
 print('Prepared Stock Manager v0.8.9 registry release metadata.')
+
+# workflow trigger
