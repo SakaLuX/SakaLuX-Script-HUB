@@ -21,7 +21,7 @@ jobs:
         run: python3 .github/scripts/audit_api_key_architecture_20260919.py
       - name: Commit audit report
         run: |
-          if git diff --quiet -- API-KEY-ARCHITECTURE-AUDIT-2026-09-19.md; then
+          if [ -z "$(git status --porcelain -- API-KEY-ARCHITECTURE-AUDIT-2026-09-19.md)" ]; then
             echo "No audit report changes."
             exit 0
           fi
