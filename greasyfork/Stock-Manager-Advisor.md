@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.8**
+**v0.8.9**
 
 ## What it does
 - Stock vault target selection directly from Torn Stocks.
@@ -22,11 +22,11 @@
 
 ## Current release note
 
-**v0.8.8 — Release metadata synchronization**
-- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
-- Shares one active API synchronization across overlapping refresh requests.
-- Twenty concurrent refreshes use three requests instead of sixty in the synthetic network regression.
-- Recovers after offline, HTTP 429 and malformed JSON errors; portfolio data and explicit trading safeguards are preserved.
+**v0.8.9 — Release metadata synchronization**
+- Adds the complete Elimination-style Stock Manager API Access sheet with live Torn API status, active-source display, standalone fallback key management and access checks.
+- Automatically uses the shared SakaLuX Hub Torn API key first whenever Hub is installed and active; the local Stock Manager key remains the standalone fallback.
+- CHECK ACCESS validates User Money, User Stocks and Torn Stocks access, while CLEAR LOCAL TORN KEY leaves an active Hub key untouched.
+- Synchronizes Stock Manager runtime and registration version surfaces to v0.8.9.
 
 ## Recommended
 - Keep **Dry Run ON** while checking a new configuration.
@@ -59,6 +59,13 @@
 
 ## Release history / Changelog
 
+
+
+### v0.8.9 — Release metadata synchronization
+- Adds the complete Elimination-style Stock Manager API Access sheet with live Torn API status, active-source display, standalone fallback key management and access checks.
+- Automatically uses the shared SakaLuX Hub Torn API key first whenever Hub is installed and active; the local Stock Manager key remains the standalone fallback.
+- CHECK ACCESS validates User Money, User Stocks and Torn Stocks access, while CLEAR LOCAL TORN KEY leaves an active Hub key untouched.
+- Synchronizes Stock Manager runtime and registration version surfaces to v0.8.9.
 
 ### v0.8.8 — Release metadata synchronization
 - Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
