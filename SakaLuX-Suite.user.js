@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.932
+// @version      0.9.933
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -214,7 +214,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.932';
+  const VERSION = '0.9.933';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -11208,14 +11208,29 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             </label>
         `).join("");
     }
+    function applyTargetAlertsViewportLock(panel) {
+        if (!panel) return;
+        const mobile = window.matchMedia?.('(max-width: 700px)')?.matches ?? (window.innerWidth <= 700);
+        panel.style.setProperty('position', 'fixed', 'important');
+        panel.style.setProperty('top', mobile ? '4px' : '8px', 'important');
+        panel.style.setProperty('left', '50vw', 'important');
+        panel.style.setProperty('right', 'auto', 'important');
+        panel.style.setProperty('bottom', 'auto', 'important');
+        panel.style.setProperty('transform', 'translateX(-50%)', 'important');
+        panel.style.setProperty('width', mobile ? 'calc(100vw - 8px)' : 'min(520px, calc(100vw - 16px))', 'important');
+        panel.style.setProperty('max-width', mobile ? 'calc(100vw - 8px)' : 'calc(100vw - 16px)', 'important');
+        panel.style.setProperty('min-width', '0', 'important');
+        panel.style.setProperty('max-height', mobile ? 'calc(100dvh - 8px)' : 'calc(100dvh - 16px)', 'important');
+        panel.style.setProperty('overflow-y', 'auto', 'important');
+        panel.style.setProperty('overflow-x', 'hidden', 'important');
+        panel.style.setProperty('margin', '0', 'important');
+        panel.style.setProperty('box-sizing', 'border-box', 'important');
+        panel.style.setProperty('z-index', '2147483647', 'important');
+    }
     function createSettingsPanel() {
         const panel = document.createElement("div");
         panel.id = IDS.settingsPanel;
-        panel.style.removeProperty('left');
-        panel.style.removeProperty('right');
-        panel.style.removeProperty('top');
-        panel.style.removeProperty('bottom');
-        panel.style.removeProperty('transform');
+        applyTargetAlertsViewportLock(panel);
 
         panel.hidden = true;
         const intervalOptions = INTERVAL_OPTIONS.map(option => `
@@ -11598,6 +11613,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         const panel = document.getElementById(IDS.settingsPanel);
         const backdrop = ensureSettingsBackdrop();
         if (!panel) return;
+        applyTargetAlertsViewportLock(panel);
         const open =
             typeof forceOpen === "boolean"
                 ? forceOpen
@@ -13148,6 +13164,16 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             ensureSettingsUi();
             ensurePeoplePanelTabs();
         }, 100);
+    }
+    if (!window.__sakaluxTargetAlertsViewportLockBound) {
+        window.__sakaluxTargetAlertsViewportLockBound = true;
+        const reflowTargetAlertsSettings = () => {
+            const panel = document.getElementById(IDS.settingsPanel);
+            if (panel && !panel.hidden) applyTargetAlertsViewportLock(panel);
+        };
+        window.addEventListener('resize', reflowTargetAlertsSettings, { passive: true });
+        window.visualViewport?.addEventListener('resize', reflowTargetAlertsSettings, { passive: true });
+        window.visualViewport?.addEventListener('scroll', reflowTargetAlertsSettings, { passive: true });
     }
     function isInsideSakaLuXSettings(target) {
         return Boolean(
