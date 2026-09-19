@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.82**
+**v1.9.83**
 
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
@@ -22,7 +22,7 @@
 
 ## Current release note
 
-**v1.9.82 — Persistent native Fly-out launcher + release synchronization**
+**v1.9.83 — Persistent native Fly-out launcher + release synchronization**
 - Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
 - Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
 - Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
@@ -33,11 +33,11 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 ### Registered complementary add-ons
 - 🛡️ SakaLuX Enhancer Guard **v1.3.48**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.42**
-- 🎯 SakaLuX Mission Rewards **v1.0.43**
+- 🎯 SakaLuX Mission Rewards **v1.0.44**
 - 📈 SakaLuX Market Intelligence **v1.17.41**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.45**
 - 🏢 SakaLuX Company Intelligence **v1.8.39**
-- 📊 SakaLuX Stock Manager & Advisor **v0.8.8**
+- 📊 SakaLuX Stock Manager & Advisor **v0.8.10**
 
 Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 
@@ -61,6 +61,12 @@ Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and
 
 
 
+
+
+### v1.9.83 — Persistent native Fly-out launcher + release synchronization
+- Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
+- Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
+- Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
 
 ### v1.9.82 — Persistent native Fly-out launcher + release synchronization
 - Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.

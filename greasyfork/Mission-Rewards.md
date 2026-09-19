@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.43**
+**v1.0.44**
 
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
@@ -17,11 +17,10 @@
 
 ## Current release note
 
-**v1.0.43 — Release metadata synchronization**
-- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
-- Scopes legacy footer repair to the Mission settings panel and batches it once.
-- Ignores unrelated chat changes in reward scanning and standalone dock maintenance.
-- Preserves reward annotations, API controls and footer restoration.
+**v1.0.44 — Keeps the Mission API create button module-specific even when Script Hub is installed**
+- Keeps the Mission API create button module-specific even when Script Hub is installed.
+- Creates only the Mission key permissions: User Ammo and Torn Items.
+- Shared Hub key may still be used for runtime data when available; the local Mission key remains the standalone fallback.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -39,6 +38,12 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 
 ## Release history / Changelog
 
+
+
+### v1.0.44 — Keeps the Mission API create button module-specific even when Script Hub is installed
+- Keeps the Mission API create button module-specific even when Script Hub is installed.
+- Creates only the Mission key permissions: User Ammo and Torn Items.
+- Shared Hub key may still be used for runtime data when available; the local Mission key remains the standalone fallback.
 
 ### v1.0.43 — Release metadata synchronization
 - Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
