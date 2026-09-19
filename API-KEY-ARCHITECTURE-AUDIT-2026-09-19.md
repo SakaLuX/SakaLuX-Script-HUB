@@ -7,43 +7,42 @@ Policy: each Torn-API data module keeps its own create-key flow; Script Hub owns
 | Script | Torn-data API | Own create URL | Create control | Reads Hub key | Create delegates to Hub |
 |---|---:|---:|---:|---:|---:|
 | Apocalypse-Poker-Exit-Alert.user.js | no | no | no | no | no |
-| SakaLuX-Account-Auditor.user.js | yes | no | no | no | no |
+| SakaLuX-Account-Auditor.user.js | yes | yes | yes | no | no |
 | SakaLuX-Bazaar-Thanker-PDA.user.js | no | no | no | no | no |
 | SakaLuX-Chat-Intelligence.user.js | no | no | no | no | no |
 | SakaLuX-Company-Intelligence-v1.0.0.user.js | yes | yes | yes | yes | no |
 | SakaLuX-Elimination-Assistant.user.js | yes | yes | yes | yes | no |
 | SakaLuX-Enhancer-Guard.user.js | yes | yes | yes | yes | no |
 | SakaLuX-Market-Intelligence.user.js | yes | yes | yes | yes | no |
-| SakaLuX-Mission-Rewards.user.js | yes | yes | yes | yes | YES |
+| SakaLuX-Mission-Rewards.user.js | yes | yes | yes | yes | no |
 | SakaLuX-Script-Hub.user.js | yes | yes | yes | yes | no |
 | SakaLuX-Stock-Manager-Advisor.user.js | yes | yes | yes | yes | no |
 | SakaLuX-Suite.user.js | no | no | no | no | no |
 
 ## Discovered create-key permissions
 
+- **SakaLuX-Account-Auditor.user.js**: `[{"user": "profile,bars,cooldowns,travel,education,jobpoints,merits,refills,notifications,money,stocks,properties,discord,weaponexp,workstats,skills,battlestats,networth,display,icons,criminalrecord,bazaar,crimes,hof,ammo,attacksfull,bounties,calendar,casino,competition,enlistedcars,equipment,faction,forumfeed,forumfriends,forumposts,forumsubscribedthreads,forumthreads,gym,honors,itemmarket,itemmods,job,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,snapshot,personalstats,list,inventory,messages,events,log", "torn": "merits,education"}]`
 - **SakaLuX-Company-Intelligence-v1.0.0.user.js**: `[{"user": "basic,profile,workstats,job", "company": "profile,employees,stock"}]`
 - **SakaLuX-Elimination-Assistant.user.js**: `[{"user": "battlestats", "torn": "elimination,eliminationteam"}]`
 - **SakaLuX-Enhancer-Guard.user.js**: `[{"user": "inventory", "torn": "items"}]`
 - **SakaLuX-Market-Intelligence.user.js**: `[{"user": "money,travel,equipment", "torn": "items", "market": "itemmarket"}]`
 - **SakaLuX-Mission-Rewards.user.js**: `[{"user": "ammo", "torn": "items"}]`
-- **SakaLuX-Script-Hub.user.js**: `[{"user": "basic,money,travel,equipment,inventory,battlestats,ammo", "torn": "items,elimination,eliminationteam", "market": "itemmarket"}]`
+- **SakaLuX-Script-Hub.user.js**: `[{"user": "basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks", "company": "profile,employees,stock", "torn": "items,elimination,eliminationteam,stocks", "market": "itemmarket"}]`
 - **SakaLuX-Stock-Manager-Advisor.user.js**: `[{"user": "money,stocks", "torn": "stocks"}]`
 
 ## Hub shared-key coverage
 
 - Union excluding Account Auditor: `{"user": ["ammo", "basic", "battlestats", "equipment", "inventory", "job", "money", "profile", "stocks", "travel", "workstats"], "company": ["employees", "profile", "stock"], "torn": ["elimination", "eliminationteam", "items", "stocks"], "market": ["itemmarket"]}`
-- Hub shared URL: `{"user": ["ammo", "basic", "battlestats", "equipment", "inventory", "money", "travel"], "torn": ["elimination", "eliminationteam", "items"], "market": ["itemmarket"]}`
-- Missing from Hub shared key: `{"user": ["job", "profile", "stocks", "workstats"], "company": ["employees", "profile", "stock"], "torn": ["stocks"]}`
+- Hub shared URL: `{"user": ["ammo", "basic", "battlestats", "equipment", "inventory", "job", "money", "profile", "stocks", "travel", "workstats"], "company": ["employees", "profile", "stock"], "torn": ["elimination", "eliminationteam", "items", "stocks"], "market": ["itemmarket"]}`
+- Missing from Hub shared key: `{}`
 - Extra in Hub shared key versus discovered module create URLs: `{}`
 
 ## Account Auditor isolation
 
 - Reads Hub key markers: **no**
-- Own create URL discovered: **no**
-- Own create/API control detected: **no**
+- Own create URL discovered: **yes**
+- Own create/API control detected: **yes**
 
 ## Findings
 
-- ❌ Hub shared create URL is missing permissions used by one or more shared modules.
-- ❌ Account Auditor uses Torn API data but lacks its own create-key flow.
-- ❌ SakaLuX-Mission-Rewards.user.js delegates its module create-key button to Hub instead of creating its own module-specific key.
+- ✅ Architecture matches the requested policy.

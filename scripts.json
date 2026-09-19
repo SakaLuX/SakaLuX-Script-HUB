@@ -135,18 +135,17 @@
         }
       ],
       "release": {
-        "version": "1.0.43",
-        "date": "2026-09-18",
+        "version": "1.0.44",
+        "date": "2026-09-19",
         "notes": [
-          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-          "Scopes legacy footer repair to the Mission settings panel and batches it once.",
-          "Ignores unrelated chat changes in reward scanning and standalone dock maintenance.",
-          "Preserves reward annotations, API controls and footer restoration."
+          "Keeps the Mission API create button module-specific even when Script Hub is installed.",
+          "Creates only the Mission key permissions: User Ammo and Torn Items.",
+          "Shared Hub key may still be used for runtime data when available; the local Mission key remains the standalone fallback."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.43",
+      "version": "1.0.44",
       "detailsRevision": 2
     },
     {
