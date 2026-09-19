@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.934**
+**v0.9.935**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -35,7 +35,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.934 — OC Recruiting/Planning scan reliability**
+**v0.9.935 — OC scan state storage fix**
 - Centers the Target Alerts Settings window inside the real browser viewport.
 - Prevents left/right clipping on TornPDA and keeps long settings scrollable inside the dialog.
 - Clears stale inline popover coordinates so Suite scrolling/navigation cannot push the dialog off-screen.
@@ -58,6 +58,12 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v0.9.935 — OC scan state storage fix
+- Fixes `ReferenceError: store is not defined` when scanning Recruiting/Planning OC stages.
+- Uses the Suite OC module's existing `loadLS` / `saveLS` helpers for scan-state persistence.
+- Keeps Recruiting and Planning completion state persistent without depending on an undefined storage object.
+
 
 ### v0.9.934 — OC Recruiting/Planning scan reliability
 - Waits briefly for Torn to finish mounting OC role slots before a manual DOM scan.
