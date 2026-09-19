@@ -3,7 +3,7 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.935**
+**v0.9.936**
 
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
@@ -35,7 +35,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.935 — OC scan state storage fix**
+**v0.9.936 — OC scan visual state + API fallback**
 - Centers the Target Alerts Settings window inside the real browser viewport.
 - Prevents left/right clipping on TornPDA and keeps long settings scrollable inside the dialog.
 - Clears stale inline popover coordinates so Suite scrolling/navigation cannot push the dialog off-screen.
@@ -58,6 +58,12 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v0.9.936 — OC scan visual state + API fallback
+- Keeps a completed Recruiting/Planning scan marked complete when revisiting the tab instead of resetting it to Scan Required.
+- Falls back automatically to the visible-page OC scanner when the faction crimes API request fails.
+- Suppresses the transient red `Incorrect ID-entity relation` banner on page entry when Faction API Access is unavailable; the manual DOM scan remains usable.
+
 
 ### v0.9.935 — OC scan state storage fix
 - Fixes `ReferenceError: store is not defined` when scanning Recruiting/Planning OC stages.
