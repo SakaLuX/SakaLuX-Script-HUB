@@ -30,21 +30,18 @@ s=aud.read_text(encoding='utf-8')
 s=s.replace('// @version      1.3.16','// @version      1.3.17',1)
 s=s.replace("const VERSION = '1.3.16';","const VERSION = '1.3.17';",1)
 s=s.replace("version:'1.3.16'","version:'1.3.17'")
-# Custom key includes every user endpoint collected by Auditor. Full/private selections remain Auditor-only.
 api_url=("https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Account%20Auditor"
 "&user=profile,bars,cooldowns,travel,education,jobpoints,merits,refills,notifications,money,stocks,properties,discord,weaponexp,workstats,skills,battlestats,networth,display,icons,criminalrecord,bazaar,crimes,hof,ammo,attacksfull,bounties,calendar,casino,competition,enlistedcars,equipment,faction,forumfeed,forumfriends,forumposts,forumsubscribedthreads,forumthreads,gym,honors,itemmarket,itemmods,job,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,snapshot,personalstats,list,inventory,messages,events,log"
 "&torn=merits,education")
 marker="    const PDA_KEY = '###PDA-APIKEY###';"
 if marker not in s: raise SystemExit('Auditor PDA_KEY marker not found')
 s=s.replace(marker,marker+"\n    const AUDITOR_API_CREATE_URL = '"+api_url+"';",1)
-# Add explicit Auditor-only create button immediately before the conditional manual Torn key input.
 needle="'<label>GitHub fine-grained token <input id=\"sl-aa-gh\" type=\"password\" placeholder=\"Stored in userscript storage\"></label>'+(!getTornApiKey()?'<label>Torn API key <input id=\"sl-aa-torn\" type=\"password\" placeholder=\"Use the least access you need\"></label>':'')+"
 if needle not in s: raise SystemExit('Auditor API input UI marker not found')
 repl="'<label>GitHub fine-grained token <input id=\"sl-aa-gh\" type=\"password\" placeholder=\"Stored in userscript storage\"></label>'+\n        '<button id=\"sl-aa-create-api\" type=\"button\">🔑 CREATE AUDITOR API KEY</button>'+\n        '<div class=\"sl-aa-note\"><b>Auditor key is isolated.</b> It is never read from or written to the Script Hub shared API key.</div>'+(!getTornApiKey()?'<label>Torn API key <input id=\"sl-aa-torn\" type=\"password\" placeholder=\"Auditor-only Torn API key\"></label>':'')+"
 s=s.replace(needle,repl,1)
 bind="overlay.querySelector('#sl-aa-close').onclick=()=>overlay.remove();"
-if bind not in s:
-    bind="overlay.querySelector('#sl-aa-close').onclick = () => overlay.remove();"
+if bind not in s: bind="overlay.querySelector('#sl-aa-close').onclick = () => overlay.remove();"
 if bind not in s: raise SystemExit('Auditor close binding marker not found')
 s=s.replace(bind,bind+"overlay.querySelector('#sl-aa-create-api').onclick=()=>{location.href=AUDITOR_API_CREATE_URL;};",1)
 aud.write_text(s,encoding='utf-8')
@@ -59,7 +56,6 @@ for row in data.get('scripts',[]):
         row['version']='1.9.83'; row['release']={'version':'1.9.83','date':'2026-09-19','notes':['Expands the shared Hub Torn API create link to the exact union required by all shared API modules.','Adds Company and Stock Manager permissions to the shared key.','Intentionally excludes Account Auditor permissions because Auditor owns a separate isolated key.']}
 regp.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
 
-# Add Account Auditor release note directly; it is intentionally not part of the shared registry.
 md=Path('greasyfork/Account-Auditor.md')
 if md.exists():
     t=md.read_text(encoding='utf-8')
@@ -73,7 +69,6 @@ if md.exists():
         else: t+='\n'+heading
     md.write_text(t,encoding='utf-8')
 
-# Fix the audit detector: generic Hub UI presence is not API-key coupling; Suite is not a Torn API consumer unless it calls api.torn.com.
 audit=Path('.github/scripts/audit_api_key_architecture_20260919.py')
 if audit.exists():
     t=audit.read_text(encoding='utf-8')
@@ -82,3 +77,4 @@ if audit.exists():
     audit.write_text(t,encoding='utf-8')
 
 print('API architecture fixed: Hub 1.9.83, Mission 1.0.44, Auditor 1.3.17')
+# trigger workflow
