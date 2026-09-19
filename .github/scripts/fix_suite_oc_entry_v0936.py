@@ -8,73 +8,24 @@ old=s
 s=s.replace('// @version      0.9.935','// @version      0.9.936',1)
 s=s.replace("const VERSION = '0.9.935';","const VERSION = '0.9.936';",1)
 
-start=s.find('  async function handleOcStageEntry(')
-if start < 0:
-    start=s.find('  function handleOcStageEntry(')
-if start < 0:
-    raise SystemExit('handleOcStageEntry start not found')
-end=s.find('\n  function refreshNotInOCFromPage()',start)
-if end < 0:
-    raise SystemExit('handleOcStageEntry end marker not found')
+needle='function handleOcStageEntry('
+pos=s.find(needle)
+if pos < 0:
+    raise SystemExit('handleOcStageEntry token not found')
+start=s.rfind('\n',0,pos)+1
+end_token='function refreshNotInOCFromPage()'
+end_pos=s.find(end_token,pos)
+if end_pos < 0:
+    raise SystemExit('refreshNotInOCFromPage token not found')
+end=s.rfind('\n',0,end_pos)+1
+indent=s[start:pos].replace('async ','')
+# Preserve surrounding indentation used by the module.
+lead=s[start:len(s[:start])+len(s[start:pos])]
+base_indent=''.join(ch for ch in s[start:pos] if ch in ' \t')
+if not base_indent:
+    base_indent='  '
 
-new_handle=r'''  async function handleOcStageEntry(
-    stage = getCrimesStageLabel()
-  ) {
-    if (
-      !moduleActive ||
-      !isCrimesTab() ||
-      (stage !== "Recruiting" && stage !== "Planning")
-    ) {
-      return;
-    }
-
-    if (stage === lastObservedOcStage) return;
-    lastObservedOcStage = stage;
-
-    // Do NOT invalidate an already completed scan merely because the user
-    // re-entered the same Torn tab. v0.9.935 persisted this state; preserve it.
-    updateStageVisuals();
-
-    const statusEl = document.querySelector('.sakalux-oco-scan-status');
-    if (statusEl) {
-      statusEl.classList.remove('is-success','is-error');
-      statusEl.classList.add('is-scanning');
-      statusEl.textContent = `Refreshing ${stage}...`;
-      statusEl.title = `Refreshing ${stage} OC data. API is preferred; visible-page scan is the fallback.`;
-    }
-
-    let result = await scanAvailableCrimesViaApi(stage, true);
-
-    // API error 7 (Incorrect ID-entity relation) commonly means the account
-    // lacks Faction API Access. Fall back to the live page instead of showing
-    // a transient red API error when the DOM contains enough OC information.
-    if (!result?.ok) {
-      const domResult = await scanCurrentCrimesStage();
-      if (domResult?.ok) result = domResult;
-    }
-
-    if (result?.ok && result?.stage === stage) {
-      markStageScanComplete(stage);
-      updateStageVisuals();
-      itemTick();
-      utilitiesLastSignature = '';
-      if (statusEl) flashScanStatus(statusEl, sessionScanSummary(), 'success');
-      return;
-    }
-
-    const reason = String(result?.reason || 'Refresh unavailable');
-    const factionAccessMissing = /incorrect id-entity relation|error\s*7|faction api access/i.test(reason);
-
-    if (statusEl) {
-      if (factionAccessMissing) {
-        statusEl.classList.remove('is-scanning','is-error','is-success');
-        renderScanStatus(statusEl);
-        statusEl.title = 'Faction API Access is unavailable for this key/account. Suite will use the visible-page scanner instead.';
-      } else {
-        flashScanStatus(statusEl, reason, 'error', 3000);
-      }
-    }
-  }'''
+new_handle='''{I}async function handleOcStageEntry(\n{I}  stage = getCrimesStageLabel()\n{I}) {{\n{I}  if (\n{I}    !moduleActive ||\n{I}    !isCrimesTab() ||\n{I}    (stage !== "Recruiting" && stage !== "Planning")\n{I}  ) {{\n{I}    return;\n{I}  }}\n\n{I}  if (stage === lastObservedOcStage) return;\n{I}  lastObservedOcStage = stage;\n\n{I}  // Do NOT invalidate an already completed scan merely because the user\n{I}  // re-entered the same Torn tab. Preserve persisted scan completion.\n{I}  updateStageVisuals();\n\n{I}  const statusEl = document.querySelector('.sakalux-oco-scan-status');\n{I}  if (statusEl) {{\n{I}    statusEl.classList.remove('is-success','is-error');\n{I}    statusEl.classList.add('is-scanning');\n{I}    statusEl.textContent = `Refreshing ${{stage}}...`;\n{I}    statusEl.title = `Refreshing ${{stage}} OC data. API is preferred; visible-page scan is the fallback.`;\n{I}  }}\n\n{I}  let result = await scanAvailableCrimesViaApi(stage, true);\n\n{I}  // If the faction API cannot serve private faction crimes, fall back to\n{I}  // the live Torn page instead of showing a transient raw API error.\n{I}  if (!result?.ok) {{\n{I}    const domResult = await scanCurrentCrimesStage();\n{I}    if (domResult?.ok) result = domResult;\n{I}  }}\n\n{I}  if (result?.ok && result?.stage === stage) {{\n{I}    markStageScanComplete(stage);\n{I}    updateStageVisuals();\n{I}    itemTick();\n{I}    utilitiesLastSignature = '';\n{I}    if (statusEl) flashScanStatus(statusEl, sessionScanSummary(), 'success');\n{I}    return;\n{I}  }}\n\n{I}  const reason = String(result?.reason || 'Refresh unavailable');\n{I}  const factionAccessMissing = /incorrect id-entity relation|error\\s*7|faction api access/i.test(reason);\n\n{I}  if (statusEl) {{\n{I}    if (factionAccessMissing) {{\n{I}      statusEl.classList.remove('is-scanning','is-error','is-success');\n{I}      renderScanStatus(statusEl);\n{I}      statusEl.title = 'Faction API Access is unavailable for this key/account. Suite will use the visible-page scanner instead.';\n{I}    }} else {{\n{I}      flashScanStatus(statusEl, reason, 'error', 3000);\n{I}    }}\n{I}  }}\n{I}}}\n'''.replace('{I}',base_indent)
 
 s=s[:start]+new_handle+s[end:]
 if s==old:
