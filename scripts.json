@@ -197,7 +197,7 @@
         }
       ],
       "release": {
-        "version": "1.17.41",
+        "version": "1.17.42",
         "date": "2026-09-18",
         "notes": [
           "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
@@ -208,7 +208,7 @@
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.41",
+      "version": "1.17.42",
       "detailsRevision": 3
     },
     {
