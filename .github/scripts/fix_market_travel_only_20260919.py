@@ -17,7 +17,6 @@ def guard_title(title):
     idx=s.find(title)
     if idx < 0:
         raise SystemExit(f'title not found: {title}')
-    # Find the containing named function before the title.
     before=s[:idx]
     matches=list(re.finditer(r'(?m)^\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{', before))
     if not matches:
@@ -25,19 +24,16 @@ def guard_title(title):
     fn=matches[-1]
     fn_name=fn.group(1)
     open_brace=fn.end()-1
-    # Discover the panel id assigned inside this function before the title, if any.
     chunk=s[open_brace:idx]
     ids=re.findall(r"(?:\.id\s*=\s*|getElementById\()\s*['\"]([^'\"]*sl-mi[^'\"]*)['\"]", chunk)
     panel_id=ids[-1] if ids else ''
     if panel_id:
         cleanup=f"document.getElementById('{panel_id}')?.remove();"
     else:
-        # Fallback removes only the smallest script-owned block whose text contains the exact title.
         cleanup=("document.querySelectorAll('[id^=\"sl-mi-\"], .sl-mi-travel').forEach(n=>{"
                  f"if(n.textContent?.includes('{title}')) n.remove();" "});")
     guard=("\n        // v1.17.43: travel-only hard guard. These inline cards must never exist outside Travel.\n"
            f"        if (detectPage() !== 'travel') {{ {cleanup} return; }}")
-    # Avoid duplicate insertion.
     look=s[open_brace:open_brace+500]
     if 'v1.17.43: travel-only hard guard' not in look:
         s=s[:open_brace+1]+guard+s[open_brace+1:]
@@ -46,7 +42,6 @@ def guard_title(title):
 session_fn,session_id=guard_title('TRAVEL SESSION SUMMARY')
 arrival_fn,arrival_id=guard_title('ARRIVAL BASKET')
 
-# Route-change cleanup: as soon as Market Intelligence scans a non-travel page, remove stale cards.
 needle="state.busy=true;state.page=detectPage();"
 if needle not in s:
     raise SystemExit('scan page-detection marker not found')
@@ -61,7 +56,6 @@ replacement=needle+cleanup
 if replacement not in s:
     s=s.replace(needle,replacement,1)
 
-# Release surfaces.
 reg=Path('scripts.json')
 if reg.exists():
     data=json.loads(reg.read_text(encoding='utf-8'))
@@ -92,3 +86,4 @@ if s==old:
     raise SystemExit('no script changes made')
 p.write_text(s,encoding='utf-8')
 print('patched',session_fn,session_id,arrival_fn,arrival_id)
+# trigger
