@@ -14,7 +14,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Apply OC entry fix
-        run: python3 .github/scripts/fix_suite_oc_entry_v0936.py
+        id: patch
+        shell: bash
+        run: |
+          set +e
+          python3 .github/scripts/fix_suite_oc_entry_v0936.py > .github/oc-entry-patch-debug.txt 2>&1
+          rc=$?
+          cat .github/oc-entry-patch-debug.txt
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Commit diagnostic if patch failed
+        if: steps.patch.outputs.rc != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/oc-entry-patch-debug.txt
+          git commit -m "Capture Suite OC v0.9.936 patch error" || true
+          git push || true
+          exit 1
       - name: Validate Suite syntax
         run: node --check SakaLuX-Suite.user.js
       - name: Assert OC entry behavior
@@ -26,6 +43,7 @@ jobs:
           grep -q 'v0.9.936 — OC scan visual state + API fallback' greasyfork/SakaLuX-Suite.md
       - name: Commit fix if needed
         run: |
+          rm -f .github/oc-entry-patch-debug.txt
           if git diff --quiet; then
             echo "Already fixed."
             exit 0
