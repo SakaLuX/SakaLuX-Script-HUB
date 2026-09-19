@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.938
+// @version      0.9.936
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -214,7 +214,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.938';
+  const VERSION = '0.9.936';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -44883,175 +44883,3 @@ function scan(){
 
 /* Suite mobile Elimination geometry contract 0.9.925: explicit viewport height */
 (()=>{const id="sakalux-suite-elimination-layout-v0922";if(document.getElementById(id))return;const st=document.createElement("style");st.id=id;st.textContent=`@media(max-width:820px), (pointer:coarse) and (max-width:1100px){#sakalux-master-suite-panel#sakalux-master-suite-panel#sakalux-master-suite-panel{position:fixed!important;inset:0 4px 36px 4px!important;top:0!important;right:4px!important;bottom:36px!important;left:4px!important;width:auto!important;height:calc(100vh - 36px)!important;height:calc(100dvh - 36px)!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;transform:none!important;align-items:stretch!important;justify-content:stretch!important;overflow:hidden!important;border:0!important;border-radius:14px!important;background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;touch-action:pan-y!important}#sakalux-master-suite-panel#sakalux-master-suite-panel#sakalux-master-suite-panel>.sakalux-suite-window{position:relative!important;inset:auto!important;flex:1 1 auto!important;align-self:stretch!important;display:flex!important;flex-direction:column!important;width:100%!important;height:calc(100vh - 36px)!important;height:calc(100dvh - 36px)!important;min-width:0!important;min-height:0!important;max-width:100%!important;max-height:100%!important;margin:0!important;padding:0!important;transform:none!important;overflow:hidden!important;border:1px solid #3c4652!important;border-radius:14px!important;background:#0b1118!important;box-shadow:0 10px 26px rgba(0,0,0,.34)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}#sakalux-master-suite-panel .sakalux-suite-header{position:relative!important;inset:auto!important;flex:0 0 auto!important;min-height:0!important;height:auto!important;margin:0!important;padding:8px 10px!important;border-radius:13px 13px 0 0!important}#sakalux-master-suite-panel .sakalux-suite-header h1,#sakalux-master-suite-panel .sakalux-suite-header h2,#sakalux-master-suite-panel .sakalux-suite-header .sakalux-suite-title{margin:0!important;font-size:18px!important;line-height:1.1!important}#sakalux-master-suite-panel .sakalux-suite-header p,#sakalux-master-suite-panel .sakalux-suite-header .sakalux-suite-subtitle,#sakalux-master-suite-panel .sakalux-suite-header .sakalux-suite-description{margin:3px 0 0!important;font-size:10px!important;line-height:1.25!important}#sakalux-master-suite-panel .sakalux-suite-close{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;padding:0!important;border-radius:10px!important;font-size:18px!important;line-height:32px!important}#sakalux-master-suite-panel .sakalux-suite-toolbar{position:relative!important;inset:auto!important;flex:0 0 auto!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;min-height:0!important;height:auto!important;margin:0!important;padding:6px 8px!important}#sakalux-master-suite-panel .sakalux-suite-toolbar button,#sakalux-master-suite-panel .sakalux-suite-toolbar .sakalux-suite-button{position:relative!important;inset:auto!important;width:100%!important;height:30px!important;min-width:0!important;min-height:30px!important;max-height:30px!important;margin:0!important;padding:0 5px!important;border-radius:9px!important;font-size:9px!important;line-height:1.05!important;white-space:normal!important;overflow:hidden!important}#sakalux-master-suite-panel>.sakalux-suite-window>.sakalux-suite-content{position:relative!important;inset:auto!important;flex:1 1 0!important;display:block!important;width:100%!important;height:0!important;min-width:0!important;min-height:0!important;max-width:100%!important;max-height:none!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important}#sakalux-master-suite-panel>.sakalux-suite-window>#sakalux-inline-footer-suite{position:relative!important;inset:auto!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;max-height:50px!important;margin:0!important;padding:0!important;border-radius:0 0 13px 13px!important;overflow:hidden!important}#sakalux-inline-footer-suite .slh-bottom{height:28px!important;padding:4px 14px!important}#sakalux-inline-footer-suite .slh-bottom-grid{height:20px!important;gap:7px!important}#sakalux-inline-footer-suite .slh-bottom-btn{height:20px!important;min-height:20px!important;max-height:20px!important;padding:0 4px!important;border-radius:10px!important;font-size:8px!important}#sakalux-inline-footer-suite .slh-footer{height:22px!important;min-height:22px!important;max-height:22px!important;border-radius:0 0 13px 13px!important;font-size:9px!important}}`;document.head.appendChild(st)})();
-
-/* SakaLuX Suite War Quick Attack — BEGIN */
-(() => {
-  'use strict';
-
-  const STYLE_ID = 'sakalux-war-quick-attack-style';
-  const BTN_CLASS = 'sakalux-war-quick-attack';
-  const START_CLASS = 'sakalux-war-start-highlight';
-  const PANEL_ID = 'sakalux-war-quick-attack-module';
-  const STORAGE_KEY = 'SakaLuX_Suite_WarQuickAttack_Enabled';
-
-  const onFactionWarPage = () => /\/factions\.php/i.test(location.pathname) && /war|ranked|territory|faction/i.test(location.href);
-  const onAttackPage = () => /loader\.php/i.test(location.pathname) && new URLSearchParams(location.search).get('sid') === 'attack';
-
-  function isEnabled() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw === null ? true : raw === '1';
-    } catch { return true; }
-  }
-
-  function setEnabled(value) {
-    try { localStorage.setItem(STORAGE_KEY, value ? '1' : '0'); } catch {}
-    applyEnabledState();
-  }
-
-  function getPlayerIdFromHref(href) {
-    if (!href) return null;
-    try {
-      const u = new URL(href, location.origin);
-      const direct = u.searchParams.get('user2ID') || u.searchParams.get('XID') || u.searchParams.get('ID');
-      if (direct && /^\d+$/.test(direct)) return direct;
-      const m = u.href.match(/(?:XID|user2ID|ID)=(\d+)/i);
-      return m ? m[1] : null;
-    } catch {
-      const m = String(href).match(/(?:XID|user2ID|ID)=(\d+)/i);
-      return m ? m[1] : null;
-    }
-  }
-
-  function ensureStyle() {
-    if (document.getElementById(STYLE_ID)) return;
-    const st = document.createElement('style');
-    st.id = STYLE_ID;
-    st.textContent = `
-.${BTN_CLASS}{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:38px!important;min-height:30px!important;margin-left:6px!important;padding:4px 8px!important;border:1px solid #b91c1c!important;border-radius:8px!important;background:linear-gradient(180deg,#ef4444,#991b1b)!important;color:#fff!important;font:800 12px/1 Arial,sans-serif!important;text-decoration:none!important;box-shadow:0 2px 8px #0005!important;vertical-align:middle!important;cursor:pointer!important}
-.${BTN_CLASS}:active{transform:scale(.97)!important}
-.${START_CLASS}{position:fixed!important;left:max(8px,env(safe-area-inset-left,0px))!important;right:max(8px,env(safe-area-inset-right,0px))!important;bottom:max(10px,calc(env(safe-area-inset-bottom,0px) + 8px))!important;width:auto!important;max-width:none!important;min-height:54px!important;z-index:2147483000!important;font-size:18px!important;font-weight:900!important;border-radius:12px!important;box-shadow:0 10px 28px #0009!important;animation:slxWarPulse 1.2s ease-in-out 2!important}
-#${PANEL_ID}{display:flex;align-items:center;gap:10px;margin:8px 0;padding:9px 10px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(16,23,32,.95);color:#edf3fa;font:700 12px/1.2 Arial,sans-serif;box-sizing:border-box}
-#${PANEL_ID} .slx-wqa-title{flex:1;min-width:0}
-#${PANEL_ID} .slx-wqa-title b{display:block;font-size:13px;color:#fff}
-#${PANEL_ID} .slx-wqa-title span{display:block;margin-top:2px;color:#93a4b7;font-weight:500}
-#${PANEL_ID} .slx-wqa-toggle{border:1px solid #526174;border-radius:999px;padding:6px 10px;min-width:58px;background:#202a36;color:#fff;font:800 11px Arial,sans-serif;cursor:pointer}
-#${PANEL_ID}[data-enabled="1"] .slx-wqa-toggle{background:#14532d;border-color:#22c55e;color:#dcfce7}
-#${PANEL_ID}[data-enabled="0"] .slx-wqa-toggle{background:#3f1d1d;border-color:#ef4444;color:#fee2e2}
-@keyframes slxWarPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
-`;
-    (document.head || document.documentElement).appendChild(st);
-  }
-
-  function cleanupQuickAttackUI() {
-    document.querySelectorAll(`.${BTN_CLASS}`).forEach(el => el.remove());
-    document.querySelectorAll(`.${START_CLASS}`).forEach(el => el.classList.remove(START_CLASS));
-    document.querySelectorAll('[data-slx-war-scanned="1"]').forEach(el => delete el.dataset.slxWarScanned);
-  }
-
-  function ensureFactionModuleControl() {
-    if (!onFactionWarPage()) {
-      document.getElementById(PANEL_ID)?.remove();
-      return;
-    }
-    ensureStyle();
-    let panel = document.getElementById(PANEL_ID);
-    if (!panel) {
-      panel = document.createElement('div');
-      panel.id = PANEL_ID;
-      panel.innerHTML = `<div class="slx-wqa-title"><b>⚔️ War Quick Attack</b><span>Direct attack shortcut + highlighted Start Fight</span></div><button type="button" class="slx-wqa-toggle"></button>`;
-      const host = document.querySelector('#faction-page-wrap,#mainContainer,[class*="faction"][class*="content"],main') || document.querySelector('#mainContainer') || document.body;
-      if (host.firstChild) host.insertBefore(panel, host.firstChild); else host.appendChild(panel);
-      panel.querySelector('.slx-wqa-toggle').addEventListener('click', () => setEnabled(!isEnabled()));
-    }
-    const enabled = isEnabled();
-    panel.dataset.enabled = enabled ? '1' : '0';
-    const toggle = panel.querySelector('.slx-wqa-toggle');
-    if (toggle) {
-      toggle.textContent = enabled ? 'ON' : 'OFF';
-      toggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-    }
-  }
-
-  function addQuickAttackButtons(root = document) {
-    if (!onFactionWarPage() || !isEnabled()) return;
-    ensureStyle();
-    const links = root.querySelectorAll?.('a[href*="profiles.php"],a[href*="XID="],a[href*="user2ID="]') || [];
-    for (const link of links) {
-      if (link.closest('.sakalux-war-quick-attack-wrap') || link.dataset.slxWarScanned === '1') continue;
-      link.dataset.slxWarScanned = '1';
-      const id = getPlayerIdFromHref(link.getAttribute('href'));
-      if (!id) continue;
-      const row = link.closest('li,[class*="member"],[class*="row"],[class*="user"],[class*="enemy"],tr') || link.parentElement;
-      if (!row || row.querySelector(`.${BTN_CLASS}[data-user-id="${id}"]`)) continue;
-
-      const a = document.createElement('a');
-      a.className = BTN_CLASS;
-      a.dataset.userId = id;
-      a.href = `/loader.php?sid=attack&user2ID=${encodeURIComponent(id)}`;
-      a.textContent = '⚔️';
-      a.title = 'Quick Attack';
-      a.setAttribute('aria-label', 'Quick Attack');
-      a.addEventListener('click', (e) => e.stopPropagation(), true);
-      link.insertAdjacentElement('afterend', a);
-    }
-  }
-
-  function isVisible(el) {
-    if (!el || !el.isConnected || el.disabled) return false;
-    const r = el.getBoundingClientRect();
-    const cs = getComputedStyle(el);
-    return r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden';
-  }
-
-  function findNativeStartButton() {
-    const candidates = document.querySelectorAll('button,input[type="button"],input[type="submit"],[role="button"]');
-    for (const el of candidates) {
-      const text = `${el.textContent || ''} ${el.value || ''} ${el.getAttribute('aria-label') || ''} ${el.title || ''}`.replace(/\s+/g,' ').trim().toLowerCase();
-      if (!text) continue;
-      if ((text.includes('start fight') || text.includes('join fight')) && isVisible(el)) return el;
-    }
-    return null;
-  }
-
-  function highlightStartButton() {
-    if (!onAttackPage() || !isEnabled()) return;
-    ensureStyle();
-    const btn = findNativeStartButton();
-    if (!btn) return;
-    document.querySelectorAll(`.${START_CLASS}`).forEach(el => { if (el !== btn) el.classList.remove(START_CLASS); });
-    btn.classList.add(START_CLASS);
-    btn.dataset.slxWarQuickAttack = '1';
-  }
-
-  function applyEnabledState() {
-    ensureFactionModuleControl();
-    if (!isEnabled()) cleanupQuickAttackUI();
-    else refresh();
-  }
-
-  let queued = false;
-  function refresh() {
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(() => {
-      queued = false;
-      ensureFactionModuleControl();
-      if (!isEnabled()) {
-        cleanupQuickAttackUI();
-        return;
-      }
-      addQuickAttackButtons();
-      highlightStartButton();
-    });
-  }
-
-  refresh();
-  const observer = new MutationObserver(refresh);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
-  window.addEventListener('popstate', () => setTimeout(refresh, 60));
-  window.addEventListener('hashchange', () => setTimeout(refresh, 60));
-  setInterval(refresh, 1500);
-})();
-/* SakaLuX Suite War Quick Attack — END */
-
