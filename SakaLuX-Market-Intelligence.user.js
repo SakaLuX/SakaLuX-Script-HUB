@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.41
+// @version      1.17.42
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -19,7 +19,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.41';
+  let v = '1.17.42';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -97,7 +97,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.41'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.42'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -593,9 +593,44 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         try{return new Date(ts).toLocaleString([], {month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});}catch(_){return '—';}
     }
 
+    function isTravelPanelPage(){
+        const href=String(location.href||'');
+        const path=String(location.pathname||'');
+        const searchHash=(String(location.search||'')+' '+String(location.hash||'')).toLowerCase();
+
+        // Canonical Torn travel routes. Do not treat "currently flying" as being on the Travel page.
+        if(/travelagency\.php/i.test(path)) return true;
+        if(/(?:^|[?&#])sid=travel(?:[&#]|$)/i.test(href)) return true;
+        if(/(?:^|[\/#?&=])travel(?:[\/#?&=]|$)/i.test(searchHash)) return true;
+
+        // SPA fallback: only accept an exact visible main-page heading, never sidebar/menu text.
+        const root=document.querySelector('#mainContainer,[role="main"],main,#content')||document.body;
+        const headings=[...root.querySelectorAll('h1,h2,h3,h4,[class*="content-title"],[class*="page-title"]')];
+        return headings.some(el=>{
+            const cs=getComputedStyle(el);
+            if(cs.display==='none'||cs.visibility==='hidden') return false;
+            const r=el.getBoundingClientRect();
+            if(r.width<1||r.height<1) return false;
+            const text=String(el.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+            return text==='travel' || text==='travel agency';
+        });
+    }
+
+    function enforceTravelPanelScope(){
+        if(isTravelPanelPage()) return;
+        document.getElementById('sl-mi-session')?.remove();
+        document.getElementById('sl-mi-arrival')?.remove();
+    }
+
+    // Torn is SPA-like on mobile/PDA, so remove stale travel panels immediately after navigation.
+    window.addEventListener('popstate',()=>setTimeout(enforceTravelPanelScope,0),{passive:true});
+    window.addEventListener('hashchange',()=>setTimeout(enforceTravelPanelScope,0),{passive:true});
+    document.addEventListener('click',()=>setTimeout(enforceTravelPanelScope,120),true);
+    setInterval(enforceTravelPanelScope,1500);
+
     function paintTravelSessionSummary(){
         const existing=document.getElementById('sl-mi-session');
-        if(detectPage()!=='travel'){existing?.remove();return;}
+        if(!isTravelPanelPage()){existing?.remove();return;}
         if(!settings.sessionSummary){existing?.remove();return;}
         const cur=travelSessions.current,history=(travelSessions.history||[]).slice(0,5);
         if(!cur&&!history.length){existing?.remove();return;}
@@ -1405,7 +1440,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         const previousArrival=document.getElementById('sl-mi-arrival');
         state.arrivalRows=0;state.flightDestination='';state.landingMins=null;
         state.arrivalBasketItems=0;state.arrivalBasketCost=0;state.arrivalBasketProfit=0;state.arrivalBasketSlots=0;state.arrivalBasketMode='';
-        if(!settings.arrivalStock||!detectInFlight()){previousArrival?.remove();return;}
+        if(!settings.arrivalStock||!detectInFlight()||!isTravelPanelPage()){previousArrival?.remove();return;}
         const flight=await fetchFlightStatus();
         const destination=normalizeDestination(flight.destination),landingMins=Number(flight.seconds)/60;
         if(!destination||!Number.isFinite(landingMins)||landingMins<0){previousArrival?.remove();return;}

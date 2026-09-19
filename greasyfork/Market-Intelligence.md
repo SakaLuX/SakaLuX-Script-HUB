@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.41**
+**v1.17.42**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,7 +20,7 @@
 
 ## Current release note
 
-**v1.17.41 — Release metadata synchronization**
+**v1.17.42 — Release metadata synchronization**
 - Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
 - Shares active market lookups for the same item and API key.
 - Shares active equipment fetches across overlapping loadout comparisons, including forced refreshes.
@@ -49,6 +49,13 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 
 ## Release history / Changelog
 
+
+
+### v1.17.42 — Release metadata synchronization
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Shares active market lookups for the same item and API key.
+- Shares active equipment fetches across overlapping loadout comparisons, including forced refreshes.
+- Clears pending operations on success and failure so later requests recover; price estimates and explicit trade controls remain unchanged.
 
 ### v1.17.41 — Release metadata synchronization
 - Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
