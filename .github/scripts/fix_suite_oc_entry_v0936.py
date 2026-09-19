@@ -8,26 +8,27 @@ old=s
 s=s.replace('// @version      0.9.935','// @version      0.9.936',1)
 s=s.replace("const VERSION = '0.9.935';","const VERSION = '0.9.936';",1)
 
-needle='function handleOcStageEntry('
-pos=s.find(needle)
-if pos < 0:
-    raise SystemExit('handleOcStageEntry token not found')
-start=s.rfind('\n',0,pos)+1
-end_token='function refreshNotInOCFromPage()'
-end_pos=s.find(end_token,pos)
-if end_pos < 0:
-    raise SystemExit('refreshNotInOCFromPage token not found')
-end=s.rfind('\n',0,end_pos)+1
-indent=s[start:pos].replace('async ','')
-# Preserve surrounding indentation used by the module.
-lead=s[start:len(s[:start])+len(s[start:pos])]
-base_indent=''.join(ch for ch in s[start:pos] if ch in ' \t')
-if not base_indent:
-    base_indent='  '
+# Keep persisted completion when the player revisits Recruiting/Planning.
+old_required='''    markStageScanRequired(stage);\n    updateStageVisuals();'''
+new_required='''    // Do NOT invalidate an already completed scan merely because the user revisited this stage.\n    updateStageVisuals();'''
+if old_required not in s:
+    raise SystemExit('stage-required entry block not found')
+s=s.replace(old_required,new_required,1)
 
-new_handle='''{I}async function handleOcStageEntry(\n{I}  stage = getCrimesStageLabel()\n{I}) {{\n{I}  if (\n{I}    !moduleActive ||\n{I}    !isCrimesTab() ||\n{I}    (stage !== "Recruiting" && stage !== "Planning")\n{I}  ) {{\n{I}    return;\n{I}  }}\n\n{I}  if (stage === lastObservedOcStage) return;\n{I}  lastObservedOcStage = stage;\n\n{I}  // Do NOT invalidate an already completed scan merely because the user\n{I}  // re-entered the same Torn tab. Preserve persisted scan completion.\n{I}  updateStageVisuals();\n\n{I}  const statusEl = document.querySelector('.sakalux-oco-scan-status');\n{I}  if (statusEl) {{\n{I}    statusEl.classList.remove('is-success','is-error');\n{I}    statusEl.classList.add('is-scanning');\n{I}    statusEl.textContent = `Refreshing ${{stage}}...`;\n{I}    statusEl.title = `Refreshing ${{stage}} OC data. API is preferred; visible-page scan is the fallback.`;\n{I}  }}\n\n{I}  let result = await scanAvailableCrimesViaApi(stage, true);\n\n{I}  // If the faction API cannot serve private faction crimes, fall back to\n{I}  // the live Torn page instead of showing a transient raw API error.\n{I}  if (!result?.ok) {{\n{I}    const domResult = await scanCurrentCrimesStage();\n{I}    if (domResult?.ok) result = domResult;\n{I}  }}\n\n{I}  if (result?.ok && result?.stage === stage) {{\n{I}    markStageScanComplete(stage);\n{I}    updateStageVisuals();\n{I}    itemTick();\n{I}    utilitiesLastSignature = '';\n{I}    if (statusEl) flashScanStatus(statusEl, sessionScanSummary(), 'success');\n{I}    return;\n{I}  }}\n\n{I}  const reason = String(result?.reason || 'Refresh unavailable');\n{I}  const factionAccessMissing = /incorrect id-entity relation|error\\s*7|faction api access/i.test(reason);\n\n{I}  if (statusEl) {{\n{I}    if (factionAccessMissing) {{\n{I}      statusEl.classList.remove('is-scanning','is-error','is-success');\n{I}      renderScanStatus(statusEl);\n{I}      statusEl.title = 'Faction API Access is unavailable for this key/account. Suite will use the visible-page scanner instead.';\n{I}    }} else {{\n{I}      flashScanStatus(statusEl, reason, 'error', 3000);\n{I}    }}\n{I}  }}\n{I}}}\n'''.replace('{I}',base_indent)
+# Automatic page-entry refresh: API first, live DOM fallback second.
+old_api='''    const result =\n      await scanAvailableCrimesViaApi(\n        stage,\n        true\n      );'''
+new_api='''    let result =\n      await scanAvailableCrimesViaApi(\n        stage,\n        true\n      );\n\n    if (!result?.ok) {\n      const domResult = await scanCurrentCrimesStage();\n      if (domResult?.ok) result = domResult;\n    }'''
+if old_api not in s:
+    raise SystemExit('stage-entry API block not found')
+s=s.replace(old_api,new_api,1)
 
-s=s[:start]+new_handle+s[end:]
+# Do not flash the raw faction API access error if DOM fallback cannot run yet.
+old_fail='''    if (statusEl) {\n      flashScanStatus(\n        statusEl,\n        result?.reason ||\n          "API refresh failed",\n        "error",\n        2200\n      );\n    }'''
+new_fail='''    if (statusEl) {\n      const reason = String(result?.reason || "API refresh failed");\n      const factionAccessMissing = /incorrect id-entity relation|error\\s*7|faction api access/i.test(reason);\n      if (factionAccessMissing) {\n        statusEl.classList.remove("is-scanning", "is-error", "is-success");\n        renderScanStatus(statusEl);\n        statusEl.title = "Faction API Access unavailable; Suite is using the visible-page OC scanner.";\n      } else {\n        flashScanStatus(statusEl, reason, "error", 3000);\n      }\n    }'''
+if old_fail not in s:
+    raise SystemExit('stage-entry failure block not found')
+s=s.replace(old_fail,new_fail,1)
+
 if s==old:
     raise SystemExit('no Suite changes made')
 suite.write_text(s,encoding='utf-8')
