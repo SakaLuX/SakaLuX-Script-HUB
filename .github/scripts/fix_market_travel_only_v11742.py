@@ -65,3 +65,4 @@ s=s.replace(old2,new2,1)
 
 p.write_text(s,encoding='utf-8')
 print('Market Intelligence patched to v1.17.42: Travel Session Summary + Arrival Basket are strict Travel-page only.')
+# trigger
