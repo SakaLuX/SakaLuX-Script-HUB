@@ -1,0 +1,36 @@
+name: Add Suite war quick attack
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/add_suite_war_quick_attack.py'
+      - '.github/workflows/add-suite-war-quick-attack.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: add-suite-war-quick-attack-main
+  cancel-in-progress: false
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply Suite war quick attack patch
+        run: python3 .github/scripts/add_suite_war_quick_attack.py
+      - name: Validate Suite syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Commit Suite update
+        run: |
+          if git diff --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Suite.user.js
+          git commit -m "Add War Quick Attack to SakaLuX Suite"
+          git push
