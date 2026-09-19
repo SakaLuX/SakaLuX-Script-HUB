@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.9**
+**v0.8.10**
 
 ## What it does
 - Stock vault target selection directly from Torn Stocks.
@@ -22,11 +22,10 @@
 
 ## Current release note
 
-**v0.8.9 — Release metadata synchronization**
-- Adds the complete Elimination-style Stock Manager API Access sheet with live Torn API status, active-source display, standalone fallback key management and access checks.
-- Automatically uses the shared SakaLuX Hub Torn API key first whenever Hub is installed and active; the local Stock Manager key remains the standalone fallback.
-- CHECK ACCESS validates User Money, User Stocks and Torn Stocks access, while CLEAR LOCAL TORN KEY leaves an active Hub key untouched.
-- Synchronizes Stock Manager runtime and registration version surfaces to v0.8.9.
+**v0.8.10 — Release metadata synchronization**
+- Rearranges the lower API Access controls into a clean two-column SAVE & TEST / CHECK ACCESS row with a full-width CLEAR LOCAL TORN KEY button below.
+- Normalizes button height, width, alignment and mobile spacing so the API controls no longer wrap or sit unevenly.
+- Keeps Hub-first API key detection and the local standalone fallback introduced in v0.8.9.
 
 ## Recommended
 - Keep **Dry Run ON** while checking a new configuration.
@@ -60,6 +59,12 @@
 ## Release history / Changelog
 
 
+
+
+### v0.8.10 — Release metadata synchronization
+- Rearranges the lower API Access controls into a clean two-column SAVE & TEST / CHECK ACCESS row with a full-width CLEAR LOCAL TORN KEY button below.
+- Normalizes button height, width, alignment and mobile spacing so the API controls no longer wrap or sit unevenly.
+- Keeps Hub-first API key detection and the local standalone fallback introduced in v0.8.9.
 
 ### v0.8.9 — Release metadata synchronization
 - Adds the complete Elimination-style Stock Manager API Access sheet with live Torn API status, active-source display, standalone fallback key management and access checks.

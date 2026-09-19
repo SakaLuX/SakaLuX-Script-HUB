@@ -937,18 +937,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "0.8.9",
+                    "version": "0.8.10",
                     "date": "2026-09-19",
                     "notes": [
-                        "Adds the complete Elimination-style Stock Manager API Access sheet with live Torn API status, active-source display, standalone fallback key management and access checks.",
-                        "Automatically uses the shared SakaLuX Hub Torn API key first whenever Hub is installed and active; the local Stock Manager key remains the standalone fallback.",
-                        "CHECK ACCESS validates User Money, User Stocks and Torn Stocks access, while CLEAR LOCAL TORN KEY leaves an active Hub key untouched.",
-                        "Synchronizes Stock Manager runtime and registration version surfaces to v0.8.9."
+                        "Rearranges the lower API Access controls into a clean two-column SAVE & TEST / CHECK ACCESS row with a full-width CLEAR LOCAL TORN KEY button below.",
+                        "Normalizes button height, width, alignment and mobile spacing so the API controls no longer wrap or sit unevenly.",
+                        "Keeps Hub-first API key detection and the local standalone fallback introduced in v0.8.9."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.9",
+                "version": "0.8.10",
                 "detailsRevision": 3
             }
         ]

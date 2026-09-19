@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.9
+// @version      0.8.10
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -16,7 +16,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '0.8.9';
+  let v = '0.8.10';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -292,7 +292,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.8.9',
+    version: '0.8.10',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
@@ -2438,11 +2438,11 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 })();
 
 /* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 */
-(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.9'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
+(()=>{const run=()=>{if(!document.body)return;let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');document.body.appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.10'});};if(document.body)run();else document.addEventListener('DOMContentLoaded',run,{once:true});})();
 
 
 /* SAKALUX_STOCKS_FOLLOWUP_V0715 */
-(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.9'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
+(()=>{const keep=()=>{try{let e=document.querySelector('[data-slx-standalone-registration="stock-manager-advisor"]');if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','stock-manager-advisor');(document.body||document.documentElement).appendChild(e);}Object.assign(e.dataset,{id:'stock-manager-advisor',name:'Stocks',icon:'📊',selector:'#sakalux-module-bridge-stock-manager-advisor',fallback:'https://www.torn.com/page.php?sid=stocks',version:'0.8.10'});if(!document.getElementById('slx-stock-panic')&&typeof window.SakaLuXStockManagerAdvisor==='object'){/* runtime init recreates it */}}catch{}};keep();setTimeout(keep,150);setTimeout(keep,800);setInterval(keep,5000);})();
 
 
 /* SAKALUX_STOCK_API_ELIMINATION_LAYOUT_V0716 */
@@ -2476,6 +2476,12 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
 #slx-stock-api-sheet .slx-stock-api-status b{color:#d7b94c!important}
 #slx-stock-api-sheet .slx-stock-api-status.ok span{color:#78d98b!important}
 #slx-stock-api-sheet .slx-stock-api-status.error span,#slx-stock-api-sheet .slx-stock-api-status.missing span{color:#f08b8b!important}
+#slx-stock-api-sheet .slx-api-sheet-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;width:100%!important;margin:2px 0 0!important}
+#slx-stock-api-sheet .slx-api-sheet-actions>button{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:none!important;height:42px!important;min-height:42px!important;margin:0!important;padding:0 8px!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;white-space:normal!important;line-height:1.15!important}
+#slx-stock-api-sheet #slx-stock-api-clear{box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;max-width:none!important;height:42px!important;min-height:42px!important;margin:0!important;padding:0 8px!important;text-align:center!important;background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+#slx-stock-api-sheet #slx-stock-api-create{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:42px!important;min-height:42px!important;margin:0!important;text-align:center!important}
+#slx-stock-api-sheet .slx-api-sheet-result{width:100%!important;box-sizing:border-box!important;padding:7px 8px!important;border:1px solid rgba(255,255,255,.06)!important;border-radius:8px!important;background:#0d141d!important;line-height:1.35!important}
+@media(max-width:420px){#slx-stock-api-sheet .slx-api-sheet-actions{grid-template-columns:1fr 1fr!important;gap:6px!important}#slx-stock-api-sheet .slx-api-sheet-actions>button,#slx-stock-api-sheet #slx-stock-api-clear,#slx-stock-api-sheet #slx-stock-api-create{font-size:10px!important;height:40px!important;min-height:40px!important;padding:0 5px!important}}
 @media(max-width:820px){#slx-stock-api-sheet#slx-stock-api-sheet{inset:6px!important;max-height:calc(100% - 12px)!important}}
 `;(document.head||document.documentElement).appendChild(st);
 })();
