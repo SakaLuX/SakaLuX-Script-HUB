@@ -188,7 +188,7 @@ block = r'''/* SakaLuX Suite War Quick Attack — BEGIN */
 /* SakaLuX Suite War Quick Attack — END */'''
 
 pattern = re.escape(start) + r'[\s\S]*?' + re.escape(end)
-s2, n = re.subn(pattern, block, s, count=1)
+s2, n = re.subn(pattern, lambda _m: block, s, count=1)
 if n != 1:
     raise SystemExit(f'Expected to replace 1 block, got {n}')
 
