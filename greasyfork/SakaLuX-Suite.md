@@ -35,10 +35,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.936 — OC scan visual state + API fallback**
-- Centers the Target Alerts Settings window inside the real browser viewport.
-- Prevents left/right clipping on TornPDA and keeps long settings scrollable inside the dialog.
-- Clears stale inline popover coordinates so Suite scrolling/navigation cannot push the dialog off-screen.
+**v0.9.936 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
