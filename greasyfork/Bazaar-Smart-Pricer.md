@@ -42,3 +42,7 @@ MIT-licensed rebuild inspired by **Torn Bazaar Quick Pricer + Smart Bazaar Prici
 - Added Market Value / Lowest Listing / Undercut modes.
 - Added % or flat-$ undercut rules, low-listing filtering, NPC warning, caching and API test.
 - Exposes `window.SakaLuXBazaarSmartPricer` with `open`, `refresh`, `priceAll`, `isEnabled`, and `setEnabled`.
+
+### v1.0.1 — Add Items Quick Fill
+- **S QUICK FILL** fills **both quantity and price** for visible Add Items rows.
+- Per-row **S PRICE** uses the same fill behavior.

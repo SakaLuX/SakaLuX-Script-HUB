@@ -134,6 +134,40 @@
     return inputs.slice().sort((a,b)=>score(b)-score(a))[0]||null;
   }
 
+  function pickQuantityControl(row){
+    const choice=row.querySelector('div.choice-container, [class*="choiceContainer___"]');
+    const checkbox=choice?.querySelector('input[type="checkbox"]')||null;
+    if(checkbox)return{type:'checkbox',input:checkbox};
+    const inputs=qsa('input',row).filter(x=>x.type!=='hidden'&&x.type!=='checkbox'&&x.type!=='radio'&&!x.disabled);
+    const scored=inputs.map(i=>{
+      const meta=(i.name+' '+i.id+' '+i.placeholder+' '+i.className+' '+(i.getAttribute('aria-label')||'')).toLowerCase();
+      let score=0;if(/qty|quantity|amount|stock/.test(meta))score+=12;if(/price|ppu|each|unit/.test(meta))score-=12;return{i,score};
+    }).sort((a,b)=>b.score-a.score);
+    const input=scored[0]?.score>0?scored[0].i:(inputs.length>=2?inputs[0]:null);
+    return input?{type:'input',input}:null;
+  }
+
+  function quantityFromRow(row){
+    const title=norm(row.querySelector('[class*="name___"], .title-wrap')?.textContent||'');
+    const m=title.match(/\bx(\d+)\s*$/i);
+    if(m)return Math.max(1,Number(m[1])||1);
+    const text=norm(row.innerText||'');
+    const n=text.match(/\bx(\d+)\b/i);
+    return n?Math.max(1,Number(n[1])||1):1;
+  }
+
+  function fillQuantity(entry){
+    const q=entry.qty||pickQuantityControl(entry.row);if(!q)return false;
+    if(q.type==='checkbox'){
+      if(!q.input.checked)q.input.click();
+      return true;
+    }
+    const amount=quantityFromRow(entry.row);
+    setNativeValue(q.input,amount);
+    q.input.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true,key:'0'}));
+    return true;
+  }
+
   function request(url){
     return new Promise((resolve,reject)=>{
       if(!settings.apiKey)return reject(new Error('API key missing'));
@@ -175,7 +209,7 @@
 
   function findRows(){
     const out=[],seen=new Set();
-    for(const img of qsa('img')){const id=itemIdFromImg(img);if(!id)continue;const row=rowFor(img);if(!row||seen.has(row))continue;const input=pickPriceInput(row);if(!input)continue;seen.add(row);out.push({id,img,row,input});}
+    for(const img of qsa('img')){const id=itemIdFromImg(img);if(!id)continue;const row=rowFor(img);if(!row||seen.has(row))continue;const input=pickPriceInput(row);if(!input)continue;const qty=pickQuantityControl(row);seen.add(row);out.push({id,img,row,input,qty});}
     return out;
   }
 
@@ -207,7 +241,7 @@
     if(old)return;
     const point=addItemsInsertionPoint();if(!point?.parent)return;
     const bar=document.createElement('div');bar.id=PREFIX+'-addbar';bar.className=PREFIX+'-addbar';
-    const b=document.createElement('button');b.type='button';b.className=PREFIX+'-quickfill';b.innerHTML='<b>S</b> QUICK FILL';b.title='Price all visible Bazaar add-item rows';
+    const b=document.createElement('button');b.type='button';b.className=PREFIX+'-quickfill';b.innerHTML='<b>S</b> QUICK FILL';b.title='Fill quantity and price for all visible Bazaar add-item rows';
     b.onclick=async ev=>{
       ev.preventDefault();ev.stopPropagation();
       if(!settings.apiKey){openPanel();toast('Add your Torn API key first.','error');return;}
@@ -220,7 +254,7 @@
   }
 
   async function priceEntry(entry,{silent=false}={}){
-    try{const r=await computePrice(entry.id);setNativeValue(entry.input,r.price);entry.input.dataset.slBspPriced=String(r.price);state.priced++;if(settings.warnNpc&&r.item.sellPrice>0&&r.price<r.item.sellPrice&&!silent)toast(`${r.item.name}: ${money(r.price)} is below NPC ${money(r.item.sellPrice)}`,'error');return true;}
+    try{const r=await computePrice(entry.id);setNativeValue(entry.input,r.price);entry.input.dataset.slBspPriced=String(r.price);fillQuantity(entry);state.priced++;if(settings.warnNpc&&r.item.sellPrice>0&&r.price<r.item.sellPrice&&!silent)toast(`${r.item.name}: ${money(r.price)} is below NPC ${money(r.item.sellPrice)}`,'error');return true;}
     catch(e){state.skipped++;if(!silent)toast(`Skipped item #${entry.id}: ${e.message}`,'error');return false;}
   }
 

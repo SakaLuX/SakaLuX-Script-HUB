@@ -134,15 +134,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 2,
+      "detailsRevision": 3,
       "version": "1.0.1",
       "release": {
         "version": "1.0.1",
         "date": "2026-09-20",
         "notes": [
-          "Adds a native S QUICK FILL button directly on the Bazaar Add Items sale page.",
-          "The Add Items button prices all visible sale rows without opening the settings panel.",
-          "Keeps per-row S PRICE and PRICE ALL VISIBLE actions unchanged."
+          "QUICK FILL on Add Items now fills both quantity and price, matching the established Torn Bazaar Quick Pricer workflow.",
+          "Quantity uses the visible stack amount (xN) or selects Torn’s quantity checkbox when that control is present.",
+          "Per-row S PRICE also fills quantity on Add Items while Manage/Reprice keeps price-focused behavior."
         ]
       }
     },
