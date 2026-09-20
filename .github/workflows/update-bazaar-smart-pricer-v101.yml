@@ -26,7 +26,7 @@ jobs:
       - name: Verify core release
         run: |
           grep -q '@version      1.0.1' SakaLuX-Bazaar-Smart-Pricer.user.js
-          grep -q 'S QUICK FILL' SakaLuX-Bazaar-Smart-Pricer.user.js
+          grep -q 'QUICK FILL' SakaLuX-Bazaar-Smart-Pricer.user.js
       - name: Commit release
         run: |
           if git diff --quiet; then
@@ -36,5 +36,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add SakaLuX-Bazaar-Smart-Pricer.user.js scripts.json greasyfork/Bazaar-Smart-Pricer.md greasyfork/Script-Hub.md CHANGELOG-Bazaar-Smart-Pricer.md releases/bazaar-smart-pricer-v1.0.1.md
-          git commit -m 'Release Bazaar Smart Pricer v1.0.1 with Add Items quick fill'
+          git commit -m 'Release Bazaar Smart Pricer v1.0.1 with quantity and price Quick Fill'
           git push
