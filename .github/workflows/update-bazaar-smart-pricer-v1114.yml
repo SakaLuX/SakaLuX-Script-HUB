@@ -1,0 +1,44 @@
+name: Update Bazaar Smart Pricer v1.1.14
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/update_bazaar_smart_pricer_v1114.py'
+      - '.github/workflows/update-bazaar-smart-pricer-v1114.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: bazaar-smart-pricer-v1114-main
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v1.1.14 pacing update
+        run: python3 .github/scripts/update_bazaar_smart_pricer_v1114.py
+      - name: Validate userscript
+        run: node --check SakaLuX-Bazaar-Smart-Pricer.user.js
+      - name: Validate registry
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Verify v1.1.14 surfaces
+        run: |
+          grep -F '// @version      1.1.14' SakaLuX-Bazaar-Smart-Pricer.user.js
+          grep -F "|| '1.1.14';" SakaLuX-Bazaar-Smart-Pricer.user.js
+          grep -F 'setTimeout(r,2000)' SakaLuX-Bazaar-Smart-Pricer.user.js
+          grep -F 'Waiting 2s' SakaLuX-Bazaar-Smart-Pricer.user.js
+          grep -F '## v1.1.14 — 2026-09-20' CHANGELOG-Bazaar-Smart-Pricer.md
+          test -f releases/bazaar-smart-pricer-v1.1.14.md
+      - name: Commit complete v1.1.14 update
+        run: |
+          if git diff --quiet && [ -z "$(git status --porcelain --untracked-files=all)" ]; then
+            echo "Already updated."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Bazaar-Smart-Pricer.user.js scripts.json CHANGELOG-Bazaar-Smart-Pricer.md README-Bazaar-Smart-Pricer.md greasyfork/Bazaar-Smart-Pricer.md releases/bazaar-smart-pricer-v1.1.14.md backups/bazaar-smart-pricer-v1.1.13-2026-09-20
+          git commit -m "Release Bazaar Smart Pricer v1.1.14 with 2s item pacing"
+          git push
