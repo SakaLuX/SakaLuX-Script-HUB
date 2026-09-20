@@ -16,13 +16,12 @@ MARK_END = '/* SakaLuX Canonical Installed Version — END */'
 DOC_BY_ID = {
     'enhancer': 'greasyfork/Enhancer-Guard.md',
     'bazaar': 'greasyfork/Bazaar-Thanker.md',
+    'bazaar-smart-pricer': 'greasyfork/Bazaar-Smart-Pricer.md',
     'mission-rewards': 'greasyfork/Mission-Rewards.md',
     'market-intelligence': 'greasyfork/Market-Intelligence.md',
     'elimination-assistant': 'greasyfork/Elimination-Assistant.md',
     'company-intelligence': 'greasyfork/Company-Intelligence.md',
-    'chat-intelligence': 'greasyfork/Chat-Intelligence.md',
     'stock-manager-advisor': 'greasyfork/Stock-Manager-Advisor.md',
-    'account-auditor': 'greasyfork/Account-Auditor.md',
 }
 
 
@@ -100,12 +99,21 @@ def sync_hub_fallback_registry(text: str, registry: dict) -> str:
     payload = json.dumps(registry, indent=4, ensure_ascii=False)
     replacement = start_token + payload.replace('\n', '\n    ')
     text = text[:start] + replacement + text[end:]
-    if 'const FALLBACK_MODULE_DETAILS =' not in text:
+
+    # Always rebuild fallback details from the canonical registry so stale embedded
+    # module INFO/NEW data cannot survive a scripts.json synchronization.
+    details_pat = re.compile(
+        r'\n\n    const FALLBACK_MODULE_DETAILS = Object\.fromEntries\(\n'
+        r'.*?\n    \);', re.S
+    )
+    details = "\n\n    const FALLBACK_MODULE_DETAILS = Object.fromEntries(\n        (FALLBACK_REGISTRY.scripts || []).map(s => [s.id, { info: s.info, release: s.release }])\n    );"
+    if details_pat.search(text):
+        text = details_pat.sub(details, text, count=1)
+    else:
         marker = '\n\n    let registry = '
         pos = text.find(marker, start)
         if pos < 0:
             raise RuntimeError('Hub registry insertion marker missing')
-        details = "\n\n    const FALLBACK_MODULE_DETAILS = Object.fromEntries(\n        (FALLBACK_REGISTRY.scripts || []).map(s => [s.id, { info: s.info, release: s.release }])\n    );"
         text = text[:pos] + details + text[pos:]
     return text
 
