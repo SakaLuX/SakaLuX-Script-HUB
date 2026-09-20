@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.5**
+**v1.1.14**
 
 ## What it does
 - Prices Bazaar items from Torn market value, the lowest visible item-market listing, or an undercut of the lowest listing.

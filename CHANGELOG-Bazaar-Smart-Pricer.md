@@ -1,5 +1,13 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.14 — 2026-09-20
+- Added a **2-second delay between every item** during Manage Bazaar **Update All**.
+- During the pause the chip shows **Waiting 2s · X/N**.
+- Keeps the v1.1.13 original working arrow-opening flow unchanged.
+- Existing pricing calculations and protection rules are unchanged.
+- The slower pacing is intended to reduce TornPDA/React rerender collisions that can leave a batch apparently stuck near the end.
+
+
 ## v1.1.13 — 2026-09-20
 - Restored the original **v1.1.1 Manage editor opening logic**, which was the first flow that targeted the working TornPDA arrow correctly.
 - Removed the later geometry/`elementFromPoint` targeting that kept opening the eye/details panel.

@@ -135,14 +135,14 @@
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
       "detailsRevision": 20,
-      "version": "1.1.13",
+      "version": "1.1.14",
       "release": {
-        "version": "1.1.13",
+        "version": "1.1.14",
         "date": "2026-09-20",
         "notes": [
-          "Restores the original v1.1.1 Manage arrow-opening strategy — the first version that opened the correct TornPDA editor control.",
-          "Removes the later geometry/elementFromPoint arrow targeting that repeatedly selected the eye/details panel on TornPDA.",
-          "Keeps hang protection: bounded editor-open wait, bounded pricing wait, per-item error continuation and live row reacquisition."
+          "Adds a deliberate 2-second pause between Manage Bazaar Update All items for TornPDA stability.",
+          "Progress displays Waiting 2s · X/N during the pacing pause.",
+          "Keeps the v1.1.13 original working arrow-opening flow and existing pricing protections unchanged."
         ]
       }
     },

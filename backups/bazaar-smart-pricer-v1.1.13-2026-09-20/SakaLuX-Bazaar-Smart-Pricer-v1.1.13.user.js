@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.14
+// @version      1.1.13
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.14';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.13';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1604,13 +1604,6 @@
             if(editor.opened&&editor.toggle){
                 try{editor.toggle.click();}catch{}
                 await new Promise(r=>setTimeout(r,140));
-            }
-
-            // TornPDA/React can rerender the Manage list after every edit/close.
-            // Deliberately wait two full seconds before touching the next item.
-            if(done < work.length){
-                if(updateButton) updateButton.textContent=`Waiting 2s · ${done}/${work.length}`;
-                await new Promise(r=>setTimeout(r,2000));
             }
         }
 
