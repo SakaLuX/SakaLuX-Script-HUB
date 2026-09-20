@@ -750,7 +750,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.17.44",
+                    "version": "1.17.45",
                     "date": "2026-09-20",
                     "notes": [
                         "Stops Market Intelligence estimate badges from being injected into Bazaar add-item/sale rows that contain quantity and price editors.",

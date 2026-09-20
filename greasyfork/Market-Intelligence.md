@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.44**
+**v1.17.45**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,10 +20,10 @@
 
 ## Current release note
 
-**v1.17.44 — Release metadata synchronization**
-- Stops Market Intelligence estimate badges from being injected into Bazaar add-item/sale rows that contain quantity and price editors.
-- Removes already-rendered MI estimate badges as soon as the Bazaar sale picker is detected, including Torn SPA/TornPDA transitions.
-- Keeps normal Items-page market estimates unchanged outside Bazaar sale-entry controls.
+**v1.17.45 — Strict Manage Bazaar isolation**
+- Market Intelligence does not scan, decorate, badge or inject Bazaar UI in **Manage your Bazaar / Manage items**.
+- Existing MI inline Bazaar elements are removed on SPA/TornPDA transition into Manage.
+- Normal MI features remain active elsewhere.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -47,6 +47,10 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.17.45 — Strict Manage Bazaar isolation
+- Zero Market Intelligence row/UI intervention in Manage your Bazaar / Manage items.
+- Existing MI Bazaar badges/board are removed when Manage is detected.
 
 ### v1.17.44 — Bazaar add-item overlay isolation
 - Stops Market Intelligence estimate badges from being injected into Bazaar add-item/sale rows that contain quantity and price editors.

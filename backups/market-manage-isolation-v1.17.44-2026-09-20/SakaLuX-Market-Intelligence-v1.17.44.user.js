@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.45
+// @version      1.17.44
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -19,7 +19,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.45';
+  let v = '1.17.44';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -97,7 +97,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.45'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.44'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -1727,7 +1727,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     }
 
     async function scanBazaar(){
-        if(isManageBazaarPage()){purgeManageBazaarMarketUi();return;}
         if(!settings.bazaar)return;
         state.bazaarDeals=0;state.bazaarBestProfit=0;state.bazaarBestRoi=0;
         document.querySelectorAll('.sl-mi-bazaar-badge-wrap,.sl-mi-bazaar').forEach(n=>n.remove());
@@ -1852,18 +1851,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if(watched&&market.minPrice<=watched.maxPrice)bar.classList.add('hit');
     }
 
-    function isManageBazaarPage(){
-        const href=String(location.href||'').toLowerCase();
-        if(!href.includes('bazaar.php'))return false;
-        if(/#\/?(?:manage|bazaar(?:\/manage)?)(?:[/?#]|$)/i.test(location.hash||''))return true;
-        const text=String(document.body?.innerText||'').toLowerCase();
-        return text.includes('manage your bazaar')&&text.includes('manage items');
-    }
-
-    function purgeManageBazaarMarketUi(){
-        document.querySelectorAll('.sl-mi-items,.sl-mi-bazaar,#sl-mi-bazaar-board,[data-sl-mi-inline]').forEach(n=>n.remove());
-    }
-
     function isBazaarSaleEditorRow(row){
         if(!row?.querySelectorAll)return false;
         const controls=[...row.querySelectorAll('input,textarea,select,[contenteditable="true"]')];
@@ -1880,7 +1867,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     }
 
     function isBazaarAddItemsView(){
-        if(isManageBazaarPage())return false;
         const rows=[],seen=new Set();
         for(const img of document.querySelectorAll('img[src*="/images/items/"]')){
             const row=rowContainer(img);if(!row||seen.has(row))continue;seen.add(row);rows.push(row);
@@ -1891,7 +1877,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     }
 
     async function scanItems(){
-        if(isManageBazaarPage()){purgeManageBazaarMarketUi();return;}
         if(!settings.items)return;
         if(isBazaarAddItemsView()){
             document.querySelectorAll('.sl-mi-items').forEach(n=>n.remove());
