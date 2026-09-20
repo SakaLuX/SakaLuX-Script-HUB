@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.11
+// @version      1.1.12
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.11';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.12';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1529,67 +1529,71 @@
         let p=findEditor(); if(p) return {priceDiv:p,opened:false,toggle:null};
         const toggle=findManageToggle(item);
         if(!toggle) return null;
-        toggle.click();
-        for(let i=0;i<24;i++){await new Promise(r=>setTimeout(r,75));p=findEditor();if(p)return{priceDiv:p,opened:true,toggle};}
+        if(!clickExactManageArrow(item)) return null;
+        for(let i=0;i<28;i++){await new Promise(r=>setTimeout(r,75));p=findEditor();if(p)return{priceDiv:p,opened:true,toggle};}
         return null;
     }
 
-    function findManageToggle(item) {
-        if (!item) return null;
-
-        const section=findSectionContainer(h =>
+    function getManagePanelRect() {
+        const container=findSectionContainer(h =>
             h.textContent.includes('Manage your Bazaar') ||
             h.textContent.includes('Manage items') ||
             h.textContent.includes('Manage Bazaar')
-        ) || item.parentElement;
-        if(!section) return null;
+        );
+        return container?.getBoundingClientRect?.() || null;
+    }
 
+    function getExactManageArrowTarget(item) {
+        if (!item) return null;
         const ir=item.getBoundingClientRect();
-        const sr=section.getBoundingClientRect();
+        const pr=getManagePanelRect();
+        if(!pr) return null;
+
+        // TornPDA layout: far-right chevron center is ~28-32 px left of the
+        // Manage panel edge. Probe only this narrow column. The eye is ~85-95 px
+        // left of the panel edge, so it can never be selected here.
         const y=Math.round(ir.top + Math.min(ir.height,64)/2);
-        const minArrowX=sr.right-58; // eye is substantially farther left on TornPDA
-
-        const safeCandidate=(el)=>{
-            if(!el || !el.getBoundingClientRect) return null;
-            let node=el;
-            for(let depth=0; depth<6 && node && node!==section.parentElement; depth++,node=node.parentElement){
-                const r=node.getBoundingClientRect?.();
-                if(!r || !r.width || !r.height) continue;
-                const meta=((node.getAttribute?.('aria-label')||'')+' '+(node.title||'')+' '+(node.className||'')).toLowerCase();
-                if(/eye|view|preview|inspect|details/.test(meta)) return null;
-                const cx=r.left+r.width/2;
-                const cy=r.top+r.height/2;
-                if(cx < minArrowX || Math.abs(cy-y)>30) continue;
-                const interactive=node.matches?.('button,a,[role="button"],[tabindex]') || /arrow|chevron|expand|toggle/.test(meta) || getComputedStyle(node).cursor==='pointer';
-                if(interactive) return node;
+        for(const off of [28,30,26,32,24,34]){
+            const x=Math.round(pr.right-off);
+            const stack=document.elementsFromPoint(x,y);
+            for(const raw of stack){
+                if(!raw || raw===document.documentElement || raw===document.body) continue;
+                let el=raw;
+                for(let d=0;d<5&&el;d++,el=el.parentElement){
+                    const r=el.getBoundingClientRect?.();
+                    if(!r||!r.width||!r.height) continue;
+                    // Hard geometry guard: target must physically occupy the last
+                    // 55px of the Manage panel and overlap this item's row.
+                    if(r.right < pr.right-58 || r.left > pr.right+2) continue;
+                    if(r.bottom < ir.top || r.top > ir.bottom) continue;
+                    const meta=((el.getAttribute?.('aria-label')||'')+' '+(el.title||'')+' '+String(el.className||'')).toLowerCase();
+                    if(/eye|view|preview|inspect|details/.test(meta)) continue;
+                    const clickable = el.matches?.('button,a,[role="button"],[tabindex]') ||
+                        /arrow|chevron|expand|toggle/.test(meta) ||
+                        getComputedStyle(el).cursor==='pointer';
+                    if(clickable) return el;
+                }
             }
-            return null;
-        };
-
-        // Probe from the true Manage panel edge, not the inner item node edge.
-        for(const off of [18,24,30,36,42,48,54]){
-            const x=Math.round(sr.right-off);
-            const hit=document.elementFromPoint(x,y);
-            const candidate=safeCandidate(hit);
-            if(candidate) return candidate;
         }
+        return null;
+    }
 
-        // Geometry fallback: find an interactive control on the same visual row whose
-        // CENTER is inside the final 58px of the Manage panel. The eye icon sits left
-        // of this zone, so it can never be selected even if it has no useful class.
-        const all=[...section.querySelectorAll('button,a,[role="button"],[tabindex],[class*="arrow"],[class*="chevron"],[class*="expand"],[class*="toggle"]')];
-        const candidates=[];
-        for(const el of all){
-            const r=el.getBoundingClientRect();
-            if(!r.width||!r.height) continue;
-            const cx=r.left+r.width/2, cy=r.top+r.height/2;
-            if(cx<minArrowX || Math.abs(cy-y)>30) continue;
-            const meta=((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
-            if(/eye|view|preview|inspect|details/.test(meta)) continue;
-            candidates.push(el);
+    function clickExactManageArrow(item) {
+        const target=getExactManageArrowTarget(item);
+        if(!target) return false;
+        const r=target.getBoundingClientRect();
+        const x=Math.round(r.left+r.width/2), y=Math.round(r.top+r.height/2);
+        for(const type of ['pointerdown','mousedown','pointerup','mouseup','click']){
+            const C=type.startsWith('pointer')?PointerEvent:MouseEvent;
+            try{target.dispatchEvent(new C(type,{bubbles:true,cancelable:true,clientX:x,clientY:y,button:0,buttons:type.includes('down')?1:0,pointerType:'mouse'}));}
+            catch{target.dispatchEvent(new MouseEvent(type,{bubbles:true,cancelable:true,clientX:x,clientY:y,button:0}));}
         }
-        candidates.sort((a,b)=>(b.getBoundingClientRect().left+b.getBoundingClientRect().width/2)-(a.getBoundingClientRect().left+a.getBoundingClientRect().width/2));
-        return candidates[0]||null;
+        return true;
+    }
+
+    function findManageToggle(item) {
+        // Kept as compatibility wrapper for close/open helpers.
+        return getExactManageArrowTarget(item);
     }
 
     async function closeManagePriceEditor(itemId, itemName) {
@@ -1599,7 +1603,7 @@
         if(!currentInput) return; // already closed by Torn
         const toggle=findManageToggle(live);
         if(!toggle) return;
-        toggle.click();
+        if(!clickExactManageArrow(live)) return;
         for(let i=0;i<20;i++){
             await new Promise(r=>setTimeout(r,75));
             const refreshed=findLiveManageItem(itemId,itemName);

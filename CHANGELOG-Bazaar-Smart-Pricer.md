@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.12 — 2026-09-20
+- Hard-fixed TornPDA **Update All** to use only the far-right chevron column.
+- The target is calculated from the **Manage panel right edge** at roughly 28–32px inset; the eye icon sits much farther left and cannot match.
+- Opening/closing now dispatches pointer + mouse events on that exact target.
+- If the chevron cannot be identified, the item is skipped safely rather than falling back to the eye/details control.
+
 ## v1.1.11 — 2026-09-20
 - Fixed the remaining TornPDA eye/details click in **Update All**.
 - Root cause: the inner item node used for geometry ends near the eye column; the edit chevron belongs to the wider Manage row.

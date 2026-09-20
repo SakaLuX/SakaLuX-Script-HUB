@@ -113,3 +113,7 @@ Manage **Update All** now targets the far-right edit arrow by its visual row pos
 
 ### v1.1.11 — Strict far-right Manage toggle
 On TornPDA the eye button is inside the inner item node while the edit chevron sits in the wider Manage row. Smart Pricer now uses the full Manage panel edge and only accepts a same-row interactive control in the final 58px, preventing eye/details activation.
+
+
+### v1.1.12 — Exact chevron column
+On TornPDA, Manage bulk repricing now opens/closes rows only through the far-right chevron column, anchored to the Manage panel's right edge. No fallback is allowed to eye/details controls.
