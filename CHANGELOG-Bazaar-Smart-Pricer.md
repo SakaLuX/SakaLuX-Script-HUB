@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.10 — 2026-09-20
+- Fixed TornPDA **Update All** clicking the eye/details icon instead of the far-right edit arrow.
+- The script now targets the visual row's extreme-right control using `elementFromPoint`, matching the arrow position shown in TornPDA.
+- Descendant-only lookup was removed as the primary strategy because the far-right arrow can live outside the inner `item___` node.
+- Eye/details controls are explicitly excluded.
+
 ## v1.1.9 — 2026-09-20
 - Fixed **Update All** for TornPDA builds where the Manage price input is not mounted until the row arrow is opened.
 - Bulk processing now opens the **far-right row arrow**, waits for the price field, updates it, then closes that same row before continuing.

@@ -105,3 +105,7 @@ Manage **Update All** no longer interacts with Torn accordions. It updates each 
 
 ### v1.1.9 — TornPDA Manage row automation
 On TornPDA, collapsed Manage rows may not contain a price input at all. Update All now opens each row through its far-right arrow, waits for the input to mount, reprices it, then closes the row before moving on. Eye/View controls are never used.
+
+
+### v1.1.10 — TornPDA arrow targeting
+Manage **Update All** now targets the far-right edit arrow by its visual row position instead of relying on descendants of the inner item node. This prevents the eye/details panel from opening on TornPDA.

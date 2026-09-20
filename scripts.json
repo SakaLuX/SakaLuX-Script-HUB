@@ -134,15 +134,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 16,
-      "version": "1.1.9",
+      "detailsRevision": 17,
+      "version": "1.1.10",
       "release": {
-        "version": "1.1.9",
+        "version": "1.1.10",
         "date": "2026-09-20",
         "notes": [
-          "Fixes Update All on TornPDA where manage price inputs only exist after the row arrow is opened.",
-          "Processes each Manage row sequentially: targets the far-right arrow, waits for the price editor, updates the price, then closes the same row.",
-          "Explicitly excludes the eye/view control and reacquires the live row after Torn React rerenders."
+          "Fixes TornPDA Manage Update All opening the eye/details panel instead of the far-right price editor arrow.",
+          "Arrow targeting now uses the actual visual row and probes the extreme-right control with elementFromPoint, then falls back to right-edge DOM controls only.",
+          "The eye/details control is explicitly excluded and is too far left to match the new right-edge threshold."
         ]
       }
     },

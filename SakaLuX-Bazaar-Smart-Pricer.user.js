@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.9
+// @version      1.1.10
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.9';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.10';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1536,19 +1536,45 @@
 
     function findManageToggle(item) {
         if (!item) return null;
-        const rowRect=item.getBoundingClientRect();
-        const selectors='button,[role="button"],a,[tabindex],[class*="arrow"],[class*="chevron"],[class*="expand"],[class*="toggle"]';
-        const candidates=[...item.querySelectorAll(selectors)].filter(el=>{
+
+        // Ascend to the compact visual row. The inner item___ node on TornPDA can
+        // exclude the far-right arrow, so searching descendants alone hits the eye.
+        let row=item;
+        const itemRect=item.getBoundingClientRect();
+        for(let i=0;i<4&&row?.parentElement;i++){
+            const p=row.parentElement, r=p.getBoundingClientRect();
+            if(r.width>=itemRect.width && r.height<=Math.max(90,itemRect.height*1.8)) row=p;
+            else break;
+        }
+        const rr=row.getBoundingClientRect();
+        const y=Math.round(rr.top+Math.min(rr.height,64)/2);
+
+        // In TornPDA the arrow sits at the extreme right of the row, typically
+        // ~20-35 px from the edge. Probe several points there and climb to the
+        // nearest clickable ancestor. This cannot resolve to the eye, which is
+        // materially further left.
+        for(const off of [18,24,30,36,42]){
+            const x=Math.round(rr.right-off);
+            let el=document.elementFromPoint(x,y);
+            if(!el) continue;
+            for(let depth=0;depth<5&&el;depth++,el=el.parentElement){
+                const er=el.getBoundingClientRect?.();
+                if(!er||!er.width||!er.height) continue;
+                const meta=((el.getAttribute?.('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
+                if(/eye|view|preview|inspect|details/.test(meta)) break;
+                const interactive = el.matches?.('button,a,[role="button"],[tabindex]') || /arrow|chevron|expand|toggle/.test(meta) || getComputedStyle(el).cursor==='pointer';
+                if(interactive && er.left>rr.left+rr.width*0.88) return el;
+            }
+        }
+
+        // DOM fallback: search the visual row (not only the inner item node), and
+        // accept only controls in the last 12% of row width.
+        const candidates=[...row.querySelectorAll('button,a,[role="button"],[tabindex],[class*="arrow"],[class*="chevron"],[class*="expand"],[class*="toggle"]')].filter(el=>{
             const r=el.getBoundingClientRect();
-            if(!r.width||!r.height) return false;
+            if(!r.width||!r.height||r.left<=rr.left+rr.width*0.88) return false;
             const meta=((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
-            // Never press Torn's eye/details control; that opens the huge item-info panel.
-            if(/eye|view|preview|inspect|details/.test(meta)) return false;
-            // Keep candidates on the right side of the compact manage row.
-            return r.left >= rowRect.left + rowRect.width*0.72;
+            return !/eye|view|preview|inspect|details/.test(meta);
         });
-        if(!candidates.length) return null;
-        // The price accordion chevron is the right-most interactive control in the row.
         candidates.sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right);
         return candidates[0]||null;
     }
