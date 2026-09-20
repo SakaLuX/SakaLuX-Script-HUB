@@ -1,0 +1,1 @@
+Validation target: `node --check SakaLuX-Bazaar-Smart-Pricer.user.js` and JSON validation for `scripts.json`.
