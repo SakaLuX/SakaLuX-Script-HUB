@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.4 — 2026-09-20
+- Fixed the **Update All** permanent hang at `Pricing 1/N`.
+- Root cause: the Manage callback used `buyPrice` and `lowestMarketPrice` without receiving them from `fetchItemData`, causing a `ReferenceError` before the Promise could resolve.
+- Added a guarded `try/catch` around Manage pricing so one bad item is counted as failed instead of freezing the complete batch.
+- Live Item Market pricing and Torn City `buy_price` floor remain unchanged.
+
 ## v1.1.3 — 2026-09-20
 - Fixed **Update All** freezing/stalling on an item. Live Item Market lookups now have a 6.5s watchdog and always release the queue.
 - Supports both Torn v2 Item Market response formats (`itemmarket[]/cost` and `itemmarket.listings[]/price`).

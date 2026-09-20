@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.3
+// @version      1.1.4
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.3';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.4';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1359,10 +1359,11 @@
             const currentPrice = parseInt(priceInput.value.replace(/,/g, ''), 10) || 0;
             priceInput.disabled = true;
             priceInput.style.opacity = '0.5';
-            fetchItemData(itemId, async ({ marketValue, sellPrice }) => {
-                priceInput.disabled = false;
-                priceInput.style.opacity = '1';
-                if (marketValue <= 0) {
+            fetchItemData(itemId, async ({ marketValue, buyPrice, sellPrice, lowestMarketPrice }) => {
+                try {
+                    priceInput.disabled = false;
+                    priceInput.style.opacity = '1';
+                    if (marketValue <= 0) {
                     qpToast(`Could not fetch price for ${itemName || 'this item'}`, 'error');
                     resolve('failed');
                     return;
@@ -1383,8 +1384,15 @@
                 priceInput.dispatchEvent(new Event('change', { bubbles: true }));
                 const cityFloor=(buyPrice>0?buyPrice:sellPrice); const borderColor = (cityFloor > 0 && newPrice === cityFloor) ? '#f0a35e' : '#4f8fe8';
                 priceInput.style.border = `2px solid ${borderColor}`;
-                setTimeout(() => priceInput.style.border = '', 1000);
-                resolve('updated');
+                    setTimeout(() => priceInput.style.border = '', 1000);
+                    resolve('updated');
+                } catch (e) {
+                    console.error('[SakaLuXBazaarSmartPricer] Manage pricing failed:', e);
+                    priceInput.disabled = false;
+                    priceInput.style.opacity = '1';
+                    qpToast(`Pricing failed for ${itemName || 'this item'}`, 'error');
+                    resolve('failed');
+                }
             });
         });
     }

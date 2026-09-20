@@ -78,3 +78,7 @@ Update All and Quick Add now calculate from the cheapest live Item Market offer 
 
 ### v1.1.3 — Update All stall fix
 Bulk repricing can no longer be held indefinitely by an Item Market request. The parser supports both known Torn v2 response shapes and falls back safely to `market_value` after the watchdog timeout. Bulk mode also suppresses per-item confirmation dialogs while keeping the Torn City shop floor.
+
+
+### v1.1.4 — Update All deadlock fix
+Fixes the permanent `Pricing 1/N` hang in Manage Bazaar. The manage callback now receives all pricing fields (`marketValue`, `buyPrice`, `sellPrice`, `lowestMarketPrice`) and safely resolves failed items instead of freezing the batch.
