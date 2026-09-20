@@ -107,7 +107,7 @@
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "icon": "💰",
       "id": "bazaar-smart-pricer",
-      "info": "Purpose\nBazaar Smart Pricer prices Torn Bazaar sale fields using Torn market value, the lowest current item-market listing or a configurable undercut. It supports both add-item and manage/reprice workflows.\n\nWorkflow\nOn the Add Items sale page, S QUICK FILL appears directly above the item rows and prices every visible item in one tap. Per-item S PRICE and the settings-panel PRICE ALL VISIBLE action remain available.\n\nAPI and storage\nRequires a Torn read-only/public API key. The key and settings are stored locally and requests go only to api.torn.com.",
+      "info": "Purpose\nBazaar Smart Pricer prices Torn Bazaar sale fields using Torn market value, the lowest current item-market listing or a configurable undercut. It supports both add-item and manage/reprice workflows.\n\nAdd Items workflow\nEach sellable item gets a compact + button immediately before Qty. Pressing + fills the full visible stack quantity and the calculated price for that item. The bulk S QUICK FILL action remains available for all visible items. RW weapons and bonus items can be skipped automatically from Settings.\n\nSafety\nSkip Ranked War (RW) weapons and Skip items / weapons with bonus icons are enabled by default so special weapons are not priced from the ordinary base-item market value.\n\nAPI and storage\nRequires a Torn read-only/public API key. The key and settings are stored locally and requests go only to api.torn.com.",
       "name": "Bazaar Smart Pricer",
       "quickActions": [
         {
@@ -134,15 +134,16 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 4,
-      "version": "1.0.2",
+      "detailsRevision": 5,
+      "version": "1.0.3",
       "release": {
-        "version": "1.0.2",
+        "version": "1.0.3",
         "date": "2026-09-20",
         "notes": [
-          "Replaces the right-side Smart Pricer pill with a compact circular + button.",
-          "Adds default-on protection to skip Ranked War weapons.",
-          "Adds default-on protection to skip items/weapons with Torn bonus icons so base market prices are not written to special gear."
+          "Moves the per-item pricing control from the far-right price area to a compact + button immediately before Qty.",
+          "The + button fills the full available quantity and the calculated price for that one item.",
+          "Removes stale right-side S PRICE controls so they can no longer overflow off-screen on TornPDA/mobile.",
+          "RW/bonus skip settings remain enabled by default; skipped special items show a disabled + control."
         ]
       }
     },

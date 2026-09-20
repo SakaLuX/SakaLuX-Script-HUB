@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.0.3 — 2026-09-20
+- Replaced right-side **S PRICE** controls with compact **+** buttons placed immediately before **Qty**.
+- Per-item **+** fills the full visible stack quantity and smart price together.
+- Removes legacy right-edge controls that could overflow outside the mobile viewport.
+- RW/bonus items remain protected by the skip settings and show a disabled per-item control when skipped.
+
 ## v1.0.2 — 2026-09-20
 - Replaced the right-side launcher with a compact circular **+** button.
 - Added **Skip Ranked War (RW) weapons** setting, enabled by default.

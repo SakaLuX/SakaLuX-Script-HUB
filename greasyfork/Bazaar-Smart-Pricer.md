@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.0.2**
+**v1.0.3**
 
 ## What it does
 - Prices Bazaar items from Torn market value, the lowest visible item-market listing, or an undercut of the lowest listing.
@@ -50,3 +50,9 @@ MIT-licensed rebuild inspired by **Torn Bazaar Quick Pricer + Smart Bazaar Prici
 ### v1.0.2 — RW / bonus safety + compact launcher
 - Right-side launcher is now a circular **+**.
 - RW weapons and bonus items are skipped by default; both protections can be changed in Settings.
+
+### v1.0.3 — Per-item + before Qty
+- Per-item control is now a compact **+** immediately before Qty.
+- Pressing it fills full quantity + smart price.
+- Old right-side buttons are removed to prevent mobile overflow.
+- RW/bonus skip protection remains enabled by default.

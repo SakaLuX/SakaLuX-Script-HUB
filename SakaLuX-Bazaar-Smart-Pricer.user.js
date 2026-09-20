@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.0.2
+// @version      1.0.3
 // @description  Smart Bazaar pricing for Torn: market value, lowest market listing, undercut rules, add-items and manage-bazaar quick pricing.
 // @author       SakaLuX [2380374]
 // @license      MIT
@@ -25,7 +25,7 @@
   'use strict';
 
   const NAME='SakaLuX Bazaar Smart Pricer';
-  const VERSION='1.0.2';
+  const VERSION='1.0.3';
   const PREFIX='sl-bsp';
   const K='SakaLuX_BAZAAR_SMART_PRICER_';
   const qs=(s,r=document)=>r.querySelector(s);
@@ -89,7 +89,9 @@
 .${PREFIX}-quickfill{width:min(100%,360px);min-height:38px;border:1px solid #4f8fe8;background:#244a73;color:#fff;border-radius:9px;padding:8px 12px;font:900 12px/1.1 Arial,sans-serif;letter-spacing:.02em;cursor:pointer}
 .${PREFIX}-quickfill:disabled{opacity:.6;cursor:wait}
 #${PREFIX}-status{margin-top:10px;padding:9px;border-radius:9px;background:#0a1118;color:#9fb1c3;font-size:11px}
-.${PREFIX}-rowbtn{margin-left:6px;border:1px solid #49627e;background:#18283a;color:#fff;border-radius:8px;padding:4px 7px;font:800 10px Arial,sans-serif;white-space:nowrap}
+.${PREFIX}-rowbtn-wrap{display:flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;min-width:34px;margin:0 5px 0 3px;box-sizing:border-box;z-index:12}. ${PREFIX}-noop{}
+.${PREFIX}-rowbtn{width:30px;height:30px;min-width:30px;display:inline-flex;align-items:center;justify-content:center;border:0;background:#7a6bd6;color:#fff;border-radius:9px;padding:0;font:900 22px/1 Arial,sans-serif;box-shadow:0 2px 7px rgba(0,0,0,.25);cursor:pointer}. ${PREFIX}-noop2{}
+.${PREFIX}-rowbtn:disabled{opacity:.32;cursor:not-allowed;box-shadow:none}
 #${PREFIX}-toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,12px);opacity:0;pointer-events:none;z-index:2147483647;max-width:min(420px,92vw);background:#111b27;color:#fff;border:1px solid #3c526c;border-radius:10px;padding:9px 12px;font:700 12px Arial;transition:.18s}
 #${PREFIX}-toast.show{opacity:1;transform:translate(-50%,0)}#${PREFIX}-toast[data-type="error"]{border-color:#b34d57}#${PREFIX}-toast[data-type="ok"]{border-color:#438a63}
 @media(max-width:700px){#${PREFIX}-launcher{right:8px;bottom:92px;width:48px;height:48px;font-size:28px}.sl-bsp-row{grid-template-columns:1fr}.sl-bsp-actions{grid-template-columns:1fr}}
@@ -287,10 +289,26 @@
   function decorateRows(){
     if(!settings.autoDecorate||!onBazaar())return;
     for(const e of findRows()){
-      if(qs('.'+PREFIX+'-rowbtn',e.row))continue;
-      const b=document.createElement('button');b.type='button';b.className=PREFIX+'-rowbtn';b.textContent='S PRICE';b.title='Price this item with SakaLuX Bazaar Smart Pricer';
-      b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();if(!settings.apiKey){openPanel();toast('Add your Torn API key first.','error');return;}priceEntry(e);};
-      (e.input.parentElement||e.row).appendChild(b);
+      let old=qs('.'+PREFIX+'-rowbtn-wrap',e.row)||qs('.'+PREFIX+'-rowbtn',e.row);
+      if(old&&old.dataset?.placement==='before-qty')continue;
+      if(old){const target=old.classList?.contains(PREFIX+'-rowbtn-wrap')?old:old.parentElement?.classList?.contains(PREFIX+'-rowbtn-wrap')?old.parentElement:old;target?.remove();}
+
+      const qtyEl=e.qty?.input||null;
+      let amountWrap=qtyEl?.closest?.('div[class*="amount___"], .amount-main-wrap, [class*="amount"], [class*="quantity"], [class*="qty"]')||null;
+      if(!amountWrap&&qtyEl)amountWrap=qtyEl.parentElement;
+      const priceWrap=e.input?.closest?.('div[class*="price___"], div.price, [class*="price"]')||e.input?.parentElement||null;
+      const parent=amountWrap?.parentElement||priceWrap?.parentElement||e.row;
+      const before=amountWrap&&amountWrap.parentElement===parent?amountWrap:(priceWrap&&priceWrap.parentElement===parent?priceWrap:null);
+      if(!parent)continue;
+
+      const wrap=document.createElement('div');wrap.className=PREFIX+'-rowbtn-wrap';wrap.dataset.placement='before-qty';
+      const b=document.createElement('button');b.type='button';b.className=PREFIX+'-rowbtn';b.textContent='+';b.dataset.placement='before-qty';
+      const reason=skipReason(e);
+      if(reason){b.disabled=true;b.title=`Skipped automatically: ${reason}`;b.setAttribute('aria-label',b.title);}else{
+        b.title='Fill full quantity and smart price';b.setAttribute('aria-label',b.title);
+        b.onclick=async ev=>{ev.preventDefault();ev.stopPropagation();if(!settings.apiKey){openPanel();toast('Add your Torn API key first.','error');return;}b.disabled=true;try{await priceEntry(e);}finally{b.disabled=false;}};
+      }
+      wrap.appendChild(b);parent.insertBefore(wrap,before);
     }
   }
 
@@ -309,7 +327,7 @@
       <div class="sl-bsp-row"><div class="sl-bsp-field"><label>Ignore listings ≤ $</label><input id="${PREFIX}-ignorebelow" type="number" min="0" value="${settings.ignoreBelow}"></div><div class="sl-bsp-field"><label>Cache minutes</label><input id="${PREFIX}-cache" type="number" min="1" max="60" value="${settings.cacheMinutes}"></div></div>
       <label class="sl-bsp-check"><input id="${PREFIX}-ignore" type="checkbox"> Ignore ultra-low / storage listings</label>
       <label class="sl-bsp-check"><input id="${PREFIX}-npc" type="checkbox"> Warn when calculated price is below NPC sell price</label>
-      <label class="sl-bsp-check"><input id="${PREFIX}-decor" type="checkbox"> Add S PRICE button beside detected Bazaar price fields</label>
+      <label class="sl-bsp-check"><input id="${PREFIX}-decor" type="checkbox"> Add + button before Qty (fills full quantity + price)</label>
       <label class="sl-bsp-check"><input id="${PREFIX}-skiprw" type="checkbox"> Skip Ranked War (RW) weapons</label>
       <label class="sl-bsp-check"><input id="${PREFIX}-skipbonus" type="checkbox"> Skip items / weapons with bonus icons</label>
       <div class="sl-bsp-actions"><button id="${PREFIX}-save" class="sl-bsp-primary" type="button">SAVE SETTINGS</button><button id="${PREFIX}-priceall" type="button">PRICE ALL VISIBLE</button><button id="${PREFIX}-test" type="button">TEST API</button><button id="${PREFIX}-clear" class="sl-bsp-danger" type="button">CLEAR CACHE</button></div><div id="${PREFIX}-status"></div></div></div>`;
@@ -328,7 +346,7 @@
 
   function refreshStatus(){const s=qs('#'+PREFIX+'-status');if(!s)return;const rows=onBazaar()?findRows().length:0;s.innerHTML=`Page: <b>${onBazaar()?'Bazaar':'outside Bazaar'}</b> · detected price fields: <b>${rows}</b><br>Mode: <b>${esc(settings.pricingMode)}</b> · API: <b>${settings.apiKey?'saved':'missing'}</b> · RW skip: <b>${settings.skipRwWeapons?'ON':'OFF'}</b> · Bonus skip: <b>${settings.skipBonusItems?'ON':'OFF'}</b> · last priced: <b>${state.priced}</b> · skipped: <b>${state.skipped}</b>`;}
   function openPanel(){ensurePanel();qs('#'+PREFIX+'-panel').classList.add('open');refreshStatus();}
-  function scan(force=false){if(!settings.enabled)return;if(!onBazaar()){qs('#'+PREFIX+'-launcher')?.remove();qs('#'+PREFIX+'-addbar')?.remove();return;}injectLauncher();injectAddItemsQuickFill();if(settings.autoDecorate)decorateRows();state.lastScan=Date.now();if(force)refreshStatus();}
+  function scan(force=false){if(!settings.enabled)return;if(!onBazaar()){qs('#'+PREFIX+'-launcher')?.remove();qs('#'+PREFIX+'-addbar')?.remove();qsa('.'+PREFIX+'-rowbtn-wrap, .'+PREFIX+'-rowbtn').forEach(x=>x.remove());return;}injectLauncher();injectAddItemsQuickFill();if(settings.autoDecorate)decorateRows();else qsa('.'+PREFIX+'-rowbtn-wrap, .'+PREFIX+'-rowbtn').forEach(x=>x.remove());state.lastScan=Date.now();if(force)refreshStatus();}
 
   let timer=null;const schedule=()=>{clearTimeout(timer);timer=setTimeout(()=>scan(),300);};
   injectStyle();scan(true);
