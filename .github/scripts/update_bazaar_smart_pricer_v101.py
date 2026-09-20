@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Triggered after workflow creation so the v1.0.1 release job runs on main.
 import json
 from pathlib import Path
 
@@ -78,7 +79,6 @@ s = s.replace("window.SakaLuXBazaarSmartPricer={version:VERSION,open:openPanel,r
 
 SCRIPT.write_text(s)
 
-# Registry: add entry if missing, then synchronize release/version.
 data = json.loads(REG.read_text())
 scripts = data.setdefault('scripts', [])
 entry = next((x for x in scripts if x.get('id') == 'bazaar-smart-pricer'), None)
@@ -116,7 +116,6 @@ entry['release']={
 }
 REG.write_text(json.dumps(data, indent=2, ensure_ascii=False)+'\n')
 
-# Documentation/changelog.
 if GF.exists():
     t=GF.read_text().replace('**v1.0.0**','**v1.0.1**',1)
     marker='## Current release note\n'
