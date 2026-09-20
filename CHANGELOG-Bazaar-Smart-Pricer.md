@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.3 — 2026-09-20
+- Fixed **Update All** freezing/stalling on an item. Live Item Market lookups now have a 6.5s watchdog and always release the queue.
+- Supports both Torn v2 Item Market response formats (`itemmarket[]/cost` and `itemmarket.listings[]/price`).
+- Bulk **Update All** no longer waits for a hidden per-item large-price confirmation; manual single-item updates still keep that safety prompt.
+- Torn City `buy_price` floor remains enforced.
+
 ## v1.1.2 — 2026-09-20
 - Fixed **Update All** price source: it now uses the cheapest live Item Market 2.0 listing when available, instead of treating `market_value` as the live price.
 - Added **Torn City shop floor**: if the calculated price is below `buy_price`, the city-shop price wins.

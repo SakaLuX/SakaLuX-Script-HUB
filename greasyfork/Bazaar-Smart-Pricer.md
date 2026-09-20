@@ -74,3 +74,7 @@ MIT-licensed rebuild inspired by **Torn Bazaar Quick Pricer + Smart Bazaar Prici
 
 ### v1.1.2 — Live market + Torn City floor
 Update All and Quick Add now calculate from the cheapest live Item Market offer when available. If that result is lower than the Torn City shop buy price, the shop price is used as the floor.
+
+
+### v1.1.3 — Update All stall fix
+Bulk repricing can no longer be held indefinitely by an Item Market request. The parser supports both known Torn v2 response shapes and falls back safely to `market_value` after the watchdog timeout. Bulk mode also suppresses per-item confirmation dialogs while keeping the Torn City shop floor.

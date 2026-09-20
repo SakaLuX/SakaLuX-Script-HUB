@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.2
+// @version      1.1.3
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.2';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.3';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1134,24 +1134,43 @@
                         const marketValue = Number(itemData.market_value) || 0;
                         const buyPrice = Number(itemData.buy_price) || 0;
                         const sellPrice = Number(itemData.sell_price) || 0;
+                        let marketSettled=false;
+                        let marketWatchdog=null;
+                        const finishMarket=(lowestMarketPrice=0)=>{
+                            if(marketSettled)return;
+                            marketSettled=true;
+                            if(marketWatchdog)clearTimeout(marketWatchdog);
+                            cachePrice(itemId,marketValue,buyPrice,sellPrice,lowestMarketPrice);
+                            finishRequest(itemId,{marketValue,buyPrice,sellPrice,lowestMarketPrice});
+                            releaseAndContinue(REQUEST_SPACING_MS);
+                        };
+                        marketWatchdog=setTimeout(()=>finishMarket(0),6500);
                         GM_xmlhttpRequest({
                             method:'GET',
                             url:`https://api.torn.com/v2/market/${itemId}/itemmarket?key=${CONFIG.apiKey}`,
-                            timeout:REQUEST_TIMEOUT_MS,
+                            timeout:6000,
                             onload:r=>{
                                 let lowestMarketPrice=0;
                                 try{
                                     const md=JSON.parse(r.responseText);
-                                    if(!md.error && Array.isArray(md.itemmarket) && md.itemmarket.length){
-                                        lowestMarketPrice=md.itemmarket.reduce((best,o)=>{const c=Number(o.cost)||0;return c>0&&(!best||c<best)?c:best;},0);
+                                    if(!md.error){
+                                        // Torn v2 has existed in two shapes:
+                                        // legacy: itemmarket:[{cost,...}]
+                                        // current: itemmarket:{listings:[{price,...}]}
+                                        const rows=Array.isArray(md.itemmarket)
+                                            ? md.itemmarket
+                                            : (Array.isArray(md.itemmarket?.listings)?md.itemmarket.listings:[]);
+                                        lowestMarketPrice=rows.reduce((best,o)=>{
+                                            const c=Number(o?.cost ?? o?.price) || 0;
+                                            return c>0&&(!best||c<best)?c:best;
+                                        },0);
                                     }
-                                }catch{}
-                                cachePrice(itemId,marketValue,buyPrice,sellPrice,lowestMarketPrice);
-                                finishRequest(itemId,{marketValue,buyPrice,sellPrice,lowestMarketPrice});
-                                releaseAndContinue(REQUEST_SPACING_MS);
+                                }catch(e){ log('Item Market parse fallback',e); }
+                                finishMarket(lowestMarketPrice);
                             },
-                            onerror:()=>{cachePrice(itemId,marketValue,buyPrice,sellPrice,0);finishRequest(itemId,{marketValue,buyPrice,sellPrice,lowestMarketPrice:0});releaseAndContinue(REQUEST_SPACING_MS);},
-                            ontimeout:()=>{cachePrice(itemId,marketValue,buyPrice,sellPrice,0);finishRequest(itemId,{marketValue,buyPrice,sellPrice,lowestMarketPrice:0});releaseAndContinue(REQUEST_SPACING_MS);}
+                            onerror:()=>finishMarket(0),
+                            ontimeout:()=>finishMarket(0),
+                            onabort:()=>finishMarket(0)
                         });
                     } else {
                         failItem();
@@ -1333,7 +1352,7 @@
      * @returns {Promise<'updated'|'declined'|'failed'>} what actually happened, so
      *          batch runs can report real counts instead of attempts.
      */
-    function updateManageItemPrice(priceDiv, itemId, itemName) {
+    function updateManageItemPrice(priceDiv, itemId, itemName, { confirmLargeChange = true } = {}) {
         return new Promise((resolve) => {
             const priceInput = priceDiv.querySelector(SELECTORS.managePriceInput);
             if (!priceInput) { warnSelectorMiss('managePriceInput'); resolve('failed'); return; }
@@ -1351,7 +1370,7 @@
                 const newPrice = calculateFinalPrice(marketValue, buyPrice, sellPrice, lowestMarketPrice, CONFIG.defaultDiscount);
                 const priceDiff = Math.abs(newPrice - currentPrice);
                 const percentDiff = currentPrice > 0 ? (priceDiff / currentPrice) * 100 : 100;
-                if (percentDiff > CONFIG.priceDiffThreshold && currentPrice > 0) {
+                if (confirmLargeChange && percentDiff > CONFIG.priceDiffThreshold && currentPrice > 0) {
                     const direction = newPrice > currentPrice ? 'increase' : 'decrease';
                     const confirmed = await qpConfirm(
                         `${itemName ? itemName + '\n\n' : ''}Price ${direction} detected!\n\nCurrent: $${currentPrice.toLocaleString()}\nNew: $${newPrice.toLocaleString()}\nDifference: ${percentDiff.toFixed(1)}%\n\nUpdate to new price?`,
@@ -1532,8 +1551,8 @@
             const input=editor.priceDiv.querySelector(SELECTORS.managePriceInput);
             const current=input?parseInt(String(input.value||'').replace(/,/g,''),10)||0:0;
             if(CONFIG.skipDollarItems&&current===1){skippedDollar++;if(editor.opened&&editor.toggle)editor.toggle.click();continue;}
-            if(updateButton)updateButton.textContent=`Updating ${done}/${work.length}`;
-            const result=await updateManageItemPrice(editor.priceDiv,job.itemId,job.itemName);
+            if(updateButton)updateButton.textContent=`Pricing ${done}/${work.length}`;
+            const result=await updateManageItemPrice(editor.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false});
             if(result==='updated')updated++;else if(result==='failed')failed++;
             await new Promise(r=>setTimeout(r,100));
             if(editor.opened&&editor.toggle)editor.toggle.click();
