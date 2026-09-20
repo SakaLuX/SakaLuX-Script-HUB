@@ -1,0 +1,44 @@
+name: Update Enhancer Guard v1.3.50
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/update_enhancer_guard_v1350.py'
+      - '.github/workflows/update-enhancer-guard-v1350.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: enhancer-guard-v1350-main
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply strict Manage Bazaar isolation
+        run: python3 .github/scripts/update_enhancer_guard_v1350.py
+      - name: Validate userscript
+        run: node --check SakaLuX-Enhancer-Guard.user.js
+      - name: Validate registry
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Verify v1.3.50 surfaces
+        run: |
+          grep -F '// @version      1.3.50' SakaLuX-Enhancer-Guard.user.js
+          grep -F "let v = '1.3.50';" SakaLuX-Enhancer-Guard.user.js
+          grep -F 'if (isManageBazaarPage()) return false;' SakaLuX-Enhancer-Guard.user.js
+          grep -F 'clearManageBazaarEnhancerArtifacts' SakaLuX-Enhancer-Guard.user.js
+          grep -F 'v1.3.50' greasyfork/Enhancer-Guard.md
+          test -f releases/enhancer-guard-v1.3.50.md
+      - name: Commit complete v1.3.50 update
+        run: |
+          if git diff --quiet && [ -z "$(git status --porcelain --untracked-files=all)" ]; then
+            echo "Already updated."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Enhancer-Guard.user.js scripts.json greasyfork/Enhancer-Guard.md greasyfork/Script-Hub.md releases/enhancer-guard-v1.3.50.md backups/enhancer-guard-v1.3.49-2026-09-20
+          git commit -m "Release Enhancer Guard v1.3.50 strict Manage Bazaar isolation"
+          git push
