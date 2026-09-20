@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.0.3
+// @version      1.0.4
 // @description  Smart Bazaar pricing for Torn: market value, lowest market listing, undercut rules, add-items and manage-bazaar quick pricing.
 // @author       SakaLuX [2380374]
 // @license      MIT
@@ -25,7 +25,7 @@
   'use strict';
 
   const NAME='SakaLuX Bazaar Smart Pricer';
-  const VERSION='1.0.3';
+  const VERSION='1.0.4';
   const PREFIX='sl-bsp';
   const K='SakaLuX_BAZAAR_SMART_PRICER_';
   const qs=(s,r=document)=>r.querySelector(s);
@@ -89,8 +89,8 @@
 .${PREFIX}-quickfill{width:min(100%,360px);min-height:38px;border:1px solid #4f8fe8;background:#244a73;color:#fff;border-radius:9px;padding:8px 12px;font:900 12px/1.1 Arial,sans-serif;letter-spacing:.02em;cursor:pointer}
 .${PREFIX}-quickfill:disabled{opacity:.6;cursor:wait}
 #${PREFIX}-status{margin-top:10px;padding:9px;border-radius:9px;background:#0a1118;color:#9fb1c3;font-size:11px}
-.${PREFIX}-rowbtn-wrap{display:flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;min-width:34px;margin:0 5px 0 3px;box-sizing:border-box;z-index:12}. ${PREFIX}-noop{}
-.${PREFIX}-rowbtn{width:30px;height:30px;min-width:30px;display:inline-flex;align-items:center;justify-content:center;border:0;background:#7a6bd6;color:#fff;border-radius:9px;padding:0;font:900 22px/1 Arial,sans-serif;box-shadow:0 2px 7px rgba(0,0,0,.25);cursor:pointer}. ${PREFIX}-noop2{}
+.${PREFIX}-rowbtn-wrap{display:flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;min-width:34px;margin:0 5px 0 3px;box-sizing:border-box;z-index:12}
+.${PREFIX}-rowbtn{width:30px;height:30px;min-width:30px;display:inline-flex;align-items:center;justify-content:center;border:0;background:#7a6bd6;color:#fff;border-radius:9px;padding:0;font:900 22px/1 Arial,sans-serif;box-shadow:0 2px 7px rgba(0,0,0,.25);cursor:pointer}
 .${PREFIX}-rowbtn:disabled{opacity:.32;cursor:not-allowed;box-shadow:none}
 #${PREFIX}-toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,12px);opacity:0;pointer-events:none;z-index:2147483647;max-width:min(420px,92vw);background:#111b27;color:#fff;border:1px solid #3c526c;border-radius:10px;padding:9px 12px;font:700 12px Arial;transition:.18s}
 #${PREFIX}-toast.show{opacity:1;transform:translate(-50%,0)}#${PREFIX}-toast[data-type="error"]{border-color:#b34d57}#${PREFIX}-toast[data-type="ok"]{border-color:#438a63}

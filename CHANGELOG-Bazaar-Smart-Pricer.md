@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.0.4 — 2026-09-20
+- Hotfixes the CSS for the new per-item **+** controls.
+- Keeps each **+** immediately before **Qty**, with full quantity + price fill.
+- Keeps the overflowing right-side controls removed.
+- RW/bonus skip protection remains enabled by default.
+
 ## v1.0.3 — 2026-09-20
 - Replaced right-side **S PRICE** controls with compact **+** buttons placed immediately before **Qty**.
 - Per-item **+** fills the full visible stack quantity and smart price together.

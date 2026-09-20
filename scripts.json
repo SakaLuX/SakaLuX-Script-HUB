@@ -134,16 +134,16 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 5,
-      "version": "1.0.3",
+      "detailsRevision": 6,
+      "version": "1.0.4",
       "release": {
-        "version": "1.0.3",
+        "version": "1.0.4",
         "date": "2026-09-20",
         "notes": [
-          "Moves the per-item pricing control from the far-right price area to a compact + button immediately before Qty.",
-          "The + button fills the full available quantity and the calculated price for that one item.",
-          "Removes stale right-side S PRICE controls so they can no longer overflow off-screen on TornPDA/mobile.",
-          "RW/bonus skip settings remain enabled by default; skipped special items show a disabled + control."
+          "Keeps the new per-item + immediately before Qty.",
+          "Fixes the per-item button CSS emitted in v1.0.3 so the compact controls render consistently in TornPDA/mobile.",
+          "The + fills full quantity and smart price; right-edge S PRICE controls remain removed.",
+          "RW and bonus-item skip protections remain enabled by default."
         ]
       }
     },
