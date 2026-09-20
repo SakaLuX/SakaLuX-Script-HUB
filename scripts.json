@@ -134,15 +134,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 14,
-      "version": "1.1.7",
+      "detailsRevision": 15,
+      "version": "1.1.8",
       "release": {
-        "version": "1.1.7",
+        "version": "1.1.8",
         "date": "2026-09-20",
         "notes": [
-          "Fixes the giant blank Manage Bazaar panel by preventing Update All from clicking Torn's eye/item-details control; only the far-right accordion toggle is selected.",
-          "Makes price writes more React/TornPDA-compatible with native setter, InputEvent, keyup, change and blur.",
-          "Collapse logic now checks that the live row is still expanded before clicking anything, avoiding accidental secondary toggles after rerenders."
+          "Reworks Manage Update All to never open or close Torn item accordions.",
+          "Bulk repricing writes directly to the already-mounted hidden price inputs used by Torn, matching the original Quick Pricer architecture.",
+          "Removes the source of the giant blank detail panel and avoids accordion rerenders while preserving native React input events for SAVE CHANGES."
         ]
       }
     },

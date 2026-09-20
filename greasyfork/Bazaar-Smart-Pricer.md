@@ -97,3 +97,7 @@ Bulk Manage pricing now writes through Torn's React-controlled input setter, ena
 
 ### v1.1.7 — Manage accordion selector fix
 Update All no longer mistakes Torn's eye/details button for the price-editor arrow. It targets the far-right row toggle, verifies expansion state before collapsing, and uses a stronger React-compatible input event sequence so SAVE CHANGES can track edits reliably.
+
+
+### v1.1.8 — Hidden-editor bulk pricing
+Manage **Update All** no longer interacts with Torn accordions. It updates each row's already-mounted price input directly while the row remains collapsed, preventing details-panel gaps and reducing React rerenders.

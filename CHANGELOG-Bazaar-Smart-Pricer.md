@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.8 — 2026-09-20
+- Rebuilt **Update All** so it does **not open or close any Manage item row**.
+- Torn keeps the manage price input mounted in the DOM while collapsed; bulk mode now updates that hidden/native input directly, as the original Quick Pricer does.
+- This removes the recurring giant blank details panel and avoids row/accordion React rerenders.
+- Native input/change events remain in place so Torn can enable **SAVE CHANGES**.
+
 ## v1.1.7 — 2026-09-20
 - Fixed the large blank panel during **Update All**: the fallback selector could click Torn's **eye/details** control instead of the far-right price-editor chevron.
 - Manage automation now selects only the right-most interactive control on the row and explicitly excludes eye/view/details controls.

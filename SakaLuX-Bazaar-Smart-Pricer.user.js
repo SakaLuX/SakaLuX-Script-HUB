@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.7
+// @version      1.1.8
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.7';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.8';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1572,47 +1572,41 @@
         const updateButton=chipFillBtn;
         if(updateButton){updateButton.disabled=true;updateButton.style.opacity='0.5';updateButton.textContent='Loading…';}
         const restoreButton=()=>{if(updateButton){updateButton.disabled=false;updateButton.style.opacity='1';updateButton.textContent='Update All';}};
+
         const items=getManageItems();
         if(items.length===0){restoreButton();qpToast('No items found to update!','error');return;}
         const moreBelow=mayHaveUnloadedItems(items);
         let skippedRw=0,skippedBonus=0,skippedDollar=0,updated=0,failed=0,done=0;
         const work=[];
         const seenIds=new Set();
+
+        // IMPORTANT: do not expand/collapse any Torn rows here. The manage price
+        // editor is already mounted in the row DOM even while the row is collapsed.
         for(const item of items){
-            const image=item.querySelector('img'); if(!image)continue;
-            const itemId=getItemIdFromImage(image); if(!itemId||seenIds.has(itemId))continue;
+            const image=item.querySelector('img');
+            const priceDiv=item.querySelector(SELECTORS.managePriceWrap);
+            if(!image||!priceDiv) continue;
+            const priceInput=priceDiv.querySelector(SELECTORS.managePriceInput);
+            if(!priceInput) continue;
+            const itemId=getItemIdFromImage(image);
+            if(!itemId||seenIds.has(itemId)) continue;
             seenIds.add(itemId);
             if(CONFIG.skipRwWeapons&&getRWBonusInfo(item).isRanked){skippedRw++;continue;}
             if(CONFIG.skipBonusItems&&hasAnyBonus(item)){skippedBonus++;continue;}
-            work.push({itemId,itemName:getItemName(item)});
+            const current=parseInt(String(priceInput.value||'').replace(/,/g,''),10)||0;
+            if(CONFIG.skipDollarItems&&current===1){skippedDollar++;continue;}
+            work.push({priceDiv,itemId,itemName:getItemName(item)});
         }
+
         for(const job of work){
             done++;
-            if(updateButton)updateButton.textContent=`Opening ${done}/${work.length}`;
-            // Always reacquire the current live row; Torn may replace row nodes
-            // whenever an accordion row opens/closes.
-            const liveItem=findLiveManageItem(job.itemId,job.itemName);
-            if(!liveItem){failed++;continue;}
-            const editor=await ensureManagePriceEditor(liveItem);
-            if(!editor){failed++;continue;}
-            const input=editor.priceDiv.querySelector(SELECTORS.managePriceInput);
-            const current=input?parseInt(String(input.value||'').replace(/,/g,''),10)||0:0;
-            if(CONFIG.skipDollarItems&&current===1){
-                skippedDollar++;
-                if(editor.opened){await closeManagePriceEditor(job.itemId,job.itemName);await new Promise(r=>setTimeout(r,120));}
-                continue;
-            }
             if(updateButton)updateButton.textContent=`Pricing ${done}/${work.length}`;
-            const result=await updateManageItemPrice(editor.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false});
-            if(result==='updated')updated++;else if(result==='failed')failed++;
-            if(editor.opened){
-                await new Promise(r=>setTimeout(r,120));
-                await closeManagePriceEditor(job.itemId,job.itemName);
-                await new Promise(r=>setTimeout(r,120));
-            } else {
-                await new Promise(r=>setTimeout(r,120));
-            }
+            const result=await updateManageItemPrice(job.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false});
+            if(result==='updated') updated++;
+            else if(result==='failed') failed++;
+            await new Promise(r=>setTimeout(r,90));
         }
+
         restoreButton();
         let msg=`Updated ${updated} of ${work.length} item price${work.length===1?'':'s'}`;
         if(skippedRw)msg+=` — ${skippedRw} RW skipped`;
