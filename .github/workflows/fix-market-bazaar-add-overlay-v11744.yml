@@ -1,0 +1,45 @@
+name: Fix Market Bazaar add-item overlays v1.17.44
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/fix_market_bazaar_add_overlay_v11744.py'
+      - '.github/workflows/fix-market-bazaar-add-overlay-v11744.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: market-bazaar-add-overlay-v11744-main
+  cancel-in-progress: false
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply Market Intelligence Bazaar isolation update
+        run: python3 .github/scripts/fix_market_bazaar_add_overlay_v11744.py
+      - name: Validate userscripts
+        run: |
+          node --check SakaLuX-Market-Intelligence.user.js
+          node --check SakaLuX-Script-Hub.user.js
+      - name: Validate registry
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Verify release surfaces
+        run: |
+          grep -F '// @version      1.17.44' SakaLuX-Market-Intelligence.user.js
+          grep -F '"version": "1.17.44"' scripts.json
+          grep -F '**v1.17.44**' greasyfork/Market-Intelligence.md
+          grep -F 'Market Intelligence **v1.17.44**' greasyfork/Script-Hub.md
+          test -f releases/market-intelligence-v1.17.44.md
+      - name: Commit complete v1.17.44 update
+        run: |
+          if git diff --quiet && [ -z "$(git status --porcelain --untracked-files=all)" ]; then
+            echo "Already fixed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Market-Intelligence.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/Market-Intelligence.md greasyfork/Script-Hub.md releases/market-intelligence-v1.17.44.md backups/market-bazaar-add-cleanup-v1.17.44-2026-09-20
+          git commit -m "Release Market Intelligence v1.17.44 Bazaar add-item cleanup"
+          git push
