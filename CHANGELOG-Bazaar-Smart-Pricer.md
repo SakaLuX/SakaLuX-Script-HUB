@@ -1,5 +1,10 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.9 — 2026-09-20
+- Fixed **Update All** for TornPDA builds where the Manage price input is not mounted until the row arrow is opened.
+- Bulk processing now opens the **far-right row arrow**, waits for the price field, updates it, then closes that same row before continuing.
+- Eye/View controls are explicitly excluded, and live rows are reacquired after every Torn React rerender.
+
 ## v1.1.8 — 2026-09-20
 - Rebuilt **Update All** so it does **not open or close any Manage item row**.
 - Torn keeps the manage price input mounted in the DOM while collapsed; bulk mode now updates that hidden/native input directly, as the original Quick Pricer does.

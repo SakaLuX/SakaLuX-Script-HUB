@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.8
+// @version      1.1.9
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.8';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.9';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1568,45 +1568,104 @@
         }
     }
 
+    function findManageRowArrow(item) {
+        if(!item) return null;
+        const rowRect=item.getBoundingClientRect();
+        const headerBottom=rowRect.top+Math.min(64, Math.max(48,rowRect.height));
+        const all=[...item.querySelectorAll('*')];
+        const pointer=all.filter(el=>{
+            const r=el.getBoundingClientRect();
+            if(!r.width||!r.height) return false;
+            if(r.top<rowRect.top-2 || r.top>headerBottom) return false;
+            if(r.right < rowRect.right-82) return false;
+            const meta=((el.getAttribute?.('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
+            if(/eye|view|preview|inspect/.test(meta)) return false;
+            try{return getComputedStyle(el).cursor==='pointer';}catch{return false;}
+        });
+        if(pointer.length){
+            pointer.sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right || a.getBoundingClientRect().width-b.getBoundingClientRect().width);
+            return pointer[0];
+        }
+        const fallback=[...item.querySelectorAll('button,a,[role="button"],[tabindex],[class*="arrow"],[class*="chevron"]')].filter(el=>{
+            const r=el.getBoundingClientRect();
+            if(!r.width||!r.height||r.right<rowRect.right-82||r.top>headerBottom) return false;
+            const meta=((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
+            return !/eye|view|preview|inspect/.test(meta);
+        });
+        fallback.sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right);
+        return fallback[0]||null;
+    }
+
+    async function openManageEditorForJob(itemId,itemName){
+        const live=findLiveManageItem(itemId,itemName);
+        if(!live) return null;
+        let input=live.querySelector(SELECTORS.managePriceInput);
+        if(input) return {item:live,input,opened:false};
+        const arrow=findManageRowArrow(live);
+        if(!arrow) return null;
+        arrow.click();
+        for(let i=0;i<28;i++){
+            await new Promise(r=>setTimeout(r,75));
+            const fresh=findLiveManageItem(itemId,itemName);
+            input=fresh?.querySelector(SELECTORS.managePriceInput)||null;
+            if(input) return {item:fresh,input,opened:true};
+        }
+        return null;
+    }
+
+    async function closeManageEditorForJob(itemId,itemName){
+        const live=findLiveManageItem(itemId,itemName);
+        if(!live || !live.querySelector(SELECTORS.managePriceInput)) return true;
+        const arrow=findManageRowArrow(live);
+        if(!arrow) return false;
+        arrow.click();
+        for(let i=0;i<24;i++){
+            await new Promise(r=>setTimeout(r,75));
+            const fresh=findLiveManageItem(itemId,itemName);
+            if(!fresh || !fresh.querySelector(SELECTORS.managePriceInput)) return true;
+        }
+        return false;
+    }
+
     async function updateAllManagePrices() {
         const updateButton=chipFillBtn;
         if(updateButton){updateButton.disabled=true;updateButton.style.opacity='0.5';updateButton.textContent='Loading…';}
         const restoreButton=()=>{if(updateButton){updateButton.disabled=false;updateButton.style.opacity='1';updateButton.textContent='Update All';}};
-
         const items=getManageItems();
         if(items.length===0){restoreButton();qpToast('No items found to update!','error');return;}
         const moreBelow=mayHaveUnloadedItems(items);
         let skippedRw=0,skippedBonus=0,skippedDollar=0,updated=0,failed=0,done=0;
-        const work=[];
-        const seenIds=new Set();
-
-        // IMPORTANT: do not expand/collapse any Torn rows here. The manage price
-        // editor is already mounted in the row DOM even while the row is collapsed.
+        const work=[]; const seenIds=new Set();
         for(const item of items){
-            const image=item.querySelector('img');
-            const priceDiv=item.querySelector(SELECTORS.managePriceWrap);
-            if(!image||!priceDiv) continue;
-            const priceInput=priceDiv.querySelector(SELECTORS.managePriceInput);
-            if(!priceInput) continue;
-            const itemId=getItemIdFromImage(image);
-            if(!itemId||seenIds.has(itemId)) continue;
+            const image=item.querySelector('img'); if(!image) continue;
+            const itemId=getItemIdFromImage(image); if(!itemId||seenIds.has(itemId)) continue;
             seenIds.add(itemId);
             if(CONFIG.skipRwWeapons&&getRWBonusInfo(item).isRanked){skippedRw++;continue;}
             if(CONFIG.skipBonusItems&&hasAnyBonus(item)){skippedBonus++;continue;}
-            const current=parseInt(String(priceInput.value||'').replace(/,/g,''),10)||0;
-            if(CONFIG.skipDollarItems&&current===1){skippedDollar++;continue;}
-            work.push({priceDiv,itemId,itemName:getItemName(item)});
+            work.push({itemId,itemName:getItemName(item)});
         }
-
         for(const job of work){
             done++;
+            if(updateButton)updateButton.textContent=`Opening ${done}/${work.length}`;
+            const editor=await openManageEditorForJob(job.itemId,job.itemName);
+            if(!editor){failed++;continue;}
+            const priceDiv=editor.input.closest('div[class*="price"]')||editor.input.parentElement;
+            const current=parseInt(String(editor.input.value||'').replace(/,/g,''),10)||0;
+            if(CONFIG.skipDollarItems&&current===1){
+                skippedDollar++;
+                if(editor.opened) await closeManageEditorForJob(job.itemId,job.itemName);
+                continue;
+            }
             if(updateButton)updateButton.textContent=`Pricing ${done}/${work.length}`;
-            const result=await updateManageItemPrice(job.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false});
-            if(result==='updated') updated++;
-            else if(result==='failed') failed++;
-            await new Promise(r=>setTimeout(r,90));
+            const result=await updateManageItemPrice(priceDiv,job.itemId,job.itemName,{confirmLargeChange:false});
+            if(result==='updated') updated++; else if(result==='failed') failed++;
+            await new Promise(r=>setTimeout(r,120));
+            if(editor.opened){
+                const closed=await closeManageEditorForJob(job.itemId,job.itemName);
+                if(!closed) console.warn('[SakaLuXBazaarSmartPricer] Could not collapse',job.itemName||job.itemId);
+            }
+            await new Promise(r=>setTimeout(r,100));
         }
-
         restoreButton();
         let msg=`Updated ${updated} of ${work.length} item price${work.length===1?'':'s'}`;
         if(skippedRw)msg+=` — ${skippedRw} RW skipped`;

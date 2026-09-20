@@ -101,3 +101,7 @@ Update All no longer mistakes Torn's eye/details button for the price-editor arr
 
 ### v1.1.8 — Hidden-editor bulk pricing
 Manage **Update All** no longer interacts with Torn accordions. It updates each row's already-mounted price input directly while the row remains collapsed, preventing details-panel gaps and reducing React rerenders.
+
+
+### v1.1.9 — TornPDA Manage row automation
+On TornPDA, collapsed Manage rows may not contain a price input at all. Update All now opens each row through its far-right arrow, waits for the input to mount, reprices it, then closes the row before moving on. Eye/View controls are never used.
