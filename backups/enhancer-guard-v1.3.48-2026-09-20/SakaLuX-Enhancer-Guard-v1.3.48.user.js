@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.49
+// @version      1.3.48
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -16,7 +16,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.49';
+  let v = '1.3.48';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -94,7 +94,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.49'});
+  const SELF=Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"},{version:'1.3.48'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -574,17 +574,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         return normalizeProtectedName(name);
     }
 
-    function isManageBazaarPage() {
-        const href = String(location.href || '').toLowerCase();
-        if (!href.includes('bazaar.php')) return false;
-        const headings = document.querySelectorAll('h1,h2,h3,[role="heading"],[class*="title"],[class*="panelHeader"]');
-        for (const el of headings) {
-            const text = String(el.textContent || '').trim().toLowerCase();
-            if (text.includes('manage your bazaar') || text === 'manage items' || text.includes('manage bazaar')) return true;
-        }
-        return false;
-    }
-
     function isProtectedSalePage() {
         const href = String(location.href || '').toLowerCase();
         return href.includes('#/addlisting')
@@ -615,12 +604,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
     function hideProtectedSaleRows() {
         if (!isProtectedSalePage()) return;
-        // Never mutate Torn's native Manage Bazaar rows. Hiding an accordion row
-        // with display:none can leave TornPDA's parent container at its previous
-        // measured height, producing the large blank panel when several price
-        // editors are opened/closed. Protection remains active on Add Listing and
-        // other actual sale-selection screens only.
-        if (isManageBazaarPage()) return;
         const locks = readProtectorLocks();
         const isLocked = row => Boolean(locks.full['stack_' + saleRowName(row)]);
         saleRows().forEach(row => {
