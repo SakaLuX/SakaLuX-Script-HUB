@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.11 — 2026-09-20
+- Fixed the remaining TornPDA eye/details click in **Update All**.
+- Root cause: the inner item node used for geometry ends near the eye column; the edit chevron belongs to the wider Manage row.
+- Arrow targeting now uses the **full Manage panel right edge** and only accepts controls centered in its final 58px.
+- The eye column is therefore excluded by position even if Torn gives it no identifying class/label.
+
 ## v1.1.10 — 2026-09-20
 - Fixed TornPDA **Update All** clicking the eye/details icon instead of the far-right edit arrow.
 - The script now targets the visual row's extreme-right control using `elementFromPoint`, matching the arrow position shown in TornPDA.

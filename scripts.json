@@ -134,15 +134,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 17,
-      "version": "1.1.10",
+      "detailsRevision": 18,
+      "version": "1.1.11",
       "release": {
-        "version": "1.1.10",
+        "version": "1.1.11",
         "date": "2026-09-20",
         "notes": [
-          "Fixes TornPDA Manage Update All opening the eye/details panel instead of the far-right price editor arrow.",
-          "Arrow targeting now uses the actual visual row and probes the extreme-right control with elementFromPoint, then falls back to right-edge DOM controls only.",
-          "The eye/details control is explicitly excluded and is too far left to match the new right-edge threshold."
+          "Fixes the remaining TornPDA eye-click bug by targeting from the full Manage panel right edge instead of the narrower inner item node.",
+          "Only controls whose center lies within the final 58px of the Manage panel and on the same row may be used as the edit toggle.",
+          "The eye/details column is geometrically excluded even when Torn provides no identifying class or aria label."
         ]
       }
     },

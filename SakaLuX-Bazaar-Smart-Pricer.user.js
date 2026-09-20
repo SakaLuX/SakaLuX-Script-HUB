@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.10
+// @version      1.1.11
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.10';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.11';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1537,45 +1537,58 @@
     function findManageToggle(item) {
         if (!item) return null;
 
-        // Ascend to the compact visual row. The inner item___ node on TornPDA can
-        // exclude the far-right arrow, so searching descendants alone hits the eye.
-        let row=item;
-        const itemRect=item.getBoundingClientRect();
-        for(let i=0;i<4&&row?.parentElement;i++){
-            const p=row.parentElement, r=p.getBoundingClientRect();
-            if(r.width>=itemRect.width && r.height<=Math.max(90,itemRect.height*1.8)) row=p;
-            else break;
-        }
-        const rr=row.getBoundingClientRect();
-        const y=Math.round(rr.top+Math.min(rr.height,64)/2);
+        const section=findSectionContainer(h =>
+            h.textContent.includes('Manage your Bazaar') ||
+            h.textContent.includes('Manage items') ||
+            h.textContent.includes('Manage Bazaar')
+        ) || item.parentElement;
+        if(!section) return null;
 
-        // In TornPDA the arrow sits at the extreme right of the row, typically
-        // ~20-35 px from the edge. Probe several points there and climb to the
-        // nearest clickable ancestor. This cannot resolve to the eye, which is
-        // materially further left.
-        for(const off of [18,24,30,36,42]){
-            const x=Math.round(rr.right-off);
-            let el=document.elementFromPoint(x,y);
-            if(!el) continue;
-            for(let depth=0;depth<5&&el;depth++,el=el.parentElement){
-                const er=el.getBoundingClientRect?.();
-                if(!er||!er.width||!er.height) continue;
-                const meta=((el.getAttribute?.('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
-                if(/eye|view|preview|inspect|details/.test(meta)) break;
-                const interactive = el.matches?.('button,a,[role="button"],[tabindex]') || /arrow|chevron|expand|toggle/.test(meta) || getComputedStyle(el).cursor==='pointer';
-                if(interactive && er.left>rr.left+rr.width*0.88) return el;
+        const ir=item.getBoundingClientRect();
+        const sr=section.getBoundingClientRect();
+        const y=Math.round(ir.top + Math.min(ir.height,64)/2);
+        const minArrowX=sr.right-58; // eye is substantially farther left on TornPDA
+
+        const safeCandidate=(el)=>{
+            if(!el || !el.getBoundingClientRect) return null;
+            let node=el;
+            for(let depth=0; depth<6 && node && node!==section.parentElement; depth++,node=node.parentElement){
+                const r=node.getBoundingClientRect?.();
+                if(!r || !r.width || !r.height) continue;
+                const meta=((node.getAttribute?.('aria-label')||'')+' '+(node.title||'')+' '+(node.className||'')).toLowerCase();
+                if(/eye|view|preview|inspect|details/.test(meta)) return null;
+                const cx=r.left+r.width/2;
+                const cy=r.top+r.height/2;
+                if(cx < minArrowX || Math.abs(cy-y)>30) continue;
+                const interactive=node.matches?.('button,a,[role="button"],[tabindex]') || /arrow|chevron|expand|toggle/.test(meta) || getComputedStyle(node).cursor==='pointer';
+                if(interactive) return node;
             }
+            return null;
+        };
+
+        // Probe from the true Manage panel edge, not the inner item node edge.
+        for(const off of [18,24,30,36,42,48,54]){
+            const x=Math.round(sr.right-off);
+            const hit=document.elementFromPoint(x,y);
+            const candidate=safeCandidate(hit);
+            if(candidate) return candidate;
         }
 
-        // DOM fallback: search the visual row (not only the inner item node), and
-        // accept only controls in the last 12% of row width.
-        const candidates=[...row.querySelectorAll('button,a,[role="button"],[tabindex],[class*="arrow"],[class*="chevron"],[class*="expand"],[class*="toggle"]')].filter(el=>{
+        // Geometry fallback: find an interactive control on the same visual row whose
+        // CENTER is inside the final 58px of the Manage panel. The eye icon sits left
+        // of this zone, so it can never be selected even if it has no useful class.
+        const all=[...section.querySelectorAll('button,a,[role="button"],[tabindex],[class*="arrow"],[class*="chevron"],[class*="expand"],[class*="toggle"]')];
+        const candidates=[];
+        for(const el of all){
             const r=el.getBoundingClientRect();
-            if(!r.width||!r.height||r.left<=rr.left+rr.width*0.88) return false;
+            if(!r.width||!r.height) continue;
+            const cx=r.left+r.width/2, cy=r.top+r.height/2;
+            if(cx<minArrowX || Math.abs(cy-y)>30) continue;
             const meta=((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
-            return !/eye|view|preview|inspect|details/.test(meta);
-        });
-        candidates.sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right);
+            if(/eye|view|preview|inspect|details/.test(meta)) continue;
+            candidates.push(el);
+        }
+        candidates.sort((a,b)=>(b.getBoundingClientRect().left+b.getBoundingClientRect().width/2)-(a.getBoundingClientRect().left+a.getBoundingClientRect().width/2));
         return candidates[0]||null;
     }
 

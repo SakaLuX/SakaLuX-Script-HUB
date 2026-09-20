@@ -109,3 +109,7 @@ On TornPDA, collapsed Manage rows may not contain a price input at all. Update A
 
 ### v1.1.10 — TornPDA arrow targeting
 Manage **Update All** now targets the far-right edit arrow by its visual row position instead of relying on descendants of the inner item node. This prevents the eye/details panel from opening on TornPDA.
+
+
+### v1.1.11 — Strict far-right Manage toggle
+On TornPDA the eye button is inside the inner item node while the edit chevron sits in the wider Manage row. Smart Pricer now uses the full Manage panel edge and only accepts a same-row interactive control in the final 58px, preventing eye/details activation.
