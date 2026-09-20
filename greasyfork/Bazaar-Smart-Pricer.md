@@ -5,11 +5,10 @@
 ## Current version
 **v1.1.7**
 
-
 ## Repository synchronization
 
 - Verified: **2026-09-20**
-- Canonical version: **v1.1.5**
+- Canonical version: **v1.1.7**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md
@@ -18,27 +17,30 @@
 - Update metadata URL: https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js
 
 ## What it does
-- Prices Bazaar items from Torn market value, the lowest visible item-market listing, or an undercut of the lowest listing.
-- Supports flat-dollar or percentage undercutting.
-- Works on Bazaar add-item and manage/reprice flows by detecting the current Torn price inputs instead of relying on one old table selector.
-- Adds an optional **S PRICE** button beside detected price fields.
-- Includes **PRICE ALL VISIBLE** for bulk repricing of the currently rendered Bazaar rows.
-- Stores settings locally and includes an in-script Torn API key setup/test panel.
-- Can ignore ultra-low storage/grief listings such as $1 offers.
-- Warns when the calculated price is below the item's NPC sell price; it does not block the user's final price.
-- Uses cached item/market data to reduce API calls and coalesces overlapping requests for the same item.
+- Prices Bazaar items from Torn market value with the configured discount or markup and optional Torn City shop-price floor.
+- Adds compact per-item Quick Add / Undo controls on Bazaar Add Items.
+- Adds Manage Bazaar repricing controls and an Update All flow that opens collapsed rows sequentially when needed.
+- Includes the draggable Quick Fill / Update All chip with Settings access.
+- Can skip ranked-war weapons, generic bonus items and $1 Bazaar entries according to Settings.
+- Stores settings and API data locally and supports the SakaLuX Hub shared API key with a local fallback.
+- Uses cached item data and request coalescing to reduce unnecessary API traffic.
+- Leaves Torn's final **SAVE CHANGES** action to the player.
 
-## Why this rebuild exists
-The older MIT-licensed Torn Bazaar Quick Pricer v3.2.3 still described settings and add-item pricing, but its published source only injected a Quick Reprice control for the Manage Bazaar page and no longer exposed a working API-key/settings onboarding UI. It also depended on a narrow legacy price-input selector. SakaLuX Bazaar Smart Pricer rebuilds those workflows with current SPA/TornPDA-friendly detection.
+## Hub integration
+Smart Pricer v1.1.7 publishes its installed-version marker on every `www.torn.com` page so Script Hub can detect that it is installed even when the Hub is opened outside Bazaar. The actual pricing/runtime code remains strictly scoped to `/bazaar.php`, so no Bazaar scanning or UI runs on unrelated Torn pages.
+
+On Bazaar itself, the script also exposes `SakaLuXBazaarSmartPricer` for Hub actions such as Settings, Quick Fill and Refresh.
 
 ## API
-The script requires a Torn read-only/public API key for item information and item-market pricing. The key is stored locally in the userscript environment and sent only to `api.torn.com`.
+The script uses a Torn API key for item information. The key is stored locally in the userscript environment; when Script Hub is installed, the compatible shared Hub key can be preferred with the script's own local key as fallback.
 
 ## Credits / License
-MIT-licensed rebuild inspired by **Torn Bazaar Quick Pricer + Smart Bazaar Pricing Panel** by R4G3RUNN3R [3877028], based on Zedtrooper [3028329] and community extensions.
+MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavior by Zedtrooper [3028329] / community contributors, with SakaLuX Hub integration, mobile/TornPDA support and additional safety controls.
 
 ## Current release note
 
-**v1.1.7 — Release metadata synchronization**
-- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
-- Rollback: restored the exact Bazaar Smart Pricer v1.1.5 userscript from commit f0ea0e5b0d629b214635eff1f3473b4a466ab710.
+**v1.1.7 — Hub installation detection fix**
+- Runs the lightweight canonical installation marker on every Torn page so Script Hub can detect Smart Pricer outside Bazaar.
+- Keeps all Smart Pricer pricing/runtime work strictly limited to `/bazaar.php`.
+- Synchronizes the metadata version, canonical marker and internal VERSION fallback to v1.1.7.
+- Keeps the GreasyFork install/update endpoints and `SakaLuXBazaarSmartPricer` Bazaar API integration intact.
