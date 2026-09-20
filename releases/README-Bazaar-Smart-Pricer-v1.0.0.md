@@ -1,0 +1,1 @@
+Release surfaces for SakaLuX Bazaar Smart Pricer v1.0.0 are tracked in `bazaar-smart-pricer-v1.0.0.md` and `bazaar-smart-pricer-v1.0.0-manifest.json`.
