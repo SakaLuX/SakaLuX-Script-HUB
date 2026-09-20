@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.49**
+**v1.3.50**
 
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
@@ -17,11 +17,11 @@
 
 ## Current release note
 
-**v1.3.49 — Manage Bazaar accordion isolation**
-- Enhancer Guard no longer hides or mutates native rows on **Manage your Bazaar**.
-- Fixes the large blank area that can remain when multiple Bazaar price rows are opened/closed on TornPDA.
-- Protected-item hiding/blocking still applies on **Add Listing** and other actual sale-selection screens.
-- Inventory tracking, lock badges, partial protection and Hub integration are unchanged.
+**v1.3.50 — Strict Manage Bazaar isolation**
+- Enhancer Guard does absolutely nothing to native rows on **Manage your Bazaar / Manage items**.
+- No hiding, blocking, badges, sale locks or DOM mutations are allowed there.
+- Any stale Enhancer sale artifacts are removed on entry.
+- Protection remains active only on real sale-selection/Add Listing screens.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -40,6 +40,11 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.3.50 — Strict Manage Bazaar isolation
+- Hard-excludes Manage Bazaar from all sale-protection logic.
+- Removes stale Enhancer sale artifacts on SPA navigation into Manage Bazaar.
+- Keeps protection only on actual Add Listing/sale-selection screens.
 
 ### v1.3.49 — Manage Bazaar accordion isolation
 - Stops sale-protection DOM hiding on **Manage your Bazaar** so Torn's accordion layout remains intact.

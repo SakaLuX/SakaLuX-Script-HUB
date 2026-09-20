@@ -31,7 +31,7 @@
 Install Script Hub when using multiple registered SakaLuX add-ons. It provides one place for installation status, updates, module power control, shared API access and health diagnostics.
 
 ### Registered complementary add-ons
-- 🛡️ SakaLuX Enhancer Guard **v1.3.49**
+- 🛡️ SakaLuX Enhancer Guard **v1.3.50**
 - 💬 SakaLuX Bazaar Thanker - PDA **v5.3.42**
 - 🎯 SakaLuX Mission Rewards **v1.0.44**
 - 📈 SakaLuX Market Intelligence **v1.17.45**

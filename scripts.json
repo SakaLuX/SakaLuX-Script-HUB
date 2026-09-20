@@ -34,19 +34,19 @@
         }
       ],
       "release": {
-        "version": "1.3.49",
+        "version": "1.3.50",
         "date": "2026-09-20",
         "notes": [
-          "Stops Enhancer Guard from hiding or mutating native rows on Manage your Bazaar.",
-          "Fixes the large blank accordion area that can appear after opening several Bazaar price rows on TornPDA.",
-          "Keeps protected-item hiding and sale blocking active on actual Add Listing / sale-selection screens.",
-          "Inventory tracking, lock badges, partial protection and Hub integration are unchanged."
+          "Hard-excludes Manage your Bazaar / Manage items from every Enhancer Guard sale-protection path.",
+          "No row hiding, blocking, badges, sale locks or DOM mutations are allowed on Manage Bazaar.",
+          "Removes any stale Enhancer sale-protection artifacts if Torn SPA navigation enters Manage Bazaar.",
+          "Protection remains active only on real Add Listing / sale-selection screens."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.49",
-      "detailsRevision": 3
+      "version": "1.3.50",
+      "detailsRevision": 4
     },
     {
       "active": true,
