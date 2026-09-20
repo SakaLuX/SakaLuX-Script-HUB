@@ -1,0 +1,36 @@
+name: Add Bazaar Smart Pricer registry
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/add_bazaar_smart_pricer_registry.py'
+      - '.github/workflows/add-bazaar-smart-pricer-registry.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: add-bazaar-smart-pricer-registry-main
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add registry entry
+        run: python3 .github/scripts/add_bazaar_smart_pricer_registry.py
+      - name: Validate userscript syntax
+        run: node --check SakaLuX-Bazaar-Smart-Pricer.user.js
+      - name: Validate registry JSON
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Commit registry surfaces if needed
+        run: |
+          if git diff --quiet; then
+            echo "Already synchronized."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts.json greasyfork/Script-Hub.md
+          git commit -m "Register SakaLuX Bazaar Smart Pricer v1.0.0"
+          git push
