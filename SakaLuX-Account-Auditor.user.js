@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.17
+// @version      1.3.18
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -176,7 +176,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.17';
+    const VERSION = '1.3.18';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const AUDITOR_API_CREATE_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Account%20Auditor&user=profile,bars,cooldowns,travel,education,jobpoints,merits,refills,notifications,money,stocks,properties,discord,weaponexp,workstats,skills,battlestats,networth,display,icons,criminalrecord,bazaar,crimes,hof,ammo,attacksfull,bounties,calendar,casino,competition,enlistedcars,equipment,faction,forumfeed,forumfriends,forumposts,forumsubscribedthreads,forumthreads,gym,honors,itemmarket,itemmods,job,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,snapshot,personalstats,list,inventory,messages,events,log&torn=merits,education';
@@ -220,7 +220,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         try { if (typeof GM_getValue === 'function') { const v=GM_getValue(key,''); if (typeof v==='string' && v) return v; } } catch(_){}
         try { return localStorage.getItem(key)||''; } catch(_) { return ''; }
     }
-    function rawSet(key,value){ const text=String(value??''); try{if(typeof GM_setValue==='function')GM_setValue(key,text);}catch(_){} try{localStorage.removeItem(key);}catch(_){} }
+    function rawSet(key,value){
+        const text=String(value??'');
+        try{if(typeof GM_setValue==='function')GM_setValue(key,text);}catch(_){}
+        // TornPDA/Tampermonkey compatibility: mirror values to localStorage too.
+        // Some environments expose asynchronous GM storage semantics, so removing
+        // the fallback here made freshly-saved values (notably LAST SYNC) read as empty.
+        try{localStorage.setItem(key,text);}catch(_){}
+    }
     function loadJson(key,fallback){ try{const raw=rawGet(key); return raw?JSON.parse(raw):fallback;}catch(_){return fallback;} }
     function saveJson(key,value){ try{rawSet(key,JSON.stringify(value));}catch(_){} }
     function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;');}
@@ -578,7 +585,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   if(!document.body)return;
   let e=document.querySelector('[data-slx-standalone-registration="account-auditor"]');
   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','account-auditor');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.17'});
+  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.18'});
  };
  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
 })();
