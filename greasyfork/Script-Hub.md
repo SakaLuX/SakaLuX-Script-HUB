@@ -320,3 +320,9 @@ Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and
 - Synchronizes offline details and refreshes stale cached information while retaining newer metadata.
 
 Latest Hub refresh improvement: overlapping registry/update checks share one active operation.
+
+
+### Bazaar Smart Pricer v1.1.0
+- Rebased on Quick Pricer v2.9.3 behavior with native per-item Quick Add/Undo.
+- Adds Hub-styled settings and Hub SETTINGS / QUICK FILL / REFRESH actions.
+- RW and generic bonus-item safety defaults to ON.

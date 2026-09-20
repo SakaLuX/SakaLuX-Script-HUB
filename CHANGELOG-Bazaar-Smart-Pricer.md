@@ -1,5 +1,13 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.0 — 2026-09-20
+- Full Quick Pricer v2.9.3 parity rebuild under MIT provenance.
+- Restores upstream per-item Quick Add/Undo placement and full quantity + price filling.
+- Removes the custom S QUICK FILL bar and broken custom row-button layout in favor of the upstream draggable Quick Fill / Settings chip.
+- Adds SakaLuX Hub dark skin while preserving the upstream settings geometry.
+- Adds generic bonus-item skipping in addition to RW skipping; both default ON.
+- Adds Script Hub API integration and synchronizes scripts.json.
+
 ## v1.0.4 — 2026-09-20
 - Hotfixes the CSS for the new per-item **+** controls.
 - Keeps each **+** immediately before **Qty**, with full quantity + price fill.
