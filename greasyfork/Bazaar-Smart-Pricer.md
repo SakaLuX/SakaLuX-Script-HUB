@@ -39,8 +39,6 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.7 — Hub installation detection fix**
-- Runs the lightweight canonical installation marker on every Torn page so Script Hub can detect Smart Pricer outside Bazaar.
-- Keeps all Smart Pricer pricing/runtime work strictly limited to `/bazaar.php`.
-- Synchronizes the metadata version, canonical marker and internal VERSION fallback to v1.1.7.
-- Keeps the GreasyFork install/update endpoints and `SakaLuXBazaarSmartPricer` Bazaar API integration intact.
+**v1.1.7 — Release metadata synchronization**
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Rollback: restored the exact Bazaar Smart Pricer v1.1.5 userscript from commit f0ea0e5b0d629b214635eff1f3473b4a466ab710.
