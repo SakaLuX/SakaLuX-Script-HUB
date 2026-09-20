@@ -1,0 +1,41 @@
+name: Update Bazaar Smart Pricer v1.0.3
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/update_bazaar_smart_pricer_v103.py'
+      - '.github/workflows/update-bazaar-smart-pricer-v103.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: bazaar-smart-pricer-v103-main
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply v1.0.3 update
+        run: python3 .github/scripts/update_bazaar_smart_pricer_v103.py
+      - name: Validate userscript
+        run: node --check SakaLuX-Bazaar-Smart-Pricer.user.js
+      - name: Validate registry
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Verify release
+        run: |
+          grep -q '@version      1.0.3' SakaLuX-Bazaar-Smart-Pricer.user.js
+          grep -q "b.textContent='+'" SakaLuX-Bazaar-Smart-Pricer.user.js
+          grep -q "before-qty" SakaLuX-Bazaar-Smart-Pricer.user.js
+      - name: Commit release
+        run: |
+          if git diff --quiet; then
+            echo 'Already synchronized.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Bazaar-Smart-Pricer.user.js scripts.json greasyfork/Bazaar-Smart-Pricer.md greasyfork/Script-Hub.md CHANGELOG-Bazaar-Smart-Pricer.md releases/bazaar-smart-pricer-v1.0.3.md
+          git commit -m 'Release Bazaar Smart Pricer v1.0.3 with per-item plus before Qty'
+          git push
