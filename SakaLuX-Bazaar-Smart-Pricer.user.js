@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.4
+// @version      1.1.5
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,9 +34,14 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.4';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.5';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
+
+    if (GM_getValue('pricingModelVersion', '') !== 'market-value-city-floor-v1') {
+        GM_setValue('priceCache', {});
+        GM_setValue('pricingModelVersion', 'market-value-city-floor-v1');
+    }
 
     // =====================================================================
     // CONFIGURATION
@@ -1060,7 +1065,7 @@
     let isProcessingQueue = false;
     let queueHalted = false;            // set when a fatal API error stops the run
 
-    const REQUEST_SPACING_MS = 1350;         // ≤100 req/min, Torn's documented limit
+    const REQUEST_SPACING_MS = 650;         // ≤100 req/min, Torn's documented limit
     const REQUEST_TIMEOUT_MS = 15000;
     const RATE_LIMIT_RETRY_DELAY_MS = 5000;
     const RATE_LIMIT_MAX_RETRIES = 2;
@@ -1134,44 +1139,9 @@
                         const marketValue = Number(itemData.market_value) || 0;
                         const buyPrice = Number(itemData.buy_price) || 0;
                         const sellPrice = Number(itemData.sell_price) || 0;
-                        let marketSettled=false;
-                        let marketWatchdog=null;
-                        const finishMarket=(lowestMarketPrice=0)=>{
-                            if(marketSettled)return;
-                            marketSettled=true;
-                            if(marketWatchdog)clearTimeout(marketWatchdog);
-                            cachePrice(itemId,marketValue,buyPrice,sellPrice,lowestMarketPrice);
-                            finishRequest(itemId,{marketValue,buyPrice,sellPrice,lowestMarketPrice});
-                            releaseAndContinue(REQUEST_SPACING_MS);
-                        };
-                        marketWatchdog=setTimeout(()=>finishMarket(0),6500);
-                        GM_xmlhttpRequest({
-                            method:'GET',
-                            url:`https://api.torn.com/v2/market/${itemId}/itemmarket?key=${CONFIG.apiKey}`,
-                            timeout:6000,
-                            onload:r=>{
-                                let lowestMarketPrice=0;
-                                try{
-                                    const md=JSON.parse(r.responseText);
-                                    if(!md.error){
-                                        // Torn v2 has existed in two shapes:
-                                        // legacy: itemmarket:[{cost,...}]
-                                        // current: itemmarket:{listings:[{price,...}]}
-                                        const rows=Array.isArray(md.itemmarket)
-                                            ? md.itemmarket
-                                            : (Array.isArray(md.itemmarket?.listings)?md.itemmarket.listings:[]);
-                                        lowestMarketPrice=rows.reduce((best,o)=>{
-                                            const c=Number(o?.cost ?? o?.price) || 0;
-                                            return c>0&&(!best||c<best)?c:best;
-                                        },0);
-                                    }
-                                }catch(e){ log('Item Market parse fallback',e); }
-                                finishMarket(lowestMarketPrice);
-                            },
-                            onerror:()=>finishMarket(0),
-                            ontimeout:()=>finishMarket(0),
-                            onabort:()=>finishMarket(0)
-                        });
+                        cachePrice(itemId, marketValue, buyPrice, sellPrice, 0);
+                        finishRequest(itemId, { marketValue, buyPrice, sellPrice, lowestMarketPrice: 0 });
+                        releaseAndContinue(REQUEST_SPACING_MS);
                     } else {
                         failItem();
                     }
@@ -1230,7 +1200,10 @@
     function calculateFinalPrice(marketValue, buyPrice, sellPrice, lowestMarketPrice, discount) {
         const pct = clampDiscount(discount) / 100;
         const multiplier = CONFIG.priceBelowMarket ? (1 - pct) : (1 + pct);
-        const referencePrice = Number(lowestMarketPrice) > 0 ? Number(lowestMarketPrice) : Number(marketValue) || 0;
+        // Use Torn market_value as the canonical reference, matching the proven
+        // Quick Pricer behavior. live Item Market was removed because it can
+        // include transient/outlier listings and produced wrong bulk prices.
+        const referencePrice = Number(marketValue) || 0;
         let finalPrice = Math.round(referencePrice * multiplier);
         const cityShopFloor = Number(buyPrice) > 0 ? Number(buyPrice) : (Number(sellPrice) || 0);
         if (!CONFIG.disableNpcCheck && cityShopFloor > 0 && finalPrice < cityShopFloor) {
@@ -1512,6 +1485,21 @@
         return lastRect.top > window.innerHeight;
     }
 
+    function findLiveManageItem(itemId, itemName) {
+        const items=getManageItems();
+        for(const item of items){
+            const image=item.querySelector('img');
+            if(!image) continue;
+            if(getItemIdFromImage(image)!==itemId) continue;
+            if(itemName){
+                const n=getItemName(item);
+                if(n && n!==itemName) continue;
+            }
+            return item;
+        }
+        return null;
+    }
+
     async function ensureManagePriceEditor(item) {
         const findEditor=()=>{
             const direct=item.querySelector(SELECTORS.managePriceWrap);
@@ -1545,29 +1533,48 @@
         const moreBelow=mayHaveUnloadedItems(items);
         let skippedRw=0,skippedBonus=0,skippedDollar=0,updated=0,failed=0,done=0;
         const work=[];
+        const seenIds=new Set();
         for(const item of items){
             const image=item.querySelector('img'); if(!image)continue;
-            const itemId=getItemIdFromImage(image); if(!itemId)continue;
+            const itemId=getItemIdFromImage(image); if(!itemId||seenIds.has(itemId))continue;
+            seenIds.add(itemId);
             if(CONFIG.skipRwWeapons&&getRWBonusInfo(item).isRanked){skippedRw++;continue;}
             if(CONFIG.skipBonusItems&&hasAnyBonus(item)){skippedBonus++;continue;}
-            work.push({item,itemId,itemName:getItemName(item)});
+            work.push({itemId,itemName:getItemName(item)});
         }
         for(const job of work){
-            done++; if(updateButton)updateButton.textContent=`Opening ${done}/${work.length}`;
-            const editor=await ensureManagePriceEditor(job.item);
+            done++;
+            if(updateButton)updateButton.textContent=`Opening ${done}/${work.length}`;
+            // Always reacquire the current live row; Torn may replace row nodes
+            // whenever an accordion row opens/closes.
+            const liveItem=findLiveManageItem(job.itemId,job.itemName);
+            if(!liveItem){failed++;continue;}
+            const editor=await ensureManagePriceEditor(liveItem);
             if(!editor){failed++;continue;}
             const input=editor.priceDiv.querySelector(SELECTORS.managePriceInput);
             const current=input?parseInt(String(input.value||'').replace(/,/g,''),10)||0:0;
-            if(CONFIG.skipDollarItems&&current===1){skippedDollar++;if(editor.opened&&editor.toggle)editor.toggle.click();continue;}
+            if(CONFIG.skipDollarItems&&current===1){
+                skippedDollar++;
+                if(editor.opened&&editor.toggle){editor.toggle.click();await new Promise(r=>setTimeout(r,180));}
+                continue;
+            }
             if(updateButton)updateButton.textContent=`Pricing ${done}/${work.length}`;
             const result=await updateManageItemPrice(editor.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false});
             if(result==='updated')updated++;else if(result==='failed')failed++;
-            await new Promise(r=>setTimeout(r,100));
-            if(editor.opened&&editor.toggle)editor.toggle.click();
+            if(editor.opened&&editor.toggle){
+                editor.toggle.click();
+                await new Promise(r=>setTimeout(r,220));
+            } else {
+                await new Promise(r=>setTimeout(r,120));
+            }
         }
         restoreButton();
         let msg=`Updated ${updated} of ${work.length} item price${work.length===1?'':'s'}`;
-        if(skippedRw)msg+=` — ${skippedRw} RW skipped`; if(skippedBonus)msg+=` — ${skippedBonus} bonus skipped`; if(skippedDollar)msg+=` — ${skippedDollar} $1 skipped`; if(failed)msg+=` — ${failed} failed`; if(moreBelow)msg+=' — scroll down to load more items, then run again';
+        if(skippedRw)msg+=` — ${skippedRw} RW skipped`;
+        if(skippedBonus)msg+=` — ${skippedBonus} bonus skipped`;
+        if(skippedDollar)msg+=` — ${skippedDollar} $1 skipped`;
+        if(failed)msg+=` — ${failed} failed`;
+        if(moreBelow)msg+=' — scroll down to load more items, then run again';
         msg+=' — press SAVE CHANGES in Torn to commit';
         qpToast(msg,failed?'error':'success',6500);
     }

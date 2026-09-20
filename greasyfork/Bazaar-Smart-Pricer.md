@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.1**
+**v1.1.5**
 
 ## What it does
 - Prices Bazaar items from Torn market value, the lowest visible item-market listing, or an undercut of the lowest listing.
@@ -82,3 +82,10 @@ Bulk repricing can no longer be held indefinitely by an Item Market request. The
 
 ### v1.1.4 — Update All deadlock fix
 Fixes the permanent `Pricing 1/N` hang in Manage Bazaar. The manage callback now receives all pricing fields (`marketValue`, `buyPrice`, `sellPrice`, `lowestMarketPrice`) and safely resolves failed items instead of freezing the batch.
+
+
+### v1.1.5 — Manage row + pricing model fix
+- Update All reacquires every live row by item ID so Torn accordion rerenders cannot make it skip alternating items.
+- Automatic price reference is Torn `market_value` again, matching the upstream Quick Pricer behavior.
+- Torn City `buy_price` remains the hard minimum when shop-floor enforcement is enabled.
+- Upgrade clears stale cache from the previous live-market pricing model.

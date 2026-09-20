@@ -1,5 +1,12 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.5 — 2026-09-20
+- Fixed **Update All skipping every second item**. Torn rerenders accordion rows when they open/close, so the batch now stores only stable item IDs and reacquires each live DOM row before processing it.
+- Removed live Item Market listings as the automatic pricing reference because transient/outlier listings produced incorrect bulk prices.
+- Restored the proven Quick Pricer reference: **Torn `market_value`**.
+- Keeps the user-requested **Torn City shop floor**: calculated price can never fall below `buy_price` while the setting is enabled.
+- Deduplicates Manage rows by item ID and clears stale price cache on upgrade.
+
 ## v1.1.4 — 2026-09-20
 - Fixed the **Update All** permanent hang at `Pricing 1/N`.
 - Root cause: the Manage callback used `buyPrice` and `lowestMarketPrice` without receiving them from `fetchItemData`, causing a `ReferenceError` before the Promise could resolve.
