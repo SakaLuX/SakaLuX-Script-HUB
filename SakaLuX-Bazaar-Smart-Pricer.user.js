@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.0
+// @version      1.1.1
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.0';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.1';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -74,6 +74,22 @@
         GM_setValue(name, val);
     }
 
+    function hubInstalled() {
+        try {
+            return !!(window.SakaLuXScriptHub || document.documentElement?.getAttribute('data-sakalux-hub-installed') === '1' || document.documentElement?.getAttribute('data-sakalux-hub-active') === '1' || document.getElementById('sakalux-hub-panel') || document.getElementById('sakalux-hub-button'));
+        } catch { return false; }
+    }
+
+    function getHubSharedApiKey() {
+        if (!hubInstalled()) return '';
+        try {
+            const k=(localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim();
+            return isValidApiKey(k)?k:'';
+        } catch { return ''; }
+    }
+
+    function activeApiSource() { return getHubSharedApiKey() ? 'SakaLuX Hub shared key' : (CONFIG.apiKey ? 'Local key' : 'No key'); }
+
     // Torn PDA key injection — runs once at startup, before any settings read.
     // NOTE: this literal is the ONLY occurrence of the PDA placeholder in the whole
     // file. Torn PDA's script manager does a global find/replace of every occurrence
@@ -92,6 +108,8 @@
         get defaultDiscount() { return getSetting('discountPercent', 0); },
         set defaultDiscount(val) { setSetting('discountPercent', val); },
         get apiKey() {
+            const hub=getHubSharedApiKey();
+            if (hub) return hub;
             const k = getSetting('tornApiKey', '');
             return isValidApiKey(k) ? k : '';
         },
@@ -250,7 +268,11 @@
     }
 
     function hasAnyBonus(itemElement) {
-        const icons = itemElement.querySelectorAll('ul.bonuses-wrap li.bonus i[class*="bonus-attachment-"], i[class*="bonus-attachment-"]');
+        const rw=getRWBonusInfo(itemElement);
+        if (rw.isRanked) return true;
+        const rarity=itemElement.querySelector(SELECTORS.rarityGlow);
+        if (!rarity) return false;
+        const icons=itemElement.querySelectorAll('ul.bonuses-wrap li.bonus i[class*="bonus-attachment-"]');
         return Array.from(icons).some(icon => !String(icon.className || '').includes('blank-bonus'));
     }
 
@@ -423,6 +445,9 @@
             flex: none;
         }
         .qp-close:hover { background: #e9e5f6; }
+        .qp-head-actions{margin-left:auto;display:flex;align-items:center;gap:7px}.qp-api-head{font-size:14px!important}
+        .qp-api-status{padding:10px 12px;border-radius:12px;background:var(--qp-field-bg);border:1.5px solid var(--qp-border);font:800 11px/1.45 var(--qp-font);color:var(--qp-muted)}
+        .qp-api-status strong{color:var(--qp-ink)}
         .qp-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 12px; }
 
         /* ── FIELDS ── */
@@ -814,6 +839,37 @@
         wireOverlayA11y(overlay, () => overlay.remove());
     }
 
+    function showApiAccessPanel() {
+        const overlay=document.createElement('div');
+        overlay.className='qp-overlay';
+        const shared=getHubSharedApiKey();
+        const local=getSetting('tornApiKey','');
+        overlay.innerHTML=`
+            <div class="qp-modal">
+                <div class="qp-head">
+                    <div class="qp-head__badge">${keyBadgeSVG}</div>
+                    <div><div class="qp-head__title">API Access</div><div class="qp-head__sub">SakaLuX Bazaar Smart Pricer</div></div>
+                    <button class="qp-close" id="qpApiClose" aria-label="Close">✕</button>
+                </div>
+                <div class="qp-body">
+                    <div class="qp-api-status">Active source: <strong>${shared?'SakaLuX Hub shared key':(isValidApiKey(local)?'Local key':'No valid key')}</strong><br>${shared?'Hub is installed, so the shared key is used automatically. Local key stays as fallback.':'Install/configure SakaLuX Hub for automatic shared-key use, or save a local Public key below.'}</div>
+                    <div><div class="qp-label">LOCAL FALLBACK KEY</div><div class="qp-field"><input type="password" id="qpApiLocal" autocomplete="off" spellcheck="false"/><div class="qp-eye-toggle" id="qpApiEye" role="button" tabindex="0">${eyeSVG}</div></div></div>
+                    <div class="qp-note"><span>🔒</span><span>Only read access to Torn item data is required. A Hub shared key is preferred when Hub is active.</span></div>
+                    <div class="qp-btn-row"><button class="qp-btn qp-btn--ghost" id="qpCreateKey">Create key</button><button class="qp-btn qp-btn--primary" id="qpTestActive">Test active</button></div>
+                    <div class="qp-btn-row"><button class="qp-btn qp-btn--danger" id="qpClearLocal">Clear local</button><button class="qp-btn qp-btn--primary" id="qpSaveLocal">Save local</button></div>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        const input=overlay.querySelector('#qpApiLocal'); input.value=isValidApiKey(local)?local:'';
+        const eye=overlay.querySelector('#qpApiEye'); eye.onclick=()=>{const p=input.type==='password';input.type=p?'text':'password';eye.innerHTML=p?eyeOffSVG:eyeSVG;};
+        const close=()=>overlay.remove(); overlay.querySelector('#qpApiClose').onclick=close; overlay.onclick=e=>{if(e.target===overlay)close();};
+        overlay.querySelector('#qpCreateKey').onclick=()=>window.open('https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Bazaar%20Smart%20Pricer&torn=items','_blank');
+        overlay.querySelector('#qpSaveLocal').onclick=()=>{const k=input.value.trim();if(k && !isValidApiKey(k))return qpToast('API key must be 16 alphanumeric characters','error');CONFIG.apiKey=k;qpToast('Local fallback key saved','success');close();};
+        overlay.querySelector('#qpClearLocal').onclick=()=>{CONFIG.apiKey='';input.value='';qpToast('Local fallback key cleared','success');};
+        overlay.querySelector('#qpTestActive').onclick=()=>{const k=CONFIG.apiKey;if(!k)return qpToast('No active API key','error');GM_xmlhttpRequest({method:'GET',url:`https://api.torn.com/torn/1?selections=items&key=${k}`,timeout:12000,onload:r=>{try{const d=JSON.parse(r.responseText);if(d.error)throw new Error(d.error.error||'API error');qpToast(`API works · ${activeApiSource()}`,'success');}catch(e){qpToast('API test failed: '+e.message,'error');}},onerror:()=>qpToast('API test failed','error'),ontimeout:()=>qpToast('API test timed out','error')});};
+        wireOverlayA11y(overlay,close);
+    }
+
     function showSettingsPanel() {
         const overlay = document.createElement('div');
         overlay.className = 'qp-overlay';
@@ -823,9 +879,9 @@
                     <div class="qp-head__badge">${gearBadgeSVG}</div>
                     <div>
                         <div class="qp-head__title">SakaLuX Smart Pricer settings</div>
-                        <div class="qp-head__sub">v${VERSION} · <a href="https://github.com/SakaLuX/SakaLuX-Script-HUB" target="_blank" rel="noopener">GitHub</a></div>
+                        <div class="qp-head__sub">v${VERSION}</div>
                     </div>
-                    <button class="qp-close" id="qpCancel" aria-label="Close">✕</button>
+                    <div class="qp-head-actions"><button class="qp-close qp-api-head" id="qpApiAccess" title="API Access" aria-label="API Access">🔑</button><button class="qp-close" id="qpCancel" aria-label="Close">✕</button></div>
                 </div>
                 <div class="qp-body">
                     <div>
@@ -910,6 +966,7 @@
             </div>
         `;
         document.body.appendChild(overlay);
+        overlay.querySelector('#qpApiAccess').onclick = (e) => { e.preventDefault(); showApiAccessPanel(); };
         wireToggleRowLabel(overlay, 'qpNpcCheck');
         wireToggleRowLabel(overlay, 'qpRwCheck');
         wireToggleRowLabel(overlay, 'qpBonusCheck');
@@ -1409,56 +1466,64 @@
         return lastRect.top > window.innerHeight;
     }
 
-    async function updateAllManagePrices() {
-        const updateButton = chipFillBtn;
-        if (updateButton) { updateButton.disabled = true; updateButton.style.opacity = '0.5'; updateButton.textContent = 'Loading…'; }
-        const restoreButton = () => {
-            if (updateButton) { updateButton.disabled = false; updateButton.style.opacity = '1'; updateButton.textContent = 'Update All'; }
-        };
-
-        // Only the rows Torn has already rendered are processed. If more may be
-        // waiting below the fold, we flag it in the summary so the user can
-        // scroll to load them and run again (see mayHaveUnloadedItems).
-        const items = getManageItems();
-        if (items.length === 0) { restoreButton(); qpToast('No items found to update!', 'error'); return; }
-        const moreBelow = mayHaveUnloadedItems(items);
-
-        // Collect the actual work first so progress and totals are accurate.
-        let skippedRw = 0, skippedBonus = 0, skippedDollar = 0;
-        const work = [];
-        for (const item of items) {
-            const priceDiv = item.querySelector(SELECTORS.managePriceWrap);
-            const image = item.querySelector('img');
-            if (!priceDiv || !image) continue;
-            const itemId = getItemIdFromImage(image);
-            if (!itemId) continue;
-            if (CONFIG.skipRwWeapons && getRWBonusInfo(item).isRanked) { skippedRw++; continue; }
-            if (CONFIG.skipBonusItems && hasAnyBonus(item)) { skippedBonus++; continue; }
-            if (CONFIG.skipDollarItems) {
-                const priceInput = priceDiv.querySelector(SELECTORS.managePriceInput);
-                const currentPrice = priceInput ? parseInt(priceInput.value.replace(/,/g, ''), 10) || 0 : 0;
-                if (currentPrice === 1) { skippedDollar++; continue; }
+    async function ensureManagePriceEditor(item) {
+        const findEditor=()=>{
+            const direct=item.querySelector(SELECTORS.managePriceWrap);
+            if(direct?.querySelector(SELECTORS.managePriceInput)) return direct;
+            const name=getItemName(item);
+            const container=findSectionContainer(h => h.textContent.includes('Manage your Bazaar') || h.textContent.includes('Manage items') || h.textContent.includes('Manage Bazaar')) || item.parentElement;
+            if(!container) return null;
+            for(const candidate of container.querySelectorAll(SELECTORS.manageItems)){
+                if(name && getItemName(candidate)!==name) continue;
+                const p=candidate.querySelector(SELECTORS.managePriceWrap);
+                if(p?.querySelector(SELECTORS.managePriceInput)) return p;
             }
-            work.push({ priceDiv, itemId, itemName: getItemName(item) });
-        }
+            return null;
+        };
+        let p=findEditor(); if(p) return {priceDiv:p,opened:false,toggle:null};
+        const controls=[...item.querySelectorAll('button,[role="button"],a')];
+        let toggle=controls.find(el=>/expand|edit|details|open/i.test((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')));
+        if(!toggle) toggle=controls[controls.length-1] || item.querySelector('[class*="arrow"],[class*="chevron"],[class*="expand"]');
+        if(!toggle) return null;
+        toggle.click();
+        for(let i=0;i<24;i++){await new Promise(r=>setTimeout(r,75));p=findEditor();if(p)return{priceDiv:p,opened:true,toggle};}
+        return null;
+    }
 
-        let updated = 0, failed = 0, done = 0;
-        for (const { priceDiv, itemId, itemName } of work) {
-            done++;
-            if (updateButton) updateButton.textContent = `Updating ${done}/${work.length}`;
-            const result = await updateManageItemPrice(priceDiv, itemId, itemName);
-            if (result === 'updated') updated++;
-            else if (result === 'failed') failed++;
+    async function updateAllManagePrices() {
+        const updateButton=chipFillBtn;
+        if(updateButton){updateButton.disabled=true;updateButton.style.opacity='0.5';updateButton.textContent='Loading…';}
+        const restoreButton=()=>{if(updateButton){updateButton.disabled=false;updateButton.style.opacity='1';updateButton.textContent='Update All';}};
+        const items=getManageItems();
+        if(items.length===0){restoreButton();qpToast('No items found to update!','error');return;}
+        const moreBelow=mayHaveUnloadedItems(items);
+        let skippedRw=0,skippedBonus=0,skippedDollar=0,updated=0,failed=0,done=0;
+        const work=[];
+        for(const item of items){
+            const image=item.querySelector('img'); if(!image)continue;
+            const itemId=getItemIdFromImage(image); if(!itemId)continue;
+            if(CONFIG.skipRwWeapons&&getRWBonusInfo(item).isRanked){skippedRw++;continue;}
+            if(CONFIG.skipBonusItems&&hasAnyBonus(item)){skippedBonus++;continue;}
+            work.push({item,itemId,itemName:getItemName(item)});
         }
-
+        for(const job of work){
+            done++; if(updateButton)updateButton.textContent=`Opening ${done}/${work.length}`;
+            const editor=await ensureManagePriceEditor(job.item);
+            if(!editor){failed++;continue;}
+            const input=editor.priceDiv.querySelector(SELECTORS.managePriceInput);
+            const current=input?parseInt(String(input.value||'').replace(/,/g,''),10)||0:0;
+            if(CONFIG.skipDollarItems&&current===1){skippedDollar++;if(editor.opened&&editor.toggle)editor.toggle.click();continue;}
+            if(updateButton)updateButton.textContent=`Updating ${done}/${work.length}`;
+            const result=await updateManageItemPrice(editor.priceDiv,job.itemId,job.itemName);
+            if(result==='updated')updated++;else if(result==='failed')failed++;
+            await new Promise(r=>setTimeout(r,100));
+            if(editor.opened&&editor.toggle)editor.toggle.click();
+        }
         restoreButton();
-        let msg = `Updated ${updated} of ${work.length} item price${work.length === 1 ? '' : 's'}`;
-        if (skippedRw > 0) msg += ` — ${skippedRw} RW weapon${skippedRw > 1 ? 's' : ''} skipped`;
-        if (skippedBonus > 0) msg += ` — ${skippedBonus} bonus item${skippedBonus > 1 ? 's' : ''} skipped`;
-        if (skippedDollar > 0) msg += ` — ${skippedDollar} $1 item${skippedDollar > 1 ? 's' : ''} skipped`;
-        if (failed > 0) msg += ` — ${failed} failed`;
-        if (moreBelow) msg += ' — scroll down to load more items, then run again';
-        qpToast(msg, failed > 0 ? 'error' : 'success', 6000);
+        let msg=`Updated ${updated} of ${work.length} item price${work.length===1?'':'s'}`;
+        if(skippedRw)msg+=` — ${skippedRw} RW skipped`; if(skippedBonus)msg+=` — ${skippedBonus} bonus skipped`; if(skippedDollar)msg+=` — ${skippedDollar} $1 skipped`; if(failed)msg+=` — ${failed} failed`; if(moreBelow)msg+=' — scroll down to load more items, then run again';
+        msg+=' — press SAVE CHANGES in Torn to commit';
+        qpToast(msg,failed?'error':'success',6500);
     }
 
     // =====================================================================

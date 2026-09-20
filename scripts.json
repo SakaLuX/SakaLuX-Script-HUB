@@ -107,7 +107,7 @@
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "icon": "💰",
       "id": "bazaar-smart-pricer",
-      "info": "Purpose\\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\\n\\nBulk workflow\\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\\n\\nSafety\\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\\n\\nHub integration\\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.",
+      "info": "Purpose\\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\\n\\nBulk workflow\\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\\n\\nSafety\\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\\n\\nHub integration\\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. API Access automatically prefers the Hub shared key when Hub is installed and keeps a local fallback. Manage Bazaar Update All can open collapsed rows sequentially, fill prices, and leaves Torn SAVE CHANGES as the final confirmation step. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.",
       "name": "Bazaar Smart Pricer",
       "quickActions": [
         {
@@ -134,17 +134,16 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 7,
-      "version": "1.1.0",
+      "detailsRevision": 8,
+      "version": "1.1.1",
       "release": {
-        "version": "1.1.0",
+        "version": "1.1.1",
         "date": "2026-09-20",
         "notes": [
-          "Rebases the module on Torn Bazaar Quick Pricer v2.9.3 so per-item button placement, quantity fill, price fill, undo, Manage Bazaar repricing and bulk chip behavior match the proven script.",
-          "Replaces the broken custom row layout with the upstream native description-area Quick Add button, preventing Equipped-row and right-edge overflow problems.",
-          "Keeps the polished upstream settings layout but skins it with SakaLuX Hub dark UI tokens.",
-          "Adds Skip bonus items alongside upstream Skip RW weapons and keeps both protections enabled by default.",
-          "Exports SakaLuXBazaarSmartPricer.open / quickFill / refresh for Script Hub integration."
+          "Removes the GitHub link from the settings header and adds a dedicated API Access key button beside Close.",
+          "Automatically uses SakaLuX Hub shared key when Hub is installed, with a local key fallback and test/create/save/clear controls.",
+          "Fixes false bonus-item skips on normal armor such as Construction Helmet and Leather Gloves by requiring real bonus attachments on rarity/RW weapon rows.",
+          "Update All now opens collapsed Manage Bazaar rows one at a time, updates their price, closes them again and leaves Torn SAVE CHANGES as the final confirmation step."
         ]
       }
     },

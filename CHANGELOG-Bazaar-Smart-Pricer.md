@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.1 — 2026-09-20
+- Added dedicated **API Access** beside Close; Hub shared key is used automatically when available.
+- Removed the GitHub link from the settings header.
+- Fixed false **bonus item** detection on normal armor/items.
+- **Update All** can now open collapsed Manage Bazaar rows sequentially, update prices and close them again; Torn **SAVE CHANGES** remains the final confirmation.
+
 ## v1.1.0 — 2026-09-20
 - Full Quick Pricer v2.9.3 parity rebuild under MIT provenance.
 - Restores upstream per-item Quick Add/Undo placement and full quantity + price filling.
