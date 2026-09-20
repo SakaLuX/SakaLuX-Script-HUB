@@ -89,3 +89,7 @@ Fixes the permanent `Pricing 1/N` hang in Manage Bazaar. The manage callback now
 - Automatic price reference is Torn `market_value` again, matching the upstream Quick Pricer behavior.
 - Torn City `buy_price` remains the hard minimum when shop-floor enforcement is enabled.
 - Upgrade clears stale cache from the previous live-market pricing model.
+
+
+### v1.1.6 — Manage save-state fix
+Bulk Manage pricing now writes through Torn's React-controlled input setter, enabling **SAVE CHANGES** correctly. Accordion rows are collapsed using a freshly reacquired live toggle after each rerender, preventing blank expanded gaps.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.5
+// @version      1.1.6
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.5';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.6';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1213,6 +1213,16 @@
         return finalPrice;
     }
 
+    function setNativeInputValue(input, value) {
+        if (!input) return;
+        const proto = Object.getPrototypeOf(input);
+        const desc = proto && Object.getOwnPropertyDescriptor(proto, 'value');
+        if (desc && typeof desc.set === 'function') desc.set.call(input, String(value));
+        else input.value = String(value);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
     function clearItemInputs(itemElement) {
         const amountDiv = itemElement.querySelector(SELECTORS.amountWrap);
         const priceDiv = itemElement.querySelector(SELECTORS.priceWrap);
@@ -1257,8 +1267,7 @@
                 if (marketValue > 0) {
                     const finalPrice = calculateFinalPrice(marketValue, buyPrice, sellPrice, lowestMarketPrice, CONFIG.defaultDiscount);
                     priceInputs.forEach(input => {
-                        input.value = finalPrice;
-                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        setNativeInputValue(input, finalPrice);
                     });
                     if (amountDiv) {
                         const isQuantityCheckbox = amountDiv.querySelector(SELECTORS.quantityCheckbox);
@@ -1352,9 +1361,7 @@
                     );
                     if (!confirmed) { resolve('declined'); return; }
                 }
-                priceInput.value = newPrice;
-                priceInput.dispatchEvent(new Event('input', { bubbles: true }));
-                priceInput.dispatchEvent(new Event('change', { bubbles: true }));
+                setNativeInputValue(priceInput, newPrice);
                 const cityFloor=(buyPrice>0?buyPrice:sellPrice); const borderColor = (cityFloor > 0 && newPrice === cityFloor) ? '#f0a35e' : '#4f8fe8';
                 priceInput.style.border = `2px solid ${borderColor}`;
                     setTimeout(() => priceInput.style.border = '', 1000);
@@ -1515,13 +1522,35 @@
             return null;
         };
         let p=findEditor(); if(p) return {priceDiv:p,opened:false,toggle:null};
-        const controls=[...item.querySelectorAll('button,[role="button"],a')];
-        let toggle=controls.find(el=>/expand|edit|details|open/i.test((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')));
-        if(!toggle) toggle=controls[controls.length-1] || item.querySelector('[class*="arrow"],[class*="chevron"],[class*="expand"]');
+        const toggle=findManageToggle(item);
         if(!toggle) return null;
         toggle.click();
         for(let i=0;i<24;i++){await new Promise(r=>setTimeout(r,75));p=findEditor();if(p)return{priceDiv:p,opened:true,toggle};}
         return null;
+    }
+
+    function findManageToggle(item) {
+        if (!item) return null;
+        const controls=[...item.querySelectorAll('button,[role="button"],a')];
+        let toggle=controls.find(el=>/expand|edit|details|open|collapse|close/i.test((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')));
+        if (!toggle) toggle=item.querySelector('[class*="arrow"],[class*="chevron"],[class*="expand"]');
+        if (!toggle && controls.length) toggle=controls[controls.length-1];
+        return toggle;
+    }
+
+    async function closeManagePriceEditor(itemId, itemName) {
+        const live=findLiveManageItem(itemId,itemName);
+        if(!live) return;
+        const toggle=findManageToggle(live);
+        if(!toggle) return;
+        const container=findSectionContainer(h => h.textContent.includes('Manage your Bazaar') || h.textContent.includes('Manage items') || h.textContent.includes('Manage Bazaar')) || live.parentElement;
+        const before=container ? container.querySelectorAll(SELECTORS.managePriceInput).length : 0;
+        toggle.click();
+        for(let i=0;i<16;i++){
+            await new Promise(r=>setTimeout(r,75));
+            const now=container ? container.querySelectorAll(SELECTORS.managePriceInput).length : 0;
+            if(now<before) break;
+        }
     }
 
     async function updateAllManagePrices() {
@@ -1555,15 +1584,16 @@
             const current=input?parseInt(String(input.value||'').replace(/,/g,''),10)||0:0;
             if(CONFIG.skipDollarItems&&current===1){
                 skippedDollar++;
-                if(editor.opened&&editor.toggle){editor.toggle.click();await new Promise(r=>setTimeout(r,180));}
+                if(editor.opened){await closeManagePriceEditor(job.itemId,job.itemName);await new Promise(r=>setTimeout(r,120));}
                 continue;
             }
             if(updateButton)updateButton.textContent=`Pricing ${done}/${work.length}`;
             const result=await updateManageItemPrice(editor.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false});
             if(result==='updated')updated++;else if(result==='failed')failed++;
-            if(editor.opened&&editor.toggle){
-                editor.toggle.click();
-                await new Promise(r=>setTimeout(r,220));
+            if(editor.opened){
+                await new Promise(r=>setTimeout(r,120));
+                await closeManagePriceEditor(job.itemId,job.itemName);
+                await new Promise(r=>setTimeout(r,120));
             } else {
                 await new Promise(r=>setTimeout(r,120));
             }

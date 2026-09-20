@@ -134,16 +134,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 12,
-      "version": "1.1.5",
+      "detailsRevision": 13,
+      "version": "1.1.6",
       "release": {
-        "version": "1.1.5",
+        "version": "1.1.6",
         "date": "2026-09-20",
         "notes": [
-          "Fixes Update All skipping every second Bazaar row by re-querying each live row before opening it instead of keeping stale Torn DOM references.",
-          "Removes the live Item Market listing as the automatic bulk-pricing reference; prices now use Torn market_value, matching Quick Pricer behavior.",
-          "Keeps the requested Torn City shop floor: if the calculated market-value price is lower than buy_price, buy_price is used.",
-          "Deduplicates manage rows by item ID and clears stale pricing cache from the previous live-market model."
+          "Fixes Manage Bazaar SAVE CHANGES staying disabled by writing price inputs through the native input setter so Torn React state receives the change.",
+          "Fixes giant blank/expanded gaps after Update All by reacquiring the live row and fresh expand/collapse control after every Torn rerender.",
+          "Update All now waits for the editor to collapse before continuing to the next item."
         ]
       }
     },

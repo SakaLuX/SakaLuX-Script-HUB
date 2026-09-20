@@ -1,5 +1,10 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.6 — 2026-09-20
+- Fixed **SAVE CHANGES** remaining disabled after bulk repricing. Price fields are now changed through the native input setter so Torn/React records the edits.
+- Fixed the large blank expanded area left behind by **Update All**. Torn replaces accordion-row DOM nodes while editing, so the old toggle reference became stale; the script now reacquires the live row and fresh collapse control.
+- Waits for each editor to close before processing the next item.
+
 ## v1.1.5 — 2026-09-20
 - Fixed **Update All skipping every second item**. Torn rerenders accordion rows when they open/close, so the batch now stores only stable item IDs and reacquires each live DOM row before processing it.
 - Removed live Item Market listings as the automatic pricing reference because transient/outlier listings produced incorrect bulk prices.
