@@ -32,15 +32,17 @@ if f'// @version      {NEW}' not in s:
     block = s[start:end]
 
     if 'setTimeout(r,2000)' not in block:
-        marker = '            await new Promise(r=>setTimeout(r,100));'
+        # v1.1.13 ends each normal item with the close-editor 140 ms settle wait.
+        # Add the long TornPDA pacing pause AFTER that close has completed.
+        marker = '                await new Promise(r=>setTimeout(r,140));\n            }'
         pos = block.rfind(marker)
         if pos < 0:
-            raise SystemExit('Could not find final per-item settle marker in Update All.')
+            raise SystemExit('Could not find v1.1.13 editor-close settle marker in Update All.')
         insert_at = pos + len(marker)
         pacing = """
-            // Slow the batch down deliberately on TornPDA: Torn/React can rerender
-            // a Manage row after each edit, so wait two full seconds before touching
-            // the next item instead of immediately moving on.
+
+            // TornPDA/React can rerender the Manage list after every edit/close.
+            // Deliberately wait two full seconds before touching the next item.
             if(done < work.length){
                 if(updateButton) updateButton.textContent=`Waiting 2s · ${done}/${work.length}`;
                 await new Promise(r=>setTimeout(r,2000));
@@ -59,10 +61,23 @@ def walk(node):
     if isinstance(node, dict):
         url = str(node.get('downloadUrl', ''))
         name = str(node.get('name', ''))
-        if url.endswith('/SakaLuX-Bazaar-Smart-Pricer.user.js') or name in {'SakaLuX Bazaar Smart Pricer', 'Bazaar Smart Pricer'}:
+        script_id = str(node.get('id', ''))
+        if (url.endswith('/SakaLuX-Bazaar-Smart-Pricer.user.js') or
+            name in {'SakaLuX Bazaar Smart Pricer', 'Bazaar Smart Pricer'} or
+            script_id == 'bazaar-smart-pricer'):
             if node.get('version') != NEW:
                 node['version'] = NEW
                 registry_changed = True
+            node['release'] = {
+                'version': NEW,
+                'date': DATE,
+                'notes': [
+                    'Adds a deliberate 2-second pause between Manage Bazaar Update All items for TornPDA stability.',
+                    'Progress displays Waiting 2s · X/N during the pacing pause.',
+                    'Keeps the v1.1.13 original working arrow-opening flow and existing pricing protections unchanged.'
+                ]
+                }
+            registry_changed = True
         for value in node.values():
             walk(value)
     elif isinstance(node, list):
@@ -85,6 +100,7 @@ for path in (README, GF):
 entry = f"""## v{NEW} — {DATE}
 - Added a **2-second delay between every item** during Manage Bazaar **Update All**.
 - During the pause the chip shows **Waiting 2s · X/N**.
+- Keeps the v1.1.13 original working arrow-opening flow unchanged.
 - Existing pricing calculations and protection rules are unchanged.
 - The slower pacing is intended to reduce TornPDA/React rerender collisions that can leave a batch apparently stuck near the end.
 
@@ -102,14 +118,15 @@ RELEASE.write_text(f"""# SakaLuX Bazaar Smart Pricer v{NEW}
 Release date: **{DATE}**
 
 ## 2-second per-item pacing
-Manage Bazaar **Update All** now deliberately waits **2000 ms between items**. The existing short DOM-settle waits are preserved, and the new pause happens only between one completed item and the next.
+Manage Bazaar **Update All** now deliberately waits **2000 ms between completed items**. The v1.1.13 working arrow-opening flow is left intact; the new pause happens after the editor has been closed and settled, before the next row is acquired.
 
-This makes large runs slower by design but gives Torn's React UI and TornPDA more time to finish row rerenders. It targets stalls like the screenshot where a run remains on `Pricing 29/33`.
+This makes large runs slower by design but gives Torn's React UI and TornPDA more time to finish row rerenders. It targets stalls like a run remaining on `Pricing 29/33`.
 
 ## Progress indicator
-During each pause the chip displays `Waiting 2s · X/N`, then changes back to `Pricing X/N` when the next item begins.
+During each pause the chip displays `Waiting 2s · X/N`, then changes back to `Opening X/N` / `Pricing X/N` when the next item begins.
 
 ## Unchanged
+- Original v1.1.13 Manage arrow targeting
 - Price calculation / discount / markup logic
 - Market reference data logic
 - RW and bonus-item protection
