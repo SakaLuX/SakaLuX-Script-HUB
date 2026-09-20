@@ -1,5 +1,13 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.15 — 2026-09-20
+- Removed the **2-second delay** introduced in v1.1.14.
+- Rebuilt Manage **Update All** so it **never opens or closes item rows**.
+- Bulk mode now edits Torn's already-mounted native price input directly while each row stays collapsed.
+- Fix targets the deterministic **giant blank panel around the 5th item** seen on TornPDA, which points to row/accordion interaction rather than request speed.
+- Kept the 18-second per-item timeout, failure continuation, RW/bonus protection and $1 protection.
+
+
 ## v1.1.14 — 2026-09-20
 - Added a **2-second delay between every item** during Manage Bazaar **Update All**.
 - During the pause the chip shows **Waiting 2s · X/N**.

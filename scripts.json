@@ -134,15 +134,16 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 20,
-      "version": "1.1.14",
+      "detailsRevision": 21,
+      "version": "1.1.15",
       "release": {
-        "version": "1.1.14",
+        "version": "1.1.15",
         "date": "2026-09-20",
         "notes": [
-          "Adds a deliberate 2-second pause between Manage Bazaar Update All items for TornPDA stability.",
-          "Progress displays Waiting 2s · X/N during the pacing pause.",
-          "Keeps the v1.1.13 original working arrow-opening flow and existing pricing protections unchanged."
+          "Removed the v1.1.14 two-second per-item delay.",
+          "Manage Update All no longer opens or closes Torn item rows at all.",
+          "Bulk pricing now writes directly to each collapsed row native price input, preventing the recurring giant blank panel around item 5 on TornPDA.",
+          "Keeps per-item timeout protection, RW/bonus/$1 safeguards and manual SAVE CHANGES confirmation."
         ]
       }
     },
