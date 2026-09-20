@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.0.1
+// @version      1.0.2
 // @description  Smart Bazaar pricing for Torn: market value, lowest market listing, undercut rules, add-items and manage-bazaar quick pricing.
 // @author       SakaLuX [2380374]
 // @license      MIT
@@ -25,7 +25,7 @@
   'use strict';
 
   const NAME='SakaLuX Bazaar Smart Pricer';
-  const VERSION='1.0.1';
+  const VERSION='1.0.2';
   const PREFIX='sl-bsp';
   const K='SakaLuX_BAZAAR_SMART_PRICER_';
   const qs=(s,r=document)=>r.querySelector(s);
@@ -46,6 +46,8 @@
     ignoreBelow:Number(get('ignoreBelow',1))||1,
     warnNpc:get('warnNpc',true),
     autoDecorate:get('autoDecorate',true),
+    skipRwWeapons:get('skipRwWeapons',true),
+    skipBonusItems:get('skipBonusItems',true),
     cacheMinutes:Number(get('cacheMinutes',5))||5
   };
 
@@ -71,8 +73,8 @@
     if(qs('#'+PREFIX+'-style'))return;
     const s=document.createElement('style');s.id=PREFIX+'-style';
     s.textContent=`
-#${PREFIX}-launcher{position:fixed;right:12px;bottom:104px;z-index:2147482500;border:1px solid #50637a;background:#101923;color:#fff;border-radius:14px;padding:9px 12px;font:800 12px/1.2 Arial,sans-serif;box-shadow:0 8px 26px rgba(0,0,0,.4);cursor:pointer}
-#${PREFIX}-launcher b{color:#dfbd61}
+#${PREFIX}-launcher{position:fixed;right:10px;bottom:104px;z-index:2147482500;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.2);background:#7a6bd6;color:#fff;border-radius:50%;padding:0;font:900 30px/1 Arial,sans-serif;box-shadow:0 8px 26px rgba(0,0,0,.35);cursor:pointer;overflow:hidden}
+#${PREFIX}-launcher:active{transform:scale(.96)}
 #${PREFIX}-panel{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.64);display:none;align-items:flex-start;justify-content:center;padding:8px;box-sizing:border-box}
 #${PREFIX}-panel.open{display:flex}
 #${PREFIX}-card{width:min(520px,100%);max-height:calc(100dvh - 16px);overflow:auto;background:#0e151e;color:#edf3fa;border:1px solid #34465b;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.55);font:13px/1.4 Arial,sans-serif}
@@ -90,7 +92,7 @@
 .${PREFIX}-rowbtn{margin-left:6px;border:1px solid #49627e;background:#18283a;color:#fff;border-radius:8px;padding:4px 7px;font:800 10px Arial,sans-serif;white-space:nowrap}
 #${PREFIX}-toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,12px);opacity:0;pointer-events:none;z-index:2147483647;max-width:min(420px,92vw);background:#111b27;color:#fff;border:1px solid #3c526c;border-radius:10px;padding:9px 12px;font:700 12px Arial;transition:.18s}
 #${PREFIX}-toast.show{opacity:1;transform:translate(-50%,0)}#${PREFIX}-toast[data-type="error"]{border-color:#b34d57}#${PREFIX}-toast[data-type="ok"]{border-color:#438a63}
-@media(max-width:700px){#${PREFIX}-launcher{right:8px;bottom:92px}.sl-bsp-row{grid-template-columns:1fr}.sl-bsp-actions{grid-template-columns:1fr}}
+@media(max-width:700px){#${PREFIX}-launcher{right:8px;bottom:92px;width:48px;height:48px;font-size:28px}.sl-bsp-row{grid-template-columns:1fr}.sl-bsp-actions{grid-template-columns:1fr}}
 `;
     document.documentElement.appendChild(s);
   }
@@ -132,6 +134,22 @@
       const v=Number(String(i.value||'').replace(/[,\s$]/g,''));if(v>100)s+=1;return s;
     };
     return inputs.slice().sort((a,b)=>score(b)-score(a))[0]||null;
+  }
+
+  function bonusInfo(row){
+    const icons=qsa('ul.bonuses-wrap li.bonus i[class*="bonus-attachment-"], i[class*="bonus-attachment-"]',row)
+      .filter(i=>!String(i.className||'').includes('blank-bonus'));
+    const names=icons.map(i=>{const m=String(i.className||'').match(/bonus-attachment-([a-z0-9-]+)/i);return m?.[1]||'bonus';});
+    const rarity=!!row.querySelector('div.image-wrap[class*="glow-"], [class*="glow-yellow"], [class*="glow-orange"], [class*="glow-red"]');
+    const bonusWrap=!!row.querySelector('ul.bonuses-wrap li.bonus:not(.blank-bonus), [class*="bonuses"] [class*="bonus"]');
+    return {hasBonus:icons.length>0||bonusWrap,isRw:icons.length>0||rarity,names};
+  }
+
+  function skipReason(entry){
+    const info=bonusInfo(entry.row);
+    if(settings.skipRwWeapons&&info.isRw)return 'RW weapon';
+    if(settings.skipBonusItems&&info.hasBonus)return info.names.length?`bonus item (${info.names.join(', ')})`:'bonus item';
+    return '';
   }
 
   function pickQuantityControl(row){
@@ -254,7 +272,7 @@
   }
 
   async function priceEntry(entry,{silent=false}={}){
-    try{const r=await computePrice(entry.id);setNativeValue(entry.input,r.price);entry.input.dataset.slBspPriced=String(r.price);fillQuantity(entry);state.priced++;if(settings.warnNpc&&r.item.sellPrice>0&&r.price<r.item.sellPrice&&!silent)toast(`${r.item.name}: ${money(r.price)} is below NPC ${money(r.item.sellPrice)}`,'error');return true;}
+    try{const reason=skipReason(entry);if(reason){state.skipped++;entry.row.dataset.slBspSkip=reason;if(!silent)toast(`Skipped item #${entry.id}: ${reason}`,'error');return false;}const r=await computePrice(entry.id);setNativeValue(entry.input,r.price);entry.input.dataset.slBspPriced=String(r.price);fillQuantity(entry);state.priced++;if(settings.warnNpc&&r.item.sellPrice>0&&r.price<r.item.sellPrice&&!silent)toast(`${r.item.name}: ${money(r.price)} is below NPC ${money(r.item.sellPrice)}`,'error');return true;}
     catch(e){state.skipped++;if(!silent)toast(`Skipped item #${entry.id}: ${e.message}`,'error');return false;}
   }
 
@@ -276,11 +294,11 @@
     }
   }
 
-  function launcherText(temp=''){const b=qs('#'+PREFIX+'-launcher');if(!b)return;b.innerHTML=temp?esc(temp):'<b>S</b> Smart Pricer';}
+  function launcherText(temp=''){const b=qs('#'+PREFIX+'-launcher');if(!b)return;b.textContent=temp?temp.replace(/^Pricing\s*/i,''):'+';b.style.fontSize=temp?'11px':'';}
 
   function injectLauncher(){
     if(!onBazaar()){qs('#'+PREFIX+'-launcher')?.remove();return;}if(qs('#'+PREFIX+'-launcher'))return;
-    const b=document.createElement('button');b.id=PREFIX+'-launcher';b.type='button';b.innerHTML='<b>S</b> Smart Pricer';b.onclick=openPanel;document.documentElement.appendChild(b);
+    const b=document.createElement('button');b.id=PREFIX+'-launcher';b.type='button';b.textContent='+';b.title='SakaLuX Bazaar Smart Pricer';b.setAttribute('aria-label',b.title);b.onclick=openPanel;document.documentElement.appendChild(b);
   }
 
   function panelHtml(){
@@ -292,6 +310,8 @@
       <label class="sl-bsp-check"><input id="${PREFIX}-ignore" type="checkbox"> Ignore ultra-low / storage listings</label>
       <label class="sl-bsp-check"><input id="${PREFIX}-npc" type="checkbox"> Warn when calculated price is below NPC sell price</label>
       <label class="sl-bsp-check"><input id="${PREFIX}-decor" type="checkbox"> Add S PRICE button beside detected Bazaar price fields</label>
+      <label class="sl-bsp-check"><input id="${PREFIX}-skiprw" type="checkbox"> Skip Ranked War (RW) weapons</label>
+      <label class="sl-bsp-check"><input id="${PREFIX}-skipbonus" type="checkbox"> Skip items / weapons with bonus icons</label>
       <div class="sl-bsp-actions"><button id="${PREFIX}-save" class="sl-bsp-primary" type="button">SAVE SETTINGS</button><button id="${PREFIX}-priceall" type="button">PRICE ALL VISIBLE</button><button id="${PREFIX}-test" type="button">TEST API</button><button id="${PREFIX}-clear" class="sl-bsp-danger" type="button">CLEAR CACHE</button></div><div id="${PREFIX}-status"></div></div></div>`;
   }
 
@@ -299,14 +319,14 @@
     if(qs('#'+PREFIX+'-panel'))return;
     const p=document.createElement('div');p.id=PREFIX+'-panel';p.innerHTML=panelHtml();document.documentElement.appendChild(p);
     qs('.sl-bsp-x',p).onclick=()=>p.classList.remove('open');p.addEventListener('click',e=>{if(e.target===p)p.classList.remove('open');});
-    qs('#'+PREFIX+'-mode',p).value=settings.pricingMode;qs('#'+PREFIX+'-utype',p).value=settings.undercutType;qs('#'+PREFIX+'-ignore',p).checked=settings.ignoreLow;qs('#'+PREFIX+'-npc',p).checked=settings.warnNpc;qs('#'+PREFIX+'-decor',p).checked=settings.autoDecorate;
-    qs('#'+PREFIX+'-save',p).onclick=()=>{settings.apiKey=qs('#'+PREFIX+'-api',p).value.trim();settings.pricingMode=qs('#'+PREFIX+'-mode',p).value;settings.marketDiscount=Math.max(0,Number(qs('#'+PREFIX+'-discount',p).value)||0);settings.undercutType=qs('#'+PREFIX+'-utype',p).value;settings.undercutValue=Math.max(0,Number(qs('#'+PREFIX+'-uvalue',p).value)||0);settings.ignoreBelow=Math.max(0,Number(qs('#'+PREFIX+'-ignorebelow',p).value)||0);settings.cacheMinutes=Math.max(1,Number(qs('#'+PREFIX+'-cache',p).value)||5);settings.ignoreLow=qs('#'+PREFIX+'-ignore',p).checked;settings.warnNpc=qs('#'+PREFIX+'-npc',p).checked;settings.autoDecorate=qs('#'+PREFIX+'-decor',p).checked;save();itemCache.clear();marketCache.clear();toast('Settings saved.','ok');scan(true);};
+    qs('#'+PREFIX+'-mode',p).value=settings.pricingMode;qs('#'+PREFIX+'-utype',p).value=settings.undercutType;qs('#'+PREFIX+'-ignore',p).checked=settings.ignoreLow;qs('#'+PREFIX+'-npc',p).checked=settings.warnNpc;qs('#'+PREFIX+'-decor',p).checked=settings.autoDecorate;qs('#'+PREFIX+'-skiprw',p).checked=settings.skipRwWeapons;qs('#'+PREFIX+'-skipbonus',p).checked=settings.skipBonusItems;
+    qs('#'+PREFIX+'-save',p).onclick=()=>{settings.apiKey=qs('#'+PREFIX+'-api',p).value.trim();settings.pricingMode=qs('#'+PREFIX+'-mode',p).value;settings.marketDiscount=Math.max(0,Number(qs('#'+PREFIX+'-discount',p).value)||0);settings.undercutType=qs('#'+PREFIX+'-utype',p).value;settings.undercutValue=Math.max(0,Number(qs('#'+PREFIX+'-uvalue',p).value)||0);settings.ignoreBelow=Math.max(0,Number(qs('#'+PREFIX+'-ignorebelow',p).value)||0);settings.cacheMinutes=Math.max(1,Number(qs('#'+PREFIX+'-cache',p).value)||5);settings.ignoreLow=qs('#'+PREFIX+'-ignore',p).checked;settings.warnNpc=qs('#'+PREFIX+'-npc',p).checked;settings.autoDecorate=qs('#'+PREFIX+'-decor',p).checked;settings.skipRwWeapons=qs('#'+PREFIX+'-skiprw',p).checked;settings.skipBonusItems=qs('#'+PREFIX+'-skipbonus',p).checked;save();itemCache.clear();marketCache.clear();toast('Settings saved.','ok');scan(true);};
     qs('#'+PREFIX+'-priceall',p).onclick=priceAll;qs('#'+PREFIX+'-clear',p).onclick=()=>{itemCache.clear();marketCache.clear();toast('Runtime cache cleared.','ok');refreshStatus();};
     qs('#'+PREFIX+'-test',p).onclick=async()=>{settings.apiKey=qs('#'+PREFIX+'-api',p).value.trim();if(!settings.apiKey)return toast('Enter an API key.','error');try{await request(`https://api.torn.com/user/?selections=basic&key=${encodeURIComponent(settings.apiKey)}`);toast('API key works.','ok');}catch(e){toast('API test failed: '+e.message,'error');}};
     refreshStatus();
   }
 
-  function refreshStatus(){const s=qs('#'+PREFIX+'-status');if(!s)return;const rows=onBazaar()?findRows().length:0;s.innerHTML=`Page: <b>${onBazaar()?'Bazaar':'outside Bazaar'}</b> · detected price fields: <b>${rows}</b><br>Mode: <b>${esc(settings.pricingMode)}</b> · API: <b>${settings.apiKey?'saved':'missing'}</b> · last priced: <b>${state.priced}</b> · skipped: <b>${state.skipped}</b>`;}
+  function refreshStatus(){const s=qs('#'+PREFIX+'-status');if(!s)return;const rows=onBazaar()?findRows().length:0;s.innerHTML=`Page: <b>${onBazaar()?'Bazaar':'outside Bazaar'}</b> · detected price fields: <b>${rows}</b><br>Mode: <b>${esc(settings.pricingMode)}</b> · API: <b>${settings.apiKey?'saved':'missing'}</b> · RW skip: <b>${settings.skipRwWeapons?'ON':'OFF'}</b> · Bonus skip: <b>${settings.skipBonusItems?'ON':'OFF'}</b> · last priced: <b>${state.priced}</b> · skipped: <b>${state.skipped}</b>`;}
   function openPanel(){ensurePanel();qs('#'+PREFIX+'-panel').classList.add('open');refreshStatus();}
   function scan(force=false){if(!settings.enabled)return;if(!onBazaar()){qs('#'+PREFIX+'-launcher')?.remove();qs('#'+PREFIX+'-addbar')?.remove();return;}injectLauncher();injectAddItemsQuickFill();if(settings.autoDecorate)decorateRows();state.lastScan=Date.now();if(force)refreshStatus();}
 

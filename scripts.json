@@ -134,15 +134,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 3,
-      "version": "1.0.1",
+      "detailsRevision": 4,
+      "version": "1.0.2",
       "release": {
-        "version": "1.0.1",
+        "version": "1.0.2",
         "date": "2026-09-20",
         "notes": [
-          "QUICK FILL on Add Items now fills both quantity and price, matching the established Torn Bazaar Quick Pricer workflow.",
-          "Quantity uses the visible stack amount (xN) or selects Torn’s quantity checkbox when that control is present.",
-          "Per-row S PRICE also fills quantity on Add Items while Manage/Reprice keeps price-focused behavior."
+          "Replaces the right-side Smart Pricer pill with a compact circular + button.",
+          "Adds default-on protection to skip Ranked War weapons.",
+          "Adds default-on protection to skip items/weapons with Torn bonus icons so base market prices are not written to special gear."
         ]
       }
     },
