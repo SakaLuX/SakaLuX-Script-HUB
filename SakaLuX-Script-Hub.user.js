@@ -698,9 +698,9 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
                 "detailsRevision": 23,
-                "version": "1.1.6",
+                "version": "1.1.7",
                 "release": {
-                    "version": "1.1.6",
+                    "version": "1.1.7",
                     "date": "2026-09-20",
                     "notes": [
                         "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
