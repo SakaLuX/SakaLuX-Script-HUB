@@ -1,0 +1,32 @@
+name: Fix Smart Pricer Hub detection v1.1.7
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/fix_pricer_hub_detection_v117.py'
+      - '.github/workflows/fix-pricer-hub-detection-v117.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply Smart Pricer Hub detection fix
+        run: python3 .github/scripts/fix_pricer_hub_detection_v117.py
+      - name: Syntax check
+        run: node --check SakaLuX-Bazaar-Smart-Pricer.user.js
+      - name: Commit fix
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Bazaar-Smart-Pricer.user.js
+          git commit -m "Fix Smart Pricer Hub installation detection"
+          git push
