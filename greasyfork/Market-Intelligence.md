@@ -20,7 +20,7 @@
 
 ## Current release note
 
-**v1.17.44 — Bazaar add-item overlay isolation**
+**v1.17.44 — Release metadata synchronization**
 - Stops Market Intelligence estimate badges from being injected into Bazaar add-item/sale rows that contain quantity and price editors.
 - Removes already-rendered MI estimate badges as soon as the Bazaar sale picker is detected, including Torn SPA/TornPDA transitions.
 - Keeps normal Items-page market estimates unchanged outside Bazaar sale-entry controls.

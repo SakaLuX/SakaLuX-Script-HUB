@@ -2,7 +2,7 @@
 
 Date: 2026-09-18
 
-Scanned 12 active top-level userscripts.
+Scanned 13 active top-level userscripts.
 
 Result: **PASS** — no current SakaLuX userscript directly changes the font size of Torn native Points or Merits counters. Script-owned widgets such as `#sl-mi-points-bar` are separate UI and do not target Torn native counters.
 
@@ -11,6 +11,7 @@ Hub fallback behavior: **PASS** — the floating launcher now depends on whether
 Scanned files:
 - `private-module.user.js`
 - `SakaLuX-Account-Auditor.user.js`
+- `SakaLuX-Bazaar-Smart-Pricer.user.js`
 - `SakaLuX-Bazaar-Thanker-PDA.user.js`
 - `SakaLuX-Chat-Intelligence.user.js`
 - `SakaLuX-Company-Intelligence-v1.0.0.user.js`
