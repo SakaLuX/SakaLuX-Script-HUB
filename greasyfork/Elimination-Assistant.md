@@ -5,6 +5,18 @@
 ## Current version
 **v1.3.45**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v1.3.45**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
+- GreasyFork page: https://greasyfork.org/scripts/594921
+- Install/download URL: https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js
+- Update metadata URL: https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js
+
 ## What it does
 - Loads Eliminations teams and available target data from Torn API v2.
 - Loads large teams in rotating groups of up to 500 players with LOAD NEXT.

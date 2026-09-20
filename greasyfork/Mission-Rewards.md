@@ -5,6 +5,18 @@
 ## Current version
 **v1.0.44**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v1.0.44**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md
+- GreasyFork page: https://greasyfork.org/scripts/592711
+- Install/download URL: https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js
+- Update metadata URL: https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js
+
 ## What it does
 - Enhances Torn's Mission Shop with practical reward information for PDA and Tampermonkey users.
 - Shows estimated market value and value per mission credit.

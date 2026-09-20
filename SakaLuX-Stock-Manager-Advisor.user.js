@@ -11,6 +11,8 @@
 // @run-at       document-end
 // @downloadURL  https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.user.js
 // @updateURL    https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js
+// @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
+// @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
 /* SakaLuX Canonical Installed Version — BEGIN */

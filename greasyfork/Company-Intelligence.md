@@ -5,6 +5,18 @@
 ## Current version
 **v1.8.39**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v1.8.39**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
+- GreasyFork page: https://greasyfork.org/scripts/595873
+- Install/download URL: https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js
+- Update metadata URL: https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js
+
 ## What it does
 - Reliable Torn API v2 sync with classic API and local company-cache fallbacks.
 - Employee dashboard, work-stat position advisor, train tracking, offer comparison and history.

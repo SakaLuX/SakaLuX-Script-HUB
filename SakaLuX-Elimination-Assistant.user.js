@@ -12,6 +12,8 @@
 // @connect      ffscouter.com
 // @downloadURL  https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js
 // @updateURL    https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js
+// @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
+// @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
 /* SakaLuX Canonical Installed Version — BEGIN */

@@ -5,6 +5,18 @@
 ## Current version
 **v5.3.42**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v5.3.42**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
+- GreasyFork page: https://greasyfork.org/scripts/592388
+- Install/download URL: https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js
+- Update metadata URL: https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js
+
 ## What it does
 - Detects Bazaar purchase events and groups purchases by buyer.
 - Generates thank-you messages with customizable Bazaar name and message text.

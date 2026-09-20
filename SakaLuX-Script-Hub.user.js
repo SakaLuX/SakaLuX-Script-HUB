@@ -11,8 +11,10 @@
 // @connect      raw.githubusercontent.com
 // @connect      api.torn.com
 // @license      All Rights Reserved
-// @downloadURL https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js
-// @updateURL https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js
+// @downloadURL  https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js
+// @updateURL    https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js
+// @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
+// @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
 /*

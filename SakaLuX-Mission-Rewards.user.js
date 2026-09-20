@@ -10,8 +10,10 @@
 // @connect      api.torn.com
 // @license      All Rights Reserved
 // @run-at       document-end
-// @downloadURL https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
-// @updateURL https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
+// @downloadURL  https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js
+// @updateURL    https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js
+// @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
+// @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
 /* SakaLuX Canonical Installed Version — BEGIN */

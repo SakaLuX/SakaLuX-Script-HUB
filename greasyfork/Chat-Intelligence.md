@@ -5,6 +5,18 @@
 ## Current version
 **v1.2.20**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v1.2.20**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
+- GreasyFork page: Not currently registered with a verified GreasyFork script ID.
+- Install/download URL: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
+- Update metadata URL: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
+
 ## What it does
 - Enhances Torn chat with SakaLuX chat intelligence features.
 - Keeps its standalone behavior available when Script Hub is not installed.

@@ -9,8 +9,10 @@
 // @grant        GM_xmlhttpRequest
 // @connect      api.torn.com
 // @license      All Rights Reserved
-// @downloadURL https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js
-// @updateURL https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js
+// @downloadURL  https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js
+// @updateURL    https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js
+// @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
+// @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
 /* SakaLuX Canonical Installed Version — BEGIN */

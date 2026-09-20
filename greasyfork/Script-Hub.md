@@ -5,6 +5,18 @@
 ## Current version
 **v1.9.83**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v1.9.83**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
+- GreasyFork page: https://greasyfork.org/scripts/592699
+- Install/download URL: https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js
+- Update metadata URL: https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js
+
 ## What it does
 - Automatically discovers active SakaLuX add-ons from the central `scripts.json` registry.
 - Detects installed, missing and outdated registered SakaLuX add-ons.

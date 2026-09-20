@@ -5,6 +5,18 @@
 ## Current version
 **v1.3.50**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v1.3.50**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
+- GreasyFork page: https://greasyfork.org/scripts/592698
+- Install/download URL: https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js
+- Update metadata URL: https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js
+
 ## What it does
 - Tracks Enhancers and Enhancer Relics in Torn.
 - Shows owned/missing status and quantities.

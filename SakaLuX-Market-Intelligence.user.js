@@ -14,6 +14,8 @@
 // @run-at       document-end
 // @downloadURL  https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js
 // @updateURL    https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js
+// @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
+// @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
 /* SakaLuX Canonical Installed Version — BEGIN */

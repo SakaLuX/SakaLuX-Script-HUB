@@ -5,6 +5,18 @@
 ## Current version
 **v0.9.936**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v0.9.936**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
+- GreasyFork page: Not currently registered with a verified GreasyFork script ID.
+- Install/download URL: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
+- Update metadata URL: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
+
 ## What it does
 SakaLuX Suite combines multiple Torn helper modules into one userscript installation.
 

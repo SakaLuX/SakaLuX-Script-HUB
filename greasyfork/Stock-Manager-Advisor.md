@@ -5,6 +5,18 @@
 ## Current version
 **v0.8.10**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v0.8.10**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
+- GreasyFork page: https://greasyfork.org/scripts/596192
+- Install/download URL: https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.user.js
+- Update metadata URL: https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js
+
 ## What it does
 - Stock vault target selection directly from Torn Stocks.
 - Vault Max / Vault Keep, Withdraw / Withdraw All and Benefit Lock protected-share floors.

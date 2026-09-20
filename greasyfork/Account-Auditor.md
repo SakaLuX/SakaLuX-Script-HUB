@@ -5,6 +5,18 @@
 ## Current version
 **v1.3.17**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v1.3.17**
+- License: **MIT**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Account-Auditor.md
+- GreasyFork page: Not currently registered with a verified GreasyFork script ID.
+- Install/download URL: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js
+- Update metadata URL: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js
+
 ## What it does
 - Builds a structured read-only Torn account snapshot using supported Torn API data.
 - Creates split snapshot files including summary, finance, combat, crimes, messages, events, logs and other account sections.

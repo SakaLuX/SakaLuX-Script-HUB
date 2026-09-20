@@ -5,6 +5,18 @@
 ## Current version
 **v1.17.45**
 
+
+## Repository synchronization
+
+- Verified: **2026-09-20**
+- Canonical version: **v1.17.45**
+- License: **All Rights Reserved**
+- Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
+- GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
+- GreasyFork page: https://greasyfork.org/scripts/592781
+- Install/download URL: https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js
+- Update metadata URL: https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js
+
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
 - Adds Item Market Intelligence with live/cached price information, local history, trends and BUY NOW / FAIR / WAIT / LEARNING signals.
