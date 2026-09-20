@@ -1,1 +1,0 @@
-MIT-license inspiration/behavior reference: Torn Bazaar Quick Pricer + Smart Bazaar Pricing Panel by R4G3RUNN3R [3877028], based on Zedtrooper [3028329] + community extensions.
