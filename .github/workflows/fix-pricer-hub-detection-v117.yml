@@ -17,9 +17,13 @@ jobs:
           fetch-depth: 0
       - name: Apply Smart Pricer Hub detection fix
         run: python3 .github/scripts/fix_pricer_hub_detection_v117.py
+      - name: Synchronize registry, Hub fallback and GreasyFork docs
+        run: python3 .github/scripts/normalize_installed_versions.py
       - name: Syntax check
-        run: node --check SakaLuX-Bazaar-Smart-Pricer.user.js
-      - name: Commit fix
+        run: |
+          node --check SakaLuX-Bazaar-Smart-Pricer.user.js
+          node --check SakaLuX-Script-Hub.user.js
+      - name: Commit synchronized fix
         run: |
           if git diff --quiet; then
             echo "No changes needed."
@@ -27,6 +31,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add SakaLuX-Bazaar-Smart-Pricer.user.js
-          git commit -m "Fix Smart Pricer Hub installation detection"
+          git add SakaLuX-Bazaar-Smart-Pricer.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/*.md
+          git commit -m "Synchronize Smart Pricer Hub detection metadata"
           git push
