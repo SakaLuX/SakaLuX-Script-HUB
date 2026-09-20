@@ -1,0 +1,1 @@
+Install from the canonical raw userscript path in the repository. Open Torn Bazaar, launch S Smart Pricer, add a read-only Torn API key, save settings, and price individual or visible rows.
