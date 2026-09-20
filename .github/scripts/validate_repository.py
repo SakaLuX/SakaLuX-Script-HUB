@@ -1,4 +1,4 @@
-"""Read-only validation of active workflows, userscripts and Hub registry."""
+"""Read-only validation of active workflows, userscripts, Hub registry and publication metadata."""
 from pathlib import Path
 import json
 import re
