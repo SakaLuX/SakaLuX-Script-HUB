@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.12
+// @version      1.1.13
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.12';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.13';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1526,148 +1526,22 @@
             }
             return null;
         };
-        let p=findEditor(); if(p) return {priceDiv:p,opened:false,toggle:null};
-        const toggle=findManageToggle(item);
+        let p=findEditor();
+        if(p) return {priceDiv:p,opened:false,toggle:null};
+
+        // ORIGINAL v1.1.1 selector path — intentionally restored.
+        const controls=[...item.querySelectorAll('button,[role="button"],a')];
+        let toggle=controls.find(el=>/expand|edit|details|open/i.test((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')));
+        if(!toggle) toggle=controls[controls.length-1] || item.querySelector('[class*="arrow"],[class*="chevron"],[class*="expand"]');
         if(!toggle) return null;
-        if(!clickExactManageArrow(item)) return null;
-        for(let i=0;i<28;i++){await new Promise(r=>setTimeout(r,75));p=findEditor();if(p)return{priceDiv:p,opened:true,toggle};}
-        return null;
-    }
 
-    function getManagePanelRect() {
-        const container=findSectionContainer(h =>
-            h.textContent.includes('Manage your Bazaar') ||
-            h.textContent.includes('Manage items') ||
-            h.textContent.includes('Manage Bazaar')
-        );
-        return container?.getBoundingClientRect?.() || null;
-    }
-
-    function getExactManageArrowTarget(item) {
-        if (!item) return null;
-        const ir=item.getBoundingClientRect();
-        const pr=getManagePanelRect();
-        if(!pr) return null;
-
-        // TornPDA layout: far-right chevron center is ~28-32 px left of the
-        // Manage panel edge. Probe only this narrow column. The eye is ~85-95 px
-        // left of the panel edge, so it can never be selected here.
-        const y=Math.round(ir.top + Math.min(ir.height,64)/2);
-        for(const off of [28,30,26,32,24,34]){
-            const x=Math.round(pr.right-off);
-            const stack=document.elementsFromPoint(x,y);
-            for(const raw of stack){
-                if(!raw || raw===document.documentElement || raw===document.body) continue;
-                let el=raw;
-                for(let d=0;d<5&&el;d++,el=el.parentElement){
-                    const r=el.getBoundingClientRect?.();
-                    if(!r||!r.width||!r.height) continue;
-                    // Hard geometry guard: target must physically occupy the last
-                    // 55px of the Manage panel and overlap this item's row.
-                    if(r.right < pr.right-58 || r.left > pr.right+2) continue;
-                    if(r.bottom < ir.top || r.top > ir.bottom) continue;
-                    const meta=((el.getAttribute?.('aria-label')||'')+' '+(el.title||'')+' '+String(el.className||'')).toLowerCase();
-                    if(/eye|view|preview|inspect|details/.test(meta)) continue;
-                    const clickable = el.matches?.('button,a,[role="button"],[tabindex]') ||
-                        /arrow|chevron|expand|toggle/.test(meta) ||
-                        getComputedStyle(el).cursor==='pointer';
-                    if(clickable) return el;
-                }
-            }
-        }
-        return null;
-    }
-
-    function clickExactManageArrow(item) {
-        const target=getExactManageArrowTarget(item);
-        if(!target) return false;
-        const r=target.getBoundingClientRect();
-        const x=Math.round(r.left+r.width/2), y=Math.round(r.top+r.height/2);
-        for(const type of ['pointerdown','mousedown','pointerup','mouseup','click']){
-            const C=type.startsWith('pointer')?PointerEvent:MouseEvent;
-            try{target.dispatchEvent(new C(type,{bubbles:true,cancelable:true,clientX:x,clientY:y,button:0,buttons:type.includes('down')?1:0,pointerType:'mouse'}));}
-            catch{target.dispatchEvent(new MouseEvent(type,{bubbles:true,cancelable:true,clientX:x,clientY:y,button:0}));}
-        }
-        return true;
-    }
-
-    function findManageToggle(item) {
-        // Kept as compatibility wrapper for close/open helpers.
-        return getExactManageArrowTarget(item);
-    }
-
-    async function closeManagePriceEditor(itemId, itemName) {
-        const live=findLiveManageItem(itemId,itemName);
-        if(!live) return;
-        const currentInput=live.querySelector(SELECTORS.managePriceInput);
-        if(!currentInput) return; // already closed by Torn
-        const toggle=findManageToggle(live);
-        if(!toggle) return;
-        if(!clickExactManageArrow(live)) return;
-        for(let i=0;i<20;i++){
-            await new Promise(r=>setTimeout(r,75));
-            const refreshed=findLiveManageItem(itemId,itemName);
-            if(!refreshed || !refreshed.querySelector(SELECTORS.managePriceInput)) break;
-        }
-    }
-
-    function findManageRowArrow(item) {
-        if(!item) return null;
-        const rowRect=item.getBoundingClientRect();
-        const headerBottom=rowRect.top+Math.min(64, Math.max(48,rowRect.height));
-        const all=[...item.querySelectorAll('*')];
-        const pointer=all.filter(el=>{
-            const r=el.getBoundingClientRect();
-            if(!r.width||!r.height) return false;
-            if(r.top<rowRect.top-2 || r.top>headerBottom) return false;
-            if(r.right < rowRect.right-82) return false;
-            const meta=((el.getAttribute?.('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
-            if(/eye|view|preview|inspect/.test(meta)) return false;
-            try{return getComputedStyle(el).cursor==='pointer';}catch{return false;}
-        });
-        if(pointer.length){
-            pointer.sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right || a.getBoundingClientRect().width-b.getBoundingClientRect().width);
-            return pointer[0];
-        }
-        const fallback=[...item.querySelectorAll('button,a,[role="button"],[tabindex],[class*="arrow"],[class*="chevron"]')].filter(el=>{
-            const r=el.getBoundingClientRect();
-            if(!r.width||!r.height||r.right<rowRect.right-82||r.top>headerBottom) return false;
-            const meta=((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
-            return !/eye|view|preview|inspect/.test(meta);
-        });
-        fallback.sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right);
-        return fallback[0]||null;
-    }
-
-    async function openManageEditorForJob(itemId,itemName){
-        const live=findLiveManageItem(itemId,itemName);
-        if(!live) return null;
-        let input=live.querySelector(SELECTORS.managePriceInput);
-        if(input) return {item:live,input,opened:false};
-        const arrow=findManageRowArrow(live);
-        if(!arrow) return null;
-        arrow.click();
+        toggle.click();
         for(let i=0;i<28;i++){
             await new Promise(r=>setTimeout(r,75));
-            const fresh=findLiveManageItem(itemId,itemName);
-            input=fresh?.querySelector(SELECTORS.managePriceInput)||null;
-            if(input) return {item:fresh,input,opened:true};
+            p=findEditor();
+            if(p) return {priceDiv:p,opened:true,toggle};
         }
         return null;
-    }
-
-    async function closeManageEditorForJob(itemId,itemName){
-        const live=findLiveManageItem(itemId,itemName);
-        if(!live || !live.querySelector(SELECTORS.managePriceInput)) return true;
-        const arrow=findManageRowArrow(live);
-        if(!arrow) return false;
-        arrow.click();
-        for(let i=0;i<24;i++){
-            await new Promise(r=>setTimeout(r,75));
-            const fresh=findLiveManageItem(itemId,itemName);
-            if(!fresh || !fresh.querySelector(SELECTORS.managePriceInput)) return true;
-        }
-        return false;
     }
 
     async function updateAllManagePrices() {
@@ -1678,37 +1552,61 @@
         if(items.length===0){restoreButton();qpToast('No items found to update!','error');return;}
         const moreBelow=mayHaveUnloadedItems(items);
         let skippedRw=0,skippedBonus=0,skippedDollar=0,updated=0,failed=0,done=0;
-        const work=[]; const seenIds=new Set();
+        const work=[];
+        const seenIds=new Set();
+
         for(const item of items){
-            const image=item.querySelector('img'); if(!image) continue;
-            const itemId=getItemIdFromImage(image); if(!itemId||seenIds.has(itemId)) continue;
+            const image=item.querySelector('img'); if(!image)continue;
+            const itemId=getItemIdFromImage(image); if(!itemId||seenIds.has(itemId))continue;
             seenIds.add(itemId);
             if(CONFIG.skipRwWeapons&&getRWBonusInfo(item).isRanked){skippedRw++;continue;}
             if(CONFIG.skipBonusItems&&hasAnyBonus(item)){skippedBonus++;continue;}
             work.push({itemId,itemName:getItemName(item)});
         }
+
         for(const job of work){
             done++;
             if(updateButton)updateButton.textContent=`Opening ${done}/${work.length}`;
-            const editor=await openManageEditorForJob(job.itemId,job.itemName);
+
+            // Reacquire row each pass because Torn can rerender after close.
+            const liveItem=findLiveManageItem(job.itemId,job.itemName);
+            if(!liveItem){failed++;continue;}
+
+            let editor=null;
+            try{
+                editor=await Promise.race([
+                    ensureManagePriceEditor(liveItem),
+                    new Promise(resolve=>setTimeout(()=>resolve(null),2600))
+                ]);
+            }catch(e){console.error('[SakaLuXBazaarSmartPricer] Open editor failed:',e);}
             if(!editor){failed++;continue;}
-            const priceDiv=editor.input.closest('div[class*="price"]')||editor.input.parentElement;
-            const current=parseInt(String(editor.input.value||'').replace(/,/g,''),10)||0;
+
+            const input=editor.priceDiv.querySelector(SELECTORS.managePriceInput);
+            const current=input?parseInt(String(input.value||'').replace(/,/g,''),10)||0:0;
             if(CONFIG.skipDollarItems&&current===1){
                 skippedDollar++;
-                if(editor.opened) await closeManageEditorForJob(job.itemId,job.itemName);
+                if(editor.opened&&editor.toggle){try{editor.toggle.click();}catch{}}
+                await new Promise(r=>setTimeout(r,120));
                 continue;
             }
+
             if(updateButton)updateButton.textContent=`Pricing ${done}/${work.length}`;
-            const result=await updateManageItemPrice(priceDiv,job.itemId,job.itemName,{confirmLargeChange:false});
-            if(result==='updated') updated++; else if(result==='failed') failed++;
+            let result='failed';
+            try{
+                result=await Promise.race([
+                    updateManageItemPrice(editor.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false}),
+                    new Promise(resolve=>setTimeout(()=>resolve('failed'),18000))
+                ]);
+            }catch(e){console.error('[SakaLuXBazaarSmartPricer] Bulk pricing failed:',e);result='failed';}
+            if(result==='updated')updated++; else if(result==='failed')failed++;
+
             await new Promise(r=>setTimeout(r,120));
-            if(editor.opened){
-                const closed=await closeManageEditorForJob(job.itemId,job.itemName);
-                if(!closed) console.warn('[SakaLuXBazaarSmartPricer] Could not collapse',job.itemName||job.itemId);
+            if(editor.opened&&editor.toggle){
+                try{editor.toggle.click();}catch{}
+                await new Promise(r=>setTimeout(r,140));
             }
-            await new Promise(r=>setTimeout(r,100));
         }
+
         restoreButton();
         let msg=`Updated ${updated} of ${work.length} item price${work.length===1?'':'s'}`;
         if(skippedRw)msg+=` — ${skippedRw} RW skipped`;

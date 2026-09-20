@@ -117,3 +117,7 @@ On TornPDA the eye button is inside the inner item node while the edit chevron s
 
 ### v1.1.12 — Exact chevron column
 On TornPDA, Manage bulk repricing now opens/closes rows only through the far-right chevron column, anchored to the Manage panel's right edge. No fallback is allowed to eye/details controls.
+
+
+### v1.1.13 — Original TornPDA arrow flow restored
+Manage **Update All** is back on the first working row-opening strategy from v1.1.1. The later coordinate/geometry targeting was removed. Timeouts and per-item failure continuation were retained to prevent the original batch freeze.

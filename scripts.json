@@ -134,15 +134,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 19,
-      "version": "1.1.12",
+      "detailsRevision": 20,
+      "version": "1.1.13",
       "release": {
-        "version": "1.1.12",
+        "version": "1.1.13",
         "date": "2026-09-20",
         "notes": [
-          "Hard-fixes TornPDA Manage Update All to target only the far-right chevron column.",
-          "Arrow targeting is now anchored to the Manage panel right edge (~28-32px inset), not the item node, so the eye column cannot match.",
-          "Opening and closing use synthetic pointer/mouse events on that exact chevron target; if no arrow is found, the item fails safely instead of clicking another control."
+          "Restores the original v1.1.1 Manage arrow-opening strategy — the first version that opened the correct TornPDA editor control.",
+          "Removes the later geometry/elementFromPoint arrow targeting that repeatedly selected the eye/details panel on TornPDA.",
+          "Keeps hang protection: bounded editor-open wait, bounded pricing wait, per-item error continuation and live row reacquisition."
         ]
       }
     },

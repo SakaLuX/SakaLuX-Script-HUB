@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.13 — 2026-09-20
+- Restored the original **v1.1.1 Manage editor opening logic**, which was the first flow that targeted the working TornPDA arrow correctly.
+- Removed the later geometry/`elementFromPoint` targeting that kept opening the eye/details panel.
+- Added bounded waits so a slow/broken item cannot freeze **Update All**: ~2.6 s to open editor and 18 s max for pricing.
+- Reacquires the live row before each item and continues after failures instead of locking the batch.
+
 ## v1.1.12 — 2026-09-20
 - Hard-fixed TornPDA **Update All** to use only the far-right chevron column.
 - The target is calculated from the **Manage panel right edge** at roughly 28–32px inset; the eye icon sits much farther left and cannot match.
