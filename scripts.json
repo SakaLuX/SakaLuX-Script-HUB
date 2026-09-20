@@ -134,15 +134,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 13,
-      "version": "1.1.6",
+      "detailsRevision": 14,
+      "version": "1.1.7",
       "release": {
-        "version": "1.1.6",
+        "version": "1.1.7",
         "date": "2026-09-20",
         "notes": [
-          "Fixes Manage Bazaar SAVE CHANGES staying disabled by writing price inputs through the native input setter so Torn React state receives the change.",
-          "Fixes giant blank/expanded gaps after Update All by reacquiring the live row and fresh expand/collapse control after every Torn rerender.",
-          "Update All now waits for the editor to collapse before continuing to the next item."
+          "Fixes the giant blank Manage Bazaar panel by preventing Update All from clicking Torn's eye/item-details control; only the far-right accordion toggle is selected.",
+          "Makes price writes more React/TornPDA-compatible with native setter, InputEvent, keyup, change and blur.",
+          "Collapse logic now checks that the live row is still expanded before clicking anything, avoiding accidental secondary toggles after rerenders."
         ]
       }
     },

@@ -93,3 +93,7 @@ Fixes the permanent `Pricing 1/N` hang in Manage Bazaar. The manage callback now
 
 ### v1.1.6 — Manage save-state fix
 Bulk Manage pricing now writes through Torn's React-controlled input setter, enabling **SAVE CHANGES** correctly. Accordion rows are collapsed using a freshly reacquired live toggle after each rerender, preventing blank expanded gaps.
+
+
+### v1.1.7 — Manage accordion selector fix
+Update All no longer mistakes Torn's eye/details button for the price-editor arrow. It targets the far-right row toggle, verifies expansion state before collapsing, and uses a stronger React-compatible input event sequence so SAVE CHANGES can track edits reliably.

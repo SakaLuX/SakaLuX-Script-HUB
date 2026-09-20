@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.6
+// @version      1.1.7
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.6';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.7';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1215,12 +1215,17 @@
 
     function setNativeInputValue(input, value) {
         if (!input) return;
-        const proto = Object.getPrototypeOf(input);
+        const next=String(value);
+        try{input.focus({preventScroll:true});}catch{try{input.focus();}catch{}}
+        const proto = window.HTMLInputElement?.prototype || Object.getPrototypeOf(input);
         const desc = proto && Object.getOwnPropertyDescriptor(proto, 'value');
-        if (desc && typeof desc.set === 'function') desc.set.call(input, String(value));
-        else input.value = String(value);
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        if (desc && typeof desc.set === 'function') desc.set.call(input, next);
+        else input.value = next;
+        try{input.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:next}));}
+        catch{input.dispatchEvent(new Event('input',{bubbles:true}));}
+        input.dispatchEvent(new KeyboardEvent('keyup',{bubbles:true,key:'0',code:'Digit0'}));
         input.dispatchEvent(new Event('change', { bubbles: true }));
+        try{input.blur();}catch{}
     }
 
     function clearItemInputs(itemElement) {
@@ -1531,25 +1536,35 @@
 
     function findManageToggle(item) {
         if (!item) return null;
-        const controls=[...item.querySelectorAll('button,[role="button"],a')];
-        let toggle=controls.find(el=>/expand|edit|details|open|collapse|close/i.test((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')));
-        if (!toggle) toggle=item.querySelector('[class*="arrow"],[class*="chevron"],[class*="expand"]');
-        if (!toggle && controls.length) toggle=controls[controls.length-1];
-        return toggle;
+        const rowRect=item.getBoundingClientRect();
+        const selectors='button,[role="button"],a,[tabindex],[class*="arrow"],[class*="chevron"],[class*="expand"],[class*="toggle"]';
+        const candidates=[...item.querySelectorAll(selectors)].filter(el=>{
+            const r=el.getBoundingClientRect();
+            if(!r.width||!r.height) return false;
+            const meta=((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
+            // Never press Torn's eye/details control; that opens the huge item-info panel.
+            if(/eye|view|preview|inspect|details/.test(meta)) return false;
+            // Keep candidates on the right side of the compact manage row.
+            return r.left >= rowRect.left + rowRect.width*0.72;
+        });
+        if(!candidates.length) return null;
+        // The price accordion chevron is the right-most interactive control in the row.
+        candidates.sort((a,b)=>b.getBoundingClientRect().right-a.getBoundingClientRect().right);
+        return candidates[0]||null;
     }
 
     async function closeManagePriceEditor(itemId, itemName) {
         const live=findLiveManageItem(itemId,itemName);
         if(!live) return;
+        const currentInput=live.querySelector(SELECTORS.managePriceInput);
+        if(!currentInput) return; // already closed by Torn
         const toggle=findManageToggle(live);
         if(!toggle) return;
-        const container=findSectionContainer(h => h.textContent.includes('Manage your Bazaar') || h.textContent.includes('Manage items') || h.textContent.includes('Manage Bazaar')) || live.parentElement;
-        const before=container ? container.querySelectorAll(SELECTORS.managePriceInput).length : 0;
         toggle.click();
-        for(let i=0;i<16;i++){
+        for(let i=0;i<20;i++){
             await new Promise(r=>setTimeout(r,75));
-            const now=container ? container.querySelectorAll(SELECTORS.managePriceInput).length : 0;
-            if(now<before) break;
+            const refreshed=findLiveManageItem(itemId,itemName);
+            if(!refreshed || !refreshed.querySelector(SELECTORS.managePriceInput)) break;
         }
     }
 

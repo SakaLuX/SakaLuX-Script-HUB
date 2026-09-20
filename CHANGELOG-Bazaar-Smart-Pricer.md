@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.7 — 2026-09-20
+- Fixed the large blank panel during **Update All**: the fallback selector could click Torn's **eye/details** control instead of the far-right price-editor chevron.
+- Manage automation now selects only the right-most interactive control on the row and explicitly excludes eye/view/details controls.
+- Price writes now send native setter + `InputEvent` + `keyup` + `change` + blur for stronger Torn/React state synchronization.
+- Collapse only runs if the live row is still actually expanded.
+
 ## v1.1.6 — 2026-09-20
 - Fixed **SAVE CHANGES** remaining disabled after bulk repricing. Price fields are now changed through the native input setter so Torn/React records the edits.
 - Fixed the large blank expanded area left behind by **Update All**. Torn replaces accordion-row DOM nodes while editing, so the old toggle reference became stale; the script now reacquires the live row and fresh collapse control.
