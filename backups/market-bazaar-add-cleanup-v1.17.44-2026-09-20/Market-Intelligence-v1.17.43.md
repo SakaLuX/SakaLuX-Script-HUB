@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.44**
+**v1.17.43**
 
 ## What it does
 - Provides market, Bazaar and travel intelligence for Torn PDA and Tampermonkey.
@@ -20,10 +20,10 @@
 
 ## Current release note
 
-**v1.17.44 — Bazaar add-item overlay isolation**
-- Stops Market Intelligence estimate badges from being injected into Bazaar add-item/sale rows that contain quantity and price editors.
-- Removes already-rendered MI estimate badges as soon as the Bazaar sale picker is detected, including Torn SPA/TornPDA transitions.
-- Keeps normal Items-page market estimates unchanged outside Bazaar sale-entry controls.
+**v1.17.43 — Hard-locks Travel Session Summary and Arrival Basket to Torn Travel pages only**
+- Hard-locks Travel Session Summary and Arrival Basket to Torn Travel pages only.
+- Removes stale travel cards immediately when Torn SPA navigation moves to Messages or any non-Travel page.
+- Adds render-time guards so mutations or delayed scans cannot recreate either panel outside Travel.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -47,11 +47,6 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
-
-### v1.17.44 — Bazaar add-item overlay isolation
-- Stops Market Intelligence estimate badges from being injected into Bazaar add-item/sale rows that contain quantity and price editors.
-- Removes already-rendered MI estimate badges as soon as the Bazaar sale picker is detected, including Torn SPA/TornPDA transitions.
-- Keeps normal Items-page market estimates unchanged outside Bazaar sale-entry controls.
 
 ### v1.17.43 — Strict Travel-only inline panels
 - Travel Session Summary and Arrival Basket now have hard render guards and can only mount when `detectPage()` is `travel`.

@@ -750,18 +750,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.17.43",
-                    "date": "2026-09-19",
+                    "version": "1.17.44",
+                    "date": "2026-09-20",
                     "notes": [
-                        "Hard-locks Travel Session Summary and Arrival Basket to Torn Travel pages only.",
-                        "Removes stale travel cards immediately when Torn SPA navigation moves to Messages or any non-Travel page.",
-                        "Adds render-time guards so mutations or delayed scans cannot recreate either panel outside Travel."
+                        "Stops Market Intelligence estimate badges from being injected into Bazaar add-item/sale rows that contain quantity and price editors.",
+                        "Removes already-rendered MI estimate badges as soon as the Bazaar sale picker is detected, including Torn SPA/TornPDA transitions.",
+                        "Keeps normal Items-page market estimates unchanged outside Bazaar sale-entry controls."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.43",
-                "detailsRevision": 3
+                "version": "1.17.44",
+                "detailsRevision": 4
             },
             {
                 "active": true,

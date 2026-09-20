@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.44
+// @version      1.17.43
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -19,7 +19,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.44';
+  let v = '1.17.43';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -97,7 +97,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.44'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.43'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -1851,52 +1851,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if(watched&&market.minPrice<=watched.maxPrice)bar.classList.add('hit');
     }
 
-    function isBazaarSaleEditorRow(row){
-        if(!row?.querySelectorAll)return false;
-        const controls=[...row.querySelectorAll('input,textarea,select,[contenteditable="true"]')];
-        if(controls.length<2)return false;
-        const describe=el=>[
-            el.getAttribute?.('placeholder'),el.getAttribute?.('aria-label'),el.getAttribute?.('name'),
-            el.getAttribute?.('id'),el.getAttribute?.('class'),el.getAttribute?.('data-testid')
-        ].filter(Boolean).join(' ').toLowerCase();
-        const labels=controls.map(describe).join(' ');
-        const text=(row.innerText||row.textContent||'').replace(/\s+/g,' ').toLowerCase();
-        const hasQty=/(?:^|[^a-z])(qty|quantity)(?:[^a-z]|$)/i.test(labels+' '+text);
-        const hasPrice=/(?:^|[^a-z])price(?:[^a-z]|$)/i.test(labels+' '+text);
-        return hasQty&&hasPrice;
-    }
-
-    function isBazaarAddItemsView(){
-        const rows=[],seen=new Set();
-        for(const img of document.querySelectorAll('img[src*="/images/items/"]')){
-            const row=rowContainer(img);if(!row||seen.has(row))continue;seen.add(row);rows.push(row);
-        }
-        const editorRows=rows.filter(isBazaarSaleEditorRow).length;
-        if(editorRows>=2)return true;
-        return editorRows>=1&&/bazaar|sell|add.?item/i.test(location.href);
-    }
-
     async function scanItems(){
-        if(!settings.items)return;
-        if(isBazaarAddItemsView()){
-            document.querySelectorAll('.sl-mi-items').forEach(n=>n.remove());
-            return;
-        }
-        const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
-        for(const img of imgs){
-            const id=itemIdFromImg(img),row=rowContainer(img);
-            if(!id||!row||seen.has(row))continue;
-            if(isBazaarSaleEditorRow(row)){row.querySelectorAll('.sl-mi-items').forEach(n=>n.remove());continue;}
-            const qm=(row.innerText||'').match(/\bx\s*([\d,]+)/i);if(!qm)continue;
-            const qty=Number(qm[1].replace(/,/g,''));if(!(qty>0))continue;
-            seen.add(row);entries.push({id,row,qty});
-        }
-        await mapWithLimit(entries.slice(0,MAX_LIVE_FETCHES),async e=>{
-            if(isBazaarSaleEditorRow(e.row)){e.row.querySelectorAll('.sl-mi-items').forEach(n=>n.remove());return;}
-            const market=await fetchMarket(e.id);if(!market)return;
-            const net=market.price*(1-(Number(settings.marketFeePct)||0)/100),box=ensureBadge(e.row,'sl-mi-items');
-            box.innerHTML='<b>☠︎ MI</b> est. net '+money(net)+'/ea · stack '+money(net*e.qty);state.decorated++;
-        });
+        if(!settings.items)return;const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
+        for(const img of imgs){const id=itemIdFromImg(img),row=rowContainer(img);if(!id||!row||seen.has(row))continue;const qm=(row.innerText||'').match(/\bx\s*([\d,]+)/i);if(!qm)continue;const qty=Number(qm[1].replace(/,/g,''));if(!(qty>0))continue;seen.add(row);entries.push({id,row,qty});}
+        await mapWithLimit(entries.slice(0,MAX_LIVE_FETCHES),async e=>{const market=await fetchMarket(e.id);if(!market)return;const net=market.price*(1-(Number(settings.marketFeePct)||0)/100),box=ensureBadge(e.row,'sl-mi-items');box.innerHTML='<b>☠︎ MI</b> est. net '+money(net)+'/ea · stack '+money(net*e.qty);state.decorated++;});
     }
 
     function scrapePointsRate(){const vals=[];document.querySelectorAll('*').forEach(el=>{if(el.children.length)return;const m=(el.textContent||'').trim().match(/^\$\s*([\d,]+)$/);if(!m)return;const n=parseMoney(m[1]);if(n>=5000&&n<=200000)vals.push(n);});return vals.length?Math.min(...vals):null;}
