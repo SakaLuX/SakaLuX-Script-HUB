@@ -1,0 +1,53 @@
+name: Full registry and GreasyFork sync 2026-09-20
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/full_registry_greasyfork_sync_20260920.py'
+      - '.github/workflows/full-registry-greasyfork-sync-20260920.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: full-registry-greasyfork-sync-20260920
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Synchronize registry, metadata and GreasyFork docs
+        run: python3 .github/scripts/full_registry_greasyfork_sync_20260920.py
+      - name: Validate userscript syntax
+        run: |
+          for f in SakaLuX-*.user.js; do node --check "$f"; done
+      - name: Validate registry consistency
+        run: python3 .github/scripts/validate_repository.py
+      - name: Remove one-shot maintenance files
+        run: |
+          rm -f .github/scripts/full_registry_greasyfork_sync_20260920.py
+          rm -f .github/workflows/full-registry-greasyfork-sync-20260920.yml
+      - name: Commit and push synchronized repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No repository changes required."
+          else
+            git commit -m "Synchronize scripts registry GreasyFork metadata and docs"
+            git push
+          fi
+      - name: Create cleanup and synchronization release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="cleanup-sync-2026-09-20"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+          else
+            gh release create "$TAG" --target main --title "Repository cleanup & GreasyFork sync — 2026-09-20" --notes "Repository cleanup and canonical metadata synchronization. scripts.json versions and endpoints were checked against the userscripts; SakaLuX userscripts now carry explicit license metadata and GreasyFork update URLs; all greasyfork/*.md descriptions were rebuilt from current script metadata and registry details; obsolete reports/releases/migration material and temporary maintenance branches/files were removed earlier in this cleanup pass."
+          fi
