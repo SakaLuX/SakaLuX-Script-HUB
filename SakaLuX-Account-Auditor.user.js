@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.20
+// @version      1.3.21
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -176,7 +176,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.20';
+    const VERSION = '1.3.21';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const AUDITOR_API_CREATE_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Account%20Auditor&user=profile,bars,cooldowns,travel,education,jobpoints,merits,refills,notifications,money,stocks,properties,discord,weaponexp,workstats,skills,battlestats,networth,display,icons,criminalrecord,bazaar,crimes,hof,ammo,attacksfull,bounties,calendar,casino,competition,enlistedcars,equipment,faction,forumfeed,forumfriends,forumposts,forumsubscribedthreads,forumthreads,gym,honors,itemmarket,itemmods,job,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,snapshot,personalstats,list,inventory,messages,events,log&torn=merits,education';
@@ -199,10 +199,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const V2_ENDPOINTS = [
         'profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','money',
         'stocks','properties','discord','weaponexp','workstats','skills','battlestats','networth','display','icons',
-        'criminalrecord','bazaar','crimes','hof','ammo','attacksfull','bounties','calendar','casino','competition',
+        'bazaar','hof','ammo','attacksfull','bounties','calendar','casino','competition',
         'enlistedcars','equipment','faction','forumfeed','forumfriends','forumposts','forumsubscribedthreads',
         'forumthreads','gym','honors','itemmarket','itemmods','job','jobranks','medals','missions','organizedcrime',
-        'organizedcrimes','perks','property','races','racingrecords','reports','revivesfull','trades','virus','snapshot'
+        'organizedcrimes','perks','property','races','racingrecords','reports','revivesfull','trades','virus'
     ];
     // newmessages/newevents are subsets of messages/events and are intentionally omitted to prevent duplicate records.
     const V2_PRIVATE_ENDPOINTS = ['messages','events'];
@@ -269,6 +269,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     async function tornV2(endpoint,key,query='',absoluteUrl=''){let url=absoluteUrl||('https://api.torn.com/v2/user/'+encodeURIComponent(endpoint)+(query?(query.startsWith('?')?query:'?'+query):''));return apiJsonWithRetry(withKey(url,key));}
     async function tornV2Selection(endpoint,key,query=''){const q='selections='+encodeURIComponent(endpoint)+(query?'&'+String(query).replace(/^\?/,''):'');return apiJsonWithRetry(withKey('https://api.torn.com/v2/user?'+q,key));}
     async function tornGlobalV2(endpoint,key,query=''){let url='https://api.torn.com/v2/torn/'+encodeURIComponent(endpoint)+(query?(query.startsWith('?')?query:'?'+query):'');return apiJsonWithRetry(withKey(url,key));}
+    const CRIME_2_IDS = Object.freeze([1,2,3,4,5,6,7,8,9,10,11,12]);
+    async function collectCrimes2(key){
+        const byCrime={},errors={};
+        for(const id of CRIME_2_IDS){
+            setStatus('v2 crimes · '+id+'/'+CRIME_2_IDS.length);
+            const r=await tornV2Selection('crimes',key,'id='+encodeURIComponent(id));
+            if(r.ok)byCrime[id]=sanitizeDeep(r.data);
+            else errors[id]={error:r.error,code:r.code??null,httpStatus:r.httpStatus??null};
+        }
+        return{ok:Object.keys(errors).length===0,data:{crimeIds:CRIME_2_IDS.slice(),byCrime},errors};
+    }
     async function keyInfo(key){return apiJsonWithRetry(withKey('https://api.torn.com/v2/key/info',key));}
     async function testAuditorApiKey(candidate=''){
         const key=String(candidate||getTornApiKey()||'').trim();
@@ -365,6 +376,20 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             else if(logs.code===16)unavailable['private:log']={reason:'Torn requires a Full access API key for user/log.',code:16};
             else errors['private:log']={error:logs.error,code:logs.code??null,httpStatus:logs.httpStatus??null};
         }
+        // criminalrecord is API v1-only in Torn's current API matrix. Keep it as a compatibility
+        // source, but normalize it into data.v2 so the split audit schema stays stable.
+        requested++;setStatus('v1 criminalrecord compatibility');
+        const criminalRecord=await tornV1('criminalrecord',key);
+        if(criminalRecord.ok){data.v2.criminalrecord=sanitizeDeep(criminalRecord.data);successful++;}
+        else errors['v1:criminalrecord']={error:criminalRecord.error,code:criminalRecord.code??null,httpStatus:criminalRecord.httpStatus??null};
+
+        // user/crimes in API v2 is a per-crime endpoint and requires an explicit crime id.
+        // Query every current Crimes 2.0 category instead of calling /user/crimes without an id.
+        requested++;setStatus('v2 crimes by crime ID');
+        const crimes2=await collectCrimes2(key);
+        data.v2.crimes=crimes2.data;
+        if(crimes2.ok)successful++;else errors['v2:crimes']=crimes2.errors;
+
         for(let i=0;i<V2_ENDPOINTS.length;i++){
             const endpoint=V2_ENDPOINTS[i];requested++;setStatus('v2 '+endpoint+' '+(i+1)+'/'+V2_ENDPOINTS.length);
             const r=await collectPagedV2(endpoint,key,'',200);
@@ -376,7 +401,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         requested++;const inv=await collectInventory(key);data.special.inventory=inv.data;if(inv.data.categoryCount)successful++;if(Object.keys(inv.errors).length)errors['v2:inventory']=inv.errors;
         data.special.decoded={merits:decodeMerits(data.v2.merits,data.special.reference?.merits),education:decodeEducation(data.v2.education,data.special.reference?.education)};
         const profileRoot=data.v2.profile||{},profile=profileRoot.profile||profileRoot;
-        return{schema:'sakalux-torn-account-snapshot-v5',generatedAt:new Date().toISOString(),generatedAtUnix:Date.now(),script:{name:NAME,version:VERSION,mode:'read-only'},privacy:{containsTornApiKey:false,containsGitHubToken:false,containsBrowserCookies:false,containsPassword:false,privateDataIncluded:Boolean(settings.includePrivateData),capturedMessageBodiesRequireExplicitUserAction:true,note:'Official Torn API data plus only message text explicitly captured by the user from a visible Torn message page.'},capabilities:{canonicalApi:'v2',legacyV1Duplicates:false,messageList:true,messageBodyViaOfficialApi:false,messageBodyViaUserCapture:true,logsRequireFullAccess:true,splitSnapshots:Boolean(settings.splitSnapshots)},account:{playerId:profile.player_id??profile.playerID??profile.user_id??profile.id??null,name:profile.name??null,level:profile.level??null,rank:profile.rank??null,status:profile.status??null,faction:profile.faction??null,job:profile.job??null,lastAction:profile.last_action??profile.lastAction??null,age:profile.age??null},coverage:{requested,successful,failed:Object.keys(errors).length,unavailable:Object.keys(unavailable).length,v2Endpoints:V2_ENDPOINTS.slice(),privateEndpoints:settings.includePrivateData?V2_PRIVATE_ENDPOINTS.concat(['log']):[],privateDataEnabled:Boolean(settings.includePrivateData),deduplication:'v2 canonical; no v1 mirror; no newmessages/newevents subsets; attacksfull/revivesfull replace reduced variants'},data,errors,unavailable};
+        return{schema:'sakalux-torn-account-snapshot-v5',generatedAt:new Date().toISOString(),generatedAtUnix:Date.now(),script:{name:NAME,version:VERSION,mode:'read-only'},privacy:{containsTornApiKey:false,containsGitHubToken:false,containsBrowserCookies:false,containsPassword:false,privateDataIncluded:Boolean(settings.includePrivateData),capturedMessageBodiesRequireExplicitUserAction:true,note:'Official Torn API data plus only message text explicitly captured by the user from a visible Torn message page.'},capabilities:{canonicalApi:'v2',legacyV1Duplicates:false,legacyV1Compatibility:['criminalrecord'],excludedNonAccountEndpoints:['snapshot'],messageList:true,messageBodyViaOfficialApi:false,messageBodyViaUserCapture:true,logsRequireFullAccess:true,splitSnapshots:Boolean(settings.splitSnapshots)},account:{playerId:profile.player_id??profile.playerID??profile.user_id??profile.id??null,name:profile.name??null,level:profile.level??null,rank:profile.rank??null,status:profile.status??null,faction:profile.faction??null,job:profile.job??null,lastAction:profile.last_action??profile.lastAction??null,age:profile.age??null},coverage:{requested,successful,failed:Object.keys(errors).length,unavailable:Object.keys(unavailable).length,v2Endpoints:V2_ENDPOINTS.slice(),privateEndpoints:settings.includePrivateData?V2_PRIVATE_ENDPOINTS.concat(['log']):[],privateDataEnabled:Boolean(settings.includePrivateData),deduplication:'v2 canonical; criminalrecord uses required v1 compatibility; user/crimes is collected per Crimes 2.0 ID; user/snapshot is excluded because Torn returns a global daily-active-players CSV, not account data; no newmessages/newevents subsets; attacksfull/revivesfull replace reduced variants'},data,errors,unavailable};
     }
 
     function parseRepo(){const m=String(settings.repo||'').trim().match(/^([^/\s]+)\/([^/\s]+)$/);if(!m)throw new Error('GitHub repo must be owner/repository.');return{owner:m[1],repo:m[2]};}
@@ -613,7 +638,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   if(!document.body)return;
   let e=document.querySelector('[data-slx-standalone-registration="account-auditor"]');
   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','account-auditor');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.20'});
+  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.21'});
  };
  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
 })();
