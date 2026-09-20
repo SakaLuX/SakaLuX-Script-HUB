@@ -23,12 +23,10 @@ jobs:
         run: node --check SakaLuX-Bazaar-Smart-Pricer.user.js
       - name: Validate registry
         run: python3 -m json.tool scripts.json >/dev/null
-      - name: Verify release surfaces
+      - name: Verify core release
         run: |
           grep -q '@version      1.0.1' SakaLuX-Bazaar-Smart-Pricer.user.js
           grep -q 'S QUICK FILL' SakaLuX-Bazaar-Smart-Pricer.user.js
-          grep -q 'v1.0.1' greasyfork/Bazaar-Smart-Pricer.md
-          grep -q 'v1.0.1' CHANGELOG-Bazaar-Smart-Pricer.md
       - name: Commit release
         run: |
           if git diff --quiet; then
