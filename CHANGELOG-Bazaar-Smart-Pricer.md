@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.2 — 2026-09-20
+- Fixed **Update All** price source: it now uses the cheapest live Item Market 2.0 listing when available, instead of treating `market_value` as the live price.
+- Added **Torn City shop floor**: if the calculated price is below `buy_price`, the city-shop price wins.
+- `market_value` remains fallback; `sell_price` is only a secondary floor when no city buy price exists.
+- Adjusted request pacing for the extra live-market request.
+
 ## v1.1.1 — 2026-09-20
 - Added dedicated **API Access** beside Close; Hub shared key is used automatically when available.
 - Removed the GitHub link from the settings header.

@@ -107,7 +107,7 @@
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "icon": "💰",
       "id": "bazaar-smart-pricer",
-      "info": "Purpose\\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\\n\\nBulk workflow\\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\\n\\nSafety\\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\\n\\nHub integration\\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. API Access automatically prefers the Hub shared key when Hub is installed and keeps a local fallback. Manage Bazaar Update All can open collapsed rows sequentially, fill prices, and leaves Torn SAVE CHANGES as the final confirmation step. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.",
+      "info": "Purpose\\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\\n\\nBulk workflow\\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\\n\\nSafety\\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\\n\\nHub integration\\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. API Access automatically prefers the Hub shared key when Hub is installed and keeps a local fallback. Manage Bazaar Update All can open collapsed rows sequentially, fill prices, and leaves Torn SAVE CHANGES as the final confirmation step. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.\\n\\nPricing source\\nPrices use the cheapest live Item Market offer when available. Torn market_value is fallback only. Torn City buy price is a hard floor when shop-floor enforcement is enabled.",
       "name": "Bazaar Smart Pricer",
       "quickActions": [
         {
@@ -134,16 +134,16 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 8,
-      "version": "1.1.1",
+      "detailsRevision": 9,
+      "version": "1.1.2",
       "release": {
-        "version": "1.1.1",
+        "version": "1.1.2",
         "date": "2026-09-20",
         "notes": [
-          "Removes the GitHub link from the settings header and adds a dedicated API Access key button beside Close.",
-          "Automatically uses SakaLuX Hub shared key when Hub is installed, with a local key fallback and test/create/save/clear controls.",
-          "Fixes false bonus-item skips on normal armor such as Construction Helmet and Leather Gloves by requiring real bonus attachments on rarity/RW weapon rows.",
-          "Update All now opens collapsed Manage Bazaar rows one at a time, updates their price, closes them again and leaves Torn SAVE CHANGES as the final confirmation step."
+          "Fixes Update All pricing source: uses the cheapest live Item Market 2.0 offer instead of relying only on Torn market_value.",
+          "Adds Torn City shop floor enforcement using buy_price; calculated prices below the city-shop price are raised to that shop price.",
+          "Keeps market_value as fallback if live Item Market data is unavailable and sell_price as fallback only when buy_price is unavailable.",
+          "Slows the per-item request cadence to account for the extra live-market request and stay within Torn API rate limits."
         ]
       }
     },

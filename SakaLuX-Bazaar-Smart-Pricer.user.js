@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.1
+// @version      1.1.2
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.1';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.2';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -159,8 +159,8 @@
         if (dirty) GM_setValue('priceCache', priceCache);
     })();
 
-    function cachePrice(itemId, marketValue, sellPrice) {
-        priceCache[itemId] = { marketValue, sellPrice, timestamp: Date.now() };
+    function cachePrice(itemId, marketValue, buyPrice, sellPrice, lowestMarketPrice) {
+        priceCache[itemId] = { marketValue, buyPrice, sellPrice, lowestMarketPrice, timestamp: Date.now() };
         clearTimeout(priceCachePersistTimer);
         priceCachePersistTimer = setTimeout(() => GM_setValue('priceCache', priceCache), 500);
     }
@@ -909,8 +909,8 @@
                     <div class="qp-toggles-card">
                         <div class="qp-toggle-row">
                             <div>
-                                <span class="qp-toggle-row__name">NPC floor enforcement</span>
-                                <div class="qp-toggle-row__desc">Never price below the NPC sell price</div>
+                                <span class="qp-toggle-row__name">Torn City shop floor</span>
+                                <div class="qp-toggle-row__desc">Never price below Torn City shop buy price</div>
                             </div>
                             <label class="qp-toggle">
                                 <input type="checkbox" id="qpNpcCheck" ${!CONFIG.disableNpcCheck ? 'checked' : ''} />
@@ -1060,7 +1060,7 @@
     let isProcessingQueue = false;
     let queueHalted = false;            // set when a fatal API error stops the run
 
-    const REQUEST_SPACING_MS = 600;         // ≤100 req/min, Torn's documented limit
+    const REQUEST_SPACING_MS = 1350;         // ≤100 req/min, Torn's documented limit
     const REQUEST_TIMEOUT_MS = 15000;
     const RATE_LIMIT_RETRY_DELAY_MS = 5000;
     const RATE_LIMIT_MAX_RETRIES = 2;
@@ -1085,7 +1085,7 @@
     function failAllPending() {
         requestQueue.length = 0;
         const ids = Array.from(pendingRequests.keys());
-        ids.forEach(id => finishRequest(id, { marketValue: 0, sellPrice: 0 }));
+        ids.forEach(id => finishRequest(id, { marketValue: 0, buyPrice: 0, sellPrice: 0, lowestMarketPrice: 0 }));
         isProcessingQueue = false;
     }
 
@@ -1100,7 +1100,7 @@
             setTimeout(processRequestQueue, delay);
         };
         const failItem = () => {
-            finishRequest(itemId, { marketValue: 0, sellPrice: 0 });
+            finishRequest(itemId, { marketValue: 0, buyPrice: 0, sellPrice: 0, lowestMarketPrice: 0 });
             releaseAndContinue(REQUEST_SPACING_MS);
         };
 
@@ -1117,7 +1117,7 @@
                             if (code === 2) CONFIG.apiKey = '';
                             queueHalted = true;
                             notifyApiError(FATAL_API_ERRORS[code]);
-                            finishRequest(itemId, { marketValue: 0, sellPrice: 0 });
+                            finishRequest(itemId, { marketValue: 0, buyPrice: 0, sellPrice: 0, lowestMarketPrice: 0 });
                             failAllPending();
                             return;
                         }
@@ -1131,11 +1131,28 @@
                         failItem();
                     } else if (data.items?.[itemId]) {
                         const itemData = data.items[itemId];
-                        const marketValue = itemData.market_value || 0;
-                        const sellPrice = itemData.sell_price || 0;
-                        cachePrice(itemId, marketValue, sellPrice);
-                        finishRequest(itemId, { marketValue, sellPrice });
-                        releaseAndContinue(REQUEST_SPACING_MS);
+                        const marketValue = Number(itemData.market_value) || 0;
+                        const buyPrice = Number(itemData.buy_price) || 0;
+                        const sellPrice = Number(itemData.sell_price) || 0;
+                        GM_xmlhttpRequest({
+                            method:'GET',
+                            url:`https://api.torn.com/v2/market/${itemId}/itemmarket?key=${CONFIG.apiKey}`,
+                            timeout:REQUEST_TIMEOUT_MS,
+                            onload:r=>{
+                                let lowestMarketPrice=0;
+                                try{
+                                    const md=JSON.parse(r.responseText);
+                                    if(!md.error && Array.isArray(md.itemmarket) && md.itemmarket.length){
+                                        lowestMarketPrice=md.itemmarket.reduce((best,o)=>{const c=Number(o.cost)||0;return c>0&&(!best||c<best)?c:best;},0);
+                                    }
+                                }catch{}
+                                cachePrice(itemId,marketValue,buyPrice,sellPrice,lowestMarketPrice);
+                                finishRequest(itemId,{marketValue,buyPrice,sellPrice,lowestMarketPrice});
+                                releaseAndContinue(REQUEST_SPACING_MS);
+                            },
+                            onerror:()=>{cachePrice(itemId,marketValue,buyPrice,sellPrice,0);finishRequest(itemId,{marketValue,buyPrice,sellPrice,lowestMarketPrice:0});releaseAndContinue(REQUEST_SPACING_MS);},
+                            ontimeout:()=>{cachePrice(itemId,marketValue,buyPrice,sellPrice,0);finishRequest(itemId,{marketValue,buyPrice,sellPrice,lowestMarketPrice:0});releaseAndContinue(REQUEST_SPACING_MS);}
+                        });
                     } else {
                         failItem();
                     }
@@ -1161,7 +1178,7 @@
     function fetchItemData(itemId, callback) {
         const cached = getCachedPrice(itemId);
         if (cached) {
-            callback({ marketValue: cached.marketValue, sellPrice: cached.sellPrice });
+            callback({ marketValue: cached.marketValue||0, buyPrice: cached.buyPrice||0, sellPrice: cached.sellPrice||0, lowestMarketPrice: cached.lowestMarketPrice||0 });
             return;
         }
         // Dedupe: if this item is already queued or in flight, piggyback on it.
@@ -1191,13 +1208,15 @@
      * NPC sell price unless the user disabled floor enforcement; that floor can
      * never trigger for a markup (the price is already ≥ market ≥ sell price).
      */
-    function calculateFinalPrice(marketValue, sellPrice, discount) {
+    function calculateFinalPrice(marketValue, buyPrice, sellPrice, lowestMarketPrice, discount) {
         const pct = clampDiscount(discount) / 100;
         const multiplier = CONFIG.priceBelowMarket ? (1 - pct) : (1 + pct);
-        let finalPrice = Math.round(marketValue * multiplier);
-        if (!CONFIG.disableNpcCheck && sellPrice > 0 && finalPrice < sellPrice) {
-            log(`Price ${finalPrice} below NPC sell price ${sellPrice}, adjusting...`);
-            finalPrice = sellPrice;
+        const referencePrice = Number(lowestMarketPrice) > 0 ? Number(lowestMarketPrice) : Number(marketValue) || 0;
+        let finalPrice = Math.round(referencePrice * multiplier);
+        const cityShopFloor = Number(buyPrice) > 0 ? Number(buyPrice) : (Number(sellPrice) || 0);
+        if (!CONFIG.disableNpcCheck && cityShopFloor > 0 && finalPrice < cityShopFloor) {
+            log(`Price ${finalPrice} below Torn City shop price ${cityShopFloor}, adjusting...`);
+            finalPrice = cityShopFloor;
         }
         return finalPrice;
     }
@@ -1242,9 +1261,9 @@
         if (priceInputs.length === 0) return Promise.resolve(false);
 
         return new Promise((resolve) => {
-            fetchItemData(itemId, ({ marketValue, sellPrice }) => {
+            fetchItemData(itemId, ({ marketValue, buyPrice, sellPrice, lowestMarketPrice }) => {
                 if (marketValue > 0) {
-                    const finalPrice = calculateFinalPrice(marketValue, sellPrice, CONFIG.defaultDiscount);
+                    const finalPrice = calculateFinalPrice(marketValue, buyPrice, sellPrice, lowestMarketPrice, CONFIG.defaultDiscount);
                     priceInputs.forEach(input => {
                         input.value = finalPrice;
                         input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -1329,7 +1348,7 @@
                     resolve('failed');
                     return;
                 }
-                const newPrice = calculateFinalPrice(marketValue, sellPrice, CONFIG.defaultDiscount);
+                const newPrice = calculateFinalPrice(marketValue, buyPrice, sellPrice, lowestMarketPrice, CONFIG.defaultDiscount);
                 const priceDiff = Math.abs(newPrice - currentPrice);
                 const percentDiff = currentPrice > 0 ? (priceDiff / currentPrice) * 100 : 100;
                 if (percentDiff > CONFIG.priceDiffThreshold && currentPrice > 0) {
@@ -1343,7 +1362,7 @@
                 priceInput.value = newPrice;
                 priceInput.dispatchEvent(new Event('input', { bubbles: true }));
                 priceInput.dispatchEvent(new Event('change', { bubbles: true }));
-                const borderColor = (sellPrice > 0 && newPrice === sellPrice) ? '#f0a35e' : '#4f8fe8';
+                const cityFloor=(buyPrice>0?buyPrice:sellPrice); const borderColor = (cityFloor > 0 && newPrice === cityFloor) ? '#f0a35e' : '#4f8fe8';
                 priceInput.style.border = `2px solid ${borderColor}`;
                 setTimeout(() => priceInput.style.border = '', 1000);
                 resolve('updated');

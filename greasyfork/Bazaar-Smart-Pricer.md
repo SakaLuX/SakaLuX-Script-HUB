@@ -70,3 +70,7 @@ MIT-licensed rebuild inspired by **Torn Bazaar Quick Pricer + Smart Bazaar Prici
 - API Access beside Close, automatic Hub shared-key use, local fallback.
 - False bonus-item detection fixed.
 - Update All opens collapsed Manage Bazaar rows sequentially and prepares price changes.
+
+
+### v1.1.2 — Live market + Torn City floor
+Update All and Quick Add now calculate from the cheapest live Item Market offer when available. If that result is lower than the Torn City shop buy price, the shop price is used as the floor.
