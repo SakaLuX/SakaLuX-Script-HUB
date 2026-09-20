@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.15**
+**v1.1.16**
 
 ## What it does
 - Prices Bazaar items from Torn market value, the lowest visible item-market listing, or an undercut of the lowest listing.
@@ -125,3 +125,7 @@ Manage **Update All** is back on the first working row-opening strategy from v1.
 
 ### v1.1.15 — No-accordion bulk pricing
 Manage **Update All** no longer clicks Torn row arrows or opens/closes item accordions. It writes directly to the native price input already mounted in each collapsed row. The temporary 2-second pacing from v1.1.14 has been removed. This specifically targets the repeatable giant blank panel that appeared around the fifth processed item on TornPDA.
+
+
+### v1.1.16 — Fifth-item arrow fix
+Manage Update All again opens each item row, prices it, and closes it. The arrow finder now permanently excludes controls labelled eye/view/preview/details, preventing the fifth-row fallback from opening Torn's details panel. Closing uses a freshly reacquired row/arrow after rerenders.

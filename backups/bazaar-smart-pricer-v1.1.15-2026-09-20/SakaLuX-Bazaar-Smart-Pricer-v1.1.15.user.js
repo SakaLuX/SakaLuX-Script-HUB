@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.16
+// @version      1.1.15
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -34,7 +34,7 @@
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.16';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.15';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
@@ -1512,21 +1512,6 @@
         return null;
     }
 
-    function findManageArrow(item) {
-        if(!item) return null;
-        const controls=[...item.querySelectorAll('button,[role="button"],a')];
-        const meta=el=>((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')).toLowerCase();
-        // The eye control is commonly labelled view/details. Never allow it.
-        const safe=controls.filter(el=>!/eye|view|preview|inspect|details/.test(meta(el)));
-        let toggle=safe.find(el=>/arrow|chevron|expand|toggle|edit/.test(meta(el)));
-        if(!toggle && safe.length) toggle=safe[safe.length-1];
-        if(!toggle){
-            const raw=item.querySelector('[class*="arrow"],[class*="chevron"],[class*="expand"]');
-            toggle=raw?.closest('button,[role="button"],a')||raw||null;
-        }
-        return toggle;
-    }
-
     async function ensureManagePriceEditor(item) {
         const findEditor=()=>{
             const direct=item.querySelector(SELECTORS.managePriceWrap);
@@ -1543,75 +1528,74 @@
         };
         let p=findEditor();
         if(p) return {priceDiv:p,opened:false,toggle:null};
-        const toggle=findManageArrow(item);
+
+        // ORIGINAL v1.1.1 selector path — intentionally restored.
+        const controls=[...item.querySelectorAll('button,[role="button"],a')];
+        let toggle=controls.find(el=>/expand|edit|details|open/i.test((el.getAttribute('aria-label')||'')+' '+(el.title||'')+' '+(el.className||'')));
+        if(!toggle) toggle=controls[controls.length-1] || item.querySelector('[class*="arrow"],[class*="chevron"],[class*="expand"]');
         if(!toggle) return null;
+
         toggle.click();
         for(let i=0;i<28;i++){
             await new Promise(r=>setTimeout(r,75));
             p=findEditor();
-            if(p) return {priceDiv:p,opened:true};
+            if(p) return {priceDiv:p,opened:true,toggle};
         }
         return null;
-    }
-
-    async function closeManagePriceEditor(itemId,itemName) {
-        const live=findLiveManageItem(itemId,itemName);
-        if(!live) return;
-        const toggle=findManageArrow(live);
-        if(!toggle) return;
-        try{toggle.click();}catch{return;}
-        await new Promise(r=>setTimeout(r,140));
     }
 
     async function updateAllManagePrices() {
         const updateButton=chipFillBtn;
         if(updateButton){updateButton.disabled=true;updateButton.style.opacity='0.5';updateButton.textContent='Loading…';}
         const restoreButton=()=>{if(updateButton){updateButton.disabled=false;updateButton.style.opacity='1';updateButton.textContent='Update All';}};
+
         const items=getManageItems();
         if(items.length===0){restoreButton();qpToast('No items found to update!','error');return;}
         const moreBelow=mayHaveUnloadedItems(items);
         let skippedRw=0,skippedBonus=0,skippedDollar=0,updated=0,failed=0,done=0;
-        const work=[]; const seenIds=new Set();
+        const work=[];
+        const seenIds=new Set();
+
+        // IMPORTANT: bulk mode must not touch Torn's arrow/accordion controls.
+        // Torn keeps the native price input mounted in each collapsed Manage row.
+        // Opening a row is what creates the giant blank panel seen consistently
+        // around the fifth item on TornPDA, so write directly to the mounted input.
         for(const item of items){
-            const image=item.querySelector('img'); if(!image)continue;
-            const itemId=getItemIdFromImage(image); if(!itemId||seenIds.has(itemId))continue;
+            const image=item.querySelector('img');
+            const priceDiv=item.querySelector(SELECTORS.managePriceWrap);
+            if(!image||!priceDiv) continue;
+            const priceInput=priceDiv.querySelector(SELECTORS.managePriceInput);
+            if(!priceInput) continue;
+            const itemId=getItemIdFromImage(image);
+            if(!itemId||seenIds.has(itemId)) continue;
             seenIds.add(itemId);
             if(CONFIG.skipRwWeapons&&getRWBonusInfo(item).isRanked){skippedRw++;continue;}
             if(CONFIG.skipBonusItems&&hasAnyBonus(item)){skippedBonus++;continue;}
-            work.push({itemId,itemName:getItemName(item)});
+            const current=parseInt(String(priceInput.value||'').replace(/,/g,''),10)||0;
+            if(CONFIG.skipDollarItems&&current===1){skippedDollar++;continue;}
+            work.push({priceDiv,itemId,itemName:getItemName(item)});
         }
+
         for(const job of work){
             done++;
-            if(updateButton)updateButton.textContent=`Opening ${done}/${work.length}`;
-            const liveItem=findLiveManageItem(job.itemId,job.itemName);
-            if(!liveItem){failed++;continue;}
-            let editor=null;
-            try{
-                editor=await Promise.race([
-                    ensureManagePriceEditor(liveItem),
-                    new Promise(resolve=>setTimeout(()=>resolve(null),2600))
-                ]);
-            }catch(e){console.error('[SakaLuXBazaarSmartPricer] Open editor failed:',e);}
-            if(!editor){failed++;continue;}
-            const input=editor.priceDiv.querySelector(SELECTORS.managePriceInput);
-            const current=input?parseInt(String(input.value||'').replace(/,/g,''),10)||0:0;
-            if(CONFIG.skipDollarItems&&current===1){
-                skippedDollar++;
-                if(editor.opened) await closeManagePriceEditor(job.itemId,job.itemName);
-                continue;
-            }
             if(updateButton)updateButton.textContent=`Pricing ${done}/${work.length}`;
             let result='failed';
             try{
                 result=await Promise.race([
-                    updateManageItemPrice(editor.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false}),
+                    updateManageItemPrice(job.priceDiv,job.itemId,job.itemName,{confirmLargeChange:false}),
                     new Promise(resolve=>setTimeout(()=>resolve('failed'),18000))
                 ]);
-            }catch(e){console.error('[SakaLuXBazaarSmartPricer] Bulk pricing failed:',e);result='failed';}
-            if(result==='updated')updated++; else if(result==='failed')failed++;
-            await new Promise(r=>setTimeout(r,120));
-            if(editor.opened) await closeManagePriceEditor(job.itemId,job.itemName);
+            }catch(e){
+                console.error('[SakaLuXBazaarSmartPricer] Bulk pricing failed:',e);
+                result='failed';
+            }
+            if(result==='updated')updated++;
+            else if(result==='failed')failed++;
+
+            // Tiny DOM settle only; the v1.1.14 two-second pacing is removed.
+            await new Promise(r=>setTimeout(r,90));
         }
+
         restoreButton();
         let msg=`Updated ${updated} of ${work.length} item price${work.length===1?'':'s'}`;
         if(skippedRw)msg+=` — ${skippedRw} RW skipped`;

@@ -1,5 +1,12 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.1.16 — 2026-09-20
+- Restored the required **open → price → close** Manage workflow.
+- Root cause of the repeatable 5th-item blank panel: the v1.1.13 selector treated `details` as a valid editor signal, so when the price input was not already mounted it could select Torn's **eye/details** control instead of the far-right arrow.
+- Arrow selection now explicitly rejects **eye / view / preview / inspect / details** controls and prefers arrow/chevron/expand/edit controls.
+- Closing reacquires the live row and a fresh arrow after React rerenders instead of clicking a stale element.
+- The 2-second timer stays removed.
+
 ## v1.1.15 — 2026-09-20
 - Removed the **2-second delay** introduced in v1.1.14.
 - Rebuilt Manage **Update All** so it **never opens or closes item rows**.
