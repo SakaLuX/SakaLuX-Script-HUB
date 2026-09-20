@@ -589,19 +589,23 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.3.48",
-                    "date": "2026-09-18",
+                    "version": "1.3.50",
+                    "date": "2026-09-20",
                     "notes": [
-                        "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-                        "Stops repeated inventory badge replacement when protection state is unchanged.",
-                        "Filters unrelated chat/dock changes and coalesces inventory/sale-protection refreshes.",
-                        "Preserves sale blocking, reserved quantities and protection controls."
+                        "Hard-excludes Manage your Bazaar / Manage items from every Enhancer Guard sale-protection path.",
+                        "No row hiding, blocking, badges, sale locks or DOM mutations are allowed on Manage Bazaar.",
+                        "Removes any stale Enhancer sale-protection artifacts if Torn SPA navigation enters Manage Bazaar.",
+                        "Protection remains active only on real Add Listing / sale-selection screens."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.48",
-                "detailsRevision": 2
+                "version": "1.3.50",
+                "detailsRevision": 4,
+                "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/592698",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
+                "license": "All Rights Reserved"
             },
             {
                 "active": true,
@@ -651,7 +655,64 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
                 "version": "5.3.42",
-                "detailsRevision": 2
+                "detailsRevision": 2,
+                "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/592388",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
+                "license": "All Rights Reserved"
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXBazaarSmartPricer",
+                "buttonSelector": ".qp-chip",
+                "category": "Trading",
+                "description": "Quick Pricer-parity Bazaar helper with per-item Quick Add/Undo, quantity + price fill, bulk pricing, RW/bonus protection and Hub-styled settings.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.user.js",
+                "icon": "💰",
+                "id": "bazaar-smart-pricer",
+                "info": "Purpose\\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\\n\\nBulk workflow\\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\\n\\nSafety\\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\\n\\nHub integration\\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. API Access automatically prefers the Hub shared key when Hub is installed and keeps a local fallback. Manage Bazaar Update All can open collapsed rows sequentially, fill prices, and leaves Torn SAVE CHANGES as the final confirmation step. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.\\n\\nPricing source\\nAutomatic pricing uses Torn market_value with the configured discount/markup. If Torn City shop-floor enforcement is enabled, buy_price is the hard minimum; sell_price is only a fallback when buy_price is unavailable.",
+                "name": "Bazaar Smart Pricer",
+                "quickActions": [
+                    {
+                        "icon": "⚙️",
+                        "id": "open",
+                        "label": "SETTINGS",
+                        "method": "open",
+                        "fallbackUrl": "https://www.torn.com/bazaar.php"
+                    },
+                    {
+                        "icon": "💰",
+                        "id": "quick-fill",
+                        "label": "QUICK FILL",
+                        "method": "quickFill",
+                        "fallbackUrl": "https://www.torn.com/bazaar.php"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh",
+                        "fallbackUrl": "https://www.torn.com/bazaar.php"
+                    }
+                ],
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
+                "type": "addon",
+                "detailsRevision": 23,
+                "version": "1.1.6",
+                "release": {
+                    "version": "1.1.6",
+                    "date": "2026-09-20",
+                    "notes": [
+                        "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
+                        "Rollback: restored the exact Bazaar Smart Pricer v1.1.5 userscript from commit f0ea0e5b0d629b214635eff1f3473b4a466ab710."
+                    ]
+                },
+                "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
+                "metaUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
+                "greasyForkId": "596672",
+                "greasyForkUrl": "https://greasyfork.org/scripts/596672",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md",
+                "license": "MIT"
             },
             {
                 "active": true,
@@ -701,7 +762,11 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
                 "version": "1.0.44",
-                "detailsRevision": 2
+                "detailsRevision": 2,
+                "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/592711",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
+                "license": "All Rights Reserved"
             },
             {
                 "active": true,
@@ -755,15 +820,20 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     "version": "1.17.45",
                     "date": "2026-09-20",
                     "notes": [
-                        "Stops Market Intelligence estimate badges from being injected into Bazaar add-item/sale rows that contain quantity and price editors.",
-                        "Removes already-rendered MI estimate badges as soon as the Bazaar sale picker is detected, including Torn SPA/TornPDA transitions.",
-                        "Keeps normal Items-page market estimates unchanged outside Bazaar sale-entry controls."
+                        "Strict Manage Bazaar isolation: Market Intelligence does not decorate, scan or inject anything into Manage your Bazaar / Manage items.",
+                        "Items estimate badges and Bazaar boards are purged if TornPDA transitions into Manage Bazaar.",
+                        "scanItems and scanBazaar return immediately on Manage Bazaar.",
+                        "Normal Market Intelligence behavior remains unchanged outside Manage Bazaar."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.44",
-                "detailsRevision": 4
+                "version": "1.17.45",
+                "detailsRevision": 5,
+                "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/592781",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
+                "license": "All Rights Reserved"
             },
             {
                 "active": true,
@@ -848,7 +918,11 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
                 "version": "1.3.45",
-                "detailsRevision": 3
+                "detailsRevision": 3,
+                "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/594921",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
+                "license": "All Rights Reserved"
             },
             {
                 "active": true,
@@ -896,7 +970,11 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
                 "version": "1.8.39",
-                "detailsRevision": 2
+                "detailsRevision": 2,
+                "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/595873",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
+                "license": "All Rights Reserved"
             },
             {
                 "active": true,
@@ -949,9 +1027,16 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
                 "version": "0.8.10",
-                "detailsRevision": 3
+                "detailsRevision": 3,
+                "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
+                "greasyForkId": "596192",
+                "greasyForkUrl": "https://greasyfork.org/scripts/596192",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md",
+                "license": "All Rights Reserved"
             }
-        ]
+        ],
+        "lastVerified": "2026-09-20",
+        "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 
     const FALLBACK_MODULE_DETAILS = Object.fromEntries(

@@ -29,11 +29,11 @@
 
 ## Current release note
 
-**v1.3.50 — Strict Manage Bazaar isolation**
-- Enhancer Guard does absolutely nothing to native rows on **Manage your Bazaar / Manage items**.
-- No hiding, blocking, badges, sale locks or DOM mutations are allowed there.
-- Any stale Enhancer sale artifacts are removed on entry.
-- Protection remains active only on real sale-selection/Add Listing screens.
+**v1.3.50 — Release metadata synchronization**
+- Hard-excludes Manage your Bazaar / Manage items from every Enhancer Guard sale-protection path.
+- No row hiding, blocking, badges, sale locks or DOM mutations are allowed on Manage Bazaar.
+- Removes any stale Enhancer sale-protection artifacts if Torn SPA navigation enters Manage Bazaar.
+- Protection remains active only on real Add Listing / sale-selection screens.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.

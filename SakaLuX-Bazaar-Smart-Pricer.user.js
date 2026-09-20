@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.5
+// @version      1.1.6
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -17,6 +17,23 @@
 // @downloadURL  https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.user.js
 // @updateURL    https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js
 // ==/UserScript==
+
+/* SakaLuX Canonical Installed Version — BEGIN */
+(() => {
+  'use strict';
+  let v = '1.1.6';
+  try {
+    const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
+    if (meta) v = String(meta);
+  } catch {}
+  const g = globalThis;
+  g.__SakaLuXInstalledVersions = g.__SakaLuXInstalledVersions || Object.create(null);
+  g.__SakaLuXInstalledVersions['bazaar-smart-pricer'] = v;
+  try {
+    document.documentElement?.setAttribute('data-sakalux-installed-bazaar-smart-pricer', v);
+  } catch {}
+})();
+/* SakaLuX Canonical Installed Version — END */
 
 /*
  * SakaLuX Bazaar Smart Pricer

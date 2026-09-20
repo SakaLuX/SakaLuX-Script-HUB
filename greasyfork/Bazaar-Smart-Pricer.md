@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.5**
+**v1.1.6**
 
 
 ## Repository synchronization
@@ -39,105 +39,6 @@ MIT-licensed rebuild inspired by **Torn Bazaar Quick Pricer + Smart Bazaar Prici
 
 ## Current release note
 
-**v1.0.1 — Add Items QUICK FILL button**
-- Adds **S QUICK FILL** directly above the Bazaar Add Items sale rows.
-- One tap prices all currently visible item rows using the saved pricing mode.
-- Keeps per-row **S PRICE** and panel **PRICE ALL VISIBLE** available.
-
-
-### v1.0.0 — SakaLuX rebuild
-- Renamed to **SakaLuX Bazaar Smart Pricer**.
-- Restored an actual settings/API-key panel.
-- Added robust Torn SPA/Bazaar runtime detection using `https://www.torn.com/*` plus a Bazaar guard.
-- Added add-item and manage-page price-input discovery.
-- Added per-row **S PRICE** and bulk **PRICE ALL VISIBLE** actions.
-- Added Market Value / Lowest Listing / Undercut modes.
-- Added % or flat-$ undercut rules, low-listing filtering, NPC warning, caching and API test.
-- Exposes `window.SakaLuXBazaarSmartPricer` with `open`, `refresh`, `priceAll`, `isEnabled`, and `setEnabled`.
-
-### v1.0.1 — Add Items Quick Fill
-- **S QUICK FILL** fills **both quantity and price** for visible Add Items rows.
-- Per-row **S PRICE** uses the same fill behavior.
-
-### v1.0.2 — RW / bonus safety + compact launcher
-- Right-side launcher is now a circular **+**.
-- RW weapons and bonus items are skipped by default; both protections can be changed in Settings.
-
-### v1.0.3 — Per-item + before Qty
-- Per-item control is now a compact **+** immediately before Qty.
-- Pressing it fills full quantity + smart price.
-- Old right-side buttons are removed to prevent mobile overflow.
-- RW/bonus skip protection remains enabled by default.
-
-### v1.0.4 — + button CSS hotfix
-- Fixes rendering of the compact per-item **+** before Qty on mobile/TornPDA.
-
-### v1.1.0 — Quick Pricer parity + Hub skin
-- Uses the exact upstream Add Items button placement and quantity+price fill workflow.
-- Uses the upstream draggable Quick Fill / Settings chip and settings layout.
-- Applies SakaLuX Hub dark styling and Hub quick actions.
-- Skips RW and generic bonus items by default.
-
-### v1.1.1 — Hub API + collapsed Manage Update
-- API Access beside Close, automatic Hub shared-key use, local fallback.
-- False bonus-item detection fixed.
-- Update All opens collapsed Manage Bazaar rows sequentially and prepares price changes.
-
-
-### v1.1.2 — Live market + Torn City floor
-Update All and Quick Add now calculate from the cheapest live Item Market offer when available. If that result is lower than the Torn City shop buy price, the shop price is used as the floor.
-
-
-### v1.1.3 — Update All stall fix
-Bulk repricing can no longer be held indefinitely by an Item Market request. The parser supports both known Torn v2 response shapes and falls back safely to `market_value` after the watchdog timeout. Bulk mode also suppresses per-item confirmation dialogs while keeping the Torn City shop floor.
-
-
-### v1.1.4 — Update All deadlock fix
-Fixes the permanent `Pricing 1/N` hang in Manage Bazaar. The manage callback now receives all pricing fields (`marketValue`, `buyPrice`, `sellPrice`, `lowestMarketPrice`) and safely resolves failed items instead of freezing the batch.
-
-
-### v1.1.5 — Manage row + pricing model fix
-- Update All reacquires every live row by item ID so Torn accordion rerenders cannot make it skip alternating items.
-- Automatic price reference is Torn `market_value` again, matching the upstream Quick Pricer behavior.
-- Torn City `buy_price` remains the hard minimum when shop-floor enforcement is enabled.
-- Upgrade clears stale cache from the previous live-market pricing model.
-
-
-### v1.1.6 — Manage save-state fix
-Bulk Manage pricing now writes through Torn's React-controlled input setter, enabling **SAVE CHANGES** correctly. Accordion rows are collapsed using a freshly reacquired live toggle after each rerender, preventing blank expanded gaps.
-
-
-### v1.1.7 — Manage accordion selector fix
-Update All no longer mistakes Torn's eye/details button for the price-editor arrow. It targets the far-right row toggle, verifies expansion state before collapsing, and uses a stronger React-compatible input event sequence so SAVE CHANGES can track edits reliably.
-
-
-### v1.1.8 — Hidden-editor bulk pricing
-Manage **Update All** no longer interacts with Torn accordions. It updates each row's already-mounted price input directly while the row remains collapsed, preventing details-panel gaps and reducing React rerenders.
-
-
-### v1.1.9 — TornPDA Manage row automation
-On TornPDA, collapsed Manage rows may not contain a price input at all. Update All now opens each row through its far-right arrow, waits for the input to mount, reprices it, then closes the row before moving on. Eye/View controls are never used.
-
-
-### v1.1.10 — TornPDA arrow targeting
-Manage **Update All** now targets the far-right edit arrow by its visual row position instead of relying on descendants of the inner item node. This prevents the eye/details panel from opening on TornPDA.
-
-
-### v1.1.11 — Strict far-right Manage toggle
-On TornPDA the eye button is inside the inner item node while the edit chevron sits in the wider Manage row. Smart Pricer now uses the full Manage panel edge and only accepts a same-row interactive control in the final 58px, preventing eye/details activation.
-
-
-### v1.1.12 — Exact chevron column
-On TornPDA, Manage bulk repricing now opens/closes rows only through the far-right chevron column, anchored to the Manage panel's right edge. No fallback is allowed to eye/details controls.
-
-
-### v1.1.13 — Original TornPDA arrow flow restored
-Manage **Update All** is back on the first working row-opening strategy from v1.1.1. The later coordinate/geometry targeting was removed. Timeouts and per-item failure continuation were retained to prevent the original batch freeze.
-
-
-### v1.1.15 — No-accordion bulk pricing
-Manage **Update All** no longer clicks Torn row arrows or opens/closes item accordions. It writes directly to the native price input already mounted in each collapsed row. The temporary 2-second pacing from v1.1.14 has been removed. This specifically targets the repeatable giant blank panel that appeared around the fifth processed item on TornPDA.
-
-
-### v1.1.16 — Fifth-item arrow fix
-Manage Update All again opens each item row, prices it, and closes it. The arrow finder now permanently excludes controls labelled eye/view/preview/details, preventing the fifth-row fallback from opening Torn's details panel. Closing uses a freshly reacquired row/arrow after rerenders.
+**v1.1.6 — Release metadata synchronization**
+- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
+- Rollback: restored the exact Bazaar Smart Pricer v1.1.5 userscript from commit f0ea0e5b0d629b214635eff1f3473b4a466ab710.

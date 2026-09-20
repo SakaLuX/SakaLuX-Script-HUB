@@ -32,10 +32,11 @@
 
 ## Current release note
 
-**v1.17.45 — Strict Manage Bazaar isolation**
-- Market Intelligence does not scan, decorate, badge or inject Bazaar UI in **Manage your Bazaar / Manage items**.
-- Existing MI inline Bazaar elements are removed on SPA/TornPDA transition into Manage.
-- Normal MI features remain active elsewhere.
+**v1.17.45 — Release metadata synchronization**
+- Strict Manage Bazaar isolation: Market Intelligence does not decorate, scan or inject anything into Manage your Bazaar / Manage items.
+- Items estimate badges and Bazaar boards are purged if TornPDA transitions into Manage Bazaar.
+- scanItems and scanBazaar return immediately on Manage Bazaar.
+- Normal Market Intelligence behavior remains unchanged outside Manage Bazaar.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
