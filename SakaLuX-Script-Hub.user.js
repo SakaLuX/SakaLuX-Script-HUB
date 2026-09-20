@@ -697,14 +697,15 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 23,
-                "version": "1.1.7",
+                "detailsRevision": 24,
+                "version": "1.1.8",
                 "release": {
-                    "version": "1.1.7",
+                    "version": "1.1.8",
                     "date": "2026-09-20",
                     "notes": [
-                        "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-                        "Rollback: restored the exact Bazaar Smart Pricer v1.1.5 userscript from commit f0ea0e5b0d629b214635eff1f3473b4a466ab710."
+                        "Adds the same shared SakaLuX Standalone Dock bootstrap used by the other managed Hub modules.",
+                        "Registers Bazaar Smart Pricer in the standalone dock when Script Hub is absent, while suppressing the dock when Hub is active.",
+                        "Synchronizes the shared standalone module order across all eight active Hub modules so Bazaar Smart Pricer appears beside the other managed tools."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
