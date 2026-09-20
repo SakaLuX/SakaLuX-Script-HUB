@@ -1,3 +1,0 @@
-Suite v0.9.929 cleans up the Member Travel Map tag-edit listener and Target Alerts document/window listeners when these native modules are disabled. Target Alerts uses a module-owned AbortController; capture/passive options are preserved.
-
-Validation: all 23 Suite switches across repeated complete cycles; active global-listener tracking accounts for automatic AbortSignal cleanup; 60-second pending callback drain; existing bridge/UI regressions. Initial tracker overcounted automatically aborted listeners; the corrected baseline identifies the retained tag-edit and Target Alerts handlers separately. All 23 modules and saved preferences remain available, and the previous complete source is backed up.

@@ -1,9 +1,0 @@
-{
-  "version": "1.1.0",
-  "date": "2026-09-20",
-  "canonical": "SakaLuX-Bazaar-Smart-Pricer.user.js",
-  "upstream": "Torn Bazaar Quick Pricer v2.9.3 (MIT)",
-  "documentation": "greasyfork/Bazaar-Smart-Pricer.md",
-  "releaseInfo": "releases/bazaar-smart-pricer-v1.1.0.md",
-  "registry": "scripts.json"
-}

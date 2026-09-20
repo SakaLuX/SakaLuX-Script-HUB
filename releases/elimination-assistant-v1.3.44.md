@@ -1,3 +1,0 @@
-Elimination v1.3.44 disconnects its panel-specific foreign-widget observer and removes the matching document click handler before discarding the panel on disable. This prevents obsolete panels and observers from accumulating after repeated disable/re-enable cycles.
-
-Validation: the initial Chromium stress reproduced observers growing from 5 to 25 over 20 cycles. Cleanup regression checks the production removeUI function, missing-panel safety and handler identity; the actual browser lifecycle test is repeated after the fix. Saved target/team/filter preferences are preserved. Complete previous source is backed up.

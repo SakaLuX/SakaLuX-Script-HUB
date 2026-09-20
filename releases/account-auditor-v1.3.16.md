@@ -1,3 +1,0 @@
-Account Auditor v1.3.16 serializes API rate permits and coalesces overlapping read-only snapshot collections. The production gap remains 1100ms and rate-limit retry delays remain 3/6/12 seconds. Concurrent callers previously woke together; the shortened-gap unit stress reproduces and checks spacing with 20 callers.
-
-Browser snapshot network tests use synthetic keys and data, with only test-source waits scaled to 1ms and mock slow responses to 5ms. No real Torn account is accessed and no account snapshot is written to an external repository. Privacy sanitization, required scopes and explicit GitHub-sync behavior remain intact. Previous complete source is backed up.
