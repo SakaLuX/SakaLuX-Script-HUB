@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.0.0**
+**v1.0.1**
 
 ## What it does
 - Prices Bazaar items from Torn market value, the lowest visible item-market listing, or an undercut of the lowest listing.
@@ -26,6 +26,12 @@ The script requires a Torn read-only/public API key for item information and ite
 MIT-licensed rebuild inspired by **Torn Bazaar Quick Pricer + Smart Bazaar Pricing Panel** by R4G3RUNN3R [3877028], based on Zedtrooper [3028329] and community extensions.
 
 ## Current release note
+
+**v1.0.1 — Add Items QUICK FILL button**
+- Adds **S QUICK FILL** directly above the Bazaar Add Items sale rows.
+- One tap prices all currently visible item rows using the saved pricing mode.
+- Keeps per-row **S PRICE** and panel **PRICE ALL VISIBLE** available.
+
 
 ### v1.0.0 — SakaLuX rebuild
 - Renamed to **SakaLuX Bazaar Smart Pricer**.

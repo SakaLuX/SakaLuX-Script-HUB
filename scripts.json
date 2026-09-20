@@ -100,6 +100,54 @@
     },
     {
       "active": true,
+      "apiGlobal": "SakaLuXBazaarSmartPricer",
+      "buttonSelector": "#sl-bsp-launcher",
+      "category": "Trading",
+      "description": "Smart Bazaar pricing for add-item and manage/reprice flows with market value, lowest listing and configurable undercut modes.",
+      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
+      "icon": "💰",
+      "id": "bazaar-smart-pricer",
+      "info": "Purpose\nBazaar Smart Pricer prices Torn Bazaar sale fields using Torn market value, the lowest current item-market listing or a configurable undercut. It supports both add-item and manage/reprice workflows.\n\nWorkflow\nOn the Add Items sale page, S QUICK FILL appears directly above the item rows and prices every visible item in one tap. Per-item S PRICE and the settings-panel PRICE ALL VISIBLE action remain available.\n\nAPI and storage\nRequires a Torn read-only/public API key. The key and settings are stored locally and requests go only to api.torn.com.",
+      "name": "Bazaar Smart Pricer",
+      "quickActions": [
+        {
+          "icon": "⚙️",
+          "id": "open",
+          "label": "SETTINGS",
+          "method": "open",
+          "fallbackUrl": "https://www.torn.com/bazaar.php"
+        },
+        {
+          "icon": "💰",
+          "id": "price-all",
+          "label": "PRICE ALL",
+          "method": "priceAll",
+          "fallbackUrl": "https://www.torn.com/bazaar.php"
+        },
+        {
+          "icon": "🔄",
+          "id": "refresh",
+          "label": "REFRESH",
+          "method": "refresh",
+          "fallbackUrl": "https://www.torn.com/bazaar.php"
+        }
+      ],
+      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
+      "type": "addon",
+      "detailsRevision": 2,
+      "version": "1.0.1",
+      "release": {
+        "version": "1.0.1",
+        "date": "2026-09-20",
+        "notes": [
+          "Adds a native S QUICK FILL button directly on the Bazaar Add Items sale page.",
+          "The Add Items button prices all visible sale rows without opening the settings panel.",
+          "Keeps per-row S PRICE and PRICE ALL VISIBLE actions unchanged."
+        ]
+      }
+    },
+    {
+      "active": true,
       "apiGlobal": "SakaLuXMissionRewards",
       "buttonSelector": "#sl-mri-button",
       "category": "Missions",

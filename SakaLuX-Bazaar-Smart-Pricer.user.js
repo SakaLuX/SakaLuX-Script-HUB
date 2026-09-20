@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.0.0
+// @version      1.0.1
 // @description  Smart Bazaar pricing for Torn: market value, lowest market listing, undercut rules, add-items and manage-bazaar quick pricing.
 // @author       SakaLuX [2380374]
 // @license      MIT
@@ -25,7 +25,7 @@
   'use strict';
 
   const NAME='SakaLuX Bazaar Smart Pricer';
-  const VERSION='1.0.0';
+  const VERSION='1.0.1';
   const PREFIX='sl-bsp';
   const K='SakaLuX_BAZAAR_SMART_PRICER_';
   const qs=(s,r=document)=>r.querySelector(s);
@@ -83,6 +83,9 @@
 .sl-bsp-check{display:flex;align-items:center;gap:8px;padding:7px 0}.sl-bsp-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .sl-bsp-actions button,.sl-bsp-btn{border:1px solid #42566e;background:#1b2a3a;color:#fff;border-radius:10px;padding:9px 10px;font-weight:800}
 .sl-bsp-primary{background:#244a73!important;border-color:#4f8fe8!important}.sl-bsp-danger{background:#4a2025!important;border-color:#8b3d46!important}
+.${PREFIX}-addbar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;margin:6px 0 10px;padding:8px;background:#101923;border:1px solid #34465b;border-radius:10px}
+.${PREFIX}-quickfill{width:min(100%,360px);min-height:38px;border:1px solid #4f8fe8;background:#244a73;color:#fff;border-radius:9px;padding:8px 12px;font:900 12px/1.1 Arial,sans-serif;letter-spacing:.02em;cursor:pointer}
+.${PREFIX}-quickfill:disabled{opacity:.6;cursor:wait}
 #${PREFIX}-status{margin-top:10px;padding:9px;border-radius:9px;background:#0a1118;color:#9fb1c3;font-size:11px}
 .${PREFIX}-rowbtn{margin-left:6px;border:1px solid #49627e;background:#18283a;color:#fff;border-radius:8px;padding:4px 7px;font:800 10px Arial,sans-serif;white-space:nowrap}
 #${PREFIX}-toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,12px);opacity:0;pointer-events:none;z-index:2147483647;max-width:min(420px,92vw);background:#111b27;color:#fff;border:1px solid #3c526c;border-radius:10px;padding:9px 12px;font:700 12px Arial;transition:.18s}
@@ -176,6 +179,46 @@
     return out;
   }
 
+  function isAddItemsPage(){
+    if(!onBazaar())return false;
+    const route=(location.search+' '+location.hash).toLowerCase();
+    if(/add[-_ ]?items?|additem/.test(route))return true;
+    const text=norm(document.body?.innerText||'');
+    if(/\badd items?\b/i.test(text)&&findRows().length)return true;
+    return findRows().some(e=>{
+      const inputs=qsa('input',e.row).filter(x=>x.type!=='hidden'&&x.type!=='checkbox'&&x.type!=='radio'&&!x.disabled);
+      if(inputs.length<2)return false;
+      const meta=inputs.map(i=>(i.name+' '+i.id+' '+i.placeholder+' '+i.className+' '+(i.getAttribute('aria-label')||''))).join(' ').toLowerCase();
+      return /qty|quantity|amount/.test(meta)&&/price|ppu|each|unit/.test(meta);
+    });
+  }
+
+  function addItemsInsertionPoint(){
+    const rows=findRows();
+    const first=rows[0]?.row;
+    if(first?.parentElement)return {parent:first.parentElement,before:first};
+    const host=qs('#mainContainer .content-wrapper')||qs('.content-wrapper')||qs('#mainContainer')||document.body;
+    return {parent:host,before:host.firstChild};
+  }
+
+  function injectAddItemsQuickFill(){
+    const old=qs('#'+PREFIX+'-addbar');
+    if(!isAddItemsPage()){old?.remove();return;}
+    if(old)return;
+    const point=addItemsInsertionPoint();if(!point?.parent)return;
+    const bar=document.createElement('div');bar.id=PREFIX+'-addbar';bar.className=PREFIX+'-addbar';
+    const b=document.createElement('button');b.type='button';b.className=PREFIX+'-quickfill';b.innerHTML='<b>S</b> QUICK FILL';b.title='Price all visible Bazaar add-item rows';
+    b.onclick=async ev=>{
+      ev.preventDefault();ev.stopPropagation();
+      if(!settings.apiKey){openPanel();toast('Add your Torn API key first.','error');return;}
+      if(state.busy)return;
+      b.disabled=true;const oldText=b.innerHTML;b.textContent='PRICING…';
+      try{await priceAll();}finally{b.disabled=false;b.innerHTML=oldText;}
+    };
+    bar.appendChild(b);
+    point.parent.insertBefore(bar,point.before||null);
+  }
+
   async function priceEntry(entry,{silent=false}={}){
     try{const r=await computePrice(entry.id);setNativeValue(entry.input,r.price);entry.input.dataset.slBspPriced=String(r.price);state.priced++;if(settings.warnNpc&&r.item.sellPrice>0&&r.price<r.item.sellPrice&&!silent)toast(`${r.item.name}: ${money(r.price)} is below NPC ${money(r.item.sellPrice)}`,'error');return true;}
     catch(e){state.skipped++;if(!silent)toast(`Skipped item #${entry.id}: ${e.message}`,'error');return false;}
@@ -231,7 +274,7 @@
 
   function refreshStatus(){const s=qs('#'+PREFIX+'-status');if(!s)return;const rows=onBazaar()?findRows().length:0;s.innerHTML=`Page: <b>${onBazaar()?'Bazaar':'outside Bazaar'}</b> · detected price fields: <b>${rows}</b><br>Mode: <b>${esc(settings.pricingMode)}</b> · API: <b>${settings.apiKey?'saved':'missing'}</b> · last priced: <b>${state.priced}</b> · skipped: <b>${state.skipped}</b>`;}
   function openPanel(){ensurePanel();qs('#'+PREFIX+'-panel').classList.add('open');refreshStatus();}
-  function scan(force=false){if(!settings.enabled)return;if(!onBazaar()){qs('#'+PREFIX+'-launcher')?.remove();return;}injectLauncher();if(settings.autoDecorate)decorateRows();state.lastScan=Date.now();if(force)refreshStatus();}
+  function scan(force=false){if(!settings.enabled)return;if(!onBazaar()){qs('#'+PREFIX+'-launcher')?.remove();qs('#'+PREFIX+'-addbar')?.remove();return;}injectLauncher();injectAddItemsQuickFill();if(settings.autoDecorate)decorateRows();state.lastScan=Date.now();if(force)refreshStatus();}
 
   let timer=null;const schedule=()=>{clearTimeout(timer);timer=setTimeout(()=>scan(),300);};
   injectStyle();scan(true);
@@ -239,6 +282,6 @@
   mo.observe(document.documentElement,{subtree:true,childList:true});
   window.addEventListener('hashchange',()=>setTimeout(()=>scan(true),80),{passive:true});window.addEventListener('popstate',()=>setTimeout(()=>scan(true),80),{passive:true});
 
-  window.SakaLuXBazaarSmartPricer={version:VERSION,open:openPanel,refresh:()=>scan(true),priceAll,isEnabled:()=>!!settings.enabled,setEnabled:v=>{settings.enabled=!!v;save();scan(true);return settings.enabled;}};
+  window.SakaLuXBazaarSmartPricer={version:VERSION,open:openPanel,refresh:()=>scan(true),priceAll,quickFill:priceAll,isEnabled:()=>!!settings.enabled,setEnabled:v=>{settings.enabled=!!v;save();scan(true);return settings.enabled;}};
   console.info(`[${NAME}] loaded v${VERSION}`);
 })();

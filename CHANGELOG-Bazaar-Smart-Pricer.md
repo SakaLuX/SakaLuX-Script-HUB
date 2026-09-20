@@ -1,5 +1,11 @@
 # SakaLuX Bazaar Smart Pricer — Changelog
 
+## v1.0.1 — 2026-09-20
+- Added **S QUICK FILL** directly to the Bazaar Add Items sale page.
+- QUICK FILL prices every visible sale row with the current Smart Pricer mode.
+- Button is SPA/TornPDA-aware and disappears outside the Add Items flow.
+- Preserved per-row **S PRICE**, settings, API test and bulk panel pricing.
+
 ## v1.0.0 — 2026-09-20
 - Initial SakaLuX rebuild and rename.
 - Restored API-key onboarding and a persistent settings panel.
