@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.6
+// @version      1.1.7
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
-// @match        https://www.torn.com/bazaar.php*
+// @match        https://www.torn.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
@@ -21,7 +21,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.1.6';
+  let v = '1.1.7';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -46,12 +46,17 @@
 (function() {
     'use strict';
 
+    // The userscript runs on every Torn page so Script Hub can always see the
+    // canonical installed-version DOM marker above. Keep all Bazaar runtime
+    // work strictly scoped to the real Bazaar page.
+    if (location.pathname !== '/bazaar.php') return;
+
     if (typeof GM_getValue === 'undefined') {
         console.error('[SakaLuXBazaarSmartPricer] GM_getValue not available! Please check Tampermonkey settings.');
         return;
     }
 
-    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.5';
+    const VERSION = (typeof GM_info !== 'undefined' && GM_info.script && GM_info.script.version) || '1.1.7';
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
