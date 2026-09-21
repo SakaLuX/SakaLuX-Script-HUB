@@ -19,7 +19,6 @@ if not pat.search(s):
     raise SystemExit('Vault & Panic layout block not found')
 s=pat.sub(new,s,1)
 
-# Make mixed button/input grid visually uniform.
 css_anchor='#slx-stock-panel .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px} #slx-stock-panel label{display:grid;gap:5px;font-size:10px;color:#9aabba}'
 css_new='#slx-stock-panel .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px} #slx-stock-panel label{display:grid;gap:5px;font-size:10px;color:#9aabba} #slx-stock-panel .slx-vault-grid>button{align-self:end;min-height:46px;width:100%;font-weight:900} #slx-stock-panel #slx-withdraw-all.danger{background:linear-gradient(180deg,#7a2630,#561820)!important;border-color:#b54552!important;color:#fff!important}'
 if css_anchor not in s:
@@ -28,7 +27,6 @@ s=s.replace(css_anchor,css_new,1)
 
 P.write_text(s)
 
-# Registry sync.
 data=json.loads(REG.read_text())
 for e in data.get('scripts',[]):
     if e.get('id')=='stock-manager-advisor':
@@ -42,6 +40,8 @@ for e in data.get('scripts',[]):
             'Vault Max moves to the old Withdraw position and Withdraw All is styled red.',
             'PANIC keep/max values stay preserved internally so PANIC behavior is not broken by the layout cleanup.'
           ]
+        }
+        break
 REG.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
 
 if CHANGE.exists():
@@ -51,7 +51,8 @@ if CHANGE.exists():
         if t.startswith('#'):
             pos=t.find('\n\n')+2
             t=t[:pos]+block+t[pos:]
-        else:t=block+t
+        else:
+            t=block+t
     CHANGE.write_text(t)
 
 if DOC.exists():
