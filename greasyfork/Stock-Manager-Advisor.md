@@ -171,3 +171,7 @@
 
 ### v0.6.x — Safety/watchlist foundation
 - Added Target Lock, favorites, near-benefit alerts and persistent safety controls.
+
+
+### v0.8.11 — Vault control layout
+The Vault & Panic card now groups controls by action: Vault (Keep) beside Vault keep cash, Withdraw beside Withdraw amount, and Vault Max beside the red Withdraw All action. PANIC keep/max values remain preserved internally.

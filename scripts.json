@@ -462,18 +462,20 @@
         }
       ],
       "release": {
-        "version": "0.8.10",
-        "date": "2026-09-19",
+        "version": "0.8.11",
+        "date": "2026-09-21",
         "notes": [
-          "Rearranges the lower API Access controls into a clean two-column SAVE & TEST / CHECK ACCESS row with a full-width CLEAR LOCAL TORN KEY button below.",
-          "Normalizes button height, width, alignment and mobile spacing so the API controls no longer wrap or sit unevenly.",
-          "Keeps Hub-first API key detection and the local standalone fallback introduced in v0.8.9."
+          "Rearranges Vault & Panic controls into a clearer two-column workflow.",
+          "Vault (Keep) now sits beside Vault keep cash.",
+          "Withdraw now sits beside Withdraw amount.",
+          "Vault Max moves to the old Withdraw position and Withdraw All is styled red.",
+          "PANIC keep/max values stay preserved internally so PANIC behavior is not broken by the layout cleanup."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.10",
-      "detailsRevision": 3,
+      "version": "0.8.11",
+      "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
