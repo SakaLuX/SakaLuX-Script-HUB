@@ -1,0 +1,42 @@
+name: Update Stock Manager v0.8.11 vault layout
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/update_stock_v0811_vault_layout.py'
+      - '.github/workflows/update-stock-v0811-vault-layout.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: stock-v0811-vault-layout
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply layout update
+        run: python3 .github/scripts/update_stock_v0811_vault_layout.py
+      - name: Validate userscript
+        run: node --check SakaLuX-Stock-Manager-Advisor.user.js
+      - name: Validate registry
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Verify layout
+        run: |
+          grep -q '@version      0.8.11' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'slx-vault-grid' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q 'id="slx-withdraw-all" class="danger"' SakaLuX-Stock-Manager-Advisor.user.js
+      - name: Commit release
+        run: |
+          if git diff --quiet; then
+            echo 'Already synchronized.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js scripts.json greasyfork/Stock-Manager-Advisor.md releases/stock-manager-advisor-v0.8.11.md
+          if [ -f CHANGELOG-Stock-Manager-Advisor.md ]; then git add CHANGELOG-Stock-Manager-Advisor.md; fi
+          git commit -m 'Release Stock Manager v0.8.11 vault layout'
+          git push
