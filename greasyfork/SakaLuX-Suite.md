@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.936**
+**v0.9.937**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
-- Canonical version: **v0.9.936**
+- Verified: **2026-09-22**
+- Canonical version: **v0.9.937**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -47,8 +47,10 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.936 — Release documentation synchronized with the current Suite userscript version**
-- Release documentation synchronized with the current Suite userscript version.
+**v0.9.937 — Church prayer streak tracker**
+- Adds a compact Prayer Streak card on Church / Pray views.
+- Records each successful-looking Pray action locally by calendar day and shows the current consecutive-day streak plus today status.
+- Keeps the data local and starts tracking from the first prayer made after installing this version.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
@@ -68,6 +70,12 @@ Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the 
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v0.9.937 — Church prayer streak tracker
+- Adds a compact Prayer Streak card on Church / Pray views.
+- Tracks one prayer per local calendar day, calculates the active consecutive-day streak and marks whether today is complete.
+- Stores only local day stamps in browser/userscript storage; no API key or remote sync is required.
+- Tracking begins with the first prayer recorded after this update.
 
 ### v0.9.936 — OC scan visual state + API fallback
 - Keeps a completed Recruiting/Planning scan marked complete when revisiting the tab instead of resetting it to Scan Required.
