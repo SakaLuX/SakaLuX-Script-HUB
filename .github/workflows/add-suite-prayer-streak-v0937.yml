@@ -1,0 +1,36 @@
+name: Add Suite prayer streak v0.9.937
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/add-suite-prayer-streak-v0937.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply prayer streak patch
+        run: python .github/scripts/add_suite_prayer_streak_v0937.py
+      - name: Validate JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Verify tracker and version
+        run: |
+          grep -q '@version.*0.9.937' SakaLuX-Suite.user.js
+          grep -q 'SakaLuX Prayer Streak Tracker' SakaLuX-Suite.user.js
+          grep -q 'v0.9.937' greasyfork/SakaLuX-Suite.md
+      - name: Commit update
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git commit -m 'Add Church prayer streak tracker to Suite v0.9.937'
+          git push origin HEAD:main
