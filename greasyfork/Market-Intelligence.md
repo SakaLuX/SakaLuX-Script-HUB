@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.46**
+**v1.17.47**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-23**
-- Canonical version: **v1.17.46**
+- Canonical version: **v1.17.47**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,10 +32,10 @@
 
 ## Current release note
 
-**v1.17.46 — Landed-abroad Travel panels + collapsed session summary**
-- Restores Travel-page detection while landed abroad, including Hawaii and the other supported foreign destinations.
-- Best Route Basket and Travel Session Summary remain strictly Travel-only and are removed on every non-Travel page.
-- Travel Session Summary always renders collapsed and opens only when the user taps the arrow.
+**v1.17.47 — Best Route Basket while landed abroad**
+- Restores Best Route Basket while landed in Hawaii and other supported foreign destinations.
+- Basket rendering remains strictly limited to Travel pages.
+- Travel Session Summary remains collapsed by default and opens only from its arrow.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -59,6 +59,11 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.17.47 — Best Route Basket while landed abroad
+- Removes the destination-level suppression that hid Best Route Basket after landing abroad.
+- Uses the Travel-page guard instead, so Hawaii/foreign-country screens can show the basket without leaking it to non-Travel pages.
+- Keeps Travel Session Summary closed by default.
 
 ### v1.17.46 — Landed-abroad Travel panels + collapsed session summary
 - Recognizes landed foreign-country views such as Hawaii as Travel in TornPDA/mobile.

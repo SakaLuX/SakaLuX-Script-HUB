@@ -818,18 +818,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.17.46",
+                    "version": "1.17.47",
                     "date": "2026-09-23",
                     "notes": [
-                        "Restores Travel-page detection while landed abroad, including Hawaii and the other supported foreign destinations.",
-                        "Best Route Basket and Travel Session Summary remain strictly Travel-only and are removed on every non-Travel page.",
-                        "Travel Session Summary now always renders collapsed; it opens only when the user taps its arrow."
+                        "Restores Best Route Basket while landed in a foreign destination such as Hawaii.",
+                        "Best Route Basket now keys off Travel-page scope instead of suppressing every detected destination.",
+                        "Travel Session Summary remains Travel-only and collapsed by default."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.46",
-                "detailsRevision": 6,
+                "version": "1.17.47",
+                "detailsRevision": 7,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

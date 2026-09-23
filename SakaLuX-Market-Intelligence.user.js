@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.46
+// @version      1.17.47
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -21,7 +21,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.46';
+  let v = '1.17.47';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -99,7 +99,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.46'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.47'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -1421,7 +1421,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
     async function renderBestTravelRun(){
         const existing=document.getElementById('sl-mi-best-run');
-        if(!settings.bestRun||detectDestination()||detectInFlight()){existing?.remove();return;}
+        if(!settings.bestRun||detectPage()!=='travel'||detectInFlight()){existing?.remove();return;}
         const yata=await fetchYataAll(); if(!yata.length) return;
         const candidates=[];
         for(const r of yata){if(r.stock!=null)recordStock(r.destination,r.itemId,r.stock);if(r.stock===0)continue;candidates.push(r);}flushStockHistory();
