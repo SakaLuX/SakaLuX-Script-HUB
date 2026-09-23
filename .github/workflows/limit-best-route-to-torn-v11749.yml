@@ -1,0 +1,42 @@
+name: Limit Best Route Basket to Torn v1.17.49
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/limit_best_route_to_torn_v11749.py'
+      - '.github/workflows/limit-best-route-to-torn-v11749.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: market-torn-only-best-route-v11749
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply Torn-only Best Route Basket scope
+        run: python3 .github/scripts/limit_best_route_to_torn_v11749.py
+      - name: Validate userscript syntax
+        run: node --check SakaLuX-Market-Intelligence.user.js
+      - name: Validate registry JSON
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Verify strict scope
+        run: |
+          grep -q '@version      1.17.49' SakaLuX-Market-Intelligence.user.js
+          grep -q "detectInFlight()||detectDestination()" SakaLuX-Market-Intelligence.user.js
+          grep -q "if(!destination){await renderBestTravelRun();paintTravelSessionSummary();return;}" SakaLuX-Market-Intelligence.user.js
+          grep -q 'v1.17.49' greasyfork/Market-Intelligence.md
+      - name: Commit release
+        run: |
+          if git diff --quiet; then
+            echo 'Already synchronized.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '4189823+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Market-Intelligence.user.js scripts.json SakaLuX-Script-Hub.user.js greasyfork/Market-Intelligence.md
+          git commit -m 'Release Market Intelligence v1.17.49 Torn-only Best Route Basket'
+          git push
