@@ -818,19 +818,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.17.45",
-                    "date": "2026-09-20",
+                    "version": "1.17.46",
+                    "date": "2026-09-23",
                     "notes": [
-                        "Strict Manage Bazaar isolation: Market Intelligence does not decorate, scan or inject anything into Manage your Bazaar / Manage items.",
-                        "Items estimate badges and Bazaar boards are purged if TornPDA transitions into Manage Bazaar.",
-                        "scanItems and scanBazaar return immediately on Manage Bazaar.",
-                        "Normal Market Intelligence behavior remains unchanged outside Manage Bazaar."
+                        "Restores Travel-page detection while landed abroad, including Hawaii and the other supported foreign destinations.",
+                        "Best Route Basket and Travel Session Summary remain strictly Travel-only and are removed on every non-Travel page.",
+                        "Travel Session Summary now always renders collapsed; it opens only when the user taps its arrow."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.45",
-                "detailsRevision": 5,
+                "version": "1.17.46",
+                "detailsRevision": 6,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -1017,18 +1016,20 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "0.8.10",
-                    "date": "2026-09-19",
+                    "version": "0.8.11",
+                    "date": "2026-09-21",
                     "notes": [
-                        "Rearranges the lower API Access controls into a clean two-column SAVE & TEST / CHECK ACCESS row with a full-width CLEAR LOCAL TORN KEY button below.",
-                        "Normalizes button height, width, alignment and mobile spacing so the API controls no longer wrap or sit unevenly.",
-                        "Keeps Hub-first API key detection and the local standalone fallback introduced in v0.8.9."
+                        "Rearranges Vault & Panic controls into a clearer two-column workflow.",
+                        "Vault (Keep) now sits beside Vault keep cash.",
+                        "Withdraw now sits beside Withdraw amount.",
+                        "Vault Max moves to the old Withdraw position and Withdraw All is styled red.",
+                        "PANIC keep/max values stay preserved internally so PANIC behavior is not broken by the layout cleanup."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.10",
-                "detailsRevision": 3,
+                "version": "0.8.11",
+                "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",
@@ -1039,10 +1040,6 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         "lastVerified": "2026-09-20",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
-
-    const FALLBACK_MODULE_DETAILS = Object.fromEntries(
-        (FALLBACK_REGISTRY.scripts || []).map(s => [s.id, { info: s.info, release: s.release }])
-    );
 
     let registry = loadJson(STORAGE.registry, FALLBACK_REGISTRY);
     let SCRIPTS = normalizeRegistry(registry);

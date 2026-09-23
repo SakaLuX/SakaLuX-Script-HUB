@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.45**
+**v1.17.46**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
-- Canonical version: **v1.17.45**
+- Verified: **2026-09-23**
+- Canonical version: **v1.17.46**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,11 +32,10 @@
 
 ## Current release note
 
-**v1.17.45 — Release metadata synchronization**
-- Strict Manage Bazaar isolation: Market Intelligence does not decorate, scan or inject anything into Manage your Bazaar / Manage items.
-- Items estimate badges and Bazaar boards are purged if TornPDA transitions into Manage Bazaar.
-- scanItems and scanBazaar return immediately on Manage Bazaar.
-- Normal Market Intelligence behavior remains unchanged outside Manage Bazaar.
+**v1.17.46 — Landed-abroad Travel panels + collapsed session summary**
+- Restores Travel-page detection while landed abroad, including Hawaii and the other supported foreign destinations.
+- Best Route Basket and Travel Session Summary remain strictly Travel-only and are removed on every non-Travel page.
+- Travel Session Summary always renders collapsed and opens only when the user taps the arrow.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -60,6 +59,11 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.17.46 — Landed-abroad Travel panels + collapsed session summary
+- Recognizes landed foreign-country views such as Hawaii as Travel in TornPDA/mobile.
+- Keeps Best Route Basket and Travel Session Summary confined to Travel pages only.
+- Forces Travel Session Summary closed by default on every render/navigation; the arrow is the only way to expand it.
 
 ### v1.17.45 — Strict Manage Bazaar isolation
 - Zero Market Intelligence row/UI intervention in Manage your Bazaar / Manage items.

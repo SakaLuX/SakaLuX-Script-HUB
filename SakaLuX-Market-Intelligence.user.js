@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.45
+// @version      1.17.46
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -21,7 +21,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.45';
+  let v = '1.17.46';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -99,7 +99,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.45'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.46'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -638,8 +638,9 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if(!settings.sessionSummary){existing?.remove();return;}
         const cur=travelSessions.current,history=(travelSessions.history||[]).slice(0,5);
         if(!cur&&!history.length){existing?.remove();return;}
-        const wasOpen=existing?existing.classList.contains('open'):true;
-        const bar=existing||document.createElement('div');bar.id='sl-mi-session';bar.classList.toggle('open',wasOpen);
+        // Travel Session Summary always starts collapsed on every render/navigation.
+        // The user opens it explicitly from the arrow when needed.
+        const bar=existing||document.createElement('div');bar.id='sl-mi-session';bar.classList.remove('open');
         const active=cur||history[0];
         const predicted=Number(active?.predicted?.profit)||0,landed=Number(active?.landed?.profit)||0,recorded=Number(active?.recorded?.profit)||0;
         const displayProfit=recorded||landed||predicted;
@@ -926,9 +927,13 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
     function detectPage() {
         const u=location.href, body=document.body?.innerText||'';
-        // Torn's mobile/PDA in-flight screen is not always kept on ?sid=travel.
-        // Detect the actual flight card too so Arrival Basket runs on /index.php-style travel views.
-        if(/sid=travel/i.test(u)||/Remaining Flight Time/i.test(body)||/(?:Traveling\s+(?:from\s+.+?\s+)?to|Torn\s+to)\s+[A-Za-zÀ-ÿ .'-]+/i.test(body)) return 'travel';
+        // Torn's mobile/PDA travel views are not always kept on ?sid=travel.
+        // Treat in-flight AND landed-abroad country/shop views as Travel, including Hawaii.
+        const travelLabels=Object.values(TORN_TRAVEL_LABELS||{}).flat().filter(Boolean);
+        const abroadLabel=travelLabels.some(label=>new RegExp('(?:^|\\b)'+String(label).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\b|$)','i').test(body));
+        const abroadUi=/\b(?:return to torn|travel home|travel back|items? available|foreign market|abroad|currently in)\b/i.test(body)
+            ||!!document.querySelector('a[href*="travelagency" i],a[href*="sid=travel" i],a[href*="travel" i][href*="index" i]');
+        if(/sid=travel/i.test(u)||/travelagency\.php/i.test(u)||/abroad\.php/i.test(u)||/Remaining Flight Time/i.test(body)||/(?:Traveling\s+(?:from\s+.+?\s+)?to|Torn\s+to)\s+[A-Za-zÀ-ÿ .'-]+/i.test(body)||(abroadLabel&&abroadUi)) return 'travel';
         if(/sid=items?/i.test(u)||/page\.php\?sid=items/i.test(u)||/item\.php/i.test(u)) return 'items';
         if(/profiles?\.php/i.test(u)||/sid=profile/i.test(u)) return 'profile';
         if(/sid=ItemMarket/i.test(u)||(document.querySelector('input[type="search"],input[placeholder*="item" i]')&&/Item Market/i.test(body))) return 'itemmarket';

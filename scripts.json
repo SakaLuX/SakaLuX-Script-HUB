@@ -263,19 +263,18 @@
         }
       ],
       "release": {
-        "version": "1.17.45",
-        "date": "2026-09-20",
+        "version": "1.17.46",
+        "date": "2026-09-23",
         "notes": [
-          "Strict Manage Bazaar isolation: Market Intelligence does not decorate, scan or inject anything into Manage your Bazaar / Manage items.",
-          "Items estimate badges and Bazaar boards are purged if TornPDA transitions into Manage Bazaar.",
-          "scanItems and scanBazaar return immediately on Manage Bazaar.",
-          "Normal Market Intelligence behavior remains unchanged outside Manage Bazaar."
+          "Restores Travel-page detection while landed abroad, including Hawaii and the other supported foreign destinations.",
+          "Best Route Basket and Travel Session Summary remain strictly Travel-only and are removed on every non-Travel page.",
+          "Travel Session Summary now always renders collapsed; it opens only when the user taps its arrow."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.45",
-      "detailsRevision": 5,
+      "version": "1.17.46",
+      "detailsRevision": 6,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
