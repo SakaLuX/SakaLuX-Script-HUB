@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.48
+// @version      1.17.49
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -21,7 +21,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.48';
+  let v = '1.17.49';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -99,7 +99,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.48'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.49'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -1422,7 +1422,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
     async function renderBestTravelRun(){
         const existing=document.getElementById('sl-mi-best-run');
-        if(!settings.bestRun||detectPage()!=='travel'||detectInFlight()){existing?.remove();return;}
+        if(!settings.bestRun||detectPage()!=='travel'||detectInFlight()||detectDestination()){existing?.remove();return;}
         if(!existing){
             const loading=document.createElement('div');loading.id='sl-mi-best-run';loading.className='open';
             loading.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST ROUTE BASKET</span><strong>Loading routes…</strong><span>Travel only</span><button type="button">▾</button></div><div class="sl-mi-perf-note">Refreshing YATA stock and market prices…</div><div class="sl-mi-br-body"></div>';
@@ -1717,12 +1717,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if(!settings.travel)return;
         if(detectInFlight()){document.getElementById('sl-mi-best-run')?.remove();await renderArrivalStock();return;}
         document.getElementById('sl-mi-arrival')?.remove();
-        // On every landed Travel page, render Best Route Basket first.
-        // Being abroad (Hawaii, Mexico, etc.) must never suppress this panel.
-        await renderBestTravelRun();
-        paintTravelSessionSummary();
         const destination=detectDestination();
-        if(!destination)return;
+        // Best Route Basket belongs only to Torn's Travel page, never to a landed foreign-country shop.
+        if(!destination){await renderBestTravelRun();paintTravelSessionSummary();return;}
+        document.getElementById('sl-mi-best-run')?.remove();
         const availableCash=await fetchAvailableCash(true);
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}

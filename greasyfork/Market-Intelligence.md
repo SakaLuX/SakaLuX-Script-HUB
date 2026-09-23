@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.48**
+**v1.17.49**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-23**
-- Canonical version: **v1.17.48**
+- Canonical version: **v1.17.49**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,11 +32,10 @@
 
 ## Current release note
 
-**v1.17.48 — Force Best Route Basket on landed Travel pages**
-- Removes all destination-level suppression of Best Route Basket.
-- Renders Basket on every non-flight Travel page, including Hawaii and all supported foreign destinations.
-- Keeps the Basket card visible while data loads or when no profitable route exists instead of silently disappearing.
-- Travel Session Summary remains Travel-only and collapsed by default.
+**v1.17.49 — Best Route Basket only in Torn**
+- Best Route Basket appears only on Torn City Travel before departure.
+- It is hidden while landed in Hawaii, Mexico, Canada and every other foreign destination.
+- Foreign-country Best Buys/Planner and Travel Session Summary remain unchanged.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -60,6 +59,11 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.17.49 — Best Route Basket only in Torn
+- Restores strict Torn-side scope for Best Route Basket.
+- Removes the basket immediately on landed foreign-country pages while preserving in-country travel tools.
+- Keeps loading/no-profit visibility on Torn Travel itself.
 
 ### v1.17.48 — Force Best Route Basket on landed Travel pages
 - Removed the scanTravel destination branch that skipped and then explicitly removed Best Route Basket after landing abroad.

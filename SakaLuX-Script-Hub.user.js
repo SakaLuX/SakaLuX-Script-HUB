@@ -818,19 +818,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.17.48",
+                    "version": "1.17.49",
                     "date": "2026-09-23",
                     "notes": [
-                        "Removes every landed-destination suppression that could hide Best Route Basket in Hawaii or any other foreign country.",
-                        "Best Route Basket now renders on every non-flight Travel page, before country-specific Best Buys processing.",
-                        "Keeps a visible Basket status card while YATA/market data loads or when no profitable route currently exists.",
-                        "Travel Session Summary remains Travel-only and collapsed by default; Best Route Basket is also purged when leaving Travel."
+                        "Best Route Basket is now shown only on Torn City Travel, not while landed in Hawaii or any other foreign destination.",
+                        "Foreign-country pages keep their country-specific Best Buys/Travel Planner and Travel Session Summary behavior.",
+                        "Best Route Basket is removed immediately when a landed foreign destination is detected."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.48",
-                "detailsRevision": 8,
+                "version": "1.17.49",
+                "detailsRevision": 9,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
