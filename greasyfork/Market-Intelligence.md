@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.47**
+**v1.17.48**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-23**
-- Canonical version: **v1.17.47**
+- Canonical version: **v1.17.48**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,10 +32,11 @@
 
 ## Current release note
 
-**v1.17.47 — Best Route Basket while landed abroad**
-- Restores Best Route Basket while landed in Hawaii and other supported foreign destinations.
-- Basket rendering remains strictly limited to Travel pages.
-- Travel Session Summary remains collapsed by default and opens only from its arrow.
+**v1.17.48 — Force Best Route Basket on landed Travel pages**
+- Removes all destination-level suppression of Best Route Basket.
+- Renders Basket on every non-flight Travel page, including Hawaii and all supported foreign destinations.
+- Keeps the Basket card visible while data loads or when no profitable route exists instead of silently disappearing.
+- Travel Session Summary remains Travel-only and collapsed by default.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -59,6 +60,12 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+### v1.17.48 — Force Best Route Basket on landed Travel pages
+- Removed the scanTravel destination branch that skipped and then explicitly removed Best Route Basket after landing abroad.
+- Basket is rendered before country-specific Best Buys/Planner work on all landed Travel pages.
+- Added persistent loading/no-profit states so the panel never vanishes silently on a valid Travel page.
+- Non-Travel cleanup still removes Basket and Travel Session Summary, keeping both strictly Travel-only.
 
 ### v1.17.47 — Best Route Basket while landed abroad
 - Removes the destination-level suppression that hid Best Route Basket after landing abroad.

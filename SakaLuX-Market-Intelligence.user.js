@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.47
+// @version      1.17.48
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -21,7 +21,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.47';
+  let v = '1.17.48';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -99,7 +99,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.47'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.48'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -622,6 +622,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if(isTravelPanelPage()) return;
         document.getElementById('sl-mi-session')?.remove();
         document.getElementById('sl-mi-arrival')?.remove();
+        document.getElementById('sl-mi-best-run')?.remove();
     }
 
     // Torn is SPA-like on mobile/PDA, so remove stale travel panels immediately after navigation.
@@ -1422,7 +1423,18 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     async function renderBestTravelRun(){
         const existing=document.getElementById('sl-mi-best-run');
         if(!settings.bestRun||detectPage()!=='travel'||detectInFlight()){existing?.remove();return;}
-        const yata=await fetchYataAll(); if(!yata.length) return;
+        if(!existing){
+            const loading=document.createElement('div');loading.id='sl-mi-best-run';loading.className='open';
+            loading.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST ROUTE BASKET</span><strong>Loading routes…</strong><span>Travel only</span><button type="button">▾</button></div><div class="sl-mi-perf-note">Refreshing YATA stock and market prices…</div><div class="sl-mi-br-body"></div>';
+            loading.querySelector('.sl-mi-br-head').onclick=()=>loading.classList.toggle('open');
+            mountTop(loading);
+        }
+        const yata=await fetchYataAll();
+        if(!yata.length){
+            const bar=document.getElementById('sl-mi-best-run');
+            if(bar){const note=bar.querySelector('.sl-mi-perf-note');if(note)note.textContent='No travel stock data available yet · retrying on next scan';}
+            return;
+        }
         const candidates=[];
         for(const r of yata){if(r.stock!=null)recordStock(r.destination,r.itemId,r.stock);if(r.stock===0)continue;candidates.push(r);}flushStockHistory();
 
@@ -1434,6 +1446,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         state.travelCacheHits=cachedMap.size;
         const cachedTop=buildBestRunRows(candidates,cachedMap,actualTimes);
         if(cachedTop.length) paintBestTravelRun(cachedTop,'route baskets · instant cache · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn times '+actualTimes.size+'/'+Object.keys(FLIGHT_MINS).length:'fallback flight times')+' · refreshing '+TRAVEL_REFRESH_LIMIT+' prices');
+        else {
+            const bar=document.getElementById('sl-mi-best-run');
+            if(bar){const note=bar.querySelector('.sl-mi-perf-note');if(note)note.textContent='No profitable cached route yet · refreshing live prices';}
+        }
 
         const ids=travelRefreshIds(candidates,TRAVEL_REFRESH_LIMIT,actualTimes);
         state.travelRefreshes=ids.length;
@@ -1443,6 +1459,13 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         for(const r of candidates){const c=cachePeek(r.itemId);if(c)finalMap.set(r.itemId,c);}
         const finalTop=buildBestRunRows(candidates,finalMap,actualTimes);
         if(finalTop.length) paintBestTravelRun(finalTop,'route baskets · live-refreshed · '+(settings.travelBudget>0?('budget '+money(settings.travelBudget)+' · '):'')+(actualTimes.size?'actual Torn flight times':'fallback flight times')+' · '+ids.length+' prices checked');
+        else {
+            const bar=document.getElementById('sl-mi-best-run');
+            if(bar){
+                const strong=bar.querySelector('.sl-mi-br-head strong');if(strong)strong.textContent='No profitable route right now';
+                const note=bar.querySelector('.sl-mi-perf-note');if(note)note.textContent='Basket is active · '+ids.length+' live prices checked · waiting for a profitable route';
+            }
+        }
     }
 
     async function renderArrivalStock(){
@@ -1694,9 +1717,12 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if(!settings.travel)return;
         if(detectInFlight()){document.getElementById('sl-mi-best-run')?.remove();await renderArrivalStock();return;}
         document.getElementById('sl-mi-arrival')?.remove();
-        if(!detectDestination()){await renderBestTravelRun();paintTravelSessionSummary();return;}
-        const destination=detectDestination();if(!destination)return;
-        document.getElementById('sl-mi-best-run')?.remove();
+        // On every landed Travel page, render Best Route Basket first.
+        // Being abroad (Hawaii, Mexico, etc.) must never suppress this panel.
+        await renderBestTravelRun();
+        paintTravelSessionSummary();
+        const destination=detectDestination();
+        if(!destination)return;
         const availableCash=await fetchAvailableCash(true);
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}
