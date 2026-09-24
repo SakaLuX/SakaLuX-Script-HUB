@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.39**
+**v1.8.40**
 
 
 ## Repository synchronization
@@ -32,11 +32,10 @@
 
 ## Current release note
 
-**v1.8.39 — Release metadata synchronization**
-- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
-- Ignores unrelated chat changes in Company page scraping and dock maintenance.
-- Removes duplicate legacy registration timers that overwrote current module metadata.
-- Preserves Company panel stacking and current standalone registration.
+**v1.8.40 — Release metadata synchronization**
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ## Recommended
 - Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
@@ -62,6 +61,12 @@
 
 ## Release history / Changelog
 
+
+
+### v1.8.40 — Release metadata synchronization
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ### v1.8.39 — Release metadata synchronization
 - Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.44**
+**v1.0.45**
 
 
 ## Repository synchronization
@@ -29,10 +29,10 @@
 
 ## Current release note
 
-**v1.0.44 — Keeps the Mission API create button module-specific even when Script Hub is installed**
-- Keeps the Mission API create button module-specific even when Script Hub is installed.
-- Creates only the Mission key permissions: User Ammo and Torn Items.
-- Shared Hub key may still be used for runtime data when available; the local Mission key remains the standalone fallback.
+**v1.0.45 — Release metadata synchronization**
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
@@ -51,6 +51,12 @@ Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-
 ## Release history / Changelog
 
 
+
+
+### v1.0.45 — Release metadata synchronization
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ### v1.0.44 — Keeps the Mission API create button module-specific even when Script Hub is installed
 - Keeps the Mission API create button module-specific even when Script Hub is installed.

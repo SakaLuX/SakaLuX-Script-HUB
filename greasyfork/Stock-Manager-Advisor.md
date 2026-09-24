@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.10**
+**v0.8.12**
 
 
 ## Repository synchronization
@@ -34,10 +34,10 @@
 
 ## Current release note
 
-**v0.8.10 — Release metadata synchronization**
-- Rearranges the lower API Access controls into a clean two-column SAVE & TEST / CHECK ACCESS row with a full-width CLEAR LOCAL TORN KEY button below.
-- Normalizes button height, width, alignment and mobile spacing so the API controls no longer wrap or sit unevenly.
-- Keeps Hub-first API key detection and the local standalone fallback introduced in v0.8.9.
+**v0.8.12 — Release metadata synchronization**
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ## Recommended
 - Keep **Dry Run ON** while checking a new configuration.
@@ -72,6 +72,12 @@
 
 
 
+
+
+### v0.8.12 — Release metadata synchronization
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ### v0.8.10 — Release metadata synchronization
 - Rearranges the lower API Access controls into a clean two-column SAVE & TEST / CHECK ACCESS row with a full-width CLEAR LOCAL TORN KEY button below.

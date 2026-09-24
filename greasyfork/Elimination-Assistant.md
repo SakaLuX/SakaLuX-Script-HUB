@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.45**
+**v1.3.46**
 
 
 ## Repository synchronization
@@ -33,11 +33,10 @@
 
 ## Current release note
 
-**v1.3.45 — Release metadata synchronization**
-- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
-- Disconnects the panel-specific observer when the module is disabled.
-- Removes the document click handler associated with the discarded panel.
-- Prevents observer and detached-panel accumulation across disable/re-enable cycles; target preferences remain saved.
+**v1.3.46 — Release metadata synchronization**
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Elimination Assistant with the other registered add-ons and use the shared Hub Torn API key when compatible.
@@ -56,6 +55,12 @@ Elimination Assistant stores enabled state, selected team, remembered SAFE targe
 
 ## Release history / Changelog
 
+
+
+### v1.3.46 — Release metadata synchronization
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ### v1.3.45 — Release metadata synchronization
 - Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.

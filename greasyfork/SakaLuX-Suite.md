@@ -47,10 +47,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.937 — Church prayer streak tracker**
-- Adds a compact Prayer Streak card on Church / Pray views.
-- Records each successful-looking Pray action locally by calendar day and shows the current consecutive-day streak plus today status.
-- Keeps the data local and starts tracking from the first prayer made after installing this version.
+**v0.9.937 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Recommended
 Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.

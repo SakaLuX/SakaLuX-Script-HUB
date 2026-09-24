@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.83
+// @version      1.9.84
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -99,6 +99,7 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.84", "date": "2026-09-24", "changes": ["Stops installed module SETTINGS/OPEN actions from falling through to the install/source URL when the module API is unavailable on the current page.", "Bazaar Smart Pricer now routes to Bazaar first when needed; pressing it again opens its own settings through the module API.", "Keeps standalone module ordering deterministic across all shared dock renderers."]},
         {"version": "1.9.83", "date": "2026-09-19", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.82", "date": "2026-09-19", "changes": ["Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.", "Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.", "Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions."]},
         {"version": "1.9.81", "date": "2026-09-19", "changes": ["Corrects Fly-out placement: SakaLuX Hub is now the first item in the vertical navigation list, immediately before Home and below the three quick-action icons.", "Clones the simple Home row instead of expandable/contact rows, so no inherited counter or chevron appears.", "Keeps the skull launcher artwork and alert blink while Topbar legacy remains handled by the native topbar launcher."]},
@@ -589,18 +590,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.3.50",
-                    "date": "2026-09-20",
+                    "version": "1.3.51",
+                    "date": "2026-09-24",
                     "notes": [
-                        "Hard-excludes Manage your Bazaar / Manage items from every Enhancer Guard sale-protection path.",
-                        "No row hiding, blocking, badges, sale locks or DOM mutations are allowed on Manage Bazaar.",
-                        "Removes any stale Enhancer sale-protection artifacts if Torn SPA navigation enters Manage Bazaar.",
-                        "Protection remains active only on real Add Listing / sale-selection screens."
+                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
+                        "Deduplicates standalone registrations by module id before rendering.",
+                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.50",
+                "version": "1.3.51",
                 "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
@@ -642,19 +642,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "5.3.42",
-                    "date": "2026-09-18",
+                    "version": "5.3.43",
+                    "date": "2026-09-24",
                     "notes": [
-                        "Integrates Bazaar Thanker actions with Suite Event Lens: removes the inline clipboard button and exposes Thanks/Details through the Suite action row when Bazaar Thanker is active.",
-                        "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-                        "Uses constant-time Hub detection instead of document-wide marker searches on every mutation.",
-                        "Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.",
-                        "Preserves buyer grouping, cooldown and message preparation."
+                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
+                        "Deduplicates standalone registrations by module id before rendering.",
+                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.42",
+                "version": "5.3.43",
                 "detailsRevision": 2,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
@@ -698,14 +696,14 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
                 "detailsRevision": 24,
-                "version": "1.1.8",
+                "version": "1.1.9",
                 "release": {
-                    "version": "1.1.8",
-                    "date": "2026-09-20",
+                    "version": "1.1.9",
+                    "date": "2026-09-24",
                     "notes": [
-                        "Adds the same shared SakaLuX Standalone Dock bootstrap used by the other managed Hub modules.",
-                        "Registers Bazaar Smart Pricer in the standalone dock when Script Hub is absent, while suppressing the dock when Hub is active.",
-                        "Synchronizes the shared standalone module order across all eight active Hub modules so Bazaar Smart Pricer appears beside the other managed tools."
+                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
+                        "Deduplicates standalone registrations by module id before rendering.",
+                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -752,17 +750,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.0.44",
-                    "date": "2026-09-19",
+                    "version": "1.0.45",
+                    "date": "2026-09-24",
                     "notes": [
-                        "Keeps the Mission API create button module-specific even when Script Hub is installed.",
-                        "Creates only the Mission key permissions: User Ammo and Torn Items.",
-                        "Shared Hub key may still be used for runtime data when available; the local Mission key remains the standalone fallback."
+                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
+                        "Deduplicates standalone registrations by module id before rendering.",
+                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.44",
+                "version": "1.0.45",
                 "detailsRevision": 2,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
@@ -818,17 +816,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.17.49",
-                    "date": "2026-09-23",
+                    "version": "1.17.50",
+                    "date": "2026-09-24",
                     "notes": [
-                        "Best Route Basket is now shown only on Torn City Travel, not while landed in Hawaii or any other foreign destination.",
-                        "Foreign-country pages keep their country-specific Best Buys/Travel Planner and Travel Session Summary behavior.",
-                        "Best Route Basket is removed immediately when a landed foreign destination is detected."
+                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
+                        "Deduplicates standalone registrations by module id before rendering.",
+                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.49",
+                "version": "1.17.50",
                 "detailsRevision": 9,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
@@ -906,18 +904,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.3.45",
-                    "date": "2026-09-18",
+                    "version": "1.3.46",
+                    "date": "2026-09-24",
                     "notes": [
-                        "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-                        "Disconnects the panel-specific observer when the module is disabled.",
-                        "Removes the document click handler associated with the discarded panel.",
-                        "Prevents observer and detached-panel accumulation across disable/re-enable cycles; target preferences remain saved."
+                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
+                        "Deduplicates standalone registrations by module id before rendering.",
+                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.45",
+                "version": "1.3.46",
                 "detailsRevision": 3,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
@@ -958,18 +955,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.8.39",
-                    "date": "2026-09-18",
+                    "version": "1.8.40",
+                    "date": "2026-09-24",
                     "notes": [
-                        "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-                        "Ignores unrelated chat changes in Company page scraping and dock maintenance.",
-                        "Removes duplicate legacy registration timers that overwrote current module metadata.",
-                        "Preserves Company panel stacking and current standalone registration."
+                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
+                        "Deduplicates standalone registrations by module id before rendering.",
+                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.39",
+                "version": "1.8.40",
                 "detailsRevision": 2,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
@@ -1016,19 +1012,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "0.8.11",
-                    "date": "2026-09-21",
+                    "version": "0.8.12",
+                    "date": "2026-09-24",
                     "notes": [
-                        "Rearranges Vault & Panic controls into a clearer two-column workflow.",
-                        "Vault (Keep) now sits beside Vault keep cash.",
-                        "Withdraw now sits beside Withdraw amount.",
-                        "Vault Max moves to the old Withdraw position and Withdraw All is styled red.",
-                        "PANIC keep/max values stay preserved internally so PANIC behavior is not broken by the layout cleanup."
+                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
+                        "Deduplicates standalone registrations by module id before rendering.",
+                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.11",
+                "version": "0.8.12",
                 "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
@@ -1040,6 +1034,10 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
         "lastVerified": "2026-09-20",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
+
+    const FALLBACK_MODULE_DETAILS = Object.fromEntries(
+        (FALLBACK_REGISTRY.scripts || []).map(s => [s.id, { info: s.info, release: s.release }])
+    );
 
     let registry = loadJson(STORAGE.registry, FALLBACK_REGISTRY);
     let SCRIPTS = normalizeRegistry(registry);
@@ -2486,9 +2484,33 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 closeHub();
                 return;
             }
+            // Installed modules must never fall through to their installer/source URL
+            // just because their runtime API is not active on this Torn page.
+            if (script.id === 'bazaar-smart-pricer') {
+                const smartAction = (script.quickActions || []).find(item => item.id === actionId)
+                    || (script.quickActions || []).find(item => item.id === 'open');
+                if (smartAction?.fallbackUrl && location.pathname !== '/bazaar.php') {
+                    recordUsage(id);
+                    closeHub();
+                    location.href = smartAction.fallbackUrl;
+                    return;
+                }
+            }
             if (script.fallbackOpen()) {
                 recordUsage(id);
                 closeHub();
+                return;
+            }
+            const fallbackAction = (script.quickActions || []).find(item => item.id === actionId)
+                || (script.quickActions || []).find(item => item.id === 'open');
+            if (fallbackAction?.fallbackUrl) {
+                recordUsage(id);
+                closeHub();
+                location.href = fallbackAction.fallbackUrl;
+                return;
+            }
+            if (getInstalledVersion(script)) {
+                alert(script.name + ' is installed but its panel is not available on this page. Open the module page and press SETTINGS again.');
                 return;
             }
             const url = getInstallUrl(script);

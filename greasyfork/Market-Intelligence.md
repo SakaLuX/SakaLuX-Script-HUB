@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.49**
+**v1.17.50**
 
 
 ## Repository synchronization
@@ -32,10 +32,10 @@
 
 ## Current release note
 
-**v1.17.49 — Best Route Basket only in Torn**
-- Best Route Basket appears only on Torn City Travel before departure.
-- It is hidden while landed in Hawaii, Mexico, Canada and every other foreign destination.
-- Foreign-country Best Buys/Planner and Travel Session Summary remain unchanged.
+**v1.17.50 — Release metadata synchronization**
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
@@ -59,6 +59,12 @@ The optional SakaLuX Price Network is disabled by default and has no default end
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+
+### v1.17.50 — Release metadata synchronization
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ### v1.17.49 — Best Route Basket only in Torn
 - Restores strict Torn-side scope for Best Route Basket.

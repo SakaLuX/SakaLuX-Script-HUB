@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.42**
+**v5.3.43**
 
 
 ## Repository synchronization
@@ -26,12 +26,10 @@
 
 ## Current release note
 
-**v5.3.42 — Release metadata synchronization**
-- Integrates Bazaar Thanker actions with Suite Event Lens: removes the inline clipboard button and exposes Thanks/Details through the Suite action row when Bazaar Thanker is active.
-- Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.
-- Uses constant-time Hub detection instead of document-wide marker searches on every mutation.
-- Avoids rebuilding unchanged standalone dock entries and ignores unrelated chat changes.
-- Preserves buyer grouping, cooldown and message preparation.
+**v5.3.43 — Release metadata synchronization**
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Bazaar Thanker with the other registered SakaLuX add-ons.
@@ -48,6 +46,12 @@ Generated thank-you text should be reviewed before sending. The script assists w
 ## Release history / Changelog
 
 
+
+
+### v5.3.43 — Release metadata synchronization
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ### v5.3.42 — Release metadata synchronization
 - Integrates Bazaar Thanker actions with Suite Event Lens: removes the inline clipboard button and exposes Thanks/Details through the Suite action row when Bazaar Thanker is active.

@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.8**
+**v1.1.9**
 
 ## Repository synchronization
 
@@ -39,7 +39,7 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.8 — Release metadata synchronization**
-- Adds the same shared SakaLuX Standalone Dock bootstrap used by the other managed Hub modules.
-- Registers Bazaar Smart Pricer in the standalone dock when Script Hub is absent, while suppressing the dock when Hub is active.
-- Synchronizes the shared standalone module order across all eight active Hub modules so Bazaar Smart Pricer appears beside the other managed tools.
+**v1.1.9 — Release metadata synchronization**
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.

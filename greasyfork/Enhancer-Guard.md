@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.50**
+**v1.3.51**
 
 
 ## Repository synchronization
@@ -29,11 +29,10 @@
 
 ## Current release note
 
-**v1.3.50 — Release metadata synchronization**
-- Hard-excludes Manage your Bazaar / Manage items from every Enhancer Guard sale-protection path.
-- No row hiding, blocking, badges, sale locks or DOM mutations are allowed on Manage Bazaar.
-- Removes any stale Enhancer sale-protection artifacts if Torn SPA navigation enters Manage Bazaar.
-- Protection remains active only on real Add Listing / sale-selection screens.
+**v1.3.51 — Release metadata synchronization**
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ## Recommended
 Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
@@ -52,6 +51,12 @@ Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registere
 **All Rights Reserved**
 
 ## Release history / Changelog
+
+
+### v1.3.51 — Release metadata synchronization
+- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
+- Deduplicates standalone registrations by module id before rendering.
+- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
 
 ### v1.3.50 — Strict Manage Bazaar isolation
 - Hard-excludes Manage Bazaar from all sale-protection logic.
