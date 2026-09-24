@@ -1,0 +1,91 @@
+name: One-shot Account Auditor draggable launcher
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-shot-auditor-draggable.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch Account Auditor launcher
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('SakaLuX-Account-Auditor.user.js')
+          s = p.read_text(encoding='utf-8')
+
+          # Bump release.
+          s = s.replace('// @version      1.3.21', '// @version      1.3.22', 1)
+          s = s.replace("const VERSION = '1.3.21';", "const VERSION = '1.3.22';", 1)
+
+          old_css = "#sl-aa-button{position:fixed;right:10px;bottom:150px;z-index:2147483643;border:0;border-radius:999px;padding:9px 11px;background:#16191f;color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font:900 12px Arial}"
+          new_css = "#sl-aa-button{position:fixed;right:10px;bottom:150px;z-index:2147483643;border:1px solid #53657a;border-radius:999px;padding:9px 12px;background:linear-gradient(180deg,#202b38,#151d27);color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.42);font:900 12px Arial;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}#sl-aa-button.sl-aa-dragging{cursor:grabbing;opacity:.94;box-shadow:0 8px 24px rgba(0,0,0,.55)}"
+          if old_css not in s:
+              raise SystemExit('Account Auditor launcher CSS anchor not found')
+          s = s.replace(old_css, new_css, 1)
+
+          old_button = "function createButton(){if(!settings.showButton||document.getElementById('sl-aa-button'))return;const b=document.createElement('button');b.id='sl-aa-button';b.textContent='☠︎ AUDIT';b.onclick=openSettings;document.body.appendChild(b);}"
+          new_button = r'''const AUDIT_BUTTON_POS_KEY='SakaLuX_AUDITOR_BUTTON_POSITION_V1';
+    function loadAuditButtonPosition(){
+        try{const p=JSON.parse(localStorage.getItem(AUDIT_BUTTON_POS_KEY)||'null');return p&&Number.isFinite(Number(p.left))&&Number.isFinite(Number(p.top))?{left:Number(p.left),top:Number(p.top)}:null;}catch(_){return null;}
+    }
+    function saveAuditButtonPosition(left,top){try{localStorage.setItem(AUDIT_BUTTON_POS_KEY,JSON.stringify({left:Math.round(left),top:Math.round(top)}));}catch(_){}}
+    function clampAuditButtonPosition(b,left,top){const r=b.getBoundingClientRect(),w=r.width||84,h=r.height||36,pad=4;return{left:Math.max(pad,Math.min(window.innerWidth-w-pad,left)),top:Math.max(pad,Math.min(window.innerHeight-h-pad,top))};}
+    function applyAuditButtonPosition(b,pos){if(!pos)return;const p=clampAuditButtonPosition(b,pos.left,pos.top);b.style.left=p.left+'px';b.style.top=p.top+'px';b.style.right='auto';b.style.bottom='auto';}
+    function makeAuditButtonDraggable(b){
+        const saved=loadAuditButtonPosition();if(saved)requestAnimationFrame(()=>applyAuditButtonPosition(b,saved));
+        let drag=null,moved=false,suppressClick=false;
+        b.addEventListener('pointerdown',e=>{
+            if(e.button!=null&&e.button!==0)return;
+            const r=b.getBoundingClientRect();
+            drag={id:e.pointerId,dx:e.clientX-r.left,dy:e.clientY-r.top};moved=false;
+            try{b.setPointerCapture(e.pointerId);}catch(_){}
+            b.classList.add('sl-aa-dragging');
+            e.preventDefault();
+        });
+        b.addEventListener('pointermove',e=>{
+            if(!drag||e.pointerId!==drag.id)return;
+            const p=clampAuditButtonPosition(b,e.clientX-drag.dx,e.clientY-drag.dy);
+            if(Math.abs(p.left-b.getBoundingClientRect().left)>2||Math.abs(p.top-b.getBoundingClientRect().top)>2)moved=true;
+            b.style.left=p.left+'px';b.style.top=p.top+'px';b.style.right='auto';b.style.bottom='auto';
+            e.preventDefault();
+        });
+        const end=e=>{
+            if(!drag||e.pointerId!==drag.id)return;
+            const r=b.getBoundingClientRect();saveAuditButtonPosition(r.left,r.top);
+            suppressClick=moved;drag=null;b.classList.remove('sl-aa-dragging');
+            try{b.releasePointerCapture(e.pointerId);}catch(_){}
+            if(suppressClick)setTimeout(()=>{suppressClick=false;},180);
+            e.preventDefault();
+        };
+        b.addEventListener('pointerup',end);b.addEventListener('pointercancel',end);
+        b.addEventListener('click',e=>{if(suppressClick){e.preventDefault();e.stopPropagation();return;}openSettings();});
+        window.addEventListener('resize',()=>{const r=b.getBoundingClientRect();applyAuditButtonPosition(b,{left:r.left,top:r.top});saveAuditButtonPosition(b.getBoundingClientRect().left,b.getBoundingClientRect().top);},{passive:true});
+    }
+    function createButton(){if(!settings.showButton||document.getElementById('sl-aa-button'))return;const b=document.createElement('button');b.id='sl-aa-button';b.type='button';b.textContent='☠︎ AUDIT';b.title='Tap to open · drag to move';document.body.appendChild(b);makeAuditButtonDraggable(b);}'''
+          if old_button not in s:
+              raise SystemExit('Account Auditor createButton anchor not found')
+          s = s.replace(old_button, new_button, 1)
+
+          p.write_text(s, encoding='utf-8')
+
+          # Remove this one-shot workflow from the committed result.
+          Path('.github/workflows/one-shot-auditor-draggable.yml').unlink(missing_ok=True)
+          PY
+      - name: Validate JavaScript
+        run: node --check SakaLuX-Account-Auditor.user.js
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Account-Auditor.user.js .github/workflows/one-shot-auditor-draggable.yml
+          git commit -m "Make Account Auditor launcher draggable"
+          git push
