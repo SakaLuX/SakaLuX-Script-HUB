@@ -3,7 +3,7 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.21**
+**v1.3.22**
 
 
 ## Repository synchronization
@@ -30,7 +30,7 @@
 
 ## Current release note
 
-**v1.3.21 — Release documentation synchronized with the current Account Auditor userscript version**
+**v1.3.22 — Release documentation synchronized with the current Account Auditor userscript version**
 - Release documentation synchronized with the current Account Auditor userscript version.
 
 ## Recommended
@@ -57,6 +57,10 @@ Account Auditor handles sensitive account information. Snapshot files can contai
 
 ## Release history / Changelog
 
+
+
+### v1.3.22 — Release documentation synchronized with the current Account Auditor userscript version
+- Release documentation synchronized with the current Account Auditor userscript version.
 
 ### v1.3.21 — Release documentation synchronized with the current Account Auditor userscript version
 - Release documentation synchronized with the current Account Auditor userscript version.
