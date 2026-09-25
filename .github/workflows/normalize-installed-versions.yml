@@ -10,9 +10,6 @@ on:
       - '.github/scripts/fix_standalone_hub_navigation.py'
       - '.github/scripts/ensure_auditor_draggable.py'
       - '.github/scripts/fix_bazaar_smart_pricer_power.py'
-      - '.github/scripts/private-module-helper.py'
-      - '.github/scripts/private-module-helper.py'
-      - '.github/scripts/private-module-helper.py'
       - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
 permissions:
@@ -34,17 +31,6 @@ jobs:
         run: python3 .github/scripts/ensure_auditor_draggable.py
       - name: Make Bazaar Smart Pricer power global
         run: python3 .github/scripts/fix_bazaar_smart_pricer_power.py
-      - name: Add FFScouter to Poker Exit Alert
-        run: |
-          if [ -f private-module.user.js ]; then
-            python3 .github/scripts/private-module-helper.py
-          else
-            echo "Poker Exit Alert already rebranded; FFScouter enhancer already embedded."
-          fi
-      - name: Rebrand Poker Exit Alert
-        run: python3 .github/scripts/private-module-helper.py
-      - name: Fix Poker FFScouter visibility and diagnostics
-        run: python3 .github/scripts/private-module-helper.py
       - name: Normalize module, Hub, NEW and release surfaces
         run: python3 .github/scripts/normalize_installed_versions.py
       - name: Validate JavaScript syntax
