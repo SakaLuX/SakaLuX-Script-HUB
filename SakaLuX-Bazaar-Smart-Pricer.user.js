@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.9
+// @version      1.1.10
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -21,7 +21,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.1.9';
+  let v = '1.1.10';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -99,7 +99,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"},{version:'1.1.9'});
+  const SELF=Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"},{version:'1.1.10'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -2080,6 +2080,39 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
     let bazaarObserver = null;
 
+    const MODULE_ENABLED_KEY = 'moduleEnabled';
+
+    function isModuleEnabled() {
+        return GM_getValue(MODULE_ENABLED_KEY, true) !== false;
+    }
+
+    function stopModuleRuntime() {
+        if (bazaarObserver) { bazaarObserver.disconnect(); bazaarObserver = null; }
+        clearTimeout(mutationDebounceTimer);
+        document.querySelectorAll('.qp-chip,.quick-price-btn,.quick-update-price-btn,.qp-overlay,.qp-toast-wrap').forEach(el => el.remove());
+        chipEl = null;
+        chipFillBtn = null;
+        isScriptInitialized = false;
+    }
+
+    function setModuleEnabled(value) {
+        const enabled = Boolean(value);
+        GM_setValue(MODULE_ENABLED_KEY, enabled);
+        if (enabled) {
+            checkForBazaar();
+        } else {
+            stopModuleRuntime();
+        }
+        try {
+            window.dispatchEvent(new CustomEvent('SakaLuX:BazaarSmartPricerStateChanged', { detail: { version: VERSION, enabled } }));
+        } catch {}
+        return enabled;
+    }
+
+    function toggleModuleEnabled() {
+        return setModuleEnabled(!isModuleEnabled());
+    }
+
     function setupObserver(bazaarRoot) {
         if (bazaarObserver) bazaarObserver.disconnect();
         bazaarObserver = new MutationObserver(() => {
@@ -2094,6 +2127,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     }
 
     function initScript(bazaarRoot) {
+        if (!isModuleEnabled()) return;
         // Full init regardless of key state: the chip and item buttons stay usable
         // and simply prompt for a key when clicked, instead of the script going
         // dead until a reload if the first-run prompt is dismissed.
@@ -2110,6 +2144,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     const ROOT_WAIT_TIMEOUT_MS = 20000;
 
     function checkForBazaar() {
+        if (!isModuleEnabled()) return;
         if (isScriptInitialized) return;
         const findRoot = () =>
             document.querySelector(SELECTORS.bazaarRoot) || document.querySelector(SELECTORS.bazaarRootLegacy);
@@ -2171,6 +2206,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     }
 
     function init() {
+        if (!isModuleEnabled()) return;
         // Stage 0: Check immediately
         checkForBazaar();
         if (isScriptInitialized) return;
@@ -2213,9 +2249,10 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
             openSettings: showSettingsPanel,
             quickFill: fillAllItems,
             priceAll: fillAllItems,
-            refresh: () => { processAllItems(); processManageItems(); updateChipContext(); },
-            isEnabled: () => true,
-            setEnabled: () => true
+            refresh: () => { if (isModuleEnabled()) { processAllItems(); processManageItems(); updateChipContext(); } },
+            isEnabled: isModuleEnabled,
+            setEnabled: setModuleEnabled,
+            toggleEnabled: toggleModuleEnabled
         };
     } catch {}
 

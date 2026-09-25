@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.9**
+**v1.1.10**
 
 ## Repository synchronization
 
@@ -39,7 +39,7 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.9 — Release metadata synchronization**
+**v1.1.10 — Release metadata synchronization**
 - Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
 - Deduplicates standalone registrations by module id before rendering.
 - Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
