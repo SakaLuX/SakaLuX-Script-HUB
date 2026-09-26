@@ -42,6 +42,8 @@ jobs:
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/hub-details-regression.cjs
       - name: Verify all Suite tool bridges
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/suite-modules-regression.cjs
+      - name: Verify Suite Daily Progress Dashboard
+        run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/suite-daily-progress-regression.cjs
       - name: Verify scoped footer recovery and stable inventory badges
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/performance/ui-regression.cjs
       - name: Verify current lifecycle and request-sharing regressions
@@ -55,4 +57,4 @@ jobs:
       - name: Check current all-script performance workload budgets
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/performance/run.cjs "$RUNNER_TEMP/performance-budget.json" --assert
 
-# Shared Core v1, Shared Dock Runtime, Hub fallback registry and Hub Health diagnostics are covered above.
+# Shared Core v1, Shared Dock Runtime, Hub fallback registry, Hub Health diagnostics and Suite Daily Progress are covered above.
