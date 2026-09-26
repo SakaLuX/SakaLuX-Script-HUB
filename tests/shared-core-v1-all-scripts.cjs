@@ -16,6 +16,7 @@ const canonicalOrder = [
 ];
 
 const SKIP_DIRS = new Set(['.git', 'node_modules']);
+const LEGACY_FOUNDATION = '// Shared SakaLuX performance + Hub-style UI foundation.';
 
 function walkUserscripts(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -59,6 +60,20 @@ for (const item of files) {
   const baseline = stripSharedCore(source);
   assert.ok(source.includes('// ==UserScript==') && source.includes('// ==/UserScript=='), `${item.rel}: invalid userscript metadata`);
 
+  // Permanent dedup contracts: shared helpers must live only in Shared Core.
+  assert.equal(baseline.includes(LEGACY_FOUNDATION), false, `${item.rel}: legacy duplicated performance/UI foundation remains outside Shared Core`);
+  assert.equal(/if\s*\(\s*!g\.SakaLuXPerf\s*\)\s*\{/.test(baseline), false, `${item.rel}: legacy SakaLuXPerf bootstrap remains outside Shared Core`);
+
+  const hubInstalledDefs = [...baseline.matchAll(/const\s+hubInstalled\s*=\s*([^;]+);/g)];
+  for (const def of hubInstalledDefs) {
+    assert.ok(/SakaLuXCore/.test(def[1]), `${item.rel}: hubInstalled still duplicates Hub detection instead of using Shared Core`);
+  }
+
+  const canonicalOrderBlocks = [...baseline.matchAll(/const\s+ORDER\s*=\s*\[(?:.|\n){0,900}?\];/g)].filter(m =>
+    canonicalOrder.every(id => m[0].includes(`'${id}'`) || m[0].includes(`\"${id}\"`))
+  );
+  assert.equal(canonicalOrderBlocks.length, 0, `${item.rel}: duplicated canonical standalone dock ORDER remains outside Shared Core`);
+
   const output = embedSharedCore(source, core);
   assert.equal(metadataHeader(output), metadataHeader(source), `${item.rel}: metadata changed during embedding`);
   assert.equal((output.match(new RegExp(BEGIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length, 1, `${item.rel}: core not embedded exactly once`);
@@ -84,13 +99,12 @@ for (const item of files) {
     fs.rmSync(tmp, { force: true });
   }
 
-  const usesPerf = /SakaLuXPerf/.test(source);
-  const usesHubDetection = /hubInstalled|SakaLuXScriptHub|sakalux-hub-panel|data-sakalux-hub-installed/.test(source);
-  const orderMatches = [...source.matchAll(/const\s+ORDER\s*=\s*\[([^\]]+)\]/g)];
+  const usesPerf = /SakaLuXPerf/.test(baseline);
+  const usesHubDetection = /hubInstalled|SakaLuXScriptHub|sakalux-hub-panel|data-sakalux-hub-installed/.test(baseline);
+  const orderMatches = [...baseline.matchAll(/const\s+ORDER\s*=\s*\[([^\]]+)\]/g)];
   let dockOrdersChecked = 0;
   for (const orderMatch of orderMatches) {
-    const ids = [...orderMatch[1].matchAll(/['"]([^'"]+)['"]/g)].map(m => m[1]);
-    // Only treat ORDER constants containing known dock module ids as a shared-dock contract.
+    const ids = [...orderMatch[1].matchAll(/['\"]([^'\"]+)['\"]/g)].map(m => m[1]);
     if (!ids.some(id => canonicalOrder.includes(id))) continue;
     dockOrdersChecked++;
     assert.deepEqual(ids, canonicalOrder, `${item.rel}: standalone dock ORDER diverges from Shared Core canonical order`);
@@ -103,23 +117,23 @@ for (const item of files) {
     registryActive: registryEntry ? registryEntry.active !== false : null,
     usesPerf,
     usesHubDetection,
-    dockOrdersChecked
+    hubInstalledDefs: hubInstalledDefs.length,
+    dockOrdersChecked,
+    legacyFoundation: false
   });
 }
 
-// Registry ids that participate in the shared dock must preserve canonical relative ordering.
 const activeEntries = registryEntries.filter(x => x.active !== false);
 const activeIds = new Set(activeEntries.map(x => x.id));
 const knownActive = canonicalOrder.filter(id => activeIds.has(id));
 const registryOrder = activeEntries.map(x => x.id).filter(id => canonicalOrder.includes(id));
 assert.deepEqual(registryOrder, knownActive, 'scripts.json active shared-dock order diverges from canonical Core order');
 
-// Every registry userscript source that points at this repository must exist among scanned files.
 const scannedBasenames = new Set(files.map(x => x.file));
 for (const entry of registryEntries) {
   const file = sourceFileFromUrl(entry.sourceUrl);
   if (file?.endsWith('.user.js')) assert.ok(scannedBasenames.has(file), `registry userscript missing from repository-wide scan: ${entry.id} -> ${file}`);
 }
 
-console.log(`Shared Core repository-wide compatibility passed for ${files.length} userscripts.`);
+console.log(`Shared Core repository-wide compatibility and dedup invariants passed for ${files.length} userscripts.`);
 for (const r of report) console.log(JSON.stringify(r));
