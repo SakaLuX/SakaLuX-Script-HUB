@@ -5,13 +5,16 @@ const assert=require('node:assert/strict');
 
 const src=fs.readFileSync('src/core/sakalux-dock-runtime.js','utf8');
 assert.match(src,/SakaLuX Shared Dock Runtime v1/);
-assert.match(src,/const VERSION = '1\.0\.0-test\.2'/);
+assert.match(src,/const VERSION = '1\.0\.0-test\.3'/);
 assert.ok(src.includes("dock: 'sakalux-standalone-dock'"));
 assert.ok(src.includes('latest registration wins'));
 assert.ok(src.includes("SakaLuX:ScriptHubReady"));
 assert.ok(src.includes("const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN'"));
 assert.ok(src.includes('findStatusIconList()'));
 assert.ok(src.includes('maybePrompt()'));
+assert.ok(src.includes('runtimeSignalsBound'));
+assert.ok(src.includes('promptScheduled'));
+assert.ok(src.includes('Promise.resolve().then(() => maybePrompt())'));
 
 function makeNode(tag='div'){
   const n={tagName:tag.toUpperCase(),children:[],dataset:{},hidden:false,disabled:false,id:'',className:'',textContent:'',title:'',type:'',href:'',attrs:{},listeners:{},removed:false,
@@ -31,15 +34,16 @@ const document={
   querySelectorAll:()=>[]
 };
 let hub=false;
+let routeSubscriptions=0;
 const core={
   hub:{installed:()=>hub},
   perf:{debounce(_key,fn){fn();},unrelated:()=>false},
-  router:{onChange:()=>()=>{},bind:()=>true},
+  router:{onChange:()=>{routeSubscriptions++;return()=>{};},bind:()=>true},
   dock:{ORDER:['a','b','c'],sort(rows){return [...new Map(rows.map(x=>[x.id,x])).values()].sort((x,y)=>this.ORDER.indexOf(x.id)-this.ORDER.indexOf(y.id));}}
 };
 const storage=new Map();
 const localStorage={getItem:k=>storage.has(k)?storage.get(k):null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)};
-const context={globalThis:null,document,SakaLuXCore:core,console,Map,Object,Error,Date,localStorage,setTimeout:()=>0,clearTimeout:()=>{},location:{href:'https://www.torn.com/index.php',pathname:'/index.php'}};
+const context={globalThis:null,document,SakaLuXCore:core,console,Map,Object,Error,Date,Promise,localStorage,setTimeout:()=>0,clearTimeout:()=>{},location:{href:'https://www.torn.com/index.php',pathname:'/index.php'}};
 context.globalThis=context;context.addEventListener=()=>{};
 vm.createContext(context);vm.runInContext(src,context);
 const rt=context.SakaLuXDockRuntime;assert(rt);
@@ -47,6 +51,7 @@ let opened=0;
 rt.register({id:'b',name:'Bee',icon:'B',open:()=>opened++});
 rt.register({id:'a',name:'Aye',icon:'A',open:()=>opened++});
 rt.register({id:'b',name:'Bee 2',icon:'B2',open:()=>opened++});
+assert.equal(routeSubscriptions,1,'runtime route signals bind only once');
 assert.deepEqual(Array.from(rt.list(),x=>x.id),['a','b']);
 assert.equal(rt.list()[1].name,'Bee 2');
 const panel=rt.render();assert(panel);
