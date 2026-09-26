@@ -260,18 +260,19 @@
         }
       ],
       "release": {
-        "version": "1.17.50",
-        "date": "2026-09-24",
+        "version": "1.17.51",
+        "date": "2026-09-26",
         "notes": [
-          "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
-          "Deduplicates standalone registrations by module id before rendering.",
-          "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
+          "Adds an explicit Travel lifecycle state machine: TORN_TRAVEL_AGENCY, IN_FLIGHT, LANDED_ABROAD and OTHER.",
+          "Shows Best Route Basket only on Torn Travel Agency, Arrival Basket only in flight, and landed Best Buys/Planner only abroad.",
+          "Removes stale Travel panels deterministically during Torn SPA/TornPDA navigation, including Travel → Flight → foreign country → Messages → Travel.",
+          "Keeps Travel Session Summary inside the travel lifecycle and adds permanent regression coverage for Hawaii and other foreign destinations."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.50",
-      "detailsRevision": 9,
+      "version": "1.17.51",
+      "detailsRevision": 10,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

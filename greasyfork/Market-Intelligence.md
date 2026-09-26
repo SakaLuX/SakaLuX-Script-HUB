@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.50**
+**v1.17.51**
 
 
 ## Repository synchronization
@@ -32,33 +32,20 @@
 
 ## Current release note
 
-**v1.17.50 — Release metadata synchronization**
-- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
-- Deduplicates standalone registrations by module id before rendering.
-- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
-
-## Recommended
-Install **SakaLuX Script Hub** to manage Market Intelligence with the other registered add-ons, use shared Hub integration and access module controls from one place.
-
-## Privacy
-Market Intelligence is local-first. Settings, market cache, watchlist, stock history, item catalogue, price history, travel sessions, loadout cache and Price Network queue/consensus data are stored locally.
-
-The module may request data from:
-- `api.torn.com` for Torn market/player/travel/equipment information.
-- `yata.yt` for public abroad travel stock and buy-price information.
-
-The optional SakaLuX Price Network is disabled by default and has no default endpoint. If explicitly enabled/configured, it is designed to submit anonymous market observations without Torn ID, username, API key, device ID or cookies.
-
-## Important
-- Displayed prices, profits, ROI, arrival-stock estimates, restock predictions, basket recommendations, Museum comparisons and loadout verdicts are decision-support estimates.
-- The script does not automatically purchase, sell, travel, trade or attack.
-- Arrival/restock prediction learns from observations and may remain LEARNING/low-confidence until sufficient history exists.
-- Market Intelligence is distributed through Greasy Fork. If Hub shows different **PUBLISHED** and **REGISTRY** versions, the public Greasy Fork metadata has not yet caught up with the registry; publish the matching current release to clear that pending state.
-
-## License
-**All Rights Reserved**
+**v1.17.51 — Explicit Travel state machine**
+- Adds explicit `TORN_TRAVEL_AGENCY`, `IN_FLIGHT`, `LANDED_ABROAD` and `OTHER` travel states.
+- Best Route Basket is now strictly limited to Torn Travel Agency.
+- Arrival Basket is limited to active flights; in-country Best Buys / Travel Buy Planner are limited to landed foreign pages.
+- Travel Session Summary remains inside the travel lifecycle and all stale travel panels are removed during SPA/TornPDA route changes.
+- Permanent regression coverage validates Hawaii/foreign-country classification and Travel → Flight → foreign country → Messages → Travel navigation.
 
 ## Release history / Changelog
+
+### v1.17.51 — Explicit Travel state machine
+- Adds explicit `TORN_TRAVEL_AGENCY`, `IN_FLIGHT`, `LANDED_ABROAD` and `OTHER` travel states.
+- Enforces deterministic panel scoping for Best Route, Arrival Basket, landed-country tools and Travel Session Summary.
+- Cleans stale panels on SPA/TornPDA navigation and adds permanent regression coverage for the complete travel lifecycle.
+
 
 
 ### v1.17.50 — Release metadata synchronization

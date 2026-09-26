@@ -816,17 +816,13 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                     }
                 ],
                 "release": {
-                    "version": "1.17.50",
-                    "date": "2026-09-24",
-                    "notes": [
-                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
-                        "Deduplicates standalone registrations by module id before rendering.",
-                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
-                    ]
+                    "version": "1.17.51",
+                    "date": "2026-09-26",
+                    "notes": ["Adds an explicit Travel lifecycle state machine for Travel Agency, flight, landed-abroad and other pages.", "Scopes Best Route, Arrival Basket and landed-country panels to their exact travel states.", "Adds SPA/TornPDA stale-panel cleanup and permanent travel navigation regression coverage."]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.50",
+                "version": "1.17.51",
                 "detailsRevision": 9,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",

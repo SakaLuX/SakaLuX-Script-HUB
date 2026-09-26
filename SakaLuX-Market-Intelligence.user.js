@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.50
+// @version      1.17.51
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -21,7 +21,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.50';
+  let v = '1.17.51';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -99,7 +99,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.50'});
+  const SELF=Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"},{version:'1.17.51'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -951,6 +951,43 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if(/pmarket\.php/i.test(u)) return 'points';
         return 'other';
     }
+
+    // Explicit Travel lifecycle state machine. Keeps travel UI deterministic across Torn SPA/TornPDA navigation.
+    const TRAVEL_STATES = Object.freeze({
+        TORN_TRAVEL_AGENCY:'TORN_TRAVEL_AGENCY',
+        IN_FLIGHT:'IN_FLIGHT',
+        LANDED_ABROAD:'LANDED_ABROAD',
+        OTHER:'OTHER'
+    });
+
+    function detectTravelStateRuntime(){
+        const href=String(location.href||''), pathname=String(location.pathname||''), body=document.body?.innerText||'';
+        if(/Remaining Flight Time/i.test(body)||/Traveling from .* to /i.test(body))return {state:TRAVEL_STATES.IN_FLIGHT,destination:null};
+        const textMatch=body.match(/You are in ([A-Z][A-Za-z ]+?) and have/i);
+        const destination=normalizeDestination((textMatch&&textMatch[1])||detectDestination()||'');
+        if(destination||/abroad\.php/i.test(href)||/\/abroad(?:\.php)?/i.test(pathname))return {state:TRAVEL_STATES.LANDED_ABROAD,destination};
+        if(/travelagency\.php/i.test(href)||/[?&]sid=travel(?:&|$)/i.test(href)||/Travel Agency/i.test(body))return {state:TRAVEL_STATES.TORN_TRAVEL_AGENCY,destination:null};
+        return {state:TRAVEL_STATES.OTHER,destination:null};
+    }
+
+    function travelPanelPolicy(stateName){
+        return {
+            bestRoute:stateName===TRAVEL_STATES.TORN_TRAVEL_AGENCY,
+            arrivalBasket:stateName===TRAVEL_STATES.IN_FLIGHT,
+            sessionSummary:stateName===TRAVEL_STATES.TORN_TRAVEL_AGENCY||stateName===TRAVEL_STATES.IN_FLIGHT||stateName===TRAVEL_STATES.LANDED_ABROAD,
+            landedBestBuys:stateName===TRAVEL_STATES.LANDED_ABROAD
+        };
+    }
+
+    function reconcileTravelPanelsRuntime(stateName){
+        const policy=travelPanelPolicy(stateName);
+        if(!policy.bestRoute)document.getElementById('sl-mi-best-run')?.remove();
+        if(!policy.arrivalBasket)document.getElementById('sl-mi-arrival')?.remove();
+        if(!policy.sessionSummary)document.getElementById('sl-mi-session')?.remove();
+        if(!policy.landedBestBuys)document.querySelectorAll('#sl-mi-country-best,#sl-mi-travel-plan').forEach(n=>n.remove());
+        return policy;
+    }
+
     function detectDestination() { const body=document.body?.innerText||''; const m=body.match(/You are in ([A-Z][A-Za-z ]+?) and have/); return m?normalizeDestination(m[1]):null; }
     function detectInFlight() { const body=document.body?.innerText||''; return /Remaining Flight Time/i.test(body)||/Traveling from .* to /i.test(body); }
 
@@ -1723,11 +1760,18 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
     async function scanTravel(){
         if(!settings.travel)return;
-        if(detectInFlight()){document.getElementById('sl-mi-best-run')?.remove();await renderArrivalStock();return;}
+        const travelCtx=detectTravelStateRuntime();
+        const travelPolicy=reconcileTravelPanelsRuntime(travelCtx.state);
+        state.travelState=travelCtx.state;
+        state.travelDestination=travelCtx.destination||'';
+        if(travelCtx.state===TRAVEL_STATES.OTHER)return;
+        if(travelCtx.state===TRAVEL_STATES.IN_FLIGHT){await renderArrivalStock();paintTravelSessionSummary();return;}
         document.getElementById('sl-mi-arrival')?.remove();
-        const destination=detectDestination();
-        // Best Route Basket belongs only to Torn's Travel page, never to a landed foreign-country shop.
-        if(!destination){await renderBestTravelRun();paintTravelSessionSummary();return;}
+        const destination=travelCtx.destination||detectDestination();
+        // Explicit state policy: Best Route Basket is Torn Travel Agency only.
+        if(travelCtx.state===TRAVEL_STATES.TORN_TRAVEL_AGENCY){await renderBestTravelRun();paintTravelSessionSummary();return;}
+        if(travelCtx.state!==TRAVEL_STATES.LANDED_ABROAD)return;
+        document.getElementById('sl-mi-best-run')?.remove();
         document.getElementById('sl-mi-best-run')?.remove();
         const availableCash=await fetchAvailableCash(true);
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
@@ -2044,7 +2088,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     function mountTop(el){const host=document.querySelector('#mainContainer .content-wrapper')||document.querySelector('.content-wrapper')||document.querySelector('#mainContainer')||document.body;host.insertBefore(el,host.firstChild);}
 
     async function scan(force=false){
-        if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();if(state.page!=='travel')document.querySelectorAll('#sl-mi-session,#sl-mi-arrival').forEach(n=>n.remove());state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
+        if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();if(state.page!=='travel')document.querySelectorAll('#sl-mi-session,#sl-mi-arrival,#sl-mi-best-run,#sl-mi-country-best,#sl-mi-travel-plan').forEach(n=>n.remove());state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
         try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());if(state.page!=='travel')document.querySelectorAll('.sl-mi-travel,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}if(state.page==='items'||state.page==='profile')document.getElementById('sl-mi-market-bar')?.remove();state.lastScan=Date.now();state.scanCount++;}
         catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;if(!settings.enabled)cleanupLiveFeature('enabled');}
     }
