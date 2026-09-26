@@ -1,0 +1,67 @@
+name: Finalize Market Travel v1.17.51
+
+on:
+  push:
+    branches:
+      - test/market-travel-state-machine
+    paths:
+      - .github/workflows/finalize-market-travel-v11751.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/market-travel-state-machine
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Final cleanup and metadata sync
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+          p=Path('SakaLuX-Market-Intelligence.user.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("        document.getElementById('sl-mi-best-run')?.remove();\n        document.getElementById('sl-mi-best-run')?.remove();", "        document.getElementById('sl-mi-best-run')?.remove();")
+          p.write_text(s,encoding='utf-8')
+          md=Path('greasyfork/Market-Intelligence.md')
+          t=md.read_text(encoding='utf-8')
+          t=t.replace('- Verified: **2026-09-23**','- Verified: **2026-09-26**')
+          t=t.replace('Canonical version: **v1.17.49**','Canonical version: **v1.17.51**')
+          md.write_text(t,encoding='utf-8')
+          data=json.loads(Path('scripts.json').read_text(encoding='utf-8'))
+          e=next(x for x in data['scripts'] if x.get('id')=='market-intelligence')
+          assert e['version']=='1.17.51'
+          assert e['release']['version']=='1.17.51'
+          hub=Path('SakaLuX-Script-Hub.user.js').read_text(encoding='utf-8')
+          i=hub.find('"id": "market-intelligence"')
+          assert i>=0
+          block=hub[max(0,i-2500):i+9000]
+          assert '1.17.51' in block
+      - name: Syntax check Market Intelligence
+        run: node --check SakaLuX-Market-Intelligence.user.js
+      - name: Run Market Travel regression suite
+        run: node tests/market-travel-state-machine-regression.cjs
+      - name: Validate release surfaces
+        run: |
+          grep -q '@version      1.17.51' SakaLuX-Market-Intelligence.user.js
+          grep -q 'Canonical version: \*\*v1.17.51\*\*' greasyfork/Market-Intelligence.md
+          grep -q 'TORN_TRAVEL_AGENCY' SakaLuX-Market-Intelligence.user.js
+          grep -q 'LANDED_ABROAD' SakaLuX-Market-Intelligence.user.js
+      - name: Commit final release candidate
+        run: |
+          git config user.name "SakaLuX"
+          git config user.email "sakalutzu92@yahoo.com"
+          git add SakaLuX-Market-Intelligence.user.js greasyfork/Market-Intelligence.md
+          if git diff --cached --quiet; then
+            echo "No cleanup changes"
+          else
+            git commit -m "Finalize Market Travel state machine v1.17.51"
+            git push origin HEAD:test/market-travel-state-machine
+          fi
