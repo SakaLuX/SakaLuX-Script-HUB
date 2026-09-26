@@ -6,6 +6,7 @@ on:
       - 'SakaLuX-Suite.user.js'
       - 'greasyfork/SakaLuX-Suite.md'
       - '.github/scripts/priority7_suite_daily_progress.py'
+      - '.github/scripts/priority7_suite_daily_progress_wrapper.py'
       - 'tests/suite-daily-progress-regression.cjs'
       - 'tests/suite-modules-regression.cjs'
       - '.github/workflows/test-priority7-suite-daily-progress.yml'
@@ -26,7 +27,7 @@ jobs:
         with:
           node-version: '24'
       - name: Apply Priority 7 migration
-        run: python3 .github/scripts/priority7_suite_daily_progress.py
+        run: python3 .github/scripts/priority7_suite_daily_progress_wrapper.py
       - name: Install DOM test dependency
         run: npm install --prefix "$RUNNER_TEMP/dom-tests" jsdom@30.1.0 --no-audit --no-fund
       - name: Syntax check Suite
@@ -38,7 +39,7 @@ jobs:
       - name: Verify migration idempotency
         run: |
           sha256sum SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md > "$RUNNER_TEMP/before.sha"
-          python3 .github/scripts/priority7_suite_daily_progress.py
+          python3 .github/scripts/priority7_suite_daily_progress_wrapper.py
           sha256sum SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md > "$RUNNER_TEMP/after.sha"
           diff -u "$RUNNER_TEMP/before.sha" "$RUNNER_TEMP/after.sha"
       - name: Commit generated Suite update
