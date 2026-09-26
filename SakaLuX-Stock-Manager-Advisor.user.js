@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.12
+// @version      0.8.13
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -18,7 +18,7 @@
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '0.8.12';
+  let v = '0.8.13';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -96,7 +96,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   })();
 
-  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.12'});
+  const SELF=Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"},{version:'0.8.13'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -956,7 +956,8 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
   function buildExecutableRebalancePlan() {
     const x=buildRebalancePreview();
     if(!x?.target) return null;
-    const sources=(x.sells||[]).filter(r=>Number.isFinite(Number(r.shares))&&Number(r.shares)>0&&Number.isFinite(Number(r.proceeds))&&Number(r.proceeds)>0)
+    const targetSym=String(x.target.sym||'').toUpperCase();
+    const sources=(x.sells||[]).filter(r=>String(r.sym||'').toUpperCase()!==targetSym&&Number.isFinite(Number(r.shares))&&Number(r.shares)>0&&Number.isFinite(Number(r.proceeds))&&Number(r.proceeds)>0)
       .map(r=>({sym:String(r.sym||'').toUpperCase(),shares:Math.floor(Number(r.shares)),value:Number(r.proceeds),price:Number(r.price)||0}));
     return {target:x.target,cash:x.cash,need:x.required||0,sources,shortfall:Number(x.shortfall)||0,reserve:x.reserve||0};
   }
@@ -977,12 +978,29 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
       await postTrade(x.sym,x.shares,'sellShares');
       if(!isDryRun()) await new Promise(r=>setTimeout(r,1650));
     }
-    if(getStockApiKey()&&!isDryRun()) await apiSync();
-    const buyShares=Math.floor(Number(plan.target.sharesNeeded)||0);
+    const hasApi=!!getStockApiKey();
+    if(hasApi&&!isDryRun()) await apiSync();
+    let buyShares=Math.floor(Number(plan.target.sharesNeeded)||0);
     if(!Number.isFinite(buyShares)||buyShares<=0) throw new Error('Invalid BUY share amount; rebalance stopped before BUY.');
-    if(!confirm(`SELL phase complete${isDryRun()?' (Dry Run)':''}.\n\nProceed with BUY ${buyShares.toLocaleString()} ${plan.target.sym} toward Tier ${plan.target.tier} for about ${money(plan.target.cost)}?`)){inlineStatus('Rebalance stopped before BUY phase.','warn');return;}
-    if(!isDryRun() && tradeCooldownRemaining()>0) await new Promise(r=>setTimeout(r,Math.max(1650,tradeCooldownRemaining()+100)));
-    await postTrade(plan.target.sym,buyShares,'buyShares'); if(getStockApiKey()&&!isDryRun()) await apiSync(); refreshInlinePanel(); renderTransactionHistory(); inlineStatus(`Guided rebalance finished for ${plan.target.sym}.`,'ok');
+    // After SELLs, use fresh cash/price when API data is available. This prevents a large rebalance from failing
+    // because the old plan ignored the 0.1% sell fee or the price changed between phases.
+    if(hasApi&&!isDryRun()){
+      const live=S.stocks.get(String(plan.target.sym||'').toUpperCase());
+      const livePrice=Number(live?.price)||Number(plan.target.price)||(Number(plan.target.cost)/Math.max(1,Number(plan.target.sharesNeeded)||1));
+      const liveCash=Math.max(Number(S.money)||0,currentMoneyFromDom());
+      const spendable=Math.max(0,liveCash-Number(plan.reserve||0));
+      if(Number.isFinite(livePrice)&&livePrice>0){
+        const affordable=Math.max(0,Math.floor(spendable/livePrice));
+        buyShares=Math.min(buyShares,affordable);
+      }
+    }
+    if(!Number.isFinite(buyShares)||buyShares<=0) throw new Error('SELL phase completed, but current cash is not enough for a safe BUY after fees/price refresh.');
+    const liveTarget=S.stocks.get(String(plan.target.sym||'').toUpperCase());
+    const buyPrice=Number(liveTarget?.price)||Number(plan.target.price)||(Number(plan.target.cost)/Math.max(1,Number(plan.target.sharesNeeded)||1));
+    const buyEstimate=buyShares*Math.max(0,buyPrice||0);
+    if(!confirm(`SELL phase complete${isDryRun()?' (Dry Run)':''}.\n\nProceed with BUY ${buyShares.toLocaleString()} ${plan.target.sym} toward Tier ${plan.target.tier} for about ${money(buyEstimate||plan.target.cost)}?`)){inlineStatus('Rebalance stopped before BUY phase.','warn');return;}
+    if(!isDryRun()) await new Promise(r=>setTimeout(r,Math.max(2200,tradeCooldownRemaining()+250)));
+    await postTrade(plan.target.sym,buyShares,'buyShares'); if(hasApi&&!isDryRun()) await apiSync(); refreshInlinePanel(); renderTransactionHistory(); inlineStatus(`Guided rebalance finished for ${plan.target.sym}.`,'ok');
   }
 
   function stockViewScore(sym, mode) {
@@ -1181,9 +1199,11 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
       const text=await res.text();
       let data=null; try{data=JSON.parse(text);}catch{}
       if(!res.ok) throw new Error(`Torn returned HTTP ${res.status}.`);
-      const serverMessage=String(data?.text||data?.message||data?.error?.error||'').trim();
-      if(data?.success===false || data?.error) throw new Error(serverMessage||'Torn rejected the stock transaction.');
-      if(!data && /(?:error|invalid|failed|denied|insufficient)/i.test(text.slice(0,600))) throw new Error('Torn returned an unexpected trade error response.');
+      const serverMessage=String(data?.text||data?.message||data?.error?.error||data?.error||'').trim();
+      if(!data || data?.success!==true){
+        const snippet=String(text||'').replace(/\s+/g,' ').trim().slice(0,180);
+        throw new Error(serverMessage||snippet||'Torn did not confirm the stock transaction.');
+      }
       S.lastTradeAt=Date.now();
       addActionLog({status:'ok',step,sym,shares,estimate,message:serverMessage||'Accepted by Torn'});
       return data||{success:true,raw:text};
@@ -1568,14 +1588,19 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
     const candidates=buildRoiCandidates().filter(r=>Number.isFinite(Number(r.cost))&&Number(r.cost)>0&&Number.isFinite(Number(r.sharesNeeded))&&Number(r.sharesNeeded)>0);
     const reserve=Math.max(0,parseAmount(get(K.rebalanceReserve,'0')));
     const cash=Math.max(Number(S.money)||0,currentMoneyFromDom());
+    const sellNetFactor=0.999; // Torn takes a 0.1% stock selling fee.
     const validSource=r=>Number.isFinite(Number(r?.price))&&Number(r.price)>0&&Number.isFinite(Number(r?.freeShares))&&Number(r.freeShares)>0&&Number.isFinite(Number(r?.freeValue))&&Number(r.freeValue)>0;
     const freeRows=held.filter(validSource).sort((a,b)=>Number(b.freeValue)-Number(a.freeValue));
     const weakRows=held.filter(r=>r.signal==='weak'&&validSource(r)).sort((a,b)=>Number(a.currentApr||0)-Number(b.currentApr||0));
-    const sources=[...freeRows,...weakRows.filter(w=>!freeRows.some(f=>f.sym===w.sym))];
-    const sourceCapital=sources.reduce((n,r)=>n+Number(r.freeValue||0),0);
+    const allSources=[...freeRows,...weakRows.filter(w=>!freeRows.some(f=>f.sym===w.sym))];
+    const netSourceValue=r=>Math.max(0,Math.floor(Number(r.freeShares)||0))*Math.max(0,Number(r.price)||0)*sellNetFactor;
+    const deployableFor=target=>Math.max(0,cash+allSources.filter(r=>String(r.sym)!==String(target?.sym)).reduce((n,r)=>n+netSourceValue(r),0)-reserve);
+    const target=candidates.find(r=>Number(r.cost)<=deployableFor(r)) || candidates[0] || null;
+    if(!target) return {cash,reserve,sourceCapital:0,deployable:Math.max(0,cash-reserve),sources:[],target:null,sells:[],shortfall:0};
+    // Never sell the same stock that this rebalance is trying to buy.
+    const sources=allSources.filter(r=>String(r.sym)!==String(target.sym));
+    const sourceCapital=sources.reduce((n,r)=>n+netSourceValue(r),0);
     const deployable=Math.max(0,cash+sourceCapital-reserve);
-    const target=candidates.find(r=>Number(r.cost)<=deployable) || candidates[0] || null;
-    if(!target) return {cash,reserve,sourceCapital,deployable,sources,target:null,sells:[],shortfall:0};
     const required=Math.max(0,Number(target.cost)-cash+reserve);
     let need=required;
     const sells=[];
@@ -1583,18 +1608,18 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
       if(need<=0) break;
       const price=Number(r.price), freeShares=Math.floor(Number(r.freeShares));
       if(!Number.isFinite(price)||price<=0||!Number.isFinite(freeShares)||freeShares<=0) continue;
-      const value=Math.min(Number(r.freeValue)||0,need);
-      const shares=Math.min(freeShares,Math.ceil(value/price));
+      const perShareNet=price*sellNetFactor;
+      const shares=Math.min(freeShares,Math.ceil(need/perShareNet));
       if(!Number.isFinite(shares)||shares<=0) continue;
-      const proceeds=shares*price;
+      const gross=shares*price;
+      const proceeds=gross*sellNetFactor;
       if(!Number.isFinite(proceeds)||proceeds<=0) continue;
-      sells.push({sym:r.sym,shares,proceeds,currentApr:Number(r.currentApr)||0,price});
+      sells.push({sym:r.sym,shares,proceeds,gross,currentApr:Number(r.currentApr)||0,price,sellFee:gross-proceeds});
       need=Math.max(0,need-proceeds);
     }
     const funded=Math.max(0,Number(target.cost)-Math.max(0,need));
-    return {cash,reserve,sourceCapital,deployable,sources,target,required,sells,shortfall:Math.max(0,need),funded};
+    return {cash,reserve,sourceCapital,deployable,sources,target,required,sells,shortfall:Math.max(0,need),funded,sellNetFactor};
   }
-
   function renderRebalancePreview() {
     const box=$('#slx-stock-rebalance-body'); if(!box) return;
     const x=buildRebalancePreview();

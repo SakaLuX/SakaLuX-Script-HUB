@@ -3,13 +3,13 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.12**
+**v0.8.13**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-20**
-- Canonical version: **v0.8.10**
+- Canonical version: **v0.8.13**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -34,10 +34,11 @@
 
 ## Current release note
 
-**v0.8.12 — Release metadata synchronization**
-- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
-- Deduplicates standalone registrations by module id before rendering.
-- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
+**v0.8.13 — Guided Rebalance SELL → BUY reliability**
+- Never sells the same stock selected as the rebalance BUY target.
+- Calculates SELL proceeds after Torn's 0.1% selling fee.
+- Refreshes cash/price before BUY and reduces the BUY share count when needed so large rebalances remain affordable.
+- Adds a TornPDA settle window between phases and requires explicit Torn trade success.
 
 ## Recommended
 - Keep **Dry Run ON** while checking a new configuration.
@@ -69,6 +70,12 @@
 **All Rights Reserved — SakaLuX [2380374]**
 
 ## Release history / Changelog
+
+### v0.8.13 — Guided Rebalance SELL → BUY reliability
+- Excludes the BUY target symbol from all rebalance SELL sources.
+- Applies the 0.1% Torn stock sell fee to funding calculations instead of using gross proceeds.
+- Rechecks live cash and price after SELLs before submitting BUY on TornPDA.
+- Refuses ambiguous/non-JSON trade responses instead of logging them as successful.
 
 
 
