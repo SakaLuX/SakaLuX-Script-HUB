@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const src=fs.readFileSync('SakaLuX-Script-Hub.user.js','utf8');
+assert.match(src,/\/\/ @version\s+1\.9\.87/);
+assert.match(src,/function getModuleStatus\(script\)/);
+for(const code of ['NOT_INSTALLED','API_ERROR','UPDATE_AVAILABLE','DISABLED','WRONG_PAGE','CHECK_ERROR','OK']) assert.ok(src.includes(`code: '${code}'`),`missing ${code}`);
+assert.match(src,/function getHealthSummary\(\)/);
+assert.ok(src.includes('id = \'slh-health-summary\'') || src.includes('id="slh-health-summary"') || src.includes("id='slh-health-summary'"),'compact summary missing');
+assert.ok(src.includes('moduleStatuses: Object.freeze(statuses.map'),'diagnostics moduleStatuses missing');
+assert.ok(src.includes('statusCounts: getHealthSummary()'),'diagnostics statusCounts missing');
+assert.ok(src.includes("label: script.name + ' local status', detail: moduleStatus.label + ' • ' + moduleStatus.detail"),'System Check exact module status missing');
+assert.ok(src.includes('const moduleStatus = getModuleStatus(script);'),'card module status chip missing');
+console.log('Hub per-module health status regression passed.');
