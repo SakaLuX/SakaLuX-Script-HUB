@@ -2,7 +2,7 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const src=fs.readFileSync('SakaLuX-Script-Hub.user.js','utf8');
-assert.match(src,/\/\/ @version\s+1\.9\.87/);
+assert.match(src,/\/\/ @version\s+1\.9\.88/);
 assert.match(src,/function getModuleStatus\(script\)/);
 for(const code of ['NOT_INSTALLED','API_ERROR','UPDATE_AVAILABLE','DISABLED','WRONG_PAGE','CHECK_ERROR','OK']) assert.ok(src.includes(`code: '${code}'`),`missing ${code}`);
 assert.match(src,/function getHealthSummary\(\)/);
