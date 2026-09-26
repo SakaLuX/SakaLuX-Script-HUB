@@ -1,0 +1,54 @@
+name: Migrate Shared Core v1 level 2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test/shared-core-v1
+    paths:
+      - src/core/sakalux-core.js
+      - tools/migrate-shared-core-level2.cjs
+      - tests/shared-core-v1-regression.cjs
+      - .github/workflows/migrate-shared-core-v1-level2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/shared-core-v1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check level-2 migration helper
+        run: node --check tools/migrate-shared-core-level2.cjs
+      - name: Apply level-2 dedup migration
+        run: node tools/migrate-shared-core-level2.cjs
+      - name: Syntax check all userscripts
+        run: |
+          find . -type f -name '*.user.js' -not -path './.git/*' -print0 | xargs -0 -n1 node --check
+      - name: Run Shared Core regression suite
+        run: node tests/shared-core-v1-regression.cjs
+      - name: Run Market Travel regression
+        run: node tests/market-travel-state-machine-regression.cjs
+      - name: Run Stock rebalance regression
+        run: node tests/stock-rebalance-state-machine-regression.cjs
+      - name: Run repository-wide compatibility
+        run: node tests/shared-core-v1-all-scripts.cjs
+      - name: Run level-2 audit
+        run: node tests/shared-core-v1-level2-audit.cjs
+      - name: Commit level-2 userscript migration
+        run: |
+          if git diff --quiet; then
+            echo 'No level-2 migration changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- '*.user.js'
+          git commit -m 'Centralize dock sorting and route signals in Shared Core v1'
+          git push origin HEAD:test/shared-core-v1
