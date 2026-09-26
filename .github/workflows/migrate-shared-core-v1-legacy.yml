@@ -8,6 +8,7 @@ on:
     paths:
       - src/core/sakalux-core.js
       - tools/migrate-shared-core-legacy.cjs
+      - tests/shared-core-v1-regression.cjs
       - .github/workflows/migrate-shared-core-v1-legacy.yml
 
 permissions:
