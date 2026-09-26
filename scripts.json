@@ -260,18 +260,18 @@
         }
       ],
       "release": {
-        "version": "1.17.52",
+        "version": "1.17.53",
         "date": "2026-09-26",
         "notes": [
-          "Embeds Shared Core v1 while preserving standalone installation and operation.",
-          "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-          "Routes Market API reads through the shared Request Broker with dedupe, bounded concurrency, retry/backoff and diagnostics."
+          "Adds a persistent MI INFO ON/OFF button to landed foreign markets so per-item Market Intelligence rows can be hidden without disabling the rest of Market Intelligence.",
+          "Fixes foreign-market stock parsing so stock is read from Torn's Stock column/cell instead of numbers embedded in item names such as Type 98 Anti-Tank.",
+          "Synchronizes Market Intelligence runtime/version surfaces and fixes Script Hub runtime version display to match its v1.9.88 metadata."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.52",
-      "detailsRevision": 11,
+      "version": "1.17.53",
+      "detailsRevision": 12,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

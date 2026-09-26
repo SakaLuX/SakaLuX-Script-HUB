@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.52
+// @version      1.17.53
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -488,7 +488,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.52';
+  let v = '1.17.53';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -853,8 +853,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 (function () {
     'use strict';
-
-    const VERSION = '1.17.37';
+    const VERSION = '1.17.53';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -959,6 +958,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         bestRun: true,
         countryBestBuys: true,
         stockEta: true,
+        travelInlineInfo: true,
         arrivalStock: true,
         arrivalBasket: true,
         smartLandedRefresh: true,
@@ -1749,12 +1749,43 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         }
         return rowContainer(img);
     }
-    function extractTravelStock(node) {
-        const txt=normText(node?.innerText||node?.textContent||'');
+    function parseTravelStockCell(cell) {
+        const txt=normText(cell?.innerText||cell?.textContent||'');
         if(!txt)return null;
-        const clean=txt.replace(/\$\s*[\d,.]+\s*[KMB]?/ig,' ');
-        const nums=[...clean.matchAll(/(?:^|\s)(\d{1,6})(?=\s|$)/g)].map(m=>Number(m[1])).filter(n=>Number.isFinite(n)&&n>=0&&n<=MAX_REASONABLE_TRAVEL_STOCK);
-        return nums.length?nums[0]:null;
+        const m=txt.match(/^\s*([0-9][0-9,]*)\s*$/);
+        if(!m)return null;
+        const n=Number(m[1].replace(/,/g,''));
+        return Number.isFinite(n)&&n>=0&&n<=MAX_REASONABLE_TRAVEL_STOCK?n:null;
+    }
+    function extractTravelStock(node) {
+        if(!node)return null;
+        const row=node.closest?.('tr')||node;
+        if(row?.tagName==='TR'){
+            const cells=[...row.children].filter(c=>/^(TD|TH)$/.test(c.tagName));
+            const table=row.closest?.('table');
+            let stockIndex=-1;
+            if(table){
+                const headerRows=[...table.querySelectorAll('thead tr, tr')].slice(0,4);
+                for(const hr of headerRows){
+                    const headers=[...hr.children].filter(c=>/^(TD|TH)$/.test(c.tagName));
+                    const idx=headers.findIndex(c=>/^stock$/i.test(normText(c.innerText||c.textContent||'')));
+                    if(idx>=0){stockIndex=idx;break;}
+                }
+            }
+            if(stockIndex>=0&&cells[stockIndex]){
+                const exact=parseTravelStockCell(cells[stockIndex]);
+                if(exact!=null)return exact;
+            }
+            const named=[...row.querySelectorAll('[class*="stock" i],[data-label*="stock" i],[aria-label*="stock" i]')];
+            for(const cell of named){const exact=parseTravelStockCell(cell);if(exact!=null)return exact;}
+            // Torn foreign-market layout is Item | Name | Stock | Cost | Buy.
+            // This fallback intentionally reads only the third cell and never the whole row,
+            // preventing item-name numbers (for example "Type 98 Anti-Tank") from being mistaken for stock.
+            if(cells.length>=5){const exact=parseTravelStockCell(cells[2]);if(exact!=null)return exact;}
+            return null;
+        }
+        const named=node.querySelector?.('[class*="stock" i],[data-label*="stock" i],[aria-label*="stock" i]');
+        return parseTravelStockCell(named);
     }
     function extractTornDisplayedValue(img) {
         let el=img;
@@ -1914,6 +1945,48 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             const box=document.createElement('div');box.className=cls+' sl-mi-bazaar-wide';td.appendChild(box);host.insertAdjacentElement('afterend',wrap);return box;
         }
         const box=document.createElement('div');box.className=cls+' sl-mi-bazaar-wide';wrap.appendChild(box);host.insertAdjacentElement('afterend',wrap);return box;
+    }
+
+    function removeTravelInlineInfo(){
+        document.querySelectorAll('.sl-mi-pda-badge-row,.sl-mi-pda-badge-block').forEach(w=>{
+            if(w.dataset?.miClass==='sl-mi-travel'||w.querySelector?.('.sl-mi-travel'))w.remove();
+        });
+        document.querySelectorAll('.sl-mi-travel').forEach(x=>x.remove());
+    }
+
+    function ensureTravelInlineInfoToggle(){
+        const landed=detectPage()==='travel'&&!detectInFlight()&&!!detectDestination();
+        let bar=document.getElementById('sl-mi-travel-inline-toggle');
+        if(!landed){bar?.remove();return null;}
+        if(!bar){
+            bar=document.createElement('div');
+            bar.id='sl-mi-travel-inline-toggle';
+            bar.style.cssText='display:flex!important;justify-content:flex-end!important;align-items:center!important;margin:6px 0!important;padding:0 6px!important;box-sizing:border-box!important;';
+            const btn=document.createElement('button');
+            btn.type='button';
+            btn.id='sl-mi-travel-inline-toggle-btn';
+            btn.style.cssText='min-height:34px!important;padding:7px 12px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:9px!important;background:#15202b!important;color:#eef3f8!important;font-weight:900!important;font-size:12px!important;';
+            btn.addEventListener('click',()=>{
+                settings.travelInlineInfo=!settings.travelInlineInfo;
+                saveJson(STORAGE.settings,settings);
+                updateTravelInlineInfoToggle();
+                if(!settings.travelInlineInfo)removeTravelInlineInfo();
+                else scheduleScan(true);
+            });
+            bar.appendChild(btn);
+            mountTop(bar);
+        }
+        updateTravelInlineInfoToggle();
+        return bar;
+    }
+
+    function updateTravelInlineInfoToggle(){
+        const btn=document.getElementById('sl-mi-travel-inline-toggle-btn');
+        if(!btn)return;
+        const on=settings.travelInlineInfo!==false;
+        btn.textContent='MI INFO: '+(on?'ON':'OFF');
+        btn.setAttribute('aria-pressed',on?'true':'false');
+        btn.style.opacity=on?'1':'.72';
     }
 
     function ensureTravelBadge(row,cls){
@@ -2344,13 +2417,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if(travelCtx.state===TRAVEL_STATES.TORN_TRAVEL_AGENCY){await renderBestTravelRun();paintTravelSessionSummary();return;}
         if(travelCtx.state!==TRAVEL_STATES.LANDED_ABROAD)return;
         document.getElementById('sl-mi-best-run')?.remove();
+        ensureTravelInlineInfoToggle();
+        if(settings.travelInlineInfo===false)removeTravelInlineInfo();
         const availableCash=await fetchAvailableCash(true);
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}
         const unique=[...new Map(entries.map(e=>[e.id,e])).values()].slice(0,MAX_LIVE_FETCHES);
         const marketMap=new Map();
         for(const e of unique){const c=cachePeek(e.id);if(c)marketMap.set(e.id,c);}
-        await mapWithLimit(unique,async e=>{if(e.stock!=null)recordStock(destination,e.id,e.stock);const fetched=await fetchMarket(e.id);if(!fetched)return;const market=e.displayValue>0?{...fetched,price:e.displayValue,tornDisplayedValue:e.displayValue}:fetched;marketMap.set(e.id,market);const m=metrics(e.buy,market.price),box=ensureTravelBadge(e.row,'sl-mi-travel');box.classList.toggle('loss',m.profit<Number(settings.minProfit||0));box.innerHTML='<b>☠︎ MI</b> Market '+money(market.price)+' · Net '+money(m.net)+' · <strong>'+money(m.profit)+' ('+pct(m.roi)+')</strong>'+(e.stock!=null?' · Stock '+e.stock.toLocaleString('en-US')+stockEtaText(destination,e.id,e.stock):'');state.decorated++;});
+        await mapWithLimit(unique,async e=>{if(e.stock!=null)recordStock(destination,e.id,e.stock);const fetched=await fetchMarket(e.id);if(!fetched)return;const market=e.displayValue>0?{...fetched,price:e.displayValue,tornDisplayedValue:e.displayValue}:fetched;marketMap.set(e.id,market);const m=metrics(e.buy,market.price);if(settings.travelInlineInfo!==false){const box=ensureTravelBadge(e.row,'sl-mi-travel');box.classList.toggle('loss',m.profit<Number(settings.minProfit||0));box.innerHTML='<b>☠︎ MI</b> Market '+money(market.price)+' · Net '+money(m.net)+' · <strong>'+money(m.profit)+' ('+pct(m.roi)+')</strong>'+(e.stock!=null?' · Stock '+e.stock.toLocaleString('en-US')+stockEtaText(destination,e.id,e.stock):'');state.decorated++;}});
         flushStockHistory();
         if(settings.countryBestBuys) paintCountryBestBuys(destination,unique,marketMap,availableCash);
         else paintTravelBuyPlan(buildTravelBuyPlan(destination,unique,marketMap));

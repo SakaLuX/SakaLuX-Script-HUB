@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.52**
+**v1.17.53**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.17.52**
+- Canonical version: **v1.17.53**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -226,3 +226,10 @@
 
 ### v1.17.0 — Native Hub Power API
 - Added `setEnabled`, `toggleEnabled` and `isEnabled`, plus shared-Hub-key preference with standalone fallback.
+
+
+### v1.17.53 — Foreign market inline toggle + stock parsing fix
+- Adds a persistent **MI INFO: ON/OFF** button while landed abroad. Turning it OFF removes the per-item `MI Market / Net / Stock / next stock` rows without disabling Best Buys, planning, pricing or the rest of Market Intelligence.
+- Reads stock strictly from Torn's **Stock** table cell / stock-labelled element. It no longer scans the whole item row, so numbers in names such as **Type 98 Anti-Tank** cannot be mistaken for stock.
+- Synchronizes Market Intelligence runtime/version surfaces and fixes Script Hub's runtime display constant to **v1.9.88**.
+
