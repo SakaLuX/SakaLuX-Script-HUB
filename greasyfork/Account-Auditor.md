@@ -3,13 +3,13 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.23**
+**v1.3.24**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.3.17**
+- Canonical version: **v1.3.24**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Account-Auditor.md
@@ -30,10 +30,20 @@
 
 ## Current release note
 
-**v1.3.23 — Release documentation synchronized with the current Account Auditor userscript version**
-- Release documentation synchronized with the current Account Auditor userscript version.
+**v1.3.24 — Changes Since Last Audit**
+- Compares each successful audit against the previous successful audit using a compact local fingerprint.
+- Adds `changes-since-last-audit.json` to split snapshots with old/new values and numeric deltas.
+- Shows the change count in the Auditor panel and exposes `changesSinceLastAudit()` without storing API keys or tokens.
+- The baseline advances only after a successful sync, so failed syncs do not erase the comparison point.
 
 ## Release history / Changelog
+
+### v1.3.24 — Changes Since Last Audit
+- Adds a compact local baseline/fingerprint for the previous successful audit.
+- Produces a bounded, prioritized change report covering account, finance, battle/work stats, skills, crimes, racing, stocks and related tracked selections.
+- Adds `changes-since-last-audit.json`, panel change count and public read-only diagnostics access.
+- Keeps the comparison baseline unchanged when a sync fails.
+
 
 ### v1.3.23 — Shared Core v1
 - Centralizes shared infrastructure in the embedded SakaLuX Core.

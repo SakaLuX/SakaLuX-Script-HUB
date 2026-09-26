@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.23
+// @version      1.3.24
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -773,7 +773,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.23" }));
+  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.24" }));
   const API_GLOBAL = "";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -804,7 +804,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.23';
+    const VERSION = '1.3.24';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const AUDITOR_API_CREATE_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Account%20Auditor&user=profile,bars,cooldowns,travel,education,jobpoints,merits,refills,notifications,money,stocks,properties,discord,weaponexp,workstats,skills,battlestats,networth,display,icons,criminalrecord,bazaar,crimes,hof,ammo,attacksfull,bounties,calendar,casino,competition,enlistedcars,equipment,faction,forumfeed,forumfriends,forumposts,forumsubscribedthreads,forumthreads,gym,honors,itemmarket,itemmods,job,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,snapshot,personalstats,list,inventory,messages,events,log&torn=merits,education';
@@ -817,7 +817,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         githubToken:'SakaLuX_AUDITOR_GITHUB_TOKEN',
         settings:'SakaLuX_AUDITOR_SETTINGS_V3',
         lastSync:'SakaLuX_AUDITOR_LAST_SYNC_V3',
-        captures:'SakaLuX_AUDITOR_MESSAGE_CAPTURES_V1'
+        captures:'SakaLuX_AUDITOR_MESSAGE_CAPTURES_V1',
+        auditBaseline:'SakaLuX_AUDITOR_CHANGE_BASELINE_V1',
+        lastChanges:'SakaLuX_AUDITOR_LAST_CHANGES_V1'
     };
     const DEFAULT_SETTINGS = {
         repo:'SakaLuX/SakaLuX-Torn-Account-Data', branch:'main', auditFolder:'audit', path:'SakaLuX-Account-Snapshot.json',
@@ -1049,6 +1051,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function buildSplitSnapshots(snapshot){
         const v2=snapshot.data?.v2||{},sp=snapshot.data?.special||{},pv=snapshot.data?.private||{},assigned=new Set(),captures=settings.includeCapturedMessages?loadJson(STORAGE.captures,[]):[];
         const parts={};
+        if(snapshot.changesSinceLastAudit)parts['changes-since-last-audit.json']=snapshot.changesSinceLastAudit;
         parts['summary.json']={...pickFields(v2,['profile','bars','cooldowns','travel','education','jobpoints','merits','refills','notifications','discord','display','icons','calendar','competition','faction','gym','honors','job','jobranks','medals','perks','virus','hof'],assigned),decoded:sp.decoded||null,reference:sp.reference||null};
         parts['finance.json']=pickFields(v2,['money','networth','stocks','properties','property','bazaar','itemmarket','trade','trades'],assigned);
         parts['combat.json']=pickFields(v2,['battlestats','attacksfull','ammo','bounties','equipment','itemmods','weaponexp','workstats','skills','revivesfull'],assigned);
@@ -1107,10 +1110,67 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     function clearCapturedMessages(){saveJson(STORAGE.captures,[]);setStatus('Captured messages cleared.');updatePanelStatus();}
 
-    async function syncNow(){if(busy)return false;busy=true;try{setStatus('Collecting read-only account snapshot…');const snapshot=await collectSnapshot();const result=await syncSnapshot(snapshot);setStatus('SYNC OK · '+new Date(result.at).toLocaleTimeString()+' · '+(result.splitFiles?.length||0)+' split files');updatePanelStatus();return true;}catch(e){setStatus('ERROR · '+String(e?.message||e));updatePanelStatus();return false;}finally{busy=false;}}
+/* SakaLuX Auditor Changes Since Last Audit — BEGIN */
+    const AUDIT_CHANGE_GROUPS=['money','networth','battlestats','workstats','skills','criminalrecord','racingrecords','personalstats','merits','education','jobpoints','stocks','bars'];
+    const AUDIT_CHANGE_IGNORE=/(?:^|\.)(?:timestamp|time|date|last_action|lastAction|updated|cooldown|current|maximum|interval|until|expires|expiry)(?:$|\.)/i;
+    function auditScalar(value){return value===null||['string','number','boolean'].includes(typeof value);}
+    function flattenAuditValues(value,prefix,out,depth=0){
+        if(depth>6||Object.keys(out).length>=600)return;
+        if(auditScalar(value)){if(prefix&&!AUDIT_CHANGE_IGNORE.test(prefix))out[prefix]=value;return;}
+        if(Array.isArray(value)){if(prefix)out[prefix+'.length']=value.length;return;}
+        if(!value||typeof value!=='object')return;
+        for(const key of Object.keys(value).sort()){
+            if(Object.keys(out).length>=600)break;
+            flattenAuditValues(value[key],prefix?prefix+'.'+key:key,out,depth+1);
+        }
+    }
+    function buildAuditFingerprint(snapshot){
+        const values={};
+        flattenAuditValues(snapshot?.account||{},'account',values);
+        flattenAuditValues(snapshot?.coverage||{},'coverage',values);
+        const v2=snapshot?.data?.v2||{};
+        const special=snapshot?.data?.special||{};
+        for(const group of AUDIT_CHANGE_GROUPS){
+            const value=group==='personalstats'?special.personalstats:v2[group];
+            if(value!==undefined)flattenAuditValues(value,group,values);
+        }
+        return{schema:'sakalux-audit-fingerprint-v1',at:snapshot?.generatedAt||new Date().toISOString(),playerId:snapshot?.account?.playerId??null,values};
+    }
+    function auditChangePriority(path){
+        if(/^account\.(?:level|rank|job|faction)/.test(path))return 0;
+        if(/^(?:networth|money|battlestats|workstats|skills)\./.test(path))return 1;
+        if(/^(?:criminalrecord|racingrecords|personalstats|stocks)\./.test(path))return 2;
+        return 3;
+    }
+    function compareAuditFingerprints(previous,current){
+        const previousValues=previous?.values||{},currentValues=current?.values||{};
+        if(!previous||previous.schema!=='sakalux-audit-fingerprint-v1')return{schema:'sakalux-audit-changes-v1',baseline:true,previousAt:null,currentAt:current?.at||null,totalChanges:0,shownChanges:0,changes:[]};
+        const changes=[];
+        for(const path of [...new Set([...Object.keys(previousValues),...Object.keys(currentValues)])].sort()){
+            const before=Object.prototype.hasOwnProperty.call(previousValues,path)?previousValues[path]:null;
+            const after=Object.prototype.hasOwnProperty.call(currentValues,path)?currentValues[path]:null;
+            if(Object.is(before,after))continue;
+            const row={path,before,after};
+            if(typeof before==='number'&&typeof after==='number'&&Number.isFinite(before)&&Number.isFinite(after))row.delta=after-before;
+            changes.push(row);
+        }
+        changes.sort((a,b)=>auditChangePriority(a.path)-auditChangePriority(b.path)||a.path.localeCompare(b.path));
+        return{schema:'sakalux-audit-changes-v1',baseline:false,previousAt:previous?.at||null,currentAt:current?.at||null,totalChanges:changes.length,shownChanges:Math.min(80,changes.length),changes:changes.slice(0,80)};
+    }
+    function prepareAuditChanges(snapshot){
+        const current=buildAuditFingerprint(snapshot),previous=loadJson(STORAGE.auditBaseline,null),report=compareAuditFingerprints(previous,current);
+        snapshot.changesSinceLastAudit=report;
+        saveJson(STORAGE.lastChanges,report);
+        return{current,report};
+    }
+    function commitAuditBaseline(fingerprint){if(fingerprint)saveJson(STORAGE.auditBaseline,fingerprint);}
+    function getLastAuditChanges(){return loadJson(STORAGE.lastChanges,{schema:'sakalux-audit-changes-v1',baseline:true,totalChanges:0,shownChanges:0,changes:[]});}
+/* SakaLuX Auditor Changes Since Last Audit — END */
+
+    async function syncNow(){if(busy)return false;busy=true;try{setStatus('Collecting read-only account snapshot…');const snapshot=await collectSnapshot();const prepared=prepareAuditChanges(snapshot);const result=await syncSnapshot(snapshot);commitAuditBaseline(prepared.current);setStatus('SYNC OK · '+new Date(result.at).toLocaleTimeString()+' · '+(result.splitFiles?.length||0)+' split files · '+(prepared.report.totalChanges||0)+' changes');updatePanelStatus();return true;}catch(e){setStatus('ERROR · '+String(e?.message||e));updatePanelStatus();return false;}finally{busy=false;}}
     function setStatus(text){lastStatus=String(text||'');const el=document.getElementById('sl-aa-status');if(el)el.textContent=lastStatus;const b=document.getElementById('sl-aa-button');if(b)b.textContent=busy?'☠︎ SYNC…':'☠︎ AUDIT';}
     function lastSyncText(){const s=loadJson(STORAGE.lastSync,null);if(!s?.at)return'Never';try{return new Date(s.at).toLocaleString();}catch(_){return'Unknown';}}
-    function updatePanelStatus(){const el=document.getElementById('sl-aa-last-sync');if(el)el.textContent=lastSyncText();const c=document.getElementById('sl-aa-captures');if(c)c.textContent=String(loadJson(STORAGE.captures,[]).length);setStatus(lastStatus);}
+    function updatePanelStatus(){const el=document.getElementById('sl-aa-last-sync');if(el)el.textContent=lastSyncText();const c=document.getElementById('sl-aa-captures');if(c)c.textContent=String(loadJson(STORAGE.captures,[]).length);const d=document.getElementById('sl-aa-changes');if(d)d.textContent=String(getLastAuditChanges().totalChanges||0);setStatus(lastStatus);}
 
     function isHubInstalled(){return Boolean(window.SakaLuXScriptHub || document.getElementById('sakalux-hub-button'));}
     function rememberHubPrompt(){try{localStorage.setItem(HUB_PROMPT_STORAGE,String(Date.now()));}catch(_){}}
@@ -1142,7 +1202,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         '<div class="sl-aa-api-state">Current key: <b>'+(getTornApiKey()?'SAVED':'MISSING')+'</b></div></div>'+
         '<label class="sl-aa-check"><input id="sl-aa-private" type="checkbox" '+(settings.includePrivateData?'checked':'')+'> Include messages/events/logs API data</label><label class="sl-aa-check"><input id="sl-aa-split" type="checkbox" '+(settings.splitSnapshots?'checked':'')+'> Sync deduplicated split JSON files (recommended)</label><label class="sl-aa-check"><input id="sl-aa-captured" type="checkbox" '+(settings.includeCapturedMessages?'checked':'')+'> Include explicitly captured message bodies in messages.json</label><label class="sl-aa-check"><input id="sl-aa-auto" type="checkbox" '+(settings.autoSync?'checked':'')+'> Auto-sync while Torn is open</label>'+
         '<label>Auto-sync interval (minutes) <input id="sl-aa-minutes" type="number" min="15" max="1440" value="'+esc(settings.autoSyncMinutes)+'"></label><label>Max paged history pages <input id="sl-aa-pages" type="number" min="1" max="500" value="'+esc(settings.maxPrivatePages)+'"></label>'+
-        '<div class="sl-aa-info">Captured messages: <strong id="sl-aa-captures">'+loadJson(STORAGE.captures,[]).length+'</strong> · Last sync: <strong id="sl-aa-last-sync">'+esc(lastSyncText())+'</strong></div><div id="sl-aa-status">'+esc(lastStatus||'Ready')+'</div>'+
+        '<div class="sl-aa-info">Captured messages: <strong id="sl-aa-captures">'+loadJson(STORAGE.captures,[]).length+'</strong> · Last sync: <strong id="sl-aa-last-sync">'+esc(lastSyncText())+'</strong> · Changes: <strong id="sl-aa-changes">'+esc(getLastAuditChanges().totalChanges||0)+'</strong></div><div id="sl-aa-status">'+esc(lastStatus||'Ready')+'</div>'+
         '<button id="sl-aa-capture">CAPTURE CURRENT MESSAGE</button><button id="sl-aa-clear">CLEAR CAPTURED MESSAGES</button><button id="sl-aa-save">SAVE SETTINGS</button><button id="sl-aa-sync">SYNC NOW</button></div>';
         document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};overlay.querySelector('#sl-aa-close').onclick=()=>overlay.remove();overlay.querySelector('#sl-aa-create-api').onclick=()=>{location.href=AUDITOR_API_CREATE_URL;};overlay.querySelector('#sl-aa-test-api').onclick=async()=>{const input=overlay.querySelector('#sl-aa-torn');await testAuditorApiKey(input?.value.trim()||'');updatePanelStatus();};overlay.querySelector('#sl-aa-clear-api').onclick=()=>{clearAuditorApiKey();const input=overlay.querySelector('#sl-aa-torn');if(input)input.value='';updatePanelStatus();};overlay.querySelector('#sl-aa-capture').onclick=()=>captureCurrentMessage();overlay.querySelector('#sl-aa-clear').onclick=()=>clearCapturedMessages();
         overlay.querySelector('#sl-aa-save').onclick=()=>{settings.repo=overlay.querySelector('#sl-aa-repo').value.trim();settings.branch=overlay.querySelector('#sl-aa-branch').value.trim()||'main';settings.auditFolder=overlay.querySelector('#sl-aa-folder').value.trim()||'audit';settings.path=(overlay.querySelector('#sl-aa-path').value.trim().split('/').pop()||'SakaLuX-Account-Snapshot.json');settings.includePrivateData=!!overlay.querySelector('#sl-aa-private').checked;settings.splitSnapshots=!!overlay.querySelector('#sl-aa-split').checked;settings.includeCapturedMessages=!!overlay.querySelector('#sl-aa-captured').checked;settings.autoSync=!!overlay.querySelector('#sl-aa-auto').checked;settings.autoSyncMinutes=Math.max(15,Math.min(1440,Number(overlay.querySelector('#sl-aa-minutes').value)||30));settings.maxPrivatePages=Math.max(1,Math.min(500,Number(overlay.querySelector('#sl-aa-pages').value)||200));const gh=overlay.querySelector('#sl-aa-gh').value.trim();if(gh)rawSet(STORAGE.githubToken,gh);saveJson(STORAGE.settings,settings);scheduleAutoSync();setStatus('Settings saved');updatePanelStatus();};overlay.querySelector('#sl-aa-sync').onclick=async()=>{await syncNow();};
@@ -1190,7 +1250,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function createButton(){if(!settings.showButton||document.getElementById('sl-aa-button'))return;const b=document.createElement('button');b.id='sl-aa-button';b.type='button';b.textContent='☠︎ AUDIT';b.title='Tap to open · drag to move';document.body.appendChild(b);makeAuditButtonDraggable(b);}
     function scheduleAutoSync(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;}if(!settings.autoSync)return;const mins=Math.max(15,Number(settings.autoSyncMinutes)||30);autoTimer=setInterval(()=>syncNow(),mins*60*1000);const last=loadJson(STORAGE.lastSync,null);if(!last?.at||Date.now()-Number(last.at)>=mins*60*1000)setTimeout(()=>syncNow(),5000);}
 
-    window.SakaLuXAccountAuditor={id:'account-auditor',name:'Account Auditor',version:VERSION,open(){openSettings();return true;},async sync(){return syncNow();},async snapshot(){return collectSnapshot();},captureCurrentMessage(){return captureCurrentMessage();},capturedMessages(){return loadJson(STORAGE.captures,[]);},status(){return{version:VERSION,busy,lastStatus,lastSync:loadJson(STORAGE.lastSync,null),capturedMessages:loadJson(STORAGE.captures,[]).length,settings:{repo:settings.repo,branch:settings.branch,path:settings.path,autoSync:settings.autoSync,autoSyncMinutes:settings.autoSyncMinutes,includePrivateData:settings.includePrivateData,maxPrivatePages:settings.maxPrivatePages,splitSnapshots:settings.splitSnapshots,includeCapturedMessages:settings.includeCapturedMessages},hasTornKey:Boolean(getTornApiKey()),hasGitHubToken:Boolean(rawGet(STORAGE.githubToken))};}};
+    window.SakaLuXAccountAuditor={id:'account-auditor',name:'Account Auditor',version:VERSION,open(){openSettings();return true;},async sync(){return syncNow();},async snapshot(){return collectSnapshot();},captureCurrentMessage(){return captureCurrentMessage();},capturedMessages(){return loadJson(STORAGE.captures,[]);},changesSinceLastAudit(){return getLastAuditChanges();},status(){return{version:VERSION,busy,lastStatus,lastSync:loadJson(STORAGE.lastSync,null),changesSinceLastAudit:getLastAuditChanges(),capturedMessages:loadJson(STORAGE.captures,[]).length,settings:{repo:settings.repo,branch:settings.branch,path:settings.path,autoSync:settings.autoSync,autoSyncMinutes:settings.autoSyncMinutes,includePrivateData:settings.includePrivateData,maxPrivatePages:settings.maxPrivatePages,splitSnapshots:settings.splitSnapshots,includeCapturedMessages:settings.includeCapturedMessages},hasTornKey:Boolean(getTornApiKey()),hasGitHubToken:Boolean(rawGet(STORAGE.githubToken))};}};
     window.dispatchEvent(new CustomEvent('SakaLuX:AccountAuditorReady',{detail:{version:VERSION}}));
     function init(){injectCss();createButton();scheduleAutoSync();setTimeout(showHubInstallPrompt,3500);console.log('['+NAME+' v'+VERSION+'] Loaded.');}
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
