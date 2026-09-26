@@ -60,13 +60,16 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.943 — Graffiti + module-state correction**
-- Uses Torn's current Crimes 2.0 graffiti selectors so the guide renders on TornPDA.
-- Removes duplicate READY/NOT READY overlays and mirrors standalone ON/OFF from each script's native `isEnabled()` API.
+**v0.9.943 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
 
 
+
+
+### v0.9.943 — Release documentation synchronized with the current Suite userscript version
+- Release documentation synchronized with the current Suite userscript version.
 
 ### v0.9.940 — Settings Schema v1 and safe automatic migrations
 - Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
