@@ -47,11 +47,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.939 — Suite Daily Progress Dashboard**
-- Adds a persistent daily progress dashboard with objectives, route activity and Suite module status.
-- Supports custom daily objectives, automatic local-day rollover, reset-today and 30-day bounded history.
-- Adds a Daily Progress action directly to Suite Master Control and a public bridge/API for reliable opening.
-
+**v0.9.939 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
 
