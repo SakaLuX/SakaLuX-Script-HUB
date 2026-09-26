@@ -190,46 +190,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-  // Shared SakaLuX performance + Hub-style UI foundation.
-  (() => {
-    const g = window;
-    if (!g.SakaLuXPerf) {
-      const timers = new Map();
-      g.SakaLuXPerf = {
-        debounce(key, fn, wait=220) {
-          const old = timers.get(key); if (old) clearTimeout(old);
-          const id = setTimeout(() => { timers.delete(key); fn(); }, Math.max(120, wait));
-          timers.set(key,id); return id;
-        },
-        idle(fn, timeout=700) {
-          if ('requestIdleCallback' in g) return g.requestIdleCallback(fn,{timeout});
-          return setTimeout(fn,32);
-        }
-      };
-    }
-    // Ignore chat and our own dock/footer mutations in unrelated UI maintenance.
-    if (!g.SakaLuXPerf.unrelated) g.SakaLuXPerf.unrelated = records => records.length > 0 && records.every(record => {
-      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
-      return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
-    });
-    if (!document.getElementById('sakalux-shared-hub-skin')) {
-      const st=document.createElement('style');
-      st.id='sakalux-shared-hub-skin';
-      st.textContent=`
-:root{--slx-bg:#0b1118;--slx-card:#111a24;--slx-card2:#172331;--slx-border:#34465b;--slx-border-soft:rgba(255,255,255,.09);--slx-text:#edf3fa;--slx-muted:#93a4b7;--slx-blue:#4f8fe8;--slx-gold:#dfbd61;--slx-green:#55d98a;--slx-red:#ff6b78;--slx-shadow:0 16px 40px rgba(0,0,0,.46)}
-body [id^="sakalux-"] button,body [id^="slx-"] button,body [class^="sakalux-"] button,body [class*=" sakalux-"] button{border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);font-family:Inter,Arial,sans-serif;transition:border-color .15s ease,background .15s ease,transform .08s ease,opacity .15s ease}
-body [id^="sakalux-"] button:active,body [id^="slx-"] button:active{transform:scale(.985)}
-body [id^="sakalux-"] input,body [id^="sakalux-"] select,body [id^="slx-"] input,body [id^="slx-"] select{border-radius:10px;border-color:#3a4d63;background:#151f2b;color:var(--slx-text);font-family:Inter,Arial,sans-serif}
-body [id*="sakalux"][id*="panel"],body [id*="sakalux"][id*="modal"],body [id*="slx"][id*="panel"],body [id*="slx"][id*="modal"],body #slx-stock-inline{font-family:Inter,Arial,sans-serif;color:var(--slx-text);border-color:var(--slx-border);box-shadow:var(--slx-shadow)}
-body [id^="sakalux-"] .header,body [id^="sakalux-"] .head,body [id^="slx-"] .header,body [id^="slx-"] .head{background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 42%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-color:var(--slx-border-soft)}
-body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-border-soft);background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(11,17,24,.98))}
-@media(max-width:700px){body [id^="sakalux-"] button,body [id^="slx-"] button{min-height:36px}body [id^="sakalux-"] input,body [id^="sakalux-"] select,body [id^="slx-"] input,body [id^="slx-"] select{min-height:36px}}
-`;
-      (document.head||document.documentElement).appendChild(st);
-    }
-  })();
-
-
     // Publish Hub presence immediately so add-ons never enter standalone mode while Hub is running.
     try {
         document.documentElement?.setAttribute('data-sakalux-hub-installed', '1');
