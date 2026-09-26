@@ -22,23 +22,42 @@ jobs:
           node --check SakaLuX-Account-Auditor.user.js
           node tests/account-auditor-changes-regression.cjs
       - name: Run strict release preflight for all scripts
-        run: python3 tools/release_preflight.py --all
+        id: preflight
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python3 tools/release_preflight.py --all 2>&1 | tee priority9-preflight-report.txt
+      - name: Upload preflight diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: priority9-preflight-diagnostics
+          path: priority9-preflight-report.txt
+          if-no-files-found: error
       - name: Build Account Auditor release candidate package
+        if: steps.preflight.outcome == 'success'
         run: |
           python3 tools/release_preflight.py --id account-auditor --out "$RUNNER_TEMP/releases"
           test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/SHA256SUMS"
           test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/RELEASE_INFO.md"
           test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/release-manifest.json"
       - name: Run current repository validator
+        if: steps.preflight.outcome == 'success'
         run: python3 .github/scripts/validate_repository.py
       - name: Commit Priority 8 generated changes
+        if: always()
         run: |
-          if git diff --quiet; then
-            echo "No generated changes to commit."
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add SakaLuX-Account-Auditor.user.js greasyfork/Account-Auditor.md
-          git commit -m "Add Account Auditor changes since last audit v1.3.24"
-          git push
+          if git diff --cached --quiet; then
+            echo "No generated Priority 8 changes to commit."
+          else
+            git commit -m "Add Account Auditor changes since last audit v1.3.24"
+            git push
+          fi
+      - name: Fail if strict preflight failed
+        if: steps.preflight.outcome != 'success'
+        run: |
+          cat priority9-preflight-report.txt
+          exit 1
