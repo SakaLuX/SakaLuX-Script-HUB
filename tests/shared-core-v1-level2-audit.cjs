@@ -18,8 +18,16 @@ function walk(dir, out = []) {
   }
   return out;
 }
-
 function count(src, re) { return [...src.matchAll(re)].length; }
+function contexts(src, re, radius = 220) {
+  const out = [];
+  for (const m of src.matchAll(re)) {
+    const start = Math.max(0, m.index - radius);
+    const end = Math.min(src.length, m.index + m[0].length + radius);
+    out.push(src.slice(start,end).replace(/\s+/g,' ').trim());
+  }
+  return out;
+}
 
 const report = [];
 for (const file of walk(root).sort()) {
@@ -43,12 +51,17 @@ for (const file of walk(root).sort()) {
     coreStorageRefs: count(src, /SakaLuXCore\??\.storage|SakaLuXCore\.storage/g)
   };
   report.push(row);
+  for (const snippet of contexts(src, /new\s+Map\s*\([\s\S]{0,300}\.map\s*\([^)]*=>\s*\[[^\]]+\.id\s*,/g, 260)) {
+    console.log('LEVEL2_DEDUPE_CONTEXT ' + JSON.stringify({file:rel,snippet}));
+  }
+  for (const snippet of contexts(src, /addEventListener\s*\(\s*['"](?:popstate|hashchange)['"][\s\S]{0,180}/g, 120)) {
+    console.log('LEVEL2_ROUTE_CONTEXT ' + JSON.stringify({file:rel,snippet}));
+  }
 }
 
 const totals = report.reduce((a, r) => {
   for (const [k,v] of Object.entries(r)) if (k !== 'file') a[k] = (a[k] || 0) + v;
   return a;
 }, {});
-
 console.log('LEVEL2_AUDIT_TOTALS ' + JSON.stringify(totals));
 for (const row of report) console.log('LEVEL2_AUDIT_FILE ' + JSON.stringify(row));
