@@ -6,7 +6,11 @@ on:
       - test/shared-core-v1
     paths:
       - src/core/sakalux-core.js
+      - tools/embed-shared-core.cjs
       - tests/shared-core-v1-regression.cjs
+      - tests/shared-core-v1-embedding.cjs
+      - SakaLuX-Market-Intelligence.user.js
+      - SakaLuX-Stock-Manager-Advisor.user.js
       - .github/workflows/test-shared-core-v1.yml
 
 jobs:
@@ -19,5 +23,9 @@ jobs:
           node-version: '22'
       - name: Syntax check Shared Core
         run: node --check src/core/sakalux-core.js
+      - name: Syntax check embedding helper
+        run: node --check tools/embed-shared-core.cjs
       - name: Run Shared Core regression suite
         run: node tests/shared-core-v1-regression.cjs
+      - name: Run Shared Core embedding/build test
+        run: node tests/shared-core-v1-embedding.cjs
