@@ -144,7 +144,7 @@
 
   const ui = {
     ensureSharedSkin() {
-      if (typeof document === 'undefined' || document.getElementById('sakalux-shared-hub-skin')) return;
+      if (typeof document === 'undefined' || typeof document.createElement !== 'function' || document.getElementById('sakalux-shared-hub-skin')) return;
       const st = document.createElement('style');
       st.id = 'sakalux-shared-hub-skin';
       st.textContent = `
