@@ -60,8 +60,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.942 — Suite menu stability**
-- Prevents Hub-state reconciliation from treating the Suite Close button as a module switch.
+**v0.9.942 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
 
