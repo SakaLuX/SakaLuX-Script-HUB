@@ -30,22 +30,58 @@ market = replaceOnce(
   'Market JSON storage migration'
 );
 
+const marketRequestReplacement = [
+  "    function requestJson(url, options={}) {",
+  "        if (typeof window.PDA_httpGet === 'function') state.apiMode='Torn PDA';",
+  "        else {",
+  "            let gm=false; try { gm=typeof GM_xmlhttpRequest === 'function'; } catch (_) {}",
+  "            state.apiMode=gm?'Tampermonkey':(state.apiMode||'Fetch');",
+  "        }",
+  "        return window.SakaLuXCore.api.requestJson(url,{",
+  "            timeout:15000,",
+  "            retries:2,",
+  "            retryBase:450,",
+  "            ttl:Math.max(0,Number(options.ttl)||0),",
+  "            force:!!options.force,",
+  "            routeScoped:!!options.routeScoped,",
+  "            headers:{Accept:'application/json'}",
+  "        });",
+  "    }",
+  ""
+].join('\n');
+
 market = replaceBetween(
   market,
   '    function requestJson(url) {',
   '    function checkApiError(data)',
-  `    function requestJson(url, options={}) {\n        if (typeof window.PDA_httpGet === 'function') state.apiMode='Torn PDA';\n        else {\n            let gm=false; try { gm=typeof GM_xmlhttpRequest === 'function'; } catch (_) {}\n            state.apiMode=gm?'Tampermonkey':(state.apiMode||'Fetch');\n        }\n        return window.SakaLuXCore.api.requestJson(url,{\n            timeout:15000,\n            retries:2,\n            retryBase:450,\n            ttl:Math.max(0,Number(options.ttl)||0),\n            force:!!options.force,\n            routeScoped:!!options.routeScoped,\n            headers:{Accept:'application/json'}\n        });\n    }\n`,
+  marketRequestReplacement,
   'Market requestJson migration'
 );
 
 fs.writeFileSync(marketPath, market, 'utf8');
 
 let stock = fs.readFileSync(stockPath, 'utf8');
+const stockApiReplacement = [
+  "  async function apiJson(url, label='API') {",
+  "    try {",
+  "      const data=await window.SakaLuXCore.api.requestJson(url,{timeout:15000,retries:2,retryBase:450});",
+  "      if(data?.error) throw new Error(apiErrorMessage(data));",
+  "      return data;",
+  "    } catch(err) {",
+  "      if(err?.code==='INVALID_JSON') throw new Error(`${label}: invalid JSON response.`);",
+  "      if(err?.code==='HTTP') throw new Error(`${label}: HTTP ${err.status||0} · ${err.message||'request failed'}`);",
+  "      throw new Error(`${label}: ${err?.message||'request failed'}`);",
+  "    }",
+  "  }",
+  "",
+  ""
+].join('\n');
+
 stock = replaceBetween(
   stock,
   "  async function apiJson(url, label='API') {",
   '  function normalizeUserStocks(data) {',
-  `  async function apiJson(url, label='API') {\n    try {\n      const data=await window.SakaLuXCore.api.requestJson(url,{timeout:15000,retries:2,retryBase:450});\n      if(data?.error) throw new Error(apiErrorMessage(data));\n      return data;\n    } catch(err) {\n      if(err?.code==='INVALID_JSON') throw new Error(\\`${'${label}'}: invalid JSON response.\\`);\n      if(err?.code==='HTTP') throw new Error(\\`${'${label}'}: HTTP ${'${err.status||0}'} · ${'${err.message||\'request failed\'}'}\\`);\n      throw new Error(\\`${'${label}'}: ${'${err?.message||\'request failed\'}'}\\`);\n    }\n  }\n\n`,
+  stockApiReplacement,
   'Stock apiJson migration'
 );
 
