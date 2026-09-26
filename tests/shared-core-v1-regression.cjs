@@ -54,8 +54,9 @@ function loadCore({ hub = false } = {}) {
 (async () => {
   const { core, context, elements, html, store } = loadCore();
   assert.ok(core, 'core exported');
-  assert.equal(core.version, '1.0.0-test.1');
+  assert.equal(core.version, '1.0.0-test.2');
   assert.equal(context.SakaLuXPerf, core.perf, 'legacy SakaLuXPerf alias preserved');
+  assert.equal(typeof core.ui?.ensureSharedSkin, 'function', 'shared UI skin moved into Core');
 
   assert.equal(core.hub.installed(), false, 'Hub absent detected');
   elements.set('sakalux-hub-panel', makeElement('sakalux-hub-panel'));
