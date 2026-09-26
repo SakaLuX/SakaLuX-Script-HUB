@@ -12,8 +12,9 @@ on:
       - tests/shared-core-v1-compatibility.cjs
       - tests/shared-core-v1-all-scripts.cjs
       - scripts.json
-      - '*.user.js'
+      - '**/*.user.js'
       - .github/workflows/test-shared-core-v1.yml
+  workflow_dispatch:
 
 jobs:
   test:
@@ -37,5 +38,5 @@ jobs:
         run: node tests/shared-core-v1-embedding.cjs
       - name: Run Market + Stocks compatibility test
         run: node tests/shared-core-v1-compatibility.cjs
-      - name: Run all active SakaLuX userscripts compatibility test
+      - name: Run every repository userscript compatibility test
         run: node tests/shared-core-v1-all-scripts.cjs
