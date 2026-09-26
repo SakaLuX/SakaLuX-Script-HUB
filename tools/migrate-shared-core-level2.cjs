@@ -20,11 +20,11 @@ function walk(dir, out = []) {
   return out;
 }
 
-const dockRank = "const regs=[...new Map(regsRaw.map(r=>[r.id,r])).values()]; const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id)));";
-const dockSimple = "const regs=[...new Map(regsRaw.map(r=>[r.id,r])).values()]; regs.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));";
-const dockCore = "const regs=window.SakaLuXCore.dock.sort(regsRaw);";
-const routePair = "addEventListener('hashchange',()=>queue(350),{passive:true}); addEventListener('popstate',()=>queue(350),{passive:true});";
-const routeCore = "window.SakaLuXCore.router.onChange(()=>queue(350)); window.SakaLuXCore.router.bind();";
+const dockRankRe = /const\s+regs=\[\.\.\.new\s+Map\(regsRaw\.map\(r=>\[r\.id,r\]\)\)\.values\(\)\];\s*const\s+rank=id=>\{const\s+i=ORDER\.indexOf\(id\);return\s+i<0\?ORDER\.length\+100:i\};\s*regs\.sort\(\(a,b\)=>rank\(a\.id\)-rank\(b\.id\)\|\|String\(a\.name\|\|a\.id\)\.localeCompare\(String\(b\.name\|\|b\.id\)\)\);/g;
+const dockSimpleRe = /const\s+regs=\[\.\.\.new\s+Map\(regsRaw\.map\(r=>\[r\.id,r\]\)\)\.values\(\)\];\s*regs\.sort\(\(a,b\)=>ORDER\.indexOf\(a\.id\)-ORDER\.indexOf\(b\.id\)\);/g;
+const routePairRe = /addEventListener\('hashchange',\(\)=>queue\(350\),\{passive:true\}\);\s*addEventListener\('popstate',\(\)=>queue\(350\),\{passive:true\}\);/g;
+const dockCore = 'const regs=window.SakaLuXCore.dock.sort(regsRaw);';
+const routeCore = 'window.SakaLuXCore.router.onChange(()=>queue(350)); window.SakaLuXCore.router.bind();';
 
 let changedFiles = 0;
 let dockReplacements = 0;
@@ -35,9 +35,9 @@ for (const file of walk(root).sort()) {
   let body = stripSharedCore(original);
   let localDock = 0, localRoute = 0;
 
-  while (body.includes(dockRank)) { body = body.replace(dockRank, dockCore); localDock++; }
-  while (body.includes(dockSimple)) { body = body.replace(dockSimple, dockCore); localDock++; }
-  while (body.includes(routePair)) { body = body.replace(routePair, routeCore); localRoute++; }
+  body = body.replace(dockRankRe, () => { localDock++; return dockCore; });
+  body = body.replace(dockSimpleRe, () => { localDock++; return dockCore; });
+  body = body.replace(routePairRe, () => { localRoute++; return routeCore; });
 
   dockReplacements += localDock;
   routeReplacements += localRoute;
