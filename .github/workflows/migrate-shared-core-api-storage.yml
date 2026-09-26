@@ -1,0 +1,60 @@
+name: Migrate Shared Core API and storage
+
+on:
+  push:
+    branches:
+      - test/shared-core-v1
+    paths:
+      - tools/migrate-shared-core-api-storage.cjs
+      - tests/shared-core-api-integration-regression.cjs
+      - .github/workflows/migrate-shared-core-api-storage.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/shared-core-v1
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check migration helper
+        run: node --check tools/migrate-shared-core-api-storage.cjs
+      - name: Apply Market and Stock broker migration
+        run: node tools/migrate-shared-core-api-storage.cjs
+      - name: Syntax check migrated userscripts
+        run: |
+          node --check SakaLuX-Market-Intelligence.user.js
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+      - name: Run Shared Core regression suite
+        run: node tests/shared-core-v1-regression.cjs
+      - name: Run API Request Broker regression suite
+        run: node tests/shared-core-api-broker-regression.cjs
+      - name: Run API integration regression
+        run: node tests/shared-core-api-integration-regression.cjs
+      - name: Run Market Travel regression
+        run: node tests/market-travel-state-machine-regression.cjs
+      - name: Run Stock rebalance regression
+        run: node tests/stock-rebalance-state-machine-regression.cjs
+      - name: Run Market and Stock compatibility
+        run: node tests/shared-core-v1-compatibility.cjs
+      - name: Run repository-wide compatibility
+        run: node tests/shared-core-v1-all-scripts.cjs
+      - name: Commit controlled broker migration
+        run: |
+          if git diff --quiet -- SakaLuX-Market-Intelligence.user.js SakaLuX-Stock-Manager-Advisor.user.js; then
+            echo 'No migration changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Market-Intelligence.user.js SakaLuX-Stock-Manager-Advisor.user.js
+          git commit -m 'Route Market and Stock API reads through Shared Core broker'
+          git push origin HEAD:test/shared-core-v1
