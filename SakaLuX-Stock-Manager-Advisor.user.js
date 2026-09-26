@@ -847,12 +847,15 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
   }
 
   async function apiJson(url, label='API') {
-    const res=await fetch(url,{credentials:'omit',cache:'no-store'});
-    let data=null;
-    try { data=await res.json(); } catch { throw new Error(`${label}: invalid JSON response (HTTP ${res.status}).`); }
-    if(!res.ok) throw new Error(`${label}: HTTP ${res.status} · ${apiErrorMessage(data,'request failed')}`);
-    if(data?.error) throw new Error(`${label}: ${apiErrorMessage(data)}`);
-    return data;
+    try {
+      const data=await window.SakaLuXCore.api.requestJson(url,{timeout:15000,retries:2,retryBase:450});
+      if(data?.error) throw new Error(apiErrorMessage(data));
+      return data;
+    } catch(err) {
+      if(err?.code==='INVALID_JSON') throw new Error(`${label}: invalid JSON response.`);
+      if(err?.code==='HTTP') throw new Error(`${label}: HTTP ${err.status||0} · ${err.message||'request failed'}`);
+      throw new Error(`${label}: ${err?.message||'request failed'}`);
+    }
   }
 
   function normalizeUserStocks(data) {
@@ -1026,9 +1029,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     for(let i=0;i<ids.length;i++) {
       const id=ids[i];
       try {
-        const r=await fetch(`https://api.torn.com/v2/torn/${id}/items?key=${encodeURIComponent(key)}&ts=${Date.now()}`,{credentials:'omit'});
-        const d=await r.json();
-        if(d?.error) throw new Error(d.error.error||'API error');
+        const d=await apiJson(`https://api.torn.com/v2/torn/${id}/items?key=${encodeURIComponent(key)}&ts=${Date.now()}`,'Torn / item');
         let price=Number(d?.value?.market_price||d?.items?.[0]?.value?.market_price||d?.items?.[0]?.market_value||d?.market_price||0);
         if(price>0){S.benefitPrices[id]=price;ok++;}
       } catch {}
@@ -1358,9 +1359,9 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
 
   const STOCK_REBALANCE_STATES=Object.freeze({PLANNING:'PLANNING',SELLING:'SELLING',VERIFYING_SELL:'VERIFYING_SELL',WAITING_SYNC:'WAITING_SYNC',VERIFYING_CASH:'VERIFYING_CASH',BUYING:'BUYING',VERIFYING_POSITION:'VERIFYING_POSITION',COMPLETE:'COMPLETE',STOPPED:'STOPPED',ERROR:'ERROR'});
   const STOCK_REBALANCE_CHECKPOINT='SLX_STOCK_REBALANCE_CHECKPOINT_V1';
-  function stockRebalanceCheckpointRead(){try{return JSON.parse(localStorage.getItem(STOCK_REBALANCE_CHECKPOINT)||'null')}catch{return null}}
-  function stockRebalanceCheckpointWrite(state){try{localStorage.setItem(STOCK_REBALANCE_CHECKPOINT,JSON.stringify(state))}catch{}}
-  function stockRebalanceCheckpointClear(){try{localStorage.removeItem(STOCK_REBALANCE_CHECKPOINT)}catch{}}
+  function stockRebalanceCheckpointRead(){return window.SakaLuXCore.storage.get(STOCK_REBALANCE_CHECKPOINT,null)}
+  function stockRebalanceCheckpointWrite(state){window.SakaLuXCore.storage.set(STOCK_REBALANCE_CHECKPOINT,state)}
+  function stockRebalanceCheckpointClear(){window.SakaLuXCore.storage.remove(STOCK_REBALANCE_CHECKPOINT)}
   function stockRebalanceNormalizeResume(resume){
     if(!resume||typeof resume!=='object')return {sold:[],bought:null};
     const sold=Array.isArray(resume.sold)?resume.sold.map(x=>({sym:String(x.sym||'').toUpperCase(),shares:Math.floor(Number(x.shares)||0)})).filter(x=>x.sym&&x.shares>0):[];

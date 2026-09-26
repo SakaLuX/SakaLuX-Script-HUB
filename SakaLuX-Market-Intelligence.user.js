@@ -867,11 +867,8 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         routeHandler: null
     };
 
-    function loadJson(key, fallback) {
-        try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
-        catch (_) { return fallback; }
-    }
-    function saveJson(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
+    function loadJson(key, fallback) { return window.SakaLuXCore.storage.get(key, fallback); }
+    function saveJson(key, value) { window.SakaLuXCore.storage.set(key, value); }
 
     function normalizeNetworkEndpoint(value) {
         const raw=String(value||'').trim().replace(/\/+$/,'');
@@ -1341,21 +1338,20 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         block.querySelector('.sl-mi-loadout-refresh').onclick=async()=>{localStorage.removeItem(STORAGE.loadoutCache);await renderLoadoutComparator(bar,market,id);};
     }
 
-    function requestJson(url) {
-        return new Promise((resolve,reject)=>{
-            if (typeof window.PDA_httpGet === 'function') {
-                state.apiMode='Torn PDA';
-                window.PDA_httpGet(url,{Accept:'application/json'}).then(r=>{
-                    try { if(typeof r==='string') return resolve(JSON.parse(r)); const raw=r?.responseText??r?.body??r?.data??r; resolve(typeof raw==='string'?JSON.parse(raw):raw); }
-                    catch(e){reject(e);}
-                }).catch(reject); return;
-            }
-            if (typeof GM_xmlhttpRequest === 'function') {
-                state.apiMode=state.apiMode||'Tampermonkey';
-                GM_xmlhttpRequest({method:'GET',url,timeout:15000,headers:{Accept:'application/json'},onload:r=>{try{resolve(JSON.parse(r.responseText));}catch(e){reject(e);}},onerror:()=>reject(new Error('Network error')),ontimeout:()=>reject(new Error('Request timeout'))});
-                return;
-            }
-            fetch(url).then(r=>r.json()).then(resolve).catch(reject);
+    function requestJson(url, options={}) {
+        if (typeof window.PDA_httpGet === 'function') state.apiMode='Torn PDA';
+        else {
+            let gm=false; try { gm=typeof GM_xmlhttpRequest === 'function'; } catch (_) {}
+            state.apiMode=gm?'Tampermonkey':(state.apiMode||'Fetch');
+        }
+        return window.SakaLuXCore.api.requestJson(url,{
+            timeout:15000,
+            retries:2,
+            retryBase:450,
+            ttl:Math.max(0,Number(options.ttl)||0),
+            force:!!options.force,
+            routeScoped:!!options.routeScoped,
+            headers:{Accept:'application/json'}
         });
     }
     function checkApiError(data) { if(data?.error) throw new Error(data.error.error||data.error.message||'Torn API error'); }
