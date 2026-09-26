@@ -456,19 +456,21 @@
         }
       ],
       "release": {
-        "version": "0.8.13",
+        "version": "0.8.14",
         "date": "2026-09-26",
         "notes": [
-          "Fixes Guided Rebalance selling the same stock selected as the BUY target.",
-          "Accounts for Torn stock selling fee (0.1%) when calculating rebalance funding and SELL proceeds.",
-          "Refreshes cash and target price between SELL and BUY phases and caps BUY shares to the amount safely affordable after fees.",
-          "Adds a longer SELL-to-BUY settle window for TornPDA and requires an explicit success response from Torn instead of treating HTML/non-JSON responses as accepted trades."
+          "Introduces a verified Stock Rebalance state machine: PLANNING → SELLING → VERIFYING_SELL → WAITING_SYNC → VERIFYING_CASH → BUYING → VERIFYING_POSITION → COMPLETE.",
+          "Verifies each SELL before another transaction, preventing duplicate sales after TornPDA/network uncertainty and supporting safe retry only when a sale did not land.",
+          "Persists recovery checkpoints so interrupted rebalances can resume without repeating completed SELL or BUY actions.",
+          "Re-syncs cash, target price and held shares before BUY, recalculates affordable quantity, preserves reserve cash and verifies the final position.",
+          "Keeps the BUY target excluded from SELL sources and retains the 0.1% sell-fee-aware planning introduced in v0.8.13.",
+          "Adds permanent regression coverage for multiple SELLs, interruption/recovery, retry safety, TornPDA transitions, large amounts and post-BUY verification."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.13",
-      "detailsRevision": 5,
+      "version": "0.8.14",
+      "detailsRevision": 6,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",

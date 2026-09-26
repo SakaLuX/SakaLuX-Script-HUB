@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.13**
+**v0.8.14**
 
 
 ## Repository synchronization
@@ -34,11 +34,13 @@
 
 ## Current release note
 
-**v0.8.13 — Guided Rebalance SELL → BUY reliability**
-- Never sells the same stock selected as the rebalance BUY target.
-- Calculates SELL proceeds after Torn's 0.1% selling fee.
-- Refreshes cash/price before BUY and reduces the BUY share count when needed so large rebalances remain affordable.
-- Adds a TornPDA settle window between phases and requires explicit Torn trade success.
+**v0.8.14 — Release metadata synchronization**
+- Introduces a verified Stock Rebalance state machine: PLANNING → SELLING → VERIFYING_SELL → WAITING_SYNC → VERIFYING_CASH → BUYING → VERIFYING_POSITION → COMPLETE.
+- Verifies each SELL before another transaction, preventing duplicate sales after TornPDA/network uncertainty and supporting safe retry only when a sale did not land.
+- Persists recovery checkpoints so interrupted rebalances can resume without repeating completed SELL or BUY actions.
+- Re-syncs cash, target price and held shares before BUY, recalculates affordable quantity, preserves reserve cash and verifies the final position.
+- Keeps the BUY target excluded from SELL sources and retains the 0.1% sell-fee-aware planning introduced in v0.8.13.
+- Adds permanent regression coverage for multiple SELLs, interruption/recovery, retry safety, TornPDA transitions, large amounts and post-BUY verification.
 
 ## Recommended
 - Keep **Dry Run ON** while checking a new configuration.
@@ -70,6 +72,15 @@
 **All Rights Reserved — SakaLuX [2380374]**
 
 ## Release history / Changelog
+
+
+### v0.8.14 — Release metadata synchronization
+- Introduces a verified Stock Rebalance state machine: PLANNING → SELLING → VERIFYING_SELL → WAITING_SYNC → VERIFYING_CASH → BUYING → VERIFYING_POSITION → COMPLETE.
+- Verifies each SELL before another transaction, preventing duplicate sales after TornPDA/network uncertainty and supporting safe retry only when a sale did not land.
+- Persists recovery checkpoints so interrupted rebalances can resume without repeating completed SELL or BUY actions.
+- Re-syncs cash, target price and held shares before BUY, recalculates affordable quantity, preserves reserve cash and verifies the final position.
+- Keeps the BUY target excluded from SELL sources and retains the 0.1% sell-fee-aware planning introduced in v0.8.13.
+- Adds permanent regression coverage for multiple SELLs, interruption/recovery, retry safety, TornPDA transitions, large amounts and post-BUY verification.
 
 ### v0.8.13 — Guided Rebalance SELL → BUY reliability
 - Excludes the BUY target symbol from all rebalance SELL sources.
