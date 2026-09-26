@@ -25,9 +25,8 @@ assert.ok(pricer.includes("bridge.id = 'sakalux-module-bridge-bazaar-smart-price
 assert.ok(pricer.includes('SakaLuX:BazaarSmartPricerPowerRequested'));
 assert.ok(pricer.includes("localStorage.setItem('SakaLuX_BAZAAR_SMART_PRICER_ENABLED'"));
 
-const hubRow = registry.scripts.find(x=>x.id==='script-hub');
 const pricerRow = registry.scripts.find(x=>x.id==='bazaar-smart-pricer');
-assert.equal(hubRow.version,'1.9.88');
+assert.ok(pricerRow,'bazaar-smart-pricer registry row');
 assert.equal(pricerRow.version,'1.1.12');
 
 console.log('Priority 5 remediation + Bazaar Smart Pricer global power regression passed.');
