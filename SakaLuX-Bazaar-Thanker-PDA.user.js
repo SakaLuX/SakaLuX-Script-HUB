@@ -1752,7 +1752,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
     function startEventObserver() {
         if (!moduleEnabled || eventObserver) return;
-        eventObserver = new MutationObserver(function (records) { if (!window.SakaLuXPerf?.unrelated?.(records)) scheduleProcess(); });
+        const ignoredUi = '#chat-box,[id^=\"chat-box\"],[class*=\"chat-box\"],[class*=\"chatBox\"],#sakalux-standalone-dock,#sakalux-standalone-fallback-s,#sakalux-standalone-native-s,#sakalux-hub-install-prompt,[id^=\"sakalux-inline-footer-\"]';
+        const relevantMutation = record => {
+            const target = record?.target?.nodeType === 1 ? record.target : record?.target?.parentElement;
+            if (target?.closest?.(ignoredUi)) return false;
+            const changed = [...(record?.addedNodes || []), ...(record?.removedNodes || [])];
+            if (!changed.length) return true;
+            return changed.some(node => {
+                const el = node?.nodeType === 1 ? node : node?.parentElement;
+                return !el?.matches?.(ignoredUi) && !el?.closest?.(ignoredUi);
+            });
+        };
+        eventObserver = new MutationObserver(function (records) {
+            if (window.SakaLuXPerf?.unrelated?.(records)) return;
+            if (records.some(relevantMutation)) scheduleProcess();
+        });
         eventObserver.observe(document.body, { childList: true, subtree: true });
     }
 
