@@ -1,0 +1,20 @@
+name: Test Priority 6 Shared Dock Runtime
+on:
+  push:
+    branches: [test/priority6-shared-dock-runtime]
+    paths:
+      - 'src/core/sakalux-dock-runtime.js'
+      - 'tests/priority6-shared-dock-runtime-regression.cjs'
+      - '.github/workflows/test-priority6-shared-dock-runtime.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check
+        run: node --check src/core/sakalux-dock-runtime.js
+      - name: Run Priority 6 regression
+        run: node tests/priority6-shared-dock-runtime-regression.cjs
