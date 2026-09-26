@@ -1,8 +1,23 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import runpy, re
+import runpy, re, sys
 
 ROOT = Path(__file__).resolve().parents[2]
+suite_path = ROOT / 'SakaLuX-Suite.user.js'
+doc_path = ROOT / 'greasyfork/SakaLuX-Suite.md'
+version = '0.9.939'
+begin = '/* SakaLuX Suite Daily Progress — BEGIN */'
+
+# Once the generated userscript and documentation are synchronized, do not run
+# the legacy migration body again. This keeps the generator byte-idempotent.
+suite_now = suite_path.read_text(encoding='utf-8')
+doc_now = doc_path.read_text(encoding='utf-8')
+if (begin in suite_now and
+    re.search(r'(?m)^//\s*@version\s+0\.9\.939\s*$', suite_now) and
+    f'### v{version} — Suite Daily Progress Dashboard' in doc_now):
+    print(f'Priority 7 Suite Daily Progress already synchronized: v{version}')
+    sys.exit(0)
+
 try:
     runpy.run_path(str(ROOT / '.github/scripts/priority7_suite_daily_progress.py'), run_name='__main__')
 except RuntimeError as exc:
@@ -10,8 +25,6 @@ except RuntimeError as exc:
         raise
     # The Suite userscript has already been written. Complete the documentation
     # migration using a line-ending-independent changelog anchor.
-    doc_path = ROOT / 'greasyfork/SakaLuX-Suite.md'
-    version = '0.9.939'
     doc = doc_path.read_text(encoding='utf-8')
     doc = re.sub(r'(?m)^\*\*v0\.9\.\d+\*\*$', f'**v{version}**', doc, count=1)
     doc = re.sub(r'(?m)^- Canonical version: \*\*v0\.9\.\d+\*\*$', f'- Canonical version: **v{version}**', doc, count=1)
