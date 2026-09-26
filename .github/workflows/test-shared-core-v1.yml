@@ -1,0 +1,23 @@
+name: Test Shared Core v1
+
+on:
+  push:
+    branches:
+      - test/shared-core-v1
+    paths:
+      - src/core/sakalux-core.js
+      - tests/shared-core-v1-regression.cjs
+      - .github/workflows/test-shared-core-v1.yml
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check Shared Core
+        run: node --check src/core/sakalux-core.js
+      - name: Run Shared Core regression suite
+        run: node tests/shared-core-v1-regression.cjs
