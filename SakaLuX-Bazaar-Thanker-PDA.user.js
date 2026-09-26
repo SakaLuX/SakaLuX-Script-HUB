@@ -23,7 +23,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.0.0-test.2';
+  const CORE_VERSION = '1.0.0-test.3';
   const NS = 'SakaLuXCore';
 
   if (g[NS]?.version === CORE_VERSION) return;
@@ -31,6 +31,7 @@
   const timers = new Map();
   const listeners = new Set();
   let routeKey = '';
+  let routerBound = false;
 
   const perf = {
     debounce(key, fn, wait = 220) {
@@ -114,6 +115,14 @@
       for (const fn of [...listeners]) {
         try { fn({ previous: prev, current: next }); } catch (err) { console.error('[SakaLuXCore router]', err); }
       }
+      return true;
+    },
+    bind() {
+      if (routerBound || typeof g.addEventListener !== 'function') return false;
+      const signal = () => this.check();
+      g.addEventListener('hashchange', signal, { passive: true });
+      g.addEventListener('popstate', signal, { passive: true });
+      routerBound = true;
       return true;
     }
   };
