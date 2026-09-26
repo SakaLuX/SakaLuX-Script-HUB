@@ -56,6 +56,7 @@ assert.ok(files.some(x => x.file === 'SakaLuX-Script-Hub.user.js'), 'Script Hub 
 const report = [];
 for (const item of files) {
   const source = fs.readFileSync(item.full, 'utf8');
+  const baseline = stripSharedCore(source);
   assert.ok(source.includes('// ==UserScript==') && source.includes('// ==/UserScript=='), `${item.rel}: invalid userscript metadata`);
 
   const output = embedSharedCore(source, core);
@@ -69,8 +70,9 @@ for (const item of files) {
   const output2 = embedSharedCore(output, core);
   assert.equal(output2, output, `${item.rel}: embedding is not idempotent`);
 
-  // Removing only the injected Core must restore the original source byte-for-byte.
-  assert.equal(stripSharedCore(output), source, `${item.rel}: embedding changed original userscript body`);
+  // Removing the embedded Core must restore the Core-free baseline byte-for-byte,
+  // whether the checked-in source already contains Core or not.
+  assert.equal(stripSharedCore(output), baseline, `${item.rel}: embedding changed original userscript body`);
 
   // Syntax validation of the fully embedded standalone build.
   const token = crypto.createHash('sha1').update(item.rel).digest('hex').slice(0, 12);
