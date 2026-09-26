@@ -9,6 +9,7 @@ on:
       - tools/embed-shared-core.cjs
       - tests/shared-core-v1-regression.cjs
       - tests/shared-core-v1-embedding.cjs
+      - tests/shared-core-v1-compatibility.cjs
       - SakaLuX-Market-Intelligence.user.js
       - SakaLuX-Stock-Manager-Advisor.user.js
       - .github/workflows/test-shared-core-v1.yml
@@ -25,7 +26,11 @@ jobs:
         run: node --check src/core/sakalux-core.js
       - name: Syntax check embedding helper
         run: node --check tools/embed-shared-core.cjs
+      - name: Syntax check compatibility test
+        run: node --check tests/shared-core-v1-compatibility.cjs
       - name: Run Shared Core regression suite
         run: node tests/shared-core-v1-regression.cjs
       - name: Run Shared Core embedding/build test
         run: node tests/shared-core-v1-embedding.cjs
+      - name: Run Market + Stocks compatibility test
+        run: node tests/shared-core-v1-compatibility.cjs
