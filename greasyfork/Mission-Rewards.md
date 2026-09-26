@@ -9,7 +9,7 @@
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.0.44**
+- Canonical version: **v1.0.46**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md

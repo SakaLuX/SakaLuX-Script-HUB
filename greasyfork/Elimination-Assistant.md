@@ -9,7 +9,7 @@
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.3.45**
+- Canonical version: **v1.3.47**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md

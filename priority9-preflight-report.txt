@@ -1,8 +1,1 @@
-Release preflight FAILED:
- - bazaar-smart-pricer: changelog entry missing for v1.1.12
- - bazaar-smart-pricer: canonical documentation version is v1.1.7, expected v1.1.12
- - bazaar: canonical documentation version is v5.3.42, expected v5.3.44
- - company-intelligence: canonical documentation version is v1.8.39, expected v1.8.41
- - elimination-assistant: canonical documentation version is v1.3.45, expected v1.3.47
- - enhancer: canonical documentation version is v1.3.50, expected v1.3.52
- - mission-rewards: canonical documentation version is v1.0.44, expected v1.0.46
+Release preflight passed for 12 script(s).

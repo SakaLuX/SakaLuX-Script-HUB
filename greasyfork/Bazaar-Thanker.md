@@ -9,7 +9,7 @@
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v5.3.42**
+- Canonical version: **v5.3.44**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md

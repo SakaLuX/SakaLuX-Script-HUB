@@ -8,7 +8,7 @@
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.1.7**
+- Canonical version: **v1.1.12**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md
@@ -43,3 +43,10 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 - Adds a global persistent power bridge so Hub ON/OFF works from every Torn page.
 - Synchronizes Hub power state with Pricer storage.
 - Keeps pricing runtime page-scoped while power control remains global.
+## Release history / Changelog
+
+### v1.1.12 — Global Hub power control
+- Adds a persistent global power bridge so Script Hub ON/OFF works from every Torn page.
+- Synchronizes Hub power state with Smart Pricer storage.
+- Keeps pricing and Bazaar scanning page-scoped while global power control stays available.
+
