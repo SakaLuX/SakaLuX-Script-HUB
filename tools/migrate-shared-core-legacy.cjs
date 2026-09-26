@@ -32,11 +32,13 @@ function removeLegacyFoundation(source) {
     const marker = text.indexOf(FOUNDATION);
     if (marker < 0) break;
     const lineStart = text.lastIndexOf('\n', marker) + 1;
-    const hubUrl = text.indexOf('const HUB_URL', marker);
-    if (hubUrl < 0 || hubUrl - marker > 12000) {
-      throw new Error(`Legacy foundation marker found without nearby HUB_URL (${marker})`);
+    const close = text.indexOf('\n  })();', marker);
+    if (close < 0 || close - marker > 16000) {
+      throw new Error(`Legacy foundation marker found without nearby IIFE close (${marker})`);
     }
-    text = text.slice(0, lineStart) + text.slice(hubUrl);
+    let end = close + '\n  })();'.length;
+    while (text[end] === '\r' || text[end] === '\n') end++;
+    text = text.slice(0, lineStart) + text.slice(end);
     removed++;
   }
   return { text, removed };
