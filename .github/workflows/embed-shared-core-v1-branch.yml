@@ -1,8 +1,9 @@
-name: Embed Shared Core v1 on test branch
+name: Embed Shared Core v1
 
 on:
   push:
     branches:
+      - main
       - test/shared-core-v1
     paths:
       - src/core/sakalux-core.js
@@ -21,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: test/shared-core-v1
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -43,4 +44,4 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -- '*.user.js'
           git commit -m 'Embed Shared Core v1 into all userscripts'
-          git push origin HEAD:test/shared-core-v1
+          git push origin HEAD:${{ github.ref_name }}
