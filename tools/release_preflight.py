@@ -123,6 +123,13 @@ def build_package(entry, out_root: Path, registry_by_id):
     return target, manifest
 
 
+def display_package_path(target: Path):
+    try:
+        return str(target.relative_to(ROOT))
+    except ValueError:
+        return str(target)
+
+
 def main():
     ap = argparse.ArgumentParser()
     group = ap.add_mutually_exclusive_group(required=True)
@@ -152,6 +159,6 @@ def main():
     print(f'Release preflight passed for {len(targets)} script(s).')
     if args.id:
         target, manifest = build_package(targets[0], ROOT / args.out, registry_by_id)
-        print(json.dumps({'package': str(target.relative_to(ROOT)), **manifest}, ensure_ascii=False))
+        print(json.dumps({'package': display_package_path(target), **manifest}, ensure_ascii=False))
 
 if __name__ == '__main__': main()
