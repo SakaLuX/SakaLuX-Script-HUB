@@ -9,6 +9,7 @@ on:
       - tools/embed-shared-core.cjs
       - tests/shared-core-v1-regression.cjs
       - tests/shared-core-api-broker-regression.cjs
+      - tests/shared-core-api-integration-regression.cjs
       - tests/shared-core-v1-embedding.cjs
       - tests/shared-core-v1-compatibility.cjs
       - tests/shared-core-v1-all-scripts.cjs
@@ -36,10 +37,13 @@ jobs:
           node --check tests/shared-core-v1-all-scripts.cjs
           node --check tests/shared-core-v1-level2-audit.cjs
           node --check tests/shared-core-api-broker-regression.cjs
+          node --check tests/shared-core-api-integration-regression.cjs
       - name: Run Shared Core regression suite
         run: node tests/shared-core-v1-regression.cjs
       - name: Run API Request Broker regression suite
         run: node tests/shared-core-api-broker-regression.cjs
+      - name: Run API integration regression
+        run: node tests/shared-core-api-integration-regression.cjs
       - name: Run Shared Core embedding/build test
         run: node tests/shared-core-v1-embedding.cjs
       - name: Run Market + Stocks compatibility test
@@ -49,4 +53,4 @@ jobs:
       - name: Audit level-2 shared duplication
         run: node tests/shared-core-v1-level2-audit.cjs
 
-# Verifies the branch after repository-wide Core embedding, API broker regressions and level-2 duplication audit.
+# Verifies the branch after repository-wide Core embedding, API broker/integration regressions and level-2 duplication audit.
