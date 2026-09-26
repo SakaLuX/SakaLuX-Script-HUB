@@ -13,7 +13,7 @@ const helper=`\n    function getModuleStatus(script) {\n        const health = g
 s=s.replace(healthAnchor,healthAnchor+helper);
 }
 
-if(!s.includes("id=\"slh-health-summary\"")) {
+if(!s.includes("id = 'slh-health-summary'")) {
 const re=/([\s\S]*?function renderMainStats\(\) \{[\s\S]*?)(\n    \}\n\n    function updateCheckButtonState)/;
 const m=s.match(re);
 if(!m) throw new Error('renderMainStats block missing');
@@ -24,9 +24,10 @@ s=s.replace(re,m[1]+insert+m[2]);
 if(!s.includes('const moduleStatus = getModuleStatus(script);')) {
 s=s.replace("        const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';",
 `        const moduleStatus = getModuleStatus(script);\n        const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';\n        const statusChipClass = moduleStatus.level === 'ok' ? 'good' : moduleStatus.level === 'bad' ? 'bad' : 'warn';`);
-const chip=`                    <span class=\"slh-chip \\${healthChipClass}\">\\${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>\n`;
+const chip='                    <span class="slh-chip ${healthChipClass}">${missing ? \'NOT INSTALLED\' : \'v\' + escapeHtml(installed || health.version || \'?\')}</span>\n';
 if(!s.includes(chip)) throw new Error('card health chip anchor missing');
-s=s.replace(chip,chip+`                    <span class=\"slh-chip \\${statusChipClass}\" title=\"\\${escapeHtml(moduleStatus.detail)}\">\\${escapeHtml(moduleStatus.label)}</span>\n`);
+const extra='                    <span class="slh-chip ${statusChipClass}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(moduleStatus.label)}</span>\n';
+s=s.replace(chip,chip+extra);
 }
 
 const localStatus=`            const health = getHealth(script);\n            results.push({ level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad', label: script.name + ' local status', detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error') });`;
