@@ -99,22 +99,15 @@ def remove_company_legacy_registration(text: str) -> str:
 
 
 def remove_stock_legacy_registration(text: str) -> str:
-    # Remove the registration span created inside the Hub bridge setup. The shared
-    # dock runtime owns registration now; the public module API/bridge remains.
     text = re.sub(
-        r"\n\s*let entry=document\.querySelector\('\[data-slx-standalone-registration=\\\"stock-manager-advisor\\\"\]'\);.*?\n\s*window\.SakaLuXStockManagerAdvisor=\{",
+        r"\n\s*let entry=document\.querySelector\([^;\n]*data-slx-standalone-registration[^;\n]*\);.*?\n\s*window\.SakaLuXStockManagerAdvisor=\{",
         '\n    window.SakaLuXStockManagerAdvisor={', text, count=1, flags=re.S
     )
-    # Remove two older keep-alive registration shims.
-    text = re.sub(
-        r"\n?/\* SAKALUX_GLOBAL_STANDALONE_STOCK_V2 \*/\s*\(\(\)=>\{.*?\}\)\(\);\s*",
-        '\n', text, count=1, flags=re.S
-    )
-    text = re.sub(
-        r"\n?/\* SAKALUX_STOCKS_FOLLOWUP_V0715 \*/\s*\(\(\)=>\{.*?\}\)\(\);\s*",
-        '\n', text, count=1, flags=re.S
-    )
-    # The observer's self-change filter no longer needs the removed span selector.
+    for marker in ('SAKALUX_GLOBAL_STANDALONE_STOCK_V2', 'SAKALUX_STOCKS_FOLLOWUP_V0715'):
+        text = re.sub(
+            rf"\n?/\* {marker} \*/\s*\(\(\)=>\{{.*?\}}\)\(\);\s*",
+            '\n', text, count=1, flags=re.S
+        )
     text = text.replace(',[data-slx-standalone-registration]', '')
     return text
 
