@@ -3,12 +3,12 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.12**
+**v1.1.13**
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.1.12**
+- Canonical version: **v1.1.13**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md
@@ -39,12 +39,18 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.12 — Adds a global persistent power bridge so Hub ON/OFF works from every Torn page**
-- Adds a global persistent power bridge so Hub ON/OFF works from every Torn page.
-- Synchronizes Hub power state with Pricer storage.
-- Keeps pricing runtime page-scoped while power control remains global.
+**v1.1.13 — Settings Schema v1 and safe automatic migrations**
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ## Release history / Changelog
+
+
+### v1.1.13 — Settings Schema v1 and safe automatic migrations
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ### v1.1.12 — Global Hub power control
 - Adds a persistent global power bridge so Script Hub ON/OFF works from every Torn page.

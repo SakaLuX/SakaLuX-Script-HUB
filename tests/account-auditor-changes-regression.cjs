@@ -2,8 +2,11 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const source=fs.readFileSync('SakaLuX-Account-Auditor.user.js','utf8');
+const currentVersion=source.match(/^\/\/\s*@version\s+(\S+)$/m)?.[1];
+const atLeast=(actual,minimum)=>{const a=actual.split('.').map(Number),b=minimum.split('.').map(Number);for(let i=0;i<Math.max(a.length,b.length);i++){const d=(a[i]||0)-(b[i]||0);if(d)return d>0}return true};
 
-assert.match(source,/^\/\/\s*@version\s+1\.3\.24$/m,'Account Auditor metadata bumped');
+assert.ok(currentVersion,'Account Auditor metadata version present');
+assert.ok(atLeast(currentVersion,'1.3.24'),'Account Auditor remains at or beyond the Priority 8 release');
 assert.ok(source.includes('SakaLuX Auditor Changes Since Last Audit — BEGIN'),'change block present');
 assert.ok(source.includes("auditBaseline:'SakaLuX_AUDITOR_CHANGE_BASELINE_V1'"),'baseline storage present');
 assert.ok(source.includes("lastChanges:'SakaLuX_AUDITOR_LAST_CHANGES_V1'"),'last changes storage present');
@@ -21,7 +24,7 @@ assert.ok(source.includes("AUDIT_CHANGE_GROUPS=['money','networth','battlestats'
 assert.ok(source.includes('changes:changes.slice(0,80)'),'report bounded to 80 detailed changes');
 
 const doc=fs.readFileSync('greasyfork/Account-Auditor.md','utf8');
-assert.ok(doc.includes('**v1.3.24**'),'doc current version synchronized');
-assert.ok(doc.includes('Canonical version: **v1.3.24**'),'doc canonical version synchronized');
+assert.ok(doc.includes(`**v${currentVersion}**`),'doc current version synchronized');
+assert.ok(doc.includes(`Canonical version: **v${currentVersion}**`),'doc canonical version synchronized');
 assert.ok(doc.includes('### v1.3.24 — Changes Since Last Audit'),'changelog synchronized');
 console.log('Account Auditor Changes Since Last Audit regression passed.');

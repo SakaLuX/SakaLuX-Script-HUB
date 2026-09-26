@@ -30,6 +30,54 @@ def registry_filename(row):
     return unquote(urlparse(row.get('sourceUrl', '')).path.rsplit('/', 1)[-1])
 
 
+def validate_runtime_versions(source: str, version: str, script_id: str):
+    errors = []
+    runtime_source = re.sub(
+        r'/\* SakaLuX Shared Dock Runtime — BEGIN \*/.*?/\* SakaLuX Shared Dock Runtime — END \*/',
+        '', source, flags=re.S,
+    )
+    patterns = {
+        'canonical installed marker': r"\blet\s+v\s*=\s*['\"]([^'\"]+)['\"]",
+        'standalone SELF marker': r"\{\s*version\s*:\s*['\"]([^'\"]+)['\"]\s*\}\s*\)\)",
+    }
+    for label, pattern in patterns.items():
+        for found in re.findall(pattern, runtime_source):
+            if found != version:
+                errors.append(f'{script_id}: {label} {found} != metadata {version}')
+    main_version = re.search(r"\bconst\s+VERSION\s*=\s*['\"]([^'\"]+)['\"]", runtime_source)
+    if main_version and main_version.group(1) != version:
+        errors.append(f'{script_id}: const VERSION {main_version.group(1)} != metadata {version}')
+    if script_id == 'company-intelligence':
+        match = re.search(r"const\s+APP=\{name:'SakaLuX Company Intelligence',version:'([^']+)'", source)
+        if not match or match.group(1) != version:
+            errors.append(f'{script_id}: APP.version drift')
+    if script_id == 'stock-manager-advisor':
+        match = re.search(r"name:\s*'SakaLuX Stock Manager & Advisor',\s*version:\s*'([^']+)'", source)
+        if not match or match.group(1) != version:
+            errors.append(f'{script_id}: APP.version drift')
+    return errors
+
+
+def validate_hub_fallback(registry):
+    hub = ROOT / 'SakaLuX-Script-Hub.user.js'
+    if not hub.exists():
+        return ['script-hub: userscript missing']
+    text = hub.read_text(encoding='utf-8', errors='replace')
+    start_token = '    const FALLBACK_REGISTRY = '
+    end_token = '\n\n    const FALLBACK_MODULE_DETAILS = '
+    start = text.find(start_token)
+    end = text.find(end_token, start)
+    if start < 0 or end < 0:
+        return ['script-hub: offline fallback registry boundaries missing']
+    try:
+        fallback = json.loads(text[start + len(start_token):end])
+    except json.JSONDecodeError as exc:
+        return [f'script-hub: offline fallback registry is invalid JSON: {exc}']
+    if fallback != {'scripts': registry.get('scripts', []), 'lastVerified': registry.get('lastVerified'), 'repository': registry.get('repository')}:
+        return ['script-hub: offline fallback registry differs from scripts.json']
+    return []
+
+
 def validate_entry(entry, registry_by_id):
     errors = []
     script = ROOT / entry['file']
@@ -47,6 +95,7 @@ def validate_entry(entry, registry_by_id):
     if not license_name: errors.append(f"{entry['id']}: missing @license")
     if not download: errors.append(f"{entry['id']}: missing @downloadURL")
     if not update: errors.append(f"{entry['id']}: missing @updateURL")
+    if version: errors.extend(validate_runtime_versions(source, version, entry['id']))
     try:
         subprocess.run(['node', '--check', str(script)], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     except subprocess.CalledProcessError as exc:
@@ -136,6 +185,7 @@ def main():
     group.add_argument('--all', action='store_true')
     group.add_argument('--id')
     ap.add_argument('--out', default='dist/releases')
+    ap.add_argument('--build', action='store_true', help='Build release packages after a successful validation')
     args = ap.parse_args()
 
     cfg = load_json(CONFIG)
@@ -151,14 +201,25 @@ def main():
 
     errors = []
     for entry in targets: errors.extend(validate_entry(entry, registry_by_id))
+    errors.extend(validate_hub_fallback(load_json(REGISTRY)))
     if errors:
         print('Release preflight FAILED:', file=sys.stderr)
         for err in errors: print(' - ' + err, file=sys.stderr)
         raise SystemExit(1)
 
     print(f'Release preflight passed for {len(targets)} script(s).')
-    if args.id:
-        target, manifest = build_package(targets[0], ROOT / args.out, registry_by_id)
-        print(json.dumps({'package': display_package_path(target), **manifest}, ensure_ascii=False))
+    if args.id or args.build:
+        built = []
+        for entry in targets:
+            target, manifest = build_package(entry, ROOT / args.out, registry_by_id)
+            built.append({'package': display_package_path(target), **manifest})
+        if args.id:
+            print(json.dumps(built[0], ensure_ascii=False))
+        else:
+            out_root = ROOT / args.out
+            out_root.mkdir(parents=True, exist_ok=True)
+            index = {'schema': 'sakalux-release-index-v1', 'generatedAt': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(), 'packages': built}
+            (out_root / 'release-index.json').write_text(json.dumps(index, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+            print(json.dumps({'releaseIndex': display_package_path(out_root / 'release-index.json'), 'packages': len(built)}, ensure_ascii=False))
 
 if __name__ == '__main__': main()

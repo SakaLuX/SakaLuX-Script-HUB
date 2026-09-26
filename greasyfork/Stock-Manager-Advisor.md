@@ -3,13 +3,13 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.15**
+**v0.8.16**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.8.15**
+- Canonical version: **v0.8.16**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -34,12 +34,18 @@
 
 ## Current release note
 
-**v0.8.15 — Embeds Shared Core v1 while preserving standalone installation and operation**
-- Embeds Shared Core v1 while preserving standalone installation and operation.
-- Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.
-- Routes Torn API reads through the shared Request Broker while keeping BUY/SELL transaction POSTs isolated from broker retries.
+**v0.8.16 — Settings Schema v1 and safe automatic migrations**
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ## Release history / Changelog
+
+
+### v0.8.16 — Settings Schema v1 and safe automatic migrations
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ### v0.8.15 — Shared Core v1
 - Centralizes shared infrastructure in the embedded SakaLuX Core.

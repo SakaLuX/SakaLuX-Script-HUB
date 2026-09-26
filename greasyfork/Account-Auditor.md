@@ -3,13 +3,13 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.24**
+**v1.3.25**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.3.24**
+- Canonical version: **v1.3.25**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Account-Auditor.md
@@ -30,10 +30,18 @@
 
 ## Current release note
 
-**v1.3.24 — Release documentation synchronized with the current Account Auditor userscript version**
-- Release documentation synchronized with the current Account Auditor userscript version.
+**v1.3.25 — Settings Schema v1 and safe automatic migrations**
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ## Release history / Changelog
+
+
+### v1.3.25 — Settings Schema v1 and safe automatic migrations
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ### v1.3.24 — Changes Since Last Audit
 - Adds a compact local baseline/fingerprint for the previous successful audit.

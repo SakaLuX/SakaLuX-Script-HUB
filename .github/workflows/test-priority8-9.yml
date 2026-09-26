@@ -39,11 +39,12 @@ jobs:
       - name: Build Account Auditor release candidate package
         if: steps.preflight.outcome == 'success'
         run: |
+          version="$(sed -n 's#^// @version[[:space:]]*##p' SakaLuX-Account-Auditor.user.js | head -1)"
           python3 tools/release_preflight.py --id account-auditor --out "$RUNNER_TEMP/releases"
-          test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/SHA256SUMS"
-          test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/RELEASE_INFO.md"
-          test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/release-manifest.json"
-          (cd "$RUNNER_TEMP/releases/account-auditor-v1.3.24" && sha256sum -c SHA256SUMS)
+          test -f "$RUNNER_TEMP/releases/account-auditor-v${version}/SHA256SUMS"
+          test -f "$RUNNER_TEMP/releases/account-auditor-v${version}/RELEASE_INFO.md"
+          test -f "$RUNNER_TEMP/releases/account-auditor-v${version}/release-manifest.json"
+          (cd "$RUNNER_TEMP/releases/account-auditor-v${version}" && sha256sum -c SHA256SUMS)
       - name: Run current repository validator
         if: steps.preflight.outcome == 'success'
         run: python3 .github/scripts/validate_repository.py

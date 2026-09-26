@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.21**
+**v1.2.22**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.2.21**
+- Canonical version: **v1.2.22**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,10 +24,18 @@
 
 ## Current release note
 
-**v1.2.21 — Release documentation synchronized with the current Chat Intelligence userscript version**
-- Release documentation synchronized with the current Chat Intelligence userscript version.
+**v1.2.22 — Settings Schema v1 and safe automatic migrations**
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ## Release history / Changelog
+
+
+### v1.2.22 — Settings Schema v1 and safe automatic migrations
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ### v1.2.21 — Shared Core v1
 - Centralizes shared infrastructure in the embedded SakaLuX Core.

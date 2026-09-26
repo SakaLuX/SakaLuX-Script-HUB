@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.44**
+**v5.3.45**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v5.3.44**
+- Canonical version: **v5.3.45**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -26,12 +26,18 @@
 
 ## Current release note
 
-**v5.3.44 — Embeds Shared Core v1 while preserving standalone installation and operation**
-- Embeds Shared Core v1 while preserving standalone installation and operation.
-- Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.
-- Includes the shared API Request Broker foundation for controlled future API migration.
+**v5.3.45 — Settings Schema v1 and safe automatic migrations**
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ## Release history / Changelog
+
+
+### v5.3.45 — Settings Schema v1 and safe automatic migrations
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ### v5.3.44 — Shared Core v1
 - Centralizes shared infrastructure in the embedded SakaLuX Core.

@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.52**
+**v1.3.53**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.3.52**
+- Canonical version: **v1.3.53**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -29,12 +29,18 @@
 
 ## Current release note
 
-**v1.3.52 — Embeds Shared Core v1 while preserving standalone installation and operation**
-- Embeds Shared Core v1 while preserving standalone installation and operation.
-- Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.
-- Includes the shared API Request Broker foundation for controlled future API migration.
+**v1.3.53 — Settings Schema v1 and safe automatic migrations**
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ## Release history / Changelog
+
+
+### v1.3.53 — Settings Schema v1 and safe automatic migrations
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ### v1.3.52 — Shared Core v1
 - Centralizes shared infrastructure in the embedded SakaLuX Core.

@@ -25,7 +25,14 @@ jobs:
       - name: Check workflows, userscripts and registry
         run: python3 .github/scripts/validate_repository.py
       - name: Verify strict release preflight
-        run: python3 tools/release_preflight.py --all
+        run: |
+          python3 tools/release_preflight.py --all --build --out "$RUNNER_TEMP/releases"
+          find "$RUNNER_TEMP/releases" -name SHA256SUMS -print0 | while IFS= read -r -d '' sums; do
+            (cd "$(dirname "$sums")" && sha256sum -c SHA256SUMS)
+          done
+          test -f "$RUNNER_TEMP/releases/release-index.json"
+      - name: Verify versioned settings schemas and recovery
+        run: node tests/shared-core-settings-schema-regression.cjs
       - name: Verify Account Auditor changes since last audit
         run: |
           node --check SakaLuX-Account-Auditor.user.js

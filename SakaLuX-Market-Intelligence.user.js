@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.53
+// @version      1.17.54
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -27,8 +27,29 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.0.0-test.4';
+  const CORE_VERSION = '1.1.0';
   const NS = 'SakaLuXCore';
+
+  const SETTINGS_CATALOG = Object.freeze([
+    { match: /Account Auditor/i, id: 'account-auditor', version: 1, keys: ['SakaLuX_AUDITOR_SETTINGS_V3'] },
+    { match: /Bazaar Smart Pricer/i, id: 'bazaar-smart-pricer', version: 1, keys: ['SakaLuX_BAZAAR_SMART_PRICER_SETTINGS'] },
+    { match: /Bazaar Thanker/i, id: 'bazaar', version: 1, keys: ['sakalux_bazaar_thanker_v5'] },
+    { match: /Chat Intelligence/i, id: 'chat-intelligence', version: 1, keys: ['SLX_CHAT_CFG4'] },
+    { match: /Company Intelligence/i, id: 'company-intelligence', version: 1, keys: ['sak_ci:mode', 'sak_ci:tab', 'sak_ci:compact', 'sak_ci:enabled'] },
+    { match: /Elimination Assistant/i, id: 'elimination-assistant', version: 1, keys: ['slx_elim_ui_v1'] },
+    { match: /Enhancer Guard/i, id: 'enhancer', version: 1, keys: ['SakaLuX_EG_FAVORITES'] },
+    { match: /Market Intelligence/i, id: 'market-intelligence', version: 1, keys: ['SakaLuX_MI_SETTINGS_V2'] },
+    { match: /Mission Rewards/i, id: 'mission-rewards', version: 1, keys: ['SakaLuX_MR_SETTINGS_V1'] },
+    { match: /Script Hub/i, id: 'script-hub', version: 1, keys: ['SakaLuX_HUB_SETTINGS_V16'] },
+    { match: /Stock Manager/i, id: 'stock-manager-advisor', version: 1, keys: ['SLX_STOCK_PRESETS', 'SLX_STOCK_BENEFIT_VALUES'] },
+    { match: /SakaLuX Suite/i, id: 'suite', version: 1, keys: ['sakalux_master_suite_settings_v1'] }
+  ]);
+
+  function currentScriptSettingsDefinition() {
+    let name = '';
+    try { name = String(g.GM_info?.script?.name || ''); } catch {}
+    return SETTINGS_CATALOG.find(entry => entry.match.test(name)) || null;
+  }
 
   function currentTransportEnvironment() {
     let gm = null;
@@ -42,6 +63,7 @@
 
   if (g[NS]?.version === CORE_VERSION) {
     g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
+    g[NS].settings?.autoGuardCurrentScript?.();
     if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
     return;
   }
@@ -117,6 +139,127 @@
       } catch { return false; }
     }
   };
+
+  const settings = (() => {
+    const statuses = new Map();
+    const prefix = 'SakaLuX_SettingsSchema::';
+    const backupPrefix = 'SakaLuX_SettingsBackup::';
+
+    function normalizeDefinition(definition = {}) {
+      const id = String(definition.id || '').trim();
+      const version = Math.max(1, Math.floor(Number(definition.version) || 1));
+      const keys = [...new Set((definition.keys || []).map(String).filter(Boolean))];
+      if (!id) throw new Error('Settings schema id is required');
+      if (!keys.length) throw new Error(`Settings schema ${id} has no storage keys`);
+      return { ...definition, id, version, keys };
+    }
+
+    function readJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw == null ? fallback : JSON.parse(raw);
+      } catch { return fallback; }
+    }
+
+    function writeJson(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+      catch { return false; }
+    }
+
+    function snapshot(keys) {
+      const values = {};
+      for (const key of keys) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw != null) values[key] = raw;
+        } catch {}
+      }
+      return values;
+    }
+
+    function validateAndRecover(def, backup) {
+      const recovered = [];
+      const reset = [];
+      const valid = [];
+      for (const key of def.keys) {
+        let raw = null;
+        try { raw = localStorage.getItem(key); } catch {}
+        if (raw == null) continue;
+        try { JSON.parse(raw); valid.push(key); continue; } catch {}
+        const previous = backup?.values?.[key];
+        if (typeof previous === 'string') {
+          try { JSON.parse(previous); localStorage.setItem(key, previous); recovered.push(key); continue; } catch {}
+        }
+        try { localStorage.removeItem(key); } catch {}
+        reset.push(key);
+      }
+      return { recovered, reset, valid };
+    }
+
+    function register(definition = {}) {
+      const def = normalizeDefinition(definition);
+      const metaKey = prefix + def.id;
+      const backupKey = backupPrefix + def.id;
+      const previousMeta = readJson(metaKey, {}) || {};
+      const previousVersion = Math.max(0, Math.floor(Number(previousMeta.version) || 0));
+      const existingBackup = readJson(backupKey, null);
+      const before = snapshot(def.keys);
+      if (Object.keys(before).length) writeJson(backupKey, { version: previousVersion, at: Date.now(), values: before });
+      const recovery = validateAndRecover(def, existingBackup);
+      let migrated = false;
+      let fallback = recovery.reset.length > 0;
+      let error = '';
+
+      if (previousVersion < def.version) {
+        try {
+          for (let target = previousVersion + 1; target <= def.version; target++) {
+            const migrate = def.migrations?.[target];
+            if (typeof migrate !== 'function') continue;
+            for (const key of def.keys) {
+              let raw = null;
+              try { raw = localStorage.getItem(key); } catch {}
+              if (raw == null) continue;
+              const current = JSON.parse(raw);
+              const next = migrate(current, { id: def.id, key, from: target - 1, to: target });
+              if (next !== undefined) localStorage.setItem(key, JSON.stringify(next));
+            }
+          }
+          migrated = previousVersion > 0 || Object.keys(before).length > 0;
+        } catch (err) {
+          error = String(err?.message || err);
+          fallback = true;
+          for (const key of def.keys) {
+            const raw = before[key];
+            try { if (raw == null) localStorage.removeItem(key); else localStorage.setItem(key, raw); } catch {}
+          }
+        }
+      }
+
+      const nextMeta = {
+        schema: 'sakalux-settings-schema-v1', id: def.id, version: error ? previousVersion : Math.max(previousVersion, def.version),
+        updatedAt: Date.now(), migrated, fallback, recovered: recovery.recovered, reset: recovery.reset,
+        error: error || null
+      };
+      writeJson(metaKey, nextMeta);
+      statuses.set(def.id, Object.freeze({ ...nextMeta }));
+      return statuses.get(def.id);
+    }
+
+    function status(id) { return statuses.get(String(id)) || readJson(prefix + String(id), null); }
+    function diagnostics() { return Object.freeze(Object.fromEntries([...statuses.entries()])); }
+    function autoGuardCurrentScript() {
+      const def = currentScriptSettingsDefinition();
+      if (!def) return null;
+      try { return register(def); }
+      catch (err) {
+        const failed = Object.freeze({ schema: 'sakalux-settings-schema-v1', id: def.id, version: 0, fallback: true, error: String(err?.message || err) });
+        statuses.set(def.id, failed);
+        return failed;
+      }
+    }
+
+    return Object.freeze({ register, status, diagnostics, autoGuardCurrentScript, catalog: SETTINGS_CATALOG });
+  })();
 
   const router = {
     key(loc = g.location) {
@@ -476,10 +619,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     error(...args) { console.error('[SakaLuX]', ...args); }
   };
 
-  const core = Object.freeze({ version: CORE_VERSION, perf, hub, storage, router, dock, api, ui, logger });
+  const core = Object.freeze({ version: CORE_VERSION, perf, hub, storage, settings, router, dock, api, ui, logger });
 
   g[NS] = core;
   g.SakaLuXPerf = perf;
+  settings.autoGuardCurrentScript();
   routeKey = router.key();
   ui.ensureSharedSkin();
 })();
@@ -488,7 +632,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.53';
+  let v = '1.17.54';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -790,7 +934,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.52" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.54" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -853,7 +997,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 (function () {
     'use strict';
-    const VERSION = '1.17.53';
+    const VERSION = '1.17.54';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';

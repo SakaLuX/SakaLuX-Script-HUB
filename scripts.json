@@ -34,18 +34,18 @@
         }
       ],
       "release": {
-        "version": "1.3.52",
+        "version": "1.3.53",
         "date": "2026-09-26",
         "notes": [
-          "Embeds Shared Core v1 while preserving standalone installation and operation.",
-          "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-          "Includes the shared API Request Broker foundation for controlled future API migration."
+          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.52",
-      "detailsRevision": 5,
+      "version": "1.3.53",
+      "detailsRevision": 6,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -86,18 +86,18 @@
         }
       ],
       "release": {
-        "version": "5.3.44",
+        "version": "5.3.45",
         "date": "2026-09-26",
         "notes": [
-          "Embeds Shared Core v1 while preserving standalone installation and operation.",
-          "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-          "Includes the shared API Request Broker foundation for controlled future API migration."
+          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.44",
-      "detailsRevision": 3,
+      "version": "5.3.45",
+      "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -139,15 +139,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 26,
-      "version": "1.1.12",
+      "detailsRevision": 27,
+      "version": "1.1.13",
       "release": {
-        "version": "1.1.12",
+        "version": "1.1.13",
         "date": "2026-09-26",
         "notes": [
-          "Adds a global persistent power bridge so Hub ON/OFF works from every Torn page.",
-          "Synchronizes Hub power state with Pricer storage.",
-          "Keeps pricing runtime page-scoped while power control remains global."
+          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -194,18 +194,18 @@
         }
       ],
       "release": {
-        "version": "1.0.46",
+        "version": "1.0.47",
         "date": "2026-09-26",
         "notes": [
-          "Embeds Shared Core v1 while preserving standalone installation and operation.",
-          "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-          "Includes the shared API Request Broker foundation for controlled future API migration."
+          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.46",
-      "detailsRevision": 3,
+      "version": "1.0.47",
+      "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -260,18 +260,18 @@
         }
       ],
       "release": {
-        "version": "1.17.53",
+        "version": "1.17.54",
         "date": "2026-09-26",
         "notes": [
-          "Adds a persistent MI INFO ON/OFF button to landed foreign markets so per-item Market Intelligence rows can be hidden without disabling the rest of Market Intelligence.",
-          "Fixes foreign-market stock parsing so stock is read from Torn's Stock column/cell instead of numbers embedded in item names such as Type 98 Anti-Tank.",
-          "Synchronizes Market Intelligence runtime/version surfaces and fixes Script Hub runtime version display to match its v1.9.88 metadata."
+          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.53",
-      "detailsRevision": 12,
+      "version": "1.17.54",
+      "detailsRevision": 13,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -348,18 +348,18 @@
         }
       ],
       "release": {
-        "version": "1.3.47",
+        "version": "1.3.48",
         "date": "2026-09-26",
         "notes": [
-          "Embeds Shared Core v1 while preserving standalone installation and operation.",
-          "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-          "Includes the shared API Request Broker foundation for controlled future API migration."
+          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.47",
-      "detailsRevision": 4,
+      "version": "1.3.48",
+      "detailsRevision": 5,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -399,18 +399,18 @@
         }
       ],
       "release": {
-        "version": "1.8.41",
+        "version": "1.8.42",
         "date": "2026-09-26",
         "notes": [
-          "Embeds Shared Core v1 while preserving standalone installation and operation.",
-          "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-          "Includes the shared API Request Broker foundation for controlled future API migration."
+          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.41",
-      "detailsRevision": 3,
+      "version": "1.8.42",
+      "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -456,18 +456,18 @@
         }
       ],
       "release": {
-        "version": "0.8.15",
+        "version": "0.8.16",
         "date": "2026-09-26",
         "notes": [
-          "Embeds Shared Core v1 while preserving standalone installation and operation.",
-          "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-          "Routes Torn API reads through the shared Request Broker while keeping BUY/SELL transaction POSTs isolated from broker retries."
+          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.15",
-      "detailsRevision": 7,
+      "version": "0.8.16",
+      "detailsRevision": 8,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
@@ -475,6 +475,6 @@
       "license": "All Rights Reserved"
     }
   ],
-  "lastVerified": "2026-09-20",
+  "lastVerified": "2026-09-26",
   "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
 }

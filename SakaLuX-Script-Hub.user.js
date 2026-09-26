@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.88
+// @version      1.9.89
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -26,8 +26,29 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.0.0-test.4';
+  const CORE_VERSION = '1.1.0';
   const NS = 'SakaLuXCore';
+
+  const SETTINGS_CATALOG = Object.freeze([
+    { match: /Account Auditor/i, id: 'account-auditor', version: 1, keys: ['SakaLuX_AUDITOR_SETTINGS_V3'] },
+    { match: /Bazaar Smart Pricer/i, id: 'bazaar-smart-pricer', version: 1, keys: ['SakaLuX_BAZAAR_SMART_PRICER_SETTINGS'] },
+    { match: /Bazaar Thanker/i, id: 'bazaar', version: 1, keys: ['sakalux_bazaar_thanker_v5'] },
+    { match: /Chat Intelligence/i, id: 'chat-intelligence', version: 1, keys: ['SLX_CHAT_CFG4'] },
+    { match: /Company Intelligence/i, id: 'company-intelligence', version: 1, keys: ['sak_ci:mode', 'sak_ci:tab', 'sak_ci:compact', 'sak_ci:enabled'] },
+    { match: /Elimination Assistant/i, id: 'elimination-assistant', version: 1, keys: ['slx_elim_ui_v1'] },
+    { match: /Enhancer Guard/i, id: 'enhancer', version: 1, keys: ['SakaLuX_EG_FAVORITES'] },
+    { match: /Market Intelligence/i, id: 'market-intelligence', version: 1, keys: ['SakaLuX_MI_SETTINGS_V2'] },
+    { match: /Mission Rewards/i, id: 'mission-rewards', version: 1, keys: ['SakaLuX_MR_SETTINGS_V1'] },
+    { match: /Script Hub/i, id: 'script-hub', version: 1, keys: ['SakaLuX_HUB_SETTINGS_V16'] },
+    { match: /Stock Manager/i, id: 'stock-manager-advisor', version: 1, keys: ['SLX_STOCK_PRESETS', 'SLX_STOCK_BENEFIT_VALUES'] },
+    { match: /SakaLuX Suite/i, id: 'suite', version: 1, keys: ['sakalux_master_suite_settings_v1'] }
+  ]);
+
+  function currentScriptSettingsDefinition() {
+    let name = '';
+    try { name = String(g.GM_info?.script?.name || ''); } catch {}
+    return SETTINGS_CATALOG.find(entry => entry.match.test(name)) || null;
+  }
 
   function currentTransportEnvironment() {
     let gm = null;
@@ -41,6 +62,7 @@
 
   if (g[NS]?.version === CORE_VERSION) {
     g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
+    g[NS].settings?.autoGuardCurrentScript?.();
     if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
     return;
   }
@@ -116,6 +138,127 @@
       } catch { return false; }
     }
   };
+
+  const settings = (() => {
+    const statuses = new Map();
+    const prefix = 'SakaLuX_SettingsSchema::';
+    const backupPrefix = 'SakaLuX_SettingsBackup::';
+
+    function normalizeDefinition(definition = {}) {
+      const id = String(definition.id || '').trim();
+      const version = Math.max(1, Math.floor(Number(definition.version) || 1));
+      const keys = [...new Set((definition.keys || []).map(String).filter(Boolean))];
+      if (!id) throw new Error('Settings schema id is required');
+      if (!keys.length) throw new Error(`Settings schema ${id} has no storage keys`);
+      return { ...definition, id, version, keys };
+    }
+
+    function readJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw == null ? fallback : JSON.parse(raw);
+      } catch { return fallback; }
+    }
+
+    function writeJson(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+      catch { return false; }
+    }
+
+    function snapshot(keys) {
+      const values = {};
+      for (const key of keys) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw != null) values[key] = raw;
+        } catch {}
+      }
+      return values;
+    }
+
+    function validateAndRecover(def, backup) {
+      const recovered = [];
+      const reset = [];
+      const valid = [];
+      for (const key of def.keys) {
+        let raw = null;
+        try { raw = localStorage.getItem(key); } catch {}
+        if (raw == null) continue;
+        try { JSON.parse(raw); valid.push(key); continue; } catch {}
+        const previous = backup?.values?.[key];
+        if (typeof previous === 'string') {
+          try { JSON.parse(previous); localStorage.setItem(key, previous); recovered.push(key); continue; } catch {}
+        }
+        try { localStorage.removeItem(key); } catch {}
+        reset.push(key);
+      }
+      return { recovered, reset, valid };
+    }
+
+    function register(definition = {}) {
+      const def = normalizeDefinition(definition);
+      const metaKey = prefix + def.id;
+      const backupKey = backupPrefix + def.id;
+      const previousMeta = readJson(metaKey, {}) || {};
+      const previousVersion = Math.max(0, Math.floor(Number(previousMeta.version) || 0));
+      const existingBackup = readJson(backupKey, null);
+      const before = snapshot(def.keys);
+      if (Object.keys(before).length) writeJson(backupKey, { version: previousVersion, at: Date.now(), values: before });
+      const recovery = validateAndRecover(def, existingBackup);
+      let migrated = false;
+      let fallback = recovery.reset.length > 0;
+      let error = '';
+
+      if (previousVersion < def.version) {
+        try {
+          for (let target = previousVersion + 1; target <= def.version; target++) {
+            const migrate = def.migrations?.[target];
+            if (typeof migrate !== 'function') continue;
+            for (const key of def.keys) {
+              let raw = null;
+              try { raw = localStorage.getItem(key); } catch {}
+              if (raw == null) continue;
+              const current = JSON.parse(raw);
+              const next = migrate(current, { id: def.id, key, from: target - 1, to: target });
+              if (next !== undefined) localStorage.setItem(key, JSON.stringify(next));
+            }
+          }
+          migrated = previousVersion > 0 || Object.keys(before).length > 0;
+        } catch (err) {
+          error = String(err?.message || err);
+          fallback = true;
+          for (const key of def.keys) {
+            const raw = before[key];
+            try { if (raw == null) localStorage.removeItem(key); else localStorage.setItem(key, raw); } catch {}
+          }
+        }
+      }
+
+      const nextMeta = {
+        schema: 'sakalux-settings-schema-v1', id: def.id, version: error ? previousVersion : Math.max(previousVersion, def.version),
+        updatedAt: Date.now(), migrated, fallback, recovered: recovery.recovered, reset: recovery.reset,
+        error: error || null
+      };
+      writeJson(metaKey, nextMeta);
+      statuses.set(def.id, Object.freeze({ ...nextMeta }));
+      return statuses.get(def.id);
+    }
+
+    function status(id) { return statuses.get(String(id)) || readJson(prefix + String(id), null); }
+    function diagnostics() { return Object.freeze(Object.fromEntries([...statuses.entries()])); }
+    function autoGuardCurrentScript() {
+      const def = currentScriptSettingsDefinition();
+      if (!def) return null;
+      try { return register(def); }
+      catch (err) {
+        const failed = Object.freeze({ schema: 'sakalux-settings-schema-v1', id: def.id, version: 0, fallback: true, error: String(err?.message || err) });
+        statuses.set(def.id, failed);
+        return failed;
+      }
+    }
+
+    return Object.freeze({ register, status, diagnostics, autoGuardCurrentScript, catalog: SETTINGS_CATALOG });
+  })();
 
   const router = {
     key(loc = g.location) {
@@ -475,10 +618,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     error(...args) { console.error('[SakaLuX]', ...args); }
   };
 
-  const core = Object.freeze({ version: CORE_VERSION, perf, hub, storage, router, dock, api, ui, logger });
+  const core = Object.freeze({ version: CORE_VERSION, perf, hub, storage, settings, router, dock, api, ui, logger });
 
   g[NS] = core;
   g.SakaLuXPerf = perf;
+  settings.autoGuardCurrentScript();
   routeKey = router.key();
   ui.ensureSharedSkin();
 })();
@@ -506,7 +650,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.88';
+    const VERSION = '1.9.89';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -526,6 +670,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.89", "date": "2026-09-26", "changes": ["Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.", "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.", "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."]},
         {"version": "1.9.88", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.87", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.85", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
@@ -1020,18 +1165,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.52",
+                    "version": "1.3.53",
                     "date": "2026-09-26",
                     "notes": [
-                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
-                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-                        "Includes the shared API Request Broker foundation for controlled future API migration."
+                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.52",
-                "detailsRevision": 5,
+                "version": "1.3.53",
+                "detailsRevision": 6,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -1072,18 +1217,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.44",
+                    "version": "5.3.45",
                     "date": "2026-09-26",
                     "notes": [
-                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
-                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-                        "Includes the shared API Request Broker foundation for controlled future API migration."
+                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.44",
-                "detailsRevision": 3,
+                "version": "5.3.45",
+                "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -1125,15 +1270,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 26,
-                "version": "1.1.12",
+                "detailsRevision": 27,
+                "version": "1.1.13",
                 "release": {
-                    "version": "1.1.12",
+                    "version": "1.1.13",
                     "date": "2026-09-26",
                     "notes": [
-                        "Adds a global persistent power bridge so Hub ON/OFF works from every Torn page.",
-                        "Synchronizes Hub power state with Pricer storage.",
-                        "Keeps pricing runtime page-scoped while power control remains global."
+                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1180,18 +1325,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.46",
+                    "version": "1.0.47",
                     "date": "2026-09-26",
                     "notes": [
-                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
-                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-                        "Includes the shared API Request Broker foundation for controlled future API migration."
+                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.46",
-                "detailsRevision": 3,
+                "version": "1.0.47",
+                "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -1246,18 +1391,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.53",
+                    "version": "1.17.54",
                     "date": "2026-09-26",
                     "notes": [
-                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
-                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-                        "Routes Market API reads through the shared Request Broker with dedupe, bounded concurrency, retry/backoff and diagnostics."
+                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.53",
-                "detailsRevision": 11,
+                "version": "1.17.54",
+                "detailsRevision": 13,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -1334,18 +1479,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.47",
+                    "version": "1.3.48",
                     "date": "2026-09-26",
                     "notes": [
-                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
-                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-                        "Includes the shared API Request Broker foundation for controlled future API migration."
+                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.47",
-                "detailsRevision": 4,
+                "version": "1.3.48",
+                "detailsRevision": 5,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -1385,18 +1530,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.41",
+                    "version": "1.8.42",
                     "date": "2026-09-26",
                     "notes": [
-                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
-                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-                        "Includes the shared API Request Broker foundation for controlled future API migration."
+                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.41",
-                "detailsRevision": 3,
+                "version": "1.8.42",
+                "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -1442,18 +1587,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.15",
+                    "version": "0.8.16",
                     "date": "2026-09-26",
                     "notes": [
-                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
-                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-                        "Routes Torn API reads through the shared Request Broker while keeping BUY/SELL transaction POSTs isolated from broker retries."
+                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
+                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
+                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.15",
-                "detailsRevision": 7,
+                "version": "0.8.16",
+                "detailsRevision": 8,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",
@@ -1461,7 +1606,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "license": "All Rights Reserved"
             }
         ],
-        "lastVerified": "2026-09-20",
+        "lastVerified": "2026-09-26",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 

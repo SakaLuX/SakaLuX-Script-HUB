@@ -4,8 +4,9 @@ const fs=require('node:fs');
 const {JSDOM}=require('jsdom');
 
 const source=fs.readFileSync('SakaLuX-Suite.user.js','utf8');
-assert.match(source,/\/\/\s*@version\s+0\.9\.939\b/,'Suite metadata version');
-assert.match(source,/const VERSION = '0\.9\.939';\s*\n\s*const SUITE = Object\.freeze/,'Suite runtime version synchronized');
+assert.match(source,/^\/\/\s*@version\s+\S+$/m,'Suite metadata version');
+const suiteVersion=source.match(/^\/\/\s*@version\s+(\S+)$/m)?.[1];
+assert.ok(source.includes(`const VERSION = '${suiteVersion}';\n  const SUITE = Object.freeze`),'Suite runtime version synchronized');
 assert.ok(source.includes('data-action="daily-progress"'),'Daily Progress is exposed in Master Control toolbar');
 const begin='/* SakaLuX Suite Daily Progress — BEGIN */';
 const end='/* SakaLuX Suite Daily Progress — END */';
