@@ -1,0 +1,10 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const hub=fs.readFileSync('SakaLuX-Script-Hub.user.js','utf8');
+assert(hub.includes('async function openSystemCheck()'));
+assert(hub.includes('SakaLuXCore?.api?.diagnostics'));
+assert(hub.includes('API Broker'));
+assert(hub.includes('Disabled modules'));
+assert(hub.includes('Runtime errors'));
+assert(!/api.?key/i.test((hub.match(/function collectHubDiagnostics\([\s\S]*?\n    }/i)||[''])[0]||''),'diagnostics must not expose API keys');
+console.log('Hub health diagnostics regression passed.');
