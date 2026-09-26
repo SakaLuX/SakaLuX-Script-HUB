@@ -1,6 +1,7 @@
 'use strict';
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
+const {embedSharedDockRuntime,BEGIN,END}=require('../tools/embed-shared-dock-runtime.cjs');
 
 const targets=[
   'SakaLuX-Enhancer-Guard.user.js',
@@ -13,6 +14,7 @@ const targets=[
   'SakaLuX-Stock-Manager-Advisor.user.js',
   'SakaLuX-Account-Auditor.user.js',
 ];
+const runtime=fs.readFileSync('src/core/sakalux-dock-runtime.js','utf8').trim();
 for(const file of targets){
   const src=fs.readFileSync(file,'utf8');
   assert.equal((src.match(/SakaLuX Shared Dock Runtime — BEGIN/g)||[]).length,1,`${file}: runtime once`);
@@ -23,5 +25,10 @@ for(const file of targets){
   assert.ok(src.includes('globalThis.SakaLuXDockRuntime'),`${file}: shared runtime registration present`);
   assert.ok(src.includes("bridge.dataset.action = 'open'"),`${file}: bridge open fallback preserved`);
   assert.match(src,/\/\/\s*@version\s+\S+/,`${file}: metadata version preserved`);
+  const b=src.indexOf(BEGIN),e=src.indexOf(END,b);
+  assert.ok(b>=0&&e>b,`${file}: runtime markers valid`);
+  const embedded=src.slice(b+BEGIN.length,e).trim();
+  assert.equal(embedded,runtime,`${file}: embedded runtime matches canonical source exactly`);
+  assert.equal(embedSharedDockRuntime(src,runtime),src,`${file}: runtime embedding is idempotent`);
 }
-console.log(`Priority 6 migration regression passed for ${targets.length} userscripts.`);
+console.log(`Priority 6 migration/source-parity regression passed for ${targets.length} userscripts.`);
