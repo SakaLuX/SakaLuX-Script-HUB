@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.86**
+**v1.9.87**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.9.86**
+- Canonical version: **v1.9.87**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -34,12 +34,18 @@
 
 ## Current release note
 
-**v1.9.86 — Hub Health / Diagnostics**
-- Adds consolidated module health, disabled-module and runtime-error diagnostics.
-- Adds Shared Core API Broker counters and transport status without exposing API keys.
-- Exposes `SakaLuXScriptHub.diagnostics()` for safe local diagnostics.
+**v1.9.87 — Per-module Health Status**
+- Adds explicit per-module states: OK, UPDATE AVAILABLE, DISABLED, WRONG PAGE, API ERROR, CHECK ERROR and NOT INSTALLED.
+- Adds a compact health summary directly under the main Hub counters.
+- System Check now reports the exact local status reason for each managed module.
+- Exposes per-module status rows and status counts through SakaLuXScriptHub.diagnostics().
 
 ## Release history / Changelog
+
+### v1.9.87 — Per-module Health Status
+- Adds explicit per-module states: OK, UPDATE AVAILABLE, DISABLED, WRONG PAGE, API ERROR, CHECK ERROR and NOT INSTALLED.
+- Adds a compact main-screen summary and exact local status reasons in System Check.
+- Exposes moduleStatuses and statusCounts from SakaLuXScriptHub.diagnostics().
 
 ### v1.9.86 — Hub Health / Diagnostics
 - Expands System Check with an overall health snapshot, disabled-module reporting and captured runtime errors.

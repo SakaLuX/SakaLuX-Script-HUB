@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.86
+// @version      1.9.87
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1873,6 +1873,32 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return SCRIPTS.map(script => ({ script, health: getHealth(script) }));
     }
 
+    function getModuleStatus(script) {
+        const health = getHealth(script);
+        const update = getUpdateState(script);
+        const installed = getInstalledVersion(script);
+        const api = script.api();
+        const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
+        const detailError = String(health.data?.error || update.data?.error || '').trim();
+        if (health.state === 'missing') return { code: 'NOT_INSTALLED', label: 'NOT INSTALLED', level: 'warn', detail: 'No installed runtime or saved installed version detected.' };
+        if (health.state === 'error') return { code: 'API_ERROR', label: 'API ERROR', level: 'bad', detail: detailError || 'The module health endpoint reported an error.' };
+        if (update.state === 'available') return { code: 'UPDATE_AVAILABLE', label: 'UPDATE AVAILABLE', level: 'warn', detail: 'Installed v' + (installed || health.version || '?') + ' • latest v' + (update.data?.latest || script.expectedVersion || '?') };
+        if (!isModuleEnabled(script)) return { code: 'DISABLED', label: 'DISABLED', level: 'warn', detail: 'Installed, but the module power state is OFF.' };
+        if (installed && !api && !bridge) return { code: 'WRONG_PAGE', label: 'WRONG PAGE', level: 'warn', detail: 'Installed, but its runtime controls are not active on this Torn page.' };
+        if (update.state === 'failed') return { code: 'CHECK_ERROR', label: 'CHECK ERROR', level: 'warn', detail: detailError || 'The latest-version check failed.' };
+        return { code: 'OK', label: 'OK', level: 'ok', detail: 'Installed and available on the current page.' };
+    }
+
+    function getAllModuleStatus() {
+        return SCRIPTS.map(script => ({ script, status: getModuleStatus(script) }));
+    }
+
+    function getHealthSummary() {
+        const counts = { OK:0, UPDATE_AVAILABLE:0, DISABLED:0, WRONG_PAGE:0, API_ERROR:0, CHECK_ERROR:0, NOT_INSTALLED:0 };
+        for (const row of getAllModuleStatus()) counts[row.status.code] = (counts[row.status.code] || 0) + 1;
+        return Object.freeze(counts);
+    }
+
     function getPrimaryAction(script) {
         const actions = Array.isArray(script.quickActions) ? script.quickActions : [];
         return actions.find(action => action.id === 'open')
@@ -2806,6 +2832,20 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             <div class="slh-stat good"><strong>${healthy}</strong><span>HEALTHY</span><small>reporting OK</small></div>
             <div class="slh-stat ${updates ? 'warn' : 'good'}"><strong>${updates}</strong><span>UPDATES</span><small>${updates ? 'action available' : 'all current'}</small></div>
             <div class="slh-stat ${issues ? 'bad' : 'good'}"><strong>${issues}</strong><span>ISSUES</span><small>${issues ? 'needs attention' : 'system clear'}</small></div>`;
+        const healthSummary = getHealthSummary();
+        let healthSummaryBox = document.getElementById('slh-health-summary');
+        if (!healthSummaryBox) {
+            healthSummaryBox = document.createElement('div');
+            healthSummaryBox.id = 'slh-health-summary';
+            healthSummaryBox.style.cssText = 'display:flex;gap:5px;flex-wrap:wrap;margin:7px 0 0;padding:0 1px';
+            box.insertAdjacentElement('afterend', healthSummaryBox);
+        }
+        const healthItems = [
+            ['OK', healthSummary.OK, 'good'], ['UPDATE', healthSummary.UPDATE_AVAILABLE, 'warn'], ['OFF', healthSummary.DISABLED, 'warn'],
+            ['PAGE', healthSummary.WRONG_PAGE, 'warn'], ['API ERR', healthSummary.API_ERROR, 'bad'], ['CHECK', healthSummary.CHECK_ERROR, 'warn'], ['MISSING', healthSummary.NOT_INSTALLED, 'bad']
+        ];
+        healthSummaryBox.innerHTML = healthItems.map(([label,count,tone]) => '<span class="slh-chip ' + tone + '" style="font-size:7px">' + label + ' ' + count + '</span>').join('');
+
     }
 
     function updateCheckButtonState(loading) {
@@ -2855,7 +2895,9 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const primary = getPrimaryAction(script);
         const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
         const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'pending' ? 'info' : update.state === 'failed' ? 'bad' : 'muted';
+        const moduleStatus = getModuleStatus(script);
         const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';
+        const statusChipClass = moduleStatus.level === 'ok' ? 'good' : moduleStatus.level === 'bad' ? 'bad' : 'warn';
         const controls = missing
             ? `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
             : `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
@@ -2865,6 +2907,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
                 <div class="slh-chips">
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
+                    <span class="slh-chip ${statusChipClass}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(moduleStatus.label)}</span>
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
                     ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
@@ -3001,6 +3044,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     }
     function collectHubDiagnostics() {
         const rows = getAllHealth();
+        const statuses = getAllModuleStatus();
         const installedRows = rows.filter(row => row.health.state !== 'missing');
         const disabled = installedRows.filter(row => !isModuleEnabled(row.script)).map(row => row.script.name);
         const errored = rows.filter(row => row.health.state === 'error').map(row => row.script.name);
@@ -3011,6 +3055,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const level = errored.length || HUB_RUNTIME_ERRORS.length ? 'bad' : (missing.length || disabled.length || updateErrors || brokerIssues ? 'warn' : 'ok');
         return Object.freeze({ level, hubVersion: VERSION, coreVersion: window.SakaLuXCore?.version || null, route: location.pathname + location.search + location.hash,
             modules: Object.freeze({ total: SCRIPTS.length, installed: installedRows.length, healthy: rows.filter(row => row.health.state === 'ok').length, disabled: Object.freeze([...disabled]), errored: Object.freeze([...errored]), missing: Object.freeze([...missing]) }),
+            moduleStatuses: Object.freeze(statuses.map(row => Object.freeze({ id: row.script.id, name: row.script.name, code: row.status.code, label: row.status.label, level: row.status.level, detail: row.status.detail }))),
+            statusCounts: getHealthSummary(),
             updates: Object.freeze({ available: getUpdateCount(), errors: updateErrors }), broker,
             runtimeErrors: Object.freeze(HUB_RUNTIME_ERRORS.map(item => Object.freeze({ ...item }))) });
     }
@@ -3030,8 +3076,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 const behind = Boolean(published && compareVersions(published, script.expectedVersion) < 0);
                 results.push({ level: behind || !published ? 'warn' : 'ok', label: script.name + ' update source', detail: 'Canonical v' + canonical + (published ? ' • ' + (script.greasyForkId ? 'Greasy Fork' : 'Distribution') + ' v' + published + (behind ? ' (publish pending)' : '') : ' • ' + (script.greasyForkId ? 'Greasy Fork' : 'Distribution') + ' unavailable') });
             } catch (error) { results.push({ level: 'warn', label: script.name + ' update source', detail: 'Canonical Registry v' + script.expectedVersion + ' • ' + String(error?.message || error) }); }
-            const health = getHealth(script);
-            results.push({ level: health.state === 'ok' ? 'ok' : health.state === 'missing' ? 'warn' : 'bad', label: script.name + ' local status', detail: health.state === 'missing' ? 'Not installed' : health.state === 'ok' ? 'Installed v' + health.version : String(health.data?.error || 'Error') });
+            const moduleStatus = getModuleStatus(script);
+            results.push({ level: moduleStatus.level, label: script.name + ' local status', detail: moduleStatus.label + ' • ' + moduleStatus.detail });
         }
         const diagnostics = collectHubDiagnostics();
         results.unshift({ level: diagnostics.level, label: 'Overall health', detail: diagnostics.modules.healthy + '/' + diagnostics.modules.total + ' healthy • ' + diagnostics.modules.installed + ' installed • route ' + diagnostics.route });
