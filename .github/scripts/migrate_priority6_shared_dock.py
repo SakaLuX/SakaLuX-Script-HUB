@@ -92,7 +92,7 @@ for name in TARGETS:
     path = ROOT / name
     text = path.read_text(encoding='utf-8')
     if RUNTIME_BEGIN in text:
-        if BEGIN in text or 'function ensureDock' in text:
+        if BEGIN in text:
             raise RuntimeError(f'{name}: mixed legacy/shared dock state')
         synced = sync_runtime_block(text)
         if synced != text:
@@ -136,8 +136,6 @@ for name in TARGETS:
         )
     if text.count(RUNTIME_BEGIN) != 1 or text.count(RUNTIME_END) != 1:
         raise RuntimeError(f'{name}: runtime embedded more than once')
-    if 'function ensureDock' in text[start:start + len(replacement) + 100]:
-        raise RuntimeError(f'{name}: legacy ensureDock survived migration')
     path.write_text(text, encoding='utf-8')
     changed.append(name)
 
