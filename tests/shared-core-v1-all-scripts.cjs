@@ -17,6 +17,9 @@ const canonicalOrder = [
 
 const SKIP_DIRS = new Set(['.git', 'node_modules']);
 const LEGACY_FOUNDATION = '// Shared SakaLuX performance + Hub-style UI foundation.';
+const LEGACY_DOCK_DEDUPE = /const\s+regs=\[\.\.\.new\s+Map\(regsRaw\.map\(r=>\[r\.id,r\]\)\)\.values\(\)\];/;
+const LEGACY_DOCK_RANK = /const\s+rank=id=>\{const\s+i=ORDER\.indexOf\(id\);return\s+i<0\?ORDER\.length\+100:i\};/;
+const LEGACY_DOCK_ROUTE_PAIR = /addEventListener\('hashchange',\(\)=>queue\(350\),\{passive:true\}\);\s*addEventListener\('popstate',\(\)=>queue\(350\),\{passive:true\}\);/;
 
 function walkUserscripts(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -74,6 +77,15 @@ for (const item of files) {
   );
   assert.equal(canonicalOrderBlocks.length, 0, `${item.rel}: duplicated canonical standalone dock ORDER remains outside Shared Core`);
 
+  // Level-2 dedup contracts. These patterns are specific to the shared standalone bootstrap;
+  // app-specific Map dedupe and route listeners remain allowed.
+  assert.equal(LEGACY_DOCK_DEDUPE.test(baseline), false, `${item.rel}: shared standalone dock still performs its own id dedupe`);
+  assert.equal(LEGACY_DOCK_RANK.test(baseline), false, `${item.rel}: shared standalone dock still performs its own canonical rank sort`);
+  assert.equal(LEGACY_DOCK_ROUTE_PAIR.test(baseline), false, `${item.rel}: shared standalone dock still owns duplicate hash/pop route listeners`);
+  if (/const\s+regsRaw=\[\.\.\.document\.querySelectorAll/.test(baseline)) {
+    assert.ok(/SakaLuXCore\.dock\.sort\(regsRaw\)/.test(baseline), `${item.rel}: shared standalone registrations must be sorted/deduped through Core`);
+  }
+
   const output = embedSharedCore(source, core);
   assert.equal(metadataHeader(output), metadataHeader(source), `${item.rel}: metadata changed during embedding`);
   assert.equal((output.match(new RegExp(BEGIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length, 1, `${item.rel}: core not embedded exactly once`);
@@ -81,15 +93,10 @@ for (const item of files) {
   assert.ok(output.indexOf(BEGIN) > output.indexOf('// ==/UserScript=='), `${item.rel}: Core must be after metadata`);
   assert.equal(metadataHeader(output), metadataHeader(source), `${item.rel}: unexpected metadata/runtime dependency change`);
 
-  // Idempotent rebuild: never duplicate Core or alter surrounding whitespace.
   const output2 = embedSharedCore(output, core);
   assert.equal(output2, output, `${item.rel}: embedding is not idempotent`);
-
-  // Removing the embedded Core must restore the Core-free baseline byte-for-byte,
-  // whether the checked-in source already contains Core or not.
   assert.equal(stripSharedCore(output), baseline, `${item.rel}: embedding changed original userscript body`);
 
-  // Syntax validation of the fully embedded standalone build.
   const token = crypto.createHash('sha1').update(item.rel).digest('hex').slice(0, 12);
   const tmp = path.join(root, `.tmp-core-test-${token}.js`);
   fs.writeFileSync(tmp, output, 'utf8');
