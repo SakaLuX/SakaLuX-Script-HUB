@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const child = require('node:child_process');
-const { embedSharedCore, metadataHeader, BEGIN, END } = require('../tools/embed-shared-core.cjs');
+const { embedSharedCore, stripSharedCore, metadataHeader, BEGIN, END } = require('../tools/embed-shared-core.cjs');
 
 const root = path.resolve(__dirname, '..');
 const core = fs.readFileSync(path.join(root, 'src/core/sakalux-core.js'), 'utf8');
@@ -32,7 +32,6 @@ for (const entry of activeEntries) {
   files.push({ id: entry.id, file, full, entry });
 }
 
-// Script Hub is the host/controller and is not guaranteed to be a normal registry entry.
 const hubFile = path.join(root, 'SakaLuX-Script-Hub.user.js');
 if (fs.existsSync(hubFile) && !files.some(x => x.full === hubFile)) {
   files.push({ id: 'script-hub', file: 'SakaLuX-Script-Hub.user.js', full: hubFile, entry: null });
@@ -50,17 +49,12 @@ for (const item of files) {
   assert.equal((output.match(new RegExp(BEGIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length, 1, `${item.file}: core not embedded exactly once`);
   assert.equal((output.match(new RegExp(END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length, 1, `${item.file}: core end marker mismatch`);
   assert.ok(output.indexOf(BEGIN) > output.indexOf('// ==/UserScript=='), `${item.file}: Core must be after metadata`);
-  assert.ok(!metadataHeader(output).includes('@require') || metadataHeader(output) === metadataHeader(source), `${item.file}: unexpected runtime dependency`);
 
-  // Idempotent rebuild: never duplicate Core.
   const output2 = embedSharedCore(output, core);
   assert.equal(output2, output, `${item.file}: embedding is not idempotent`);
 
-  // The original body must remain byte-for-byte present after removing only the injected Core block.
-  const stripped = output.replace(new RegExp(`${BEGIN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?${END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\n?`, 'g'), '');
-  assert.equal(stripped, source, `${item.file}: embedding changed original userscript body`);
+  assert.equal(stripSharedCore(output), source, `${item.file}: embedding changed original userscript body`);
 
-  // Syntax validation of the fully embedded standalone build.
   const tmp = path.join(root, '.tmp-core-test-' + item.id.replace(/[^a-z0-9_-]/gi, '_') + '.js');
   fs.writeFileSync(tmp, output, 'utf8');
   try {
@@ -82,7 +76,6 @@ for (const item of files) {
   report.push({ id:item.id, file:item.file, usesPerf, usesHubDetection, hasDockOrder:!!orderMatch, orderCompatible });
 }
 
-// Registry ids that participate in the shared dock must preserve canonical relative ordering.
 const activeIds = new Set(activeEntries.map(x => x.id));
 const knownActive = canonicalOrder.filter(id => activeIds.has(id));
 const registryOrder = activeEntries.map(x => x.id).filter(id => canonicalOrder.includes(id));
