@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.937**
+**v0.9.938**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-22**
-- Canonical version: **v0.9.937**
+- Verified: **2026-09-26**
+- Canonical version: **v0.9.938**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -47,27 +47,19 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.937 — Release documentation synchronized with the current Suite userscript version**
-- Release documentation synchronized with the current Suite userscript version.
-
-## Recommended
-Use SakaLuX Suite if you prefer one experimental all-in-one userscript. For the stable modular ecosystem, use **SakaLuX Script Hub** with its registered complementary add-ons.
-
-## Privacy
-- The shared Torn API key used by Suite is stored locally.
-- Exported Suite settings intentionally exclude the API key.
-- Module preferences and local runtime state are stored in the userscript/browser environment.
-- Individual modules can access Torn data required for their functions; review enabled modules and API permissions before use.
-
-## Important
-- SakaLuX Suite is **EXPERIMENTAL**. Its modules share one large runtime, so a regression in one area can affect other Suite modules more broadly than standalone add-ons.
-- Suite does not automate attacks, crimes, bets, item consumption or race entry. Recommendations, alerts and analysis remain advisory/user-triggered.
-- Suite is intentionally **not registered in `scripts.json`** and must not appear as a required Hub module unless that product decision changes intentionally.
-
-## License
-**All Rights Reserved**
+**v0.9.938 — Shared Core v1**
+- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
+- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+- No separate Core userscript is required; Shared Core is embedded into this standalone build.
 
 ## Release history / Changelog
+
+### v0.9.938 — Shared Core v1
+- Centralizes shared infrastructure in the embedded SakaLuX Core.
+- Adds permanent Shared Core/API broker regression coverage.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+
 
 ### v0.9.937 — Church prayer streak tracker
 - Adds a compact Prayer Streak card on Church / Pray views.

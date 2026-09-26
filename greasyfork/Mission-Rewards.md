@@ -3,12 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.45**
+**v1.0.46**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
+- Verified: **2026-09-26**
 - Canonical version: **v1.0.44**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
@@ -29,26 +29,19 @@
 
 ## Current release note
 
-**v1.0.45 — Release metadata synchronization**
-- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
-- Deduplicates standalone registrations by module id before rendering.
-- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
-
-## Recommended
-Install **SakaLuX Script Hub** to manage Mission Rewards with the other registered add-ons and use the shared Hub API key when available.
-
-## Privacy
-Mission Rewards stores settings, catalogue cache, ammo cache and learned weapon-mod ranges locally. Torn API requests are sent to `api.torn.com` and use only the active key required for module data. No Torn API write permissions are requested.
-
-## Important
-- Market values and value-per-credit calculations are estimates.
-- Weapon-mod ranges are learned locally from offers seen by the script and are guidance, not guaranteed future Mission Shop prices.
-- The experimental v1.2.0 Mission Hints branch was rolled back; the active/canonical release is the current v1.0.42 line.
-
-## License
-**All Rights Reserved**
+**v1.0.46 — Shared Core v1**
+- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
+- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+- No separate Core userscript is required; Shared Core is embedded into this standalone build.
 
 ## Release history / Changelog
+
+### v1.0.46 — Shared Core v1
+- Centralizes shared infrastructure in the embedded SakaLuX Core.
+- Adds permanent Shared Core/API broker regression coverage.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+
 
 
 

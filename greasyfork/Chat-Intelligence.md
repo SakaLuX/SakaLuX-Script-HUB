@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.20**
+**v1.2.21**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
-- Canonical version: **v1.2.20**
+- Verified: **2026-09-26**
+- Canonical version: **v1.2.21**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,16 +24,19 @@
 
 ## Current release note
 
-**v1.2.20 — Release documentation synchronized with the current Chat Intelligence userscript version**
-- Release documentation synchronized with the current Chat Intelligence userscript version.
-
-## Recommended
-- Use together with SakaLuX Script Hub for consistent controls and status handling.
-
-## License
-All Rights Reserved — SakaLuX [2380374].
+**v1.2.21 — Shared Core v1**
+- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
+- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+- No separate Core userscript is required; Shared Core is embedded into this standalone build.
 
 ## Release history / Changelog
+
+### v1.2.21 — Shared Core v1
+- Centralizes shared infrastructure in the embedded SakaLuX Core.
+- Adds permanent Shared Core/API broker regression coverage.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+
 
 ### v1.2.20 — Extended performance validation
 - Recent-message IDs are capped at 4,096. Weak per-element tracking preserves notification deduplication for messages still visible after cache eviction.

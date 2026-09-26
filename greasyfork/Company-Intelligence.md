@@ -3,12 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.40**
+**v1.8.41**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
+- Verified: **2026-09-26**
 - Canonical version: **v1.8.39**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
@@ -32,34 +32,19 @@
 
 ## Current release note
 
-**v1.8.40 — Release metadata synchronization**
-- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
-- Deduplicates standalone registrations by module id before rendering.
-- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
-
-## Recommended
-- Install **SakaLuX Script Hub** to use Company Intelligence with the modular SakaLuX ecosystem.
-- Use the API-key button to create a key with the displayed selections.
-- Refresh after Torn's daily company report to build useful history.
-- Director-only modules require the key owner to be the company director.
-- Add several same-type companies at the next star level before trusting Benchmark direction.
-
-## Privacy
-- The API key, company notes, contracts, benchmarks, snapshots and history are stored locally in the script manager/browser.
-- Company Intelligence requests Torn data required by the enabled employee/director features.
-- No hidden gameplay action is performed by the information and planning modules.
-
-## Important
-- Financial totals exclude costs Torn does not expose; missing values are not silently treated as real zeroes.
-- Company rating is comparative and evaluated by Torn.
-- Star Outlook, growth direction, position advice and benchmark results are decision-support estimates, not guarantees.
-- The userscript header, runtime version, `scripts.json` registry entry and this information page are synchronized at **v1.8.38**.
-- The Hub registry uses Greasy Fork script **595873** for public version checks, while the userscript retains its own raw-GitHub `@downloadURL` / `@updateURL` metadata.
-
-## License
-**All Rights Reserved**
+**v1.8.41 — Shared Core v1**
+- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
+- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+- No separate Core userscript is required; Shared Core is embedded into this standalone build.
 
 ## Release history / Changelog
+
+### v1.8.41 — Shared Core v1
+- Centralizes shared infrastructure in the embedded SakaLuX Core.
+- Adds permanent Shared Core/API broker regression coverage.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+
 
 
 

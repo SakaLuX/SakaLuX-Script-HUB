@@ -3,13 +3,13 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.14**
+**v0.8.15**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
-- Canonical version: **v0.8.14**
+- Verified: **2026-09-26**
+- Canonical version: **v0.8.15**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -34,44 +34,19 @@
 
 ## Current release note
 
-**v0.8.14 — Release metadata synchronization**
-- Introduces a verified Stock Rebalance state machine: PLANNING → SELLING → VERIFYING_SELL → WAITING_SYNC → VERIFYING_CASH → BUYING → VERIFYING_POSITION → COMPLETE.
-- Verifies each SELL before another transaction, preventing duplicate sales after TornPDA/network uncertainty and supporting safe retry only when a sale did not land.
-- Persists recovery checkpoints so interrupted rebalances can resume without repeating completed SELL or BUY actions.
-- Re-syncs cash, target price and held shares before BUY, recalculates affordable quantity, preserves reserve cash and verifies the final position.
-- Keeps the BUY target excluded from SELL sources and retains the 0.1% sell-fee-aware planning introduced in v0.8.13.
-- Adds permanent regression coverage for multiple SELLs, interruption/recovery, retry safety, TornPDA transitions, large amounts and post-BUY verification.
-
-## Recommended
-- Keep **Dry Run ON** while checking a new configuration.
-- Keep **Benefit Lock ON** when benefit blocks must not be touched.
-- Review every Smart Rebalance proposal before using the separate guided execution controls.
-- Install/update the public build through Greasy Fork script 596192.
-
-## Privacy
-- Settings, stock history, favorites, transaction history and advisor state are stored locally in the userscript/browser environment.
-- The configured Torn API key is used only for the Torn data required by the module.
-- Export/import excludes the API key.
-- The module does not use an external historical-price service; technical history grows locally while the module is used.
-
-## Important
-- Advisor scores, ROI, technical signals, benefit values and rebalance plans are decision-support estimates, not guaranteed outcomes.
-- Smart Rebalance and Portfolio Simulator do not automatically submit trades.
-- Guided execution remains protected by the module's confirmation, Dry Run, cooldown and Benefit Lock safeguards.
-- Torn DOM structure, stock endpoints or API response formats can change and may require a module update.
-
-## Installation and Hub integration
-- GitHub remains the canonical source repository; Greasy Fork is the public install/update channel.
-- Namespace and existing local-storage keys are retained so settings, API key and cached data survive normal updates.
-- Script Hub provides OPEN, REFRESH, ON/OFF, INFO and NEW.
-- The standalone dock can open the same native panel when Hub is absent.
-- The ordinary Stock Manager launcher is hidden while Hub is present; the explicit PANIC action remains available while Stocks is enabled.
-- OFF disconnects runtime observation, clears polling, removes inline/row controls and blocks new orders. An already submitted request is not cancelled.
-
-## License
-**All Rights Reserved — SakaLuX [2380374]**
+**v0.8.15 — Shared Core v1**
+- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
+- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
+- Routes Torn API reads through the shared Request Broker while keeping stock BUY/SELL transaction POSTs isolated in the verified rebalance state machine.
+- No separate Core userscript is required; Shared Core is embedded into this standalone build.
 
 ## Release history / Changelog
+
+### v0.8.15 — Shared Core v1
+- Centralizes shared infrastructure in the embedded SakaLuX Core.
+- Adds permanent Shared Core/API broker regression coverage.
+- Routes Torn API reads through the shared Request Broker while keeping stock BUY/SELL transaction POSTs isolated in the verified rebalance state machine.
+
 
 
 ### v0.8.14 — Verified Rebalance state machine

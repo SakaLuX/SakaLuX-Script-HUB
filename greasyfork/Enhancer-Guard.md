@@ -3,12 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.51**
+**v1.3.52**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
+- Verified: **2026-09-26**
 - Canonical version: **v1.3.50**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
@@ -29,28 +29,19 @@
 
 ## Current release note
 
-**v1.3.51 — Release metadata synchronization**
-- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
-- Deduplicates standalone registrations by module id before rendering.
-- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
-
-## Recommended
-Install **SakaLuX Script Hub** to manage Enhancer Guard with the other registered add-ons and use shared Hub integration/API access when compatible.
-
-## Privacy
-- Enhancer settings, protection preferences, favorites and local cache/state are stored locally in the userscript/browser environment.
-- Torn API requests are sent to `api.torn.com` using the active key required for inventory/item information.
-- Enhancer Guard does not require Torn API write permissions for its inventory intelligence/protection display.
-
-## Important
-- Bazaar protection is a client-side safety guard. Always verify the final Torn sale list before confirming a sale.
-- Inventory/API values can briefly lag behind Torn after item changes until the next refresh.
-- Partial protection quantities are local preferences and should be reviewed after major inventory changes.
-
-## License
-**All Rights Reserved**
+**v1.3.52 — Shared Core v1**
+- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
+- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+- No separate Core userscript is required; Shared Core is embedded into this standalone build.
 
 ## Release history / Changelog
+
+### v1.3.52 — Shared Core v1
+- Centralizes shared infrastructure in the embedded SakaLuX Core.
+- Adds permanent Shared Core/API broker regression coverage.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+
 
 
 ### v1.3.51 — Release metadata synchronization

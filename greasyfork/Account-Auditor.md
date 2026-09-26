@@ -3,12 +3,12 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.22**
+**v1.3.23**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
+- Verified: **2026-09-26**
 - Canonical version: **v1.3.17**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js
@@ -30,32 +30,19 @@
 
 ## Current release note
 
-**v1.3.22 — Release documentation synchronized with the current Account Auditor userscript version**
-- Release documentation synchronized with the current Account Auditor userscript version.
-
-## Recommended
-Use Account Auditor only with a **private GitHub repository** dedicated to your own account snapshots. Restrict the GitHub fine-grained token to the minimum required repository and Contents read/write permission.
-
-SakaLuX Script Hub is optional. Auditor remains intentionally standalone and excluded from `scripts.json`.
-
-## Privacy
-Account Auditor handles sensitive account information. Snapshot files can contain private Torn account data, financial information, combat/account statistics, events, message metadata and message text you explicitly choose to capture.
-
-- Use a private GitHub repository.
-- Git history may retain older snapshot contents after files are replaced.
-- Explicitly captured message bodies are stored locally and included only when that option is enabled.
-- The official Torn API does not provide private message body text; body capture occurs only after the user manually opens a message and presses the capture control.
-- Do not publish or share the Torn API key or GitHub token.
-
-## Important
-- Account Auditor is **not a complementary Hub module** and must not be added to the Hub registry unless that product decision is intentionally changed later.
-- The audit is a snapshot of data available through configured permissions and explicit captures.
-- Missing permissions/unavailable endpoints can produce incomplete sections rather than fabricated data.
-
-## License
-**MIT**
+**v1.3.23 — Shared Core v1**
+- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
+- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+- No separate Core userscript is required; Shared Core is embedded into this standalone build.
 
 ## Release history / Changelog
+
+### v1.3.23 — Shared Core v1
+- Centralizes shared infrastructure in the embedded SakaLuX Core.
+- Adds permanent Shared Core/API broker regression coverage.
+- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
+
 
 
 

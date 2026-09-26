@@ -3,11 +3,11 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.10**
+**v1.1.11**
 
 ## Repository synchronization
 
-- Verified: **2026-09-20**
+- Verified: **2026-09-26**
 - Canonical version: **v1.1.7**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
