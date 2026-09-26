@@ -45747,7 +45747,7 @@ const HINT={
 const IMG=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
 const TITLE=[[/east/i,'East Side'],[/west/i,'West Side'],[/north/i,'North Side'],[/residential/i,'Residential'],[/red[-\s]?light/i,'Red-Light'],[/financial/i,'Financial'],[/city\s*cent/i,'City Center']];
 const STANDALONE=[
- ['account-auditor','Account Auditor'],['bazaar-smart-pricer','Bazaar Smart Pricer'],['bazaar-thanker','Bazaar Thanker'],['chat-intelligence','Chat Intelligence'],['company-intelligence','Company Intelligence'],['elimination-assistant','Elimination Assistant'],['enhancer-guard','Enhancer Guard'],['market-intelligence','Market Intelligence'],['mission-rewards','Mission Rewards'],['stock-manager-advisor','Stock Manager']
+ ['account-auditor','Account Auditor'],['bazaar-smart-pricer','Bazaar Smart Pricer'],['bazaar','Bazaar Thanker'],['chat-intelligence','Chat Intelligence'],['company-intelligence','Company Intelligence'],['elimination-assistant','Elimination Assistant'],['enhancer','Enhancer Guard'],['market-intelligence','Market Intelligence'],['mission-rewards','Mission Rewards'],['stock-manager-advisor','Stock Manager']
 ];
 const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
 const txt=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
@@ -45789,7 +45789,7 @@ function ensureStrip(){
  bar.querySelectorAll('[data-m]').forEach(x=>{x.disabled=x.dataset.m===mode();x.onclick=()=>setMode(x.dataset.m);});
 }
 function removeGraffiti(){document.querySelectorAll('.slx-graffiti-badge,#slx-graffiti-strip').forEach(x=>x.remove());}
-function render(){ensureStyle();if(!enabled()||!isGraffiti()){removeGraffiti();return;}cards().forEach(decorateCard);ensureStrip();injectMasterControl();syncHubState();}
+function render(){ensureStyle();injectMasterControl();syncHubState();if(!enabled()||!isGraffiti()){removeGraffiti();return;}cards().forEach(decorateCard);ensureStrip();}
 function injectMasterControl(){
  const all=$$('div,section,aside'); const panel=all.find(x=>/master control/i.test(txt(x))&&/crimes/i.test(txt(x))&&x.querySelectorAll('*').length<1500); if(!panel||panel.querySelector('[data-slx-graffiti-control]'))return;
  const crimes=[...panel.querySelectorAll('*')].find(x=>/^crimes$/i.test(txt(x)));const row=document.createElement('div');row.dataset.slxGraffitiControl='1';row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;margin:4px 0;border:1px solid rgba(255,255,255,.08);border-radius:7px';row.innerHTML=`<span>🎨 Graffiti Spray Guide</span><label><input type="checkbox" ${enabled()?'checked':''}> ON</label>`;row.querySelector('input').onchange=e=>{localStorage.setItem(ENABLE_KEY,e.target.checked?'1':'0');render();};(crimes?.parentElement||panel).appendChild(row);
