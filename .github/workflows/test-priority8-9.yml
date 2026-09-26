@@ -1,0 +1,44 @@
+name: Test Priorities 8 and 9
+on:
+  push:
+    branches: [test/priority8-9-audit-release]
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Apply Account Auditor Priority 8 migration
+        run: python3 .github/scripts/apply_priority8_auditor_changes.py
+      - name: Install repository validation dependency
+        run: python3 -m pip install PyYAML==6.0.3
+      - name: Validate Account Auditor changes
+        run: |
+          node --check SakaLuX-Account-Auditor.user.js
+          node tests/account-auditor-changes-regression.cjs
+      - name: Run strict release preflight for all scripts
+        run: python3 tools/release_preflight.py --all
+      - name: Build Account Auditor release candidate package
+        run: |
+          python3 tools/release_preflight.py --id account-auditor --out "$RUNNER_TEMP/releases"
+          test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/SHA256SUMS"
+          test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/RELEASE_INFO.md"
+          test -f "$RUNNER_TEMP/releases/account-auditor-v1.3.24/release-manifest.json"
+      - name: Run current repository validator
+        run: python3 .github/scripts/validate_repository.py
+      - name: Commit Priority 8 generated changes
+        run: |
+          if git diff --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Account-Auditor.user.js greasyfork/Account-Auditor.md
+          git commit -m "Add Account Auditor changes since last audit v1.3.24"
+          git push
