@@ -78,6 +78,15 @@ def adapter(meta: dict, version: str, api_global: str) -> str:
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', register, {{ once: true }}); else register();
 }})();'''
 
+
+def sync_runtime_block(text: str) -> str:
+    start = text.find(RUNTIME_BEGIN)
+    end = text.find(RUNTIME_END, start)
+    if start < 0 or end < 0:
+        return text
+    end += len(RUNTIME_END)
+    return text[:start] + '\n'.join([RUNTIME_BEGIN, runtime, RUNTIME_END]) + text[end:]
+
 changed = []
 for name in TARGETS:
     path = ROOT / name
@@ -85,6 +94,10 @@ for name in TARGETS:
     if RUNTIME_BEGIN in text:
         if BEGIN in text or 'function ensureDock' in text:
             raise RuntimeError(f'{name}: mixed legacy/shared dock state')
+        synced = sync_runtime_block(text)
+        if synced != text:
+            path.write_text(synced, encoding='utf-8')
+            changed.append(name)
         continue
     start = text.find(BEGIN)
     end = text.find(END, start)
@@ -128,6 +141,6 @@ for name in TARGETS:
     path.write_text(text, encoding='utf-8')
     changed.append(name)
 
-print(f'Priority 6 shared dock migration applied to {len(changed)} userscripts.')
+print(f'Priority 6 shared dock migration/sync updated {len(changed)} userscripts.')
 for name in changed:
     print(' -', name)
