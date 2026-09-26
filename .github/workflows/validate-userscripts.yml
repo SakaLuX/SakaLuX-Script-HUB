@@ -36,5 +36,9 @@ jobs:
         run: |
           node tests/performance/elimination-lifecycle-regression.cjs
           node tests/performance/request-sharing-regression.cjs
+      - name: Run Stock rebalance state-machine regressions
+        run: |
+          node --check tests/stock-rebalance-state-machine-core.cjs
+          node tests/stock-rebalance-state-machine-regression.cjs
       - name: Check current all-script performance workload budgets
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/performance/run.cjs "$RUNNER_TEMP/performance-budget.json" --assert
