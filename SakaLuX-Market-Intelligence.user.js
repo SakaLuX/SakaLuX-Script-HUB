@@ -1772,7 +1772,6 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
         if(travelCtx.state===TRAVEL_STATES.TORN_TRAVEL_AGENCY){await renderBestTravelRun();paintTravelSessionSummary();return;}
         if(travelCtx.state!==TRAVEL_STATES.LANDED_ABROAD)return;
         document.getElementById('sl-mi-best-run')?.remove();
-        document.getElementById('sl-mi-best-run')?.remove();
         const availableCash=await fetchAvailableCash(true);
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}

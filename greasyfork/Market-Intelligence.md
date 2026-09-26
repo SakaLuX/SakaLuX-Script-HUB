@@ -8,8 +8,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-09-23**
-- Canonical version: **v1.17.49**
+- Verified: **2026-09-26**
+- Canonical version: **v1.17.51**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
