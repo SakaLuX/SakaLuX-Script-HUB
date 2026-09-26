@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.85**
+**v1.9.86**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.9.83**
+- Canonical version: **v1.9.86**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -34,12 +34,17 @@
 
 ## Current release note
 
-**v1.9.85 — Persistent native Fly-out launcher + release synchronization**
-- Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
-- Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
-- Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
+**v1.9.86 — Hub Health / Diagnostics**
+- Adds consolidated module health, disabled-module and runtime-error diagnostics.
+- Adds Shared Core API Broker counters and transport status without exposing API keys.
+- Exposes `SakaLuXScriptHub.diagnostics()` for safe local diagnostics.
 
 ## Release history / Changelog
+
+### v1.9.86 — Hub Health / Diagnostics
+- Expands System Check with an overall health snapshot, disabled-module reporting and captured runtime errors.
+- Displays Shared Core API Broker request/cache/retry/failure/queue diagnostics without exposing API keys.
+- Exposes `SakaLuXScriptHub.diagnostics()` for safe local diagnostics.
 
 ### v1.9.85 — Shared Core v1
 - Centralizes shared infrastructure in the embedded SakaLuX Core.
