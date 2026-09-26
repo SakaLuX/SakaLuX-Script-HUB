@@ -2,19 +2,62 @@ name: Test Priority 6 Shared Dock Runtime
 on:
   push:
     branches: [test/priority6-shared-dock-runtime]
-    paths:
-      - 'src/core/sakalux-dock-runtime.js'
-      - 'tests/priority6-shared-dock-runtime-regression.cjs'
-      - '.github/workflows/test-priority6-shared-dock-runtime.yml'
+permissions:
+  contents: write
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Syntax check
-        run: node --check src/core/sakalux-dock-runtime.js
-      - name: Run Priority 6 regression
-        run: node tests/priority6-shared-dock-runtime-regression.cjs
+      - name: Apply shared dock migration
+        run: python3 .github/scripts/migrate_priority6_shared_dock.py
+      - name: Install validation dependencies
+        run: |
+          python3 -m pip install PyYAML==6.0.3
+          npm install --prefix "$RUNNER_TEMP/dom-tests" jsdom@30.1.0 --no-audit --no-fund
+      - name: Validate Shared Dock Runtime
+        run: |
+          node --check src/core/sakalux-dock-runtime.js
+          node tests/priority6-shared-dock-runtime-regression.cjs
+          node tests/priority6-shared-dock-migration-regression.cjs
+      - name: Syntax check migrated userscripts
+        run: |
+          for f in \
+            SakaLuX-Enhancer-Guard.user.js \
+            SakaLuX-Bazaar-Thanker-PDA.user.js \
+            SakaLuX-Bazaar-Smart-Pricer.user.js \
+            SakaLuX-Mission-Rewards.user.js \
+            SakaLuX-Market-Intelligence.user.js \
+            SakaLuX-Elimination-Assistant.user.js \
+            SakaLuX-Company-Intelligence-v1.0.0.user.js \
+            SakaLuX-Stock-Manager-Advisor.user.js \
+            SakaLuX-Account-Auditor.user.js; do node --check "$f"; done
+      - name: Run current repository regressions
+        run: |
+          python3 .github/scripts/validate_repository.py
+          node tests/shared-core-v1-all-scripts.cjs
+          node tests/tornpda-navigation-regression.cjs
+          node tests/market-travel-state-machine-regression.cjs
+          node tests/stock-rebalance-state-machine-regression.cjs
+          NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/performance/ui-regression.cjs
+      - name: Commit migrated userscripts
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add \
+            SakaLuX-Enhancer-Guard.user.js \
+            SakaLuX-Bazaar-Thanker-PDA.user.js \
+            SakaLuX-Bazaar-Smart-Pricer.user.js \
+            SakaLuX-Mission-Rewards.user.js \
+            SakaLuX-Market-Intelligence.user.js \
+            SakaLuX-Elimination-Assistant.user.js \
+            SakaLuX-Company-Intelligence-v1.0.0.user.js \
+            SakaLuX-Stock-Manager-Advisor.user.js \
+            SakaLuX-Account-Auditor.user.js
+          git commit -m 'Migrate userscripts to Shared Dock Runtime'
+          git push
