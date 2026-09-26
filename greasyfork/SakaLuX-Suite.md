@@ -55,8 +55,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.940 — Release documentation synchronized with the current Suite userscript version**
-- Release documentation synchronized with the current Suite userscript version.
+**v0.9.941 — Graffiti Spray Guide + Hub state authority**
+- Graffiti Spray Guide and Hub-authoritative module state synchronization are active in the current Suite release.
 
 ## Release history / Changelog
 
