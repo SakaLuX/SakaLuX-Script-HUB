@@ -74,19 +74,6 @@ if(!hub.includes('diagnostics: collectHubDiagnostics')) {
 }
 fs.writeFileSync(hubPath,hub);
 
-const registryPath='scripts.json';
-const registry=JSON.parse(fs.readFileSync(registryPath,'utf8'));
-const entry=registry.scripts.find(s=>s.id==='script-hub');
-if(!entry) throw new Error('script-hub registry entry missing');
-entry.version='1.9.86';
-entry.detailsRevision=Number(entry.detailsRevision||0)+1;
-entry.release={version:'1.9.86',date:'2026-09-26',notes:[
-  'Adds a consolidated Hub Health / Diagnostics snapshot to System Check.',
-  'Shows module health, disabled modules, captured runtime errors and Shared Core API Broker statistics.',
-  'Exposes diagnostics() through SakaLuXScriptHub without exposing the saved Torn API key.'
-]};
-fs.writeFileSync(registryPath,JSON.stringify(registry,null,2)+'\n');
-
 const docPath='greasyfork/Script-Hub.md';
 let doc=fs.readFileSync(docPath,'utf8');
 doc=doc.replace(/Current version: `?v?1\.9\.85`?/i,'Current version: `v1.9.86`');
