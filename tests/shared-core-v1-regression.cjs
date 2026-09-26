@@ -66,7 +66,7 @@ function loadCore({ hub = false } = {}) {
 
   assert.equal(core.storage.get('missing', 7), 7);
   assert.equal(core.storage.set('x', {a:1}), true);
-  assert.deepEqual(core.storage.get('x'), {a:1});
+  assert.equal(JSON.stringify(core.storage.get('x')), '{"a":1}');
   assert.equal(core.storage.remove('x'), true);
   store.set('bad','{broken');
   assert.equal(core.storage.get('bad','fallback'),'fallback');
@@ -79,7 +79,7 @@ function loadCore({ hub = false } = {}) {
     {id:'zzz',name:'ZZZ'}
   ];
   const sorted = core.dock.sort(regs);
-  assert.deepEqual(sorted.map(x=>x.id), ['enhancer','market-intelligence','stock-manager-advisor','zzz']);
+  assert.equal(JSON.stringify([...sorted].map(x=>x.id)), JSON.stringify(['enhancer','market-intelligence','stock-manager-advisor','zzz']));
   assert.equal(sorted.find(x=>x.id==='market-intelligence').name,'Market latest','latest duplicate wins');
 
   const events = [];
