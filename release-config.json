@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "scripts": [
+    {"id":"account-auditor","file":"SakaLuX-Account-Auditor.user.js","doc":"greasyfork/Account-Auditor.md","registry":false,"tagPrefix":"account-auditor-v"},
+    {"id":"bazaar-smart-pricer","file":"SakaLuX-Bazaar-Smart-Pricer.user.js","doc":"greasyfork/Bazaar-Smart-Pricer.md","registry":true,"tagPrefix":"bazaar-smart-pricer-v"},
+    {"id":"bazaar","file":"SakaLuX-Bazaar-Thanker-PDA.user.js","doc":"greasyfork/Bazaar-Thanker.md","registry":true,"tagPrefix":"bazaar-v"},
+    {"id":"chat-intelligence","file":"SakaLuX-Chat-Intelligence.user.js","doc":"greasyfork/Chat-Intelligence.md","registry":false,"tagPrefix":"chat-intelligence-v"},
+    {"id":"company-intelligence","file":"SakaLuX-Company-Intelligence-v1.0.0.user.js","doc":"greasyfork/Company-Intelligence.md","registry":true,"tagPrefix":"company-intelligence-v"},
+    {"id":"elimination-assistant","file":"SakaLuX-Elimination-Assistant.user.js","doc":"greasyfork/Elimination-Assistant.md","registry":true,"tagPrefix":"elimination-assistant-v"},
+    {"id":"enhancer","file":"SakaLuX-Enhancer-Guard.user.js","doc":"greasyfork/Enhancer-Guard.md","registry":true,"tagPrefix":"enhancer-v"},
+    {"id":"market-intelligence","file":"SakaLuX-Market-Intelligence.user.js","doc":"greasyfork/Market-Intelligence.md","registry":true,"tagPrefix":"market-intelligence-v"},
+    {"id":"mission-rewards","file":"SakaLuX-Mission-Rewards.user.js","doc":"greasyfork/Mission-Rewards.md","registry":true,"tagPrefix":"mission-rewards-v"},
+    {"id":"script-hub","file":"SakaLuX-Script-Hub.user.js","doc":"greasyfork/Script-Hub.md","registry":false,"tagPrefix":"script-hub-v"},
+    {"id":"stock-manager-advisor","file":"SakaLuX-Stock-Manager-Advisor.user.js","doc":"greasyfork/Stock-Manager-Advisor.md","registry":true,"tagPrefix":"stock-manager-advisor-v"},
+    {"id":"suite","file":"SakaLuX-Suite.user.js","doc":"greasyfork/SakaLuX-Suite.md","registry":false,"tagPrefix":"suite-v"}
+  ]
+}
