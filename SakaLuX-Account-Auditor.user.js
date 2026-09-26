@@ -485,119 +485,193 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 })();
 /* SakaLuX Shared Core — END */
 
-/* SakaLuX Standalone Dock Bootstrap — BEGIN */
+/* SakaLuX Shared Dock Runtime — BEGIN */
+/* SakaLuX Shared Dock Runtime v1 - Priority 6 foundation
+ * Source-only module. Not installed directly by users.
+ * Intended to be embedded with Shared Core into standalone userscripts.
+ */
 (() => {
   'use strict';
 
-  const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
-  const LAST_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
-  const INTERVAL = 12 * 60 * 60 * 1000;
-  const DOCK_ID = 'sakalux-account-auditor-standalone-dock';
-  const PROMPT_ID = 'sakalux-account-auditor-hub-install-prompt';
-  const STYLE_ID = 'sakalux-account-auditor-standalone-style';
+  const g = globalThis;
+  const NS = 'SakaLuXDockRuntime';
+  const VERSION = '1.0.0-test.1';
+  const IDS = Object.freeze({
+    dock: 'sakalux-standalone-dock',
+    prompt: 'sakalux-hub-install-prompt',
+    native: 'sakalux-standalone-native-s',
+    fallback: 'sakalux-standalone-fallback-s',
+    style: 'sakalux-standalone-dock-runtime-style'
+  });
 
-  const hubInstalled = () => !!window.SakaLuXCore?.hub?.installed?.();
+  if (g[NS]?.version === VERSION) return;
+
+  const modules = g.__SakaLuXDockRuntimeModules instanceof Map
+    ? g.__SakaLuXDockRuntimeModules
+    : new Map();
+  g.__SakaLuXDockRuntimeModules = modules;
+
+  function core() { return g.SakaLuXCore || null; }
+  function doc() { return typeof document === 'undefined' ? null : document; }
+  function hubInstalled() { return Boolean(core()?.hub?.installed?.()); }
+
+  function normalize(entry = {}) {
+    const id = String(entry.id || '').trim();
+    if (!id) throw new Error('Dock module id is required');
+    return Object.freeze({
+      id,
+      name: String(entry.name || id),
+      icon: String(entry.icon || '🧩'),
+      open: typeof entry.open === 'function' ? entry.open : null,
+      enabled: typeof entry.enabled === 'function' ? entry.enabled : () => true
+    });
+  }
+
+  function sorted() {
+    const values = [...modules.values()];
+    const sorter = core()?.dock?.sort;
+    return typeof sorter === 'function' ? sorter.call(core().dock, values) : values;
+  }
+
+  function removeNode(id) { try { doc()?.getElementById(id)?.remove(); } catch {} }
+
+  function removeUi() {
+    removeNode(IDS.dock);
+    removeNode(IDS.prompt);
+    removeNode(IDS.native);
+    removeNode(IDS.fallback);
+  }
 
   function addStyle() {
-    if (document.getElementById(STYLE_ID)) return;
-    const s = document.createElement('style');
-    s.id = STYLE_ID;
-    s.textContent = `
-#${DOCK_ID}{position:fixed;right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:2147483000;display:flex;flex-direction:column;gap:7px;width:min(220px,calc(100vw - 20px));max-height:calc(100dvh - 190px);overflow:hidden;padding:10px;background:rgba(13,17,23,.985);border:1px solid #465365;border-radius:16px;box-shadow:0 12px 34px rgba(0,0,0,.5);font:12px Arial,sans-serif;box-sizing:border-box}
-#${DOCK_ID}[data-collapsed="1"] .slx-dock-items{display:none}
-#${DOCK_ID} .slx-dock-head{display:flex;align-items:center;gap:6px}
-#${DOCK_ID} .slx-dock-title{flex:1;color:#facc15;font-weight:900}
-#${DOCK_ID} button,#${DOCK_ID} a{box-sizing:border-box!important;position:static!important;inset:auto!important;transform:none!important;float:none!important;margin:0!important;min-width:0!important;max-width:none!important;width:100%!important;height:auto!important;min-height:34px!important;padding:7px 9px!important;border-radius:8px!important;font:700 12px/1.2 Arial,sans-serif!important;white-space:normal!important}
-#${DOCK_ID} .slx-dock-head button{width:auto!important;min-height:28px!important;padding:4px 7px!important}
-#${DOCK_ID} .slx-dock-install{background:linear-gradient(180deg,#9a741f,#6d5015)!important;border:1px solid #f0c44e!important;color:#fff7d6!important;text-decoration:none!important;text-align:center!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;min-height:42px!important;font-weight:900!important}
-#${DOCK_ID} .slx-dock-items{display:flex;flex:1 1 auto;min-height:0;overflow-y:auto;flex-direction:column;gap:7px}
+    const d = doc();
+    if (!d || d.getElementById(IDS.style)) return;
+    const style = d.createElement('style');
+    style.id = IDS.style;
+    style.textContent = `
+#${IDS.dock}{position:fixed;right:10px;bottom:52px;z-index:2147482500;min-width:210px;max-width:min(320px,calc(100vw - 20px));padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0b1118;color:#eaf0f6;font:600 11px/1.25 Arial,sans-serif;box-shadow:0 14px 32px rgba(0,0,0,.38)}
+#${IDS.dock}[hidden]{display:none!important}
+#${IDS.dock} .sl-dock-row{display:flex;align-items:center;gap:8px;width:100%;min-height:34px;margin:0 0 6px;padding:7px 9px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#111b26;color:#eaf0f6;text-align:left}
+#${IDS.dock} .sl-dock-row:last-child{margin-bottom:0}
+#${IDS.dock} .sl-dock-row[disabled]{opacity:.45}
+#${IDS.native},#${IDS.fallback}{position:fixed;right:10px;bottom:10px;z-index:2147482400;width:38px;height:38px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#0b1118;color:#e9a84d;font:800 15px/1 Arial,sans-serif}
 `;
-    (document.head || document.documentElement).appendChild(s);
+    (d.head || d.documentElement).appendChild(style);
   }
 
-  function ensureDock() {
+  function toggleDock(force) {
+    const d = doc();
+    if (!d || hubInstalled()) { removeUi(); return false; }
+    render();
+    const panel = d.getElementById(IDS.dock);
+    if (!panel) return false;
+    const show = typeof force === 'boolean' ? force : panel.hidden;
+    panel.hidden = !show;
+    return show;
+  }
+
+  function ensureLauncher() {
+    const d = doc();
+    if (!d || hubInstalled()) { removeUi(); return null; }
+    let button = d.getElementById(IDS.fallback);
+    if (!button) {
+      button = d.createElement('button');
+      button.id = IDS.fallback;
+      button.type = 'button';
+      button.textContent = 'S';
+      button.title = 'SakaLuX Scripts';
+      button.addEventListener('click', () => toggleDock());
+      (d.body || d.documentElement).appendChild(button);
+    }
+    return button;
+  }
+
+  function render() {
+    const d = doc();
+    if (!d) return null;
     if (hubInstalled()) {
-      document.getElementById(DOCK_ID)?.remove();
-      document.getElementById(PROMPT_ID)?.remove();
+      try { d.documentElement?.setAttribute('data-sakalux-hub-active', '1'); } catch {}
+      try { d.body?.setAttribute('data-sakalux-hub-active', '1'); } catch {}
+      removeUi();
       return null;
     }
+    try { d.body?.removeAttribute('data-sakalux-hub-active'); } catch {}
     addStyle();
-    let dock = document.getElementById(DOCK_ID);
-    if (dock) return dock;
-    dock = document.createElement('div');
-    dock.id = DOCK_ID;
-    dock.innerHTML = `<div class="slx-dock-head"><span class="slx-dock-title">SakaLuX Scripts</span><button type="button" data-slx-collapse>−</button></div><div class="slx-dock-items"></div><a class="slx-dock-install" href="${HUB_URL}">⬇ Install SakaLuX Hub</a>`;
-    (document.body || document.documentElement).appendChild(dock);
-    dock.querySelector('[data-slx-collapse]').addEventListener('click', () => {
-      const collapsed = dock.dataset.collapsed === '1';
-      dock.dataset.collapsed = collapsed ? '0' : '1';
-      dock.querySelector('[data-slx-collapse]').textContent = collapsed ? '−' : '+';
-    });
-    return dock;
+    ensureLauncher();
+    let panel = d.getElementById(IDS.dock);
+    if (!panel) {
+      panel = d.createElement('div');
+      panel.id = IDS.dock;
+      panel.hidden = true;
+      (d.body || d.documentElement).appendChild(panel);
+    }
+    panel.replaceChildren();
+    for (const entry of sorted()) {
+      const button = d.createElement('button');
+      button.type = 'button';
+      button.className = 'sl-dock-row';
+      button.dataset.moduleId = entry.id;
+      button.textContent = `${entry.icon} ${entry.name}`;
+      let enabled = true;
+      try { enabled = entry.enabled() !== false; } catch { enabled = false; }
+      button.disabled = !enabled || !entry.open;
+      button.addEventListener('click', () => {
+        try { entry.open?.(); } finally { panel.hidden = true; }
+      });
+      panel.appendChild(button);
+    }
+    return panel;
   }
 
-  function eligible(el) {
-    if (!el || el.nodeType !== 1 || el.closest('#' + DOCK_ID) || el.id === 'sakalux-hub-button') return false;
-    if (!['BUTTON','A','DIV'].includes(el.tagName)) return false;
-    const ident = `${el.id || ''} ${el.className || ''}`.toLowerCase();
-    if (!/(slx|sakalux)/.test(ident)) return false;
-    const cs = getComputedStyle(el);
-    if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden') return false;
-    const r = el.getBoundingClientRect();
-    if (!r.width || !r.height || r.width > 320 || r.height > 100) return false;
-    if (/panel|modal|prompt|toast|style|overlay|dock/i.test(ident)) return false;
-    return true;
+  function register(entry) {
+    const normalized = normalize(entry);
+    modules.set(normalized.id, normalized); // latest registration wins
+    render();
+    return normalized;
   }
 
-  function collectLaunchers() {
-    const dock = ensureDock();
-    if (!dock) return;
-    const items = dock.querySelector('.slx-dock-items');
-    document.querySelectorAll('button,a,div').forEach(el => {
-      if (!eligible(el)) return;
-      el.dataset.slxDocked = '1';
-      items.appendChild(el);
-    });
+  function unregister(id) {
+    const removed = modules.delete(String(id || ''));
+    render();
+    return removed;
   }
 
-  function maybePrompt() {
-    if (hubInstalled() || document.getElementById(PROMPT_ID)) return;
-    let last = 0;
-    try { last = Number(localStorage.getItem(LAST_KEY) || 0); } catch {}
-    if (last && Date.now() - last < INTERVAL) return;
-    try { localStorage.setItem(LAST_KEY, String(Date.now())); } catch {}
-    const p = document.createElement('div');
-    p.id = PROMPT_ID;
-    p.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px';
-    p.innerHTML = `<div style="width:min(380px,100%);background:#111820;color:#fff;border:1px solid #465365;border-radius:14px;padding:18px;font:14px Arial,sans-serif;box-shadow:0 16px 50px #0008"><b style="font-size:17px">Install SakaLuX Script Hub?</b><div style="margin-top:8px;color:#cbd5e1;line-height:1.45">Keep all SakaLuX scripts together, with shared settings and controls.</div><div style="display:flex;gap:8px;margin-top:14px"><button type="button" data-slx-later style="flex:1;padding:10px;border-radius:8px;background:#202a36;color:#fff;border:1px solid #526174">Later</button><button type="button" data-slx-install style="flex:1;padding:10px;border-radius:8px;background:#8a5a00;color:#fff;border:1px solid #f59e0b;font-weight:900">Install Hub</button></div></div>`;
-    (document.body || document.documentElement).appendChild(p);
-    p.querySelector('[data-slx-later]').addEventListener('click', () => p.remove());
-    p.querySelector('[data-slx-install]').addEventListener('click', () => { location.href = HUB_URL; });
-  }
+  function list() { return Object.freeze(sorted().map(item => Object.freeze({ ...item }))); }
 
-  function start() {
-    if (hubInstalled()) return;
-    ensureDock();
-    collectLaunchers();
-    setTimeout(maybePrompt, 1200);
-    let timer = 0;
-    new MutationObserver(records => {
-      if(window.SakaLuXPerf?.unrelated?.(records)||timer)return;
-      timer = setTimeout(() => {
-        timer = 0;
-        if (hubInstalled()) {
-          document.getElementById(DOCK_ID)?.remove();
-          document.getElementById(PROMPT_ID)?.remove();
-        } else collectLaunchers();
-      }, 80);
-    }).observe(document.documentElement, {childList:true, subtree:true});
-    setInterval(() => { if (!hubInstalled()) { collectLaunchers(); maybePrompt(); } }, 60000);
-  }
+  const api = Object.freeze({ version: VERSION, ids: IDS, register, unregister, list, render, toggleDock, removeUi, hubInstalled });
+  g[NS] = api;
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
-  else start();
+  try { g.addEventListener?.('SakaLuX:ScriptHubReady', () => removeUi(), { passive: true }); } catch {}
 })();
-/* SakaLuX Standalone Dock Bootstrap — END */
+/* SakaLuX Shared Dock Runtime — END */
+
+/* SakaLuX Shared Dock Registration — BEGIN */
+(() => {
+  'use strict';
+  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.23" }));
+  const API_GLOBAL = "";
+  function openSelf() {
+    if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
+      location.href = SELF.fallback || 'https://www.torn.com/bazaar.php';
+      return;
+    }
+    try {
+      const api = API_GLOBAL ? window[API_GLOBAL] : null;
+      if (api && typeof api.open === 'function') { api.open(); return; }
+    } catch {}
+    const el = SELF.selector ? document.querySelector(SELF.selector) : null;
+    if (el) { el.click(); return; }
+    const bridge = document.getElementById('sakalux-module-bridge-' + SELF.id);
+    if (bridge) { bridge.dataset.action = 'open'; bridge.click(); return; }
+    if (SELF.fallback) location.href = SELF.fallback;
+  }
+  function register() {
+    const dock = globalThis.SakaLuXDockRuntime;
+    if (!dock || typeof dock.register !== 'function') throw new Error('SakaLuX Shared Dock Runtime is unavailable');
+    dock.register({ ...SELF, open: openSelf });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', register, { once: true }); else register();
+})();
+/* SakaLuX Shared Dock Registration — END */
 
 
 
@@ -1099,13 +1173,3 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* Compact donation controls and Elimination mobile panel geometry 1.3.12 */
 (()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sl-aa-overlay#sl-aa-overlay#sl-aa-overlay{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;padding:0!important;background:transparent!important;overflow:hidden!important;border-radius:14px!important;align-items:stretch!important;justify-content:stretch!important;}\n#sl-aa-overlay#sl-aa-overlay#sl-aa-overlay #sl-aa-panel#sl-aa-panel{position:relative!important;inset:auto!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;align-self:stretch!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;max-width:100%!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border:1px solid #3c4652!important;border-radius:14px!important;}\n#sl-aa-overlay#sl-aa-overlay#sl-aa-overlay #sl-aa-panel#sl-aa-panel{overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
 
-/* SAKALUX_GLOBAL_STANDALONE_ACCOUNT_AUDITOR */
-(()=>{
- const mount=()=>{
-  if(!document.body)return;
-  let e=document.querySelector('[data-slx-standalone-registration="account-auditor"]');
-  if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','account-auditor');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'account-auditor',name:'Auditor',icon:'🔎',selector:'#sl-aa-panel',fallback:'https://www.torn.com/index.php',version:'1.3.21'});
- };
- if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
-})();
