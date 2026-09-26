@@ -1,0 +1,27 @@
+name: Test Stock Rebalance State Machine
+on:
+  push:
+    branches:
+      - test/stock-rebalance-state-machine
+    paths:
+      - 'tests/stock-rebalance-state-machine-core.cjs'
+      - 'tests/stock-rebalance-state-machine-regression.cjs'
+      - '.github/workflows/test-stock-rebalance-state-machine.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check isolated state machine
+        run: |
+          node --check tests/stock-rebalance-state-machine-core.cjs
+          node --check tests/stock-rebalance-state-machine-regression.cjs
+      - name: Run Stock rebalance regression suite
+        run: node tests/stock-rebalance-state-machine-regression.cjs
