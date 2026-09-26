@@ -317,8 +317,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
   function render(){
     const d=ensureDock(); if(!d) return;
     const box=d.querySelector('.slx-dock-items');
-    const regsRaw=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id); const regs=[...new Map(regsRaw.map(r=>[r.id,r])).values()];
-    const rank=id=>{const i=ORDER.indexOf(id);return i<0?ORDER.length+100:i}; regs.sort((a,b)=>rank(a.id)-rank(b.id)||String(a.name||a.id).localeCompare(String(b.name||b.id))); const signature=JSON.stringify(regs.map(r=>[r.id,r.name,r.icon,r.selector,r.fallback,r.version]));if(box.dataset.slxEntries===signature){ensureNativeLauncher();return;}box.dataset.slxEntries=signature;box.replaceChildren();
+    const regsRaw=[...document.querySelectorAll(`[${REG_ATTR}]`)].map(x=>x.dataset).filter(x=>x.id); const regs=window.SakaLuXCore.dock.sort(regsRaw); const signature=JSON.stringify(regs.map(r=>[r.id,r.name,r.icon,r.selector,r.fallback,r.version]));if(box.dataset.slxEntries===signature){ensureNativeLauncher();return;}box.dataset.slxEntries=signature;box.replaceChildren();
     for(const r of regs){
       const b=document.createElement('button'); b.type='button'; b.className='slx-dock-row';
       b.innerHTML=`<span class="slx-left"><span class="i">${r.icon||'•'}</span></span><span class="slx-title">${r.name||r.id}</span><span class="slx-right-pad"></span>`;
@@ -356,8 +355,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     });
     observer.observe(root,{childList:true,subtree:true});
     addEventListener('SakaLuX:ScriptHubReady',stopForHub,{once:true});
-    addEventListener('hashchange',()=>queue(350),{passive:true});
-    addEventListener('popstate',()=>queue(350),{passive:true});
+    window.SakaLuXCore.router.onChange(()=>queue(350)); window.SakaLuXCore.router.bind();
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
 })();
