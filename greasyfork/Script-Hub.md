@@ -34,10 +34,10 @@
 
 ## Current release note
 
-**v1.9.89 — Settings Schema v1 and safe automatic migrations**
-- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
-- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
-- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
+**v1.9.89 — Persistent native Fly-out launcher + release synchronization**
+- Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
+- Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
+- Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
 
 ## Release history / Changelog
 

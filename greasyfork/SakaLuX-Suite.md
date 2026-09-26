@@ -47,10 +47,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.940 — Settings Schema v1 and safe automatic migrations**
-- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
-- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
-- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
+**v0.9.940 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
 
