@@ -27,10 +27,16 @@ function loadCore({ hub = false } = {}) {
   const body = makeElement('body');
   if (hub) elements.set('sakalux-hub-panel', makeElement('sakalux-hub-panel'));
   const store = new Map();
+  const eventHandlers = new Map();
   const context = {
     console,
     setTimeout,
     clearTimeout,
+    addEventListener(type, fn) {
+      const list = eventHandlers.get(type) || [];
+      list.push(fn);
+      eventHandlers.set(type, list);
+    },
     localStorage: {
       getItem: k => store.has(k) ? store.get(k) : null,
       setItem: (k,v) => store.set(k,String(v)),
@@ -48,13 +54,13 @@ function loadCore({ hub = false } = {}) {
   vm.createContext(context);
   const code = fs.readFileSync('src/core/sakalux-core.js','utf8');
   vm.runInContext(code, context);
-  return { context, core: context.SakaLuXCore, elements, html, body, store };
+  return { context, core: context.SakaLuXCore, elements, html, body, store, eventHandlers };
 }
 
 (async () => {
-  const { core, context, elements, html, store } = loadCore();
+  const { core, context, elements, html, store, eventHandlers } = loadCore();
   assert.ok(core, 'core exported');
-  assert.equal(core.version, '1.0.0-test.2');
+  assert.equal(core.version, '1.0.0-test.3');
   assert.equal(context.SakaLuXPerf, core.perf, 'legacy SakaLuXPerf alias preserved');
   assert.equal(typeof core.ui?.ensureSharedSkin, 'function', 'shared UI skin moved into Core');
 
@@ -86,8 +92,12 @@ function loadCore({ hub = false } = {}) {
   const events = [];
   core.router.onChange(e => events.push(e));
   assert.equal(core.router.check(), false, 'same route ignored');
+  assert.equal(core.router.bind(), true, 'router binds browser route signals once');
+  assert.equal(core.router.bind(), false, 'router bind is idempotent');
+  assert.equal(eventHandlers.get('hashchange').length, 1);
+  assert.equal(eventHandlers.get('popstate').length, 1);
   context.location.search='?sid=travel';
-  assert.equal(core.router.check(), true, 'SPA route change detected');
+  eventHandlers.get('popstate')[0]();
   assert.equal(events.length,1);
   assert.equal(events[0].current,'/index.php?sid=travel');
 
