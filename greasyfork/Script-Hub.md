@@ -34,11 +34,10 @@
 
 ## Current release note
 
-**v1.9.87 — Per-module Health Status**
-- Adds explicit per-module states: OK, UPDATE AVAILABLE, DISABLED, WRONG PAGE, API ERROR, CHECK ERROR and NOT INSTALLED.
-- Adds a compact health summary directly under the main Hub counters.
-- System Check now reports the exact local status reason for each managed module.
-- Exposes per-module status rows and status counts through SakaLuXScriptHub.diagnostics().
+**v1.9.87 — Persistent native Fly-out launcher + release synchronization**
+- Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
+- Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
+- Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
 
 ## Release history / Changelog
 
