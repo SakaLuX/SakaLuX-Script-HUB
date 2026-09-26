@@ -510,7 +510,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.0.0-test.2';
+  const VERSION = '1.0.0-test.3';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -531,6 +531,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   g.__SakaLuXDockRuntimeModules = modules;
   let observer = null;
   let observerQueued = false;
+  let runtimeSignalsBound = false;
+  let promptScheduled = false;
 
   function core() { return g.SakaLuXCore || null; }
   function doc() { return typeof document === 'undefined' ? null : document; }
@@ -740,6 +742,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   function bindRuntimeSignals() {
+    if (runtimeSignalsBound) return;
+    runtimeSignalsBound = true;
     try {
       core()?.router?.onChange?.(() => scheduleRefresh(180));
       core()?.router?.bind?.();
@@ -761,7 +765,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     modules.set(normalized.id, normalized); // latest registration wins
     render();
     bindRuntimeSignals();
-    setTimeout(() => maybePrompt(), 1200);
+    if (!promptScheduled) {
+      promptScheduled = true;
+      Promise.resolve().then(() => maybePrompt());
+    }
     return normalized;
   }
 
