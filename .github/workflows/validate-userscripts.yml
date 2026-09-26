@@ -26,6 +26,8 @@ jobs:
         run: python3 .github/scripts/validate_repository.py
       - name: Verify Hub Health / Diagnostics
         run: node tests/hub-health-diagnostics-regression.cjs
+      - name: Verify Hub per-module health status
+        run: node tests/hub-health-status-regression.cjs
       - name: Verify Stocks panel in a busy TornPDA page
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/stocks-panel-regression.cjs
       - name: Verify Hub INFO and NEW
