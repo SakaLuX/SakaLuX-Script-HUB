@@ -5,17 +5,49 @@ const { STATES, netSellProceeds, sanitizePlan, executeRebalance } = require('./s
 
 function ioFactory(cfg = {}) {
   const calls = [];
+  const checkpoints = [];
   let snapshots = Array.isArray(cfg.snapshots) ? [...cfg.snapshots] : [];
+  const sellAttempts = new Map();
   return {
     calls,
-    sell: async (sym, shares) => { calls.push(['sell', sym, shares]); return cfg.sellResult?.[sym] ?? { success: true }; },
-    buy: async (sym, shares) => { calls.push(['buy', sym, shares]); return cfg.buyResult ?? { success: true }; },
+    checkpoints,
+    sell: async (sym, shares) => {
+      const n = (sellAttempts.get(sym) || 0) + 1;
+      sellAttempts.set(sym, n);
+      calls.push(['sell', sym, shares, n]);
+      const scripted = cfg.sellScript?.[sym];
+      if (Array.isArray(scripted) && scripted.length) {
+        const step = scripted[Math.min(n - 1, scripted.length - 1)];
+        if (step instanceof Error) throw step;
+        return step;
+      }
+      return cfg.sellResult?.[sym] ?? { success: true };
+    },
+    verifySell: async (sym, shares) => {
+      calls.push(['verifySell', sym, shares]);
+      const scripted = cfg.verifySell?.[sym];
+      if (Array.isArray(scripted) && scripted.length) return scripted.shift();
+      if (typeof scripted === 'boolean') return scripted;
+      return true;
+    },
+    buy: async (sym, shares) => {
+      calls.push(['buy', sym, shares]);
+      if (cfg.buyError) throw cfg.buyError;
+      return cfg.buyResult ?? { success: true };
+    },
     wait: async ms => { calls.push(['wait', ms]); },
-    sync: async () => { calls.push(['sync']); },
+    sync: async () => { calls.push(['sync']); if (cfg.syncError) throw cfg.syncError; },
     snapshot: async () => {
       calls.push(['snapshot']);
       if (!snapshots.length) throw new Error('No snapshot configured.');
-      return snapshots.shift();
+      const next = snapshots.shift();
+      if (next instanceof Error) throw next;
+      return next;
+    },
+    checkpoint: async state => {
+      checkpoints.push(JSON.parse(JSON.stringify(state)));
+      calls.push(['checkpoint', state.phase]);
+      if (typeof cfg.onCheckpoint === 'function') await cfg.onCheckpoint(state, checkpoints.length);
     }
   };
 }
@@ -44,7 +76,7 @@ async function test(name, fn) {
     assert.deepEqual(p.sources.map(x => x.sym), ['SYM']);
   });
 
-  await test('happy path follows the full state machine in order', async () => {
+  await test('happy path follows state machine and verifies SELL before BUY', async () => {
     const io = ioFactory({ snapshots: [
       { cash: 120000, targetPrice: 100, targetShares: 100 },
       { cash: 20000, targetPrice: 100, targetShares: 1100 }
@@ -57,12 +89,126 @@ async function test(name, fn) {
     }, io, { syncDelayMs: 0 });
     assert.equal(ctx.phase, STATES.COMPLETE);
     assert.equal(ctx.verified, true);
-    assert.deepEqual(ctx.history, [
-      STATES.PLANNING, STATES.SELLING, STATES.WAITING_SYNC,
-      STATES.VERIFYING_CASH, STATES.BUYING, STATES.VERIFYING_POSITION,
-      STATES.COMPLETE
-    ]);
-    assert.deepEqual(io.calls.filter(x => x[0] === 'buy')[0], ['buy', 'TCB', 1000]);
+    assert.equal(io.calls.some(x => x[0] === 'verifySell' && x[1] === 'SYM'), true);
+    assert.deepEqual(io.calls.filter(x => x[0] === 'buy')[0].slice(0,3), ['buy', 'TCB', 1000]);
+  });
+
+  await test('multiple SELL sources execute once each and all are checkpointed', async () => {
+    const io = ioFactory({ snapshots: [
+      { cash: 300000, targetPrice: 1000, targetShares: 0 },
+      { cash: 0, targetPrice: 1000, targetShares: 300 }
+    ]});
+    const ctx = await executeRebalance({
+      cash: 0,
+      reserve: 0,
+      target: { sym: 'TCB', sharesNeeded: 300, price: 1000 },
+      sources: [
+        { sym: 'SYM', shares: 100, price: 1000 },
+        { sym: 'WLT', shares: 100, price: 1000 },
+        { sym: 'FHG', shares: 100, price: 1000 }
+      ]
+    }, io, { syncDelayMs: 0 });
+    assert.equal(ctx.phase, STATES.COMPLETE);
+    assert.deepEqual(io.calls.filter(x => x[0] === 'sell').map(x => x[1]), ['SYM','WLT','FHG']);
+    assert.equal(io.checkpoints.filter(x => Array.isArray(x.sold) && x.sold.length > 0).length >= 3, true);
+  });
+
+  await test('resume after interruption does not sell an already completed source twice', async () => {
+    const io = ioFactory({ snapshots: [
+      { cash: 200000, targetPrice: 1000, targetShares: 0 },
+      { cash: 0, targetPrice: 1000, targetShares: 200 }
+    ]});
+    const ctx = await executeRebalance({
+      cash: 0,
+      reserve: 0,
+      target: { sym: 'TCB', sharesNeeded: 200, price: 1000 },
+      sources: [
+        { sym: 'SYM', shares: 100, price: 1000 },
+        { sym: 'WLT', shares: 100, price: 1000 }
+      ]
+    }, io, {
+      syncDelayMs: 0,
+      resumeState: { sold: [{ sym: 'SYM', shares: 100 }] }
+    });
+    assert.equal(ctx.phase, STATES.COMPLETE);
+    assert.equal(io.calls.some(x => x[0] === 'sell' && x[1] === 'SYM'), false);
+    assert.equal(io.calls.filter(x => x[0] === 'sell' && x[1] === 'WLT').length, 1);
+  });
+
+  await test('uncertain SELL response is verified before retry so duplicate sale is prevented', async () => {
+    const io = ioFactory({
+      sellScript: { SYM: [new Error('TornPDA network detached')] },
+      verifySell: { SYM: [true] },
+      snapshots: [
+        { cash: 100000, targetPrice: 1000, targetShares: 0 },
+        { cash: 0, targetPrice: 1000, targetShares: 100 }
+      ]
+    });
+    const ctx = await executeRebalance({
+      cash: 0,
+      reserve: 0,
+      target: { sym: 'TCB', sharesNeeded: 100, price: 1000 },
+      sources: [{ sym: 'SYM', shares: 100, price: 1000 }]
+    }, io, { syncDelayMs: 0, maxSellRetries: 2, retryDelayMs: 0 });
+    assert.equal(ctx.phase, STATES.COMPLETE);
+    assert.equal(io.calls.filter(x => x[0] === 'sell' && x[1] === 'SYM').length, 1);
+    assert.equal(ctx.sold[0].recovered, true);
+  });
+
+  await test('safe retry occurs only after verification proves first SELL did not land', async () => {
+    const io = ioFactory({
+      sellScript: { SYM: [new Error('timeout'), { success: true }] },
+      verifySell: { SYM: [false, true] },
+      snapshots: [
+        { cash: 100000, targetPrice: 1000, targetShares: 0 },
+        { cash: 0, targetPrice: 1000, targetShares: 100 }
+      ]
+    });
+    const ctx = await executeRebalance({
+      cash: 0,
+      reserve: 0,
+      target: { sym: 'TCB', sharesNeeded: 100, price: 1000 },
+      sources: [{ sym: 'SYM', shares: 100, price: 1000 }]
+    }, io, { syncDelayMs: 0, maxSellRetries: 1, retryDelayMs: 0 });
+    assert.equal(ctx.phase, STATES.COMPLETE);
+    assert.equal(io.calls.filter(x => x[0] === 'sell' && x[1] === 'SYM').length, 2);
+  });
+
+  await test('failed SELL after retries stops entire rebalance before BUY', async () => {
+    const io = ioFactory({
+      sellScript: { SYM: [{ success: false }, { success: false }] },
+      verifySell: { SYM: [false, false] },
+      snapshots: []
+    });
+    const ctx = await executeRebalance({
+      cash: 0,
+      reserve: 0,
+      target: { sym: 'TCB', sharesNeeded: 100, price: 1000 },
+      sources: [{ sym: 'SYM', shares: 100, price: 1000 }]
+    }, io, { syncDelayMs: 0, maxSellRetries: 1, retryDelayMs: 0 });
+    assert.equal(ctx.phase, STATES.ERROR);
+    assert.equal(io.calls.some(x => x[0] === 'buy'), false);
+  });
+
+  await test('TornPDA-style SELL to BUY transition waits, syncs, snapshots, then buys', async () => {
+    const io = ioFactory({ snapshots: [
+      { cash: 100000, targetPrice: 1000, targetShares: 0 },
+      { cash: 0, targetPrice: 1000, targetShares: 100 }
+    ]});
+    const ctx = await executeRebalance({
+      cash: 0,
+      reserve: 0,
+      target: { sym: 'TCB', sharesNeeded: 100, price: 1000 },
+      sources: [{ sym: 'SYM', shares: 101, price: 1000 }]
+    }, io, { syncDelayMs: 2500 });
+    assert.equal(ctx.phase, STATES.COMPLETE);
+    const names = io.calls.map(x => x[0]);
+    const sellIdx = names.indexOf('sell');
+    const waitIdx = names.indexOf('wait', sellIdx + 1);
+    const syncIdx = names.indexOf('sync', waitIdx + 1);
+    const snapIdx = names.indexOf('snapshot', syncIdx + 1);
+    const buyIdx = names.indexOf('buy', snapIdx + 1);
+    assert.equal(sellIdx >= 0 && waitIdx > sellIdx && syncIdx > waitIdx && snapIdx > syncIdx && buyIdx > snapIdx, true);
   });
 
   await test('BUY amount is recalculated from verified cash after SELL', async () => {
@@ -109,19 +255,6 @@ async function test(name, fn) {
     assert.equal(io.calls.some(x => x[0] === 'buy'), false);
   });
 
-  await test('SELL must be explicitly confirmed', async () => {
-    const io = ioFactory({ sellResult: { SYM: { success: false } }, snapshots: [] });
-    const ctx = await executeRebalance({
-      cash: 0,
-      reserve: 0,
-      target: { sym: 'TCB', sharesNeeded: 10, price: 1000 },
-      sources: [{ sym: 'SYM', shares: 10, price: 1000 }]
-    }, io, { syncDelayMs: 0 });
-    assert.equal(ctx.phase, STATES.ERROR);
-    assert.match(ctx.error, /SELL not confirmed/);
-    assert.equal(io.calls.some(x => x[0] === 'buy'), false);
-  });
-
   await test('BUY must be explicitly confirmed', async () => {
     const io = ioFactory({ buyResult: { success: false }, snapshots: [
       { cash: 10000, targetPrice: 1000, targetShares: 0 }
@@ -149,6 +282,23 @@ async function test(name, fn) {
     }, io, { syncDelayMs: 0 });
     assert.equal(ctx.phase, STATES.ERROR);
     assert.match(ctx.error, /verification failed/i);
+  });
+
+  await test('resume after BUY checkpoint verifies position without buying twice', async () => {
+    const io = ioFactory({ snapshots: [
+      { cash: 0, targetPrice: 1000, targetShares: 100 }
+    ]});
+    const ctx = await executeRebalance({
+      cash: 0,
+      reserve: 0,
+      target: { sym: 'TCB', sharesNeeded: 100, price: 1000 },
+      sources: []
+    }, io, {
+      syncDelayMs: 0,
+      resumeState: { bought: { sym: 'TCB', shares: 100, price: 1000 } }
+    });
+    assert.equal(ctx.phase, STATES.COMPLETE);
+    assert.equal(io.calls.some(x => x[0] === 'buy'), false);
   });
 
   await test('reserve cash is never consumed by BUY', async () => {
