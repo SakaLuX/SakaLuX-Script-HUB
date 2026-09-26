@@ -19,6 +19,7 @@ const {window}=dom;
 window.confirm=()=>true;
 window.SakaLuXCore={router:{onChange(){return()=>{}},bind(){return true;}}};
 window.eval(block);
+window.document.dispatchEvent(new window.Event('DOMContentLoaded'));
 const api=window.SakaLuXSuiteDailyProgress;
 assert.ok(api,'Daily Progress public API exposed');
 assert.equal(api.version,'1.0.0');
