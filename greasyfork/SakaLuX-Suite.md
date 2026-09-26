@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.938**
+**v0.9.939**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.938**
+- Canonical version: **v0.9.939**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -47,10 +47,16 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.938 — Release documentation synchronized with the current Suite userscript version**
+**v0.9.939 — Daily Progress Dashboard**
 - Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
+
+### v0.9.939 — Daily Progress Dashboard
+- Adds the Suite Daily Progress dashboard with daily goal completion, unique pages visited, Suite actions and active-time tracking.
+- Includes automatic goals for Torn visit, Gym, Missions and Church prayer, plus user-defined recurring goals.
+- Keeps a rolling 14-day local history and exposes `SakaLuXSuiteDailyProgress` for diagnostics/integration.
+- Uses local browser storage only; no new API requests or remote sync are introduced.
 
 ### v0.9.938 — Shared Core v1
 - Centralizes shared infrastructure in the embedded SakaLuX Core.
