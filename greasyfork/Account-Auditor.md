@@ -30,11 +30,8 @@
 
 ## Current release note
 
-**v1.3.24 — Changes Since Last Audit**
-- Compares each successful audit against the previous successful audit using a compact local fingerprint.
-- Adds `changes-since-last-audit.json` to split snapshots with old/new values and numeric deltas.
-- Shows the change count in the Auditor panel and exposes `changesSinceLastAudit()` without storing API keys or tokens.
-- The baseline advances only after a successful sync, so failed syncs do not erase the comparison point.
+**v1.3.24 — Release documentation synchronized with the current Account Auditor userscript version**
+- Release documentation synchronized with the current Account Auditor userscript version.
 
 ## Release history / Changelog
 
