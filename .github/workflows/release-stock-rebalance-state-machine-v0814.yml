@@ -1,0 +1,56 @@
+name: Release Stock Rebalance State Machine v0.8.14
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-stock-rebalance-state-machine-v0814.yml'
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Fetch tested state-machine branch
+        run: git fetch origin test/stock-rebalance-state-machine
+      - name: Copy tested regression fixtures to main
+        run: |
+          git show origin/test/stock-rebalance-state-machine:tests/stock-rebalance-state-machine-core.cjs > tests/stock-rebalance-state-machine-core.cjs
+          git show origin/test/stock-rebalance-state-machine:tests/stock-rebalance-state-machine-regression.cjs > tests/stock-rebalance-state-machine-regression.cjs
+      - name: Integrate tested state machine into Stock Manager
+        run: python3 .github/scripts/release_stock_rebalance_state_machine_v0814.py
+      - name: Synchronize Hub fallback and release docs
+        run: python3 .github/scripts/normalize_installed_versions.py
+      - name: Add permanent regression gate to repository validation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/validate-userscripts.yml')
+          s=p.read_text()
+          needle='      - name: Check current all-script performance workload budgets\n'
+          if 'Run Stock rebalance state-machine regressions' not in s:
+              insert="      - name: Run Stock rebalance state-machine regressions\n        run: |\n          node --check tests/stock-rebalance-state-machine-core.cjs\n          node tests/stock-rebalance-state-machine-regression.cjs\n"
+              s=s.replace(needle,insert+needle)
+              p.write_text(s)
+          PY
+      - name: Validate JavaScript and regression suite
+        run: |
+          node --check SakaLuX-Stock-Manager-Advisor.user.js
+          node --check tests/stock-rebalance-state-machine-core.cjs
+          node tests/stock-rebalance-state-machine-regression.cjs
+          python3 -m json.tool scripts.json >/dev/null
+          grep -q '@version      0.8.14' SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "STOCK_REBALANCE_STATES" SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q '"version": "0.8.14"' scripts.json
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Script-Hub.user.js scripts.json greasyfork/Stock-Manager-Advisor.md tests/stock-rebalance-state-machine-core.cjs tests/stock-rebalance-state-machine-regression.cjs .github/workflows/validate-userscripts.yml
+          git commit -m 'Release Stock Manager v0.8.14 verified rebalance state machine'
+          git push
