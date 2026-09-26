@@ -2,14 +2,22 @@
 
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
+### v0.9.941 — Graffiti Spray Guide + Hub state authority
+- Adds **Graffiti Spray Guide** under `Master Control → Crimes`, using the TornPDA/mobile-friendly helper behaviour as the primary presentation and adding progress, goals, stock and warning intelligence from the advanced helper.
+- Shows REP and CASH spray suggestions together by default, with persistent BOTH / REP / CASH modes and all seven graffiti zones.
+- Adds next reputation tier progress (25/50/100/250/500), Crime Skill, Paint Mask, nerve/attempt estimate, unique outcomes, next CS objective, stock checks, <=15% spray warnings and no-spare warnings.
+- Remains read-only: no Torn API calls and no gameplay autoclicks.
+- Makes Script Hub the authority for Suite-backed standalone modules: Hub OFF forces Suite OFF; missing standalones are shown as **NOT READY** in Master Control.
+- Listens for `SakaLuX:ModuleReady` / Hub-ready signals and continuously reconciles module health without page reloads.
+
 ## Current version
-**v0.9.940**
+**v0.9.941**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.940**
+- Canonical version: **v0.9.941**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
