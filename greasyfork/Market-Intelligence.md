@@ -32,11 +32,10 @@
 
 ## Current release note
 
-**v1.17.52 — Shared Core v1**
-- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
-- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
-- Routes Market Intelligence API reads through the shared Request Broker while preserving Travel/Bazaar page behavior and strict Manage Bazaar isolation.
-- No separate Core userscript is required; Shared Core is embedded into this standalone build.
+**v1.17.52 — Embeds Shared Core v1 while preserving standalone installation and operation**
+- Embeds Shared Core v1 while preserving standalone installation and operation.
+- Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.
+- Routes Market API reads through the shared Request Broker with dedupe, bounded concurrency, retry/backoff and diagnostics.
 
 ## Release history / Changelog
 

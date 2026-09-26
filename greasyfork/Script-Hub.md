@@ -34,11 +34,10 @@
 
 ## Current release note
 
-**v1.9.85 — Shared Core v1**
-- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
-- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
-- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
-- No separate Core userscript is required; Shared Core is embedded into this standalone build.
+**v1.9.85 — Persistent native Fly-out launcher + release synchronization**
+- Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
+- Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
+- Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
 
 ## Release history / Changelog
 

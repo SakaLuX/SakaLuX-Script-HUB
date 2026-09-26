@@ -29,11 +29,10 @@
 
 ## Current release note
 
-**v1.3.52 — Shared Core v1**
-- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
-- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
-- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
-- No separate Core userscript is required; Shared Core is embedded into this standalone build.
+**v1.3.52 — Embeds Shared Core v1 while preserving standalone installation and operation**
+- Embeds Shared Core v1 while preserving standalone installation and operation.
+- Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.
+- Includes the shared API Request Broker foundation for controlled future API migration.
 
 ## Release history / Changelog
 

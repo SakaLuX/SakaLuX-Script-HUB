@@ -39,7 +39,7 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.10 — Release metadata synchronization**
-- Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.
-- Deduplicates standalone registrations by module id before rendering.
-- Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page.
+**v1.1.11 — Embeds Shared Core v1 while preserving standalone installation and operation**
+- Embeds Shared Core v1 while preserving standalone installation and operation.
+- Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.
+- Includes the shared API Request Broker foundation for controlled future API migration.

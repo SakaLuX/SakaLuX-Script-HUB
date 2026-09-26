@@ -526,6 +526,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.85", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.84", "date": "2026-09-24", "changes": ["Stops installed module SETTINGS/OPEN actions from falling through to the install/source URL when the module API is unavailable on the current page.", "Bazaar Smart Pricer now routes to Bazaar first when needed; pressing it again opens its own settings through the module API.", "Keeps standalone module ordering deterministic across all shared dock renderers."]},
         {"version": "1.9.83", "date": "2026-09-19", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.82", "date": "2026-09-19", "changes": ["Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.", "Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.", "Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions."]},
@@ -1017,18 +1018,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.51",
-                    "date": "2026-09-24",
+                    "version": "1.3.52",
+                    "date": "2026-09-26",
                     "notes": [
-                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
-                        "Deduplicates standalone registrations by module id before rendering.",
-                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
+                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
+                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
+                        "Includes the shared API Request Broker foundation for controlled future API migration."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.51",
-                "detailsRevision": 4,
+                "version": "1.3.52",
+                "detailsRevision": 5,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -1069,18 +1070,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.43",
-                    "date": "2026-09-24",
+                    "version": "5.3.44",
+                    "date": "2026-09-26",
                     "notes": [
-                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
-                        "Deduplicates standalone registrations by module id before rendering.",
-                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
+                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
+                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
+                        "Includes the shared API Request Broker foundation for controlled future API migration."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.43",
-                "detailsRevision": 2,
+                "version": "5.3.44",
+                "detailsRevision": 3,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -1122,15 +1123,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 24,
-                "version": "1.1.10",
+                "detailsRevision": 25,
+                "version": "1.1.11",
                 "release": {
-                    "version": "1.1.10",
-                    "date": "2026-09-24",
+                    "version": "1.1.11",
+                    "date": "2026-09-26",
                     "notes": [
-                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
-                        "Deduplicates standalone registrations by module id before rendering.",
-                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
+                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
+                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
+                        "Includes the shared API Request Broker foundation for controlled future API migration."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1177,18 +1178,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.45",
-                    "date": "2026-09-24",
+                    "version": "1.0.46",
+                    "date": "2026-09-26",
                     "notes": [
-                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
-                        "Deduplicates standalone registrations by module id before rendering.",
-                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
+                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
+                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
+                        "Includes the shared API Request Broker foundation for controlled future API migration."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.45",
-                "detailsRevision": 2,
+                "version": "1.0.46",
+                "detailsRevision": 3,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -1243,19 +1244,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.51",
+                    "version": "1.17.52",
                     "date": "2026-09-26",
                     "notes": [
-                        "Adds an explicit Travel lifecycle state machine: TORN_TRAVEL_AGENCY, IN_FLIGHT, LANDED_ABROAD and OTHER.",
-                        "Shows Best Route Basket only on Torn Travel Agency, Arrival Basket only in flight, and landed Best Buys/Planner only abroad.",
-                        "Removes stale Travel panels deterministically during Torn SPA/TornPDA navigation, including Travel → Flight → foreign country → Messages → Travel.",
-                        "Keeps Travel Session Summary inside the travel lifecycle and adds permanent regression coverage for Hawaii and other foreign destinations."
+                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
+                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
+                        "Routes Market API reads through the shared Request Broker with dedupe, bounded concurrency, retry/backoff and diagnostics."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.51",
-                "detailsRevision": 10,
+                "version": "1.17.52",
+                "detailsRevision": 11,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -1332,18 +1332,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.46",
-                    "date": "2026-09-24",
+                    "version": "1.3.47",
+                    "date": "2026-09-26",
                     "notes": [
-                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
-                        "Deduplicates standalone registrations by module id before rendering.",
-                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
+                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
+                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
+                        "Includes the shared API Request Broker foundation for controlled future API migration."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.46",
-                "detailsRevision": 3,
+                "version": "1.3.47",
+                "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -1383,18 +1383,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.40",
-                    "date": "2026-09-24",
+                    "version": "1.8.41",
+                    "date": "2026-09-26",
                     "notes": [
-                        "Locks the shared standalone launcher to one canonical module order so rows no longer jump as add-ons register or refresh.",
-                        "Deduplicates standalone registrations by module id before rendering.",
-                        "Makes Bazaar Smart Pricer open its Settings on Bazaar and otherwise navigate to Bazaar first instead of opening an installer/source page."
+                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
+                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
+                        "Includes the shared API Request Broker foundation for controlled future API migration."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.40",
-                "detailsRevision": 2,
+                "version": "1.8.41",
+                "detailsRevision": 3,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -1440,21 +1440,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.14",
+                    "version": "0.8.15",
                     "date": "2026-09-26",
                     "notes": [
-                        "Introduces a verified Stock Rebalance state machine: PLANNING → SELLING → VERIFYING_SELL → WAITING_SYNC → VERIFYING_CASH → BUYING → VERIFYING_POSITION → COMPLETE.",
-                        "Verifies each SELL before another transaction, preventing duplicate sales after TornPDA/network uncertainty and supporting safe retry only when a sale did not land.",
-                        "Persists recovery checkpoints so interrupted rebalances can resume without repeating completed SELL or BUY actions.",
-                        "Re-syncs cash, target price and held shares before BUY, recalculates affordable quantity, preserves reserve cash and verifies the final position.",
-                        "Keeps the BUY target excluded from SELL sources and retains the 0.1% sell-fee-aware planning introduced in v0.8.13.",
-                        "Adds permanent regression coverage for multiple SELLs, interruption/recovery, retry safety, TornPDA transitions, large amounts and post-BUY verification."
+                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
+                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
+                        "Routes Torn API reads through the shared Request Broker while keeping BUY/SELL transaction POSTs isolated from broker retries."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.14",
-                "detailsRevision": 6,
+                "version": "0.8.15",
+                "detailsRevision": 7,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",

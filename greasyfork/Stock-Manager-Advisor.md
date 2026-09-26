@@ -34,11 +34,10 @@
 
 ## Current release note
 
-**v0.8.15 — Shared Core v1**
-- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
-- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
-- Routes Torn API reads through the shared Request Broker while keeping stock BUY/SELL transaction POSTs isolated in the verified rebalance state machine.
-- No separate Core userscript is required; Shared Core is embedded into this standalone build.
+**v0.8.15 — Embeds Shared Core v1 while preserving standalone installation and operation**
+- Embeds Shared Core v1 while preserving standalone installation and operation.
+- Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.
+- Routes Torn API reads through the shared Request Broker while keeping BUY/SELL transaction POSTs isolated from broker retries.
 
 ## Release history / Changelog
 

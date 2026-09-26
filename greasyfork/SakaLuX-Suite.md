@@ -47,11 +47,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.938 — Shared Core v1**
-- Centralizes shared performance, Hub detection, standalone dock ordering, SPA routing and common storage helpers.
-- Adds the shared API Request Broker foundation with request deduplication, bounded concurrency, retry/backoff, cache and diagnostics.
-- Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
-- No separate Core userscript is required; Shared Core is embedded into this standalone build.
+**v0.9.938 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
 
