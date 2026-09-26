@@ -6,12 +6,21 @@ const path = require('node:path');
 const BEGIN = '/* SakaLuX Shared Core — BEGIN */';
 const END = '/* SakaLuX Shared Core — END */';
 
+function stripSharedCore(source) {
+  if (typeof source !== 'string') throw new TypeError('source must be a string');
+  // The embedder owns the two newlines immediately before BEGIN. Removing the
+  // block together with only those owned newlines restores the original file
+  // byte-for-byte, including whatever whitespace originally followed metadata.
+  const ownedBlock = new RegExp(`\\n\\n${escapeRegExp(BEGIN)}[\\s\\S]*?${escapeRegExp(END)}`, 'g');
+  return source.replace(ownedBlock, '');
+}
+
 function embedSharedCore(source, core) {
   if (typeof source !== 'string' || typeof core !== 'string') throw new TypeError('source/core must be strings');
   if (!source.includes('// ==/UserScript==')) throw new Error('userscript metadata terminator not found');
   if (!core.includes("const NS = 'SakaLuXCore'")) throw new Error('unexpected Shared Core source');
 
-  const stripped = source.replace(new RegExp(`${escapeRegExp(BEGIN)}[\\s\\S]*?${escapeRegExp(END)}\\n?`, 'g'), '');
+  const stripped = stripSharedCore(source);
   const marker = '// ==/UserScript==';
   const at = stripped.indexOf(marker) + marker.length;
   return stripped.slice(0, at) + `\n\n${BEGIN}\n${core.trim()}\n${END}` + stripped.slice(at);
@@ -42,4 +51,4 @@ function cli(argv = process.argv.slice(2)) {
 }
 
 if (require.main === module) cli();
-module.exports = { embedSharedCore, metadataHeader, BEGIN, END };
+module.exports = { embedSharedCore, stripSharedCore, metadataHeader, BEGIN, END };
