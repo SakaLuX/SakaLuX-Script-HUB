@@ -34,7 +34,7 @@
 
 ## Current release note
 
-**v0.8.14 — Verified Rebalance state machine**
+**v0.8.14 — Release metadata synchronization**
 - Introduces a verified Stock Rebalance state machine: PLANNING → SELLING → VERIFYING_SELL → WAITING_SYNC → VERIFYING_CASH → BUYING → VERIFYING_POSITION → COMPLETE.
 - Verifies each SELL before another transaction, preventing duplicate sales after TornPDA/network uncertainty and supporting safe retry only when a sale did not land.
 - Persists recovery checkpoints so interrupted rebalances can resume without repeating completed SELL or BUY actions.

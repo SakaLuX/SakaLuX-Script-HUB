@@ -49,7 +49,7 @@ Install Script Hub when using multiple registered SakaLuX add-ons. It provides o
 - 📈 SakaLuX Market Intelligence **v1.17.51**
 - ⚔️ SakaLuX Elimination Assistant **v1.3.46**
 - 🏢 SakaLuX Company Intelligence **v1.8.40**
-- 📊 SakaLuX Stock Manager & Advisor **v0.8.12**
+- 📊 SakaLuX Stock Manager & Advisor **v0.8.14**
 
 Chat Intelligence, Account Auditor and SakaLuX Suite remain standalone tools and are intentionally not registered in `scripts.json`.
 

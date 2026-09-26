@@ -32,12 +32,11 @@
 
 ## Current release note
 
-**v1.17.51 — Explicit Travel state machine**
-- Adds explicit `TORN_TRAVEL_AGENCY`, `IN_FLIGHT`, `LANDED_ABROAD` and `OTHER` travel states.
-- Best Route Basket is now strictly limited to Torn Travel Agency.
-- Arrival Basket is limited to active flights; in-country Best Buys / Travel Buy Planner are limited to landed foreign pages.
-- Travel Session Summary remains inside the travel lifecycle and all stale travel panels are removed during SPA/TornPDA route changes.
-- Permanent regression coverage validates Hawaii/foreign-country classification and Travel → Flight → foreign country → Messages → Travel navigation.
+**v1.17.51 — Release metadata synchronization**
+- Adds an explicit Travel lifecycle state machine: TORN_TRAVEL_AGENCY, IN_FLIGHT, LANDED_ABROAD and OTHER.
+- Shows Best Route Basket only on Torn Travel Agency, Arrival Basket only in flight, and landed Best Buys/Planner only abroad.
+- Removes stale Travel panels deterministically during Torn SPA/TornPDA navigation, including Travel → Flight → foreign country → Messages → Travel.
+- Keeps Travel Session Summary inside the travel lifecycle and adds permanent regression coverage for Hawaii and other foreign destinations.
 
 ## Release history / Changelog
 

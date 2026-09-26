@@ -818,12 +818,17 @@ body [id^="sakalux-"] .card,body [id^="slx-"] .card{border-color:var(--slx-borde
                 "release": {
                     "version": "1.17.51",
                     "date": "2026-09-26",
-                    "notes": ["Adds an explicit Travel lifecycle state machine for Travel Agency, flight, landed-abroad and other pages.", "Scopes Best Route, Arrival Basket and landed-country panels to their exact travel states.", "Adds SPA/TornPDA stale-panel cleanup and permanent travel navigation regression coverage."]
+                    "notes": [
+                        "Adds an explicit Travel lifecycle state machine: TORN_TRAVEL_AGENCY, IN_FLIGHT, LANDED_ABROAD and OTHER.",
+                        "Shows Best Route Basket only on Torn Travel Agency, Arrival Basket only in flight, and landed Best Buys/Planner only abroad.",
+                        "Removes stale Travel panels deterministically during Torn SPA/TornPDA navigation, including Travel → Flight → foreign country → Messages → Travel.",
+                        "Keeps Travel Session Summary inside the travel lifecycle and adds permanent regression coverage for Hawaii and other foreign destinations."
+                    ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
                 "version": "1.17.51",
-                "detailsRevision": 9,
+                "detailsRevision": 10,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
