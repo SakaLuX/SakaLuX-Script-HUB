@@ -68,16 +68,18 @@ function makeCore(fetchImpl) {
 
   // Retry 429/5xx, but not normal 4xx.
   let retryCalls = 0;
-  core.api.registerEnvironment({ fetch: async () => {
+  context.fetch = async () => {
     retryCalls++;
     return retryCalls === 1 ? response(429, { error:'rate' }) : response(200, { ok:'retry' });
-  }});
+  };
+  core.api.registerEnvironment({ fetch: context.fetch });
   const retried = await core.api.requestJson('https://api.torn.com/v2/test/retry?x=1', { retries:1, retryBase:1, force:true });
   assert.equal(retried.ok, 'retry');
   assert.equal(retryCalls, 2, '429 should retry exactly once');
 
   let badCalls = 0;
-  core.api.registerEnvironment({ fetch: async () => { badCalls++; return response(400, { error:'bad' }); } });
+  context.fetch = async () => { badCalls++; return response(400, { error:'bad' }); };
+  core.api.registerEnvironment({ fetch: context.fetch });
   await assert.rejects(
     () => core.api.requestJson('https://api.torn.com/v2/test/bad?x=1', { retries:3, retryBase:1, force:true }),
     err => err?.code === 'HTTP' && err?.status === 400
@@ -85,7 +87,8 @@ function makeCore(fetchImpl) {
   assert.equal(badCalls, 1, 'non-retryable 4xx must not loop');
 
   // Torn API application errors are classified without leaking keys into diagnostics.
-  core.api.registerEnvironment({ fetch: async () => response(200, { error:{ code:2, error:'Incorrect key' } }) });
+  context.fetch = async () => response(200, { error:{ code:2, error:'Incorrect key' } });
+  core.api.registerEnvironment({ fetch: context.fetch });
   await assert.rejects(
     () => core.api.requestJson('https://api.torn.com/v2/user/money?key=secret-key', { throwApiError:true, force:true }),
     err => err?.code === 'TORN_API_ERROR' && err?.isInvalidKey === true && err?.apiCode === 2
@@ -95,21 +98,23 @@ function makeCore(fetchImpl) {
   // Concurrency queue is globally bounded.
   let live = 0, peak = 0;
   core.api.configure({ maxConcurrent:2 });
-  core.api.registerEnvironment({ fetch: async url => {
+  context.fetch = async url => {
     live++; peak = Math.max(peak, live);
     await new Promise(r => setTimeout(r, 20));
     live--;
     return response(200, { url:String(url) });
-  }});
+  };
+  core.api.registerEnvironment({ fetch: context.fetch });
   await Promise.all(Array.from({length:6}, (_,i) => core.api.requestJson(`https://example.test/${i}`, { force:true })));
   assert.ok(peak <= 2, `broker concurrency exceeded configured maximum: ${peak}`);
 
   // Route-scoped requests are aborted/suppressed after SPA navigation.
   core.api.configure({ maxConcurrent:4 });
-  core.api.registerEnvironment({ fetch: (url, opts={}) => new Promise((resolve, reject) => {
+  context.fetch = (url, opts={}) => new Promise((resolve, reject) => {
     const timer = setTimeout(() => resolve(response(200,{late:true})), 120);
     opts.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new Error('aborted')); }, { once:true });
-  }) });
+  });
+  core.api.registerEnvironment({ fetch: context.fetch });
   const routeRequest = core.api.requestJson('https://example.test/route', { routeScoped:true, force:true, retries:0 });
   await new Promise(r => setTimeout(r, 10));
   context.location.search='?sid=travel';
