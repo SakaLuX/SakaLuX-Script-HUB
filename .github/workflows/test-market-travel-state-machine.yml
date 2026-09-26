@@ -1,0 +1,25 @@
+name: Test Market Travel State Machine
+on:
+  push:
+    branches:
+      - test/market-travel-state-machine
+    paths:
+      - 'tests/market-travel-state-machine-core.cjs'
+      - 'tests/market-travel-state-machine-regression.cjs'
+      - '.github/workflows/test-market-travel-state-machine.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check state machine core
+        run: node --check tests/market-travel-state-machine-core.cjs
+      - name: Syntax check regression suite
+        run: node --check tests/market-travel-state-machine-regression.cjs
+      - name: Run Market travel regression suite
+        run: node tests/market-travel-state-machine-regression.cjs
