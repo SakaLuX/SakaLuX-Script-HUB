@@ -18,24 +18,36 @@ BEGIN = '/* SakaLuX Shared Dock Runtime — BEGIN */'
 END = '/* SakaLuX Shared Dock Runtime — END */'
 
 src = RUNTIME.read_text(encoding='utf-8')
-src = src.replace("const VERSION = '1.0.0-test.2';", "const VERSION = '1.0.0-test.3';", 1)
-src = src.replace(
-    "  let observer = null;\n  let observerQueued = false;\n",
-    "  let observer = null;\n  let observerQueued = false;\n  let runtimeSignalsBound = false;\n  let promptScheduled = false;\n",
-    1,
-)
-src = src.replace(
-    "  function bindRuntimeSignals() {\n    try {",
-    "  function bindRuntimeSignals() {\n    if (runtimeSignalsBound) return;\n    runtimeSignalsBound = true;\n    try {",
-    1,
-)
-src = src.replace(
-    "    bindRuntimeSignals();\n    setTimeout(() => maybePrompt(), 1200);\n    return normalized;",
-    "    bindRuntimeSignals();\n    if (!promptScheduled) {\n      promptScheduled = true;\n      Promise.resolve().then(() => maybePrompt());\n    }\n    return normalized;",
-    1,
-)
-if "1.0.0-test.3" not in src or "runtimeSignalsBound" not in src or "Promise.resolve().then(() => maybePrompt())" not in src:
-    raise SystemExit('Priority 6 performance patch anchors did not apply')
+
+# Idempotent patch: apply only when upgrading test.2 -> test.3.
+if "const VERSION = '1.0.0-test.2';" in src:
+    src = src.replace("const VERSION = '1.0.0-test.2';", "const VERSION = '1.0.0-test.3';", 1)
+    src = src.replace(
+        "  let observer = null;\n  let observerQueued = false;\n",
+        "  let observer = null;\n  let observerQueued = false;\n  let runtimeSignalsBound = false;\n  let promptScheduled = false;\n",
+        1,
+    )
+    src = src.replace(
+        "  function bindRuntimeSignals() {\n    try {",
+        "  function bindRuntimeSignals() {\n    if (runtimeSignalsBound) return;\n    runtimeSignalsBound = true;\n    try {",
+        1,
+    )
+    src = src.replace(
+        "    bindRuntimeSignals();\n    setTimeout(() => maybePrompt(), 1200);\n    return normalized;",
+        "    bindRuntimeSignals();\n    if (!promptScheduled) {\n      promptScheduled = true;\n      Promise.resolve().then(() => maybePrompt());\n    }\n    return normalized;",
+        1,
+    )
+elif "const VERSION = '1.0.0-test.3';" not in src:
+    raise SystemExit('Unexpected Shared Dock Runtime version; refusing unsafe patch')
+
+# Guard against accidental duplicate patch application.
+if src.count('let runtimeSignalsBound = false;') != 1:
+    raise SystemExit('runtimeSignalsBound must be declared exactly once')
+if src.count('let promptScheduled = false;') != 1:
+    raise SystemExit('promptScheduled must be declared exactly once')
+if src.count('Promise.resolve().then(() => maybePrompt())') != 1:
+    raise SystemExit('Prompt scheduling optimization must exist exactly once')
+
 RUNTIME.write_text(src, encoding='utf-8')
 
 runtime = src.rstrip()
@@ -51,4 +63,4 @@ for name in TARGETS:
     text = text[:start] + replacement + text[end:]
     path.write_text(text, encoding='utf-8')
 
-print('Priority 6 dock runtime performance scheduling patched and re-embedded in 9 userscripts.')
+print('Priority 6 dock runtime performance scheduling verified/re-embedded in 9 userscripts.')
