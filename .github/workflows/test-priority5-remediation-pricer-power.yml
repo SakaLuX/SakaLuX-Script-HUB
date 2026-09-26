@@ -13,7 +13,9 @@ jobs:
         with:
           node-version: '24'
       - name: Apply remediation and Pricer power migration
-        run: python3 .github/scripts/apply_priority5_remediation_and_pricer_power.py
+        run: |
+          python3 .github/scripts/apply_priority5_remediation_and_pricer_power.py
+          python3 .github/scripts/sync_priority5_hub_fallback.py
       - name: Install validation dependencies
         run: |
           python3 -m pip install PyYAML==6.0.3
