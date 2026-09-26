@@ -1,0 +1,17 @@
+name: Diagnose Bazaar Thanker Performance
+on:
+  push:
+    branches: [test/bazaar-thanker-performance]
+permissions:
+  contents: read
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --prefix "$RUNNER_TEMP/dom-tests" jsdom@30.1.0 --no-audit --no-fund
+      - name: Bazaar Thanker relevant timeout sources
+        run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/performance/worker.cjs SakaLuX-Bazaar-Thanker-PDA.user.js relevant
