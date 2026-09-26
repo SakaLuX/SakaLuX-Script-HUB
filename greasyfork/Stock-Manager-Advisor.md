@@ -9,7 +9,7 @@
 ## Repository synchronization
 
 - Verified: **2026-09-20**
-- Canonical version: **v0.8.13**
+- Canonical version: **v0.8.14**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -34,7 +34,7 @@
 
 ## Current release note
 
-**v0.8.14 — Release metadata synchronization**
+**v0.8.14 — Verified Rebalance state machine**
 - Introduces a verified Stock Rebalance state machine: PLANNING → SELLING → VERIFYING_SELL → WAITING_SYNC → VERIFYING_CASH → BUYING → VERIFYING_POSITION → COMPLETE.
 - Verifies each SELL before another transaction, preventing duplicate sales after TornPDA/network uncertainty and supporting safe retry only when a sale did not land.
 - Persists recovery checkpoints so interrupted rebalances can resume without repeating completed SELL or BUY actions.
@@ -74,7 +74,7 @@
 ## Release history / Changelog
 
 
-### v0.8.14 — Release metadata synchronization
+### v0.8.14 — Verified Rebalance state machine
 - Introduces a verified Stock Rebalance state machine: PLANNING → SELLING → VERIFYING_SELL → WAITING_SYNC → VERIFYING_CASH → BUYING → VERIFYING_POSITION → COMPLETE.
 - Verifies each SELL before another transaction, preventing duplicate sales after TornPDA/network uncertainty and supporting safe retry only when a sale did not land.
 - Persists recovery checkpoints so interrupted rebalances can resume without repeating completed SELL or BUY actions.
