@@ -25,11 +25,10 @@ jobs:
         run: node --check SakaLuX-Suite.user.js
       - name: Run graffiti + Hub sync regression
         run: node tests/suite-graffiti-hub-sync-regression.cjs
-      - name: Run existing Suite regression when dependencies are available
-        shell: bash
-        run: |
-          if [ -f package-lock.json ]; then npm ci --ignore-scripts; fi
-          node tests/suite-modules-regression.cjs
+      - name: Install DOM test dependency
+        run: npm install --no-save --ignore-scripts jsdom
+      - name: Run existing Suite regression
+        run: node tests/suite-modules-regression.cjs
       - name: Commit generated release files
         shell: bash
         run: |
