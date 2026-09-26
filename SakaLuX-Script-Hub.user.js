@@ -526,6 +526,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.88", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.87", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.85", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.84", "date": "2026-09-24", "changes": ["Stops installed module SETTINGS/OPEN actions from falling through to the install/source URL when the module API is unavailable on the current page.", "Bazaar Smart Pricer now routes to Bazaar first when needed; pressing it again opens its own settings through the module API.", "Keeps standalone module ordering deterministic across all shared dock renderers."]},

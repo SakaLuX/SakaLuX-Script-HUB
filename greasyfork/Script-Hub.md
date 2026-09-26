@@ -34,7 +34,7 @@
 
 ## Current release note
 
-**v1.9.87 — Persistent native Fly-out launcher + release synchronization**
+**v1.9.88 — Persistent native Fly-out launcher + release synchronization**
 - Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
 - Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
 - Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.

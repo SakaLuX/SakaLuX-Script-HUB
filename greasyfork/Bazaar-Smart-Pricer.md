@@ -39,12 +39,7 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.12 — Embeds Shared Core v1 while preserving standalone installation and operation**
-- Embeds Shared Core v1 while preserving standalone installation and operation.
-- Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.
-- Includes the shared API Request Broker foundation for controlled future API migration.
-
-
-### v1.1.12 — Global Hub power control
-- ON/OFF can be changed from Script Hub on any Torn page.
-- Pricing runtime remains limited to Bazaar pages.
+**v1.1.12 — Adds a global persistent power bridge so Hub ON/OFF works from every Torn page**
+- Adds a global persistent power bridge so Hub ON/OFF works from every Torn page.
+- Synchronizes Hub power state with Pricer storage.
+- Keeps pricing runtime page-scoped while power control remains global.
