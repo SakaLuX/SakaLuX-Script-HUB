@@ -1,0 +1,102 @@
+name: Release Gate
+on:
+  pull_request:
+    paths:
+      - '*.user.js'
+      - 'greasyfork/**'
+      - 'scripts.json'
+      - 'release-config.json'
+      - 'tools/release_preflight.py'
+      - '.github/workflows/release-gate.yml'
+  push:
+    branches: [main]
+    paths:
+      - '*.user.js'
+      - 'greasyfork/**'
+      - 'scripts.json'
+      - 'release-config.json'
+      - 'tools/release_preflight.py'
+      - '.github/workflows/release-gate.yml'
+  workflow_dispatch:
+    inputs:
+      script_id:
+        description: 'Release-config script id'
+        required: true
+        type: string
+      publish:
+        description: 'Create the GitHub Release after all gates pass'
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: write
+concurrency:
+  group: release-gate-${{ github.ref }}-${{ inputs.script_id || 'all' }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install repository validation dependency
+        run: python3 -m pip install PyYAML==6.0.3
+      - name: Validate repository
+        run: python3 .github/scripts/validate_repository.py
+      - name: Strict release preflight
+        run: python3 tools/release_preflight.py --all
+      - name: Build selected release package
+        if: github.event_name == 'workflow_dispatch'
+        run: python3 tools/release_preflight.py --id "${{ inputs.script_id }}" --out dist/releases
+      - name: Read release manifest
+        if: github.event_name == 'workflow_dispatch'
+        id: manifest
+        shell: bash
+        run: |
+          MANIFEST=$(find dist/releases -name release-manifest.json -type f -print -quit)
+          test -n "$MANIFEST"
+          DIR=$(dirname "$MANIFEST")
+          TAG=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["tag"])' "$MANIFEST")
+          VERSION=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$MANIFEST")
+          NAME=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["name"])' "$MANIFEST")
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+      - name: Verify package checksums
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: ${{ steps.manifest.outputs.dir }}
+        run: sha256sum -c SHA256SUMS
+      - name: Upload release candidate artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.script_id }}-v${{ steps.manifest.outputs.version }}-release-candidate
+          path: ${{ steps.manifest.outputs.dir }}/*
+          if-no-files-found: error
+      - name: Refuse duplicate release tag
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.manifest.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; refusing to overwrite it."
+            exit 1
+          fi
+      - name: Publish GitHub release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.manifest.outputs.tag }}
+          NAME: ${{ steps.manifest.outputs.name }}
+          VERSION: ${{ steps.manifest.outputs.version }}
+          DIR: ${{ steps.manifest.outputs.dir }}
+        run: |
+          gh release create "$TAG" "$DIR"/* \
+            --target "$GITHUB_SHA" \
+            --title "$NAME v$VERSION" \
+            --notes-file "$DIR/RELEASE_INFO.md"
