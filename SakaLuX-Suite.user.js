@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.941
+// @version      0.9.942
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45795,8 +45795,8 @@ function injectMasterControl(){
  const crimes=[...panel.querySelectorAll('*')].find(x=>/^crimes$/i.test(txt(x)));const row=document.createElement('div');row.dataset.slxGraffitiControl='1';row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;margin:4px 0;border:1px solid rgba(255,255,255,.08);border-radius:7px';row.innerHTML=`<span>🎨 Graffiti Spray Guide</span><label><input type="checkbox" ${enabled()?'checked':''}> ON</label>`;row.querySelector('input').onchange=e=>{localStorage.setItem(ENABLE_KEY,e.target.checked?'1':'0');render();};(crimes?.parentElement||panel).appendChild(row);
 }
 function masterPanel(){return $$('div,section,aside').find(x=>/master control/i.test(txt(x))&&x.querySelectorAll('*').length<1800)||null;}
-function rowFor(panel,name){const candidates=$$('label,li,[class*=row],[class*=module],div',panel);return candidates.find(x=>new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i').test(txt(x))&&x.querySelector('input[type=checkbox],button,[role=switch]'));}
-function switchState(row,want){const c=row?.querySelector('input[type=checkbox]');if(c){if(c.checked!==want){c.checked=want;c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}return;}const b=row?.querySelector('[role=switch],button');if(!b)return;const on=b.getAttribute('aria-checked')==='true'||/\bon\b/i.test(txt(b));if(on!==want)b.click();}
+function rowFor(panel,name){const esc=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),rx=new RegExp(esc,'i');const candidates=$$('label,li,[class*=row],[class*=module]',panel).filter(x=>rx.test(txt(x))&&x.querySelector('input[type=checkbox],[role=switch]'));return candidates.sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length)[0]||null;}
+function switchState(row,want){const c=row?.querySelector('input[type=checkbox]');if(c){if(c.checked!==want){c.checked=want;c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}return;}const b=row?.querySelector('[role=switch]');if(!b)return;const on=b.getAttribute('aria-checked')==='true';if(on!==want){b.setAttribute('aria-checked',want?'true':'false');b.dispatchEvent(new Event('change',{bubbles:true}));}}
 function badgeState(row,text){let b=row.querySelector('.slx-hub-not-ready');if(!b){b=document.createElement('span');b.className='slx-hub-not-ready';row.appendChild(b);}b.textContent=text||'';b.hidden=!text;}
 function syncHubState(){
  const panel=masterPanel();if(!panel)return;const map=window.__SakaLuXDockRuntimeModules instanceof Map?window.__SakaLuXDockRuntimeModules:new Map();

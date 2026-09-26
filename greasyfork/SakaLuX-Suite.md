@@ -10,14 +10,19 @@
 - Makes Script Hub the authority for Suite-backed standalone modules: Hub OFF forces Suite OFF; missing standalones are shown as **NOT READY** in Master Control.
 - Listens for `SakaLuX:ModuleReady` / Hub-ready signals and continuously reconciles module health without page reloads.
 
+### v0.9.942 — Suite menu stability
+- Fixes the Suite/Master Control panel closing itself shortly after opening.
+- Hub synchronization now targets only real module switches (checkbox / role=switch), never generic buttons such as Close.
+- Module-row matching prefers the smallest valid row instead of broad container elements.
+
 ## Current version
-**v0.9.941**
+**v0.9.942**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.941**
+- Canonical version: **v0.9.942**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -55,8 +60,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.941 — Release documentation synchronized with the current Suite userscript version**
-- Release documentation synchronized with the current Suite userscript version.
+**v0.9.942 — Suite menu stability**
+- Prevents Hub-state reconciliation from treating the Suite Close button as a module switch.
 
 ## Release history / Changelog
 
