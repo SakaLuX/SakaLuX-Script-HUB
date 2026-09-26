@@ -55,7 +55,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.940 — Release documentation synchronized with the current Suite userscript version**
+**v0.9.941 — Release documentation synchronized with the current Suite userscript version**
 - Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
