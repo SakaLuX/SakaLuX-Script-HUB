@@ -87,16 +87,30 @@ def sync_runtime_block(text: str) -> str:
     end += len(RUNTIME_END)
     return text[:start] + '\n'.join([RUNTIME_BEGIN, runtime, RUNTIME_END]) + text[end:]
 
+
+def remove_company_legacy_registration(text: str) -> str:
+    text = re.sub(
+        r"\nconst STANDALONE_REG_ATTR='data-slx-standalone-registration';\nfunction registerStandaloneEntry\(\)\{.*?\n\}\n\n(?=function normalizeStandaloneCompanyPlacement\(\))",
+        '\n', text, count=1, flags=re.S
+    )
+    text = text.replace(' registerStandaloneEntry();\n', '')
+    text = text.replace('setInterval(registerStandaloneEntry,15000);\n', '')
+    return text
+
+
 changed = []
 for name in TARGETS:
     path = ROOT / name
-    text = path.read_text(encoding='utf-8')
+    original = path.read_text(encoding='utf-8')
+    text = original
+    if name == 'SakaLuX-Company-Intelligence-v1.0.0.user.js':
+        text = remove_company_legacy_registration(text)
     if RUNTIME_BEGIN in text:
         if BEGIN in text:
             raise RuntimeError(f'{name}: mixed legacy/shared dock state')
-        synced = sync_runtime_block(text)
-        if synced != text:
-            path.write_text(synced, encoding='utf-8')
+        text = sync_runtime_block(text)
+        if text != original:
+            path.write_text(text, encoding='utf-8')
             changed.append(name)
         continue
     start = text.find(BEGIN)
