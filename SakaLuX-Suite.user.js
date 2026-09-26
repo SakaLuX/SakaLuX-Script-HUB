@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.942
+// @version      0.9.943
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45747,24 +45747,26 @@ const HINT={
 const IMG=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
 const TITLE=[[/east/i,'East Side'],[/west/i,'West Side'],[/north/i,'North Side'],[/residential/i,'Residential'],[/red[-\s]?light/i,'Red-Light'],[/financial/i,'Financial'],[/city\s*cent/i,'City Center']];
 const STANDALONE=[
- ['account-auditor','Account Auditor'],['bazaar-smart-pricer','Bazaar Smart Pricer'],['bazaar','Bazaar Thanker'],['chat-intelligence','Chat Intelligence'],['company-intelligence','Company Intelligence'],['elimination-assistant','Elimination Assistant'],['enhancer','Enhancer Guard'],['market-intelligence','Market Intelligence'],['mission-rewards','Mission Rewards'],['stock-manager-advisor','Stock Manager']
+ ['account-auditor','Account Auditor','SakaLuXAccountAuditor'],['bazaar-smart-pricer','Bazaar Smart Pricer','SakaLuXBazaarSmartPricer'],['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],['chat-intelligence','Chat Intelligence','SakaLuXChatIntelligence'],['company-intelligence','Company Intelligence','SakaLuXCompanyIntelligence'],['elimination-assistant','Elimination Assistant','SakaLuXEliminationAssistant'],['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],['market-intelligence','Market Intelligence','SakaLuXMarketIntelligence'],['mission-rewards','Mission Rewards','SakaLuXMissionRewards'],['stock-manager-advisor','Stock Manager','SakaLuXStockManagerAdvisor']
 ];
 const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
 const txt=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
 const enabled=()=>localStorage.getItem(ENABLE_KEY)!=='0';
 const mode=()=>['BOTH','REP','CASH'].includes(localStorage.getItem(MODE_KEY))?localStorage.getItem(MODE_KEY):'BOTH';
 const setMode=v=>{localStorage.setItem(MODE_KEY,v);render();};
-const isGraffiti=()=>/graffiti/i.test(location.href+' '+txt(document.querySelector('h1,h2,[class*=title]')));
+const isGraffiti=()=>/sid=crimes/i.test(location.href)&&(/graffiti/i.test(location.hash)||/\bGraffiti\b/i.test(txt(document.body)));
 function locationName(card){
- const im=card.querySelector('img'); const src=im?.src||im?.getAttribute('src')||'';
+ const im=card.querySelector('[class*="crimeOptionImage" i] img'); const src=im?.getAttribute('srcset')||im?.src||'';
  for(const [rx,n] of IMG) if(rx.test(src)) return n;
- const t=txt(card); for(const [rx,n] of TITLE) if(rx.test(t)) return n; return null;
+ const title=txt(card.querySelector('[class*="tabletTitleAndTagCount" i]')||card);
+ for(const [rx,n] of TITLE) if(rx.test(title)) return n; return null;
 }
 function tagCount(card){
- const t=txt(card); const m=t.match(/(?:tags?|reputation|rep)\D{0,12}(\d{1,4})/i)||t.match(/(\d{1,4})\s*(?:tags?)/i); return m?Number(m[1]):null;
+ const v=txt(card.querySelector('[class*="tagsCount" i]')||card).replace(/\+\d+→\d+|MAX/g,''); const m=v.match(/\d+/); return m?Number(m[0]):null;
 }
 function nextTier(v){ if(v==null)return null; const t=TIERS.find(x=>v<x); return t?{tier:t,left:t-v}:null; }
 function pageNumber(rx){const m=txt(document.body).match(rx);return m?Number(String(m[1]).replace(/,/g,'')):null;}
+function graffitiStats(){const out={cans:{}};$$('li[class*="statistic" i] button[aria-label]').forEach(btn=>{const a=btn.getAttribute('aria-label')||'';let m;if((m=a.match(/^Skill:\s*([\d.]+)/i)))out.skill=Number(m[1]);if((m=a.match(/^Enhancer:\s*(.+)/i)))out.enhancer=m[1].trim();if((m=a.match(/^Unique outcomes:\s*(\d+)\s*\/\s*(\d+)/i))){out.uniques=Number(m[1]);out.uniquesTotal=Number(m[2]);}if((m=a.match(/^Spray Paint\s*:\s*(\w+):\s*(\d+)/i)))out.cans[m[1].toLowerCase()]=Number(m[2]);});return out;}
 function colourStock(col){
  const body=txt(document.body); const rx=new RegExp(col+'[^\\n]{0,55}?(\\d{1,3})%','i'); const p=body.match(rx);
  const count=body.match(new RegExp(col+'[^\\n]{0,55}?(?:x|qty|quantity|stock)\\s*[:x]?\\s*(\\d+)','i'));
@@ -45772,18 +45774,10 @@ function colourStock(col){
 }
 function ensureStyle(){if($('#slx-graffiti-style'))return;const e=document.createElement('style');e.id='slx-graffiti-style';e.textContent=`
 .slx-graffiti-strip{display:flex;gap:6px;align-items:center;overflow:auto;white-space:nowrap;margin:4px 0;padding:6px 8px;border:1px solid #39414a;border-radius:7px;background:#151a20;color:#aeb8c3;font:11px/1.3 Arial,sans-serif}.slx-graffiti-strip b{color:#eef3f8}.slx-graffiti-mode{border:1px solid #4b5968;border-radius:5px;background:#202833;color:#e6edf3;padding:2px 6px;font-weight:800}.slx-graffiti-alert{color:#ffb45c!important}.slx-graffiti-badge{display:inline-flex;gap:4px;margin-left:5px;padding:1px 4px;border-radius:4px;background:#19232d;color:#dce7ef;font:10px/1.25 Arial,sans-serif}.slx-graffiti-rep{color:#ffcf66}.slx-graffiti-cash{color:#72d6a0}.slx-hub-not-ready{margin-left:6px;color:#ef9a62;font-size:10px;font-weight:800}`;(document.head||document.documentElement).appendChild(e);}
-function cards(){return $$('img').map(i=>i.closest('li,article,[class*=card],[class*=item],div')).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i&&locationName(v));}
-function decorateCard(card){
- const loc=locationName(card); if(!loc)return; let host=card.querySelector('h3,h4,[class*=title],[class*=name]')||card;
- let b=card.querySelector('.slx-graffiti-badge');if(!b){b=document.createElement('span');b.className='slx-graffiti-badge';host.appendChild(b);} const h=HINT[loc],m=mode();
- const nt=nextTier(tagCount(card)); const parts=[]; if(nt)parts.push(`+${nt.left} → ${nt.tier}`);
- if(m==='BOTH'||m==='REP')parts.push(`⭐ REP ${h.rep}`); if(m==='BOTH'||m==='CASH')parts.push(`💰 CASH ${h.cash}`);
- b.innerHTML=parts.map(x=>`<span class="${x.includes('REP')?'slx-graffiti-rep':x.includes('CASH')?'slx-graffiti-cash':''}">${x}</span>`).join(' ');
- b.title='Read-only suggestion; no clicks or automation.';
-}
+function cards(){return $$('[class*="crimeOption___" i]').filter(x=>locationName(x));}
 function objective(cs){if(cs==null)return '—';if(cs<70)return `CS70 (${70-cs})`;if(cs<100)return `CS100 (${100-cs})`;return 'unlock / uniques';}
 function ensureStrip(){
- let root=cards()[0]?.parentElement;if(!root)return;let bar=$('#slx-graffiti-strip');if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-strip';bar.className='slx-graffiti-strip';root.parentElement?.insertBefore(bar,root);} const cs=pageNumber(/(?:crime\s*skill|skill)\D{0,10}(\d{1,3})/i), nerve=pageNumber(/nerve\D{0,10}(\d{1,3})/i), uniques=txt(document.body).match(/unique(?:\s*outcomes?)?\D{0,10}(\d+)\s*\/\s*(\d+)/i); const mask=/paint\s*mask/i.test(txt(document.body));
+ const first=cards()[0];if(!first)return;const list=first.closest('[class*="virtualItem" i]')?.parentElement||first.parentElement;const container=list?.parentElement;if(!container)return;let bar=$('#slx-graffiti-strip');if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-strip';bar.className='slx-graffiti-strip';container.insertBefore(bar,list);} const gs=graffitiStats(), cs=gs.skill??pageNumber(/(?:crime\s*skill|skill)\D{0,10}(\d{1,3})/i), nerve=pageNumber(/nerve\D{0,10}(\d{1,3})/i), uniques=gs.uniques!=null?[null,String(gs.uniques),String(gs.uniquesTotal??'?')]:txt(document.body).match(/unique(?:\s*outcomes?)?\D{0,10}(\d+)\s*\/\s*(\d+)/i); const mask=/paint\s*mask/i.test(gs.enhancer||txt(document.body));
  const alerts=[]; Object.values(HINT).flatMap(x=>[x.rep,x.cash]).filter((v,i,a)=>a.indexOf(v)===i).forEach(c=>{const st=colourStock(c);if(st.percent!=null&&st.percent<=15)alerts.push(`${c} ${st.percent}%`);if(st.count===0)alerts.push(`${c}: no spare`);});
  bar.innerHTML=`<b>Graffiti Spray Guide</b><button class="slx-graffiti-mode" data-m="BOTH">BOTH</button><button class="slx-graffiti-mode" data-m="REP">REP</button><button class="slx-graffiti-mode" data-m="CASH">CASH</button><span>CS <b>${cs??'?'}</b></span><span>Mask <b>${mask?'YES':'NO'}</b></span><span>Nerve <b>${nerve??'?'}</b></span><span>Attempts <b>${nerve!=null?Math.floor(nerve/3):'?'}</b></span><span>Unique <b>${uniques?uniques[1]+'/'+uniques[2]:'?'}</b></span><span>Next <b>${objective(cs)}</b></span>${alerts.length?`<span class="slx-graffiti-alert">⚠ ${alerts.join(' · ')}</span>`:''}`;
  bar.querySelectorAll('[data-m]').forEach(x=>{x.disabled=x.dataset.m===mode();x.onclick=()=>setMode(x.dataset.m);});
@@ -45797,10 +45791,19 @@ function injectMasterControl(){
 function masterPanel(){return $$('div,section,aside').find(x=>/master control/i.test(txt(x))&&x.querySelectorAll('*').length<1800)||null;}
 function rowFor(panel,name){const esc=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),rx=new RegExp(esc,'i');const candidates=$$('label,li,[class*=row],[class*=module]',panel).filter(x=>rx.test(txt(x))&&x.querySelector('input[type=checkbox],[role=switch]'));return candidates.sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length)[0]||null;}
 function switchState(row,want){const c=row?.querySelector('input[type=checkbox]');if(c){if(c.checked!==want){c.checked=want;c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}return;}const b=row?.querySelector('[role=switch]');if(!b)return;const on=b.getAttribute('aria-checked')==='true';if(on!==want){b.setAttribute('aria-checked',want?'true':'false');b.dispatchEvent(new Event('change',{bubbles:true}));}}
-function badgeState(row,text){let b=row.querySelector('.slx-hub-not-ready');if(!b){b=document.createElement('span');b.className='slx-hub-not-ready';row.appendChild(b);}b.textContent=text||'';b.hidden=!text;}
+function standaloneState(id,apiGlobal){
+ const api=window[apiGlobal]; const bridge=document.getElementById('sakalux-module-bridge-'+id);
+ const installed=Boolean(api||bridge); let enabled=null;
+ try{if(api&&typeof api.isEnabled==='function')enabled=Boolean(api.isEnabled());else if(bridge?.dataset?.enabled!=null)enabled=bridge.dataset.enabled==='true';}catch{enabled=null;}
+ return {installed,enabled};
+}
 function syncHubState(){
- const panel=masterPanel();if(!panel)return;const map=window.__SakaLuXDockRuntimeModules instanceof Map?window.__SakaLuXDockRuntimeModules:new Map();
- for(const [id,name] of STANDALONE){const row=rowFor(panel,name);if(!row)continue;const entry=map.get(id);if(!entry){badgeState(row,'NOT READY');switchState(row,false);const c=row.querySelector('input[type=checkbox]');if(c)c.disabled=true;continue;}const c=row.querySelector('input[type=checkbox]');if(c)c.disabled=false;let on=true;try{on=entry.enabled?.()!==false;}catch{on=false;}badgeState(row,'');switchState(row,on);}
+ const panel=masterPanel();if(!panel)return;
+ panel.querySelectorAll('.slx-hub-not-ready').forEach(x=>x.remove());
+ for(const [id,name,apiGlobal] of STANDALONE){const row=rowFor(panel,name);if(!row)continue;const st=standaloneState(id,apiGlobal);const c=row.querySelector('input[type=checkbox]');const b=row.querySelector('[role=switch]');
+   if(c)c.disabled=!st.installed;if(b){b.setAttribute('aria-disabled',st.installed?'false':'true');if(!st.installed)b.setAttribute('disabled','');else b.removeAttribute('disabled');}
+   if(st.enabled!==null)switchState(row,st.enabled);
+ }
 }
 window.SakaLuXGraffitiSprayGuide={id:GID,version:VERSION,isEnabled:enabled,setEnabled(v){localStorage.setItem(ENABLE_KEY,v?'1':'0');render();},render};
 window.addEventListener('SakaLuX:ModuleReady',()=>setTimeout(syncHubState,40),{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(syncHubState,40),{passive:true});window.addEventListener('storage',()=>setTimeout(syncHubState,40),{passive:true});
