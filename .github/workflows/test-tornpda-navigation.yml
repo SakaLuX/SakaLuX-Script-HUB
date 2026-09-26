@@ -1,0 +1,58 @@
+name: Test TornPDA navigation regressions
+
+on:
+  push:
+    branches:
+      - main
+      - test/tornpda-navigation-regression
+    paths:
+      - '**/*.user.js'
+      - 'src/core/**'
+      - 'tests/tornpda-navigation-regression.cjs'
+      - 'tests/market-travel-state-machine-*.cjs'
+      - 'tests/stocks-panel-regression.cjs'
+      - 'tests/suite-modules-regression.cjs'
+      - 'tests/shared-core-api-*.cjs'
+      - 'tests/shared-core-v1-all-scripts.cjs'
+      - '.github/workflows/test-tornpda-navigation.yml'
+  pull_request:
+    paths:
+      - '**/*.user.js'
+      - 'src/core/**'
+      - 'tests/tornpda-navigation-regression.cjs'
+      - 'tests/market-travel-state-machine-*.cjs'
+      - 'tests/stocks-panel-regression.cjs'
+      - 'tests/suite-modules-regression.cjs'
+      - 'tests/shared-core-api-*.cjs'
+      - 'tests/shared-core-v1-all-scripts.cjs'
+      - '.github/workflows/test-tornpda-navigation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install DOM test dependency
+        run: npm install --prefix "$RUNNER_TEMP/dom-tests" jsdom@30.1.0 --no-audit --no-fund
+      - name: Run Shared Core TornPDA navigation scenarios
+        run: node tests/tornpda-navigation-regression.cjs
+      - name: Run Market travel navigation state-machine regressions
+        run: node tests/market-travel-state-machine-regression.cjs
+      - name: Run Stock leave and return navigation regression
+        run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/stocks-panel-regression.cjs
+      - name: Run Suite module bridge regression
+        run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/suite-modules-regression.cjs
+      - name: Run API Broker route-safety regressions
+        run: |
+          node tests/shared-core-api-broker-regression.cjs
+          node tests/shared-core-api-integration-regression.cjs
+      - name: Run repository-wide userscript compatibility regression
+        run: node tests/shared-core-v1-all-scripts.cjs
