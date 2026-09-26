@@ -1,1 +1,0 @@
-Release preflight passed for 12 script(s).
