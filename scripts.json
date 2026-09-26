@@ -139,15 +139,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 25,
-      "version": "1.1.11",
+      "detailsRevision": 26,
+      "version": "1.1.12",
       "release": {
-        "version": "1.1.11",
+        "version": "1.1.12",
         "date": "2026-09-26",
         "notes": [
-          "Embeds Shared Core v1 while preserving standalone installation and operation.",
-          "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-          "Includes the shared API Request Broker foundation for controlled future API migration."
+          "Adds a global persistent power bridge so Hub ON/OFF works from every Torn page.",
+          "Synchronizes Hub power state with Pricer storage.",
+          "Keeps pricing runtime page-scoped while power control remains global."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",

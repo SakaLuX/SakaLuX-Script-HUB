@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.87**
+**v1.9.88**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.9.87**
+- Canonical version: **v1.9.88**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -40,6 +40,11 @@
 - Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
 
 ## Release history / Changelog
+
+### v1.9.88 — Health Remediation Actions
+- Adds one-tap UPDATE, ENABLE, OPEN PAGE, FIX API, RECHECK and INSTALL actions from module health status.
+- Keeps remediation inside Hub and refreshes health after local actions.
+- Bazaar Smart Pricer power can now be toggled from Hub on any Torn page.
 
 ### v1.9.87 — Per-module Health Status
 - Adds explicit per-module states: OK, UPDATE AVAILABLE, DISABLED, WRONG PAGE, API ERROR, CHECK ERROR and NOT INSTALLED.

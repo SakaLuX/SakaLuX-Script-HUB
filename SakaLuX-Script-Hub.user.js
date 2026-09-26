@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.87
+// @version      1.9.88
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1124,15 +1124,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 25,
-                "version": "1.1.11",
+                "detailsRevision": 26,
+                "version": "1.1.12",
                 "release": {
-                    "version": "1.1.11",
+                    "version": "1.1.12",
                     "date": "2026-09-26",
                     "notes": [
-                        "Embeds Shared Core v1 while preserving standalone installation and operation.",
-                        "Centralizes shared performance, Hub detection, dock ordering, SPA routing and common infrastructure.",
-                        "Includes the shared API Request Broker foundation for controlled future API migration."
+                        "Adds a global persistent power bridge so Hub ON/OFF works from every Torn page.",
+                        "Synchronizes Hub power state with Pricer storage.",
+                        "Keeps pricing runtime page-scoped while power control remains global."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1900,6 +1900,44 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return Object.freeze(counts);
     }
 
+
+    function getRemediationAction(script) {
+        const status = getModuleStatus(script);
+        if (status.code === 'UPDATE_AVAILABLE') return { label: 'UPDATE', kind: 'update' };
+        if (status.code === 'DISABLED') return { label: 'ENABLE', kind: 'enable' };
+        if (status.code === 'WRONG_PAGE') return { label: 'OPEN PAGE', kind: 'page' };
+        if (status.code === 'API_ERROR') return { label: 'FIX API', kind: 'api' };
+        if (status.code === 'CHECK_ERROR') return { label: 'RECHECK', kind: 'recheck' };
+        if (status.code === 'NOT_INSTALLED') return { label: 'INSTALL', kind: 'install' };
+        return null;
+    }
+
+    async function runRemediationAction(id) {
+        const script = SCRIPTS.find(item => item.id === id);
+        if (!script) return false;
+        const remediation = getRemediationAction(script);
+        if (!remediation) return true;
+        if (remediation.kind === 'update' || remediation.kind === 'install') { const url = getInstallUrl(script); if (url) { location.href = url; return true; } throw new Error('Installer URL is unavailable.'); }
+        if (remediation.kind === 'enable') { await setModulePower(script.id, true); return true; }
+        if (remediation.kind === 'recheck') { await checkScriptUpdate(script, true); renderList(); renderMainStats(); return true; }
+        if (remediation.kind === 'api') {
+            const api = script.api();
+            const apiAction = (script.quickActions || []).find(a => ['create-key','api-key','test-key'].includes(a.id)) || (script.quickActions || []).find(a => /api|key/i.test(a.label || ''));
+            if (api && apiAction && typeof api[apiAction.method] === 'function') { await api[apiAction.method](); return true; }
+            if (typeof api?.createRequiredTornKey === 'function') { await api.createRequiredTornKey(); return true; }
+            openSettings(); return true;
+        }
+        if (remediation.kind === 'page') {
+            const primary = getPrimaryAction(script);
+            const configured = (script.quickActions || []).find(a => a.id === primary.id) || primary;
+            if (configured?.fallbackUrl) { location.href = configured.fallbackUrl; return true; }
+            if (script.id === 'bazaar-smart-pricer') { location.href = 'https://www.torn.com/bazaar.php'; return true; }
+            if (script.fallbackOpen()) return true;
+            throw new Error('No module page is configured.');
+        }
+        return false;
+    }
+
     function getPrimaryAction(script) {
         const actions = Array.isArray(script.quickActions) ? script.quickActions : [];
         return actions.find(action => action.id === 'open')
@@ -1929,9 +1967,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             await api.setEnabled(Boolean(enabled));
         } else {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
-            if (!bridge) throw new Error(script.name + ' control interface is unavailable on this page.');
-            bridge.dataset.action = enabled ? 'on' : 'off';
-            bridge.click();
+            if (bridge) { bridge.dataset.action = enabled ? 'on' : 'off'; bridge.click(); }
+            else if (script.id === 'bazaar-smart-pricer' && getInstalledVersion(script)) {
+                try { localStorage.setItem('SakaLuX_BAZAAR_SMART_PRICER_ENABLED', enabled ? '1' : '0'); } catch {}
+                try { window.dispatchEvent(new CustomEvent('SakaLuX:BazaarSmartPricerPowerRequested', { detail: { enabled: Boolean(enabled) } })); } catch {}
+            } else throw new Error(script.name + ' control interface is unavailable on this page.');
         }
         modulePower[id] = Boolean(enabled);
         saveJson(STORAGE.modulePower, modulePower);
@@ -2892,7 +2932,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const missing = health.state === 'missing';
         const enabled = !missing && isModuleEnabled(script);
         const moduleApi = script.api();
-        const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id));
+        const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id) || (script.id === 'bazaar-smart-pricer' && installed));
         const primary = getPrimaryAction(script);
         const primaryLabel = /settings/i.test(primary.label || '') ? 'SETTINGS' : 'OPEN';
         const updateChipClass = update.state === 'current' ? 'good' : update.state === 'available' ? 'warn' : update.state === 'pending' ? 'info' : update.state === 'failed' ? 'bad' : 'muted';
@@ -2909,6 +2949,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 <div class="slh-chips">
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${statusChipClass}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(moduleStatus.label)}</span>
+                    ${getRemediationAction(script) ? `<button class="slh-chip ${statusChipClass} slh-remedy" type="button" data-remediate="${escapeHtml(script.id)}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(getRemediationAction(script).label)}</button>` : ''}
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
                     ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
@@ -2921,6 +2962,13 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     function bindCards() {
         document.querySelectorAll('[data-module-info]').forEach(button => { button.onclick = () => openModuleInfo(SCRIPTS.find(item => item.id === button.dataset.moduleInfo)); });
         document.querySelectorAll('[data-module-new]').forEach(button => { button.onclick = () => openModuleRelease(SCRIPTS.find(item => item.id === button.dataset.moduleNew)); });
+        document.querySelectorAll('[data-remediate]').forEach(button => {
+            button.onclick = async () => {
+                button.disabled = true;
+                try { await runRemediationAction(button.dataset.remediate); }
+                catch (error) { console.error('[SakaLuX Hub remediation]', error); alert('Repair action failed: ' + String(error?.message || error)); renderList(); }
+            };
+        });
         document.querySelectorAll('[data-module-toggle]').forEach(button => {
             button.onclick = async () => {
                 const id = button.dataset.moduleToggle;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.11
+// @version      1.1.12
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -488,7 +488,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.1.11';
+  let v = '1.1.12';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -501,6 +501,42 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   } catch {}
 })();
 /* SakaLuX Canonical Installed Version — END */
+
+/* SakaLuX Bazaar Smart Pricer Global Power Bridge — BEGIN */
+(() => {
+  'use strict';
+  const VERSION = '1.1.12';
+  const LOCAL_KEY = 'SakaLuX_BAZAAR_SMART_PRICER_ENABLED';
+  const GM_KEY = 'moduleEnabled';
+  function readEnabled() {
+    try { const local = localStorage.getItem(LOCAL_KEY); if (local === '1') return true; if (local === '0') return false; } catch {}
+    try { return GM_getValue(GM_KEY, true) !== false; } catch { return true; }
+  }
+  function writeEnabled(value) {
+    const enabled = Boolean(value);
+    try { localStorage.setItem(LOCAL_KEY, enabled ? '1' : '0'); } catch {}
+    try { GM_setValue(GM_KEY, enabled); } catch {}
+    try { window.dispatchEvent(new CustomEvent('SakaLuX:BazaarSmartPricerStateChanged', { detail: { version: VERSION, enabled } })); } catch {}
+    return enabled;
+  }
+  const api = window.SakaLuXBazaarSmartPricer || {};
+  api.version = VERSION;
+  api.isEnabled = readEnabled;
+  api.setEnabled = writeEnabled;
+  api.toggleEnabled = () => writeEnabled(!readEnabled());
+  api.health = () => ({ ready: true, version: VERSION, enabled: readEnabled(), powerBridge: true, pageActive: location.pathname === '/bazaar.php' });
+  window.SakaLuXBazaarSmartPricer = api;
+  try {
+    let bridge = document.getElementById('sakalux-module-bridge-bazaar-smart-pricer');
+    if (!bridge) { bridge = document.createElement('button'); bridge.type = 'button'; bridge.id = 'sakalux-module-bridge-bazaar-smart-pricer'; bridge.hidden = true; (document.body || document.documentElement).appendChild(bridge); }
+    const sync = () => { bridge.dataset.version = VERSION; bridge.dataset.enabled = readEnabled() ? 'true' : 'false'; };
+    bridge.onclick = () => { const action = bridge.dataset.action; if (action === 'on') writeEnabled(true); else if (action === 'off') writeEnabled(false); else if (action === 'toggle') writeEnabled(!readEnabled()); sync(); };
+    sync();
+    window.addEventListener('SakaLuX:BazaarSmartPricerStateChanged', sync, { passive: true });
+    window.addEventListener('SakaLuX:BazaarSmartPricerPowerRequested', event => { writeEnabled(event?.detail?.enabled); sync(); }, { passive: true });
+  } catch {}
+})();
+/* SakaLuX Bazaar Smart Pricer Global Power Bridge — END */
 
 /* SakaLuX Standalone Dock Bootstrap — BEGIN */
 (() => {
@@ -527,7 +563,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-  const SELF=Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"},{version:'1.1.11'});
+  const SELF=Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"},{version:'1.1.12'});
   const HUB_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const LAST_KEY='SakaLuX_HUB_INSTALL_PROMPT_LAST', INTERVAL=12*60*60*1000;
   const DOCK_ID='sakalux-standalone-dock', PROMPT_ID='sakalux-hub-install-prompt', STYLE_ID='sakalux-standalone-dock-style';
@@ -2509,6 +2545,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     const MODULE_ENABLED_KEY = 'moduleEnabled';
 
     function isModuleEnabled() {
+        try { const local = localStorage.getItem('SakaLuX_BAZAAR_SMART_PRICER_ENABLED'); if (local === '1') return true; if (local === '0') return false; } catch {}
         return GM_getValue(MODULE_ENABLED_KEY, true) !== false;
     }
 
@@ -2524,6 +2561,7 @@ body:not([data-sakalux-hub-active="1"]) :is(#sl-eg-button,#sakalux-bt-settings-b
     function setModuleEnabled(value) {
         const enabled = Boolean(value);
         GM_setValue(MODULE_ENABLED_KEY, enabled);
+        try { localStorage.setItem('SakaLuX_BAZAAR_SMART_PRICER_ENABLED', enabled ? '1' : '0'); } catch {}
         if (enabled) {
             checkForBazaar();
         } else {
