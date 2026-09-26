@@ -3,6 +3,7 @@ name: Test Shared Core v1
 on:
   push:
     branches:
+      - main
       - test/shared-core-v1
     paths:
       - src/core/sakalux-core.js
@@ -52,5 +53,3 @@ jobs:
         run: node tests/shared-core-v1-all-scripts.cjs
       - name: Audit level-2 shared duplication
         run: node tests/shared-core-v1-level2-audit.cjs
-
-# Verifies the branch after repository-wide Core embedding, API broker/integration regressions and level-2 duplication audit.
