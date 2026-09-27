@@ -1,0 +1,30 @@
+name: Fix Suite modules live status 0.9.945
+on:
+  push:
+    branches: [fix/suite-modules-live-status-0945]
+    paths:
+      - '.github/scripts/fix_suite_modules_live_status_0945.py'
+      - '.github/workflows/fix-suite-modules-live-status-0945.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - run: python .github/scripts/fix_suite_modules_live_status_0945.py
+      - run: node --check SakaLuX-Suite.user.js
+      - run: node tests/suite-modules-live-status-0945-regression.cjs
+      - run: npm install --no-save --ignore-scripts jsdom
+      - run: node tests/suite-modules-regression.cjs
+      - name: Commit release
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-modules-live-status-0945-regression.cjs
+          git commit -m 'Release Suite v0.9.945 complete modules and live status'
+          git push
