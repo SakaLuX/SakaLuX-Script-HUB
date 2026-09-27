@@ -60,16 +60,14 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.944 — Release documentation synchronized with the current Suite userscript version**
+**v0.9.945 — Release documentation synchronized with the current Suite userscript version**
 - Release documentation synchronized with the current Suite userscript version.
 
-**v0.9.945 — Complete module list + truthful live status**
-- Keeps all 10 managed SakaLuX standalone modules visible together at the top of SakaLuX Modules in canonical order.
-- Installation status now uses only live API, live bridge, or live runtime registration; old `data-sakalux-installed-*` markers no longer count as installed.
-- Status meanings are strict: `NOT INSTALLED`, `INSTALLED · OFF`, `READY · ON`, or `INSTALLED · UNKNOWN`.
-- Missing or unknown modules cannot be falsely shown as READY.
-
 ## Release history / Changelog
+
+
+### v0.9.945 — Release documentation synchronized with the current Suite userscript version
+- Release documentation synchronized with the current Suite userscript version.
 
 ### v0.9.944 — Canonical SakaLuX Modules + truthful READY state
 - Rebuilds the SakaLuX Modules section from the canonical 10 standalone modules, including Bazaar Smart Pricer.
