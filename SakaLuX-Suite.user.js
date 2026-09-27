@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.946
+// @version      0.9.943
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45730,7 +45730,7 @@ function scan(){
 /* SAKALUX_SUITE_0941_GRAFFITI_HUB_SYNC */
 (() => {
 'use strict';
-const VERSION='0.9.946';
+const VERSION='0.9.941';
 const GID='graffiti-spray-guide';
 const ENABLE_KEY='SakaLuX_SUITE_GRAFFITI_ENABLED';
 const MODE_KEY='SakaLuX_SUITE_GRAFFITI_MODE';
@@ -45747,89 +45747,43 @@ const HINT={
 const IMG=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
 const TITLE=[[/east/i,'East Side'],[/west/i,'West Side'],[/north/i,'North Side'],[/residential/i,'Residential'],[/red[-\s]?light/i,'Red-Light'],[/financial/i,'Financial'],[/city\s*cent/i,'City Center']];
 const STANDALONE=[
- ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard','Advanced Enhancer inventory tracker and protection tools.'],
- ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker','Bazaar buyer grouping, thank-you messages, statistics and history.'],
- ['bazaar-smart-pricer','Bazaar Smart Pricer','SakaLuXBazaarSmartPricer','Quick Bazaar pricing, bulk fill and sale-safety controls.'],
- ['mission-rewards','Mission Rewards','SakaLuXMissionRewards','Mission Shop values, ammo ownership and mod tracking.'],
- ['market-intelligence','Market Intelligence','SakaLuXMarketIntelligence','Market, travel and pricing intelligence.'],
- ['elimination-assistant','Elimination Assistant','SakaLuXEliminationAssistant','Eliminations target advisor and safe-target tools.'],
- ['company-intelligence','Company Intelligence','SakaLuXCompanyIntelligence','Company dashboard, employee analysis and training recommendations.'],
- ['chat-intelligence','Chat Intelligence','SakaLuXChatIntelligence','Chat search, exports, favorites and notification controls.'],
- ['stock-manager-advisor','Stock Manager & Advisor','SakaLuXStockManagerAdvisor','Stocks portfolio, benefits, ROI advice and rebalance tools.'],
- ['account-auditor','Account Auditor','SakaLuXAccountAuditor','Account audit, security and configuration diagnostics.']
+ ['account-auditor','Account Auditor','SakaLuXAccountAuditor'],['bazaar-smart-pricer','Bazaar Smart Pricer','SakaLuXBazaarSmartPricer'],['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],['chat-intelligence','Chat Intelligence','SakaLuXChatIntelligence'],['company-intelligence','Company Intelligence','SakaLuXCompanyIntelligence'],['elimination-assistant','Elimination Assistant','SakaLuXEliminationAssistant'],['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],['market-intelligence','Market Intelligence','SakaLuXMarketIntelligence'],['mission-rewards','Mission Rewards','SakaLuXMissionRewards'],['stock-manager-advisor','Stock Manager','SakaLuXStockManagerAdvisor']
 ];
 const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
 const txt=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
 const enabled=()=>localStorage.getItem(ENABLE_KEY)!=='0';
 const mode=()=>['BOTH','REP','CASH'].includes(localStorage.getItem(MODE_KEY))?localStorage.getItem(MODE_KEY):'BOTH';
 const setMode=v=>{localStorage.setItem(MODE_KEY,v);render();};
-const isGraffiti=()=>{const t=txt(document.body);return /\bGraffiti\b/i.test(t)&&/East Side/i.test(t)&&/West Side/i.test(t)&&/North Side/i.test(t);};
+const isGraffiti=()=>/sid=crimes/i.test(location.href)&&(/graffiti/i.test(location.hash)||/\bGraffiti\b/i.test(txt(document.body)));
 function locationName(card){
- const explicit=card?.dataset?.slxGraffitiLocation;if(explicit)return explicit;
- const title=txt(card?.querySelector?.('[class*="title" i],[class*="name" i],h3,h4')||card);
- for(const [rx,n] of TITLE) if(rx.test(title)) return n;
- const im=card?.querySelector?.('img');const src=im?.getAttribute?.('srcset')||im?.src||'';
+ const im=card.querySelector('[class*="crimeOptionImage" i] img'); const src=im?.getAttribute('srcset')||im?.src||'';
  for(const [rx,n] of IMG) if(rx.test(src)) return n;
- return null;
+ const title=txt(card.querySelector('[class*="tabletTitleAndTagCount" i]')||card);
+ for(const [rx,n] of TITLE) if(rx.test(title)) return n; return null;
 }
-
 function tagCount(card){
- const specific=card?.querySelector?.('[class*="tagsCount" i],[class*="tagCount" i]');
- if(specific){const m=txt(specific).match(/\d+/);if(m)return Number(m[0]);}
- const lines=(card?.innerText||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
- const loc=locationName(card);const i=loc?lines.findIndex(x=>x.toLowerCase()===loc.toLowerCase()):-1;
- if(i>=0){const m=(lines[i+1]||'').match(/^\d+$/);if(m)return Number(m[0]);}
- return null;
+ const v=txt(card.querySelector('[class*="tagsCount" i]')||card).replace(/\+\d+→\d+|MAX/g,''); const m=v.match(/\d+/); return m?Number(m[0]):null;
 }
-
 function nextTier(v){ if(v==null)return null; const t=TIERS.find(x=>v<x); return t?{tier:t,left:t-v}:null; }
 function pageNumber(rx){const m=txt(document.body).match(rx);return m?Number(String(m[1]).replace(/,/g,'')):null;}
-function graffitiStats(){
- const out={cans:{}};
- $$('[aria-label]').forEach(el=>{
-   const a=el.getAttribute('aria-label')||'';let m;
-   if((m=a.match(/(?:Crime )?Skill:\s*([\d.]+)/i)))out.skill=Number(m[1]);
-   if((m=a.match(/Enhancer:\s*(.+)/i)))out.enhancer=m[1].trim();
-   if((m=a.match(/Unique outcomes?:\s*(\d+)\s*\/\s*(\d+)/i))){out.uniques=Number(m[1]);out.uniquesTotal=Number(m[2]);}
-   if((m=a.match(/Spray Paint\s*:\s*(\w+)\s*:\s*(\d+)/i)))out.cans[m[1].toLowerCase()]=Number(m[2]);
- });
- const body=txt(document.body);
- if(out.skill==null){const m=body.match(/(?:Crime\s*)?Skill\D{0,12}(\d{1,3})/i);if(m)out.skill=Number(m[1]);}
- return out;
-}
-
+function graffitiStats(){const out={cans:{}};$$('li[class*="statistic" i] button[aria-label]').forEach(btn=>{const a=btn.getAttribute('aria-label')||'';let m;if((m=a.match(/^Skill:\s*([\d.]+)/i)))out.skill=Number(m[1]);if((m=a.match(/^Enhancer:\s*(.+)/i)))out.enhancer=m[1].trim();if((m=a.match(/^Unique outcomes:\s*(\d+)\s*\/\s*(\d+)/i))){out.uniques=Number(m[1]);out.uniquesTotal=Number(m[2]);}if((m=a.match(/^Spray Paint\s*:\s*(\w+):\s*(\d+)/i)))out.cans[m[1].toLowerCase()]=Number(m[2]);});return out;}
 function colourStock(col){
- const body=txt(document.body);const esc=String(col).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
- const p=body.match(new RegExp(esc+'[^%]{0,80}(\\d{1,3})%','i'));
- const count=body.match(new RegExp(esc+'[^0-9]{0,80}(?:x|qty|quantity|stock)?\\s*(\\d+)','i'));
+ const body=txt(document.body); const rx=new RegExp(col+'[^\\n]{0,55}?(\\d{1,3})%','i'); const p=body.match(rx);
+ const count=body.match(new RegExp(col+'[^\\n]{0,55}?(?:x|qty|quantity|stock)\\s*[:x]?\\s*(\\d+)','i'));
  return {percent:p?Number(p[1]):null,count:count?Number(count[1]):null};
 }
-
 function ensureStyle(){if($('#slx-graffiti-style'))return;const e=document.createElement('style');e.id='slx-graffiti-style';e.textContent=`
 .slx-graffiti-strip{display:flex;gap:6px;align-items:center;overflow:auto;white-space:nowrap;margin:4px 0;padding:6px 8px;border:1px solid #39414a;border-radius:7px;background:#151a20;color:#aeb8c3;font:11px/1.3 Arial,sans-serif}.slx-graffiti-strip b{color:#eef3f8}.slx-graffiti-mode{border:1px solid #4b5968;border-radius:5px;background:#202833;color:#e6edf3;padding:2px 6px;font-weight:800}.slx-graffiti-alert{color:#ffb45c!important}.slx-graffiti-badge{display:inline-flex;gap:4px;margin-left:5px;padding:1px 4px;border-radius:4px;background:#19232d;color:#dce7ef;font:10px/1.25 Arial,sans-serif}.slx-graffiti-rep{color:#ffcf66}.slx-graffiti-cash{color:#72d6a0}.slx-hub-not-ready{margin-left:6px;color:#ef9a62;font-size:10px;font-weight:800}`;(document.head||document.documentElement).appendChild(e);}
-function cards(){
- const names=TITLE.map(x=>x[1]),out=[];
- const all=$$('body *').filter(el=>el.children.length===0&&names.some(n=>txt(el).toLowerCase()===n.toLowerCase()));
- for(const el of all){
-   const name=names.find(n=>txt(el).toLowerCase()===n.toLowerCase());let cur=el;
-   for(let depth=0;cur&&depth<8;depth++,cur=cur.parentElement){
-     const t=txt(cur);const useful=(/%/.test(t)||cur.querySelector('button')||cur.querySelector('img'))&&t.length<900;
-     if(useful){cur.dataset.slxGraffitiLocation=name;out.push(cur);break;}
-   }
- }
- if(out.length)return [...new Set(out)];
- return $$('[class*="crimeOption" i],[class*="virtualItem" i]').filter(x=>locationName(x));
-}
-
+function cards(){return $$('[class*="crimeOption___" i]').filter(x=>locationName(x));}
 function objective(cs){if(cs==null)return '—';if(cs<70)return `CS70 (${70-cs})`;if(cs<100)return `CS100 (${100-cs})`;return 'unlock / uniques';}
 function ensureStrip(){
- const first=cards()[0];if(!first)return;const anchor=first;const container=anchor.parentElement;if(!container)return;let bar=$('#slx-graffiti-strip');if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-strip';bar.className='slx-graffiti-strip';container.insertBefore(bar,anchor);} const gs=graffitiStats(), cs=gs.skill??pageNumber(/(?:crime\s*skill|skill)\D{0,10}(\d{1,3})/i), nerve=pageNumber(/nerve\D{0,10}(\d{1,3})/i), uniques=gs.uniques!=null?[null,String(gs.uniques),String(gs.uniquesTotal??'?')]:txt(document.body).match(/unique(?:\s*outcomes?)?\D{0,10}(\d+)\s*\/\s*(\d+)/i); const mask=/paint\s*mask/i.test(gs.enhancer||txt(document.body));
+ const first=cards()[0];if(!first)return;const list=first.closest('[class*="virtualItem" i]')?.parentElement||first.parentElement;const container=list?.parentElement;if(!container)return;let bar=$('#slx-graffiti-strip');if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-strip';bar.className='slx-graffiti-strip';container.insertBefore(bar,list);} const gs=graffitiStats(), cs=gs.skill??pageNumber(/(?:crime\s*skill|skill)\D{0,10}(\d{1,3})/i), nerve=pageNumber(/nerve\D{0,10}(\d{1,3})/i), uniques=gs.uniques!=null?[null,String(gs.uniques),String(gs.uniquesTotal??'?')]:txt(document.body).match(/unique(?:\s*outcomes?)?\D{0,10}(\d+)\s*\/\s*(\d+)/i); const mask=/paint\s*mask/i.test(gs.enhancer||txt(document.body));
  const alerts=[]; Object.values(HINT).flatMap(x=>[x.rep,x.cash]).filter((v,i,a)=>a.indexOf(v)===i).forEach(c=>{const st=colourStock(c);if(st.percent!=null&&st.percent<=15)alerts.push(`${c} ${st.percent}%`);if(st.count===0)alerts.push(`${c}: no spare`);});
  bar.innerHTML=`<b>Graffiti Spray Guide</b><button class="slx-graffiti-mode" data-m="BOTH">BOTH</button><button class="slx-graffiti-mode" data-m="REP">REP</button><button class="slx-graffiti-mode" data-m="CASH">CASH</button><span>CS <b>${cs??'?'}</b></span><span>Mask <b>${mask?'YES':'NO'}</b></span><span>Nerve <b>${nerve??'?'}</b></span><span>Attempts <b>${nerve!=null?Math.floor(nerve/3):'?'}</b></span><span>Unique <b>${uniques?uniques[1]+'/'+uniques[2]:'?'}</b></span><span>Next <b>${objective(cs)}</b></span>${alerts.length?`<span class="slx-graffiti-alert">⚠ ${alerts.join(' · ')}</span>`:''}`;
  bar.querySelectorAll('[data-m]').forEach(x=>{x.disabled=x.dataset.m===mode();x.onclick=()=>setMode(x.dataset.m);});
 }
 function removeGraffiti(){document.querySelectorAll('.slx-graffiti-badge,#slx-graffiti-strip').forEach(x=>x.remove());}
-function render(){ensureStyle();injectMasterControl();renderCanonicalModules();if(!enabled()||!isGraffiti()){removeGraffiti();return;}cards().forEach(decorateCard);ensureStrip();}
+function render(){ensureStyle();injectMasterControl();syncHubState();if(!enabled()||!isGraffiti()){removeGraffiti();return;}cards().forEach(decorateCard);ensureStrip();}
 function injectMasterControl(){
  const all=$$('div,section,aside'); const panel=all.find(x=>/master control/i.test(txt(x))&&/crimes/i.test(txt(x))&&x.querySelectorAll('*').length<1500); if(!panel||panel.querySelector('[data-slx-graffiti-control]'))return;
  const crimes=[...panel.querySelectorAll('*')].find(x=>/^crimes$/i.test(txt(x)));const row=document.createElement('div');row.dataset.slxGraffitiControl='1';row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;margin:4px 0;border:1px solid rgba(255,255,255,.08);border-radius:7px';row.innerHTML=`<span>🎨 Graffiti Spray Guide</span><label><input type="checkbox" ${enabled()?'checked':''}> ON</label>`;row.querySelector('input').onchange=e=>{localStorage.setItem(ENABLE_KEY,e.target.checked?'1':'0');render();};(crimes?.parentElement||panel).appendChild(row);
@@ -45838,38 +45792,19 @@ function masterPanel(){return $$('div,section,aside').find(x=>/master control/i.
 function rowFor(panel,name){const esc=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),rx=new RegExp(esc,'i');const candidates=$$('label,li,[class*=row],[class*=module]',panel).filter(x=>rx.test(txt(x))&&x.querySelector('input[type=checkbox],[role=switch]'));return candidates.sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length)[0]||null;}
 function switchState(row,want){const c=row?.querySelector('input[type=checkbox]');if(c){if(c.checked!==want){c.checked=want;c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}return;}const b=row?.querySelector('[role=switch]');if(!b)return;const on=b.getAttribute('aria-checked')==='true';if(on!==want){b.setAttribute('aria-checked',want?'true':'false');b.dispatchEvent(new Event('change',{bubbles:true}));}}
 function standaloneState(id,apiGlobal){
- const api=window[apiGlobal]; const bridge=document.getElementById('sakalux-module-bridge-'+id); const runtimeMap=window.__SakaLuXDockRuntimeModules; const runtime=runtimeMap instanceof Map?runtimeMap.get(id):null;
- const installed=Boolean(api||bridge||runtime); let enabled=null;
- try{if(api&&typeof api.isEnabled==='function')enabled=Boolean(api.isEnabled());else if(bridge?.dataset?.enabled!=null)enabled=bridge.dataset.enabled==='true';else if(runtime&&typeof runtime.enabled==='function')enabled=Boolean(runtime.enabled());}catch{enabled=null;}
- return {installed,enabled,api,bridge,runtime};
+ const api=window[apiGlobal]; const bridge=document.getElementById('sakalux-module-bridge-'+id);
+ const installed=Boolean(api||bridge); let enabled=null;
+ try{if(api&&typeof api.isEnabled==='function')enabled=Boolean(api.isEnabled());else if(bridge?.dataset?.enabled!=null)enabled=bridge.dataset.enabled==='true';}catch{enabled=null;}
+ return {installed,enabled};
 }
-function canonicalModulesHost(panel){
- let host=panel.querySelector('#slx-suite-canonical-modules');
- if(host)return host;
- host=document.createElement('section');host.id='slx-suite-canonical-modules';host.style.cssText='margin:10px 16px 14px;padding:0';
- host.innerHTML='<div style="font-size:12px;letter-spacing:.18em;color:#e0b56d;margin:4px 4px 10px;font-weight:800">SAKALUX MODULES</div><div id="slx-suite-canonical-modules-list"></div>';
- const anchor=[...panel.querySelectorAll('button')].find(b=>/Enable Ready Modules/i.test(txt(b)))?.closest('div');
- (anchor?.parentElement||panel).insertBefore(host,anchor?.nextSibling||panel.firstChild);
- return host;
-}
-function hideLegacyStandaloneCards(panel){
- const names=STANDALONE.map(x=>x[1]);
- const cards=[...panel.querySelectorAll('div,article,section,li')].filter(el=>!el.closest('#slx-suite-canonical-modules')&&names.some(n=>txt(el).includes(n))&&/Requires the standalone SakaLuX script/i.test(txt(el)));
- cards.forEach(card=>{card.style.display='none';card.dataset.slxLegacyStandalone='1';});
-}
-function statusLabel(st){if(!st.installed)return ['NOT INSTALLED','#ef9a62'];if(st.enabled===false)return ['INSTALLED · OFF','#e5bd65'];if(st.enabled===true)return ['READY · ON','#72d6a0'];return ['INSTALLED · UNKNOWN','#9fb0c2'];}
-function invokeOpen(api){for(const k of ['open','openSettings','openSettingsPanel','openApiSettings']){try{if(typeof api?.[k]==='function'){api[k]();return true;}}catch{}}return false;}
-function setStandaloneEnabled(st,want){try{if(st.api&&typeof st.api.setEnabled==='function'){st.api.setEnabled(Boolean(want));return true;}if(st.runtime&&typeof st.runtime.setEnabled==='function'){st.runtime.setEnabled(Boolean(want));return true;}if(st.bridge){const cur=st.bridge.dataset?.enabled==='true';if(cur!==Boolean(want))st.bridge.click();return true;}}catch{}return false;}
-function renderCanonicalModules(){
- const panel=masterPanel();if(!panel)return;hideLegacyStandaloneCards(panel);const host=canonicalModulesHost(panel),list=host.querySelector('#slx-suite-canonical-modules-list');if(!list)return;
- const seen=new Map([...list.children].map(x=>[x.dataset.moduleId,x]));
- for(const [id,name,apiGlobal,desc] of STANDALONE){let card=seen.get(id);if(!card){card=document.createElement('div');card.dataset.moduleId=id;card.className='slx-suite-canonical-module';card.style.cssText='background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(11,17,24,.98));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 16px;margin:8px 0;color:#eef3f8';list.appendChild(card);}const st=standaloneState(id,apiGlobal);const [label,color]=statusLabel(st);card.innerHTML=`<div style="display:flex;align-items:flex-start;gap:10px"><div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:17px">${name}</b><span data-status style="border:1px solid ${color};color:${color};border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800">${label}</span></div><div style="margin-top:7px;color:#a9b5c3;font-size:13px;line-height:1.45">${desc}</div>${!st.installed?'<div style="margin-top:7px;color:#ef7892;font-size:12px">⚠ Requires the standalone SakaLuX script.</div>':''}</div><div style="display:flex;align-items:center;gap:8px"><button data-open type="button" style="min-width:88px;border:0;border-radius:12px;padding:11px 12px;background:#2479c8;color:white;font-weight:700" ${st.installed?'':'disabled'}>Settings</button><label style="position:relative;display:inline-flex;align-items:center"><input data-toggle type="checkbox" ${st.enabled===true?'checked':''} ${st.installed?'':'disabled'} style="width:52px;height:28px;accent-color:#d6ae47"></label></div></div>`;
- const open=card.querySelector('[data-open]');open.onclick=()=>{const cur=standaloneState(id,apiGlobal);if(cur.installed&&!invokeOpen(cur.api)&&cur.bridge)cur.bridge.click();};
- const tog=card.querySelector('[data-toggle]');tog.onchange=()=>{const cur=standaloneState(id,apiGlobal);if(!cur.installed){tog.checked=false;return;}if(!setStandaloneEnabled(cur,tog.checked))tog.checked=cur.enabled===true;setTimeout(renderCanonicalModules,80);};
+function syncHubState(){
+ const panel=masterPanel();if(!panel)return;
+ panel.querySelectorAll('.slx-hub-not-ready').forEach(x=>x.remove());
+ for(const [id,name,apiGlobal] of STANDALONE){const row=rowFor(panel,name);if(!row)continue;const st=standaloneState(id,apiGlobal);const c=row.querySelector('input[type=checkbox]');const b=row.querySelector('[role=switch]');
+   if(c)c.disabled=!st.installed;if(b){b.setAttribute('aria-disabled',st.installed?'false':'true');if(!st.installed)b.setAttribute('disabled','');else b.removeAttribute('disabled');}
+   if(st.enabled!==null)switchState(row,st.enabled);
  }
- [...list.children].forEach(x=>{if(!STANDALONE.some(m=>m[0]===x.dataset.moduleId))x.remove();});
 }
-function syncHubState(){renderCanonicalModules();}
 window.SakaLuXGraffitiSprayGuide={id:GID,version:VERSION,isEnabled:enabled,setEnabled(v){localStorage.setItem(ENABLE_KEY,v?'1':'0');render();},render};
 window.addEventListener('SakaLuX:ModuleReady',()=>setTimeout(syncHubState,40),{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(syncHubState,40),{passive:true});window.addEventListener('storage',()=>setTimeout(syncHubState,40),{passive:true});
 let q=0;new MutationObserver(()=>{if(q)return;q=setTimeout(()=>{q=0;render();},180)}).observe(document.documentElement,{childList:true,subtree:true});setInterval(syncHubState,1500);setTimeout(render,40);
