@@ -1,0 +1,42 @@
+name: Update Market Intelligence v1.17.55 Performance
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/update_market_v11755_perf.py'
+      - '.github/workflows/update-market-v11755-perf.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: market-v11755-performance
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply Market Intelligence performance update
+        run: python3 .github/scripts/update_market_v11755_perf.py
+      - name: Validate userscript
+        run: node --check SakaLuX-Market-Intelligence.user.js
+      - name: Validate registry
+        run: python3 -m json.tool scripts.json >/dev/null
+      - name: Verify performance patch
+        run: |
+          grep -q '@version      1.17.55' SakaLuX-Market-Intelligence.user.js
+          grep -q 'YATA_CACHE_MS=60\*1000' SakaLuX-Market-Intelligence.user.js
+          grep -q 'TRAVEL_STATES.IN_FLIGHT?10000' SakaLuX-Market-Intelligence.user.js
+          grep -q 'now-state.lastObserverScan<5000' SakaLuX-Market-Intelligence.user.js
+      - name: Commit release
+        run: |
+          if git diff --quiet; then
+            echo 'Already synchronized.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Market-Intelligence.user.js scripts.json greasyfork/Market-Intelligence.md releases/market-intelligence-v1.17.55.md
+          git commit -m 'Release Market Intelligence v1.17.55 performance update'
+          git push
