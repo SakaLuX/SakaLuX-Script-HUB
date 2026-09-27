@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.945**
+**v0.9.946**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.945**
+- Canonical version: **v0.9.946**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -62,6 +62,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 **v0.9.945 — Release documentation synchronized with the current Suite userscript version**
 - Release documentation synchronized with the current Suite userscript version.
+
+### v0.9.946 — Graffiti TornPDA DOM repair
+- Fixes the generated Graffiti regex escaping bug.
+- Detects the live Graffiti screen from visible zone labels instead of TornPDA URL/hash format.
+- Finds all seven zone cards from visible titles with hashed-class fallbacks and injects REP/CASH badges plus the progress strip.
+- Keeps the v0.9.945 canonical 10-module list and truthful install/ON/OFF status logic unchanged.
 
 ## Release history / Changelog
 

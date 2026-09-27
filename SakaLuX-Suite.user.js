@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.945
+// @version      0.9.946
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45730,7 +45730,7 @@ function scan(){
 /* SAKALUX_SUITE_0941_GRAFFITI_HUB_SYNC */
 (() => {
 'use strict';
-const VERSION='0.9.941';
+const VERSION='0.9.946';
 const GID='graffiti-spray-guide';
 const ENABLE_KEY='SakaLuX_SUITE_GRAFFITI_ENABLED';
 const MODE_KEY='SakaLuX_SUITE_GRAFFITI_MODE';
@@ -45763,30 +45763,67 @@ const txt=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
 const enabled=()=>localStorage.getItem(ENABLE_KEY)!=='0';
 const mode=()=>['BOTH','REP','CASH'].includes(localStorage.getItem(MODE_KEY))?localStorage.getItem(MODE_KEY):'BOTH';
 const setMode=v=>{localStorage.setItem(MODE_KEY,v);render();};
-const isGraffiti=()=>/sid=crimes/i.test(location.href)&&(/graffiti/i.test(location.hash)||/\bGraffiti\b/i.test(txt(document.body)));
+const isGraffiti=()=>{const t=txt(document.body);return /\bGraffiti\b/i.test(t)&&/East Side/i.test(t)&&/West Side/i.test(t)&&/North Side/i.test(t);};
 function locationName(card){
- const im=card.querySelector('[class*="crimeOptionImage" i] img'); const src=im?.getAttribute('srcset')||im?.src||'';
+ const explicit=card?.dataset?.slxGraffitiLocation;if(explicit)return explicit;
+ const title=txt(card?.querySelector?.('[class*="title" i],[class*="name" i],h3,h4')||card);
+ for(const [rx,n] of TITLE) if(rx.test(title)) return n;
+ const im=card?.querySelector?.('img');const src=im?.getAttribute?.('srcset')||im?.src||'';
  for(const [rx,n] of IMG) if(rx.test(src)) return n;
- const title=txt(card.querySelector('[class*="tabletTitleAndTagCount" i]')||card);
- for(const [rx,n] of TITLE) if(rx.test(title)) return n; return null;
+ return null;
 }
+
 function tagCount(card){
- const v=txt(card.querySelector('[class*="tagsCount" i]')||card).replace(/\+\d+→\d+|MAX/g,''); const m=v.match(/\d+/); return m?Number(m[0]):null;
+ const specific=card?.querySelector?.('[class*="tagsCount" i],[class*="tagCount" i]');
+ if(specific){const m=txt(specific).match(/\d+/);if(m)return Number(m[0]);}
+ const lines=(card?.innerText||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ const loc=locationName(card);const i=loc?lines.findIndex(x=>x.toLowerCase()===loc.toLowerCase()):-1;
+ if(i>=0){const m=(lines[i+1]||'').match(/^\d+$/);if(m)return Number(m[0]);}
+ return null;
 }
+
 function nextTier(v){ if(v==null)return null; const t=TIERS.find(x=>v<x); return t?{tier:t,left:t-v}:null; }
 function pageNumber(rx){const m=txt(document.body).match(rx);return m?Number(String(m[1]).replace(/,/g,'')):null;}
-function graffitiStats(){const out={cans:{}};$$('li[class*="statistic" i] button[aria-label]').forEach(btn=>{const a=btn.getAttribute('aria-label')||'';let m;if((m=a.match(/^Skill:\s*([\d.]+)/i)))out.skill=Number(m[1]);if((m=a.match(/^Enhancer:\s*(.+)/i)))out.enhancer=m[1].trim();if((m=a.match(/^Unique outcomes:\s*(\d+)\s*\/\s*(\d+)/i))){out.uniques=Number(m[1]);out.uniquesTotal=Number(m[2]);}if((m=a.match(/^Spray Paint\s*:\s*(\w+):\s*(\d+)/i)))out.cans[m[1].toLowerCase()]=Number(m[2]);});return out;}
+function graffitiStats(){
+ const out={cans:{}};
+ $$('[aria-label]').forEach(el=>{
+   const a=el.getAttribute('aria-label')||'';let m;
+   if((m=a.match(/(?:Crime )?Skill:\s*([\d.]+)/i)))out.skill=Number(m[1]);
+   if((m=a.match(/Enhancer:\s*(.+)/i)))out.enhancer=m[1].trim();
+   if((m=a.match(/Unique outcomes?:\s*(\d+)\s*\/\s*(\d+)/i))){out.uniques=Number(m[1]);out.uniquesTotal=Number(m[2]);}
+   if((m=a.match(/Spray Paint\s*:\s*(\w+)\s*:\s*(\d+)/i)))out.cans[m[1].toLowerCase()]=Number(m[2]);
+ });
+ const body=txt(document.body);
+ if(out.skill==null){const m=body.match(/(?:Crime\s*)?Skill\D{0,12}(\d{1,3})/i);if(m)out.skill=Number(m[1]);}
+ return out;
+}
+
 function colourStock(col){
- const body=txt(document.body); const rx=new RegExp(col+'[^\\n]{0,55}?(\\d{1,3})%','i'); const p=body.match(rx);
- const count=body.match(new RegExp(col+'[^\\n]{0,55}?(?:x|qty|quantity|stock)\\s*[:x]?\\s*(\\d+)','i'));
+ const body=txt(document.body);const esc=String(col).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ const p=body.match(new RegExp(esc+'[^%]{0,80}(\\d{1,3})%','i'));
+ const count=body.match(new RegExp(esc+'[^0-9]{0,80}(?:x|qty|quantity|stock)?\\s*(\\d+)','i'));
  return {percent:p?Number(p[1]):null,count:count?Number(count[1]):null};
 }
+
 function ensureStyle(){if($('#slx-graffiti-style'))return;const e=document.createElement('style');e.id='slx-graffiti-style';e.textContent=`
 .slx-graffiti-strip{display:flex;gap:6px;align-items:center;overflow:auto;white-space:nowrap;margin:4px 0;padding:6px 8px;border:1px solid #39414a;border-radius:7px;background:#151a20;color:#aeb8c3;font:11px/1.3 Arial,sans-serif}.slx-graffiti-strip b{color:#eef3f8}.slx-graffiti-mode{border:1px solid #4b5968;border-radius:5px;background:#202833;color:#e6edf3;padding:2px 6px;font-weight:800}.slx-graffiti-alert{color:#ffb45c!important}.slx-graffiti-badge{display:inline-flex;gap:4px;margin-left:5px;padding:1px 4px;border-radius:4px;background:#19232d;color:#dce7ef;font:10px/1.25 Arial,sans-serif}.slx-graffiti-rep{color:#ffcf66}.slx-graffiti-cash{color:#72d6a0}.slx-hub-not-ready{margin-left:6px;color:#ef9a62;font-size:10px;font-weight:800}`;(document.head||document.documentElement).appendChild(e);}
-function cards(){return $$('[class*="crimeOption___" i]').filter(x=>locationName(x));}
+function cards(){
+ const names=TITLE.map(x=>x[1]),out=[];
+ const all=$$('body *').filter(el=>el.children.length===0&&names.some(n=>txt(el).toLowerCase()===n.toLowerCase()));
+ for(const el of all){
+   const name=names.find(n=>txt(el).toLowerCase()===n.toLowerCase());let cur=el;
+   for(let depth=0;cur&&depth<8;depth++,cur=cur.parentElement){
+     const t=txt(cur);const useful=(/%/.test(t)||cur.querySelector('button')||cur.querySelector('img'))&&t.length<900;
+     if(useful){cur.dataset.slxGraffitiLocation=name;out.push(cur);break;}
+   }
+ }
+ if(out.length)return [...new Set(out)];
+ return $$('[class*="crimeOption" i],[class*="virtualItem" i]').filter(x=>locationName(x));
+}
+
 function objective(cs){if(cs==null)return '—';if(cs<70)return `CS70 (${70-cs})`;if(cs<100)return `CS100 (${100-cs})`;return 'unlock / uniques';}
 function ensureStrip(){
- const first=cards()[0];if(!first)return;const list=first.closest('[class*="virtualItem" i]')?.parentElement||first.parentElement;const container=list?.parentElement;if(!container)return;let bar=$('#slx-graffiti-strip');if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-strip';bar.className='slx-graffiti-strip';container.insertBefore(bar,list);} const gs=graffitiStats(), cs=gs.skill??pageNumber(/(?:crime\s*skill|skill)\D{0,10}(\d{1,3})/i), nerve=pageNumber(/nerve\D{0,10}(\d{1,3})/i), uniques=gs.uniques!=null?[null,String(gs.uniques),String(gs.uniquesTotal??'?')]:txt(document.body).match(/unique(?:\s*outcomes?)?\D{0,10}(\d+)\s*\/\s*(\d+)/i); const mask=/paint\s*mask/i.test(gs.enhancer||txt(document.body));
+ const first=cards()[0];if(!first)return;const anchor=first;const container=anchor.parentElement;if(!container)return;let bar=$('#slx-graffiti-strip');if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-strip';bar.className='slx-graffiti-strip';container.insertBefore(bar,anchor);} const gs=graffitiStats(), cs=gs.skill??pageNumber(/(?:crime\s*skill|skill)\D{0,10}(\d{1,3})/i), nerve=pageNumber(/nerve\D{0,10}(\d{1,3})/i), uniques=gs.uniques!=null?[null,String(gs.uniques),String(gs.uniquesTotal??'?')]:txt(document.body).match(/unique(?:\s*outcomes?)?\D{0,10}(\d+)\s*\/\s*(\d+)/i); const mask=/paint\s*mask/i.test(gs.enhancer||txt(document.body));
  const alerts=[]; Object.values(HINT).flatMap(x=>[x.rep,x.cash]).filter((v,i,a)=>a.indexOf(v)===i).forEach(c=>{const st=colourStock(c);if(st.percent!=null&&st.percent<=15)alerts.push(`${c} ${st.percent}%`);if(st.count===0)alerts.push(`${c}: no spare`);});
  bar.innerHTML=`<b>Graffiti Spray Guide</b><button class="slx-graffiti-mode" data-m="BOTH">BOTH</button><button class="slx-graffiti-mode" data-m="REP">REP</button><button class="slx-graffiti-mode" data-m="CASH">CASH</button><span>CS <b>${cs??'?'}</b></span><span>Mask <b>${mask?'YES':'NO'}</b></span><span>Nerve <b>${nerve??'?'}</b></span><span>Attempts <b>${nerve!=null?Math.floor(nerve/3):'?'}</b></span><span>Unique <b>${uniques?uniques[1]+'/'+uniques[2]:'?'}</b></span><span>Next <b>${objective(cs)}</b></span>${alerts.length?`<span class="slx-graffiti-alert">⚠ ${alerts.join(' · ')}</span>`:''}`;
  bar.querySelectorAll('[data-m]').forEach(x=>{x.disabled=x.dataset.m===mode();x.onclick=()=>setMode(x.dataset.m);});
