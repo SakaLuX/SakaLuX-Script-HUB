@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.943
+// @version      0.9.944
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45747,7 +45747,16 @@ const HINT={
 const IMG=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
 const TITLE=[[/east/i,'East Side'],[/west/i,'West Side'],[/north/i,'North Side'],[/residential/i,'Residential'],[/red[-\s]?light/i,'Red-Light'],[/financial/i,'Financial'],[/city\s*cent/i,'City Center']];
 const STANDALONE=[
- ['account-auditor','Account Auditor','SakaLuXAccountAuditor'],['bazaar-smart-pricer','Bazaar Smart Pricer','SakaLuXBazaarSmartPricer'],['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],['chat-intelligence','Chat Intelligence','SakaLuXChatIntelligence'],['company-intelligence','Company Intelligence','SakaLuXCompanyIntelligence'],['elimination-assistant','Elimination Assistant','SakaLuXEliminationAssistant'],['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],['market-intelligence','Market Intelligence','SakaLuXMarketIntelligence'],['mission-rewards','Mission Rewards','SakaLuXMissionRewards'],['stock-manager-advisor','Stock Manager','SakaLuXStockManagerAdvisor']
+ ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard','Advanced Enhancer inventory tracker and protection tools.'],
+ ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker','Bazaar buyer grouping, thank-you messages, statistics and history.'],
+ ['bazaar-smart-pricer','Bazaar Smart Pricer','SakaLuXBazaarSmartPricer','Quick Bazaar pricing, bulk fill and sale-safety controls.'],
+ ['mission-rewards','Mission Rewards','SakaLuXMissionRewards','Mission Shop values, ammo ownership and mod tracking.'],
+ ['market-intelligence','Market Intelligence','SakaLuXMarketIntelligence','Market, travel and pricing intelligence.'],
+ ['elimination-assistant','Elimination Assistant','SakaLuXEliminationAssistant','Eliminations target advisor and safe-target tools.'],
+ ['company-intelligence','Company Intelligence','SakaLuXCompanyIntelligence','Company dashboard, employee analysis and training recommendations.'],
+ ['chat-intelligence','Chat Intelligence','SakaLuXChatIntelligence','Chat search, exports, favorites and notification controls.'],
+ ['stock-manager-advisor','Stock Manager & Advisor','SakaLuXStockManagerAdvisor','Stocks portfolio, benefits, ROI advice and rebalance tools.'],
+ ['account-auditor','Account Auditor','SakaLuXAccountAuditor','Account audit, security and configuration diagnostics.']
 ];
 const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
 const txt=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
@@ -45783,7 +45792,7 @@ function ensureStrip(){
  bar.querySelectorAll('[data-m]').forEach(x=>{x.disabled=x.dataset.m===mode();x.onclick=()=>setMode(x.dataset.m);});
 }
 function removeGraffiti(){document.querySelectorAll('.slx-graffiti-badge,#slx-graffiti-strip').forEach(x=>x.remove());}
-function render(){ensureStyle();injectMasterControl();syncHubState();if(!enabled()||!isGraffiti()){removeGraffiti();return;}cards().forEach(decorateCard);ensureStrip();}
+function render(){ensureStyle();injectMasterControl();renderCanonicalModules();if(!enabled()||!isGraffiti()){removeGraffiti();return;}cards().forEach(decorateCard);ensureStrip();}
 function injectMasterControl(){
  const all=$$('div,section,aside'); const panel=all.find(x=>/master control/i.test(txt(x))&&/crimes/i.test(txt(x))&&x.querySelectorAll('*').length<1500); if(!panel||panel.querySelector('[data-slx-graffiti-control]'))return;
  const crimes=[...panel.querySelectorAll('*')].find(x=>/^crimes$/i.test(txt(x)));const row=document.createElement('div');row.dataset.slxGraffitiControl='1';row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;margin:4px 0;border:1px solid rgba(255,255,255,.08);border-radius:7px';row.innerHTML=`<span>🎨 Graffiti Spray Guide</span><label><input type="checkbox" ${enabled()?'checked':''}> ON</label>`;row.querySelector('input').onchange=e=>{localStorage.setItem(ENABLE_KEY,e.target.checked?'1':'0');render();};(crimes?.parentElement||panel).appendChild(row);
@@ -45792,19 +45801,38 @@ function masterPanel(){return $$('div,section,aside').find(x=>/master control/i.
 function rowFor(panel,name){const esc=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),rx=new RegExp(esc,'i');const candidates=$$('label,li,[class*=row],[class*=module]',panel).filter(x=>rx.test(txt(x))&&x.querySelector('input[type=checkbox],[role=switch]'));return candidates.sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length)[0]||null;}
 function switchState(row,want){const c=row?.querySelector('input[type=checkbox]');if(c){if(c.checked!==want){c.checked=want;c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}return;}const b=row?.querySelector('[role=switch]');if(!b)return;const on=b.getAttribute('aria-checked')==='true';if(on!==want){b.setAttribute('aria-checked',want?'true':'false');b.dispatchEvent(new Event('change',{bubbles:true}));}}
 function standaloneState(id,apiGlobal){
- const api=window[apiGlobal]; const bridge=document.getElementById('sakalux-module-bridge-'+id);
- const installed=Boolean(api||bridge); let enabled=null;
+ const api=window[apiGlobal]; const bridge=document.getElementById('sakalux-module-bridge-'+id); const rootMark=document.documentElement?.getAttribute('data-sakalux-installed-'+id);
+ const installed=Boolean(api||bridge||rootMark); let enabled=null;
  try{if(api&&typeof api.isEnabled==='function')enabled=Boolean(api.isEnabled());else if(bridge?.dataset?.enabled!=null)enabled=bridge.dataset.enabled==='true';}catch{enabled=null;}
- return {installed,enabled};
+ return {installed,enabled,api,bridge};
 }
-function syncHubState(){
- const panel=masterPanel();if(!panel)return;
- panel.querySelectorAll('.slx-hub-not-ready').forEach(x=>x.remove());
- for(const [id,name,apiGlobal] of STANDALONE){const row=rowFor(panel,name);if(!row)continue;const st=standaloneState(id,apiGlobal);const c=row.querySelector('input[type=checkbox]');const b=row.querySelector('[role=switch]');
-   if(c)c.disabled=!st.installed;if(b){b.setAttribute('aria-disabled',st.installed?'false':'true');if(!st.installed)b.setAttribute('disabled','');else b.removeAttribute('disabled');}
-   if(st.enabled!==null)switchState(row,st.enabled);
+function canonicalModulesHost(panel){
+ let host=panel.querySelector('#slx-suite-canonical-modules');
+ if(host)return host;
+ host=document.createElement('section');host.id='slx-suite-canonical-modules';host.style.cssText='margin:10px 16px 14px;padding:0';
+ host.innerHTML='<div style="font-size:12px;letter-spacing:.18em;color:#e0b56d;margin:4px 4px 10px;font-weight:800">SAKALUX MODULES</div><div id="slx-suite-canonical-modules-list"></div>';
+ const anchor=[...panel.querySelectorAll('button')].find(b=>/Enable Ready Modules/i.test(txt(b)))?.closest('div');
+ (anchor?.parentElement||panel).insertBefore(host,anchor?.nextSibling||panel.firstChild);
+ return host;
+}
+function hideLegacyStandaloneCards(panel){
+ const names=STANDALONE.map(x=>x[1]);
+ const cards=[...panel.querySelectorAll('div,article,section,li')].filter(el=>!el.closest('#slx-suite-canonical-modules')&&names.some(n=>txt(el).includes(n))&&/Requires the standalone SakaLuX script/i.test(txt(el)));
+ cards.forEach(card=>{card.style.display='none';card.dataset.slxLegacyStandalone='1';});
+}
+function statusLabel(st){if(!st.installed)return ['NOT INSTALLED','#ef9a62'];if(st.enabled===false)return ['INSTALLED · OFF','#9fb0c2'];if(st.enabled===true)return ['READY · ON','#72d6a0'];return ['INSTALLED','#72d6a0'];}
+function invokeOpen(api){for(const k of ['open','openSettings','openSettingsPanel','openApiSettings']){try{if(typeof api?.[k]==='function'){api[k]();return true;}}catch{}}return false;}
+function setStandaloneEnabled(st,want){try{if(st.api&&typeof st.api.setEnabled==='function'){st.api.setEnabled(Boolean(want));return true;}if(st.bridge){const cur=st.bridge.dataset?.enabled==='true';if(cur!==Boolean(want))st.bridge.click();return true;}}catch{}return false;}
+function renderCanonicalModules(){
+ const panel=masterPanel();if(!panel)return;hideLegacyStandaloneCards(panel);const host=canonicalModulesHost(panel),list=host.querySelector('#slx-suite-canonical-modules-list');if(!list)return;
+ const seen=new Map([...list.children].map(x=>[x.dataset.moduleId,x]));
+ for(const [id,name,apiGlobal,desc] of STANDALONE){let card=seen.get(id);if(!card){card=document.createElement('div');card.dataset.moduleId=id;card.className='slx-suite-canonical-module';card.style.cssText='background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(11,17,24,.98));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 16px;margin:8px 0;color:#eef3f8';list.appendChild(card);}const st=standaloneState(id,apiGlobal);const [label,color]=statusLabel(st);card.innerHTML=`<div style="display:flex;align-items:flex-start;gap:10px"><div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:17px">${name}</b><span data-status style="border:1px solid ${color};color:${color};border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800">${label}</span></div><div style="margin-top:7px;color:#a9b5c3;font-size:13px;line-height:1.45">${desc}</div>${!st.installed?'<div style="margin-top:7px;color:#ef7892;font-size:12px">⚠ Requires the standalone SakaLuX script.</div>':''}</div><div style="display:flex;align-items:center;gap:8px"><button data-open type="button" style="min-width:88px;border:0;border-radius:12px;padding:11px 12px;background:#2479c8;color:white;font-weight:700" ${st.installed?'':'disabled'}>Settings</button><label style="position:relative;display:inline-flex;align-items:center"><input data-toggle type="checkbox" ${st.enabled===true?'checked':''} ${st.installed?'':'disabled'} style="width:52px;height:28px;accent-color:#d6ae47"></label></div></div>`;
+ const open=card.querySelector('[data-open]');open.onclick=()=>{const cur=standaloneState(id,apiGlobal);if(cur.installed&&!invokeOpen(cur.api)&&cur.bridge)cur.bridge.click();};
+ const tog=card.querySelector('[data-toggle]');tog.onchange=()=>{const cur=standaloneState(id,apiGlobal);if(!cur.installed){tog.checked=false;return;}if(!setStandaloneEnabled(cur,tog.checked))tog.checked=cur.enabled===true;setTimeout(renderCanonicalModules,80);};
  }
+ [...list.children].forEach(x=>{if(!STANDALONE.some(m=>m[0]===x.dataset.moduleId))x.remove();});
 }
+function syncHubState(){renderCanonicalModules();}
 window.SakaLuXGraffitiSprayGuide={id:GID,version:VERSION,isEnabled:enabled,setEnabled(v){localStorage.setItem(ENABLE_KEY,v?'1':'0');render();},render};
 window.addEventListener('SakaLuX:ModuleReady',()=>setTimeout(syncHubState,40),{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(syncHubState,40),{passive:true});window.addEventListener('storage',()=>setTimeout(syncHubState,40),{passive:true});
 let q=0;new MutationObserver(()=>{if(q)return;q=setTimeout(()=>{q=0;render();},180)}).observe(document.documentElement,{childList:true,subtree:true});setInterval(syncHubState,1500);setTimeout(render,40);
