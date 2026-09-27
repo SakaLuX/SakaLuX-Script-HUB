@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.944
+// @version      0.9.945
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45801,10 +45801,10 @@ function masterPanel(){return $$('div,section,aside').find(x=>/master control/i.
 function rowFor(panel,name){const esc=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),rx=new RegExp(esc,'i');const candidates=$$('label,li,[class*=row],[class*=module]',panel).filter(x=>rx.test(txt(x))&&x.querySelector('input[type=checkbox],[role=switch]'));return candidates.sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length)[0]||null;}
 function switchState(row,want){const c=row?.querySelector('input[type=checkbox]');if(c){if(c.checked!==want){c.checked=want;c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}return;}const b=row?.querySelector('[role=switch]');if(!b)return;const on=b.getAttribute('aria-checked')==='true';if(on!==want){b.setAttribute('aria-checked',want?'true':'false');b.dispatchEvent(new Event('change',{bubbles:true}));}}
 function standaloneState(id,apiGlobal){
- const api=window[apiGlobal]; const bridge=document.getElementById('sakalux-module-bridge-'+id); const rootMark=document.documentElement?.getAttribute('data-sakalux-installed-'+id);
- const installed=Boolean(api||bridge||rootMark); let enabled=null;
- try{if(api&&typeof api.isEnabled==='function')enabled=Boolean(api.isEnabled());else if(bridge?.dataset?.enabled!=null)enabled=bridge.dataset.enabled==='true';}catch{enabled=null;}
- return {installed,enabled,api,bridge};
+ const api=window[apiGlobal]; const bridge=document.getElementById('sakalux-module-bridge-'+id); const runtimeMap=window.__SakaLuXDockRuntimeModules; const runtime=runtimeMap instanceof Map?runtimeMap.get(id):null;
+ const installed=Boolean(api||bridge||runtime); let enabled=null;
+ try{if(api&&typeof api.isEnabled==='function')enabled=Boolean(api.isEnabled());else if(bridge?.dataset?.enabled!=null)enabled=bridge.dataset.enabled==='true';else if(runtime&&typeof runtime.enabled==='function')enabled=Boolean(runtime.enabled());}catch{enabled=null;}
+ return {installed,enabled,api,bridge,runtime};
 }
 function canonicalModulesHost(panel){
  let host=panel.querySelector('#slx-suite-canonical-modules');
@@ -45820,9 +45820,9 @@ function hideLegacyStandaloneCards(panel){
  const cards=[...panel.querySelectorAll('div,article,section,li')].filter(el=>!el.closest('#slx-suite-canonical-modules')&&names.some(n=>txt(el).includes(n))&&/Requires the standalone SakaLuX script/i.test(txt(el)));
  cards.forEach(card=>{card.style.display='none';card.dataset.slxLegacyStandalone='1';});
 }
-function statusLabel(st){if(!st.installed)return ['NOT INSTALLED','#ef9a62'];if(st.enabled===false)return ['INSTALLED · OFF','#9fb0c2'];if(st.enabled===true)return ['READY · ON','#72d6a0'];return ['INSTALLED','#72d6a0'];}
+function statusLabel(st){if(!st.installed)return ['NOT INSTALLED','#ef9a62'];if(st.enabled===false)return ['INSTALLED · OFF','#e5bd65'];if(st.enabled===true)return ['READY · ON','#72d6a0'];return ['INSTALLED · UNKNOWN','#9fb0c2'];}
 function invokeOpen(api){for(const k of ['open','openSettings','openSettingsPanel','openApiSettings']){try{if(typeof api?.[k]==='function'){api[k]();return true;}}catch{}}return false;}
-function setStandaloneEnabled(st,want){try{if(st.api&&typeof st.api.setEnabled==='function'){st.api.setEnabled(Boolean(want));return true;}if(st.bridge){const cur=st.bridge.dataset?.enabled==='true';if(cur!==Boolean(want))st.bridge.click();return true;}}catch{}return false;}
+function setStandaloneEnabled(st,want){try{if(st.api&&typeof st.api.setEnabled==='function'){st.api.setEnabled(Boolean(want));return true;}if(st.runtime&&typeof st.runtime.setEnabled==='function'){st.runtime.setEnabled(Boolean(want));return true;}if(st.bridge){const cur=st.bridge.dataset?.enabled==='true';if(cur!==Boolean(want))st.bridge.click();return true;}}catch{}return false;}
 function renderCanonicalModules(){
  const panel=masterPanel();if(!panel)return;hideLegacyStandaloneCards(panel);const host=canonicalModulesHost(panel),list=host.querySelector('#slx-suite-canonical-modules-list');if(!list)return;
  const seen=new Map([...list.children].map(x=>[x.dataset.moduleId,x]));
