@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.943**
+**v0.9.944**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.943**
+- Canonical version: **v0.9.944**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -62,6 +62,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 **v0.9.943 — Release documentation synchronized with the current Suite userscript version**
 - Release documentation synchronized with the current Suite userscript version.
+
+**v0.9.944 — Complete SakaLuX Modules registry + authoritative status**
+- Shows all 10 managed standalone modules in canonical order, including Bazaar Smart Pricer.
+- Replaces legacy READY labels with live status from each standalone API/bridge/runtime: NOT INSTALLED, INSTALLED · OFF, READY · ON, or INSTALLED · UNKNOWN.
+- Never treats persistent installed markers or old buttons as proof that a script is installed.
+- Keeps missing-module switches disabled and mirrors live ON/OFF state.
 
 ## Release history / Changelog
 
