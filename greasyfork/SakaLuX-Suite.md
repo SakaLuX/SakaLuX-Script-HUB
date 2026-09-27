@@ -60,17 +60,15 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.945 — Release documentation synchronized with the current Suite userscript version**
+**v0.9.946 — Release documentation synchronized with the current Suite userscript version**
 - Release documentation synchronized with the current Suite userscript version.
-
-### v0.9.946 — Graffiti TornPDA DOM repair
-- Fixes the generated Graffiti regex escaping bug.
-- Detects the live Graffiti screen from visible zone labels instead of TornPDA URL/hash format.
-- Finds all seven zone cards from visible titles with hashed-class fallbacks and injects REP/CASH badges plus the progress strip.
-- Keeps the v0.9.945 canonical 10-module list and truthful install/ON/OFF status logic unchanged.
 
 ## Release history / Changelog
 
+
+
+### v0.9.946 — Release documentation synchronized with the current Suite userscript version
+- Release documentation synchronized with the current Suite userscript version.
 
 ### v0.9.945 — Release documentation synchronized with the current Suite userscript version
 - Release documentation synchronized with the current Suite userscript version.
