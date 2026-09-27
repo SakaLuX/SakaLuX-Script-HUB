@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.54**
+**v1.17.55**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.17.54**
+- Canonical version: **v1.17.55**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -238,4 +238,10 @@
 - Adds a persistent **MI INFO: ON/OFF** button while landed abroad. Turning it OFF removes the per-item `MI Market / Net / Stock / next stock` rows without disabling Best Buys, planning, pricing or the rest of Market Intelligence.
 - Reads stock strictly from Torn's **Stock** table cell / stock-labelled element. It no longer scans the whole item row, so numbers in names such as **Type 98 Anti-Tank** cannot be mistaken for stock.
 - Synchronizes Market Intelligence runtime/version surfaces and fixes Script Hub's runtime display constant to **v1.9.88**.
+
+
+### v1.17.55 — Travel performance pass
+- Adds a 60-second YATA export cache with in-flight request deduplication.
+- Throttles passive Travel rescans by lifecycle state: in-flight 10s, landed 12s, travel agency 15s.
+- Keeps forced navigation/manual refreshes responsive while cutting repeated DOM scans and API work on TornPDA.
 
