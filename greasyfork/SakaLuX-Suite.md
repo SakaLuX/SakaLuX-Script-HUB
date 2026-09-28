@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.953**
+**v0.9.954**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.953**
+- Canonical version: **v0.9.954**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -109,6 +109,14 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Makes Graffiti Spray Guide a native Suite module in Crimes with only an ON/OFF switch: no Settings button and no Ready badge.
 - Replaces the appended Graffiti experiment with the working helper DOM contract: crimeOption/card image, tagsCount, Reputation aria-label and sprayCanButton aria-label.
 - Keeps BOTH / REP / CASH hints, reputation tier progress, CS/enhancer/nerve/unique summary and <=15% / no-spare warnings.
+
+### v0.9.954 — Graffiti primary-helper UI + Target Alerts back to Lists
+- Moves **Target Alerts** back to **Lists**.
+- Keeps **Graffiti Spray Guide** under **Crimes** as a built-in Suite module with ON/OFF only (no Settings, no Ready badge).
+- Rebuilds Graffiti presentation around the primary Torchin helper concept: compact per-zone **REP** and **CASH** best-colour hints instead of the BOTH/REP/CASH mode bar.
+- Adds only the useful secondary-helper cue: the currently selected spray is marked `✓ REP`, `✓ CASH`, or `✓ REP + CASH` when it matches the recommended colour.
+- Removes the large CS/enhancer/nerve/uniques strip and tag-progress overlays that were obscuring zone names on TornPDA.
+- Uses the same seven-zone colour guidance documented by the Torn Graffiti guide.
 
 ## Release history / Changelog
 
