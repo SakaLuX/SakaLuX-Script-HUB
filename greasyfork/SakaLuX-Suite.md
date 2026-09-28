@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.948**
+**v0.9.949**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.948**
+- Canonical version: **v0.9.949**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -77,6 +77,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Module cards no longer toggle when tapping the title/description/background.
 - Status badges now reflect the live bridge state: `NOT INSTALLED`, `INSTALLED · OFF`, `READY · ON`, or `INSTALLED · UNKNOWN`.
 - Suppresses stale legacy `READY` / `NOT READY` decorations without changing the compact Suite card layout.
+
+### v0.9.949 — Complete managed module list
+- Guarantees all 10 managed standalone cards are present in Master Control on every render.
+- Restores missing Bazaar Smart Pricer by cloning the native compact Suite card structure instead of introducing a new layout.
+- Keeps canonical order: Enhancer Guard, Bazaar Thanker, Bazaar Smart Pricer, Mission Rewards, Market Intelligence, Elimination Assistant, Company Intelligence, Chat Intelligence, Stock Manager & Advisor, Account Auditor.
+- Leaves v0.9.948 live status, Settings and ON/OFF bridge handling in control of each card after creation.
 
 ## Release history / Changelog
 
