@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.89**
+**v1.9.90**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v1.9.89**
+- Canonical version: **v1.9.90**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -38,6 +38,11 @@
 - Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
 - Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
 - Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
+
+### v1.9.90 — Alphabetical active-first module order
+- Enabled/ON modules are shown first and sorted A–Z.
+- Disabled/OFF modules automatically move to the bottom and are sorted A–Z there.
+- The order refreshes immediately after ON/OFF changes and remains consistent between Hub and Suite/standalone module control.
 
 ## Release history / Changelog
 

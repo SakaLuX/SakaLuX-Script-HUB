@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.949**
+**v0.9.950**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.949**
+- Canonical version: **v0.9.950**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -83,6 +83,11 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Restores missing Bazaar Smart Pricer by cloning the native compact Suite card structure instead of introducing a new layout.
 - Keeps canonical order: Enhancer Guard, Bazaar Thanker, Bazaar Smart Pricer, Mission Rewards, Market Intelligence, Elimination Assistant, Company Intelligence, Chat Intelligence, Stock Manager & Advisor, Account Auditor.
 - Leaves v0.9.948 live status, Settings and ON/OFF bridge handling in control of each card after creation.
+
+### v0.9.950 — Alphabetical active-first module order
+- Enabled/ON modules are shown first and sorted A–Z.
+- Disabled/OFF modules automatically move to the bottom and are sorted A–Z there.
+- The order refreshes immediately after ON/OFF changes and remains consistent between Hub and Suite/standalone module control.
 
 ## Release history / Changelog
 

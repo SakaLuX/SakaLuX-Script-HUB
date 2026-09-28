@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.89
+// @version      1.9.90
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3549,3 +3549,56 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 #sakalux-hub-panel#sakalux-hub-panel .slh-tool span{font-size:11px!important;line-height:1!important}
 @media(max-width:520px){#sakalux-hub-panel#sakalux-hub-panel .slh-tool{font-size:7px!important}}
 `;(document.head||document.documentElement).appendChild(s)})();
+
+
+/* SAKALUX_ACTIVE_FIRST_ALPHA_SORT */
+(() => {
+'use strict';
+const NAMES=["Account Auditor", "Bazaar Smart Pricer", "Bazaar Thanker", "Chat Intelligence", "Company Intelligence", "Elimination Assistant", "Enhancer Guard", "Market Intelligence", "Mission Rewards", "Stock Manager & Advisor"];
+const txt=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
+const all=(q,r=document)=>[...r.querySelectorAll(q)];
+function leafFor(root,name){return all('*',root).find(e=>e.children.length===0&&txt(e)===name)||null;}
+function cardFor(root,name){
+ const leaf=leafFor(root,name); if(!leaf)return null;
+ let c=leaf;
+ for(let i=0;c&&i<9;i++,c=c.parentElement){
+   if(c.querySelector?.('input[type=checkbox],[role=switch]')&&c.querySelector?.('button'))return c;
+ }
+ return null;
+}
+function active(card){
+ const input=card.querySelector('input[type=checkbox]');
+ if(input)return !input.disabled&&input.checked;
+ const sw=card.querySelector('[role=switch]');
+ if(sw){if(sw.getAttribute('aria-disabled')==='true')return false;return sw.getAttribute('aria-checked')==='true';}
+ const t=txt(card);
+ if(/NOT INSTALLED|INSTALLED\s*·\s*OFF|DISABLED|NOT READY/i.test(t))return false;
+ if(/READY\s*·\s*ON|ACTIVE|ENABLED/i.test(t))return true;
+ return false;
+}
+function reorder(root){
+ const rows=NAMES.map(name=>({name,card:cardFor(root,name)})).filter(x=>x.card);
+ if(rows.length<2)return;
+ const groups=new Map();
+ for(const row of rows){const p=row.card.parentElement;if(!p)continue;if(!groups.has(p))groups.set(p,[]);groups.get(p).push(row);}
+ for(const [parent,list] of groups){
+   const sorted=[...list].sort((a,b)=>Number(active(b.card))-Number(active(a.card))||a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
+   const current=list.map(x=>x.card);
+   if(sorted.every((x,i)=>x.card===current[i]))continue;
+   for(const x of sorted)parent.appendChild(x.card);
+ }
+}
+function run(){
+ const roots=[];
+ const hub=document.getElementById('sakalux-hub-panel'); if(hub)roots.push(hub);
+ for(const x of all('div,section,aside')){const t=txt(x);if(/SakaLuX Suite/i.test(t)&&/Enable Ready Modules/i.test(t))roots.push(x);}
+ const uniq=[...new Set(roots)].sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length);
+ for(const r of uniq)reorder(r);
+}
+let q=0;const schedule=()=>{if(q)return;q=setTimeout(()=>{q=0;run();},40)};
+document.addEventListener('change',schedule,true);document.addEventListener('click',schedule,true);
+new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['checked','disabled','aria-checked','aria-disabled','class']});
+window.addEventListener('SakaLuX:ModuleReady',schedule,{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',schedule,{passive:true});
+setInterval(run,1000);setTimeout(run,60);
+})();
+
