@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.950**
+**v0.9.951**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.950**
+- Canonical version: **v0.9.951**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -88,6 +88,13 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Enabled/ON modules are shown first and sorted A–Z.
 - Disabled/OFF modules automatically move to the bottom and are sorted A–Z there.
 - The order refreshes immediately after ON/OFF changes and remains consistent between Hub and Suite/standalone module control.
+
+### v0.9.951 — Rebuilt Graffiti Spray Guide
+- Rebuilds Graffiti integration from the two requested MIT helpers instead of extending the broken experimental DOM layer.
+- Uses the mobile/TornPDA-first inline recommendation presentation as the primary behavior and adds advanced REP tier progress, CS gates, enhancer, nerve/attempts, unique outcomes, stock percentage warnings and BOTH/REP/CASH modes.
+- Detects all seven Graffiti locations by visible title and image fallback, avoiding dependence on Torn's generated CSS class names.
+- Removes the previous v0.9.941 Graffiti renderer to prevent duplicate observers and conflicting UI.
+- Remains read-only: no API requests and no gameplay automation.
 
 ## Release history / Changelog
 

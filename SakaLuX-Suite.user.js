@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.950
+// @version      0.9.951
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45727,89 +45727,6 @@ function scan(){
 })();
 /* SakaLuX Suite Daily Progress — END */
 
-/* SAKALUX_SUITE_0941_GRAFFITI_HUB_SYNC */
-(() => {
-'use strict';
-const VERSION='0.9.941';
-const GID='graffiti-spray-guide';
-const ENABLE_KEY='SakaLuX_SUITE_GRAFFITI_ENABLED';
-const MODE_KEY='SakaLuX_SUITE_GRAFFITI_MODE';
-const TIERS=[25,50,100,250,500];
-const HINT={
- 'East Side':{cash:'purple',rep:'red'},
- 'West Side':{cash:'green',rep:'blue'},
- 'North Side':{cash:'green',rep:'orange'},
- 'Residential':{cash:'white',rep:'blue'},
- 'Red-Light':{cash:'green',rep:'pink'},
- 'Financial':{cash:'black',rep:'red'},
- 'City Center':{cash:'green',rep:'blue'}
-};
-const IMG=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
-const TITLE=[[/east/i,'East Side'],[/west/i,'West Side'],[/north/i,'North Side'],[/residential/i,'Residential'],[/red[-\s]?light/i,'Red-Light'],[/financial/i,'Financial'],[/city\s*cent/i,'City Center']];
-const STANDALONE=[
- ['account-auditor','Account Auditor','SakaLuXAccountAuditor'],['bazaar-smart-pricer','Bazaar Smart Pricer','SakaLuXBazaarSmartPricer'],['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],['chat-intelligence','Chat Intelligence','SakaLuXChatIntelligence'],['company-intelligence','Company Intelligence','SakaLuXCompanyIntelligence'],['elimination-assistant','Elimination Assistant','SakaLuXEliminationAssistant'],['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],['market-intelligence','Market Intelligence','SakaLuXMarketIntelligence'],['mission-rewards','Mission Rewards','SakaLuXMissionRewards'],['stock-manager-advisor','Stock Manager','SakaLuXStockManagerAdvisor']
-];
-const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
-const txt=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
-const enabled=()=>localStorage.getItem(ENABLE_KEY)!=='0';
-const mode=()=>['BOTH','REP','CASH'].includes(localStorage.getItem(MODE_KEY))?localStorage.getItem(MODE_KEY):'BOTH';
-const setMode=v=>{localStorage.setItem(MODE_KEY,v);render();};
-const isGraffiti=()=>/sid=crimes/i.test(location.href)&&(/graffiti/i.test(location.hash)||/\bGraffiti\b/i.test(txt(document.body)));
-function locationName(card){
- const im=card.querySelector('[class*="crimeOptionImage" i] img'); const src=im?.getAttribute('srcset')||im?.src||'';
- for(const [rx,n] of IMG) if(rx.test(src)) return n;
- const title=txt(card.querySelector('[class*="tabletTitleAndTagCount" i]')||card);
- for(const [rx,n] of TITLE) if(rx.test(title)) return n; return null;
-}
-function tagCount(card){
- const v=txt(card.querySelector('[class*="tagsCount" i]')||card).replace(/\+\d+→\d+|MAX/g,''); const m=v.match(/\d+/); return m?Number(m[0]):null;
-}
-function nextTier(v){ if(v==null)return null; const t=TIERS.find(x=>v<x); return t?{tier:t,left:t-v}:null; }
-function pageNumber(rx){const m=txt(document.body).match(rx);return m?Number(String(m[1]).replace(/,/g,'')):null;}
-function graffitiStats(){const out={cans:{}};$$('li[class*="statistic" i] button[aria-label]').forEach(btn=>{const a=btn.getAttribute('aria-label')||'';let m;if((m=a.match(/^Skill:\s*([\d.]+)/i)))out.skill=Number(m[1]);if((m=a.match(/^Enhancer:\s*(.+)/i)))out.enhancer=m[1].trim();if((m=a.match(/^Unique outcomes:\s*(\d+)\s*\/\s*(\d+)/i))){out.uniques=Number(m[1]);out.uniquesTotal=Number(m[2]);}if((m=a.match(/^Spray Paint\s*:\s*(\w+):\s*(\d+)/i)))out.cans[m[1].toLowerCase()]=Number(m[2]);});return out;}
-function colourStock(col){
- const body=txt(document.body); const rx=new RegExp(col+'[^\\n]{0,55}?(\\d{1,3})%','i'); const p=body.match(rx);
- const count=body.match(new RegExp(col+'[^\\n]{0,55}?(?:x|qty|quantity|stock)\\s*[:x]?\\s*(\\d+)','i'));
- return {percent:p?Number(p[1]):null,count:count?Number(count[1]):null};
-}
-function ensureStyle(){if($('#slx-graffiti-style'))return;const e=document.createElement('style');e.id='slx-graffiti-style';e.textContent=`
-.slx-graffiti-strip{display:flex;gap:6px;align-items:center;overflow:auto;white-space:nowrap;margin:4px 0;padding:6px 8px;border:1px solid #39414a;border-radius:7px;background:#151a20;color:#aeb8c3;font:11px/1.3 Arial,sans-serif}.slx-graffiti-strip b{color:#eef3f8}.slx-graffiti-mode{border:1px solid #4b5968;border-radius:5px;background:#202833;color:#e6edf3;padding:2px 6px;font-weight:800}.slx-graffiti-alert{color:#ffb45c!important}.slx-graffiti-badge{display:inline-flex;gap:4px;margin-left:5px;padding:1px 4px;border-radius:4px;background:#19232d;color:#dce7ef;font:10px/1.25 Arial,sans-serif}.slx-graffiti-rep{color:#ffcf66}.slx-graffiti-cash{color:#72d6a0}.slx-hub-not-ready{margin-left:6px;color:#ef9a62;font-size:10px;font-weight:800}`;(document.head||document.documentElement).appendChild(e);}
-function cards(){return $$('[class*="crimeOption___" i]').filter(x=>locationName(x));}
-function objective(cs){if(cs==null)return '—';if(cs<70)return `CS70 (${70-cs})`;if(cs<100)return `CS100 (${100-cs})`;return 'unlock / uniques';}
-function ensureStrip(){
- const first=cards()[0];if(!first)return;const list=first.closest('[class*="virtualItem" i]')?.parentElement||first.parentElement;const container=list?.parentElement;if(!container)return;let bar=$('#slx-graffiti-strip');if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-strip';bar.className='slx-graffiti-strip';container.insertBefore(bar,list);} const gs=graffitiStats(), cs=gs.skill??pageNumber(/(?:crime\s*skill|skill)\D{0,10}(\d{1,3})/i), nerve=pageNumber(/nerve\D{0,10}(\d{1,3})/i), uniques=gs.uniques!=null?[null,String(gs.uniques),String(gs.uniquesTotal??'?')]:txt(document.body).match(/unique(?:\s*outcomes?)?\D{0,10}(\d+)\s*\/\s*(\d+)/i); const mask=/paint\s*mask/i.test(gs.enhancer||txt(document.body));
- const alerts=[]; Object.values(HINT).flatMap(x=>[x.rep,x.cash]).filter((v,i,a)=>a.indexOf(v)===i).forEach(c=>{const st=colourStock(c);if(st.percent!=null&&st.percent<=15)alerts.push(`${c} ${st.percent}%`);if(st.count===0)alerts.push(`${c}: no spare`);});
- bar.innerHTML=`<b>Graffiti Spray Guide</b><button class="slx-graffiti-mode" data-m="BOTH">BOTH</button><button class="slx-graffiti-mode" data-m="REP">REP</button><button class="slx-graffiti-mode" data-m="CASH">CASH</button><span>CS <b>${cs??'?'}</b></span><span>Mask <b>${mask?'YES':'NO'}</b></span><span>Nerve <b>${nerve??'?'}</b></span><span>Attempts <b>${nerve!=null?Math.floor(nerve/3):'?'}</b></span><span>Unique <b>${uniques?uniques[1]+'/'+uniques[2]:'?'}</b></span><span>Next <b>${objective(cs)}</b></span>${alerts.length?`<span class="slx-graffiti-alert">⚠ ${alerts.join(' · ')}</span>`:''}`;
- bar.querySelectorAll('[data-m]').forEach(x=>{x.disabled=x.dataset.m===mode();x.onclick=()=>setMode(x.dataset.m);});
-}
-function removeGraffiti(){document.querySelectorAll('.slx-graffiti-badge,#slx-graffiti-strip').forEach(x=>x.remove());}
-function render(){ensureStyle();injectMasterControl();syncHubState();if(!enabled()||!isGraffiti()){removeGraffiti();return;}cards().forEach(decorateCard);ensureStrip();}
-function injectMasterControl(){
- const all=$$('div,section,aside'); const panel=all.find(x=>/master control/i.test(txt(x))&&/crimes/i.test(txt(x))&&x.querySelectorAll('*').length<1500); if(!panel||panel.querySelector('[data-slx-graffiti-control]'))return;
- const crimes=[...panel.querySelectorAll('*')].find(x=>/^crimes$/i.test(txt(x)));const row=document.createElement('div');row.dataset.slxGraffitiControl='1';row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;margin:4px 0;border:1px solid rgba(255,255,255,.08);border-radius:7px';row.innerHTML=`<span>🎨 Graffiti Spray Guide</span><label><input type="checkbox" ${enabled()?'checked':''}> ON</label>`;row.querySelector('input').onchange=e=>{localStorage.setItem(ENABLE_KEY,e.target.checked?'1':'0');render();};(crimes?.parentElement||panel).appendChild(row);
-}
-function masterPanel(){return $$('div,section,aside').find(x=>/master control/i.test(txt(x))&&x.querySelectorAll('*').length<1800)||null;}
-function rowFor(panel,name){const esc=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),rx=new RegExp(esc,'i');const candidates=$$('label,li,[class*=row],[class*=module]',panel).filter(x=>rx.test(txt(x))&&x.querySelector('input[type=checkbox],[role=switch]'));return candidates.sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length)[0]||null;}
-function switchState(row,want){const c=row?.querySelector('input[type=checkbox]');if(c){if(c.checked!==want){c.checked=want;c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}return;}const b=row?.querySelector('[role=switch]');if(!b)return;const on=b.getAttribute('aria-checked')==='true';if(on!==want){b.setAttribute('aria-checked',want?'true':'false');b.dispatchEvent(new Event('change',{bubbles:true}));}}
-function standaloneState(id,apiGlobal){
- const api=window[apiGlobal]; const bridge=document.getElementById('sakalux-module-bridge-'+id);
- const installed=Boolean(api||bridge); let enabled=null;
- try{if(api&&typeof api.isEnabled==='function')enabled=Boolean(api.isEnabled());else if(bridge?.dataset?.enabled!=null)enabled=bridge.dataset.enabled==='true';}catch{enabled=null;}
- return {installed,enabled};
-}
-function syncHubState(){
- const panel=masterPanel();if(!panel)return;
- panel.querySelectorAll('.slx-hub-not-ready').forEach(x=>x.remove());
- for(const [id,name,apiGlobal] of STANDALONE){const row=rowFor(panel,name);if(!row)continue;const st=standaloneState(id,apiGlobal);const c=row.querySelector('input[type=checkbox]');const b=row.querySelector('[role=switch]');
-   if(c)c.disabled=!st.installed;if(b){b.setAttribute('aria-disabled',st.installed?'false':'true');if(!st.installed)b.setAttribute('disabled','');else b.removeAttribute('disabled');}
-   if(st.enabled!==null)switchState(row,st.enabled);
- }
-}
-window.SakaLuXGraffitiSprayGuide={id:GID,version:VERSION,isEnabled:enabled,setEnabled(v){localStorage.setItem(ENABLE_KEY,v?'1':'0');render();},render};
-window.addEventListener('SakaLuX:ModuleReady',()=>setTimeout(syncHubState,40),{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(syncHubState,40),{passive:true});window.addEventListener('storage',()=>setTimeout(syncHubState,40),{passive:true});
-let q=0;new MutationObserver(()=>{if(q)return;q=setTimeout(()=>{q=0;render();},180)}).observe(document.documentElement,{childList:true,subtree:true});setInterval(syncHubState,1500);setTimeout(render,40);
-})();
-
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
 (() => {
 'use strict';
@@ -46117,5 +46034,115 @@ document.addEventListener('change',schedule,true);document.addEventListener('cli
 new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['checked','disabled','aria-checked','aria-disabled','class']});
 window.addEventListener('SakaLuX:ModuleReady',schedule,{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',schedule,{passive:true});
 setInterval(run,1000);setTimeout(run,60);
+})();
+
+/* SAKALUX_GRAFFITI_COMBINED_V2 */
+(() => {
+'use strict';
+// SakaLuX integration inspired by Torn Graffiti Helper (Torchin, MIT)
+// and Torn Graffiti Helper v1.2.0 (NebiGoktug, MIT). Reimplemented for Suite.
+const VERSION='0.9.951';
+const ID='graffiti-spray-guide';
+const STORE='SakaLuX_GRAFFITI_GUIDE_V2';
+const DEFAULT={enabled:true,mode:'BOTH'};
+const TIERS=[25,50,100,250,500];
+const GATES=[[15,'Ladder'],[25,'Wire Cutters'],[35,'Paint Mask'],[50,'Residential + Red-Light'],[70,'Crew unique'],[95,'Points'],[100,'Final unique']];
+const HINT={
+ 'East Side':{cash:'purple',rep:'red'},
+ 'West Side':{cash:'green',rep:'blue'},
+ 'North Side':{cash:'green',rep:'orange'},
+ 'Residential':{cash:'white',rep:'blue'},
+ 'Red-Light':{cash:'green',rep:'pink'},
+ 'Financial':{cash:'black',rep:'red'},
+ 'City Center':{cash:'green',rep:'blue'}
+};
+const LOCS=Object.keys(HINT);
+const IMG=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
+const TITLE=[[/^east side$/i,'East Side'],[/^west side$/i,'West Side'],[/^north side$/i,'North Side'],[/^residential$/i,'Residential'],[/^red[-\s]?light$/i,'Red-Light'],[/^financial$/i,'Financial'],[/^city\s*center$/i,'City Center']];
+const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
+const text=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
+const num=v=>{const m=String(v||'').replace(/,/g,'').match(/\d+/);return m?Number(m[0]):null};
+function load(){try{return {...DEFAULT,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch{return {...DEFAULT}}}
+function save(x){try{localStorage.setItem(STORE,JSON.stringify({...load(),...x}))}catch{}}
+function cfg(){return load()}
+function onGraffiti(){const t=text(document.body);return LOCS.slice(0,3).every(n=>t.includes(n))&&/Graffiti/i.test(t)}
+function locByNode(node){
+ const im=node?.querySelector?.('img'); const src=im?.src||im?.getAttribute?.('src')||'';
+ for(const [rx,n] of IMG)if(rx.test(src))return n;
+ for(const el of $$('*',node||document)){if(el.children.length)continue;const v=text(el);for(const [rx,n] of TITLE)if(rx.test(v))return n;}
+ return null;
+}
+function findLocationLeaf(name){return $$('*').find(e=>e.children.length===0&&text(e)===name)||null}
+function cardFor(name){
+ const leaf=findLocationLeaf(name); if(!leaf)return null;
+ let c=leaf;
+ for(let i=0;c&&i<10;i++,c=c.parentElement){
+   const loc=locByNode(c);
+   if(loc===name && (c.matches?.('[class*="crimeOption"],[class*="crimeWrapper"],[class*="crimePanel"],li,article')||c.querySelector?.('img')))return c;
+ }
+ return leaf.parentElement;
+}
+function tagCount(card,name){
+ const candidates=$$('[class*="tabletTitleAndTagCount"],[class*="tagCount"],[class*="tagsCount"]',card);
+ for(const e of candidates){const n=num(text(e));if(n!=null)return n;}
+ const raw=text(card).replace(name,' ');
+ let m=raw.match(/(?:tags?|reputation|rep)\D{0,10}(\d{1,4})/i); if(m)return Number(m[1]);
+ const leaf=findLocationLeaf(name); if(leaf){const sib=text(leaf.parentElement);m=sib.match(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*(\\d{1,4})','i'));if(m)return Number(m[1]);}
+ return null;
+}
+function nextTier(v){if(v==null)return null;for(const t of TIERS)if(v<t)return {tier:t,left:t-v};return null}
+function pageStat(rx){const m=text(document.body).match(rx);return m?num(m[1]):null}
+function crimeSkill(){return pageStat(/(?:crime\s*skill|skill)\D{0,12}(\d{1,3})/i)}
+function nerve(){const exact=$$('[aria-label]').map(e=>e.getAttribute('aria-label')).find(v=>/^Nerve\b/i.test(v||''));if(exact){const n=num(exact);if(n!=null)return n}return pageStat(/nerve\D{0,10}(\d{1,3})/i)}
+function enhancer(){const t=text(document.body);return /paint\s*mask/i.test(t)?'Paint Mask':(/wire\s*cutters/i.test(t)?'Wire Cutters':(/ladder/i.test(t)?'Ladder':'—'))}
+function uniques(){const m=text(document.body).match(/unique(?:\s*outcomes?)?\D{0,12}(\d+)\s*\/\s*(\d+)/i);return m?`${m[1]}/${m[2]}`:'—'}
+function goal(cs){if(cs==null)return '—';for(const [gate,label] of GATES)if(cs<gate)return `${label} @ CS${gate}`;return 'All CS gates reached'}
+function sprayPercent(card){
+ const els=$$('[aria-label],*',card);
+ for(const e of els){const v=(e.getAttribute?.('aria-label')||'')+' '+text(e);const m=v.match(/(\d{1,3})%/);if(m){const x=Number(m[1]);if(x<=100)return x}}
+ return null;
+}
+function sprayColour(card){
+ const vals=$$('img,[aria-label],[title]',card).map(e=>[(e.alt||''),(e.title||''),(e.getAttribute?.('aria-label')||''),(e.src||'')].join(' ')).join(' ');
+ for(const c of ['black','blue','green','orange','pink','purple','red','white'])if(new RegExp(c,'i').test(vals))return c;
+ return null;
+}
+function ownedColours(){
+ const out=new Set();
+ for(const name of LOCS){const c=cardFor(name);if(!c)continue;const col=sprayColour(c);if(col)out.add(col)}
+ const body=$$('img,[aria-label],[title]').map(e=>[(e.alt||''),(e.title||''),(e.getAttribute?.('aria-label')||''),(e.src||'')].join(' ')).join(' ');
+ for(const c of ['black','blue','green','orange','pink','purple','red','white'])if(new RegExp(c,'i').test(body))out.add(c);
+ return out;
+}
+function style(){if($('#slx-graffiti-v2-style'))return;const e=document.createElement('style');e.id='slx-graffiti-v2-style';e.textContent=`
+#slx-graffiti-summary{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:6px 0;padding:7px 8px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(10,15,21,.92);color:#dbe4ec;font:700 11px/1.25 Arial,sans-serif}#slx-graffiti-summary .slx-g-head{color:#f2bd58;font-weight:900}#slx-graffiti-summary button{border:1px solid rgba(255,255,255,.16);border-radius:5px;background:#192532;color:#dce6ee;padding:3px 6px;font:800 10px Arial}#slx-graffiti-summary button[data-active="1"]{background:#8a6928;color:#fff}.slx-graffiti-v2{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}.slx-graffiti-v2 span{display:inline-flex;align-items:center;border-radius:4px;padding:2px 5px;background:rgba(0,0,0,.42);font:800 10px/1.25 Arial,sans-serif;white-space:nowrap}.slx-g-rep{color:#ffd56b}.slx-g-cash{color:#7ee0aa}.slx-g-progress{color:#b9c8d5}.slx-g-alert{color:#ff8d8d!important}.slx-g-unowned{opacity:.55;text-decoration:line-through}
+`; (document.head||document.documentElement).appendChild(e)}
+function summaryAnchor(){const first=cardFor('East Side');if(!first)return null;let p=first.parentElement;return p||first}
+function renderSummary(){
+ let bar=$('#slx-graffiti-summary');const anchor=summaryAnchor();if(!anchor)return;
+ if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-summary';anchor.parentElement?.insertBefore(bar,anchor)}
+ const c=cfg(),cs=crimeSkill(),nv=nerve();
+ bar.innerHTML=`<span class="slx-g-head">🎨 Graffiti Spray Guide</span><button data-mode="BOTH">BOTH</button><button data-mode="REP">REP</button><button data-mode="CASH">CASH</button><span>CS ${cs??'?'}</span><span>Enhancer ${enhancer()}</span><span>Nerve ${nv??'?'}</span><span>Attempts ${nv!=null?Math.floor(nv/3):'?'}</span><span>Uniques ${uniques()}</span><span>Next ${goal(cs)}</span>`;
+ bar.querySelectorAll('[data-mode]').forEach(b=>{b.dataset.active=b.dataset.mode===c.mode?'1':'0';b.onclick=()=>{save({mode:b.dataset.mode});render()}})
+}
+function renderCard(name,owned){
+ const card=cardFor(name);if(!card)return;let box=card.querySelector(':scope .slx-graffiti-v2');if(!box){box=document.createElement('div');box.className='slx-graffiti-v2';const leaf=findLocationLeaf(name);(leaf?.parentElement||card).appendChild(box)}
+ const c=cfg(),h=HINT[name],rep=tagCount(card,name),nt=nextTier(rep),pct=sprayPercent(card),col=sprayColour(card),parts=[];
+ if(nt)parts.push(`<span class="slx-g-progress">+${nt.left} → ${nt.tier}</span>`);else if(rep!=null)parts.push(`<span class="slx-g-progress">REP ${rep}</span>`);
+ if(c.mode==='BOTH'||c.mode==='REP')parts.push(`<span class="slx-g-rep ${owned.size&&!owned.has(h.rep)?'slx-g-unowned':''}">⭐ REP ${h.rep.toUpperCase()}</span>`);
+ if(c.mode==='BOTH'||c.mode==='CASH')parts.push(`<span class="slx-g-cash ${owned.size&&!owned.has(h.cash)?'slx-g-unowned':''}">💰 CASH ${h.cash.toUpperCase()}</span>`);
+ if(pct!=null&&pct<=15)parts.push(`<span class="slx-g-alert">⚠ ${col?col.toUpperCase()+' ':''}${pct}%</span>`);
+ box.innerHTML=parts.join('');
+}
+function cleanup(){ $$('.slx-graffiti-v2').forEach(e=>e.remove()); $('#slx-graffiti-summary')?.remove(); }
+function render(){
+ style();const c=cfg();if(!c.enabled||!onGraffiti()){cleanup();return}const owned=ownedColours();renderSummary();for(const n of LOCS)renderCard(n,owned)
+}
+function setEnabled(v){save({enabled:!!v});render()}
+window.SakaLuXGraffitiSprayGuide={id:ID,version:VERSION,isEnabled:()=>cfg().enabled,setEnabled,render};
+let timer=0;const schedule=()=>{clearTimeout(timer);timer=setTimeout(render,120)};
+new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
+window.addEventListener('hashchange',schedule,{passive:true});window.addEventListener('popstate',schedule,{passive:true});
+setInterval(render,1500);setTimeout(render,100);
 })();
 
