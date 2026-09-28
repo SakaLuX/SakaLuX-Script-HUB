@@ -1,0 +1,28 @@
+name: Suite 0.9.955 Graffiti professional
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/suite_0955_graffiti_professional.py'
+      - '.github/workflows/suite-0955-graffiti-professional.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - run: python .github/scripts/suite_0955_graffiti_professional.py
+      - run: node --check SakaLuX-Suite.user.js
+      - run: node tests/suite-graffiti-0955-regression.cjs
+      - name: Commit release
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-graffiti-0955-regression.cjs
+          git commit -m 'Release Suite v0.9.955 professional Graffiti advisor'
+          git push
