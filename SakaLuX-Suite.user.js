@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.952
+// @version      0.9.953
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1124,9 +1124,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       factory: createCasinoEdgeScannerModule
     },
     {
+      id: "graffitiSprayGuide",
+      name: "Graffiti Spray Guide",
+      category: "Crimes",
+      description: "Inline Graffiti REP/CASH spray hints, progress and low-stock warnings.",
+      ready: true,
+      hideReadyBadge: true,
+      requiresReload: false,
+      factory: createGraffitiSprayGuideModule
+    },
+    {
       id: "targetAlerts",
       name: "Target Alerts",
-      category: "Lists",
+      category: "Crimes",
       description: "Monitors Targets and Enemies, adds People-panel tabs, Okay counters and configurable status alerts.",
       ready: true,
       requiresReload: false,
@@ -2512,9 +2522,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     <div class="sakalux-module-main">
                       <div class="sakalux-module-name-line">
                         <span class="sakalux-module-name">${escapeHtml(module.name)}</span>
-                        <span class="sakalux-badge ${module.ready ? "sakalux-badge-ready" : "sakalux-badge-pending"}">
+                        ${module.hideReadyBadge ? "" : `<span class="sakalux-badge ${module.ready ? "sakalux-badge-ready" : "sakalux-badge-pending"}">
                           ${module.ready ? "Ready" : "Coming Soon"}
-                        </span>
+                        </span>`}
                       </div>
                       <div class="sakalux-module-desc">${escapeHtml(module.description)}</div>
                       ${module.warning ? `
@@ -10887,6 +10897,62 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         destroy
     };
   }
+
+  function createGraffitiSprayGuideModule(context) {
+    const STYLE_ID='sakalux-graffiti-native-style';
+    const STORE_KEY='sakalux_graffiti_native_v1';
+    const REP_TIERS=[25,50,100,250,500];
+    const CS_GATES=[[15,'Ladder'],[25,'Wire Cutters'],[35,'Paint Mask'],[50,'Residential + Red-Light'],[70,'Crew unique'],[95,'Points'],[100,'Final unique']];
+    const HINT={
+      'East Side':{cash:'purple',rep:'red'},'West Side':{cash:'green',rep:'blue'},'North Side':{cash:'green',rep:'orange'},
+      'Residential':{cash:'white',rep:'blue'},'Red-Light':{cash:'green',rep:'pink'},'Financial':{cash:'black',rep:'red'},'City Center':{cash:'green',rep:'blue'}
+    };
+    const BY_IMAGE=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
+    const BY_TITLE=[[/east/i,'East Side'],[/west/i,'West Side'],[/north/i,'North Side'],[/residential/i,'Residential'],[/red[-\s]?light/i,'Red-Light'],[/financial/i,'Financial'],[/city\s*cent/i,'City Center']];
+    const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
+    const text=e=>e?.textContent?.replace(/\s+/g,' ').trim()||'';
+    const int=v=>{const m=String(v??'').replace(/,/g,'').match(/\d+/);return m?+m[0]:null;};
+    const onPage=()=>/sid=crimes/i.test(location.href)&&/graffiti/i.test(location.hash||location.href);
+    const load=()=>{try{return JSON.parse(localStorage.getItem(STORE_KEY)||'{}')}catch{return {}}};
+    const save=d=>{try{localStorage.setItem(STORE_KEY,JSON.stringify(d))}catch{}};
+    const getMode=()=>load().mode||'both';
+    const setMode=mode=>{const d=load();d.mode=mode;save(d);};
+    let observer=null,timer=0,writing=false,active=false;
+
+    function readStats(){
+      const d=load(),stats={...(d.stats||{})};let found=false;
+      $$('li[class*="statistic" i] button[aria-label]').forEach(btn=>{const label=btn.getAttribute('aria-label')||'';let m;
+        if((m=label.match(/^Skill:\s*([\d.]+)/i))){stats.skill=parseFloat(m[1]);found=true;}
+        if((m=label.match(/^Enhancer:\s*(.+)/i))){stats.enhancer=m[1].trim();found=true;}
+        if((m=label.match(/^Unique outcomes:\s*(\d+)\s*\/\s*(\d+)/i))){stats.uniques=+m[1];stats.uniquesTotal=+m[2];found=true;}
+        if((m=label.match(/^Spray Paint\s*:\s*(\w+):\s*(\d+)/i))){stats.cans=stats.cans||{};stats.cans[m[1].toLowerCase()]=+m[2];found=true;}
+      });
+      if(found){d.stats=stats;save(d);}return stats;
+    }
+    function readNerve(){for(const el of $$('[class*="nerve" i],[id*="nerve" i]')){const m=text(el).match(/(\d+)\s*\/\s*(\d+)/);if(m)return {current:+m[1],max:+m[2]};}return null;}
+    function readCard(card){
+      const srcset=$('[class*="crimeOptionImage" i] img',card)?.getAttribute('srcset')||$('[class*="crimeOptionImage" i] img',card)?.src||'';
+      const file=(srcset.match(/\/([\w-]+)\.jpg/i)||[])[1]||'';
+      let name=BY_IMAGE.find(([re])=>re.test(file))?.[1];
+      if(!name){const title=text($('[class*="tabletTitleAndTagCount" i]',card));name=BY_TITLE.find(([re])=>re.test(title))?.[1];}
+      if(!name)return null;
+      const rep=$('[aria-label*="Reputation" i]',card)?.getAttribute('aria-label')?.match(/Reputation\s+(\d+)\s+out of/i);
+      const spray=$('[class*="sprayCanButton" i][aria-label]',card)?.getAttribute('aria-label')?.match(/(\w+)\s+spray selected,\s*(\d+)%\s*left/i);
+      return {name,locked:/locked/i.test(card.className),tags:int(text($('[class*="tagsCount" i]',card))?.replace(/\+\d+→\d+|MAX/g,'')),stars:rep?+rep[1]:null,colour:spray?spray[1].toLowerCase():null,paint:spray?+spray[2]:null};
+    }
+    function tier(tags){if(tags==null)return null;const t=REP_TIERS.find(x=>tags<x);return t?{tier:t,left:t-tags}:null;}
+    function ensureStyle(){if(document.getElementById(STYLE_ID))return;const st=document.createElement('style');st.id=STYLE_ID;st.textContent=`.slx-gh-badge{display:inline-block;margin-left:4px;padding:0 3px;border-radius:3px;font:800 9px/13px ui-monospace,monospace;vertical-align:middle;white-space:nowrap;background:rgba(255,255,255,.08)}.slx-gh-rep{color:#ffd56b}.slx-gh-cash{color:#7ee0aa}.slx-gh-progress{color:#b8c6d2}.slx-gh-strip{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:5px 0;padding:6px 7px;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:rgba(10,15,20,.88);font:700 10px/1.25 Arial;color:#dce5ec}.slx-gh-strip button{padding:2px 5px;border:1px solid #44505b;border-radius:4px;background:#1b2530;color:#e5edf3;font:800 9px Arial}.slx-gh-strip button[data-active="1"]{background:#806326;color:#fff}.slx-gh-alert{color:#ff9090}`;(document.head||document.documentElement).appendChild(st);}
+    function setBadge(parent,cls,content){let el=parent.querySelector(`:scope > .${cls.split(' ')[0]}`);if(content==null){el?.remove();return;}if(!el){el=document.createElement('span');parent.appendChild(el);}el.className=cls;if(el.textContent!==content)el.textContent=content;}
+    function paintCard(el,mode){const c=readCard(el);if(!c)return;const host=$('[class*="tabletTitleAndTagCount" i]',el)||el;const next=tier(c.tags),hint=HINT[c.name];setBadge(host,'slx-gh-progress slx-gh-badge',next?`+${next.left}→${next.tier}`:(c.tags!=null?'MAX':null));setBadge(host,'slx-gh-rep slx-gh-badge',(mode==='rep'||mode==='both')?`REP ${hint.rep.toUpperCase()}`:null);setBadge(host,'slx-gh-cash slx-gh-badge',(mode==='cash'||mode==='both')?`CASH ${hint.cash.toUpperCase()}`:null);}
+    function buildStrip(stats,cards,nerve,mode){const parts=[];const cs=Number.isFinite(stats.skill)?stats.skill:null;parts.push(`<span>CS <b>${cs??'?'}</b></span>`);parts.push(`<span>Enhancer <b>${stats.enhancer||'—'}</b></span>`);parts.push(`<span>Nerve <b>${nerve?nerve.current+'/'+nerve.max:'?'}</b></span>`);if(cs!=null){const gate=CS_GATES.find(([lvl])=>lvl>cs);parts.push(`<span>Next <b>${gate?`CS${gate[0]} ${gate[1]}`:'Complete'}</b></span>`);}if(stats.uniquesTotal!=null)parts.push(`<span>Uniques <b>${stats.uniques||0}/${stats.uniquesTotal}</b></span>`);const alerts=[];cards.filter(c=>!c.locked&&c.paint!=null&&c.paint<=15).forEach(c=>alerts.push(`${c.name.split(' ')[0]} ${c.colour||''} ${c.paint}%${stats.cans?.[c.colour]===0?' no spare':''}`));if(alerts.length)parts.push(`<span class="slx-gh-alert">⚠ ${alerts.join(' · ')}</span>`);return `<button data-gh-mode="both" data-active="${mode==='both'?1:0}">BOTH</button><button data-gh-mode="rep" data-active="${mode==='rep'?1:0}">REP</button><button data-gh-mode="cash" data-active="${mode==='cash'?1:0}">CASH</button>${parts.join('')}`;}
+    function cleanup(){document.querySelectorAll('.slx-gh-badge,.slx-gh-strip').forEach(x=>x.remove());}
+    function render(){if(!active||!onPage()){cleanup();return;}ensureStyle();const cardEls=$$('[class*="crimeOption___" i],[class*="crimeOption" i]').filter(el=>readCard(el));if(!cardEls.length)return;const stats=readStats(),cards=cardEls.map(readCard).filter(Boolean),nerve=readNerve(),mode=getMode();writing=true;try{cardEls.forEach(el=>paintCard(el,mode));const list=cardEls[0].closest('[class*="virtualItem" i]')?.parentElement||cardEls[0].parentElement;const container=list?.parentElement;if(container){let strip=container.querySelector(':scope > .slx-gh-strip');if(!strip){strip=document.createElement('div');strip.className='slx-gh-strip';container.insertBefore(strip,list);}const html=buildStrip(stats,cards,nerve,mode);if(strip.innerHTML!==html)strip.innerHTML=html;strip.querySelectorAll('[data-gh-mode]').forEach(b=>b.onclick=e=>{e.stopPropagation();setMode(b.dataset.ghMode);queue();});}}finally{writing=false;}}
+    function queue(){clearTimeout(timer);timer=setTimeout(render,100);}
+    function init(){active=true;ensureStyle();if(!observer){observer=new MutationObserver(records=>{if(writing)return;queue();});observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['aria-label','class']});}queue();}
+    function destroy(){active=false;observer?.disconnect();observer=null;clearTimeout(timer);cleanup();}
+    return {init,destroy,onRouteChange:queue};
+  }
+
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
     function listenGlobal(target,type,listener,options){const opts=typeof options==="boolean"?{capture:options}:options||{};target.addEventListener(type,listener,{...opts,signal:globalEventController.signal});}
@@ -46035,136 +46101,3 @@ new MutationObserver(schedule).observe(document.documentElement,{childList:true,
 window.addEventListener('SakaLuX:ModuleReady',schedule,{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',schedule,{passive:true});
 setInterval(run,1000);setTimeout(run,60);
 })();
-
-/* SAKALUX_GRAFFITI_COMBINED_V2 */
-(() => {
-'use strict';
-// SakaLuX integration inspired by Torn Graffiti Helper (Torchin, MIT)
-// and Torn Graffiti Helper v1.2.0 (NebiGoktug, MIT). Reimplemented for Suite.
-const VERSION='0.9.951';
-const ID='graffiti-spray-guide';
-const STORE='SakaLuX_GRAFFITI_GUIDE_V2';
-const DEFAULT={enabled:true,mode:'BOTH'};
-const TIERS=[25,50,100,250,500];
-const GATES=[[15,'Ladder'],[25,'Wire Cutters'],[35,'Paint Mask'],[50,'Residential + Red-Light'],[70,'Crew unique'],[95,'Points'],[100,'Final unique']];
-const HINT={
- 'East Side':{cash:'purple',rep:'red'},
- 'West Side':{cash:'green',rep:'blue'},
- 'North Side':{cash:'green',rep:'orange'},
- 'Residential':{cash:'white',rep:'blue'},
- 'Red-Light':{cash:'green',rep:'pink'},
- 'Financial':{cash:'black',rep:'red'},
- 'City Center':{cash:'green',rep:'blue'}
-};
-const LOCS=Object.keys(HINT);
-const IMG=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
-const TITLE=[[/^east side$/i,'East Side'],[/^west side$/i,'West Side'],[/^north side$/i,'North Side'],[/^residential$/i,'Residential'],[/^red[-\s]?light$/i,'Red-Light'],[/^financial$/i,'Financial'],[/^city\s*center$/i,'City Center']];
-const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
-const text=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
-const num=v=>{const m=String(v||'').replace(/,/g,'').match(/\d+/);return m?Number(m[0]):null};
-function load(){try{return {...DEFAULT,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch{return {...DEFAULT}}}
-function save(x){try{localStorage.setItem(STORE,JSON.stringify({...load(),...x}))}catch{}}
-function cfg(){return load()}
-function onGraffiti(){return /sid=crimes/i.test(location.href)&&(/#graffiti/i.test(location.href)||/Graffiti/i.test(text(document.querySelector('h1,h2,[class*=title]')||document.body)))}
-function locByNode(node){
- const im=node?.querySelector?.('img'); const src=im?.src||im?.getAttribute?.('src')||'';
- for(const [rx,n] of IMG)if(rx.test(src))return n;
- for(const el of $$('*',node||document)){if(el.children.length)continue;const v=text(el);for(const [rx,n] of TITLE)if(rx.test(v))return n;}
- return null;
-}
-function findLocationLeaf(name){return $$('*').find(e=>e.children.length===0&&text(e)===name)||null}
-function cardFor(name){
- const exact=$$('[class*="crimeOption___"],[class*="crimeOption"]');
- for(const c of exact){
-   const title=text(c.querySelector('[class*="tabletTitleAndTagCount"]')||c.querySelector('[class*="title"]')||c);
-   if(new RegExp('^'+name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\s|$)','i').test(title)||locByNode(c)===name)return c;
- }
- const leaf=findLocationLeaf(name); if(!leaf)return null;
- let c=leaf;
- for(let i=0;c&&i<10;i++,c=c.parentElement){if(c.matches?.('[class*="crimeOption"],li,article')||c.querySelector?.('[class*="sprayCanButton"],[class*="crimeOptionImage"]'))return c;}
- return leaf.parentElement;
-}
-function tagCount(card,name){
- const candidates=$$('[class*="tagsCount"],[class*="tagCount"],[class*="tabletTitleAndTagCount"]',card);
- for(const e of candidates){const n=num(text(e));if(n!=null)return n;}
- const raw=text(card).replace(name,' ');
- let m=raw.match(/(?:tags?|reputation|rep)\D{0,10}(\d{1,4})/i); if(m)return Number(m[1]);
- const leaf=findLocationLeaf(name); if(leaf){const sib=text(leaf.parentElement);m=sib.match(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*(\\d{1,4})','i'));if(m)return Number(m[1]);}
- return null;
-}
-function nextTier(v){if(v==null)return null;for(const t of TIERS)if(v<t)return {tier:t,left:t-v};return null}
-function pageStat(rx){const m=text(document.body).match(rx);return m?num(m[1]):null}
-function crimeSkill(){return pageStat(/(?:crime\s*skill|skill)\D{0,12}(\d{1,3})/i)}
-function nerve(){const exact=$$('[aria-label]').map(e=>e.getAttribute('aria-label')).find(v=>/^Nerve\b/i.test(v||''));if(exact){const n=num(exact);if(n!=null)return n}return pageStat(/nerve\D{0,10}(\d{1,3})/i)}
-function enhancer(){const t=text(document.body);return /paint\s*mask/i.test(t)?'Paint Mask':(/wire\s*cutters/i.test(t)?'Wire Cutters':(/ladder/i.test(t)?'Ladder':'—'))}
-function uniques(){const m=text(document.body).match(/unique(?:\s*outcomes?)?\D{0,12}(\d+)\s*\/\s*(\d+)/i);return m?`${m[1]}/${m[2]}`:'—'}
-function goal(cs){if(cs==null)return '—';for(const [gate,label] of GATES)if(cs<gate)return `${label} @ CS${gate}`;return 'All CS gates reached'}
-function sprayPercent(card){
- const els=$$('[class*="sprayCanButton"][aria-label],[aria-label]',card);
- for(const e of els){const v=(e.getAttribute?.('aria-label')||'')+' '+text(e);const m=v.match(/(\d{1,3})%/);if(m){const x=Number(m[1]);if(x<=100)return x}}
- return null;
-}
-function sprayColour(card){
- const vals=$$('img,[aria-label],[title]',card).map(e=>[(e.alt||''),(e.title||''),(e.getAttribute?.('aria-label')||''),(e.src||'')].join(' ')).join(' ');
- for(const c of ['black','blue','green','orange','pink','purple','red','white'])if(new RegExp(c,'i').test(vals))return c;
- return null;
-}
-function ownedColours(){
- const out=new Set();
- for(const name of LOCS){const c=cardFor(name);if(!c)continue;const col=sprayColour(c);if(col)out.add(col)}
- const body=$$('img,[aria-label],[title]').map(e=>[(e.alt||''),(e.title||''),(e.getAttribute?.('aria-label')||''),(e.src||'')].join(' ')).join(' ');
- for(const c of ['black','blue','green','orange','pink','purple','red','white'])if(new RegExp(c,'i').test(body))out.add(c);
- return out;
-}
-function style(){if($('#slx-graffiti-v2-style'))return;const e=document.createElement('style');e.id='slx-graffiti-v2-style';e.textContent=`
-#slx-graffiti-summary{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:6px 0;padding:7px 8px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(10,15,21,.92);color:#dbe4ec;font:700 11px/1.25 Arial,sans-serif}#slx-graffiti-summary .slx-g-head{color:#f2bd58;font-weight:900}#slx-graffiti-summary button{border:1px solid rgba(255,255,255,.16);border-radius:5px;background:#192532;color:#dce6ee;padding:3px 6px;font:800 10px Arial}#slx-graffiti-summary button[data-active="1"]{background:#8a6928;color:#fff}.slx-graffiti-v2{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}.slx-graffiti-v2 span{display:inline-flex;align-items:center;border-radius:4px;padding:2px 5px;background:rgba(0,0,0,.42);font:800 10px/1.25 Arial,sans-serif;white-space:nowrap}.slx-g-rep{color:#ffd56b}.slx-g-cash{color:#7ee0aa}.slx-g-progress{color:#b9c8d5}.slx-g-alert{color:#ff8d8d!important}.slx-g-unowned{opacity:.55;text-decoration:line-through}
-`; (document.head||document.documentElement).appendChild(e)}
-function summaryAnchor(){const first=cardFor('East Side');if(!first)return null;let p=first.parentElement;return p||first}
-function renderSummary(){
- let bar=$('#slx-graffiti-summary');const anchor=summaryAnchor();if(!anchor)return;
- if(!bar){bar=document.createElement('div');bar.id='slx-graffiti-summary';anchor.parentElement?.insertBefore(bar,anchor)}
- const c=cfg(),cs=crimeSkill(),nv=nerve();
- bar.innerHTML=`<span class="slx-g-head">🎨 Graffiti Spray Guide</span><button data-mode="BOTH">BOTH</button><button data-mode="REP">REP</button><button data-mode="CASH">CASH</button><span>CS ${cs??'?'}</span><span>Enhancer ${enhancer()}</span><span>Nerve ${nv??'?'}</span><span>Attempts ${nv!=null?Math.floor(nv/3):'?'}</span><span>Uniques ${uniques()}</span><span>Next ${goal(cs)}</span>`;
- bar.querySelectorAll('[data-mode]').forEach(b=>{b.dataset.active=b.dataset.mode===c.mode?'1':'0';b.onclick=()=>{save({mode:b.dataset.mode});render()}})
-}
-function renderCard(name,owned){
- const card=cardFor(name);if(!card)return;let box=card.querySelector(':scope .slx-graffiti-v2');if(!box){box=document.createElement('div');box.className='slx-graffiti-v2';const leaf=findLocationLeaf(name);(leaf?.parentElement||card).appendChild(box)}
- const c=cfg(),h=HINT[name],rep=tagCount(card,name),nt=nextTier(rep),pct=sprayPercent(card),col=sprayColour(card),parts=[];
- if(nt)parts.push(`<span class="slx-g-progress">+${nt.left} → ${nt.tier}</span>`);else if(rep!=null)parts.push(`<span class="slx-g-progress">REP ${rep}</span>`);
- if(c.mode==='BOTH'||c.mode==='REP')parts.push(`<span class="slx-g-rep ${owned.size&&!owned.has(h.rep)?'slx-g-unowned':''}">⭐ REP ${h.rep.toUpperCase()}</span>`);
- if(c.mode==='BOTH'||c.mode==='CASH')parts.push(`<span class="slx-g-cash ${owned.size&&!owned.has(h.cash)?'slx-g-unowned':''}">💰 CASH ${h.cash.toUpperCase()}</span>`);
- if(pct!=null&&pct<=15)parts.push(`<span class="slx-g-alert">⚠ ${col?col.toUpperCase()+' ':''}${pct}%</span>`);
- box.innerHTML=parts.join('');
-}
-function cleanup(){ $$('.slx-graffiti-v2').forEach(e=>e.remove()); $('#slx-graffiti-summary')?.remove(); }
-function render(){
- style();const c=cfg();if(!c.enabled||!onGraffiti()){cleanup();return}const owned=ownedColours();renderSummary();for(const n of LOCS)renderCard(n,owned)
-}
-function setEnabled(v){save({enabled:!!v});render()}
-window.SakaLuXGraffitiSprayGuide={id:ID,version:VERSION,isEnabled:()=>cfg().enabled,setEnabled,render};
-let timer=0;const schedule=()=>{clearTimeout(timer);timer=setTimeout(render,120)};
-new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
-window.addEventListener('hashchange',schedule,{passive:true});window.addEventListener('popstate',schedule,{passive:true});
-setInterval(render,1500);setTimeout(render,100);
-})();
-
-/* SAKALUX_GRAFFITI_MASTER_CONTROL_0952 */
-(() => {
-'use strict';
-const NAME='Graffiti Spray Guide';
-const API='SakaLuXGraffitiSprayGuide';
-const text=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
-const all=(q,r=document)=>[...r.querySelectorAll(q)];
-function root(){return all('div,section,aside').filter(x=>/SakaLuX Suite/i.test(text(x))&&/Enable Ready Modules/i.test(text(x))).sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length)[0]||null;}
-function cardByName(r,name){const leaf=all('*',r).find(e=>e.children.length===0&&text(e)===name);if(!leaf)return null;let c=leaf;for(let i=0;c&&i<8;i++,c=c.parentElement){if(c.querySelector('input[type=checkbox],[role=switch]')&&/Settings/i.test(text(c)))return c;}return null;}
-function template(r){for(const name of ['Mission Rewards','Market Intelligence','Enhancer Guard','Bazaar Thanker']){const c=cardByName(r,name);if(c)return c;}return null;}
-function status(card,on){let b=card.querySelector('[data-slx-graffiti-status]');if(!b){b=document.createElement('span');b.dataset.slxGraffitiStatus='1';b.style.cssText='margin-left:8px;font-size:11px;font-weight:800;border:1px solid currentColor;border-radius:999px;padding:2px 7px;';const title=all('*',card).find(e=>e.children.length===0&&text(e)===NAME);title?.parentElement?.appendChild(b);}if(b){b.textContent=on?'READY · ON':'INSTALLED · OFF';b.style.color=on?'#72d6a0':'#e9bd63';}}
-function ensure(){
- const r=root();if(!r)return;let card=cardByName(r,NAME);if(!card){const t=template(r);if(!t)return;card=t.cloneNode(true);card.dataset.slxGraffitiModule='1';const title=all('*',card).find(e=>e.children.length===0&&/Mission Rewards|Market Intelligence|Enhancer Guard|Bazaar Thanker/.test(text(e)));if(title)title.textContent=NAME;const desc=all('*',card).find(e=>e.children.length===0&&/Opens the installed standalone SakaLuX/i.test(text(e)));if(desc)desc.textContent='Built-in Graffiti spray recommendations, progress and warnings.';card.querySelectorAll('[data-slx0948-status],[data-slx0948-bound],[data-slx0947-module],[data-slx0948-card-bound]').forEach(e=>{if(e.dataset.slx0948Status)e.remove();delete e.dataset.slx0948Bound;delete e.dataset.slx0947Module;delete e.dataset.slx0948CardBound;});t.parentElement.appendChild(card);}
- const api=window[API];const on=api?.isEnabled?.()!==false;status(card,on);
- const sw=card.querySelector('input[type=checkbox],[role=switch]');if(sw){if(sw.tagName==='INPUT'){sw.disabled=false;sw.checked=on;sw.onchange=e=>{api?.setEnabled?.(!!e.target.checked);setTimeout(ensure,20);};}else{sw.setAttribute('aria-checked',String(on));sw.onclick=e=>{e.preventDefault();e.stopPropagation();api?.setEnabled?.(!api?.isEnabled?.());setTimeout(ensure,20);};}}
- const settings=all('button',card).find(b=>/Settings/i.test(text(b)));if(settings){settings.disabled=false;settings.onclick=e=>{e.preventDefault();e.stopPropagation();api?.setEnabled?.(true);location.href='/loader.php?sid=crimes#/graffiti';};}
-}
-window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(ensure,40),{passive:true});new MutationObserver(()=>{clearTimeout(window.__slxGraffitiMC);window.__slxGraffitiMC=setTimeout(ensure,80);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(ensure,1200);setTimeout(ensure,100);
-})();
-
