@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.943**
+**v0.9.947**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.943**
+- Canonical version: **v0.9.947**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -62,6 +62,13 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 **v0.9.943 — Release documentation synchronized with the current Suite userscript version**
 - Release documentation synchronized with the current Suite userscript version.
+
+### v0.9.947 — Stable UI: complete modules + truthful status + Graffiti
+- Keeps the original compact Suite card design from v0.9.943; no replacement card theme or oversized module layout.
+- Shows all 10 managed SakaLuX standalone modules, adding any missing card by cloning the native Suite card structure.
+- Live status is truthful: `NOT INSTALLED`, `INSTALLED · OFF`, `READY · ON`, or `INSTALLED · UNKNOWN`; duplicate stale `NOT READY` labels are suppressed.
+- Settings and switches are rebound to each standalone public API/bridge so Hub/Suite state follows the actual script state.
+- Replaces the broken Graffiti DOM detection with visible-zone detection for TornPDA and shows REP/CASH recommendations plus next reputation tier without changing the Torn card layout.
 
 ## Release history / Changelog
 
