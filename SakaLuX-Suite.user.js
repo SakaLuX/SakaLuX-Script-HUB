@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.954
+// @version      0.9.955
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10899,10 +10899,10 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
   }
 
   function createGraffitiSprayGuideModule(context) {
-    // Primary behaviour follows Torchin's Torn Graffiti Helper (GreasyFork 593486):
-    // show best REP/CASH spray colours next to each zone, compact on desktop + TornPDA.
-    // The selected-colour match indicator is inspired by the secondary helper (587425).
-    const STYLE_ID='sakalux-graffiti-primary-style';
+    // Professional hybrid of the two requested Graffiti helpers:
+    // 593486 drives the compact best-spray recommendations; 587425 contributes
+    // selected-colour feedback and low-paint awareness. Read-only, no API/autoclick.
+    const STYLE_ID='sakalux-graffiti-pro-style';
     const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
     const text=e=>e?.textContent?.replace(/\s+/g,' ').trim()||'';
     const BEST={
@@ -10914,35 +10914,32 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       'Financial':{cash:'black',rep:'red'},
       'City Center':{cash:'green',rep:'blue'}
     };
-    const BY_IMAGE=[
-      [/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],
-      [/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],
-      [/CentreCity|CityCentre|CityCenter/i,'City Center']
-    ];
-    const BY_TITLE=[
-      [/east/i,'East Side'],[/west/i,'West Side'],[/north/i,'North Side'],[/residential/i,'Residential'],
-      [/red[-\s]?light/i,'Red-Light'],[/financial/i,'Financial'],[/city\s*cent/i,'City Center']
-    ];
+    const COLOUR={red:'#e34b4b',blue:'#4f86e8',orange:'#e89a3d',white:'#f1f3f5',pink:'#df72b7',black:'#25272a',green:'#58b875',purple:'#9868cf'};
+    const BY_IMAGE=[[/EastSide/i,'East Side'],[/WestSide/i,'West Side'],[/NorthSide/i,'North Side'],[/Resident[ai]l/i,'Residential'],[/RedLight|Red-Light/i,'Red-Light'],[/Financial/i,'Financial'],[/CentreCity|CityCentre|CityCenter/i,'City Center']];
+    const BY_TITLE=[[/east/i,'East Side'],[/west/i,'West Side'],[/north/i,'North Side'],[/residential/i,'Residential'],[/red[-\s]?light/i,'Red-Light'],[/financial/i,'Financial'],[/city\s*cent/i,'City Center']];
     let observer=null,timer=0,active=false,writing=false;
 
     function onPage(){return /sid=crimes/i.test(location.href)&&/graffiti/i.test(location.hash||location.href);}
     function ensureStyle(){
       if(document.getElementById(STYLE_ID))return;
       const st=document.createElement('style');st.id=STYLE_ID;st.textContent=`
-        .slx-graf-primary{display:flex;flex-wrap:wrap;gap:3px 5px;align-items:center;margin-top:2px;max-width:100%;font:800 9px/12px ui-monospace,Menlo,monospace;pointer-events:none}
-        .slx-graf-primary .slx-graf-pill{display:inline-flex;align-items:center;gap:3px;padding:1px 4px;border-radius:4px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.13);white-space:nowrap}
-        .slx-graf-primary .slx-graf-rep{color:#ffd166}.slx-graf-primary .slx-graf-cash{color:#73d99f}
-        .slx-graf-primary .slx-graf-match{color:#8cf5ae;border-color:rgba(105,240,150,.55);background:rgba(30,105,60,.28)}
-        .slx-graf-primary .slx-graf-selected{color:#cbd5df;font-weight:700}
-        @media(max-width:650px){.slx-graf-primary{font-size:8px;line-height:11px;gap:2px 3px}.slx-graf-primary .slx-graf-pill{padding:1px 3px}}
+        .slx-graf-pro-host{position:relative!important}
+        .slx-graf-pro-advisor{position:absolute;left:36px;bottom:1px;display:flex;align-items:center;gap:3px;max-width:calc(100% - 38px);white-space:nowrap;pointer-events:none;z-index:2;font:800 8px/12px ui-monospace,Menlo,monospace}
+        .slx-graf-pro-chip{display:inline-flex;align-items:center;gap:3px;height:14px;padding:0 4px;border:1px solid rgba(255,255,255,.16);border-radius:4px;background:rgba(10,13,17,.78);box-sizing:border-box;color:#cdd5dc;text-shadow:0 1px 1px #000}
+        .slx-graf-pro-swatch{width:7px;height:7px;border-radius:50%;box-sizing:border-box;border:1px solid rgba(255,255,255,.35);flex:0 0 7px}
+        .slx-graf-pro-chip[data-kind="rep"]{color:#f2cc67}.slx-graf-pro-chip[data-kind="cash"]{color:#76d8a0}
+        .slx-graf-pro-chip.slx-match{border-color:rgba(94,218,139,.75);box-shadow:inset 0 0 0 1px rgba(94,218,139,.18);color:#8af0b0}
+        .slx-graf-pro-low{display:inline-flex;align-items:center;height:14px;padding:0 4px;border-radius:4px;border:1px solid rgba(255,100,100,.55);background:rgba(120,30,30,.38);color:#ffaaaa}
+        [class*="crimeOption" i][class*="locked" i] .slx-graf-pro-advisor{opacity:.48}
+        @media(max-width:650px){.slx-graf-pro-advisor{left:32px;gap:2px;font-size:7px;line-height:11px;bottom:1px}.slx-graf-pro-chip,.slx-graf-pro-low{height:13px;padding:0 3px}.slx-graf-pro-swatch{width:6px;height:6px;flex-basis:6px}}
       `;(document.head||document.documentElement).appendChild(st);
     }
     function zone(card){
       const img=$('[class*="crimeOptionImage" i] img',card)||$('img',card);
-      const src=(img?.getAttribute('srcset')||img?.src||'');
-      const file=(src.match(/\/([\w-]+)\.(?:jpg|png|webp)/i)||[])[1]||'';
+      const src=img?.getAttribute('srcset')||img?.src||'';
+      const file=(src.match(/\/([\w-]+)\.(?:jpg|jpeg|png|webp)/i)||[])[1]||'';
       let name=BY_IMAGE.find(([rx])=>rx.test(file))?.[1];
-      if(!name){const title=text($('[class*="tabletTitleAndTagCount" i],[class*="title" i]',card)||card);name=BY_TITLE.find(([rx])=>rx.test(title))?.[1];}
+      if(!name){const title=text($('[class*="tabletTitleAndTagCount" i],[class*="crimeOptionTitle" i],[class*="title" i]',card)||card);name=BY_TITLE.find(([rx])=>rx.test(title))?.[1];}
       return name||null;
     }
     function selected(card){
@@ -10952,33 +10949,22 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       return m?{colour:m[1].toLowerCase(),percent:m[2]?+m[2]:null}:null;
     }
     function cards(){return $$('[class*="crimeOption___" i],[class*="crimeOption" i]').filter(c=>zone(c));}
-    function host(card){
-      return $('[class*="tabletTitleAndTagCount" i]',card)||$('[class*="crimeOptionTitle" i],[class*="title" i]',card)||card.firstElementChild||card;
-    }
-    function clean(){document.querySelectorAll('.slx-graf-primary').forEach(x=>x.remove());}
+    function host(card){return $('[class*="tabletTitleAndTagCount" i]',card)||$('[class*="crimeOptionTitle" i],[class*="title" i]',card)||null;}
+    function clean(){document.querySelectorAll('.slx-graf-pro-advisor').forEach(x=>x.remove());document.querySelectorAll('.slx-graf-pro-host').forEach(x=>x.classList.remove('slx-graf-pro-host'));}
+    function swatch(colour){const c=COLOUR[colour]||colour;const border=colour==='white'?'#9da5ad':'rgba(255,255,255,.35)';return `<i class="slx-graf-pro-swatch" style="background:${c};border-color:${border}"></i>`;}
+    function chip(kind,colour,match){const icon=kind==='rep'?'★':'$';return `<span class="slx-graf-pro-chip${match?' slx-match':''}" data-kind="${kind}">${swatch(colour)}${match?'✓ ':''}${icon} ${colour.toUpperCase()}</span>`;}
     function paint(card){
-      const name=zone(card),best=BEST[name];if(!name||!best)return;
-      const h=host(card);if(!h)return;
-      const sel=selected(card);
-      let box=$(':scope > .slx-graf-primary',h);
-      if(!box){box=document.createElement('span');box.className='slx-graf-primary';h.appendChild(box);}
-      const repMatch=sel?.colour===best.rep,cashMatch=sel?.colour===best.cash;
-      const selectedHint=sel ? (repMatch&&cashMatch?'✓ REP + CASH':repMatch?'✓ REP':cashMatch?'✓ CASH':`selected ${sel.colour}`) : '';
-      const selectedClass=(repMatch||cashMatch)?' slx-graf-match':' slx-graf-selected';
-      const html=`<span class="slx-graf-pill slx-graf-rep">REP ${best.rep.toUpperCase()}</span><span class="slx-graf-pill slx-graf-cash">CASH ${best.cash.toUpperCase()}</span>${selectedHint?`<span class="slx-graf-pill${selectedClass}">${selectedHint}${sel?.percent!=null?` · ${sel.percent}%`:''}</span>`:''}`;
+      const name=zone(card),best=BEST[name],h=host(card);if(!name||!best||!h)return;
+      h.classList.add('slx-graf-pro-host');
+      const sel=selected(card),repMatch=sel?.colour===best.rep,cashMatch=sel?.colour===best.cash;
+      let box=h.querySelector(':scope > .slx-graf-pro-advisor');if(!box){box=document.createElement('span');box.className='slx-graf-pro-advisor';h.appendChild(box);}
+      const low=sel?.percent!=null&&sel.percent<=15?`<span class="slx-graf-pro-low">LOW ${sel.percent}%</span>`:'';
+      const html=chip('rep',best.rep,repMatch)+chip('cash',best.cash,cashMatch)+low;
       if(box.innerHTML!==html)box.innerHTML=html;
     }
-    function render(){
-      if(!active||!onPage()){clean();return;}
-      ensureStyle();const list=cards();if(!list.length)return;
-      writing=true;try{list.forEach(paint);}finally{observer?.takeRecords?.();writing=false;}
-    }
+    function render(){if(!active||!onPage()){clean();return;}ensureStyle();const list=cards();if(!list.length)return;writing=true;try{list.forEach(paint);}finally{observer?.takeRecords?.();writing=false;}}
     function schedule(){if(writing)return;clearTimeout(timer);timer=setTimeout(render,120);}
-    function init(){
-      active=true;render();
-      if(!observer){observer=new MutationObserver(schedule);observer.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['aria-label','class']});}
-      window.addEventListener('hashchange',schedule,{passive:true});window.addEventListener('popstate',schedule,{passive:true});
-    }
+    function init(){active=true;render();if(!observer){observer=new MutationObserver(schedule);observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['aria-label','class','src','srcset']});}window.addEventListener('hashchange',schedule,{passive:true});window.addEventListener('popstate',schedule,{passive:true});}
     function destroy(){active=false;clearTimeout(timer);observer?.disconnect();observer=null;clean();document.getElementById(STYLE_ID)?.remove();}
     return {init,destroy,onRouteChange:schedule};
   }

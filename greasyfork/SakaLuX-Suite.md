@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.954**
+**v0.9.955**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.954**
+- Canonical version: **v0.9.955**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -117,6 +117,14 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Adds only the useful secondary-helper cue: the currently selected spray is marked `✓ REP`, `✓ CASH`, or `✓ REP + CASH` when it matches the recommended colour.
 - Removes the large CS/enhancer/nerve/uniques strip and tag-progress overlays that were obscuring zone names on TornPDA.
 - Uses the same seven-zone colour guidance documented by the Torn Graffiti guide.
+
+### v0.9.955 — Professional Graffiti Advisor
+- Reworks Graffiti into a compact, non-overlapping advisor designed for TornPDA.
+- Keeps the primary helper's best REP/CASH colour recommendations for all seven zones.
+- Uses colour swatches plus concise `★ REP` / `$ CASH` chips instead of extra text rows, so Torn's zone names and controls remain visible.
+- Highlights the recommendation when the currently selected spray matches and adds a compact `LOW xx%` warning at 15% or less.
+- Removes the extra selected-colour pill, large summary bars, progress overlays and mode controls.
+- Remains read-only with no API calls or gameplay automation.
 
 ## Release history / Changelog
 
