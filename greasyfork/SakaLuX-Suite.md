@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.951**
+**v0.9.952**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.951**
+- Canonical version: **v0.9.952**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -95,6 +95,13 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Detects all seven Graffiti locations by visible title and image fallback, avoiding dependence on Torn's generated CSS class names.
 - Removes the previous v0.9.941 Graffiti renderer to prevent duplicate observers and conflicting UI.
 - Remains read-only: no API requests and no gameplay automation.
+
+### v0.9.952 — Graffiti module activation + exact Torn selectors
+- Adds Graffiti Spray Guide as a real built-in Master Control module with ON/OFF state.
+- Uses the working helper's Crimes 2.0 selectors (`crimeOption___`, `tabletTitleAndTagCount`, `tagsCount`, `sprayCanButton[aria-label]`) before fallbacks.
+- Keeps the module enabled by default, so no separate activation is required after updating.
+- Settings enables the module and opens Crimes → Graffiti.
+- Keeps the existing compact Suite card style and the combined REP/CASH/progress/warning logic from v0.9.951.
 
 ## Release history / Changelog
 

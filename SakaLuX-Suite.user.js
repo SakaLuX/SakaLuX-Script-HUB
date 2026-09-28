@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.951
+// @version      0.9.952
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -46065,7 +46065,7 @@ const num=v=>{const m=String(v||'').replace(/,/g,'').match(/\d+/);return m?Numbe
 function load(){try{return {...DEFAULT,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch{return {...DEFAULT}}}
 function save(x){try{localStorage.setItem(STORE,JSON.stringify({...load(),...x}))}catch{}}
 function cfg(){return load()}
-function onGraffiti(){const t=text(document.body);return LOCS.slice(0,3).every(n=>t.includes(n))&&/Graffiti/i.test(t)}
+function onGraffiti(){return /sid=crimes/i.test(location.href)&&(/#graffiti/i.test(location.href)||/Graffiti/i.test(text(document.querySelector('h1,h2,[class*=title]')||document.body)))}
 function locByNode(node){
  const im=node?.querySelector?.('img'); const src=im?.src||im?.getAttribute?.('src')||'';
  for(const [rx,n] of IMG)if(rx.test(src))return n;
@@ -46074,16 +46074,18 @@ function locByNode(node){
 }
 function findLocationLeaf(name){return $$('*').find(e=>e.children.length===0&&text(e)===name)||null}
 function cardFor(name){
+ const exact=$$('[class*="crimeOption___"],[class*="crimeOption"]');
+ for(const c of exact){
+   const title=text(c.querySelector('[class*="tabletTitleAndTagCount"]')||c.querySelector('[class*="title"]')||c);
+   if(new RegExp('^'+name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\s|$)','i').test(title)||locByNode(c)===name)return c;
+ }
  const leaf=findLocationLeaf(name); if(!leaf)return null;
  let c=leaf;
- for(let i=0;c&&i<10;i++,c=c.parentElement){
-   const loc=locByNode(c);
-   if(loc===name && (c.matches?.('[class*="crimeOption"],[class*="crimeWrapper"],[class*="crimePanel"],li,article')||c.querySelector?.('img')))return c;
- }
+ for(let i=0;c&&i<10;i++,c=c.parentElement){if(c.matches?.('[class*="crimeOption"],li,article')||c.querySelector?.('[class*="sprayCanButton"],[class*="crimeOptionImage"]'))return c;}
  return leaf.parentElement;
 }
 function tagCount(card,name){
- const candidates=$$('[class*="tabletTitleAndTagCount"],[class*="tagCount"],[class*="tagsCount"]',card);
+ const candidates=$$('[class*="tagsCount"],[class*="tagCount"],[class*="tabletTitleAndTagCount"]',card);
  for(const e of candidates){const n=num(text(e));if(n!=null)return n;}
  const raw=text(card).replace(name,' ');
  let m=raw.match(/(?:tags?|reputation|rep)\D{0,10}(\d{1,4})/i); if(m)return Number(m[1]);
@@ -46098,7 +46100,7 @@ function enhancer(){const t=text(document.body);return /paint\s*mask/i.test(t)?'
 function uniques(){const m=text(document.body).match(/unique(?:\s*outcomes?)?\D{0,12}(\d+)\s*\/\s*(\d+)/i);return m?`${m[1]}/${m[2]}`:'—'}
 function goal(cs){if(cs==null)return '—';for(const [gate,label] of GATES)if(cs<gate)return `${label} @ CS${gate}`;return 'All CS gates reached'}
 function sprayPercent(card){
- const els=$$('[aria-label],*',card);
+ const els=$$('[class*="sprayCanButton"][aria-label],[aria-label]',card);
  for(const e of els){const v=(e.getAttribute?.('aria-label')||'')+' '+text(e);const m=v.match(/(\d{1,3})%/);if(m){const x=Number(m[1]);if(x<=100)return x}}
  return null;
 }
@@ -46144,5 +46146,25 @@ let timer=0;const schedule=()=>{clearTimeout(timer);timer=setTimeout(render,120)
 new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
 window.addEventListener('hashchange',schedule,{passive:true});window.addEventListener('popstate',schedule,{passive:true});
 setInterval(render,1500);setTimeout(render,100);
+})();
+
+/* SAKALUX_GRAFFITI_MASTER_CONTROL_0952 */
+(() => {
+'use strict';
+const NAME='Graffiti Spray Guide';
+const API='SakaLuXGraffitiSprayGuide';
+const text=e=>(e?.textContent||'').replace(/\s+/g,' ').trim();
+const all=(q,r=document)=>[...r.querySelectorAll(q)];
+function root(){return all('div,section,aside').filter(x=>/SakaLuX Suite/i.test(text(x))&&/Enable Ready Modules/i.test(text(x))).sort((a,b)=>a.querySelectorAll('*').length-b.querySelectorAll('*').length)[0]||null;}
+function cardByName(r,name){const leaf=all('*',r).find(e=>e.children.length===0&&text(e)===name);if(!leaf)return null;let c=leaf;for(let i=0;c&&i<8;i++,c=c.parentElement){if(c.querySelector('input[type=checkbox],[role=switch]')&&/Settings/i.test(text(c)))return c;}return null;}
+function template(r){for(const name of ['Mission Rewards','Market Intelligence','Enhancer Guard','Bazaar Thanker']){const c=cardByName(r,name);if(c)return c;}return null;}
+function status(card,on){let b=card.querySelector('[data-slx-graffiti-status]');if(!b){b=document.createElement('span');b.dataset.slxGraffitiStatus='1';b.style.cssText='margin-left:8px;font-size:11px;font-weight:800;border:1px solid currentColor;border-radius:999px;padding:2px 7px;';const title=all('*',card).find(e=>e.children.length===0&&text(e)===NAME);title?.parentElement?.appendChild(b);}if(b){b.textContent=on?'READY · ON':'INSTALLED · OFF';b.style.color=on?'#72d6a0':'#e9bd63';}}
+function ensure(){
+ const r=root();if(!r)return;let card=cardByName(r,NAME);if(!card){const t=template(r);if(!t)return;card=t.cloneNode(true);card.dataset.slxGraffitiModule='1';const title=all('*',card).find(e=>e.children.length===0&&/Mission Rewards|Market Intelligence|Enhancer Guard|Bazaar Thanker/.test(text(e)));if(title)title.textContent=NAME;const desc=all('*',card).find(e=>e.children.length===0&&/Opens the installed standalone SakaLuX/i.test(text(e)));if(desc)desc.textContent='Built-in Graffiti spray recommendations, progress and warnings.';card.querySelectorAll('[data-slx0948-status],[data-slx0948-bound],[data-slx0947-module],[data-slx0948-card-bound]').forEach(e=>{if(e.dataset.slx0948Status)e.remove();delete e.dataset.slx0948Bound;delete e.dataset.slx0947Module;delete e.dataset.slx0948CardBound;});t.parentElement.appendChild(card);}
+ const api=window[API];const on=api?.isEnabled?.()!==false;status(card,on);
+ const sw=card.querySelector('input[type=checkbox],[role=switch]');if(sw){if(sw.tagName==='INPUT'){sw.disabled=false;sw.checked=on;sw.onchange=e=>{api?.setEnabled?.(!!e.target.checked);setTimeout(ensure,20);};}else{sw.setAttribute('aria-checked',String(on));sw.onclick=e=>{e.preventDefault();e.stopPropagation();api?.setEnabled?.(!api?.isEnabled?.());setTimeout(ensure,20);};}}
+ const settings=all('button',card).find(b=>/Settings/i.test(text(b)));if(settings){settings.disabled=false;settings.onclick=e=>{e.preventDefault();e.stopPropagation();api?.setEnabled?.(true);location.href='/loader.php?sid=crimes#/graffiti';};}
+}
+window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(ensure,40),{passive:true});new MutationObserver(()=>{clearTimeout(window.__slxGraffitiMC);window.__slxGraffitiMC=setTimeout(ensure,80);}).observe(document.documentElement,{childList:true,subtree:true});setInterval(ensure,1200);setTimeout(ensure,100);
 })();
 
