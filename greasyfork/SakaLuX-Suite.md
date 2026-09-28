@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.947**
+**v0.9.948**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.947**
+- Canonical version: **v0.9.948**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -69,6 +69,14 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Live status is truthful: `NOT INSTALLED`, `INSTALLED · OFF`, `READY · ON`, or `INSTALLED · UNKNOWN`; duplicate stale `NOT READY` labels are suppressed.
 - Settings and switches are rebound to each standalone public API/bridge so Hub/Suite state follows the actual script state.
 - Replaces the broken Graffiti DOM detection with visible-zone detection for TornPDA and shows REP/CASH recommendations plus next reputation tier without changing the Torn card layout.
+
+### v0.9.948 — Native bridge module controls
+- Uses each standalone module hidden `sakalux-module-bridge-*` as the authoritative control/status channel.
+- Installed detection now reads the canonical installed-version attribute value instead of incorrectly expecting `1`.
+- Settings sends the bridge `open` action; ON/OFF sends explicit `on` / `off` actions, so controls no longer only change Suite-local state.
+- Module cards no longer toggle when tapping the title/description/background.
+- Status badges now reflect the live bridge state: `NOT INSTALLED`, `INSTALLED · OFF`, `READY · ON`, or `INSTALLED · UNKNOWN`.
+- Suppresses stale legacy `READY` / `NOT READY` decorations without changing the compact Suite card layout.
 
 ## Release history / Changelog
 
