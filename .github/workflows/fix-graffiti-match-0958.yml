@@ -1,0 +1,28 @@
+name: Fix Graffiti strict match 0.9.958
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/fix_graffiti_match_0958.py'
+      - '.github/workflows/fix-graffiti-match-0958.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - run: python .github/scripts/fix_graffiti_match_0958.py
+      - run: node --check SakaLuX-Suite.user.js
+      - run: node tests/suite-graffiti-0958-regression.cjs
+      - name: Commit release
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-graffiti-0958-regression.cjs
+          git commit -m 'Release Suite v0.9.958 strict Graffiti match fix'
+          git push
