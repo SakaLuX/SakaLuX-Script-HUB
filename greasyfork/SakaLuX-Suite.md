@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.955**
+**v0.9.956**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.955**
+- Canonical version: **v0.9.956**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -125,6 +125,13 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Highlights the recommendation when the currently selected spray matches and adds a compact `LOW xx%` warning at 15% or less.
 - Removes the extra selected-colour pill, large summary bars, progress overlays and mode controls.
 - Remains read-only with no API calls or gameplay automation.
+
+### v0.9.956 — Graffiti selected-spray + low-percent reliability
+- Moves Graffiti recommendations onto the spray control itself so Torn's reputation stars remain fully visible.
+- Makes selected spray detection tolerant of TornPDA label/text/image variants instead of relying on one exact aria-label sentence.
+- Correctly marks the matching REP/CASH recommendation with a green check.
+- Detects the visible remaining percentage as a fallback and highlights Torn's own percentage display at 15% or below instead of adding another overlapping warning row.
+- Keeps the advisor compact and read-only.
 
 ## Release history / Changelog
 
