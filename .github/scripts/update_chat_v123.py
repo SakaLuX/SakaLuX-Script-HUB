@@ -57,9 +57,7 @@ text = text.replace(needle, replacement, 1)
 
 # Ensure the Search control honors its switch even though header controls are always mounted.
 old = "x.innerHTML='<button data-s title=\"Search\">🔎</button><button data-m title=\"Maximize\">⛶</button><button data-e title=\"Export\">⇩</button>';"
-new = "x.innerHTML='<button data-s title=\"Search\">🔎</button><button data-m title=\"Maximize\">⛶</button><button data-e title=\"Export\">⇩</button>';"
 assert old in text, 'controls markup marker not found'
-# Keep markup, update visibility immediately after mount/update.
 vis_old = "x.querySelector('[data-e]').hidden=!S.exportSearch;const mb=x.querySelector('[data-m]');"
 vis_new = "x.querySelector('[data-s]').hidden=!S.search;x.querySelector('[data-e]').hidden=!S.exportSearch;const mb=x.querySelector('[data-m]');"
 assert vis_old in text, 'controls visibility marker not found'
@@ -83,3 +81,4 @@ if history.strip() not in doc:
 DOC.write_text(doc, encoding='utf-8')
 
 print('Updated Chat Intelligence to v1.2.23')
+# trigger release workflow
