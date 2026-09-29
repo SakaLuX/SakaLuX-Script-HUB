@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.22**
+**v1.2.23**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-26**
-- Canonical version: **v1.2.22**
+- Verified: **2026-09-29**
+- Canonical version: **v1.2.23**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,10 +24,20 @@
 
 ## Current release note
 
-**v1.2.22 — Release documentation synchronized with the current Chat Intelligence userscript version**
-- Release documentation synchronized with the current Chat Intelligence userscript version.
+**v1.2.23 — Restore complete chat controls and TornPDA header layout**
+- Restores the Search switch, mute/alias/favorite maintenance actions, alias colors and richer @mention suggestions.
+- Keeps favorites first in @mention autocomplete and shows player IDs.
+- Tightens native Chat V3 header detection and uses compact adaptive Search / Maximize / Export controls without touching Torn native minimize/close buttons.
+- Synchronizes runtime and metadata versions.
 
 ## Release history / Changelog
+
+### v1.2.23 — Restore complete chat controls and TornPDA header layout
+- Restored the Search settings switch and Clear mute / Clear aliases-favorites actions.
+- Restored alias custom colors and contextual alias/color state.
+- Restored favorite-first @mention suggestions with player IDs.
+- Reworked Chat V3 header detection and compact mobile controls to avoid collisions with unrelated chat widgets.
+- Synchronized runtime/header version surfaces to v1.2.23.
 
 
 ### v1.2.22 — Settings Schema v1 and safe automatic migrations
