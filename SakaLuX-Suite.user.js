@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.957
+// @version      0.9.958
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10938,32 +10938,27 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
     }
     function selected(card){
       const h=sprayHost(card);if(!h)return null;
-      // Important: never read textContent from the host here. The advisor itself is
-      // injected inside this host, so reading host text can feed our own REP/CASH
-      // colour labels back into selected-spray detection and create false checkmarks.
-      const nativeEls=[h,...$$('[aria-label],[title],img',h)].filter(el=>!el.closest?.('.slx-graf-spray-advisor'));
+      // Strict mode: only trust Torn-native semantics that explicitly identify
+      // the equipped/selected/current spray. Never infer the selected colour
+      // from generic image/src/title metadata because those nodes can contain
+      // preview/recommendation colours and create false green checks.
       let colour=null,percent=null;
-      // 1) Prefer Torn's explicit selected-spray label when available.
-      for(const el of nativeEls){
+      const native=[h,...$$('[aria-label]',h)].filter(el=>!el.closest?.('.slx-graf-spray-advisor'));
+      for(const el of native){
         const label=(el.getAttribute?.('aria-label')||'').trim();
-        let m=label.match(/\b(red|blue|orange|white|pink|black|green|purple)\b[^,;]*\bspray\b/i)
-          ||label.match(/\bspray\b[^,;]*\b(red|blue|orange|white|pink|black|green|purple)\b/i);
-        if(m){colour=m[1].toLowerCase();const pm=label.match(/(\d{1,3})\s*%/);if(pm)percent=+pm[1];break;}
+        if(!/(selected|equipped|current|in use|using)/i.test(label))continue;
+        const m=label.match(/\b(red|blue|orange|white|pink|black|green|purple)\b/i);
+        if(!m)continue;
+        colour=m[1].toLowerCase();
+        const pm=label.match(/(\d{1,3})\s*%/);if(pm)percent=+pm[1];
+        break;
       }
-      // 2) If TornPDA omits the aria-label colour, use only native image/attribute metadata.
-      if(!colour){
-        const blob=nativeEls.map(el=>[
-          el.getAttribute?.('title'),el.getAttribute?.('alt'),el.getAttribute?.('src'),el.getAttribute?.('srcset')
-        ].filter(Boolean).join(' ')).join(' ').toLowerCase();
-        colour=COLOURS.find(c=>new RegExp(`(?:^|[^a-z])${c}(?:[^a-z]|$)`,'i').test(blob))||null;
-        const pm=blob.match(/(\d{1,3})\s*%/);if(pm)percent=+pm[1];
-      }
-      // 3) Remaining percentage may be visible next to the native spray control.
+      // Percentage may still be read visually, independently of colour.
       if(percent==null){
         const area=h.parentElement||card;
         for(const el of $$('*',area)){
           if(el.closest?.('.slx-graf-spray-advisor'))continue;
-          const t=text(el),m=t.match(/^\s*(\d{1,3})\s*%\s*$/);if(m){percent=+m[1];break;}
+          const m=text(el).match(/^\s*(\d{1,3})\s*%\s*$/);if(m){percent=+m[1];break;}
         }
       }
       return {colour,percent,host:h};

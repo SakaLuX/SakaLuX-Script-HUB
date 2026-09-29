@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.957**
+**v0.9.958**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.957**
+- Canonical version: **v0.9.958**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -138,6 +138,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Selected-spray detection no longer reads text from the injected SakaLuX recommendation overlay, preventing REP/CASH labels from being mistaken for Torn's equipped colour.
 - Prefers Torn's native spray `aria-label`, then native image/title/alt/src metadata; if the colour cannot be confirmed, no checkmark is shown.
 - Keeps low-percentage detection and the seven-zone REP/CASH recommendation mapping unchanged.
+
+### v0.9.958 — Strict Graffiti selected-spray matching
+- Removes heuristic colour detection for the equipped spray.
+- A REP/CASH recommendation is marked as matched only when Torn itself exposes an aria-label that explicitly says the spray is selected/equipped/current/in use and contains the colour.
+- If TornPDA does not expose a trustworthy selected-colour signal, no green checkmark is shown instead of guessing.
+- Remaining paint percentage detection stays active independently.
 
 ## Release history / Changelog
 
