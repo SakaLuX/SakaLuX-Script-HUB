@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.23**
+**v1.2.24**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-29**
-- Canonical version: **v1.2.23**
+- Canonical version: **v1.2.24**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,19 @@
 
 ## Current release note
 
-**v1.2.23 — Restore complete chat controls and TornPDA header layout**
-- Restores the Search switch, mute/alias/favorite maintenance actions, alias colors and richer @mention suggestions.
-- Keeps favorites first in @mention autocomplete and shows player IDs.
-- Tightens native Chat V3 header detection and uses compact adaptive Search / Maximize / Export controls without touching Torn native minimize/close buttons.
-- Synchronizes runtime and metadata versions.
+**v1.2.24 — Native Chat V3 control alignment fix**
+- Removes the black rounded control capsule visible in TornPDA chat headers.
+- Gives Chat Intelligence controls a dedicated high-specificity selector so shared/global SakaLuX button CSS cannot stretch them.
+- Renders Search / Maximize / Export as flat native-style header buttons immediately before Torn's close control.
+- Adds a narrower mobile sizing rule while preserving all restored v1.2.23 features.
 
 ## Release history / Changelog
+
+### v1.2.24 — Native Chat V3 control alignment fix
+- Removed the pill/capsule background around Chat Intelligence header controls.
+- Added Chat-specific high-specificity CSS to defeat shared/global button stretching on TornPDA.
+- Kept Search, Maximize and Export as separate native-like controls beside the Torn close button.
+- Added compact mobile sizing and synchronized runtime/header versions.
 
 ### v1.2.23 — Restore complete chat controls and TornPDA header layout
 - Restored the Search settings switch and Clear mute / Clear aliases-favorites actions.
