@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.956**
+**v0.9.957**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-26**
-- Canonical version: **v0.9.956**
+- Canonical version: **v0.9.957**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -132,6 +132,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Correctly marks the matching REP/CASH recommendation with a green check.
 - Detects the visible remaining percentage as a fallback and highlights Torn's own percentage display at 15% or below instead of adding another overlapping warning row.
 - Keeps the advisor compact and read-only.
+
+### v0.9.957 — Graffiti selected-spray false-check fix
+- Fixes false green checkmarks when the equipped spray is not the recommended colour.
+- Selected-spray detection no longer reads text from the injected SakaLuX recommendation overlay, preventing REP/CASH labels from being mistaken for Torn's equipped colour.
+- Prefers Torn's native spray `aria-label`, then native image/title/alt/src metadata; if the colour cannot be confirmed, no checkmark is shown.
+- Keeps low-percentage detection and the seven-zone REP/CASH recommendation mapping unchanged.
 
 ## Release history / Changelog
 

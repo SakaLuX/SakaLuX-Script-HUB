@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.956
+// @version      0.9.957
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10938,15 +10938,33 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
     }
     function selected(card){
       const h=sprayHost(card);if(!h)return null;
-      const els=[h,...$$('[aria-label],[title],img',h)];
-      const blob=els.map(el=>[el.getAttribute?.('aria-label'),el.getAttribute?.('title'),el.getAttribute?.('alt'),el.getAttribute?.('src'),el.getAttribute?.('srcset'),text(el)].filter(Boolean).join(' ')).join(' ').toLowerCase();
-      let colour=COLOURS.find(c=>new RegExp(`\\b${c}\\b`,'i').test(blob))||null;
-      let pm=blob.match(/(\d{1,3})\s*%/);let percent=pm?+pm[1]:null;
-      if(percent==null){
-        const area=h.parentElement||card;for(const el of $$('*',area)){const t=text(el);const m=t.match(/^\s*(\d{1,3})\s*%\s*$/);if(m){percent=+m[1];break;}}
+      // Important: never read textContent from the host here. The advisor itself is
+      // injected inside this host, so reading host text can feed our own REP/CASH
+      // colour labels back into selected-spray detection and create false checkmarks.
+      const nativeEls=[h,...$$('[aria-label],[title],img',h)].filter(el=>!el.closest?.('.slx-graf-spray-advisor'));
+      let colour=null,percent=null;
+      // 1) Prefer Torn's explicit selected-spray label when available.
+      for(const el of nativeEls){
+        const label=(el.getAttribute?.('aria-label')||'').trim();
+        let m=label.match(/\b(red|blue|orange|white|pink|black|green|purple)\b[^,;]*\bspray\b/i)
+          ||label.match(/\bspray\b[^,;]*\b(red|blue|orange|white|pink|black|green|purple)\b/i);
+        if(m){colour=m[1].toLowerCase();const pm=label.match(/(\d{1,3})\s*%/);if(pm)percent=+pm[1];break;}
       }
+      // 2) If TornPDA omits the aria-label colour, use only native image/attribute metadata.
       if(!colour){
-        const img=$('img',h);const src=(img?.getAttribute('src')||img?.getAttribute('srcset')||img?.getAttribute('alt')||'').toLowerCase();colour=COLOURS.find(c=>src.includes(c))||null;
+        const blob=nativeEls.map(el=>[
+          el.getAttribute?.('title'),el.getAttribute?.('alt'),el.getAttribute?.('src'),el.getAttribute?.('srcset')
+        ].filter(Boolean).join(' ')).join(' ').toLowerCase();
+        colour=COLOURS.find(c=>new RegExp(`(?:^|[^a-z])${c}(?:[^a-z]|$)`,'i').test(blob))||null;
+        const pm=blob.match(/(\d{1,3})\s*%/);if(pm)percent=+pm[1];
+      }
+      // 3) Remaining percentage may be visible next to the native spray control.
+      if(percent==null){
+        const area=h.parentElement||card;
+        for(const el of $$('*',area)){
+          if(el.closest?.('.slx-graf-spray-advisor'))continue;
+          const t=text(el),m=t.match(/^\s*(\d{1,3})\s*%\s*$/);if(m){percent=+m[1];break;}
+        }
       }
       return {colour,percent,host:h};
     }
