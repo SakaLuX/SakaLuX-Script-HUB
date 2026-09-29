@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.24**
+**v1.2.25**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-29**
-- Canonical version: **v1.2.24**
+- Canonical version: **v1.2.25**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,19 @@
 
 ## Current release note
 
-**v1.2.24 — Native Chat V3 control alignment fix**
-- Removes the black rounded control capsule visible in TornPDA chat headers.
-- Gives Chat Intelligence controls a dedicated high-specificity selector so shared/global SakaLuX button CSS cannot stretch them.
-- Renders Search / Maximize / Export as flat native-style header buttons immediately before Torn's close control.
-- Adds a narrower mobile sizing rule while preserving all restored v1.2.23 features.
+**v1.2.25 — Working maximize and visible complete controls**
+- Replaces the fragile inner-message maximize routine with native chat-shell fullscreen sizing for TornPDA.
+- Adds a dedicated ⚙ Settings button directly in every enhanced chat header.
+- Settings now explicitly lists the full context-action set: Favorite, Reply, copy ID/name, Profile, Mute and Alias/color.
+- Keeps Search, Export, notifications and favorite-first @mentions.
 
 ## Release history / Changelog
+
+### v1.2.25 — Working maximize and visible complete controls
+- Fixed Maximize on TornPDA by maximizing the common native chat shell instead of depending on a fragile detected message viewport.
+- Added a persistent ⚙ Chat Intelligence Settings control in the chat title bar.
+- Exposed the complete context-action feature list in Settings.
+- Synchronized metadata/runtime version surfaces to v1.2.25.
 
 ### v1.2.24 — Native Chat V3 control alignment fix
 - Removed the pill/capsule background around Chat Intelligence header controls.
