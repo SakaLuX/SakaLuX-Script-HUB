@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.35**
+**v1.2.36**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v1.2.35**
+- Canonical version: **v1.2.36**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,17 @@
 
 ## Current release note
 
-**v1.2.35 — Native minimize/settings collision fix**
-- Reserves a dedicated right-side zone for Torn's native Minimize and Close buttons.
-- Moves the SakaLuX Search, Maximize, Export and Settings strip left as a single group on TornPDA.
-- Prevents Settings from sitting on top of the native Minimize control.
-- Keeps the compact mobile layout introduced in v1.2.34.
+**v1.2.36 — Native-flow chat header controls**
+- Removes the fixed right-offset workaround from v1.2.35.
+- Inserts the SakaLuX control strip before Torn's native Minimize/Close controls when detectable.
+- Lets the chat header reserve real flex width so controls no longer overlap the avatar/name or native buttons.
+- Keeps compact mobile button widths for TornPDA.
 
 ## Release history / Changelog
+
+### v1.2.36 — Native-flow chat header controls
+- Replaced absolute right offsets with native header flow placement before Minimize/Close.
+- Fixes the v1.2.35 regression where controls shifted over the chat title/name.
 
 ### v1.2.35 — Native minimize/settings collision fix
 - Reserves 126px at the right of the chat header for Torn native controls.
