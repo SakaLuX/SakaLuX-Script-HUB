@@ -1,0 +1,37 @@
+name: Sync Market Intelligence v1.17.57 Changelog
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/fix_market_v11757_changelog.py'
+      - '.github/workflows/fix-market-v11757-changelog.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: market-v11757-changelog-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Synchronize Market Intelligence changelog
+        run: python3 .github/scripts/fix_market_v11757_changelog.py
+      - name: Verify release metadata
+        run: |
+          grep -q 'Canonical version: \*\*v1.17.57\*\*' greasyfork/Market-Intelligence.md
+          grep -q 'v1.17.57 — Automatic cash + selectable Best Buys' greasyfork/Market-Intelligence.md
+          test "$(grep -c '^### v1.17.57 — Automatic cash + selectable Best Buys$' greasyfork/Market-Intelligence.md)" -eq 1
+      - name: Commit documentation sync
+        run: |
+          if git diff --quiet; then
+            echo 'Documentation already synchronized.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add greasyfork/Market-Intelligence.md
+          git commit -m 'Sync Market Intelligence v1.17.57 changelog'
+          git push
