@@ -260,19 +260,19 @@
         }
       ],
       "release": {
-        "version": "1.17.56",
-        "date": "2026-09-28",
+        "version": "1.17.57",
+        "date": "2026-09-30",
         "notes": [
-          "Performance update for Travel/TornPDA.",
-          "Caches and deduplicates the full YATA travel export for 60 seconds.",
-          "Throttles passive Travel scans by lifecycle state instead of allowing repeated heavy scans every few seconds.",
-          "Keeps forced scans immediate for navigation, manual refreshes and meaningful landed-stock changes."
+          "Best Buys now detects the live Torn cash balance automatically, including a Torn-page fallback for PDA travel pages.",
+          "Every Best Buys option is selectable instead of always using the first recommendation.",
+          "The selected item persists per destination and recalculates quantity from live cash, travel slots and current stock.",
+          "MARK PLAN BOUGHT now records the currently selected option and its calculated quantity."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.56",
-      "detailsRevision": 14,
+      "version": "1.17.57",
+      "detailsRevision": 15,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

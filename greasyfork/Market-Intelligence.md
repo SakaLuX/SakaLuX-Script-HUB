@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.56**
+**v1.17.57**
 
 
 ## Repository synchronization
@@ -252,4 +252,11 @@
 - Adds a 60-second YATA export cache with in-flight request deduplication.
 - Throttles passive Travel rescans by lifecycle state: in-flight 10s, landed 12s, travel agency 15s.
 - Keeps forced navigation/manual refreshes responsive while cutting repeated DOM scans and API work on TornPDA.
+
+
+### v1.17.57 — Automatic cash + selectable Best Buys
+- Best Buys reads the live Torn cash balance automatically; on TornPDA/foreign travel pages it can fall back to Torn's visible “you have $…” balance.
+- Any Best Buys row can be selected as the active plan instead of the first recommendation being forced.
+- The selection persists per destination and the selected quantity is recalculated from cash, slot capacity and current stock.
+- MARK PLAN BOUGHT records the selected item plan, not an implicit first-row plan.
 
