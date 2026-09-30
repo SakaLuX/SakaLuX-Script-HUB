@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.25**
+**v1.2.26**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-29**
-- Canonical version: **v1.2.25**
+- Verified: **2026-09-30**
+- Canonical version: **v1.2.26**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,20 @@
 
 ## Current release note
 
-**v1.2.25 — Working maximize and visible complete controls**
-- Replaces the fragile inner-message maximize routine with native chat-shell fullscreen sizing for TornPDA.
-- Adds a dedicated ⚙ Settings button directly in every enhanced chat header.
-- Settings now explicitly lists the full context-action set: Favorite, Reply, copy ID/name, Profile, Mute and Alias/color.
-- Keeps Search, Export, notifications and favorite-first @mentions.
+**v1.2.26 — Full legacy feature restore, settings repair and reliable fullscreen**
+- Restores every v1.1.0 context action: Favorite, Reply, Copy ID, Copy Name, Profile, Local Mute and Alias + color.
+- Makes each context action individually configurable and repairs Search, Export and @mention setting side effects.
+- Rebuilds fullscreen around the real common chat shell and forces TornPDA-safe viewport sizing with reversible styles.
+- Adds working clear/reset controls and immediate settings application.
 
 ## Release history / Changelog
+
+### v1.2.26 — Full legacy feature restore, settings repair and reliable fullscreen
+- Restored and exposed all legacy context actions.
+- Fixed Search, Export, notifications/channel toggles and @mention cleanup behavior.
+- Added individual context-action switches and reliable reset/clear actions.
+- Reworked maximize/restore to use the actual chat shell and reversible important styles.
+- Alias custom colors are applied to detected sender names.
 
 ### v1.2.25 — Working maximize and visible complete controls
 - Fixed Maximize on TornPDA by maximizing the common native chat shell instead of depending on a fragile detected message viewport.
