@@ -39,19 +39,19 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.14 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0**
-- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
-- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
-- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
+**v1.1.14 — Correct Torn City sell-price floor**
+- Fixes the Torn City shop floor to use sell_price, the amount the NPC shop pays you, instead of buy_price.
+- Prevents Smart Pricer from incorrectly raising a Bazaar price to the NPC shop purchase price when market value is lower.
+- Resets stale pricing cache data and keeps the floor indicator aligned with sell_price.
 
 ## Release history / Changelog
 
 
 
-### v1.1.14 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0
-- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
-- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
-- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
+### v1.1.14 — Correct Torn City sell-price floor
+- Fixes the Torn City shop floor to use sell_price, the amount the NPC shop pays you, instead of buy_price.
+- Prevents Smart Pricer from incorrectly raising a Bazaar price to the NPC shop purchase price when market value is lower.
+- Resets stale pricing cache data and keeps the floor indicator aligned with sell_price.
 
 ### v1.1.13 — Settings Schema v1 and safe automatic migrations
 - Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
