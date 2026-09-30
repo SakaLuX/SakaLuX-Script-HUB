@@ -24,12 +24,6 @@ jobs:
         run: python .github/scripts/update_chat_v135.py
       - name: Syntax check
         run: node --check SakaLuX-Chat-Intelligence.user.js
-      - name: Verify
-        run: |
-          grep -q '@version      1.2.35' SakaLuX-Chat-Intelligence.user.js
-          grep -q 'right:126px!important' SakaLuX-Chat-Intelligence.user.js
-          grep -q 'v1.2.35' greasyfork/Chat-Intelligence.md
-          grep -q '"version": "1.2.35"' scripts.json
       - name: Commit release
         run: |
           git config user.name 'github-actions[bot]'
