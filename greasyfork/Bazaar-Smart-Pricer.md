@@ -7,8 +7,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-09-26**
-- Canonical version: **v1.1.13**
+- Verified: **2026-09-30**
+- Canonical version: **v1.1.14**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md

@@ -32,11 +32,11 @@
 
 ## Current release note
 
-**v1.17.57 — Automatic cash + selectable Best Buys**
-- Best Buys detects the live Torn cash balance automatically, with the visible foreign-travel page balance preferred and Torn API used as fallback.
-- Every Best Buys candidate can be selected as the active plan instead of forcing the first recommendation.
-- The selected candidate persists per destination and quantity is recalculated from live cash, travel slots and current foreign stock.
-- MARK PLAN BOUGHT records the selected candidate and calculated quantity in the Travel Session.
+**v1.17.57 — Release metadata synchronization**
+- Best Buys now detects the live Torn cash balance automatically, including a Torn-page fallback for PDA travel pages.
+- Every Best Buys option is selectable instead of always using the first recommendation.
+- The selected item persists per destination and recalculates quantity from live cash, travel slots and current stock.
+- MARK PLAN BOUGHT now records the currently selected option and its calculated quantity.
 
 ## Release history / Changelog
 
