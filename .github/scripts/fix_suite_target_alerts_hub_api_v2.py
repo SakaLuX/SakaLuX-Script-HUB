@@ -34,7 +34,6 @@ if MARKER not in s:
         raise SystemExit('legacy profile selection not found')
     s = s.replace(legacy_selection, '`/profile?striptags=true`', 1)
 
-    # Accept both compact and multiline formatting of the existing parser.
     image_anchor = 'data?.profile_image ||'
     if image_anchor not in s:
         raise SystemExit('profile image parser token not found')
@@ -43,12 +42,6 @@ if MARKER not in s:
         'data?.profile?.image ||\n              data?.image ||\n              data?.profile_image ||',
         1,
     )
-
-    old_status = '''    function readApiListStatuses(entry) {\n        return {\n            activity: normaliseState(entry?.last_action?.status),\n            state: normaliseState(entry?.status?.state)\n        };\n    }'''
-    new_status = '''    function readApiListStatuses(entry) {\n        const row = entry?.user || entry?.profile || entry || {};\n        return {\n            activity: normaliseState(row?.last_action?.status),\n            state: normaliseState(row?.status?.state)\n        };\n    }'''
-    if old_status not in s:
-        raise SystemExit('list status parser anchor not found')
-    s = s.replace(old_status, new_status, 1)
 
     marker_anchor = '/* SakaLuX Target Alerts Async Repaint v0.9.966 */\n'
     if marker_anchor not in s:
@@ -64,7 +57,7 @@ if DOC.exists():
     bullets = [
         'Reads the Torn API key directly from SakaLuX Script Hub through getApiKey(), fixing Target/Enemy lists that stayed on SYNC when the key existed only in Hub.',
         'Moves avatar hydration from the legacy v1 profile request to the current v2 user/{id}/profile endpoint and reads profile.image.',
-        'Keeps the v2 contact-list status parser and adds tolerance for nested response rows while preserving the existing refresh-loop protection.'
+        'Retains the current v2 contact-list status parser and existing refresh-loop protection while restoring the missing data path.'
     ]
     block = '## Current release note\n\n**v' + VERSION + ' — ' + title + '**\n' + '\n'.join('- ' + x for x in bullets) + '\n'
     m = re.search(r'(?is)##\s+Current release note\b.*?(?=\n##\s|\Z)', d)
