@@ -24,8 +24,6 @@ if MARKER not in s:
         raise SystemExit('getSharedApiKey anchor not found')
     s = s.replace(old_key, new_key, 1)
 
-    # Legacy avatar hydration used API v1. The current stable schema exposes
-    # /v2/user/{id}/profile with the image under profile.image.
     legacy_host = 'https://api.torn.com/user/'
     if legacy_host not in s:
         raise SystemExit('legacy profile API host not found')
@@ -36,11 +34,15 @@ if MARKER not in s:
         raise SystemExit('legacy profile selection not found')
     s = s.replace(legacy_selection, '`/profile?striptags=true`', 1)
 
-    old_profile_parse = '''          const profileImage =\n              data?.profile_image ||\n              data?.profile?.profile_image ||\n              \"\";\n          resolve(typeof profileImage === \"string\" ? profileImage : \"\");'''
-    new_profile_parse = '''          const profileImage =\n              data?.profile?.image ||\n              data?.image ||\n              data?.profile_image ||\n              data?.profile?.profile_image ||\n              \"\";\n          resolve(typeof profileImage === \"string\" ? profileImage : \"\");'''
-    if old_profile_parse not in s:
-        raise SystemExit('profile image parser anchor not found')
-    s = s.replace(old_profile_parse, new_profile_parse, 1)
+    # Accept both compact and multiline formatting of the existing parser.
+    image_anchor = 'data?.profile_image ||'
+    if image_anchor not in s:
+        raise SystemExit('profile image parser token not found')
+    s = s.replace(
+        image_anchor,
+        'data?.profile?.image ||\n              data?.image ||\n              data?.profile_image ||',
+        1,
+    )
 
     old_status = '''    function readApiListStatuses(entry) {\n        return {\n            activity: normaliseState(entry?.last_action?.status),\n            state: normaliseState(entry?.status?.state)\n        };\n    }'''
     new_status = '''    function readApiListStatuses(entry) {\n        const row = entry?.user || entry?.profile || entry || {};\n        return {\n            activity: normaliseState(row?.last_action?.status),\n            state: normaliseState(row?.status?.state)\n        };\n    }'''
