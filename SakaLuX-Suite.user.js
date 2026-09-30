@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.959
+// @version      0.9.960
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10986,6 +10986,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
   }
 
 /* SakaLuX Target Alerts Mobile Isolation v0.9.959 */
+/* SakaLuX Target Alerts Render Recovery v0.9.960 */
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
     function listenGlobal(target,type,listener,options){const opts=typeof options==="boolean"?{capture:options}:options||{};target.addEventListener(type,listener,{...opts,signal:globalEventController.signal});}
@@ -14110,7 +14111,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             #${PEOPLE_PANEL_IDS.customPanel} {
                 box-sizing: border-box;
                 width: 100%;
-                min-height: 400px;
+                min-height: 0;
                 overflow: hidden;
             }
             #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] {
@@ -14756,6 +14757,11 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         }
         hideNativePeopleContent(host);
         renderPeopleListPanel(type, host);
+        if (!playerLists[type]?.length && isValidApiKey(syncSharedApiKey())) {
+            pollAllLists(true).catch(error => {
+                console.warn(`[${SCRIPT_NAME}] Could not refresh ${type} for People panel.`, error);
+            });
+        }
     }
     function cacheNativePeopleTemplate() {
         if (nativePeopleTemplateCache) {
@@ -15163,8 +15169,11 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             panel.addEventListener("mouseover", event => event.stopPropagation());
             panel.addEventListener("pointerover", event => event.stopPropagation());
         }
-        panel.replaceChildren();
-        const players = playerLists[type]
+        const persistedPlayers = loadPlayerList(type);
+        if (persistedPlayers.length && (!Array.isArray(playerLists[type]) || !playerLists[type].length)) {
+            playerLists[type] = persistedPlayers;
+        }
+        const players = (Array.isArray(playerLists[type]) ? playerLists[type] : [])
             .filter(player =>
                 !settings.ownUserId ||
                 player.id !== settings.ownUserId
@@ -15176,6 +15185,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                     { sensitivity: "base" }
                 )
             );
+        panel.replaceChildren();
         let searchRoot;
         if (template?.searchRoot) {
             searchRoot =
@@ -15217,6 +15227,8 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             inner.style.height =
                 `${filtered.length * 40}px`;
             if (!filtered.length) {
+                inner.style.height = "40px";
+                inner.style.minHeight = "40px";
                 const empty = document.createElement("div");
                 empty.className = "sakalux-native-empty";
                 empty.style.height = "40px";
@@ -15229,6 +15241,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 inner.appendChild(empty);
                 return;
             }
+            inner.style.minHeight = "0px";
             filtered.forEach((player, index) => {
                 let row;
                 if (template?.sampleRow) {

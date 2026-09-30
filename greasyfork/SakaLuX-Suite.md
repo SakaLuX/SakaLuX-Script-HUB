@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.959**
+**v0.9.960**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v0.9.959**
+- Canonical version: **v0.9.960**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,10 +60,10 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.959 — Target Alerts People-panel isolation and TornPDA avatar containment**
-- Scopes Target/Enemy tab discovery to Torn's actual #people_panel so Target Alerts can no longer attach to the private-chat tab bar.
-- Constrains Target Alerts player rows and avatars on TornPDA so a player image cannot expand across the whole People panel.
-- Stops custom Target/Enemy list hover events from leaking into Torn's native delegated profile-preview handlers while preserving normal links and list actions.
+**v0.9.960 — Target Alerts saved-list render recovery on TornPDA**
+- Rehydrates persisted Target/Enemy players before rebuilding the custom People panel so a UI or route refresh cannot leave the list blank.
+- Makes the zero-player state visible instead of clipping it inside a zero-height list container, and removes the forced 400px empty panel.
+- Triggers the existing Torn API list refresh when a selected Target/Enemy tab has no local rows, while retaining the v0.9.959 private-chat isolation and 32px avatar containment.
 
 ## Release history / Changelog
 
@@ -71,6 +71,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+
+### v0.9.960 — Target Alerts saved-list render recovery on TornPDA
+- Rehydrates persisted Target/Enemy players before rebuilding the custom People panel so a UI or route refresh cannot leave the list blank.
+- Makes the zero-player state visible instead of clipping it inside a zero-height list container, and removes the forced 400px empty panel.
+- Triggers the existing Torn API list refresh when a selected Target/Enemy tab has no local rows, while retaining the v0.9.959 private-chat isolation and 32px avatar containment.
 
 ### v0.9.959 — Target Alerts People-panel isolation and TornPDA avatar containment
 - Scopes Target/Enemy tab discovery to Torn's actual #people_panel so Target Alerts can no longer attach to the private-chat tab bar.
