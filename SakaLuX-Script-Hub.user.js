@@ -1142,7 +1142,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "greasyForkId": "592698",
                 "icon": "🛡️",
                 "id": "enhancer",
-                "info": "Purpose\nEnhancer Guard helps you track Enhancers and Enhancer Relics in your Torn inventory and protect items you want to keep. It combines an inventory dashboard with Item Protector integration directly on Torn Items.\n\nInventory dashboard\nShows which tracked items you own, which are missing and the quantities available. Search locates individual items; filters and sorting narrow the list; favorites keep important items easy to find. Compact mode reduces space used on TornPDA. Refresh and hard refresh update the information, and optional auto-refresh can periodically refresh inventory data.\n\nItem protection\nDisplays lock badges for fully protected, partially protected and unlocked items. Partial protection lets you retain a chosen quantity instead of locking the entire item stack. Local protection settings and Item Protector state are used to keep the display consistent. Fully protected items are hidden or blocked in supported Bazaar sale-selection flows so they do not enter the selection accidentally.\n\nAPI and saved settings\nUses Torn API v2 inventory/item data and includes a dedicated API Access panel for creating, testing, saving or clearing the required key. Favorites, display preferences, protection quantities and cached inventory state are saved locally. Compatible Hub key integration is available; the module also works standalone.\n\nHow to use\nRefresh after inventory changes, search or filter for the item, then review its protection state and retained quantity. Inventory data can lag until refreshed. Protection is a local browser safeguard, so review Torn's final sale list before confirming any sale.",
+                "info": "Purpose\nEnhancer Guard helps you track Enhancers and Enhancer Relics in your Torn inventory and protect items you want to keep. It combines an inventory dashboard with Item Protector integration directly on Torn Items.\n\nInventory dashboard\nShows which tracked items you own, which are missing and the quantities available. Search locates individual items; filters and sorting narrow the list; favorites keep important items easy to find. Compact mode reduces space used on TornPDA. Refresh and hard refresh update the information, and optional auto-refresh can periodically refresh inventory data.\n\nItem protection\nDisplays lock badges for fully protected, partially protected and unlocked items. Partial protection lets you retain a chosen quantity instead of locking the entire item stack. Local protection settings and Item Protector state are used to keep the display consistent. Fully protected items are hidden or blocked in supported Bazaar sale-selection flows so they do not enter the selection accidentally.\n\nAPI and saved settings\nUses Torn API v2 inventory/item data and includes a dedicated API Access panel for creating, testing, saving or clearing the required key. Favorites, display preferences, protection quantities and cached inventory state are saved locally. Compatible Hub key integration is available; the module also works standalone.\n\nHow to use\nRefresh after inventory changes, search or filter for the item, then review its protection state and retained quantity. Torn API inventory is cached server-side for up to about one hour, so newly purchased items may remain pending even after a manual refresh. The panel shows the snapshot age when the API data is stale. Protection is a local browser safeguard, so review Torn's final sale list before confirming any sale.",
                 "metaUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "name": "Enhancer Guard",
                 "quickActions": [
@@ -1166,17 +1166,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.53",
-                    "date": "2026-09-26",
+                    "version": "1.3.54",
+                    "date": "2026-09-30",
                     "notes": [
-                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+                        "Fixes Enhancer item links so they open Item Market directly in the selected item search instead of only opening the generic market page.",
+                        "Reads Torn API inventory.timestamp and shows a visible stale-cache warning when the inventory snapshot is old, explaining why a newly purchased enhancer can still appear as NOT OWNED.",
+                        "Keeps manual Refresh accurate about Torn server-side inventory caching instead of implying that a refresh can bypass the API cache."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.53",
+                "version": "1.3.54",
                 "detailsRevision": 6,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",

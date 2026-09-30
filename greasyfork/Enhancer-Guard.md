@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.53**
+**v1.3.54**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v1.3.53**
+- Canonical version: **v1.3.54**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -29,12 +29,18 @@
 
 ## Current release note
 
-**v1.3.53 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0**
-- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
-- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
-- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
+**v1.3.54 — Release metadata synchronization**
+- Fixes Enhancer item links so they open Item Market directly in the selected item search instead of only opening the generic market page.
+- Reads Torn API inventory.timestamp and shows a visible stale-cache warning when the inventory snapshot is old, explaining why a newly purchased enhancer can still appear as NOT OWNED.
+- Keeps manual Refresh accurate about Torn server-side inventory caching instead of implying that a refresh can bypass the API cache.
 
 ## Release history / Changelog
+
+
+### v1.3.54 — Inventory cache visibility and direct market search
+- Fixes item links to use `/page.php?sid=ItemMarket#/market/view=search&itemID=...` with item name/type context, so the selected Enhancer opens directly instead of the generic Item Market.
+- Captures `inventory.timestamp` from Torn API v2 and displays the age of stale inventory snapshots.
+- Adds an explicit warning that Torn caches `user/inventory` per category for up to about one hour, so a new purchase may remain marked NOT OWNED even after manual refresh.
 
 
 ### v1.3.53 — Settings Schema v1 and safe automatic migrations
