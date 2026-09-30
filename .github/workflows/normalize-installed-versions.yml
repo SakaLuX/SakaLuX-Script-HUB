@@ -7,6 +7,8 @@ on:
       - 'scripts.json'
       - 'greasyfork/*.md'
       - '.github/scripts/normalize_installed_versions.py'
+      - '.github/scripts/sync_release_doc_headers.py'
+      - '.github/scripts/verify_release_consistency.py'
       - '.github/scripts/fix_standalone_hub_navigation.py'
       - '.github/scripts/ensure_auditor_draggable.py'
       - '.github/scripts/fix_bazaar_smart_pricer_power.py'
@@ -39,17 +41,21 @@ jobs:
         run: python3 .github/scripts/fix_market_intelligence_budget_cap.py
       - name: Normalize module, Hub, NEW and release surfaces
         run: python3 .github/scripts/normalize_installed_versions.py
+      - name: Synchronize release documentation headers
+        run: python3 .github/scripts/sync_release_doc_headers.py
+      - name: Verify release and changelog consistency
+        run: python3 .github/scripts/verify_release_consistency.py
       - name: Validate JavaScript syntax
         run: |
           for f in *.user.js; do node --check "$f"; done
       - name: Commit normalization if needed
         run: |
           if git diff --quiet; then
-            echo "Version and release surfaces already normalized."
+            echo "Version, release and changelog surfaces already synchronized."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A -- '*.user.js' scripts.json greasyfork/*.md
-          git commit -m "Synchronize standalone dock and Hub navigation"
+          git commit -m "Synchronize versions releases and changelogs"
           git push
