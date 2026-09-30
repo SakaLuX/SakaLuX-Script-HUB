@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.30
+// @version      1.2.31
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -646,7 +646,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const V='1.2.30',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+const V='1.2.31',ID='chat-intelligence',API='SakaLuXChatIntelligence';
 const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
 const D={enabled:true,search:true,quickActions:true,contextFavorite:true,contextReply:true,contextCopyId:true,contextCopyName:true,contextProfile:true,contextMute:true,contextAlias:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
 const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
@@ -697,8 +697,36 @@ function chatShell(r,h,c){
  return r;
 }
 function restoreStyle(el,style){if(!el)return;if(style===null||style===undefined||style==='')el.removeAttribute('style');else el.setAttribute('style',style)}
-function commonChatPanel(r,c){const h=findHeader(r,c);if(!h)return r;let n=h;for(let i=0;n&&i<10;i++,n=n.parentElement){if(n===document.body||n===document.documentElement)break;if(n.contains(c)){const q=n.getBoundingClientRect();if(q.width>=220&&q.height>=220&&q.width<=innerWidth*.98)return n}}return r}
-function toggleMax(r,c,b){if(MAX.has(r)){const s=MAX.get(r);restoreStyle(s.panel,s.panelStyle);restoreStyle(r,s.rootStyle);restoreStyle(s.view,s.viewStyle);document.documentElement.classList.remove('slx-chat-max-active');document.body.classList.remove('slx-chat-max-active');MAX.delete(r);b.textContent='⛶';b.title='Maximize';return}const panel=commonChatPanel(r,c),v=viewport(r,c),state={panel,panelStyle:panel.getAttribute('style'),rootStyle:r.getAttribute('style'),view:v,viewStyle:v?.getAttribute('style')??null};MAX.set(r,state);document.documentElement.classList.add('slx-chat-max-active');document.body.classList.add('slx-chat-max-active');const f=(el,k,val)=>el?.style?.setProperty(k,val,'important');f(panel,'position','fixed');f(panel,'left','4vw');f(panel,'right','4vw');f(panel,'top','8dvh');f(panel,'bottom','10dvh');f(panel,'width','auto');f(panel,'height','auto');f(panel,'max-width','92vw');f(panel,'max-height','82dvh');f(panel,'margin','0 auto');f(panel,'transform','none');f(panel,'z-index','2147483600');f(panel,'overflow','hidden');f(panel,'visibility','visible');f(panel,'opacity','1');if(panel!==r){f(r,'width','100%');f(r,'height','100%');f(r,'max-width','none');f(r,'max-height','none')}if(v){f(v,'max-height','none');f(v,'overflow-y','auto')}b.textContent='⤢';b.title='Restore';requestAnimationFrame(()=>{const q=panel.getBoundingClientRect();if(q.width<innerWidth*.65||q.height<innerHeight*.5||q.left<0||q.top<0||q.right>innerWidth+2||q.bottom>innerHeight+2){restoreStyle(panel,state.panelStyle);restoreStyle(r,state.rootStyle);restoreStyle(v,state.viewStyle);MAX.delete(r);document.documentElement.classList.remove('slx-chat-max-active');document.body.classList.remove('slx-chat-max-active');b.textContent='⛶';b.title='Maximize'}})}
+function commonChatPanel(r,c){
+ const h=findHeader(r,c);if(!h)return r;
+ let n=h,best=null;
+ const vw=window.visualViewport?.width||innerWidth,vh=window.visualViewport?.height||innerHeight;
+ for(let i=0;n&&i<12;i++,n=n.parentElement){
+  if(n===document.body||n===document.documentElement)break;
+  if(!n.contains(r)||!n.contains(c))continue;
+  const q=n.getBoundingClientRect();
+  if(q.width<220||q.height<220)continue;
+  if(q.width>vw*.94||q.height>vh*.94)break;
+  best=n;
+ }
+ return best||r
+}
+function toggleMax(r,c,b){
+ if(MAX.has(r)){
+  const s=MAX.get(r);restoreStyle(s.panel,s.panelStyle);restoreStyle(r,s.rootStyle);restoreStyle(s.view,s.viewStyle);restoreStyle(s.composerHost,s.composerStyle);document.documentElement.classList.remove('slx-chat-max-active');document.body.classList.remove('slx-chat-max-active');MAX.delete(r);b.textContent='⛶';b.title='Maximize';setTimeout(()=>c?.focus(),0);return
+ }
+ const panel=commonChatPanel(r,c),v=viewport(r,c),ch=c?.parentElement;
+ const state={panel,panelStyle:panel.getAttribute('style'),rootStyle:r.getAttribute('style'),view:v,viewStyle:v?.getAttribute('style')??null,composerHost:ch,composerStyle:ch?.getAttribute('style')??null};MAX.set(r,state);
+ document.documentElement.classList.add('slx-chat-max-active');document.body.classList.add('slx-chat-max-active');
+ const f=(el,k,val)=>el?.style?.setProperty(k,val,'important');
+ const vv=window.visualViewport,top=Math.max(6,Math.round(vv?.offsetTop||0)+6),left=Math.max(6,Math.round(vv?.offsetLeft||0)+6),vw=Math.round(vv?.width||innerWidth),vh=Math.round(vv?.height||innerHeight);
+ f(panel,'position','fixed');f(panel,'left',left+'px');f(panel,'top',top+'px');f(panel,'right','auto');f(panel,'bottom','auto');f(panel,'width',Math.max(280,vw-12)+'px');f(panel,'height',Math.max(360,vh-12)+'px');f(panel,'max-width','none');f(panel,'max-height','none');f(panel,'min-width','0');f(panel,'min-height','0');f(panel,'margin','0');f(panel,'transform','none');f(panel,'z-index','2147483600');f(panel,'overflow','hidden');f(panel,'display','flex');f(panel,'flex-direction','column');f(panel,'box-sizing','border-box');
+ if(panel!==r){f(r,'position','relative');f(r,'display','flex');f(r,'flex-direction','column');f(r,'flex','1 1 auto');f(r,'width','100%');f(r,'height','auto');f(r,'min-height','0');f(r,'max-width','none');f(r,'max-height','none');f(r,'overflow','hidden')}
+ if(v){f(v,'position','relative');f(v,'flex','1 1 auto');f(v,'height','auto');f(v,'min-height','0');f(v,'max-height','none');f(v,'overflow-y','auto');f(v,'overscroll-behavior','contain')}
+ if(ch){f(ch,'position','relative');f(ch,'flex','0 0 auto');f(ch,'left','auto');f(ch,'right','auto');f(ch,'bottom','auto');f(ch,'width','100%');f(ch,'margin-top','auto')}
+ b.textContent='⤢';b.title='Restore';
+ requestAnimationFrame(()=>{const q=panel.getBoundingClientRect(),ok=q.width>=vw*.88&&q.height>=vh*.80&&q.left>=-2&&q.top>=-2&&q.right<=left+vw+4&&q.bottom<=top+vh+4;if(!ok){restoreStyle(panel,state.panelStyle);restoreStyle(r,state.rootStyle);restoreStyle(v,state.viewStyle);restoreStyle(ch,state.composerStyle);MAX.delete(r);document.documentElement.classList.remove('slx-chat-max-active');document.body.classList.remove('slx-chat-max-active');b.textContent='⛶';b.title='Maximize';return}setTimeout(()=>{try{v?.scrollTo?.({top:v.scrollHeight,behavior:'auto'})}catch{};c?.focus?.()},40)})
+}
 function findHeader(r,c){const rr=r.getBoundingClientRect(),cr=c.getBoundingClientRect();let scope=r;for(let i=0;i<4&&scope.parentElement&&scope.parentElement!==document.body;i++)scope=scope.parentElement;let best=null,bestScore=-1;for(const e of scope.querySelectorAll('header,div,section')){if(e===r||e.closest('.slx-head-controls'))continue;const er=e.getBoundingClientRect();if(er.width<rr.width*.72||er.width>rr.width*1.2||er.height<36||er.height>78)continue;if(er.bottom>cr.top-24)continue;if(er.top<rr.top-120||er.top>rr.top+28)continue;if(Math.abs(er.left-rr.left)>48)continue;if(e.querySelector('textarea,[contenteditable="true"]'))continue;const t=N(e.innerText);if(!t||t.length>140)continue;let s=0;s+=Math.max(0,100-Math.abs(er.width-rr.width));s+=Math.max(0,80-Math.min(Math.abs(er.top-rr.top),Math.abs(er.bottom-rr.top)));s+=Math.max(0,50-Math.abs(er.left-rr.left));if([...e.querySelectorAll('button,[role="button"],a,span,div')].some(x=>/^(—|−|-|_)$/.test(N(x.textContent))))s+=90;if(/^(?:faction|company|global|trade|new players|chat)(?:\s|$)/i.test(t))s+=30;if(s>bestScore){best=e;bestScore=s}}
 return bestScore>=80?best:null}
 function bindButton(b,fn){b.onclick=e=>{e.preventDefault();e.stopPropagation();fn(e.currentTarget)};b.addEventListener('pointerdown',e=>e.stopPropagation(),{passive:true});b.addEventListener('touchstart',e=>e.stopPropagation(),{passive:true})}
@@ -858,7 +886,7 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
   if(!document.body)return;
   let e=document.querySelector('[data-slx-standalone-registration="chat-intelligence"]');
   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','chat-intelligence');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.30'});
+  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.31'});
  };
  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
 })();

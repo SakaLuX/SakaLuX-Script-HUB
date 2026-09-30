@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.30**
+**v1.2.31**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v1.2.30**
+- Canonical version: **v1.2.31**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,10 +24,11 @@
 
 ## Current release note
 
-**v1.2.30 — Named alias color palette**
-- Replaces the free-text hex color prompt with a touch-friendly color picker.
-- Adds Default, Green, Yellow, Red, Blue, White, Black, Orange and Purple.
-- Keeps the selected alias color saved per player and highlights the current choice.
+**v1.2.31 — TornPDA full chat maximize repair**
+- Maximize now selects the outer chat panel that contains the title bar, message root and composer, instead of stopping at the first inner message container.
+- Uses visualViewport dimensions so the maximized panel stays inside the actual TornPDA WebView.
+- The whole chat becomes a fixed flex panel, with the message viewport taking the available space and the composer pinned inside the same panel.
+- Restore returns every touched inline style to its original value.
 
 ## Release history / Changelog
 
