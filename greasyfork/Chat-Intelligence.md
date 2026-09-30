@@ -24,11 +24,8 @@
 
 ## Current release note
 
-**v1.2.26 — Full legacy feature restore, settings repair and reliable fullscreen**
-- Restores every v1.1.0 context action: Favorite, Reply, Copy ID, Copy Name, Profile, Local Mute and Alias + color.
-- Makes each context action individually configurable and repairs Search, Export and @mention setting side effects.
-- Rebuilds fullscreen around the real common chat shell and forces TornPDA-safe viewport sizing with reversible styles.
-- Adds working clear/reset controls and immediate settings application.
+**v1.2.26 — Release documentation synchronized with the current Chat Intelligence userscript version**
+- Release documentation synchronized with the current Chat Intelligence userscript version.
 
 ## Release history / Changelog
 

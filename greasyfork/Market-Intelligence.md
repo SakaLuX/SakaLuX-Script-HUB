@@ -32,10 +32,11 @@
 
 ## Current release note
 
-**v1.17.54 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0**
-- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
-- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
-- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
+**v1.17.55 — Performance update for Travel/TornPDA**
+- Performance update for Travel/TornPDA.
+- Caches and deduplicates the full YATA travel export for 60 seconds.
+- Throttles passive Travel scans by lifecycle state instead of allowing repeated heavy scans every few seconds.
+- Keeps forced scans immediate for navigation, manual refreshes and meaningful landed-stock changes.
 
 ## Release history / Changelog
 

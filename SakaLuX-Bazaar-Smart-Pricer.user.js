@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.13
+// @version      1.1.14
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -632,7 +632,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.1.13';
+  let v = '1.1.14';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -970,7 +970,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"}, { version: "1.1.13" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"}, { version: "1.1.14" }));
   const API_GLOBAL = "SakaLuXBazaarSmartPricer";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1042,9 +1042,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
     console.log(`[SakaLuXBazaarSmartPricer] v${VERSION} Starting (PDA optimized)...`);
 
-    if (GM_getValue('pricingModelVersion', '') !== 'market-value-city-floor-v1') {
+    if (GM_getValue('pricingModelVersion', '') !== 'market-value-city-sell-floor-v2') {
         GM_setValue('priceCache', {});
-        GM_setValue('pricingModelVersion', 'market-value-city-floor-v1');
+        GM_setValue('pricingModelVersion', 'market-value-city-sell-floor-v2');
     }
 
     // =====================================================================
@@ -1919,7 +1919,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                         <div class="qp-toggle-row">
                             <div>
                                 <span class="qp-toggle-row__name">Torn City shop floor</span>
-                                <div class="qp-toggle-row__desc">Never price below Torn City shop buy price</div>
+                                <div class="qp-toggle-row__desc">Never price below Torn City shop sell price</div>
                             </div>
                             <label class="qp-toggle">
                                 <input type="checkbox" id="qpNpcCheck" ${!CONFIG.disableNpcCheck ? 'checked' : ''} />
@@ -2209,7 +2209,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         // include transient/outlier listings and produced wrong bulk prices.
         const referencePrice = Number(marketValue) || 0;
         let finalPrice = Math.round(referencePrice * multiplier);
-        const cityShopFloor = Number(buyPrice) > 0 ? Number(buyPrice) : (Number(sellPrice) || 0);
+        const cityShopFloor = Number(sellPrice) || 0;
         if (!CONFIG.disableNpcCheck && cityShopFloor > 0 && finalPrice < cityShopFloor) {
             log(`Price ${finalPrice} below Torn City shop price ${cityShopFloor}, adjusting...`);
             finalPrice = cityShopFloor;
@@ -2359,7 +2359,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 priceInput.value = newPrice;
                 priceInput.dispatchEvent(new Event('input', { bubbles: true }));
                 priceInput.dispatchEvent(new Event('change', { bubbles: true }));
-                const cityFloor=(buyPrice>0?buyPrice:sellPrice); const borderColor = (cityFloor > 0 && newPrice === cityFloor) ? '#f0a35e' : '#4f8fe8';
+                const cityFloor=Number(sellPrice)||0; const borderColor = (cityFloor > 0 && newPrice === cityFloor) ? '#f0a35e' : '#4f8fe8';
                 priceInput.style.border = `2px solid ${borderColor}`;
                     setTimeout(() => priceInput.style.border = '', 1000);
                     resolve('updated');

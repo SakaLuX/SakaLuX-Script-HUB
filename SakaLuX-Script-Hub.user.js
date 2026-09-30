@@ -670,6 +670,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.90", "date": "2026-09-30", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.89", "date": "2026-09-26", "changes": ["Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.", "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.", "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."]},
         {"version": "1.9.88", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.87", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
@@ -1271,9 +1272,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
                 "detailsRevision": 27,
-                "version": "1.1.13",
+                "version": "1.1.14",
                 "release": {
-                    "version": "1.1.13",
+                    "version": "1.1.14",
                     "date": "2026-09-26",
                     "notes": [
                         "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
@@ -1391,18 +1392,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.54",
-                    "date": "2026-09-26",
+                    "version": "1.17.55",
+                    "date": "2026-09-28",
                     "notes": [
-                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+                        "Performance update for Travel/TornPDA.",
+                        "Caches and deduplicates the full YATA travel export for 60 seconds.",
+                        "Throttles passive Travel scans by lifecycle state instead of allowing repeated heavy scans every few seconds.",
+                        "Keeps forced scans immediate for navigation, manual refreshes and meaningful landed-stock changes."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.54",
-                "detailsRevision": 13,
+                "version": "1.17.55",
+                "detailsRevision": 14,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

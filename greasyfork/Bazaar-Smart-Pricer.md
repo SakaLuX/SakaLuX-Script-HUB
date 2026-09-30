@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.13**
+**v1.1.14**
 
 ## Repository synchronization
 
@@ -39,13 +39,19 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.13 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0**
+**v1.1.14 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0**
 - Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
 - Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
 - Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ## Release history / Changelog
 
+
+
+### v1.1.14 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0
+- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
+- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
+- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
 
 ### v1.1.13 — Settings Schema v1 and safe automatic migrations
 - Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.

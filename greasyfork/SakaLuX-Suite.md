@@ -60,95 +60,17 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.943 — Release documentation synchronized with the current Suite userscript version**
+**v0.9.958 — Release documentation synchronized with the current Suite userscript version**
 - Release documentation synchronized with the current Suite userscript version.
-
-### v0.9.947 — Stable UI: complete modules + truthful status + Graffiti
-- Keeps the original compact Suite card design from v0.9.943; no replacement card theme or oversized module layout.
-- Shows all 10 managed SakaLuX standalone modules, adding any missing card by cloning the native Suite card structure.
-- Live status is truthful: `NOT INSTALLED`, `INSTALLED · OFF`, `READY · ON`, or `INSTALLED · UNKNOWN`; duplicate stale `NOT READY` labels are suppressed.
-- Settings and switches are rebound to each standalone public API/bridge so Hub/Suite state follows the actual script state.
-- Replaces the broken Graffiti DOM detection with visible-zone detection for TornPDA and shows REP/CASH recommendations plus next reputation tier without changing the Torn card layout.
-
-### v0.9.948 — Native bridge module controls
-- Uses each standalone module hidden `sakalux-module-bridge-*` as the authoritative control/status channel.
-- Installed detection now reads the canonical installed-version attribute value instead of incorrectly expecting `1`.
-- Settings sends the bridge `open` action; ON/OFF sends explicit `on` / `off` actions, so controls no longer only change Suite-local state.
-- Module cards no longer toggle when tapping the title/description/background.
-- Status badges now reflect the live bridge state: `NOT INSTALLED`, `INSTALLED · OFF`, `READY · ON`, or `INSTALLED · UNKNOWN`.
-- Suppresses stale legacy `READY` / `NOT READY` decorations without changing the compact Suite card layout.
-
-### v0.9.949 — Complete managed module list
-- Guarantees all 10 managed standalone cards are present in Master Control on every render.
-- Restores missing Bazaar Smart Pricer by cloning the native compact Suite card structure instead of introducing a new layout.
-- Keeps canonical order: Enhancer Guard, Bazaar Thanker, Bazaar Smart Pricer, Mission Rewards, Market Intelligence, Elimination Assistant, Company Intelligence, Chat Intelligence, Stock Manager & Advisor, Account Auditor.
-- Leaves v0.9.948 live status, Settings and ON/OFF bridge handling in control of each card after creation.
-
-### v0.9.950 — Alphabetical active-first module order
-- Enabled/ON modules are shown first and sorted A–Z.
-- Disabled/OFF modules automatically move to the bottom and are sorted A–Z there.
-- The order refreshes immediately after ON/OFF changes and remains consistent between Hub and Suite/standalone module control.
-
-### v0.9.951 — Rebuilt Graffiti Spray Guide
-- Rebuilds Graffiti integration from the two requested MIT helpers instead of extending the broken experimental DOM layer.
-- Uses the mobile/TornPDA-first inline recommendation presentation as the primary behavior and adds advanced REP tier progress, CS gates, enhancer, nerve/attempts, unique outcomes, stock percentage warnings and BOTH/REP/CASH modes.
-- Detects all seven Graffiti locations by visible title and image fallback, avoiding dependence on Torn's generated CSS class names.
-- Removes the previous v0.9.941 Graffiti renderer to prevent duplicate observers and conflicting UI.
-- Remains read-only: no API requests and no gameplay automation.
-
-### v0.9.952 — Graffiti module activation + exact Torn selectors
-- Adds Graffiti Spray Guide as a real built-in Master Control module with ON/OFF state.
-- Uses the working helper's Crimes 2.0 selectors (`crimeOption___`, `tabletTitleAndTagCount`, `tagsCount`, `sprayCanButton[aria-label]`) before fallbacks.
-- Keeps the module enabled by default, so no separate activation is required after updating.
-- Settings enables the module and opens Crimes → Graffiti.
-- Keeps the existing compact Suite card style and the combined REP/CASH/progress/warning logic from v0.9.951.
-
-### v0.9.953 — Native Crimes tab + Graffiti module
-- Adds a dedicated **Crimes** tab in Master Control.
-- Moves Target Alerts from Lists to Crimes.
-- Makes Graffiti Spray Guide a native Suite module in Crimes with only an ON/OFF switch: no Settings button and no Ready badge.
-- Replaces the appended Graffiti experiment with the working helper DOM contract: crimeOption/card image, tagsCount, Reputation aria-label and sprayCanButton aria-label.
-- Keeps BOTH / REP / CASH hints, reputation tier progress, CS/enhancer/nerve/unique summary and <=15% / no-spare warnings.
-
-### v0.9.954 — Graffiti primary-helper UI + Target Alerts back to Lists
-- Moves **Target Alerts** back to **Lists**.
-- Keeps **Graffiti Spray Guide** under **Crimes** as a built-in Suite module with ON/OFF only (no Settings, no Ready badge).
-- Rebuilds Graffiti presentation around the primary Torchin helper concept: compact per-zone **REP** and **CASH** best-colour hints instead of the BOTH/REP/CASH mode bar.
-- Adds only the useful secondary-helper cue: the currently selected spray is marked `✓ REP`, `✓ CASH`, or `✓ REP + CASH` when it matches the recommended colour.
-- Removes the large CS/enhancer/nerve/uniques strip and tag-progress overlays that were obscuring zone names on TornPDA.
-- Uses the same seven-zone colour guidance documented by the Torn Graffiti guide.
-
-### v0.9.955 — Professional Graffiti Advisor
-- Reworks Graffiti into a compact, non-overlapping advisor designed for TornPDA.
-- Keeps the primary helper's best REP/CASH colour recommendations for all seven zones.
-- Uses colour swatches plus concise `★ REP` / `$ CASH` chips instead of extra text rows, so Torn's zone names and controls remain visible.
-- Highlights the recommendation when the currently selected spray matches and adds a compact `LOW xx%` warning at 15% or less.
-- Removes the extra selected-colour pill, large summary bars, progress overlays and mode controls.
-- Remains read-only with no API calls or gameplay automation.
-
-### v0.9.956 — Graffiti selected-spray + low-percent reliability
-- Moves Graffiti recommendations onto the spray control itself so Torn's reputation stars remain fully visible.
-- Makes selected spray detection tolerant of TornPDA label/text/image variants instead of relying on one exact aria-label sentence.
-- Correctly marks the matching REP/CASH recommendation with a green check.
-- Detects the visible remaining percentage as a fallback and highlights Torn's own percentage display at 15% or below instead of adding another overlapping warning row.
-- Keeps the advisor compact and read-only.
-
-### v0.9.957 — Graffiti selected-spray false-check fix
-- Fixes false green checkmarks when the equipped spray is not the recommended colour.
-- Selected-spray detection no longer reads text from the injected SakaLuX recommendation overlay, preventing REP/CASH labels from being mistaken for Torn's equipped colour.
-- Prefers Torn's native spray `aria-label`, then native image/title/alt/src metadata; if the colour cannot be confirmed, no checkmark is shown.
-- Keeps low-percentage detection and the seven-zone REP/CASH recommendation mapping unchanged.
-
-### v0.9.958 — Strict Graffiti selected-spray matching
-- Removes heuristic colour detection for the equipped spray.
-- A REP/CASH recommendation is marked as matched only when Torn itself exposes an aria-label that explicitly says the spray is selected/equipped/current/in use and contains the colour.
-- If TornPDA does not expose a trustworthy selected-colour signal, no green checkmark is shown instead of guessing.
-- Remaining paint percentage detection stays active independently.
 
 ## Release history / Changelog
 
 
 
+
+
+### v0.9.958 — Release documentation synchronized with the current Suite userscript version
+- Release documentation synchronized with the current Suite userscript version.
 
 ### v0.9.943 — Release documentation synchronized with the current Suite userscript version
 - Release documentation synchronized with the current Suite userscript version.
