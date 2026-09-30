@@ -51,6 +51,40 @@ def source_path(url: str):
     return ROOT / unquote(Path(urlparse(url).path).name)
 
 
+def audit_changelog_depth(text: str, label: str):
+    heading = re.search(r'(?im)^##\s+Release history\s*/\s*Changelog\s*$', text)
+    if not heading:
+        return
+    history = text[heading.end():]
+    matches = list(re.finditer(r'(?im)^###\s+v?([0-9]+(?:\.[0-9]+){1,3})\s*(?:[—-]\s*(.*?))?\s*$', history))
+    if not matches:
+        fail(f'{label}: changelog contains no version entries')
+        return
+
+    seen = set()
+    for i, m in enumerate(matches):
+        version = m.group(1).strip()
+        title = (m.group(2) or '').strip()
+        body_start = m.end()
+        body_end = matches[i + 1].start() if i + 1 < len(matches) else len(history)
+        body = history[body_start:body_end]
+        bullets = [x.strip() for x in re.findall(r'(?m)^-\s+(.+?)\s*$', body) if x.strip()]
+
+        if version in seen:
+            fail(f'{label}: duplicate changelog entry v{version}')
+        seen.add(version)
+        if not title:
+            fail(f'{label}: v{version} has no descriptive changelog title')
+        if not bullets:
+            fail(f'{label}: v{version} has no detail bullets')
+            continue
+        if any(len(x) < 12 for x in bullets):
+            fail(f'{label}: v{version} contains an overly short detail bullet')
+        generic = [x for x in bullets if re.fullmatch(r'(?i)(release|update|bug fixes?|improvements?|release metadata synchronization)\.?', x)]
+        if generic:
+            fail(f'{label}: v{version} contains generic placeholder details instead of specific changes')
+
+
 def check_doc(path: Path, version: str, label: str):
     if not path.exists():
         fail(f'{label}: missing release doc {path.relative_to(ROOT)}')
@@ -69,13 +103,19 @@ def check_doc(path: Path, version: str, label: str):
     release = re.search(r'(?is)##\s+Current release note\b(.*?)(?=\n##\s|\Z)', text)
     if not release:
         fail(f'{label}: missing Current release note')
-    elif not re.search(rf'\*\*v?{re.escape(version)}(?:\s|—|-)', release.group(1)):
-        fail(f'{label}: Current release note is not for v{version}')
+    else:
+        block = release.group(1)
+        if not re.search(rf'\*\*v?{re.escape(version)}(?:\s|—|-)', block):
+            fail(f'{label}: Current release note is not for v{version}')
+        if not re.search(r'(?m)^-\s+\S.+$', block):
+            fail(f'{label}: Current release note has no detail bullets')
 
     if not re.search(r'(?im)^##\s+Release history\s*/\s*Changelog\s*$', text):
         fail(f'{label}: missing Release history / Changelog heading')
     elif not re.search(rf'(?im)^###\s+v?{re.escape(version)}(?:\s|—|-|$)', text):
         fail(f'{label}: changelog has no v{version} entry')
+
+    audit_changelog_depth(text, label)
 
 
 registry = json.loads(REGISTRY.read_text(encoding='utf-8'))
@@ -121,9 +161,6 @@ for src_name, doc_name, label in STANDALONE_DOCS:
         checked.append(f'{label} v{version}')
         check_doc(ROOT / doc_name, version, label)
 
-# Every root SakaLuX userscript must at least have a valid version. If it is not
-# represented by scripts.json or the standalone release-doc list, report it so a
-# newly added script cannot silently escape release coverage.
 covered = registry_sources | {x[0] for x in STANDALONE_DOCS}
 for src in sorted(ROOT.glob('SakaLuX*.user.js')):
     version = header_version(src)
@@ -140,4 +177,4 @@ if errors:
     for item in errors:
         print('  FAIL', item, file=sys.stderr)
     sys.exit(1)
-print(f'PASS: {len(checked)} release surfaces are version/changelog consistent.')
+print(f'PASS: {len(checked)} release surfaces are version/changelog consistent, including detailed history entries.')
