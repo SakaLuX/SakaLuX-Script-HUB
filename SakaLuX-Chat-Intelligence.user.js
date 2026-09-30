@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.31
+// @version      1.2.32
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -646,7 +646,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const V='1.2.31',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+const V='1.2.32',ID='chat-intelligence',API='SakaLuXChatIntelligence';
 const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
 const D={enabled:true,search:true,quickActions:true,contextFavorite:true,contextReply:true,contextCopyId:true,contextCopyName:true,contextProfile:true,contextMute:true,contextAlias:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
 const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
@@ -674,16 +674,35 @@ function allow(r){const c=chan(r);return c==='faction'?S.notifyFaction:c==='comp
 function rememberMessage(k){SEEN.add(k);if(SEEN.size>4096)SEEN.delete(SEEN.values().next().value)}
 function toast(r,t,b,k){if(!S.notifications||SEEN.has(k))return;rememberMessage(k);let h=r.querySelector(':scope>.slx-toast-host');if(!h){h=document.createElement('div');h.className='slx-toast-host';r.appendChild(h)}const e=document.createElement('div');e.className='slx-toast';e.innerHTML='<b>'+t.replace(/[<>]/g,'')+'</b><span>'+b.replace(/[<>]/g,'').slice(0,150)+'</span>';h.appendChild(e);setTimeout(()=>{e.remove();if(!h.childElementCount)h.remove()},2800)}
 function exportMessages(r,q=''){const s=N(q).toLowerCase(),rows=msgs(r).filter(e=>{const p=who(e);return !s||body(e,p).toLowerCase().includes(s)||dn(p).toLowerCase().includes(s)}).map(e=>{const p=who(e);return dn(p)+(p.id?' ['+p.id+']':'')+': '+body(e,p)}),blob=new Blob([rows.join('\n')],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='SakaLuX-chat-'+Date.now()+'.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),500)}
-function closeSearch(reset=true){document.querySelectorAll('.slx-search').forEach(p=>{if(reset&&p._root)msgs(p._root).forEach(e=>e.style.removeProperty('display'));p.remove()})}
+function closeSearch(reset=true){
+ document.querySelectorAll('.slx-search').forEach(p=>{
+  // Cleanup any stale display:none left by older builds.
+  if(p._root)msgs(p._root).forEach(e=>e.style.removeProperty('display'));
+  p.remove()
+ })
+}
 function searchBox(r){
- if(!S.search)return;closeSearch(false);
+ if(!S.search)return;closeSearch(true);
  const p=document.createElement('div');p.className='slx-search';p._root=r;
- p.innerHTML='<div class="slx-search-title"><span>Search chat</span><button data-c>×</button></div><div class="slx-search-row"><input type="search" placeholder="Name or message…"><span data-count>0</span><button data-e title="Export results">⇩</button></div>';
+ p.innerHTML='<div class="slx-search-title"><span>Search chat</span><button data-c>×</button></div><div class="slx-search-row"><input type="search" placeholder="Name or message…"><span data-count>0/0</span><button data-e title="Export results">⇩</button></div><div class="slx-search-results"></div>';
  document.body.appendChild(p);
- const place=()=>{const rr=r.getBoundingClientRect(),w=Math.min(Math.max(280,rr.width-16),innerWidth-16);p.style.width=w+'px';p.style.left=Math.max(8,Math.min(innerWidth-w-8,rr.left+8))+'px';p.style.top=Math.max(8,Math.min(innerHeight-p.offsetHeight-8,rr.top+44))+'px'};p._place=place;
- const i=p.querySelector('input'),n=p.querySelector('[data-count]'),ex=p.querySelector('[data-e]');ex.hidden=!S.exportSearch;
- const run=()=>{const q=N(i.value).toLowerCase(),m=msgs(r);let z=0;m.forEach(e=>{const pl=who(e),txt=N(e.innerText||e.textContent).toLowerCase(),hit=!q||txt.includes(q)||dn(pl).toLowerCase().includes(q);e.style.setProperty('display',hit?'':'none','important');if(hit)z++});n.textContent=z+'/'+m.length;n.title=m.length?'Detected message rows':'No message rows detected'};
- i.addEventListener('input',run);i.addEventListener('search',run);p.querySelector('[data-c]').onclick=()=>{i.value='';run();closeSearch(true)};ex.onclick=()=>{if(S.exportSearch)exportMessages(r,i.value)};place();run();setTimeout(()=>i.focus(),0)
+ const place=()=>{const rr=r.getBoundingClientRect(),w=Math.min(Math.max(290,rr.width-16),innerWidth-16);p.style.width=w+'px';p.style.left=Math.max(8,Math.min(innerWidth-w-8,rr.left+8))+'px';p.style.top=Math.max(8,Math.min(innerHeight-p.offsetHeight-8,rr.top+44))+'px'};p._place=place;
+ const i=p.querySelector('input'),n=p.querySelector('[data-count]'),ex=p.querySelector('[data-e]'),box=p.querySelector('.slx-search-results');ex.hidden=!S.exportSearch;
+ const render=()=>{
+  const q=N(i.value).toLowerCase(),all=msgs(r),hits=all.filter(e=>{const pl=who(e),txt=N(e.innerText||e.textContent).toLowerCase();return !q||txt.includes(q)||dn(pl).toLowerCase().includes(q)});
+  n.textContent=hits.length+'/'+all.length;box.textContent='';
+  if(!q){const hint=document.createElement('div');hint.className='slx-search-empty';hint.textContent='Type to search loaded chat messages.';box.appendChild(hint);place();return}
+  if(!hits.length){const z=document.createElement('div');z.className='slx-search-empty';z.textContent='No matching messages.';box.appendChild(z);place();return}
+  hits.slice(0,80).forEach(e=>{
+   const pl=who(e),row=document.createElement('button');row.type='button';row.className='slx-search-result';
+   const name=document.createElement('b');name.textContent=dn(pl)||pl.name||'Message';
+   const body=document.createElement('span');let raw=N(e.innerText||e.textContent);if(pl.name&&raw.toLowerCase().startsWith(pl.name.toLowerCase()))raw=raw.slice(pl.name.length).replace(/^\s*:\s*/,'');body.textContent=raw;
+   row.append(name,body);row.onclick=()=>{closeSearch(true);try{e.scrollIntoView({behavior:'smooth',block:'center'});e.animate?.([{outline:'2px solid #4aa3ff'},{outline:'0 solid transparent'}],{duration:1200})}catch{}};box.appendChild(row)
+  });
+  if(hits.length>80){const more=document.createElement('div');more.className='slx-search-empty';more.textContent='Showing first 80 of '+hits.length+' results.';box.appendChild(more)}
+  place()
+ };
+ i.addEventListener('input',render);i.addEventListener('search',render);p.querySelector('[data-c]').onclick=()=>closeSearch(true);ex.onclick=()=>{if(S.exportSearch)exportMessages(r,i.value)};render();place();setTimeout(()=>i.focus(),0)
 }
 function viewport(r,c){const m=msgs(r);if(!m.length)return null;let best=null,bestScore=-1;for(let n=m[0].parentElement;n&&n!==r;n=n.parentElement){const rr=n.getBoundingClientRect(),cs=getComputedStyle(n),scroll=n.scrollHeight>n.clientHeight+8||['auto','scroll'].includes(cs.overflowY),score=(scroll?1000:0)+rr.width*rr.height-(n.contains(c)?1e8:0);if(rr.width>180&&rr.height>80&&score>bestScore){best=n;bestScore=score}}return best}
 function chatShell(r,h,c){
@@ -796,6 +815,7 @@ body .slx-head-controls[data-sakalux-chat-controls="1"]{position:absolute!import
 .slx-msg-actions{position:relative!important;display:inline-flex!important;vertical-align:middle!important;align-items:center!important;justify-content:center!important;width:24px!important;height:24px!important;min-width:24px!important;margin:0 0 0 5px!important;padding:0!important;border:1px solid rgba(255,255,255,.20)!important;border-radius:6px!important;background:#313a43!important;color:#fff!important;font-size:17px!important;line-height:1!important;z-index:2147483000!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;box-shadow:0 1px 3px #0008!important}.slx-chat-max-active{overflow:hidden!important}
 .slx-toast-host{position:absolute!important;top:44px!important;right:8px!important;z-index:65!important;width:min(300px,calc(100% - 16px))!important;pointer-events:none!important}.slx-toast{margin-bottom:5px!important;padding:8px!important;border:1px solid #465462!important;border-radius:6px!important;background:#20262cf2!important;color:#eee!important}.slx-toast b,.slx-toast span{display:block!important}.slx-toast span{font-size:10px!important;color:#aaa!important}
 #slx-color-picker{position:fixed!important;inset:0!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:16px!important;background:#000b!important;box-sizing:border-box!important}#slx-color-picker>section{width:min(390px,94vw)!important;max-height:82dvh!important;overflow:hidden!important;border:1px solid #485563!important;border-radius:14px!important;background:#171c21!important;color:#eee!important;box-shadow:0 16px 44px #000c!important}#slx-color-picker header{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:12px 14px!important;background:#242b32!important;font-size:15px!important}#slx-color-picker header button{width:34px!important;height:34px!important;border:0!important;border-radius:8px!important;background:#303840!important;color:#fff!important;font-size:20px!important}#slx-color-picker main{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:12px!important;overflow:auto!important}.slx-color-choice{display:grid!important;grid-template-columns:28px 1fr 20px!important;align-items:center!important;gap:9px!important;min-height:44px!important;padding:7px 9px!important;border:1px solid #3d4854!important;border-radius:9px!important;background:#20272e!important;color:#f1f5f9!important;text-align:left!important;font-weight:700!important}.slx-color-choice:active{background:#2b343d!important}.slx-color-swatch{width:26px!important;height:26px!important;border:2px solid rgba(255,255,255,.55)!important;border-radius:50%!important;box-shadow:0 0 0 1px #0008 inset!important}.slx-color-check{text-align:center!important;color:#6ee7b7!important;font-size:17px!important}#slx-color-picker footer{padding:0 12px 12px!important}#slx-color-picker footer button{width:100%!important;min-height:38px!important;border:1px solid #465462!important;border-radius:8px!important;background:#303840!important;color:#eee!important;font-weight:700!important}@media(max-width:420px){#slx-color-picker main{grid-template-columns:1fr 1fr!important;gap:6px!important;padding:9px!important}.slx-color-choice{min-height:40px!important;padding:6px!important;font-size:12px!important}}
+.slx-search-results{display:flex!important;flex-direction:column!important;gap:6px!important;max-height:min(48dvh,420px)!important;overflow-y:auto!important;padding:8px!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#151b20!important}.slx-search-result{display:flex!important;flex-direction:column!important;align-items:flex-start!important;width:100%!important;min-height:0!important;padding:8px 10px!important;border:1px solid #394652!important;border-radius:8px!important;background:#202830!important;color:#e9eef3!important;text-align:left!important;box-sizing:border-box!important;white-space:normal!important}.slx-search-result b{font-size:13px!important;line-height:1.25!important;color:#fff!important}.slx-search-result span{display:block!important;margin-top:2px!important;font-size:12px!important;line-height:1.3!important;color:#c5ced7!important;overflow-wrap:anywhere!important}.slx-search-result:active{background:#2a3540!important}.slx-search-empty{padding:12px 8px!important;color:#9aa5b1!important;font-size:12px!important;text-align:center!important}
 #slx-menu{position:fixed!important;z-index:2147483646!important;display:flex!important;gap:3px!important;padding:4px!important;border:1px solid #485563!important;border-radius:6px!important;background:#20262c!important;opacity:0!important;visibility:hidden!important}#slx-menu.show{opacity:1!important;visibility:visible!important}#slx-menu button{min-width:31px!important;height:28px!important;border:1px solid #4a5662!important;border-radius:4px!important;background:#303840!important;color:#eee!important}.slx-mentions{position:absolute!important;left:4px!important;right:4px!important;bottom:42px!important;z-index:2147483200!important;max-height:160px!important;overflow:auto!important;padding:4px!important;background:#20262c!important}.slx-mentions button{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;width:100%!important;padding:7px!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.06)!important;background:transparent!important;color:#eee!important;text-align:left!important}.slx-mentions small{color:#8fa3ba!important;font-size:10px!important}.slx-settings-actions{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin-top:8px!important}.slx-settings-actions button{flex:1 1 145px!important;min-height:34px!important;padding:7px 9px!important;background:#1a2634!important;color:#fff!important;border:1px solid #3a4c62!important;border-radius:8px!important}#sakalux-chat-settings-overlay footer{text-align:center!important;padding:8px!important;color:#8fa3ba!important}#sakalux-chat-settings-overlay h3{margin:10px 2px 7px!important;font-size:12px!important;color:#9fb7d0!important;text-transform:uppercase!important;letter-spacing:.5px!important}
 #sakalux-chat-settings-overlay{position:fixed!important;inset:0!important;z-index:2147483647!important;display:flex!important;align-items:flex-end!important;background:#000b!important}#sakalux-chat-settings-overlay section{width:100%!important;background:#171c21!important;color:#eee!important}#sakalux-chat-settings-overlay header{display:flex!important;justify-content:space-between!important;padding:11px!important;background:#242b32!important}#sakalux-chat-settings-overlay main{padding:8px!important}#sakalux-chat-settings-overlay label{display:flex!important;justify-content:space-between!important;padding:8px!important;margin-bottom:5px!important;border:1px solid #39434d!important}
 `;document.head.appendChild(s)}
@@ -886,7 +906,7 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
   if(!document.body)return;
   let e=document.querySelector('[data-slx-standalone-registration="chat-intelligence"]');
   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','chat-intelligence');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.31'});
+  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.32'});
  };
  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
 })();
