@@ -24,21 +24,35 @@ if MARKER not in s:
         raise SystemExit('getSharedApiKey anchor not found')
     s = s.replace(old_key, new_key, 1)
 
-    old_profile_url = '''        const url =\n            `https://api.torn.com/user/` +\n            `${encodeURIComponent(id)}` +\n            `?selections=profile` +\n            `&key=${encodeURIComponent(apiKey)}`;'''
-    new_profile_url = '''        const url =\n            `https://api.torn.com/v2/user/` +\n            `${encodeURIComponent(id)}/profile` +\n            `?striptags=true` +\n            `&key=${encodeURIComponent(apiKey)}`;'''
-    if old_profile_url not in s:
-        raise SystemExit('profile API URL anchor not found')
-    s = s.replace(old_profile_url, new_profile_url, 1)
+    # Replace the legacy v1 user profile call inside requestUserProfileImage with
+    # the stable v2 /user/{id}/profile endpoint. Do this with a scoped regex so
+    # formatting differences do not make the release normalizer brittle.
+    profile_fn = re.search(r'(?s)(function\s+requestUserProfileImage\s*\([^)]*\)\s*\{.*?)(?=\n\s*function\s+|\n\s*async\s+function\s+)', s)
+    if not profile_fn:
+        raise SystemExit('requestUserProfileImage function not found')
+    block = profile_fn.group(1)
+    changed = block
+    changed = changed.replace('https://api.torn.com/user/', 'https://api.torn.com/v2/user/')
+    changed = re.sub(
+        r'(`\$\{encodeURIComponent\(id\)\}`\s*\+)\s*`\?selections=profile`',
+        r'`${encodeURIComponent(id)}/profile` +\n            `?striptags=true`',
+        changed,
+        count=1,
+    )
+    # Handle one-line/template formatting as a fallback.
+    changed = changed.replace('${encodeURIComponent(id)}` +\n            `?selections=profile', '${encodeURIComponent(id)}/profile` +\n            `?striptags=true')
+    if changed == block or '/profile' not in changed or 'api.torn.com/v2/user/' not in changed:
+        raise SystemExit('Could not convert profile request to v2')
+    s = s[:profile_fn.start(1)] + changed + s[profile_fn.end(1):]
 
-    old_profile_parse = '''          const profileImage =\n              data?.profile_image ||\n              data?.profile?.profile_image ||\n              \"\";\n          resolve(typeof profileImage === \"string\" ? profileImage : \"\");'''
-    new_profile_parse = '''          const profileImage =\n              data?.profile?.image ||\n              data?.image ||\n              data?.profile_image ||\n              data?.profile?.profile_image ||\n              \"\";\n          resolve(typeof profileImage === \"string\" ? profileImage : \"\");'''
-    if old_profile_parse not in s:
+    # v2 profile response is wrapped in { profile: ... } and exposes image.
+    parse_pat = re.compile(r'(?s)const\s+profileImage\s*=\s*(.*?);\s*resolve\(typeof\s+profileImage\s*===\s*[\"\']string[\"\']\s*\?\s*profileImage\s*:\s*[\"\'][\"\']\);')
+    pm = parse_pat.search(s)
+    if not pm:
         raise SystemExit('profile image parser anchor not found')
-    s = s.replace(old_profile_parse, new_profile_parse, 1)
+    replacement = '''const profileImage =\n              data?.profile?.image ||\n              data?.image ||\n              data?.profile_image ||\n              data?.profile?.profile_image ||\n              \"\";\n          resolve(typeof profileImage === \"string\" ? profileImage : \"\");'''
+    s = s[:pm.start()] + replacement + s[pm.end():]
 
-    # The current v2 list schema already contains status and last_action. Keep the
-    # parser, but make it tolerant of a wrapped list item in case transport helpers
-    # return a future nested shape.
     old_status = '''    function readApiListStatuses(entry) {\n        return {\n            activity: normaliseState(entry?.last_action?.status),\n            state: normaliseState(entry?.status?.state)\n        };\n    }'''
     new_status = '''    function readApiListStatuses(entry) {\n        const row = entry?.user || entry?.profile || entry || {};\n        return {\n            activity: normaliseState(row?.last_action?.status),\n            state: normaliseState(row?.status?.state)\n        };\n    }'''
     if old_status not in s:
