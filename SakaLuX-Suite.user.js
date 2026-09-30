@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.965
+// @version      0.9.966
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10991,6 +10991,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
 /* SakaLuX Target Alerts Mobile Width v0.9.962 */
 /* SakaLuX Target Alerts Controls+Status v0.9.963 */
 /* SakaLuX Target Alerts Refresh Guard v0.9.965 */
+/* SakaLuX Target Alerts Async Repaint v0.9.966 */
 /* SakaLuX Target Alerts Controls Freeze Fix v0.9.964 */
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
@@ -15496,12 +15497,12 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         }
         return row;
     }
-    function renderPeopleListPanel(type, host = null) {
+    function renderPeopleListPanel(type, host = null, force = false) {
         const refreshGuardHost = host || document.getElementById("people_panel");
         if (refreshGuardHost) {
             const now = Date.now();
             const last = Number(refreshGuardHost.dataset.sakaluxTargetLastRender || 0);
-            if (last && now - last < 1200) return;
+            if (!force && last && now - last < 1200) return;
             refreshGuardHost.dataset.sakaluxTargetLastRender = String(now);
         }
         if (
@@ -15641,9 +15642,15 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         const avatarHydrateAt = Number(panel.dataset.sakaluxAvatarHydrateAt || 0);
         if (!avatarHydrateAt || Date.now() - avatarHydrateAt > 60000) {
             panel.dataset.sakaluxAvatarHydrateAt = String(Date.now());
-            hydrateMissingAvatars(type).catch(error => {
-                console.warn(`[${SCRIPT_NAME}] Could not hydrate ${type} avatars.`, error);
-            });
+            hydrateMissingAvatars(type)
+                .then(() => {
+                    if (activePeopleListType === type && document.contains(panel)) {
+                        renderPeopleListPanel(type, host, true);
+                    }
+                })
+                .catch(error => {
+                    console.warn(`[${SCRIPT_NAME}] Could not hydrate ${type} avatars.`, error);
+                });
         }
 
         // If the saved list has no live states yet, request a fresh API baseline.
@@ -15662,6 +15669,11 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             panel.dataset.sakaluxLiveStatusAt = String(Date.now());
             setTimeout(() => {
                 pollAllLists(true)
+                    .then(() => {
+                        if (activePeopleListType === type && document.contains(panel)) {
+                            renderPeopleListPanel(type, host, true);
+                        }
+                    })
                     .catch(error => console.warn(`[${SCRIPT_NAME}] Could not refresh ${type} status.`, error))
                     .finally(() => { panel.dataset.sakaluxLiveStatusRequested = "0"; });
             }, 120);

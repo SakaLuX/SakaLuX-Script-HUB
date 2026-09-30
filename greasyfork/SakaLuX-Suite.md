@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.965**
+**v0.9.966**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v0.9.965**
+- Canonical version: **v0.9.966**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,10 +60,10 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.965 — Target Alerts refresh-loop and TornPDA performance guard**
-- Throttles Target/Enemy panel DOM reconstruction so TornPDA MutationObservers cannot rebuild the list many times per second.
-- Adds a 60-second avatar hydration cooldown instead of restarting avatar requests on every UI render.
-- Adds a 45-second live-status refresh cooldown, preventing repeated pollAllLists API calls while status data is still missing or synchronizing.
+**v0.9.966 — Target Alerts async avatar/status repaint recovery**
+- Keeps the v0.9.965 observer throttle for performance but allows a forced data-driven repaint after asynchronous Target/Enemy data finishes loading.
+- Repaints the panel immediately after avatar hydration completes so real player avatars replace placeholders without restarting the request loop.
+- Repaints after the live status baseline finishes so SYNC is replaced by the returned Torn state/activity instead of remaining stuck.
 
 ## Release history / Changelog
 
@@ -77,6 +77,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+
+### v0.9.966 — Target Alerts async avatar/status repaint recovery
+- Keeps the v0.9.965 observer throttle for performance but allows a forced data-driven repaint after asynchronous Target/Enemy data finishes loading.
+- Repaints the panel immediately after avatar hydration completes so real player avatars replace placeholders without restarting the request loop.
+- Repaints after the live status baseline finishes so SYNC is replaced by the returned Torn state/activity instead of remaining stuck.
 
 ### v0.9.965 — Target Alerts refresh-loop and TornPDA performance guard
 - Throttles Target/Enemy panel DOM reconstruction so TornPDA MutationObservers cannot rebuild the list many times per second.
