@@ -9,7 +9,6 @@ text=CHAT.read_text(encoding='utf-8')
 text,n=re.subn(r'(?m)^(//\s*@version\s+)\S+',r'\g<1>1.2.28',text,count=1); assert n==1
 text,n=re.subn(r"const V='[^']+',ID='chat-intelligence'","const V='1.2.28',ID='chat-intelligence'",text,count=1); assert n==1
 
-# --- Robust sender detection for TornPDA message markup ---
 who_pat=r"function who\(e\)\{.*?return\{id,name\}\}"
 m=re.search(who_pat,text,re.S); assert m,'who() not found'
 who_new=r'''function who(e){
@@ -21,10 +20,6 @@ who_new=r'''function who(e){
 }'''
 text=text[:m.start()]+who_new+text[m.end():]
 
-# --- Fallback message candidates used only for context buttons ---
-insert_after="function msgs(r){"
-pos=text.find(insert_after); assert pos>=0,'msgs() not found'
-# place helper after msgs function via regex
 msgs_pat=r"function msgs\(r\)\{.*?\n\}"
 mm=re.search(msgs_pat,text,re.S); assert mm,'msgs block not found'
 helper=r'''
@@ -43,7 +38,6 @@ function contextRows(r){
 '''
 text=text[:mm.end()]+helper+text[mm.end():]
 
-# --- Replace context-trigger injector with CSS-class based implementation ---
 ctx_pat=r"function syncContextTrigger\(r,e,p\)\{.*?\n\}"
 cm=re.search(ctx_pat,text,re.S); assert cm,'syncContextTrigger not found'
 ctx_new=r'''function syncContextTrigger(r,e,p){
@@ -56,13 +50,11 @@ ctx_new=r'''function syncContextTrigger(r,e,p){
 }'''
 text=text[:cm.start()]+ctx_new+text[cm.end():]
 
-# enhance fallback rows every scan so buttons appear even when Torn class names change
-old="function enhance(r){controls(r);mentions(r);const first=!ROOTS.has(r);msgs(r).forEach(e=>decorate(r,e,first));ROOTS.add(r)}"
-assert old in text,'enhance marker missing'
-new="function enhance(r){controls(r);mentions(r);const first=!ROOTS.has(r);msgs(r).forEach(e=>decorate(r,e,first));contextRows(r).forEach(({e,p})=>syncContextTrigger(r,e,p));ROOTS.add(r)}"
-text=text.replace(old,new,1)
+enh_pat=r"function enhance\(r\)\{.*?ROOTS\.add\(r\)\}"
+em=re.search(enh_pat,text,re.S); assert em,'enhance marker missing'
+enh_new="function enhance(r){controls(r);mentions(r);const first=!ROOTS.has(r);msgs(r).forEach(e=>decorate(r,e,first));contextRows(r).forEach(({e,p})=>syncContextTrigger(r,e,p));ROOTS.add(r)}"
+text=text[:em.start()]+enh_new+text[em.end():]
 
-# --- Replace maximize with centered, bounded floating panel based on common ancestor of header+composer ---
 max_pat=r"function restoreStyle\(el,style\)\{.*?\nfunction findHeader\(r,c\)"
 mx=re.search(max_pat,text,re.S); assert mx,'maximize block not found'
 max_new=r'''function restoreStyle(el,style){if(!el)return;if(style===null||style===undefined||style==='')el.removeAttribute('style');else el.setAttribute('style',style)}
@@ -87,7 +79,6 @@ function toggleMax(r,c,b){
 function findHeader(r,c)'''
 text=text[:mx.start()]+max_new+text[mx.end():]
 
-# --- CSS for visible message context button + safe max overlay ---
 css_marker=".slx-toast-host{position:absolute!important;"
 idx=text.find(css_marker); assert idx>=0,'css marker missing'
 css_add=".slx-msg-actions{position:absolute!important;right:2px!important;top:2px!important;width:22px!important;height:22px!important;min-width:22px!important;padding:0!important;margin:0!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:50%!important;background:#2a323a!important;color:#e8edf2!important;font-size:16px!important;line-height:20px!important;text-align:center!important;z-index:50!important;opacity:.92!important;box-shadow:0 1px 3px #0008!important}.slx-msg-actions:active{background:#3b4650!important}.slx-chat-max-active{overflow:hidden!important}\n"
