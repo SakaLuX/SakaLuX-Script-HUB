@@ -8,8 +8,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-09-26**
-- Canonical version: **v1.17.55**
+- Verified: **2026-09-30**
+- Canonical version: **v1.17.57**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,13 +32,20 @@
 
 ## Current release note
 
-**v1.17.56 — Performance update for Travel/TornPDA**
-- Performance update for Travel/TornPDA.
-- Caches and deduplicates the full YATA travel export for 60 seconds.
-- Throttles passive Travel scans by lifecycle state instead of allowing repeated heavy scans every few seconds.
-- Keeps forced scans immediate for navigation, manual refreshes and meaningful landed-stock changes.
+**v1.17.57 — Automatic cash + selectable Best Buys**
+- Best Buys detects the live Torn cash balance automatically, with the visible foreign-travel page balance preferred and Torn API used as fallback.
+- Every Best Buys candidate can be selected as the active plan instead of forcing the first recommendation.
+- The selected candidate persists per destination and quantity is recalculated from live cash, travel slots and current foreign stock.
+- MARK PLAN BOUGHT records the selected candidate and calculated quantity in the Travel Session.
 
 ## Release history / Changelog
+
+### v1.17.57 — Automatic cash + selectable Best Buys
+- Best Buys detects the live Torn cash balance automatically, with the visible foreign-travel page balance preferred and Torn API used as fallback.
+- Every Best Buys candidate can be selected as the active plan instead of forcing the first recommendation.
+- The selected candidate persists per destination and quantity is recalculated from live cash, travel slots and current foreign stock.
+- MARK PLAN BOUGHT records the selected candidate and calculated quantity in the Travel Session.
+
 
 
 
@@ -252,11 +259,3 @@
 - Adds a 60-second YATA export cache with in-flight request deduplication.
 - Throttles passive Travel rescans by lifecycle state: in-flight 10s, landed 12s, travel agency 15s.
 - Keeps forced navigation/manual refreshes responsive while cutting repeated DOM scans and API work on TornPDA.
-
-
-### v1.17.57 — Automatic cash + selectable Best Buys
-- Best Buys reads the live Torn cash balance automatically; on TornPDA/foreign travel pages it can fall back to Torn's visible “you have $…” balance.
-- Any Best Buys row can be selected as the active plan instead of the first recommendation being forced.
-- The selection persists per destination and the selected quantity is recalculated from cash, slot capacity and current stock.
-- MARK PLAN BOUGHT records the selected item plan, not an implicit first-row plan.
-
