@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.33**
+**v1.2.34**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v1.2.33**
+- Canonical version: **v1.2.34**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,17 @@
 
 ## Current release note
 
-**v1.2.33 — Settings recovery + immediate toggle sync**
-- Search OFF now immediately hides the Search button and closes any open Search panel.
-- Disabling enhancements no longer removes the Settings gear; Settings remains available so the module can always be re-enabled.
-- Maximize/Export/Search header controls now follow their settings immediately.
-- Reset Settings restores the module and all controls without requiring manual storage edits.
+**v1.2.34 — Chat header overlap fix**
+- Prevents the per-message ⋮ context button from ever attaching to the native conversation header/title area.
+- Cleans stray context buttons from the header during rescans.
+- Compacts Search, Maximize, Export and Settings controls on TornPDA so they stay to the right without covering the chat title.
+- Keeps per-message context actions available beside real sender rows only.
 
 ## Release history / Changelog
+
+### v1.2.34 — Chat header overlap fix
+- Context ⋮ is restricted to real message rows and excluded from the native chat header.
+- Header controls use a compact TornPDA layout to prevent overlap with avatar/name/title controls.
 
 ### v1.2.27 — Visible context actions and safe fullscreen
 - Visible per-message ⋮ context trigger.
