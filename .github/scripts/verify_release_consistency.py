@@ -52,11 +52,11 @@ def source_path(url: str):
 
 
 def audit_changelog_depth(text: str, label: str):
-    heading = re.search(r'(?im)^##\s+Release history\s*/\s*Changelog\s*$', text)
+    heading = re.search(r'(?im)^##[ \t]+Release history[ \t]*/[ \t]*Changelog[ \t]*$', text)
     if not heading:
         return
     history = text[heading.end():]
-    matches = list(re.finditer(r'(?im)^###\s+v?([0-9]+(?:\.[0-9]+){1,3})\s*(?:[—-]\s*(.*?))?\s*$', history))
+    matches = list(re.finditer(r'(?im)^###[ \t]+v?([0-9]+(?:\.[0-9]+){1,3})[ \t]*(?:[—-][ \t]*(.*?))?[ \t]*$', history))
     if not matches:
         fail(f'{label}: changelog contains no version entries')
         return
@@ -68,7 +68,7 @@ def audit_changelog_depth(text: str, label: str):
         body_start = m.end()
         body_end = matches[i + 1].start() if i + 1 < len(matches) else len(history)
         body = history[body_start:body_end]
-        bullets = [x.strip() for x in re.findall(r'(?m)^-\s+(.+?)\s*$', body) if x.strip()]
+        bullets = [x.strip() for x in re.findall(r'(?m)^-[ \t]+(.+?)[ \t]*$', body) if x.strip()]
 
         if version in seen:
             fail(f'{label}: duplicate changelog entry v{version}')
