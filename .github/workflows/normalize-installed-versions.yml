@@ -22,6 +22,7 @@ on:
       - '.github/scripts/polish_suite_target_alerts_ui.py'
       - '.github/scripts/fix_suite_target_alerts_mobile_width.py'
       - '.github/scripts/fix_suite_target_alerts_controls_status.py'
+      - '.github/scripts/fix_suite_target_alerts_controls_freeze.py'
       - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
 permissions:
@@ -61,6 +62,8 @@ jobs:
         run: python3 .github/scripts/fix_suite_target_alerts_mobile_width.py
       - name: Add Target Alerts controls, avatars and live status recovery
         run: python3 .github/scripts/fix_suite_target_alerts_controls_status.py
+      - name: Fix Target Alerts Back and Minimize freezes
+        run: python3 .github/scripts/fix_suite_target_alerts_controls_freeze.py
       - name: Correct Bazaar Smart Pricer v1.1.14 release metadata
         run: python3 .github/scripts/fix_bazaar_v1114_release.py
       - name: Repair historical changelog detail gaps
