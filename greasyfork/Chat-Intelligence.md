@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.26**
+**v1.2.27**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v1.2.26**
+- Canonical version: **v1.2.27**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,10 +24,19 @@
 
 ## Current release note
 
-**v1.2.26 — Release documentation synchronized with the current Chat Intelligence userscript version**
-- Release documentation synchronized with the current Chat Intelligence userscript version.
+**v1.2.27 — Visible context actions and safe fullscreen**
+- Adds a visible ⋮ Player actions trigger to every detected chat message so the context menu is discoverable on TornPDA.
+- Sender-name taps also open the context menu.
+- Replaces ancestor-based maximize with direct chat-root fullscreen plus automatic geometry validation/fallback.
+- Context actions are removed immediately when disabled and restored when re-enabled.
 
 ## Release history / Changelog
+
+### v1.2.27 — Visible context actions and safe fullscreen
+- Visible per-message ⋮ context trigger.
+- Sender/name tap opens Player actions.
+- Direct-root fullscreen with geometry validation to prevent off-screen/disappearing chat.
+- Immediate cleanup/re-render for Context actions setting.
 
 ### v1.2.26 — Full legacy feature restore, settings repair and reliable fullscreen
 - Restored and exposed all legacy context actions.
