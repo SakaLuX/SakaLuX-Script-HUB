@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.966
+// @version      0.9.967
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10992,6 +10992,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
 /* SakaLuX Target Alerts Controls+Status v0.9.963 */
 /* SakaLuX Target Alerts Refresh Guard v0.9.965 */
 /* SakaLuX Target Alerts Async Repaint v0.9.966 */
+/* SakaLuX Target Alerts Hub API + v2 Profile Fix v0.9.967 */
 /* SakaLuX Target Alerts Controls Freeze Fix v0.9.964 */
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
@@ -11063,7 +11064,14 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
     let settings = loadSettings();
     let sharedApiKey = "";
     function getSharedApiKey() {
+        let hubKey = "";
+        try {
+            if (typeof window.SakaLuXScriptHub?.getApiKey === "function") {
+                hubKey = String(window.SakaLuXScriptHub.getApiKey() || "").trim();
+            }
+        } catch {}
         return String(
+            hubKey ||
             state.settings?.api?.key ||
             context.settings?.api?.key ||
             ""
@@ -12985,9 +12993,9 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                     return;
                 }
                 const url =
-                    `https://api.torn.com/user/` +
+                    `https://api.torn.com/v2/user/` +
                     `${encodeURIComponent(id)}` +
-                    `?selections=profile` +
+                    `/profile?striptags=true` +
                     `&key=${encodeURIComponent(apiKey)}`;
                 GM_xmlhttpRequest({
                     method: "GET",
@@ -13007,7 +13015,9 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                                 return;
                             }
                             const profileImage =
-                                data?.profile_image ||
+                                data?.profile?.image ||
+              data?.image ||
+              data?.profile_image ||
                                 data?.profile?.profile_image ||
                                 "";
                             resolve(
