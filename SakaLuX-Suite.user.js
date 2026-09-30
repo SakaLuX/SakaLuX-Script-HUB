@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.961
+// @version      0.9.962
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10988,6 +10988,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
 /* SakaLuX Target Alerts Mobile Isolation v0.9.959 */
 /* SakaLuX Target Alerts Render Recovery v0.9.960 */
 /* SakaLuX Target Alerts Professional UI v0.9.961 */
+/* SakaLuX Target Alerts Mobile Width v0.9.962 */
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
     function listenGlobal(target,type,listener,options){const opts=typeof options==="boolean"?{capture:options}:options||{};target.addEventListener(type,listener,{...opts,signal:globalEventController.signal});}
@@ -14284,6 +14285,69 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 background: rgba(239,68,68,.16) !important;
                 border-color: rgba(239,68,68,.35) !important;
             }
+            #people_panel:has(#${PEOPLE_PANEL_IDS.customPanel}) {
+                box-sizing: border-box !important;
+                width: min(430px, calc(100vw - 12px)) !important;
+                max-width: calc(100vw - 12px) !important;
+                min-width: 0 !important;
+                left: auto !important;
+                right: 6px !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                transform: none !important;
+                overflow: hidden !important;
+            }
+            #people_panel:has(#${PEOPLE_PANEL_IDS.customPanel}) > div,
+            #people_panel:has(#${PEOPLE_PANEL_IDS.customPanel}) [class*="content"] {
+                box-sizing: border-box !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} {
+                box-sizing: border-box !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} > * {
+                box-sizing: border-box !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                overflow-x: hidden !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] > div > div {
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                overflow: hidden !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} div[class*="textContainer"] {
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                overflow: hidden !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} div[class*="actionContainer"] {
+                flex: 0 0 auto !important;
+                width: auto !important;
+                max-width: 88px !important;
+                min-width: 0 !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-status-name,
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-native-subtext {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+            }
             @media (max-width: 460px) {
                 #${PEOPLE_PANEL_IDS.customPanel} {
                     padding: 8px !important;
@@ -14305,6 +14369,47 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                     max-width: 58px !important;
                     padding: 0 5px !important;
                     font-size: 9px !important;
+                }
+                #people_panel:has(#${PEOPLE_PANEL_IDS.customPanel}) {
+                    width: calc(100vw - 8px) !important;
+                    max-width: calc(100vw - 8px) !important;
+                    right: 4px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} {
+                    padding: 6px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] > div > div {
+                    padding: 6px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} a[data-label="avatar"] {
+                    width: 34px !important;
+                    min-width: 34px !important;
+                    max-width: 34px !important;
+                    margin-right: 7px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} a[data-label="avatar"] img {
+                    width: 30px !important;
+                    height: 30px !important;
+                    min-width: 30px !important;
+                    min-height: 30px !important;
+                    max-width: 30px !important;
+                    max-height: 30px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} div[class*="actionContainer"] {
+                    gap: 4px !important;
+                    max-width: 72px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip {
+                    min-width: 36px !important;
+                    max-width: 44px !important;
+                    height: 20px !important;
+                    padding: 0 4px !important;
+                    font-size: 8px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} .profile-button-attack {
+                    width: 26px !important;
+                    height: 26px !important;
+                    min-width: 26px !important;
                 }
             }
             .sakalux-native-people-content {

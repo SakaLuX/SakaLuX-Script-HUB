@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.961**
+**v0.9.962**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v0.9.961**
+- Canonical version: **v0.9.962**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,10 +60,10 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.961 — Professional Target Alerts People-panel redesign**
-- Reworks Target/Enemy rows into a compact 54px mobile layout with cleaner spacing, neutral dark surfaces and consistent typography.
-- Adds a compact player-state pill beside the attack action, with distinct Okay, Hospital and travel states.
-- Restyles search, list container, avatars, player names, descriptions and attack actions without depending on Torn hashed CSS class names.
+**v0.9.962 — Target Alerts viewport containment and compact mobile rows**
+- Constrains TornPDA's actual People panel to the phone viewport so Target/Enemy lists can no longer extend past the right edge of the screen.
+- Makes row layout genuinely responsive with shrinkable text, fixed compact actions and full-width search/list containers.
+- Adds a denser layout for narrow phones, reducing avatar, state-chip and attack-action footprints while preserving readable player names and descriptions.
 
 ## Release history / Changelog
 
@@ -73,6 +73,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+
+### v0.9.962 — Target Alerts viewport containment and compact mobile rows
+- Constrains TornPDA's actual People panel to the phone viewport so Target/Enemy lists can no longer extend past the right edge of the screen.
+- Makes row layout genuinely responsive with shrinkable text, fixed compact actions and full-width search/list containers.
+- Adds a denser layout for narrow phones, reducing avatar, state-chip and attack-action footprints while preserving readable player names and descriptions.
 
 ### v0.9.961 — Professional Target Alerts People-panel redesign
 - Reworks Target/Enemy rows into a compact 54px mobile layout with cleaner spacing, neutral dark surfaces and consistent typography.
