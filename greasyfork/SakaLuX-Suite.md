@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.960**
+**v0.9.961**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v0.9.960**
+- Canonical version: **v0.9.961**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,10 +60,10 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.960 — Target Alerts saved-list render recovery on TornPDA**
-- Rehydrates persisted Target/Enemy players before rebuilding the custom People panel so a UI or route refresh cannot leave the list blank.
-- Makes the zero-player state visible instead of clipping it inside a zero-height list container, and removes the forced 400px empty panel.
-- Triggers the existing Torn API list refresh when a selected Target/Enemy tab has no local rows, while retaining the v0.9.959 private-chat isolation and 32px avatar containment.
+**v0.9.961 — Professional Target Alerts People-panel redesign**
+- Reworks Target/Enemy rows into a compact 54px mobile layout with cleaner spacing, neutral dark surfaces and consistent typography.
+- Adds a compact player-state pill beside the attack action, with distinct Okay, Hospital and travel states.
+- Restyles search, list container, avatars, player names, descriptions and attack actions without depending on Torn hashed CSS class names.
 
 ## Release history / Changelog
 
@@ -72,6 +72,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+
+### v0.9.961 — Professional Target Alerts People-panel redesign
+- Reworks Target/Enemy rows into a compact 54px mobile layout with cleaner spacing, neutral dark surfaces and consistent typography.
+- Adds a compact player-state pill beside the attack action, with distinct Okay, Hospital and travel states.
+- Restyles search, list container, avatars, player names, descriptions and attack actions without depending on Torn hashed CSS class names.
 
 ### v0.9.960 — Target Alerts saved-list render recovery on TornPDA
 - Rehydrates persisted Target/Enemy players before rebuilding the custom People panel so a UI or route refresh cannot leave the list blank.

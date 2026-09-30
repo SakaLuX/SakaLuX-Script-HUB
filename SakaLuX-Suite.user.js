@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.960
+// @version      0.9.961
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10987,6 +10987,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
 
 /* SakaLuX Target Alerts Mobile Isolation v0.9.959 */
 /* SakaLuX Target Alerts Render Recovery v0.9.960 */
+/* SakaLuX Target Alerts Professional UI v0.9.961 */
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
     function listenGlobal(target,type,listener,options){const opts=typeof options==="boolean"?{capture:options}:options||{};target.addEventListener(type,listener,{...opts,signal:globalEventController.signal});}
@@ -14153,6 +14154,159 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 object-fit: cover !important;
                 border-radius: 50% !important;
             }
+            #${PEOPLE_PANEL_IDS.customPanel} {
+                padding: 10px !important;
+                border-radius: 14px !important;
+                background: rgba(15, 23, 32, .96) !important;
+                border: 1px solid rgba(255,255,255,.08) !important;
+                box-shadow: 0 12px 30px rgba(0,0,0,.28) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} input[placeholder="Search by player name"] {
+                width: 100% !important;
+                height: 42px !important;
+                padding: 0 42px 0 14px !important;
+                border-radius: 11px !important;
+                border: 1px solid rgba(255,255,255,.12) !important;
+                background: rgba(255,255,255,.055) !important;
+                color: #f5f7fa !important;
+                font-size: 14px !important;
+                outline: none !important;
+                box-shadow: none !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} input[placeholder="Search by player name"]:focus {
+                border-color: rgba(59,130,246,.75) !important;
+                background: rgba(255,255,255,.075) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] {
+                margin-top: 9px !important;
+                border: 1px solid rgba(255,255,255,.07) !important;
+                border-radius: 12px !important;
+                background: rgba(4,10,16,.38) !important;
+                scrollbar-width: thin !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] > div > div {
+                min-height: 54px !important;
+                height: 54px !important;
+                padding: 7px 9px !important;
+                border-bottom: 1px solid rgba(255,255,255,.055) !important;
+                background: transparent !important;
+                transition: background .15s ease !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] > div > div:hover {
+                background: rgba(255,255,255,.045) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] > div > div:last-child {
+                border-bottom: 0 !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} a[data-label="avatar"] {
+                margin-right: 9px !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} a[data-label="avatar"] img {
+                border: 1px solid rgba(255,255,255,.14) !important;
+                background: rgba(255,255,255,.06) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-status-name {
+                color: #f5f7fa !important;
+                font-weight: 700 !important;
+                font-size: 14px !important;
+                line-height: 18px !important;
+                text-decoration: none !important;
+                max-width: 175px !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                display: block !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-native-subtext {
+                margin: 1px 0 0 !important;
+                color: rgba(225,231,239,.58) !important;
+                font-size: 12px !important;
+                line-height: 16px !important;
+                max-width: 190px !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} div[class*="actionContainer"] {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                gap: 7px !important;
+                margin-left: auto !important;
+                min-width: 92px !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-width: 50px !important;
+                max-width: 72px !important;
+                height: 22px !important;
+                padding: 0 7px !important;
+                border-radius: 999px !important;
+                border: 1px solid rgba(148,163,184,.26) !important;
+                background: rgba(148,163,184,.10) !important;
+                color: #cbd5e1 !important;
+                font-size: 10px !important;
+                font-weight: 700 !important;
+                line-height: 1 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                text-transform: uppercase !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip[data-state="okay"] {
+                color: #86efac !important;
+                border-color: rgba(34,197,94,.35) !important;
+                background: rgba(34,197,94,.12) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip[data-state="hospital"] {
+                color: #fda4af !important;
+                border-color: rgba(244,63,94,.35) !important;
+                background: rgba(244,63,94,.12) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip[data-state="traveling"],
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip[data-state="abroad"] {
+                color: #93c5fd !important;
+                border-color: rgba(59,130,246,.35) !important;
+                background: rgba(59,130,246,.12) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .profile-button-attack {
+                width: 30px !important;
+                height: 30px !important;
+                min-width: 30px !important;
+                border-radius: 9px !important;
+                color: #f1f5f9 !important;
+                background: rgba(255,255,255,.07) !important;
+                border: 1px solid rgba(255,255,255,.09) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .profile-button-attack:hover {
+                background: rgba(239,68,68,.16) !important;
+                border-color: rgba(239,68,68,.35) !important;
+            }
+            @media (max-width: 460px) {
+                #${PEOPLE_PANEL_IDS.customPanel} {
+                    padding: 8px !important;
+                    border-radius: 12px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} .sakalux-status-name {
+                    max-width: 135px !important;
+                    font-size: 13px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} .sakalux-native-subtext {
+                    max-width: 145px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} div[class*="actionContainer"] {
+                    min-width: 82px !important;
+                    gap: 5px !important;
+                }
+                #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip {
+                    min-width: 42px !important;
+                    max-width: 58px !important;
+                    padding: 0 5px !important;
+                    font-size: 9px !important;
+                }
+            }
             .sakalux-native-people-content {
                 width: 100%;
             }
@@ -15035,9 +15189,9 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         row.style.maxWidth = "100%";
         row.style.boxSizing = "border-box";
         row.style.overflow = "hidden";
-        row.style.height = "40px";
+        row.style.height = "54px";
         row.style.transform =
-            `translateY(${index * 40}px)`;
+            `translateY(${index * 54}px)`;
         makeUniqueSvgIds(row, suffix);
         const statuses =
             previousStatuses[type].get(player.id);
@@ -15130,6 +15284,10 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         );
         if (actionContainer) {
             actionContainer.replaceChildren();
+            const stateChip = document.createElement("span");
+            stateChip.className = "sakalux-player-state-chip";
+            stateChip.dataset.state = String(statuses?.state || "Unknown").trim().toLowerCase();
+            stateChip.textContent = statuses?.state || "Unknown";
             const attackIcon = createListActionIcon(
                 type,
                 sampleRow,
@@ -15137,6 +15295,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 player.id
             );
             actionContainer.append(
+                stateChip,
                 attackIcon
             );
         }
@@ -15225,7 +15384,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             inner.replaceChildren();
             inner.style.position = "relative";
             inner.style.height =
-                `${filtered.length * 40}px`;
+                `${filtered.length * 54}px`;
             if (!filtered.length) {
                 inner.style.height = "40px";
                 inner.style.minHeight = "40px";
