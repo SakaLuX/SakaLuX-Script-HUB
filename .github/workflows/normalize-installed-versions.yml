@@ -20,6 +20,7 @@ on:
       - '.github/scripts/fix_suite_target_alerts_mobile.py'
       - '.github/scripts/fix_suite_target_alerts_render.py'
       - '.github/scripts/polish_suite_target_alerts_ui.py'
+      - '.github/scripts/fix_suite_target_alerts_mobile_width.py'
       - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
 permissions:
@@ -55,6 +56,8 @@ jobs:
         run: python3 .github/scripts/fix_suite_target_alerts_render.py
       - name: Polish Suite Target Alerts People panel
         run: python3 .github/scripts/polish_suite_target_alerts_ui.py
+      - name: Contain Suite Target Alerts inside mobile viewport
+        run: python3 .github/scripts/fix_suite_target_alerts_mobile_width.py
       - name: Correct Bazaar Smart Pricer v1.1.14 release metadata
         run: python3 .github/scripts/fix_bazaar_v1114_release.py
       - name: Repair historical changelog detail gaps
