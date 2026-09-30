@@ -26,13 +26,18 @@ jobs:
         run: node --check SakaLuX-Chat-Intelligence.user.js
       - name: Verify
         run: |
-          grep -q '@version      1.2.34' SakaLuX-Chat-Intelligence.user.js
-          grep -q "const V='1.2.34',ID='chat-intelligence'" SakaLuX-Chat-Intelligence.user.js
-          grep -q 'function isChatHeaderCandidate' SakaLuX-Chat-Intelligence.user.js
-          grep -q 'isChatHeaderCandidate(r,e)' SakaLuX-Chat-Intelligence.user.js
-          grep -q 'max-width:132px' SakaLuX-Chat-Intelligence.user.js
-          grep -q 'v1.2.34' greasyfork/Chat-Intelligence.md
-          grep -q '"version": "1.2.34"' scripts.json
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('SakaLuX-Chat-Intelligence.user.js').read_text(encoding='utf-8')
+          d=Path('greasyfork/Chat-Intelligence.md').read_text(encoding='utf-8')
+          assert '@version      1.2.34' in s
+          assert "const V='1.2.34',ID='chat-intelligence'" in s
+          assert 'function isChatHeaderCandidate' in s
+          assert 'isChatHeaderCandidate(r,e)' in s
+          assert 'max-width:132px' in s
+          assert 'v1.2.34' in d
+          print('verification passed')
+          PY
       - name: Commit release
         run: |
           git config user.name 'github-actions[bot]'
