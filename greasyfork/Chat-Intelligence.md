@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.32**
+**v1.2.33**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v1.2.32**
+- Canonical version: **v1.2.33**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,11 +24,11 @@
 
 ## Current release note
 
-**v1.2.32 — Isolated Search results overlay**
-- Search no longer hides/reflows native Torn chat message nodes.
-- Matching messages render as lightweight result cards inside the Search panel.
-- Tapping a result closes Search and scrolls to the original message.
-- Cleans stale display:none styles left by older Search builds.
+**v1.2.33 — Settings recovery + immediate toggle sync**
+- Search OFF now immediately hides the Search button and closes any open Search panel.
+- Disabling enhancements no longer removes the Settings gear; Settings remains available so the module can always be re-enabled.
+- Maximize/Export/Search header controls now follow their settings immediately.
+- Reset Settings restores the module and all controls without requiring manual storage edits.
 
 ## Release history / Changelog
 
