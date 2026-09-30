@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.963
+// @version      0.9.964
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10990,6 +10990,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
 /* SakaLuX Target Alerts Professional UI v0.9.961 */
 /* SakaLuX Target Alerts Mobile Width v0.9.962 */
 /* SakaLuX Target Alerts Controls+Status v0.9.963 */
+/* SakaLuX Target Alerts Controls Freeze Fix v0.9.964 */
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
     function listenGlobal(target,type,listener,options){const opts=typeof options==="boolean"?{capture:options}:options||{};target.addEventListener(type,listener,{...opts,signal:globalEventController.signal});}
@@ -14009,6 +14010,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         customPanel: "sakalux-people-custom-list-panel"
     };
     let activePeopleListType = null;
+    const peopleListCollapsed = { targets: false, enemies: false };
     let nativePeopleTemplateCache = null;
     function injectPeoplePanelStyles() {
         if (document.getElementById(PEOPLE_PANEL_IDS.style)) return;
@@ -15545,12 +15547,24 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         backButton.className = "sakalux-target-panel-control sakalux-target-back";
         backButton.innerHTML = "← <span>Back</span>";
         backButton.title = "Back to Torn People panel";
+        const isolateToolbarPointer = event => {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        };
+        backButton.addEventListener("pointerdown", isolateToolbarPointer);
         backButton.addEventListener("click", event => {
             event.preventDefault();
             event.stopPropagation();
+            event.stopImmediatePropagation();
+            backButton.disabled = true;
             activePeopleListType = null;
-            restoreNativePeoplePanel();
-            queueUiUpdate();
+            // Defer restoration until Torn's current pointer/click dispatch is done.
+            // Calling queueUiUpdate here caused the People-panel observer to rebuild
+            // the custom panel while it was being restored, which could lock TornPDA.
+            setTimeout(() => {
+                restoreNativePeoplePanel();
+                backButton.disabled = false;
+            }, 0);
         });
 
         const title = document.createElement("strong");
@@ -15597,15 +15611,21 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         contentWrap.className = "sakalux-target-panel-body";
         contentWrap.append(searchRoot, list);
         panel.appendChild(contentWrap);
-        minimizeButton.addEventListener("click", event => {
-            event.preventDefault();
-            event.stopPropagation();
-            const collapsed = contentWrap.hidden !== true;
-            contentWrap.hidden = collapsed;
+        const applyCollapsedState = collapsed => {
+            peopleListCollapsed[type] = Boolean(collapsed);
+            contentWrap.style.display = collapsed ? "none" : "block";
             panel.classList.toggle("sakalux-target-collapsed", collapsed);
             minimizeButton.textContent = collapsed ? "+" : "−";
             minimizeButton.title = collapsed ? "Expand list" : "Minimize list";
             minimizeButton.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        };
+        applyCollapsedState(Boolean(peopleListCollapsed[type]));
+        minimizeButton.addEventListener("pointerdown", isolateToolbarPointer);
+        minimizeButton.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            applyCollapsedState(!peopleListCollapsed[type]);
         });
 
         // Avatars are persisted separately from the list. Request any missing ones

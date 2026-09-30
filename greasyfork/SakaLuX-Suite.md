@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.963**
+**v0.9.964**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v0.9.963**
+- Canonical version: **v0.9.964**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,10 +60,10 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.963 — Target Alerts navigation controls, avatar hydration and live status recovery**
-- Adds Back and Minimize/Expand controls to the Target/Enemy People panel so the custom view is easy to dismiss or collapse on TornPDA.
-- Hydrates missing player avatars as soon as the list opens instead of leaving generic silhouettes until a later background refresh.
-- Replaces persistent UNKNOWN chips with live Torn state/activity where available and shows SYNC only while a fresh API baseline is being requested.
+**v0.9.964 — Target Alerts Back/Minimize freeze prevention on TornPDA**
+- Removes the immediate queueUiUpdate call from Back restoration so TornPDA no longer rebuilds the custom People panel while it is being restored.
+- Isolates pointer/click events from Torn delegated handlers with stopImmediatePropagation and defers Back restoration until the active click dispatch has completed.
+- Stores Minimize/Expand state outside the rebuilt DOM and toggles the body directly, preventing observer-driven re-render loops while keeping the collapsed state stable.
 
 ## Release history / Changelog
 
@@ -75,6 +75,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+
+### v0.9.964 — Target Alerts Back/Minimize freeze prevention on TornPDA
+- Removes the immediate queueUiUpdate call from Back restoration so TornPDA no longer rebuilds the custom People panel while it is being restored.
+- Isolates pointer/click events from Torn delegated handlers with stopImmediatePropagation and defers Back restoration until the active click dispatch has completed.
+- Stores Minimize/Expand state outside the rebuilt DOM and toggles the body directly, preventing observer-driven re-render loops while keeping the collapsed state stable.
 
 ### v0.9.963 — Target Alerts navigation controls, avatar hydration and live status recovery
 - Adds Back and Minimize/Expand controls to the Target/Enemy People panel so the custom view is easy to dismiss or collapse on TornPDA.
