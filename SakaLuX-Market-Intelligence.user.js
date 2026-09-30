@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.55
+// @version      1.17.56
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -632,7 +632,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.55';
+  let v = '1.17.56';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -2469,6 +2469,32 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return {destination,slots,used,remaining:slots-used,totalCost,totalProfit,rows,budget:configuredBudget,unusedBudget:Math.max(0,configuredBudget-totalCost),mode:'OPTIMIZED'};
     }
 
+    /* SakaLuX Travel Hard Budget Cap v1 */
+    function enforceTravelBudgetCap(plan, configuredBudget, slots) {
+        const budget=Math.max(0,Number(configuredBudget)||0);
+        if(!plan||!(budget>0))return plan;
+        const rows=Array.isArray(plan.rows)?plan.rows:[];
+        let left=budget,totalCost=0,totalProfit=0,used=0;
+        const capped=[];
+        for(const r of rows){
+            if(left<=0||used>=slots)break;
+            const buy=Math.max(0,Number(r.buy)||0);
+            if(!(buy>0))continue;
+            const requested=Math.max(0,Math.floor(Number(r.qty)||0));
+            const affordable=Math.floor(left/buy);
+            const qty=Math.min(requested,affordable,Math.max(0,slots-used));
+            if(qty<=0)continue;
+            const cost=buy*qty;
+            const profit=(Number(r.profitItem)||0)*qty;
+            capped.push({...r,qty,cost,profit});
+            totalCost+=cost;totalProfit+=profit;used+=qty;left-=cost;
+        }
+        if(totalCost>budget){
+            console.warn('[SakaLuX Market Intelligence] Travel budget cap invariant failed', {totalCost,budget});
+        }
+        return {...plan,rows:capped,totalCost,totalProfit,used,remaining:Math.max(0,slots-used),budget,unusedBudget:Math.max(0,budget-totalCost),budgetCapped:true};
+    }
+
     function buildTravelBuyPlan(destination, entries, marketMap, budgetOverride=null) {
         const slots=Math.max(1,Number(settings.travelSlots)||29);
         const configuredBudget=Number.isFinite(Number(budgetOverride))&&Number(budgetOverride)>=0?Math.max(0,Number(budgetOverride)):Math.max(0,Number(settings.travelBudget)||0);
@@ -2478,7 +2504,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         optimized.greedyProfit=greedy.totalProfit;
         optimized.optimizationGain=Math.max(0,optimized.totalProfit-greedy.totalProfit);
         optimized.candidateCount=candidates.length;
-        return optimized;
+        return enforceTravelBudgetCap(optimized,configuredBudget,slots);
     }
 
 

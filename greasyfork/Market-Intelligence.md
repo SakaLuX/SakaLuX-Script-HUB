@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.55**
+**v1.17.56**
 
 
 ## Repository synchronization
@@ -32,7 +32,7 @@
 
 ## Current release note
 
-**v1.17.55 — Performance update for Travel/TornPDA**
+**v1.17.56 — Performance update for Travel/TornPDA**
 - Performance update for Travel/TornPDA.
 - Caches and deduplicates the full YATA travel export for 60 seconds.
 - Throttles passive Travel scans by lifecycle state instead of allowing repeated heavy scans every few seconds.
@@ -40,6 +40,13 @@
 
 ## Release history / Changelog
 
+
+
+### v1.17.56 — Performance update for Travel/TornPDA
+- Performance update for Travel/TornPDA.
+- Caches and deduplicates the full YATA travel export for 60 seconds.
+- Throttles passive Travel scans by lifecycle state instead of allowing repeated heavy scans every few seconds.
+- Keeps forced scans immediate for navigation, manual refreshes and meaningful landed-stock changes.
 
 ### v1.17.54 — Settings Schema v1 and safe automatic migrations
 - Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.

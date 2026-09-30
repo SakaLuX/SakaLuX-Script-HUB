@@ -1392,7 +1392,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.55",
+                    "version": "1.17.56",
                     "date": "2026-09-28",
                     "notes": [
                         "Performance update for Travel/TornPDA.",
@@ -1403,7 +1403,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.55",
+                "version": "1.17.56",
                 "detailsRevision": 14,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",

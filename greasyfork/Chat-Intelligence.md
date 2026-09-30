@@ -24,11 +24,8 @@
 
 ## Current release note
 
-**v1.2.36 — Native-flow chat header controls**
-- Removes the fixed right-offset workaround from v1.2.35.
-- Inserts the SakaLuX control strip before Torn's native Minimize/Close controls when detectable.
-- Lets the chat header reserve real flex width so controls no longer overlap the avatar/name or native buttons.
-- Keeps compact mobile button widths for TornPDA.
+**v1.2.36 — Release documentation synchronized with the current Chat Intelligence userscript version**
+- Release documentation synchronized with the current Chat Intelligence userscript version.
 
 ## Release history / Changelog
 
