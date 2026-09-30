@@ -152,7 +152,7 @@
 - Opens the SakaLuX panel from the top of the available Torn viewport.
 - Improves compact Hub integration and mobile visibility.
 
-### v1.0.21
+### v1.0.21 — Performance/UI optimization
 - Performance/UI optimization: reduces unnecessary repeated DOM work and aligns Mission Rewards controls with the common SakaLuX Hub-style visual foundation.
 
 ### v1.0.20 — Shared Standalone ordering fix

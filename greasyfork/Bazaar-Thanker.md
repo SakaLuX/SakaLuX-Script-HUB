@@ -125,7 +125,7 @@
 - Opens the SakaLuX panel from the top of the available Torn viewport.
 - Improves compact Hub integration and mobile visibility.
 
-### v5.3.26
+### v5.3.26 — Performance/UI optimization
 - Performance/UI optimization: reduces repeated DOM work on Torn/TornPDA redraws and aligns standalone controls with the shared SakaLuX Hub-style UI foundation.
 
 ### v5.3.25 — Fixed profile link

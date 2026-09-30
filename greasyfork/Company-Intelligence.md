@@ -150,7 +150,7 @@
 - Removed the visible `Updated … · SakaLuX Script Hub · no automated company actions` status line.
 - Keeps the `Made with ❤️ by SakaLuX [2380374]` footer as the only bottom attribution line.
 
-### v1.8.18
+### v1.8.18 — Performance/UI optimization
 - Performance/UI optimization: throttles expensive redraw paths and applies the shared Hub-style surface, controls, spacing and mobile-friendly visual foundation.
 
 ### v1.8.17 — Standalone placement hardening

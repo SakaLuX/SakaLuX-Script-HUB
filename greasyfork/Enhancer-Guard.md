@@ -127,7 +127,7 @@
 - Opens the SakaLuX panel from the top of the available Torn viewport.
 - Improves compact Hub integration and mobile visibility.
 
-### v1.3.34
+### v1.3.34 — Performance/UI optimization
 - Performance/UI optimization: uses the shared single-instance SakaLuX performance helpers, reduces repeated observer/render work and aligns the standalone UI with the Hub visual system.
 
 ### v1.3.33 — Shared Standalone ordering fix

@@ -130,5 +130,5 @@
 - Opens the script panel from the top of the TornPDA viewport.
 - Uses the shared SakaLuX top-alignment contract.
 
-### v1.2.9
+### v1.2.9 — Performance/UI optimization
 - Performance/UI optimization: reduces duplicate high-frequency DOM work and aligns Chat Intelligence surfaces with the shared SakaLuX Hub-style UI foundation.

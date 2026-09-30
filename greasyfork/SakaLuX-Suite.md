@@ -205,7 +205,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Opens the active mobile sheet from top to bottom of the available viewport.
 - Adds the shared translucent SakaLuX blur treatment.
 
-### v0.9.913
+### v0.9.913 — Performance/UI optimization
 - Performance/UI optimization: introduces the shared SakaLuX performance/UI foundation, reduces duplicate high-frequency rendering work and aligns Suite surfaces with the Hub visual language.
 
 ### v0.9.912 — Current experimental build

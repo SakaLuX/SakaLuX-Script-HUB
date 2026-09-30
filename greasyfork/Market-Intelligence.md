@@ -203,7 +203,7 @@
 - Opens the SakaLuX panel from the top of the available Torn viewport.
 - Improves compact Hub integration and mobile visibility.
 
-### v1.17.22
+### v1.17.22 — Performance/UI optimization
 - Performance/UI optimization: tunes high-frequency DOM/update paths and applies the shared SakaLuX Hub-style UI foundation across standalone controls without changing market logic.
 
 ### v1.17.21 — Shared Standalone ordering fix

@@ -178,4 +178,6 @@
 
 
 ### v0.8.11 — Vault control layout
-The Vault & Panic card now groups controls by action: Vault (Keep) beside Vault keep cash, Withdraw beside Withdraw amount, and Vault Max beside the red Withdraw All action. PANIC keep/max values remain preserved internally.
+- Rearranges the Vault & Panic controls into action-based pairs for the mobile layout.
+- Places **Vault (Keep)** beside **Vault keep cash**, then **Withdraw** beside **Withdraw amount**.
+- Places **Vault Max** beside the red **Withdraw All** action while preserving PANIC keep/max values internally.

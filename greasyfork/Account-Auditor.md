@@ -112,7 +112,7 @@
 - Opens the active mobile sheet from top to bottom of the available viewport.
 - Adds the shared translucent SakaLuX blur treatment.
 
-### v1.3.5
+### v1.3.5 — Performance/UI optimization
 - Performance/UI optimization: adds the shared SakaLuX performance foundation, reduces duplicate high-frequency UI work, and aligns controls/cards with the Hub visual language.
 
 ### v1.3.2 — API diagnostics and readable merits

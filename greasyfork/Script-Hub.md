@@ -249,7 +249,7 @@
 - Keeps the SakaLuX author footer stable inside managed module panels.
 - Removes the temporary standalone Hub Card UX layer.
 
-### v1.9.42
+### v1.9.42 — Performance/UI optimization release
 - Performance/UI optimization release: adds the shared single-instance SakaLuX performance foundation used across compatible scripts, synchronizes optimized module versions, and keeps the Hub as the canonical visual design reference.
 
 ### v1.9.41 — Fallback registry synchronization

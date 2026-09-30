@@ -119,7 +119,7 @@
 - Opens the SakaLuX panel from the top of the available Torn viewport.
 - Improves compact Hub integration and mobile visibility.
 
-### v1.3.32
+### v1.3.32 — Performance/UI optimization
 - Performance/UI optimization: reduces duplicate observer-driven work and aligns assistant controls with the shared SakaLuX Hub-style UI foundation while preserving attack safety behavior.
 
 ### v1.3.31 — Desktop ATTACK route fix
