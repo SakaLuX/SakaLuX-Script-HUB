@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.34**
+**v1.2.35**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v1.2.34**
+- Canonical version: **v1.2.35**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,17 @@
 
 ## Current release note
 
-**v1.2.34 — Chat header overlap fix**
-- Prevents the per-message ⋮ context button from ever attaching to the native conversation header/title area.
-- Cleans stray context buttons from the header during rescans.
-- Compacts Search, Maximize, Export and Settings controls on TornPDA so they stay to the right without covering the chat title.
-- Keeps per-message context actions available beside real sender rows only.
+**v1.2.35 — Native minimize/settings collision fix**
+- Reserves a dedicated right-side zone for Torn's native Minimize and Close buttons.
+- Moves the SakaLuX Search, Maximize, Export and Settings strip left as a single group on TornPDA.
+- Prevents Settings from sitting on top of the native Minimize control.
+- Keeps the compact mobile layout introduced in v1.2.34.
 
 ## Release history / Changelog
+
+### v1.2.35 — Native minimize/settings collision fix
+- Reserves 126px at the right of the chat header for Torn native controls.
+- Moves the complete SakaLuX header control strip left so Settings no longer overlaps Minimize.
 
 ### v1.2.34 — Chat header overlap fix
 - Context ⋮ is restricted to real message rows and excluded from the native chat header.
