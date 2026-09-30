@@ -24,6 +24,8 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/dom-tests" jsdom@30.1.0 --no-audit --no-fund
       - name: Check workflows, userscripts and registry
         run: python3 .github/scripts/validate_repository.py
+      - name: Verify release and changelog consistency
+        run: python3 .github/scripts/verify_release_consistency.py
       - name: Verify strict release preflight
         run: |
           python3 tools/release_preflight.py --all --build --out "$RUNNER_TEMP/releases"
@@ -70,4 +72,4 @@ jobs:
       - name: Check current all-script performance workload budgets
         run: NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/performance/run.cjs "$RUNNER_TEMP/performance-budget.json" --assert
 
-# Shared Core v1, Shared Dock Runtime, Hub fallback registry, Hub Health diagnostics, Suite Daily Progress, Account Auditor diffing and strict release preflight are covered above.
+# Shared Core v1, release/changelog consistency, Shared Dock Runtime, Hub fallback registry, Hub Health diagnostics, Suite Daily Progress, Account Auditor diffing and strict release preflight are covered above.
