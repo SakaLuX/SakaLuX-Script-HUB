@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.962
+// @version      0.9.963
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10989,6 +10989,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
 /* SakaLuX Target Alerts Render Recovery v0.9.960 */
 /* SakaLuX Target Alerts Professional UI v0.9.961 */
 /* SakaLuX Target Alerts Mobile Width v0.9.962 */
+/* SakaLuX Target Alerts Controls+Status v0.9.963 */
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
     function listenGlobal(target,type,listener,options){const opts=typeof options==="boolean"?{capture:options}:options||{};target.addEventListener(type,listener,{...opts,signal:globalEventController.signal});}
@@ -14285,6 +14286,84 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 background: rgba(239,68,68,.16) !important;
                 border-color: rgba(239,68,68,.35) !important;
             }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-target-panel-controls {
+                display: grid !important;
+                grid-template-columns: auto minmax(0,1fr) auto !important;
+                align-items: center !important;
+                gap: 8px !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                margin: 0 0 8px !important;
+                padding: 0 0 8px !important;
+                border-bottom: 1px solid rgba(255,255,255,.08) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-target-panel-title {
+                min-width: 0 !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                color: #e5edf7 !important;
+                font-size: 12px !important;
+                font-weight: 700 !important;
+                text-align: center !important;
+                letter-spacing: .2px !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-target-panel-control {
+                appearance: none !important;
+                border: 1px solid rgba(255,255,255,.11) !important;
+                background: rgba(255,255,255,.06) !important;
+                color: #eef4fb !important;
+                min-height: 32px !important;
+                height: 32px !important;
+                border-radius: 9px !important;
+                padding: 0 10px !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                line-height: 1 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                cursor: pointer !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-target-minimize {
+                width: 34px !important;
+                min-width: 34px !important;
+                padding: 0 !important;
+                font-size: 18px !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel}.sakalux-target-collapsed {
+                padding-bottom: 2px !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel}.sakalux-target-collapsed .sakalux-target-panel-controls {
+                margin-bottom: 0 !important;
+                border-bottom: 0 !important;
+                padding-bottom: 0 !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-target-panel-body[hidden] {
+                display: none !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip[data-state="sync"] {
+                color: #facc15 !important;
+                border-color: rgba(250,204,21,.30) !important;
+                background: rgba(250,204,21,.10) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip[data-state="online"] {
+                color: #86efac !important;
+                border-color: rgba(34,197,94,.32) !important;
+                background: rgba(34,197,94,.10) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip[data-state="idle"] {
+                color: #fde68a !important;
+                border-color: rgba(245,158,11,.32) !important;
+                background: rgba(245,158,11,.10) !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} .sakalux-player-state-chip[data-state="offline"] {
+                color: #94a3b8 !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} a[data-label="avatar"] img[src*="avatar-profile_man.jpg"] {
+                opacity: .56 !important;
+                filter: grayscale(.35) !important;
+            }
             #people_panel:has(#${PEOPLE_PANEL_IDS.customPanel}) {
                 box-sizing: border-box !important;
                 width: min(430px, calc(100vw - 12px)) !important;
@@ -15391,8 +15470,16 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
             actionContainer.replaceChildren();
             const stateChip = document.createElement("span");
             stateChip.className = "sakalux-player-state-chip";
-            stateChip.dataset.state = String(statuses?.state || "Unknown").trim().toLowerCase();
-            stateChip.textContent = statuses?.state || "Unknown";
+            const liveState = String(statuses?.state || "").trim();
+            const liveActivity = String(statuses?.activity || "").trim();
+            const displayState =
+                liveState && liveState.toLowerCase() !== "unknown"
+                    ? liveState
+                    : (liveActivity && liveActivity.toLowerCase() !== "unknown"
+                        ? liveActivity
+                        : "SYNC");
+            stateChip.dataset.state = displayState.toLowerCase();
+            stateChip.textContent = displayState;
             const attackIcon = createListActionIcon(
                 type,
                 sampleRow,
@@ -15450,6 +15537,35 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 )
             );
         panel.replaceChildren();
+        const controls = document.createElement("div");
+        controls.className = "sakalux-target-panel-controls";
+
+        const backButton = document.createElement("button");
+        backButton.type = "button";
+        backButton.className = "sakalux-target-panel-control sakalux-target-back";
+        backButton.innerHTML = "← <span>Back</span>";
+        backButton.title = "Back to Torn People panel";
+        backButton.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            activePeopleListType = null;
+            restoreNativePeoplePanel();
+            queueUiUpdate();
+        });
+
+        const title = document.createElement("strong");
+        title.className = "sakalux-target-panel-title";
+        title.textContent = `${LIST_TYPES[type].label} · ${players.length}`;
+
+        const minimizeButton = document.createElement("button");
+        minimizeButton.type = "button";
+        minimizeButton.className = "sakalux-target-panel-control sakalux-target-minimize";
+        minimizeButton.textContent = "−";
+        minimizeButton.title = "Minimize list";
+        minimizeButton.setAttribute("aria-expanded", "true");
+
+        controls.append(backButton, title, minimizeButton);
+        panel.appendChild(controls);
         let searchRoot;
         if (template?.searchRoot) {
             searchRoot =
@@ -15477,7 +15593,41 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         inner.style.position = "relative";
         inner.style.height = "0px";
         list.appendChild(inner);
-        panel.append(searchRoot, list);
+        const contentWrap = document.createElement("div");
+        contentWrap.className = "sakalux-target-panel-body";
+        contentWrap.append(searchRoot, list);
+        panel.appendChild(contentWrap);
+        minimizeButton.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const collapsed = contentWrap.hidden !== true;
+            contentWrap.hidden = collapsed;
+            panel.classList.toggle("sakalux-target-collapsed", collapsed);
+            minimizeButton.textContent = collapsed ? "+" : "−";
+            minimizeButton.title = collapsed ? "Expand list" : "Minimize list";
+            minimizeButton.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        });
+
+        // Avatars are persisted separately from the list. Request any missing ones
+        // immediately when this panel is shown, rather than waiting for a later poll.
+        hydrateMissingAvatars(type).catch(error => {
+            console.warn(`[${SCRIPT_NAME}] Could not hydrate ${type} avatars.`, error);
+        });
+
+        // If the saved list has no live states yet, request a fresh API baseline.
+        const missingLiveStatus = players.some(player => {
+            const live = previousStatuses[type].get(player.id);
+            return !live || (!live.state && !live.activity) || String(live.state || "").toLowerCase() === "unknown";
+        });
+        if (missingLiveStatus && isValidApiKey(syncSharedApiKey()) && panel.dataset.sakaluxLiveStatusRequested !== "1") {
+            panel.dataset.sakaluxLiveStatusRequested = "1";
+            setTimeout(() => {
+                pollAllLists(true)
+                    .catch(error => console.warn(`[${SCRIPT_NAME}] Could not refresh ${type} status.`, error))
+                    .finally(() => { panel.dataset.sakaluxLiveStatusRequested = "0"; });
+            }, 80);
+        }
+
         function drawRows(query = "") {
             const lowerQuery =
                 query.trim().toLowerCase();

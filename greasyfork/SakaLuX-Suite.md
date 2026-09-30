@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.962**
+**v0.9.963**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v0.9.962**
+- Canonical version: **v0.9.963**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,10 +60,10 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.962 — Target Alerts viewport containment and compact mobile rows**
-- Constrains TornPDA's actual People panel to the phone viewport so Target/Enemy lists can no longer extend past the right edge of the screen.
-- Makes row layout genuinely responsive with shrinkable text, fixed compact actions and full-width search/list containers.
-- Adds a denser layout for narrow phones, reducing avatar, state-chip and attack-action footprints while preserving readable player names and descriptions.
+**v0.9.963 — Target Alerts navigation controls, avatar hydration and live status recovery**
+- Adds Back and Minimize/Expand controls to the Target/Enemy People panel so the custom view is easy to dismiss or collapse on TornPDA.
+- Hydrates missing player avatars as soon as the list opens instead of leaving generic silhouettes until a later background refresh.
+- Replaces persistent UNKNOWN chips with live Torn state/activity where available and shows SYNC only while a fresh API baseline is being requested.
 
 ## Release history / Changelog
 
@@ -74,6 +74,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+
+### v0.9.963 — Target Alerts navigation controls, avatar hydration and live status recovery
+- Adds Back and Minimize/Expand controls to the Target/Enemy People panel so the custom view is easy to dismiss or collapse on TornPDA.
+- Hydrates missing player avatars as soon as the list opens instead of leaving generic silhouettes until a later background refresh.
+- Replaces persistent UNKNOWN chips with live Torn state/activity where available and shows SYNC only while a fresh API baseline is being requested.
 
 ### v0.9.962 — Target Alerts viewport containment and compact mobile rows
 - Constrains TornPDA's actual People panel to the phone viewport so Target/Enemy lists can no longer extend past the right edge of the screen.
