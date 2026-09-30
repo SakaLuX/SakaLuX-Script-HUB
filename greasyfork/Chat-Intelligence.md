@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.28**
+**v1.2.29**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v1.2.28**
+- Canonical version: **v1.2.29**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,9 +24,11 @@
 
 ## Current release note
 
-**v1.2.28 — TornPDA maximize/context fix**
-- Bounded centered maximize using the common chat header/composer panel.
-- Fallback sender/message detection and visible ⋮ context buttons on TornPDA.
+**v1.2.29 — TornPDA message-row/search repair**
+- Replaced class-name-only message detection with sender/text-based row discovery.
+- Search now rescans actual detected rows on every input and shows matched/total counts.
+- Context ⋮ is inserted inline next to the detected sender so TornPDA overflow clipping cannot hide it.
+- Search, export and context actions now share the same row detector.
 
 ## Release history / Changelog
 
