@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.958
+// @version      0.9.959
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -10985,6 +10985,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
     return {init,destroy,onRouteChange:schedule};
   }
 
+/* SakaLuX Target Alerts Mobile Isolation v0.9.959 */
   function createTargetAlertsModule(context) {
     const globalEventController=new AbortController();
     function listenGlobal(target,type,listener,options){const opts=typeof options==="boolean"?{capture:options}:options||{};target.addEventListener(type,listener,{...opts,signal:globalEventController.signal});}
@@ -14112,6 +14113,45 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 min-height: 400px;
                 overflow: hidden;
             }
+            #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] {
+                position: relative !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: min(56vh, 420px) !important;
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+                box-sizing: border-box !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} [id$="-user-list"] > div {
+                position: relative !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} a[data-label="avatar"] {
+                width: 36px !important;
+                min-width: 36px !important;
+                max-width: 36px !important;
+                height: 36px !important;
+                min-height: 36px !important;
+                max-height: 36px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                overflow: hidden !important;
+                flex: 0 0 36px !important;
+            }
+            #${PEOPLE_PANEL_IDS.customPanel} a[data-label="avatar"] img {
+                width: 32px !important;
+                height: 32px !important;
+                min-width: 32px !important;
+                min-height: 32px !important;
+                max-width: 32px !important;
+                max-height: 32px !important;
+                object-fit: cover !important;
+                border-radius: 50% !important;
+            }
             .sakalux-native-people-content {
                 width: 100%;
             }
@@ -14366,8 +14406,10 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         document.head.appendChild(style);
     }
     function findPeopleTabBar() {
+        const peoplePanel = document.getElementById("people_panel");
+        if (!peoplePanel) return null;
         const nativeButtons = [
-            ...document.querySelectorAll('button[role="tab"][title]')
+            ...peoplePanel.querySelectorAll('button[role="tab"][title]')
         ];
         const friendsButton = nativeButtons.find(button =>
             /^friends list$/i.test(
@@ -14983,6 +15025,10 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         row.style.position = "absolute";
         row.style.top = "0px";
         row.style.left = "0px";
+        row.style.width = "100%";
+        row.style.maxWidth = "100%";
+        row.style.boxSizing = "border-box";
+        row.style.overflow = "hidden";
         row.style.height = "40px";
         row.style.transform =
             `translateY(${index * 40}px)`;
@@ -15015,6 +15061,12 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                     "";
                 avatarLink.replaceChildren(image);
             }
+            image.style.setProperty("width", "32px", "important");
+            image.style.setProperty("height", "32px", "important");
+            image.style.setProperty("max-width", "32px", "important");
+            image.style.setProperty("max-height", "32px", "important");
+            image.style.setProperty("object-fit", "cover", "important");
+            image.style.setProperty("border-radius", "50%", "important");
             image.onerror = () => {
                 if (
                     image.src.includes(
@@ -15105,6 +15157,11 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
                 "content___SMWAe";
             panel.id = PEOPLE_PANEL_IDS.customPanel;
             host.appendChild(panel);
+        }
+        if (panel.dataset.sakaluxTargetIsolationBound !== "1") {
+            panel.dataset.sakaluxTargetIsolationBound = "1";
+            panel.addEventListener("mouseover", event => event.stopPropagation());
+            panel.addEventListener("pointerover", event => event.stopPropagation());
         }
         panel.replaceChildren();
         const players = playerLists[type]

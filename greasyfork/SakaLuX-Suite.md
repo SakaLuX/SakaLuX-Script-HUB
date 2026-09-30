@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.958**
+**v0.9.959**
 
 
 ## Repository synchronization
 
 - Verified: **2026-09-30**
-- Canonical version: **v0.9.958**
+- Canonical version: **v0.9.959**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,14 +60,22 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.958 — Release documentation synchronized with the current Suite userscript version**
-- Release documentation synchronized with the current Suite userscript version.
+**v0.9.959 — Target Alerts People-panel isolation and TornPDA avatar containment**
+- Scopes Target/Enemy tab discovery to Torn's actual #people_panel so Target Alerts can no longer attach to the private-chat tab bar.
+- Constrains Target Alerts player rows and avatars on TornPDA so a player image cannot expand across the whole People panel.
+- Stops custom Target/Enemy list hover events from leaking into Torn's native delegated profile-preview handlers while preserving normal links and list actions.
 
 ## Release history / Changelog
 
 
 
 
+
+
+### v0.9.959 — Target Alerts People-panel isolation and TornPDA avatar containment
+- Scopes Target/Enemy tab discovery to Torn's actual #people_panel so Target Alerts can no longer attach to the private-chat tab bar.
+- Constrains Target Alerts player rows and avatars on TornPDA so a player image cannot expand across the whole People panel.
+- Stops custom Target/Enemy list hover events from leaking into Torn's native delegated profile-preview handlers while preserving normal links and list actions.
 
 ### v0.9.958 — Release documentation synchronized with the current Suite userscript version
 - Release documentation synchronized with the current Suite userscript version.
