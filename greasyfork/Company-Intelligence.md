@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.45**
+**v1.8.46**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.45**
+- Canonical version: **v1.8.46**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,17 @@
 
 ## Current release note
 
-**v1.8.45 — Complete position discovery and top-layer editor**
-- Discovers and remembers real role names from the Company Positions page, including currently unoccupied roles.
-- Keeps Primary/Secondary Gains separate from position requirements so gain values are never used as qualification thresholds.
-- Opens `EDIT POSITION DATA` as a true top-layer modal above Company Intelligence/TornPDA and lists every detected role for manual data entry.
+**v1.8.46 — Company Position duplicate cleanup**
+- Deduplicates discovered company roles using a canonical role-name key.
+- Removes presentation-only slot counts and decorative suffixes from Torn position labels.
+- Merges duplicate cached rows while preserving manual Primary/Secondary values.
 
 ## Release history / Changelog
+
+### v1.8.46 — Company Position duplicate cleanup
+- Deduplicates the Position Data editor by canonical role name.
+- Normalizes role labels before saving so one Torn role cannot appear twice because of icons or slot-count suffixes.
+- Merges previously duplicated cached rows and keeps the most useful Primary/Secondary data.
 
 ### v1.8.45 — Complete position discovery and editor layering
 - Learns all actual company role names from Company Positions and remembers them for the current company, including vacant roles.

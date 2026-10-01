@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.45
+// @version      1.8.46
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -633,7 +633,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.44';
+  let v = '1.8.45';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1011,7 +1011,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.45',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.46',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1248,19 +1248,58 @@ function reqObj(primary,secondary){const r={manual:0,intelligence:0,endurance:0}
 function seededCompanyPositions(){const type=String(meta().type||'').toLowerCase();return type.includes('pub')?PUB_POSITIONS:[]}
 function positionReqCache(){const all=get(KEY.positionReqs,{})||{},key=String(detectCompanyId()||meta().name||'unknown');return {all,key,rows:all[key]||{}}}
 function savePositionReqRows(rows){if(!rows?.length)return;const c=positionReqCache();for(const row of rows){if(!row?.name)continue;const old=c.rows[row.name]||{};c.rows[row.name]={...old,...row,primary:row.primary||old.primary,secondary:row.secondary||old.secondary,updated:now()}}c.all[c.key]=c.rows;set(KEY.positionReqs,c.all)}
+function normalizedPositionDisplayName(raw){
+ let n=cleanPositionName(raw);
+ if(!n)return'';
+ // Torn can append slot counts, icons or decorative markers to the visible role label.
+ // Strip those presentation-only suffixes before storing/deduplicating the role.
+ let previous='';
+ while(n&&n!==previous){
+  previous=n;
+  n=n.replace(/\s+(?:\d+|[^A-Za-z0-9&'()\/-]+)$/g,'').trim();
+ }
+ return n;
+}
+function positionNameKey(raw){
+ return normalizedPositionDisplayName(raw).toLowerCase().replace(/[^a-z0-9]+/g,'');
+}
 function validPositionName(raw){
- const n=cleanPositionName(raw);
+ const n=normalizedPositionDisplayName(raw);
  if(!n)return'';
  if(/^(?:position|positions|company positions|primary|secondary|primary gains?|secondary gains?|primary stat|secondary stat|gains?|requirements?|employees?|vacant|occupied|apply|hire|fire|save|cancel)$/i.test(n))return'';
  if(/\b(?:MAN|INT|END)\b/i.test(n)||/^\d/.test(n))return'';
  return n;
 }
+function dedupePositionReqCache(){
+ const c=positionReqCache(),groups=new Map();
+ for(const [rawName,row] of Object.entries(c.rows||{})){
+  const name=validPositionName(rawName||row?.name);if(!name)continue;
+  const key=positionNameKey(name);if(!key)continue;
+  const old=groups.get(key);
+  if(!old){groups.set(key,{name,row:{...row,name}});continue}
+  const oldName=old.name;
+  // Prefer the shortest clean label (e.g. "Armorer" over "Armorer 3" / icon variants).
+  const chosen=name.length<oldName.length?name:oldName;
+  const manualOld=!!old.row?.manual,manualNew=!!row?.manual;
+  const preferred=manualNew&&!manualOld?row:old.row;
+  const fallback=preferred===row?old.row:row;
+  groups.set(key,{name:chosen,row:{...fallback,...preferred,name:chosen,primary:preferred?.primary||fallback?.primary||null,secondary:preferred?.secondary||fallback?.secondary||null,detected:!!(preferred?.detected||fallback?.detected),manual:!!(preferred?.manual||fallback?.manual),updated:Math.max(Number(preferred?.updated||0),Number(fallback?.updated||0))}});
+ }
+ const next={};for(const {name,row} of groups.values())next[name]=row;
+ if(JSON.stringify(next)!==JSON.stringify(c.rows||{})){c.all[c.key]=next;set(KEY.positionReqs,c.all)}
+ return next;
+}
 function rememberDetectedPositionNames(names){
- const clean=[...new Set((names||[]).map(validPositionName).filter(Boolean))];
- if(!clean.length)return clean;
+ const byKey=new Map();
+ for(const raw of names||[]){const name=validPositionName(raw),key=positionNameKey(name);if(!name||!key)continue;const old=byKey.get(key);if(!old||name.length<old.length)byKey.set(key,name)}
+ const clean=[...byKey.values()];if(!clean.length)return clean;
  const c=positionReqCache();
- for(const name of clean){const old=c.rows[name]||{};c.rows[name]={...old,name,detected:true,source:old.source||'Company Positions',updated:old.updated||now()}}
- c.all[c.key]=c.rows;set(KEY.positionReqs,c.all);return clean;
+ for(const name of clean){
+  const key=positionNameKey(name);let existingName=Object.keys(c.rows).find(x=>positionNameKey(x)===key);const old=existingName?c.rows[existingName]:{};
+  if(existingName&&existingName!==name)delete c.rows[existingName];
+  c.rows[name]={...old,name,detected:true,source:old.source||'Company Positions',updated:old.updated||now()};
+ }
+ c.all[c.key]=c.rows;set(KEY.positionReqs,c.all);dedupePositionReqCache();return clean;
 }
 function discoverCompanyPositionNamesFromPage(){
  if(document.hidden||!/(?:companies|joblist)\.php/i.test(location.pathname))return[];
@@ -1292,15 +1331,17 @@ function discoverCompanyPositionNamesFromPage(){
  return rememberDetectedPositionNames([...found]);
 }
 function detectedPositionNames(){
- const names=new Set();
- for(const e of employees().map(normEmp))if(e.position)names.add(e.position);
- const current=currentPosition();if(current&&!/not currently|not returned/i.test(current))names.add(current);
- Object.keys(positionReqCache().rows).forEach(x=>names.add(x));
+ dedupePositionReqCache();
+ const names=new Map();
+ const add=raw=>{const n=validPositionName(raw),k=positionNameKey(n);if(!n||!k)return;const old=names.get(k);if(!old||n.length<old.length)names.set(k,n)};
+ for(const e of employees().map(normEmp))add(e.position);
+ const current=currentPosition();if(current&&!/not currently|not returned/i.test(current))add(current);
+ Object.keys(positionReqCache().rows).forEach(add);
  let raw=first(profile(),['positions','company_positions','type.positions'],[]);
- if(Array.isArray(raw))raw.forEach(p=>{const n=positionLabel(p?.name||p?.position);if(n)names.add(n)});
- else if(raw&&typeof raw==='object')Object.keys(raw).forEach(n=>{if(n)names.add(n)});
- discoverCompanyPositionNamesFromPage().forEach(n=>names.add(n));
- return [...names].map(validPositionName).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+ if(Array.isArray(raw))raw.forEach(p=>add(positionLabel(p?.name||p?.position)));
+ else if(raw&&typeof raw==='object')Object.keys(raw).forEach(add);
+ discoverCompanyPositionNamesFromPage().forEach(add);
+ return [...names.values()].sort((a,b)=>a.localeCompare(b));
 }
 function cleanPositionName(raw){
  let t=String(raw||'').replace(/\s+/g,' ').trim();
@@ -1308,6 +1349,7 @@ function cleanPositionName(raw){
  return t;
 }
 function sanitizePositionReqCache(){
+ dedupePositionReqCache();
  const c=positionReqCache(),valid=new Set(detectedPositionNames().map(x=>String(x).toLowerCase())),next={};
  for(const [name,row] of Object.entries(c.rows||{})){
   const n=cleanPositionName(name);
