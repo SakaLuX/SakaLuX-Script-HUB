@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.42**
+**v1.8.43**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.42**
+- Canonical version: **v1.8.43**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,21 @@
 
 ## Current release note
 
-**v1.8.42 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0**
-- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
-- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
-- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
+**v1.8.43 — Generic company position requirements and manual editor**
+- Detects Primary and Secondary requirements from Company Positions for arbitrary company types instead of only Pub roles.
+- Adds **EDIT POSITIONS** in the Position tab so missing requirements can be entered and saved manually for the current company.
+- Prioritizes Torn API requirements, then Company Positions, then manual values, and uses coworker medians only as the final estimated fallback.
+- Clears saved position requirements automatically when the player changes company and labels coworker-only results as **ESTIMATED MATCH**.
 
 ## Release history / Changelog
+
+### v1.8.43 — Generic company position requirements and manual editor
+- Detects Primary and Secondary requirements from Company Positions for arbitrary company types instead of only Pub roles.
+- Adds **EDIT POSITIONS** in the Position tab so missing requirements can be entered and saved manually per current company.
+- Prioritizes Torn API requirements, then Company Positions, then manual values, and uses coworker medians only as the final estimated fallback.
+- Clears saved position requirements automatically when the player changes company so values cannot leak between different companies.
+- Labels coworker-only results as **ESTIMATED MATCH** rather than claiming guaranteed qualification.
+
 
 
 ### v1.8.42 — Settings Schema v1 and safe automatic migrations
