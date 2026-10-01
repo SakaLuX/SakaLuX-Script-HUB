@@ -1532,17 +1532,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.50",
+                    "version": "1.8.51",
                     "date": "2026-10-02",
                     "notes": [
-                        "Stops requesting the rendered Torn Wiki page for Company Data, which returned HTML in TornPDA instead of raw module source.",
-                        "Loads Module:Company_Data through the MediaWiki revisions API and extracts the raw module content before parsing positions.",
-                        "Tries multiple standard Torn Wiki API paths and keeps diagnostics/manual overrides intact if the network source is unavailable."
+                        "Uses TornPDA PDA_httpGet first for the official Company catalogue, with flutter bridge, GM_xmlhttpRequest and fetch fallbacks.",
+                        "Accepts TornPDA responseText, body, data, response, direct string and object response shapes instead of accidentally turning a valid response into an empty string.",
+                        "Replaces the generic Unexpected end of JSON input failure with explicit empty-response, HTML-response or invalid-JSON diagnostics."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.50",
+                "version": "1.8.51",
                 "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",

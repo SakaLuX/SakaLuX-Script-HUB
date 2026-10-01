@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.51
+// @version      1.8.52
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -634,7 +634,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.50';
+  let v = '1.8.51';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1012,7 +1012,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.51',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.52',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1021,7 +1021,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -1370,38 +1370,105 @@ function parseOfficialCompanyModule(raw){
  const sample=original.replace(/\s+/g,' ').slice(0,120);
  throw new Error('Official company catalogue format was not recognized'+(sample?' · response: '+sample:''));
 }
+function parseRecommendedStatsCell(text){
+ const req={manual:0,intelligence:0,endurance:0};
+ const src=String(text||'').replace(/,/g,' ');
+ const re=/(\d[\d\s.]*)\s*(MAN|INT|END)\b/gi;let m;
+ while((m=re.exec(src))){const value=num(String(m[1]).replace(/\D/g,''));const stat=statKey(m[2]);if(stat&&value>0)req[stat]=value}
+ return req;
+}
+function parseStatGainsCell(text){
+ const gains={manual:0,intelligence:0,endurance:0};
+ const src=String(text||'').replace(/,/g,' ');
+ const re=/(\d+(?:\.\d+)?)\s*(MAN|INT|END)\b/gi;let m;
+ while((m=re.exec(src))){const value=num(m[1]);const stat=statKey(m[2]);if(stat&&value>0)gains[stat]=value}
+ return gains;
+}
+function parseRenderedCompanyWiki(raw,typeName){
+ const html=String(raw||'').trim();if(!html)throw new Error('Rendered company wiki returned an empty response');
+ let doc;try{doc=new DOMParser().parseFromString(html,'text/html')}catch{throw new Error('Rendered company wiki HTML could not be parsed')}
+ if(!doc)throw new Error('Rendered company wiki HTML could not be parsed');
+ const tables=[...doc.querySelectorAll('table')];
+ let target=null;
+ for(const table of tables){
+  const headers=[...table.querySelectorAll('tr:first-child th, thead th')].map(x=>String(x.textContent||'').trim().toLowerCase());
+  const joined=headers.join(' | ');
+  if(/rank/.test(joined)&&/recommended\s+stats?/.test(joined)&&/stat\s+gains?/.test(joined)){target=table;break}
+ }
+ if(!target){
+  for(const table of tables){
+   const txt=String(table.textContent||'').toLowerCase();
+   if(txt.includes('recommended stats')&&txt.includes('stat gains')&&txt.includes('rank')){target=table;break}
+  }
+ }
+ if(!target)throw new Error('Rendered company wiki page did not contain a Job Positions table');
+ const positions={};
+ for(const tr of [...target.querySelectorAll('tr')].slice(1)){
+  const cells=[...tr.querySelectorAll('th,td')].map(x=>String(x.textContent||'').replace(/\s+/g,' ').trim());
+  if(cells.length<2)continue;
+  const name=validPositionName(cells[0]);if(!name)continue;
+  const req=parseRecommendedStatsCell(cells[1]);if(!Object.values(req).some(v=>v>0))continue;
+  const gains=parseStatGainsCell(cells[2]||'');
+  positions[name]={man_required:req.manual,int_required:req.intelligence,end_required:req.endurance,man_gain:gains.manual,int_gain:gains.intelligence,end_gain:gains.endurance,special_ability:cells[3]||'None'};
+ }
+ if(!Object.keys(positions).length)throw new Error('Rendered company wiki Job Positions table contained no readable position requirements');
+ const key='rendered-'+companyTypeKey(typeName);
+ return {[key]:{name:String(typeName||'Unknown company type'),positions}};
+}
+async function loadRenderedCompanyWiki(typeName){
+ const type=String(typeName||'').trim();if(!type||/^unknown$/i.test(type))throw new Error('Company type is unknown');
+ const slug=type.replace(/&/g,'and').replace(/\s+/g,'_');
+ const urls=[
+  'https://wiki.torn.com/wiki/'+encodeURIComponent(slug),
+  'https://wiki.torn.com/wiki/'+slug.split('_').map(encodeURIComponent).join('_')
+ ];
+ let last='';
+ for(const url of urls){
+  try{const raw=await wikiText(url);return parseRenderedCompanyWiki(raw,type)}catch(e){last=String(e?.message||e||'Rendered company wiki failed')}
+ }
+ throw new Error(last||'Rendered company wiki fallback failed');
+}
 async function ensureOfficialCompanyCatalog(force=false){
  const cached=officialCatalogCache();
  if(!force&&cached?.companies&&now()-num(cached.updated)<7*86400000){
   S.companyCatalogDiag={state:'cached',error:'',updated:num(cached.updated),source:'cache'};
   return cached.companies;
  }
- const endpoints=[
-  'https://wiki.torn.com/wiki/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data',
-  'https://wiki.torn.com/w/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data',
-  'https://wiki.torn.com/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data'
- ];
+ const typeName=String(meta().type||'').trim();
  try{
   S.companyCatalogDiag={state:'loading',error:'',updated:num(cached?.updated),source:'network'};
+  // TornPDA often receives HTML from wiki API endpoints. Prefer the rendered company page there.
+  if(typeof window.PDA_httpGet==='function'||window.flutter_inappwebview?.callHandler){
+   try{
+    const companies=await loadRenderedCompanyWiki(typeName);const updated=now();set(KEY.companyCatalog,{updated,companies});
+    S.companyCatalogDiag={state:'loaded',error:'',updated,source:'Rendered Torn Wiki'};return companies;
+   }catch(e){console.warn('[SakaLuX Company] rendered wiki fallback first attempt failed',e)}
+  }
+  const endpoints=[
+   'https://wiki.torn.com/wiki/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data',
+   'https://wiki.torn.com/w/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data',
+   'https://wiki.torn.com/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data'
+  ];
   let lastError='';
   for(const url of endpoints){
    try{
-    const raw=await wikiText(url);
-    const clean=String(raw||'').replace(/^\uFEFF/,'').trim();
+    const raw=await wikiText(url),clean=String(raw||'').replace(/^\uFEFF/,'').trim();
     if(!clean)throw new Error('MediaWiki API returned an empty response');
     if(/^<!doctype|^<html/i.test(clean))throw new Error('MediaWiki API returned HTML instead of JSON');
     let envelope;try{envelope=JSON.parse(clean)}catch(e){throw new Error('MediaWiki API returned invalid JSON: '+String(e?.message||e))}
-    const page=envelope?.query?.pages?.[0]||Object.values(envelope?.query?.pages||{})[0];
-    const rev=page?.revisions?.[0];
+    const page=envelope?.query?.pages?.[0]||Object.values(envelope?.query?.pages||{})[0],rev=page?.revisions?.[0];
     const source=rev?.slots?.main?.content??rev?.slots?.main?.['*']??rev?.content??rev?.['*'];
     if(!source)throw new Error('MediaWiki API returned no Module:Company_Data source');
-    const companies=parseOfficialCompanyModule(source);
-    const updated=now();set(KEY.companyCatalog,{updated,companies});
-    S.companyCatalogDiag={state:'loaded',error:'',updated,source:'MediaWiki API'};
-    return companies;
+    const companies=parseOfficialCompanyModule(source),updated=now();set(KEY.companyCatalog,{updated,companies});
+    S.companyCatalogDiag={state:'loaded',error:'',updated,source:'MediaWiki API'};return companies;
    }catch(e){lastError=String(e?.message||e||'Unknown MediaWiki API error')}
   }
-  throw new Error(lastError||'All MediaWiki API endpoints failed');
+  // Final generic fallback: parse the public company page HTML table.
+  try{
+   const companies=await loadRenderedCompanyWiki(typeName),updated=now();set(KEY.companyCatalog,{updated,companies});
+   S.companyCatalogDiag={state:'loaded',error:'',updated,source:'Rendered Torn Wiki'};return companies;
+  }catch(e){lastError=String(e?.message||e||lastError)}
+  throw new Error(lastError||'All official company catalogue sources failed');
  }catch(e){
   const error=String(e?.message||e||'Unknown catalogue error');
   if(cached?.companies){S.companyCatalogDiag={state:'stale-cache',error,updated:num(cached.updated),source:'cache'};return cached.companies}
@@ -1429,6 +1496,7 @@ function companyCatalogDiagnostics(){
   updated:num(d.updated||cached?.updated),
   companyType:String(meta().type||'Unknown'),
   matchedType:String(match?.c?.name||''),
+  source:String(d.source||''),
   positions:rows.length
  };
 }
@@ -1437,7 +1505,7 @@ function companyCatalogDiagnosticsHtml(){
  const ok=d.positions>0&&d.matchedType;
  const status=d.state==='failed'?'FAILED ❌':d.state==='loading'?'LOADING…':d.state==='stale-cache'?'STALE CACHE ⚠️':ok?'LOADED ✅':'NOT MATCHED ⚠️';
  const age=d.updated?Math.max(0,Math.floor((now()-d.updated)/60000)):null;
- return `<div class="ci-card" style="margin:10px 0"><div class="ci-card-title">Company Position Diagnostics</div>${kv('Official catalogue',status)}${kv('Company type',esc(d.companyType||'Unknown'))}${kv('Matched catalogue type',d.matchedType?esc(d.matchedType):'Not matched')}${kv('Positions loaded',String(d.positions))}${d.updated?kv('Catalogue age',age+' min'):''}${d.error?`<div class="ci-note" style="color:#ffb3b3;margin-top:8px">${esc(d.error)}</div>`:''}<div class="ci-actions" style="margin-top:8px"><button class="ci-btn" data-refresh-catalog>↻ RETRY CATALOGUE</button></div></div>`;
+ return `<div class="ci-card" style="margin:10px 0"><div class="ci-card-title">Company Position Diagnostics</div>${kv('Official catalogue',status)}${kv('Company type',esc(d.companyType||'Unknown'))}${kv('Matched catalogue type',d.matchedType?esc(d.matchedType):'Not matched')}${d.source?kv('Source',esc(d.source)):''}${kv('Positions loaded',String(d.positions))}${d.updated?kv('Catalogue age',age+' min'):''}${d.error?`<div class="ci-note" style="color:#ffb3b3;margin-top:8px">${esc(d.error)}</div>`:''}<div class="ci-actions" style="margin-top:8px"><button class="ci-btn" data-refresh-catalog>↻ RETRY CATALOGUE</button></div></div>`;
 }
 function officialCompanyPositions(){
  const match=currentOfficialCompanyType();if(!match?.c?.positions)return[];
@@ -1559,7 +1627,7 @@ async function refresh(){
   S.employment=employment;set(APP.key+':employment',employment);
   if(!employment.id){
    clearCurrentCompany();S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);
-   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
+   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
   }
   if(previousId&&previousId!==employment.id)clearCurrentCompany();
  }

@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.51**
+**v1.8.52**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.51**
+- Canonical version: **v1.8.52**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,17 @@
 
 ## Current release note
 
-**v1.8.51 — TornPDA-safe Company catalogue transport**
-- Uses TornPDA `PDA_httpGet` first and falls back through the Flutter bridge, `GM_xmlhttpRequest` and normal `fetch`.
-- Understands all response shapes used by TornPDA (`responseText`, `body`, `data`, `response`, direct text/object), fixing the empty-response path that caused `Unexpected end of JSON input`.
-- Adds precise diagnostics for empty, HTML and malformed JSON responses so future catalogue failures identify the actual transport problem.
+**v1.8.52 — Rendered Wiki Company Positions fallback**
+- Uses the public company-specific Torn Wiki page as the preferred source on TornPDA when MediaWiki API requests are returned as HTML.
+- Parses the real `Job Positions` table for rank, recommended MAN/INT/END requirements and stat gains instead of treating HTML as JSON.
+- Keeps MediaWiki API support for compatible environments and reports the active source in Company Position Diagnostics.
 
 ## Release history / Changelog
+
+### v1.8.52 — Rendered Wiki Company Positions fallback
+- Fixes the confirmed TornPDA error `MediaWiki API returned HTML instead of JSON`.
+- Reads the detected company type's public Torn Wiki page and parses only the `Job Positions` table, avoiding unrelated labels such as Primary Gains or Secondary Gains.
+- Preserves the existing official catalogue cache, manual overrides and diagnostics while adding an explicit source indicator.
 
 ### v1.8.51 — TornPDA-safe Company catalogue transport
 - Fixes the confirmed `Unexpected end of JSON input` error from Company Position Diagnostics.
