@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.43**
+**v1.8.44**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.43**
+- Canonical version: **v1.8.44**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,13 +32,18 @@
 
 ## Current release note
 
-**v1.8.43 — Generic company position requirements and manual editor**
-- Detects Primary and Secondary requirements from Company Positions for arbitrary company types instead of only Pub roles.
-- Adds **EDIT POSITIONS** in the Position tab so missing requirements can be entered and saved manually for the current company.
-- Prioritizes Torn API requirements, then Company Positions, then manual values, and uses coworker medians only as the final estimated fallback.
-- Clears saved position requirements automatically when the player changes company and labels coworker-only results as **ESTIMATED MATCH**.
+**v1.8.44 — Position Advisor UI restoration and safe company-position parsing**
+- Restores the cleaner Position Advisor layout used before v1.8.43 while keeping the manual position-data editor.
+- Prevents headings such as `Primary Gains` and `Secondary Gains` from being interpreted as company positions.
+- Imports Company Positions requirements only when they match a real detected company position and removes invalid cached rows.
 
 ## Release history / Changelog
+
+### v1.8.44 — Position Advisor UI restoration and safe parsing
+- Restores the compact Position Advisor presentation from the previous stable layout.
+- Keeps `EDIT POSITION DATA` as a small secondary action instead of changing the whole Position screen.
+- Stops generic headings such as `Primary Gains` and `Secondary Gains` from becoming fake positions.
+- Cleans invalid cached position rows and only accepts scraped requirements tied to a real detected company position.
 
 ### v1.8.43 — Generic company position requirements and manual editor
 - Detects Primary and Secondary requirements from Company Positions for arbitrary company types instead of only Pub roles.

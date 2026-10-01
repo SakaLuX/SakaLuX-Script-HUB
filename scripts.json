@@ -400,17 +400,17 @@
         }
       ],
       "release": {
-        "version": "1.8.43",
+        "version": "1.8.44",
         "date": "2026-10-02",
         "notes": [
-          "Adds generic Company Positions requirement detection for every company type instead of relying on Pub-only position names.",
-          "Adds an EDIT POSITIONS editor for manually saving Primary and Secondary work-stat requirements when Torn does not expose them.",
-          "Uses requirement priority API → Company Positions → manual values → coworker estimate, labels estimated matches honestly, and clears saved position requirements automatically when the player changes company."
+          "Restores the cleaner Position Advisor layout used before v1.8.43 while keeping the manual position-data editor.",
+          "Prevents Company Positions headings such as Primary Gains and Secondary Gains from being misread as job positions.",
+          "Only imports Company Positions data when it can be tied to a real detected company position, and removes poisoned cached rows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.43",
+      "version": "1.8.44",
       "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",

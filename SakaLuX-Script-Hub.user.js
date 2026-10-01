@@ -1532,17 +1532,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.42",
-                    "date": "2026-09-26",
+                    "version": "1.8.43",
+                    "date": "2026-10-02",
                     "notes": [
-                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+                        "Adds generic Company Positions requirement detection for every company type instead of relying on Pub-only position names.",
+                        "Adds an EDIT POSITIONS editor for manually saving Primary and Secondary work-stat requirements when Torn does not expose them.",
+                        "Uses requirement priority API → Company Positions → manual values → coworker estimate, labels estimated matches honestly, and clears saved position requirements automatically when the player changes company."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.42",
+                "version": "1.8.43",
                 "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
