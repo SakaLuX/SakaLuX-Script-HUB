@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.50**
+**v1.8.51**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.50**
+- Canonical version: **v1.8.51**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,17 @@
 
 ## Current release note
 
-**v1.8.50 — MediaWiki API Company catalogue loader**
-- Replaces the rendered `Module:Company_Data?action=raw` page request, which TornPDA was receiving as HTML, with MediaWiki revision API requests.
-- Extracts the module source from the API response and feeds that source into the existing structured Company Data parser.
-- Tries multiple standard Torn Wiki API paths and preserves diagnostics, cache fallback and per-company manual overrides.
+**v1.8.51 — TornPDA-safe Company catalogue transport**
+- Uses TornPDA `PDA_httpGet` first and falls back through the Flutter bridge, `GM_xmlhttpRequest` and normal `fetch`.
+- Understands all response shapes used by TornPDA (`responseText`, `body`, `data`, `response`, direct text/object), fixing the empty-response path that caused `Unexpected end of JSON input`.
+- Adds precise diagnostics for empty, HTML and malformed JSON responses so future catalogue failures identify the actual transport problem.
 
 ## Release history / Changelog
+
+### v1.8.51 — TornPDA-safe Company catalogue transport
+- Fixes the confirmed `Unexpected end of JSON input` error from Company Position Diagnostics.
+- Routes catalogue reads through the same TornPDA-compatible transport strategy already used by stable SakaLuX modules.
+- Preserves MediaWiki API parsing, official position matching, cache fallback and manual per-company overrides.
 
 ### v1.8.50 — MediaWiki API Company catalogue loader
 - Fixes the confirmed TornPDA failure where the Company Data request returned a full HTML page beginning with `<!DOCTYPE html>`.

@@ -1532,17 +1532,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.49",
+                    "version": "1.8.50",
                     "date": "2026-10-02",
                     "notes": [
-                        "Makes the official Company Data parser accept direct JSON, Lua long-bracket strings, quoted jsonDecode payloads and HTML-wrapped responses.",
-                        "Keeps Company Position Diagnostics and now shows the beginning of an unrecognized response if every parser strategy fails.",
-                        "Fixes FAILED / format was not recognized cases seen in TornPDA while preserving structured official position data and manual overrides."
+                        "Stops requesting the rendered Torn Wiki page for Company Data, which returned HTML in TornPDA instead of raw module source.",
+                        "Loads Module:Company_Data through the MediaWiki revisions API and extracts the raw module content before parsing positions.",
+                        "Tries multiple standard Torn Wiki API paths and keeps diagnostics/manual overrides intact if the network source is unavailable."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.49",
+                "version": "1.8.50",
                 "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",

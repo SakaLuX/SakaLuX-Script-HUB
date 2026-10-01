@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.50
+// @version      1.8.51
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -634,7 +634,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.49';
+  let v = '1.8.50';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1012,7 +1012,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.50',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.51',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1021,7 +1021,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -1268,15 +1268,43 @@ function validPositionName(raw){
 function officialCatalogCache(){
  const c=get(KEY.companyCatalog,null);return c&&typeof c==='object'?c:null;
 }
-function wikiText(url){
- return new Promise((resolve,reject)=>{
-  let done=false;const finish=(fn,v)=>{if(done)return;done=true;fn(v)};
-  const parse=r=>finish(resolve,String(r?.responseText??r?.response??''));
+async function wikiText(url){
+ const checked=response=>{
+  const raw=typeof response==='string'?response:(response?.responseText??response?.body??response?.data??response?.response??response);
+  if(raw==null)throw new Error('Empty response received from catalogue transport');
+  const text=typeof raw==='string'?raw:JSON.stringify(raw);
+  if(!String(text||'').trim())throw new Error('Empty response received from catalogue transport');
+  return String(text);
+ };
+ const viaGM=()=>new Promise((resolve,reject)=>{
+  let settled=false;const done=(fn,v)=>{if(settled)return;settled=true;fn(v)};
   try{
-   const x=GM_xmlhttpRequest({method:'GET',url,timeout:15000,headers:{Accept:'text/plain'},onload:parse,onerror:()=>finish(reject,new Error('Official company catalogue request failed')),ontimeout:()=>finish(reject,new Error('Official company catalogue request timed out'))});
-   if(x&&typeof x.then==='function')x.then(parse).catch(e=>finish(reject,e));
-  }catch(e){fetch(url).then(r=>r.text()).then(t=>finish(resolve,t)).catch(err=>finish(reject,err))}
- })
+   const req=GM_xmlhttpRequest({
+    method:'GET',url,timeout:15000,headers:{Accept:'application/json, text/plain, */*'},
+    onload:r=>{try{if(Number(r?.status||200)>=400)throw new Error('HTTP '+r.status);done(resolve,checked(r))}catch(e){done(reject,e)}},
+    onerror:()=>done(reject,new Error('GM catalogue request failed')),
+    ontimeout:()=>done(reject,new Error('GM catalogue request timed out'))
+   });
+   if(req&&typeof req.then==='function')req.then(r=>{try{done(resolve,checked(r))}catch(e){done(reject,e)}}).catch(e=>done(reject,e));
+  }catch(e){done(reject,e)}
+ });
+ const viaFetch=async()=>{
+  const r=await fetch(url,{method:'GET',headers:{Accept:'application/json, text/plain, */*'},credentials:'omit',cache:'no-store'});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return checked(await r.text());
+ };
+ let last=null;
+ if(typeof window.PDA_httpGet==='function'){
+  try{return checked(await window.PDA_httpGet(url,{Accept:'application/json, text/plain, */*'}))}catch(e){last=e}
+ }
+ if(window.flutter_inappwebview?.callHandler){
+  try{return checked(await window.flutter_inappwebview.callHandler('PDA_httpGet',url,{Accept:'application/json, text/plain, */*'}))}catch(e){last=e}
+ }
+ if(typeof GM_xmlhttpRequest==='function'){
+  try{return await viaGM()}catch(e){last=e}
+ }
+ try{return await viaFetch()}catch(e){last=e}
+ throw last||new Error('No catalogue HTTP transport is available');
 }
 function parseOfficialCompanyModule(raw){
  const original=String(raw||'').replace(/^\uFEFF/,'').trim();
@@ -1359,7 +1387,10 @@ async function ensureOfficialCompanyCatalog(force=false){
   for(const url of endpoints){
    try{
     const raw=await wikiText(url);
-    const envelope=JSON.parse(String(raw||'').replace(/^\uFEFF/,'').trim());
+    const clean=String(raw||'').replace(/^\uFEFF/,'').trim();
+    if(!clean)throw new Error('MediaWiki API returned an empty response');
+    if(/^<!doctype|^<html/i.test(clean))throw new Error('MediaWiki API returned HTML instead of JSON');
+    let envelope;try{envelope=JSON.parse(clean)}catch(e){throw new Error('MediaWiki API returned invalid JSON: '+String(e?.message||e))}
     const page=envelope?.query?.pages?.[0]||Object.values(envelope?.query?.pages||{})[0];
     const rev=page?.revisions?.[0];
     const source=rev?.slots?.main?.content??rev?.slots?.main?.['*']??rev?.content??rev?.['*'];
@@ -1528,7 +1559,7 @@ async function refresh(){
   S.employment=employment;set(APP.key+':employment',employment);
   if(!employment.id){
    clearCurrentCompany();S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);
-   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
+   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
   }
   if(previousId&&previousId!==employment.id)clearCurrentCompany();
  }
