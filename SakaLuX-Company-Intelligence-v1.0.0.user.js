@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.52
+// @version      1.8.53
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -634,7 +634,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.51';
+  let v = '1.8.52';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1012,7 +1012,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.52',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.53',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1021,7 +1021,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -1265,6 +1265,26 @@ function validPositionName(raw){
  if(/\b(?:MAN|INT|END)\b/i.test(n)||/^\d/.test(n))return'';
  return n;
 }
+const BUILTIN_COMPANY_CATALOG={
+ '37':{name:'Private Security Firm',positions:{
+  'Security Contractor':{man_required:70000,int_required:0,end_required:35000,man_gain:64,int_gain:0,end_gain:32,special_ability:'None'},
+  'Team Leader':{man_required:110000,int_required:0,end_required:55000,man_gain:68,int_gain:0,end_gain:34,special_ability:'Manager'},
+  'Defense Consultant':{man_required:0,int_required:135000,end_required:67500,man_gain:0,int_gain:70,end_gain:35,special_ability:'Trainer'},
+  'Spokesperson':{man_required:0,int_required:80000,end_required:40000,man_gain:0,int_gain:65,end_gain:33,special_ability:'Marketer'},
+  'Company Liaison':{man_required:0,int_required:57500,end_required:115000,man_gain:0,int_gain:34,end_gain:68,special_ability:'Secretary'},
+  'Chief Strategist':{man_required:0,int_required:165000,end_required:82500,man_gain:0,int_gain:71,end_gain:36,special_ability:'None'},
+  'Reconnaissance':{man_required:80000,int_required:40000,end_required:0,man_gain:65,int_gain:33,end_gain:0,special_ability:'None'},
+  'Disposal Engineer':{man_required:0,int_required:85000,end_required:42500,man_gain:0,int_gain:66,end_gain:33,special_ability:'None'},
+  'Armorer':{man_required:40000,int_required:0,end_required:80000,man_gain:33,int_gain:0,end_gain:65,special_ability:'None'},
+  'Medic':{man_required:0,int_required:90000,end_required:45000,man_gain:0,int_gain:66,end_gain:33,special_ability:'Cleaner'},
+  'Comms Engineer':{man_required:0,int_required:85000,end_required:42500,man_gain:0,int_gain:66,end_gain:33,special_ability:'None'}
+ }}
+};
+function builtinCompanyCatalogFor(typeName){
+ const wanted=companyTypeKey(typeName);if(!wanted)return null;
+ const out={};for(const [id,c] of Object.entries(BUILTIN_COMPANY_CATALOG)){if(companyTypeKey(c?.name)===wanted)out[id]=c}
+ return Object.keys(out).length?out:null;
+}
 function officialCatalogCache(){
  const c=get(KEY.companyCatalog,null);return c&&typeof c==='object'?c:null;
 }
@@ -1435,6 +1455,8 @@ async function ensureOfficialCompanyCatalog(force=false){
   return cached.companies;
  }
  const typeName=String(meta().type||'').trim();
+ const builtin=builtinCompanyCatalogFor(typeName);
+ if(builtin){const updated=now();set(KEY.companyCatalog,{updated,companies:builtin});S.companyCatalogDiag={state:'loaded',error:'',updated,source:'Built-in verified catalogue'};return builtin}
  try{
   S.companyCatalogDiag={state:'loading',error:'',updated:num(cached?.updated),source:'network'};
   // TornPDA often receives HTML from wiki API endpoints. Prefer the rendered company page there.
@@ -1627,7 +1649,7 @@ async function refresh(){
   S.employment=employment;set(APP.key+':employment',employment);
   if(!employment.id){
    clearCurrentCompany();S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);
-   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
+   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
   }
   if(previousId&&previousId!==employment.id)clearCurrentCompany();
  }

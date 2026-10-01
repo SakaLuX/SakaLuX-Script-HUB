@@ -400,17 +400,17 @@
         }
       ],
       "release": {
-        "version": "1.8.52",
+        "version": "1.8.53",
         "date": "2026-10-02",
         "notes": [
-          "Adds a TornPDA-first fallback that reads the public company Wiki page and parses its Job Positions table when MediaWiki API endpoints return HTML.",
-          "Extracts every real position, recommended MAN/INT/END requirements and stat gains from the rendered company page for the detected company type.",
-          "Diagnostics now show whether data came from the MediaWiki API, rendered Torn Wiki or stale cache."
+          "Adds a verified built-in Private Security Firm position catalogue so TornPDA no longer depends on Wiki HTML/API compatibility for this company type.",
+          "Loads all 11 official Private Security Firm positions with MAN/INT/END requirements and stat gains before attempting any remote Wiki source.",
+          "Company Position Diagnostics reports Built-in verified catalogue when this reliable fallback is active."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.52",
+      "version": "1.8.53",
       "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",

@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.52**
+**v1.8.53**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.52**
+- Canonical version: **v1.8.53**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,17 @@
 
 ## Current release note
 
-**v1.8.52 — Rendered Wiki Company Positions fallback**
-- Uses the public company-specific Torn Wiki page as the preferred source on TornPDA when MediaWiki API requests are returned as HTML.
-- Parses the real `Job Positions` table for rank, recommended MAN/INT/END requirements and stat gains instead of treating HTML as JSON.
-- Keeps MediaWiki API support for compatible environments and reports the active source in Company Position Diagnostics.
+**v1.8.53 — Verified built-in Company Position fallback**
+- Adds a verified built-in `Private Security Firm` catalogue with all official positions and MAN/INT/END requirements.
+- Uses the built-in catalogue before Wiki network requests, avoiding TornPDA responses that return HTML without the expected Job Positions table.
+- Diagnostics reports `Built-in verified catalogue` when this source is active.
 
 ## Release history / Changelog
+
+### v1.8.53 — Verified built-in Company Position fallback
+- Fixes the confirmed TornPDA error `Rendered company wiki page did not contain a Job Positions table` for Private Security Firm.
+- Embeds all 11 official positions and their required working stats, including Reconnaissance 80,000 MAN / 40,000 INT and Armorer 40,000 MAN / 80,000 END.
+- Keeps remote catalogue loading as a fallback for other company types while preserving manual overrides and diagnostics.
 
 ### v1.8.52 — Rendered Wiki Company Positions fallback
 - Fixes the confirmed TornPDA error `MediaWiki API returned HTML instead of JSON`.
