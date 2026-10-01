@@ -400,17 +400,17 @@
         }
       ],
       "release": {
-        "version": "1.8.47",
+        "version": "1.8.48",
         "date": "2026-10-02",
         "notes": [
-          "Replaces fragile Company Positions DOM scraping with Torn official structured Company Data for every company type.",
-          "Loads exact official role names and MAN/INT/END requirements, so labels such as Primary Gains and Primary Stat can no longer become fake positions.",
-          "Keeps per-company manual overrides in EDIT POSITION DATA, adds Reset to official, and removes poisoned scraper cache rows automatically."
+          "Adds live diagnostics to EDIT POSITION DATA for the official Torn company catalogue.",
+          "Shows catalogue state, detected company type, matched official type, loaded position count, cache age and the exact loader error.",
+          "Adds RETRY CATALOGUE to force a fresh official-data request without clearing valid manual overrides."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.47",
+      "version": "1.8.48",
       "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",

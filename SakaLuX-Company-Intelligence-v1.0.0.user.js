@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.47
+// @version      1.8.48
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1012,7 +1012,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.47',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.48',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1021,7 +1021,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -1287,12 +1287,21 @@ function parseOfficialCompanyModule(raw){
 }
 async function ensureOfficialCompanyCatalog(force=false){
  const cached=officialCatalogCache();
- if(!force&&cached?.companies&&now()-num(cached.updated)<7*86400000)return cached.companies;
+ if(!force&&cached?.companies&&now()-num(cached.updated)<7*86400000){
+  S.companyCatalogDiag={state:'cached',error:'',updated:num(cached.updated),source:'cache'};
+  return cached.companies;
+ }
  try{
+  S.companyCatalogDiag={state:'loading',error:'',updated:num(cached?.updated),source:'network'};
   const raw=await wikiText('https://wiki.torn.com/wiki/Module:Company_Data?action=raw');
-  const companies=parseOfficialCompanyModule(raw);set(KEY.companyCatalog,{updated:now(),companies});return companies;
+  const companies=parseOfficialCompanyModule(raw);
+  const updated=now();set(KEY.companyCatalog,{updated,companies});
+  S.companyCatalogDiag={state:'loaded',error:'',updated,source:'network'};
+  return companies;
  }catch(e){
-  if(cached?.companies)return cached.companies;
+  const error=String(e?.message||e||'Unknown catalogue error');
+  if(cached?.companies){S.companyCatalogDiag={state:'stale-cache',error,updated:num(cached.updated),source:'cache'};return cached.companies}
+  S.companyCatalogDiag={state:'failed',error,updated:0,source:'none'};
   console.warn('[SakaLuX Company] official catalogue unavailable',e);return null;
  }
 }
@@ -1305,6 +1314,26 @@ function currentOfficialCompanyType(companies=officialCatalogCache()?.companies)
   if(key&&wanted&&(key.includes(wanted)||wanted.includes(key)))fallback={id,c};
  }
  return fallback;
+}
+function companyCatalogDiagnostics(){
+ const cached=officialCatalogCache(),companies=cached?.companies||null,match=currentOfficialCompanyType(companies),rows=match?.c?.positions?Object.keys(match.c.positions):[];
+ const d=S.companyCatalogDiag||{};
+ const state=d.state||(companies?'cached':'not-loaded');
+ return {
+  state,
+  error:String(d.error||''),
+  updated:num(d.updated||cached?.updated),
+  companyType:String(meta().type||'Unknown'),
+  matchedType:String(match?.c?.name||''),
+  positions:rows.length
+ };
+}
+function companyCatalogDiagnosticsHtml(){
+ const d=companyCatalogDiagnostics();
+ const ok=d.positions>0&&d.matchedType;
+ const status=d.state==='failed'?'FAILED ❌':d.state==='loading'?'LOADING…':d.state==='stale-cache'?'STALE CACHE ⚠️':ok?'LOADED ✅':'NOT MATCHED ⚠️';
+ const age=d.updated?Math.max(0,Math.floor((now()-d.updated)/60000)):null;
+ return `<div class="ci-card" style="margin:10px 0"><div class="ci-card-title">Company Position Diagnostics</div>${kv('Official catalogue',status)}${kv('Company type',esc(d.companyType||'Unknown'))}${kv('Matched catalogue type',d.matchedType?esc(d.matchedType):'Not matched')}${kv('Positions loaded',String(d.positions))}${d.updated?kv('Catalogue age',age+' min'):''}${d.error?`<div class="ci-note" style="color:#ffb3b3;margin-top:8px">${esc(d.error)}</div>`:''}<div class="ci-actions" style="margin-top:8px"><button class="ci-btn" data-refresh-catalog>↻ RETRY CATALOGUE</button></div></div>`;
 }
 function officialCompanyPositions(){
  const match=currentOfficialCompanyType();if(!match?.c?.positions)return[];
@@ -1362,8 +1391,8 @@ async function openPositionRequirementsEditor(){
  if(!names.length){alert('Official position data is not available yet for this company type. Check the company type/API data and try again.');return}
  const cache=positionReqCache().rows,official=new Map(officialCompanyPositions().map(x=>[positionNameKey(x.name),x])),back=document.createElement('div');back.className='ci-dialogback';back.id='ci-position-editor';
  const statOptions=value=>['','manual','intelligence','endurance'].map(v=>`<option value="${v}" ${v===value?'selected':''}>${v?statShort(v):'— Select —'}</option>`).join('');
- back.innerHTML=`<div class="ci-dialog ci-position-editor"><h3>Company Position Requirements</h3><p class="ci-note">Company: <b>${esc(meta().name)}</b> · Type: <b>${esc(meta().type)}</b>. Positions come from Torn's structured official company catalogue. Change a value only when you want a manual override for this company.</p><div class="ci-position-edit-list">${names.map(name=>{const base=official.get(positionNameKey(name))||{},row=cache[name]?.manual?cache[name]:{},primary=row.primary||base.primary,secondary=row.secondary||base.secondary;return `<div class="ci-position-edit-row" data-pos-row data-name="${esc(name)}"><b>${esc(name)}</b><small>${row.manual?'MANUAL OVERRIDE':'OFFICIAL'}</small><label>Primary<select data-primary-stat>${statOptions(primary?.stat||'')}</select><input data-primary-value type="number" min="0" value="${num(primary?.value)}"></label><label>Secondary<select data-secondary-stat>${statOptions(secondary?.stat||'')}</select><input data-secondary-value type="number" min="0" value="${num(secondary?.value)}"></label></div>`}).join('')}</div><div class="ci-actions"><button class="ci-btn primary" data-save>Save overrides</button><button class="ci-btn" data-reset>Reset to official</button><button class="ci-btn" data-cancel>Cancel</button></div></div>`;
- document.body.appendChild(back);$('[data-cancel]',back).onclick=()=>back.remove();$('[data-reset]',back).onclick=()=>{const c=positionReqCache();c.all[c.key]={};set(KEY.positionReqs,c.all);back.remove();render()};$('[data-save]',back).onclick=()=>{const rows=[];$$('[data-pos-row]',back).forEach(el=>{const name=el.dataset.name,base=official.get(positionNameKey(name))||{},ps=$('[data-primary-stat]',el)?.value,pv=num($('[data-primary-value]',el)?.value),ss=$('[data-secondary-stat]',el)?.value,sv=num($('[data-secondary-value]',el)?.value),bp=base.primary,bs=base.secondary;const changed=(ps||'')!==(bp?.stat||'')||pv!==num(bp?.value)||(ss||'')!==(bs?.stat||'')||sv!==num(bs?.value);if(changed&&((ps&&pv)||(ss&&sv)))rows.push({name,primary:ps&&pv?{stat:ps,value:pv}:null,secondary:ss&&sv?{stat:ss,value:sv}:null,manual:true,source:'Manual override'})});const c=positionReqCache();c.all[c.key]={};set(KEY.positionReqs,c.all);savePositionReqRows(rows);back.remove();render()};
+ back.innerHTML=`<div class="ci-dialog ci-position-editor"><h3>Company Position Requirements</h3><p class="ci-note">Company: <b>${esc(meta().name)}</b> · Type: <b>${esc(meta().type)}</b>. Positions come from Torn's structured official company catalogue. Change a value only when you want a manual override for this company.</p>${companyCatalogDiagnosticsHtml()}<div class="ci-position-edit-list">${names.map(name=>{const base=official.get(positionNameKey(name))||{},row=cache[name]?.manual?cache[name]:{},primary=row.primary||base.primary,secondary=row.secondary||base.secondary;return `<div class="ci-position-edit-row" data-pos-row data-name="${esc(name)}"><b>${esc(name)}</b><small>${row.manual?'MANUAL OVERRIDE':'OFFICIAL'}</small><label>Primary<select data-primary-stat>${statOptions(primary?.stat||'')}</select><input data-primary-value type="number" min="0" value="${num(primary?.value)}"></label><label>Secondary<select data-secondary-stat>${statOptions(secondary?.stat||'')}</select><input data-secondary-value type="number" min="0" value="${num(secondary?.value)}"></label></div>`}).join('')}</div><div class="ci-actions"><button class="ci-btn primary" data-save>Save overrides</button><button class="ci-btn" data-reset>Reset to official</button><button class="ci-btn" data-cancel>Cancel</button></div></div>`;
+ document.body.appendChild(back);const retry=$('[data-refresh-catalog]',back);if(retry)retry.onclick=async()=>{retry.disabled=true;retry.textContent='Loading…';await ensureOfficialCompanyCatalog(true);cleanupPositionCacheAgainstOfficial();back.remove();openPositionRequirementsEditor()};$('[data-cancel]',back).onclick=()=>back.remove();$('[data-reset]',back).onclick=()=>{const c=positionReqCache();c.all[c.key]={};set(KEY.positionReqs,c.all);back.remove();render()};$('[data-save]',back).onclick=()=>{const rows=[];$$('[data-pos-row]',back).forEach(el=>{const name=el.dataset.name,base=official.get(positionNameKey(name))||{},ps=$('[data-primary-stat]',el)?.value,pv=num($('[data-primary-value]',el)?.value),ss=$('[data-secondary-stat]',el)?.value,sv=num($('[data-secondary-value]',el)?.value),bp=base.primary,bs=base.secondary;const changed=(ps||'')!==(bp?.stat||'')||pv!==num(bp?.value)||(ss||'')!==(bs?.stat||'')||sv!==num(bs?.value);if(changed&&((ps&&pv)||(ss&&sv)))rows.push({name,primary:ps&&pv?{stat:ps,value:pv}:null,secondary:ss&&sv?{stat:ss,value:sv}:null,manual:true,source:'Manual override'})});const c=positionReqCache();c.all[c.key]={};set(KEY.positionReqs,c.all);savePositionReqRows(rows);back.remove();render()};
 }
 function fit(stats,p){
  const rs=[['manual',p.req.manual],['intelligence',p.req.intelligence],['endurance',p.req.endurance]].filter(x=>x[1]>0);
@@ -1426,7 +1455,7 @@ async function refresh(){
   S.employment=employment;set(APP.key+':employment',employment);
   if(!employment.id){
    clearCurrentCompany();S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);
-   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
+   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
   }
   if(previousId&&previousId!==employment.id)clearCurrentCompany();
  }

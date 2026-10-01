@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.47**
+**v1.8.48**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.47**
+- Canonical version: **v1.8.48**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,17 @@
 
 ## Current release note
 
-**v1.8.47 — Structured official Company Position catalogue**
-- Replaces heuristic page-text scraping with Torn's structured official Company Data catalogue for all company types.
-- Uses exact official role names and MAN/INT/END requirements, preventing headings such as `Primary Gains`, `Primary Stat`, or `Secondary Gains` from entering the position list.
-- Keeps the top-layer editor as a per-company manual override and adds `Reset to official`; stale scraper-generated rows are purged automatically.
+**v1.8.48 — Company Position catalogue diagnostics**
+- Adds a diagnostics block to `EDIT POSITION DATA` showing whether the official catalogue loaded, the detected company type, the matched catalogue type and the number of positions loaded.
+- Shows cache age and the exact catalogue loader/parser error when official values are unavailable.
+- Adds `RETRY CATALOGUE` to force a fresh official-data request directly from the editor.
 
 ## Release history / Changelog
+
+### v1.8.48 — Company Position catalogue diagnostics
+- Adds an on-screen health check for the structured official Company Position catalogue.
+- Distinguishes loaded, cached, stale-cache, not-matched and failed states so missing Primary/Secondary values can be diagnosed immediately.
+- Displays company-type matching, position count, cache age and loader errors, with a one-tap forced retry.
 
 ### v1.8.47 — Structured official Company Position catalogue
 - Stops discovering position names from arbitrary Company Positions DOM text.
