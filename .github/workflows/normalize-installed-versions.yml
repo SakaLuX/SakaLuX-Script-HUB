@@ -38,6 +38,7 @@ on:
       - '.github/scripts/add_company_catalog_diagnostics_v1848.py'
       - '.github/scripts/fix_company_catalog_parser_v1849.py'
       - '.github/scripts/fix_company_catalog_mediawiki_api_v1850.py'
+      - '.github/scripts/fix_company_catalog_tornpda_transport_v1851.py'
       - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
 permissions:
@@ -109,6 +110,8 @@ jobs:
         run: python3 .github/scripts/fix_company_catalog_parser_v1849.py
       - name: Load Company catalogue through MediaWiki API
         run: python3 .github/scripts/fix_company_catalog_mediawiki_api_v1850.py
+      - name: Use TornPDA-safe Company catalogue transport
+        run: python3 .github/scripts/fix_company_catalog_tornpda_transport_v1851.py
       - name: Correct Bazaar Smart Pricer v1.1.14 release metadata
         run: python3 .github/scripts/fix_bazaar_v1114_release.py
       - name: Repair historical changelog detail gaps
