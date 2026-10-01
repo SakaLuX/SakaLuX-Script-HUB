@@ -57,7 +57,8 @@ function parseRenderedCompanyWiki(raw,typeName){
   positions[name]={man_required:req.manual,int_required:req.intelligence,end_required:req.endurance,man_gain:gains.manual,int_gain:gains.intelligence,end_gain:gains.endurance,special_ability:cells[3]||'None'};
  }
  if(!Object.keys(positions).length)throw new Error('Rendered company wiki Job Positions table contained no readable position requirements');
- return {'rendered-'+companyTypeKey(typeName):{name:String(typeName||'Unknown company type'),positions}};
+ const key='rendered-'+companyTypeKey(typeName);
+ return {[key]:{name:String(typeName||'Unknown company type'),positions}};
 }
 async function loadRenderedCompanyWiki(typeName){
  const type=String(typeName||'').trim();if(!type||/^unknown$/i.test(type))throw new Error('Company type is unknown');
