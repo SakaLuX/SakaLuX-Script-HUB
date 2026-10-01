@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.48**
+**v1.8.49**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.48**
+- Canonical version: **v1.8.49**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,17 @@
 
 ## Current release note
 
-**v1.8.48 — Company Position catalogue diagnostics**
-- Adds a diagnostics block to `EDIT POSITION DATA` showing whether the official catalogue loaded, the detected company type, the matched catalogue type and the number of positions loaded.
-- Shows cache age and the exact catalogue loader/parser error when official values are unavailable.
-- Adds `RETRY CATALOGUE` to force a fresh official-data request directly from the editor.
+**v1.8.49 — Robust official Company Data parser**
+- Accepts direct JSON, Lua long-bracket `mw.text.jsonDecode` payloads, quoted payloads and HTML-wrapped source responses.
+- Fixes TornPDA cases where the official catalogue request succeeded but diagnostics showed `format was not recognized`.
+- Keeps the diagnostic panel and includes a short response preview only when parsing still fails, making any future format change immediately visible.
 
 ## Release history / Changelog
+
+### v1.8.49 — Robust official Company Data parser
+- Replaces the single fragile jsonDecode regex with multiple safe parsing strategies.
+- Supports direct JSON, Lua long-bracket strings, single/double quoted payloads and HTML-escaped/wrapped responses.
+- Adds a short response preview to diagnostics when all parser strategies fail, without exposing the Torn API key.
 
 ### v1.8.48 — Company Position catalogue diagnostics
 - Adds an on-screen health check for the structured official Company Position catalogue.

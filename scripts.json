@@ -400,17 +400,17 @@
         }
       ],
       "release": {
-        "version": "1.8.48",
+        "version": "1.8.49",
         "date": "2026-10-02",
         "notes": [
-          "Adds live diagnostics to EDIT POSITION DATA for the official Torn company catalogue.",
-          "Shows catalogue state, detected company type, matched official type, loaded position count, cache age and the exact loader error.",
-          "Adds RETRY CATALOGUE to force a fresh official-data request without clearing valid manual overrides."
+          "Makes the official Company Data parser accept direct JSON, Lua long-bracket strings, quoted jsonDecode payloads and HTML-wrapped responses.",
+          "Keeps Company Position Diagnostics and now shows the beginning of an unrecognized response if every parser strategy fails.",
+          "Fixes FAILED / format was not recognized cases seen in TornPDA while preserving structured official position data and manual overrides."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.48",
+      "version": "1.8.49",
       "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",

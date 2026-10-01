@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.48
+// @version      1.8.49
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -634,7 +634,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.47';
+  let v = '1.8.48';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1012,7 +1012,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.48',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.49',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1021,7 +1021,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -1279,11 +1279,68 @@ function wikiText(url){
  })
 }
 function parseOfficialCompanyModule(raw){
- const src=String(raw||'');
- const m=src.match(/mw\.text\.jsonDecode\(\"([\s\S]*)\"\)\s*$/);
- if(!m)throw new Error('Official company catalogue format was not recognized');
- let jsonText;try{jsonText=JSON.parse('"'+m[1]+'"')}catch{throw new Error('Official company catalogue could not be decoded')}
- const data=JSON.parse(jsonText);if(!data?.companies||typeof data.companies!=='object')throw new Error('Official company catalogue has no companies data');return data.companies;
+ const original=String(raw||'').replace(/^\uFEFF/,'').trim();
+ const accept=data=>{
+  if(data?.companies&&typeof data.companies==='object')return data.companies;
+  if(data&&typeof data==='object'&&!Array.isArray(data)){
+   const vals=Object.values(data);
+   if(vals.length&&vals.some(x=>x&&typeof x==='object'&&x.positions&&typeof x.positions==='object'))return data;
+  }
+  return null;
+ };
+ const parseJson=s=>{try{const data=JSON.parse(String(s||'').trim());return accept(data)}catch{return null}};
+ const decodeQuoted=(s,quote)=>{
+  let out='';
+  for(let i=1;i<s.length;i++){
+   const c=s[i];
+   if(c===quote)return {value:out,rest:s.slice(i+1)};
+   if(c==='\\'&&i+1<s.length){
+    const n=s[++i];
+    if(n==='n')out+='\n';else if(n==='r')out+='\r';else if(n==='t')out+='\t';else if(n==='b')out+='\b';else if(n==='f')out+='\f';
+    else if(n==='u'&&/^[0-9a-fA-F]{4}/.test(s.slice(i+1,i+5))){out+=String.fromCharCode(parseInt(s.slice(i+1,i+5),16));i+=4}
+    else out+=n;
+   }else out+=c;
+  }
+  return null;
+ };
+ const extractBalancedJson=s=>{
+  const start=s.search(/\{\s*["']companies["']\s*:/i);if(start<0)return null;
+  let depth=0,inStr=false,quote='',escNext=false;
+  for(let i=start;i<s.length;i++){
+   const c=s[i];
+   if(inStr){if(escNext){escNext=false;continue}if(c==='\\'){escNext=true;continue}if(c===quote)inStr=false;continue}
+   if(c==='"'||c==="'"){inStr=true;quote=c;continue}
+   if(c==='{')depth++;else if(c==='}'&&--depth===0)return s.slice(start,i+1);
+  }
+  return null;
+ };
+ const attempts=[];
+ const add=s=>{if(typeof s==='string'&&s.trim()&&!attempts.includes(s.trim()))attempts.push(s.trim())};
+ add(original);
+ if(/<!doctype|<html|<body|<pre/i.test(original)){
+  try{add(new DOMParser().parseFromString(original,'text/html').body?.textContent||'')}catch{}
+ }
+ for(const src of attempts.slice()){
+  const direct=parseJson(src);if(direct)return direct;
+  const idx=src.indexOf('mw.text.jsonDecode');
+  if(idx>=0){
+   const open=src.indexOf('(',idx);if(open>=0){
+    const arg=src.slice(open+1).trimStart();
+    const long=arg.match(/^\[(=*)\[([\s\S]*?)\]\1\]/);
+    if(long){const found=parseJson(long[2]);if(found)return found}
+    if(arg[0]==='"'||arg[0]==="'"){
+     const decoded=decodeQuoted(arg,arg[0]);if(decoded){const found=parseJson(decoded.value);if(found)return found}
+    }
+   }
+  }
+  const balanced=extractBalancedJson(src);if(balanced){const found=parseJson(balanced);if(found)return found}
+  const encoded=src.match(/&quot;companies&quot;|&#34;companies&#34;/i);
+  if(encoded){
+   try{const ta=document.createElement('textarea');ta.innerHTML=src;const decoded=ta.value;const balanced2=extractBalancedJson(decoded);if(balanced2){const found=parseJson(balanced2);if(found)return found}}catch{}
+  }
+ }
+ const sample=original.replace(/\s+/g,' ').slice(0,120);
+ throw new Error('Official company catalogue format was not recognized'+(sample?' · response: '+sample:''));
 }
 async function ensureOfficialCompanyCatalog(force=false){
  const cached=officialCatalogCache();
@@ -1455,7 +1512,7 @@ async function refresh(){
   S.employment=employment;set(APP.key+':employment',employment);
   if(!employment.id){
    clearCurrentCompany();S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);
-   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
+   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
   }
   if(previousId&&previousId!==employment.id)clearCurrentCompany();
  }
