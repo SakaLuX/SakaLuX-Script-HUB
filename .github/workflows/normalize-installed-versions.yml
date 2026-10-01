@@ -9,6 +9,7 @@ on:
       - '.github/scripts/normalize_installed_versions.py'
       - '.github/scripts/sync_release_doc_headers.py'
       - '.github/scripts/verify_release_consistency.py'
+      - '.github/scripts/verify_runtime_version_signals.py'
       - '.github/scripts/fix_historical_changelog_details.py'
       - '.github/scripts/fix_bazaar_v1114_release.py'
       - '.github/scripts/fix_standalone_hub_navigation.py'
@@ -41,6 +42,7 @@ on:
       - '.github/scripts/fix_company_catalog_tornpda_transport_v1851.py'
       - '.github/scripts/fix_company_rendered_wiki_fallback_v1852.py'
       - '.github/scripts/fix_company_builtin_fallback_v1853.py'
+      - '.github/scripts/fix_company_release_surfaces_v1854.py'
       - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
 permissions:
@@ -118,14 +120,20 @@ jobs:
         run: python3 .github/scripts/fix_company_rendered_wiki_fallback_v1852.py
       - name: Add verified built-in Company Position fallback
         run: python3 .github/scripts/fix_company_builtin_fallback_v1853.py
+      - name: Finalize Company version surfaces and clean duplicate patch residue
+        run: python3 .github/scripts/fix_company_release_surfaces_v1854.py
       - name: Correct Bazaar Smart Pricer v1.1.14 release metadata
         run: python3 .github/scripts/fix_bazaar_v1114_release.py
+      - name: Re-synchronize final runtime, Hub and release surfaces
+        run: python3 .github/scripts/normalize_installed_versions.py
       - name: Repair historical changelog detail gaps
         run: python3 .github/scripts/fix_historical_changelog_details.py
       - name: Synchronize release documentation headers
         run: python3 .github/scripts/sync_release_doc_headers.py
       - name: Verify release and changelog consistency
         run: python3 .github/scripts/verify_release_consistency.py
+      - name: Verify runtime version signals
+        run: python3 .github/scripts/verify_runtime_version_signals.py
       - name: Validate JavaScript syntax
         run: |
           for f in *.user.js; do node --check "$f"; done
