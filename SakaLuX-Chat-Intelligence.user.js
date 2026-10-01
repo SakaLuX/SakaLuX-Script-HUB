@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.36
+// @version      1.2.37
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -623,6 +623,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   ui.ensureSharedSkin();
 })();
 /* SakaLuX Shared Core — END */
+/* SakaLuX Chat Intelligence visible-chat toast suppression v1.2.37 */
 (()=>{'use strict';
   // SakaLuX shared mobile top-alignment contract.
   (() => {
@@ -646,7 +647,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   })();
 
 
-const V='1.2.36',ID='chat-intelligence',API='SakaLuXChatIntelligence';
+const V='1.2.37',ID='chat-intelligence',API='SakaLuXChatIntelligence';
 const K='SLX_CHAT_CFG4',KP='SLX_CHAT_PEOPLE4',KF='SLX_CHAT_FAV4',KM='SLX_CHAT_MUTE4';
 const D={enabled:true,search:true,quickActions:true,contextFavorite:true,contextReply:true,contextCopyId:true,contextCopyName:true,contextProfile:true,contextMute:true,contextAlias:true,notifications:true,notifyPM:true,notifyFaction:true,notifyCompany:true,mentionAutocomplete:true,exportSearch:true};
 const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch{return d}},W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}},N=v=>String(v??'').replace(/\s+/g,' ').trim(),H=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
@@ -803,7 +804,24 @@ function syncContextTrigger(r,e,p){
  if(sender&&sender!==e){sender.insertAdjacentElement('afterend',z)}else e.appendChild(z)
 }
 
-function decorate(r,e,first){const p=who(e),b=body(e,p),k=e.dataset.messageId||e.id||H((p.id||p.name)+'|'+b),d=pd(p),sender=e.querySelector('[class*="sender"],[class*="author"],[class*="username"],[class*="playerName"],a[href*="profiles.php"],a[href*="XID="]');syncContextTrigger(r,e,p);if(sender){if(d.color){if(!sender.dataset.slxOriginalColor)sender.dataset.slxOriginalColor=sender.style.color||'';sender.style.setProperty('color',d.color,'important')}else if('slxOriginalColor' in sender.dataset){sender.style.color=sender.dataset.slxOriginalColor||'';delete sender.dataset.slxOriginalColor}};if(!BOUND.has(e)){BOUND.add(e);e.onclick=x=>{if(x.target.closest('.slx-msg-actions'))return;const senderTap=x.target.closest('[class*="sender"],[class*="author"],[class*="username"],[class*="playerName"]');if(senderTap){x.preventDefault();x.stopPropagation();showMenu(r,e,p);return}if(!x.target.closest('a,button,input,textarea,[contenteditable="true"]'))showMenu(r,e,p)}}if(MESSAGE_KEYS.get(e)===k)return;MESSAGE_KEYS.set(e,k);if(first||!p.name||!allow(r)||M.has(pk(p))){rememberMessage(k);return}toast(r,(F.has(pk(p))?'★ ':'')+dn(p),b,k)}
+function messageIsActuallyVisible(e){
+ if(!e?.isConnected)return false;
+ try{
+  const cs=getComputedStyle(e);
+  if(cs.display==='none'||cs.visibility==='hidden'||Number(cs.opacity)===0)return false;
+  const q=e.getBoundingClientRect();
+  if(q.width<2||q.height<2)return false;
+  if(q.bottom<=0||q.right<=0||q.top>=innerHeight||q.left>=innerWidth)return false;
+  for(let n=e.parentElement;n&&n!==document.body;n=n.parentElement){
+   const s=getComputedStyle(n);
+   if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0)return false;
+   const r=n.getBoundingClientRect();
+   if((s.overflowY==='hidden'||s.overflowY==='auto'||s.overflowY==='scroll')&&(q.bottom<=r.top||q.top>=r.bottom))return false;
+  }
+  return true;
+ }catch{return false}
+}
+function decorate(r,e,first){const p=who(e),b=body(e,p),k=e.dataset.messageId||e.id||H((p.id||p.name)+'|'+b),d=pd(p),sender=e.querySelector('[class*="sender"],[class*="author"],[class*="username"],[class*="playerName"],a[href*="profiles.php"],a[href*="XID="]');syncContextTrigger(r,e,p);if(sender){if(d.color){if(!sender.dataset.slxOriginalColor)sender.dataset.slxOriginalColor=sender.style.color||'';sender.style.setProperty('color',d.color,'important')}else if('slxOriginalColor' in sender.dataset){sender.style.color=sender.dataset.slxOriginalColor||'';delete sender.dataset.slxOriginalColor}};if(!BOUND.has(e)){BOUND.add(e);e.onclick=x=>{if(x.target.closest('.slx-msg-actions'))return;const senderTap=x.target.closest('[class*="sender"],[class*="author"],[class*="username"],[class*="playerName"]');if(senderTap){x.preventDefault();x.stopPropagation();showMenu(r,e,p);return}if(!x.target.closest('a,button,input,textarea,[contenteditable="true"]'))showMenu(r,e,p)}}if(MESSAGE_KEYS.get(e)===k)return;MESSAGE_KEYS.set(e,k);if(first||!p.name||!allow(r)||M.has(pk(p))||messageIsActuallyVisible(e)){rememberMessage(k);return}toast(r,(F.has(pk(p))?'★ ':'')+dn(p),b,k)}
 function mentions(r){if(!S.mentionAutocomplete)return;const c=composer().find(x=>rootFor(x)===r);if(!c)return;const previous=MENT.get(c);if(previous?.box.isConnected)return;if(previous)c.removeEventListener('input',previous.handler);const b=document.createElement('div');b.className='slx-mentions';b.hidden=true;(c.parentElement||r).appendChild(b);const handler=()=>{const v=c.value??'',m=v.match(/(^|\s)@([\w .'-]*)$/);if(!m){b.hidden=true;return}const q=m[2].toLowerCase(),map=new Map;msgs(r).forEach(e=>{const p=who(e),k=pk(p);if(p.name&&!map.has(k))map.set(k,p)});const a=[...map.values()].filter(p=>!q||p.name.toLowerCase().includes(q)||dn(p).toLowerCase().includes(q)).sort((x,y)=>Number(F.has(pk(y)))-Number(F.has(pk(x)))||dn(x).localeCompare(dn(y))).slice(0,7);b.innerHTML='';a.forEach(p=>{const z=document.createElement('button');z.innerHTML='<strong>'+dn(p).replace(/[<>]/g,'')+'</strong>'+(p.id?'<small>#'+p.id+'</small>':'');z.onmousedown=e=>{e.preventDefault();const now=c.value??'',mm=now.match(/(^|\s)@([\w .'-]*)$/);if(mm){c.value=now.slice(0,now.length-mm[2].length)+p.name+' ';c.dispatchEvent(new Event('input',{bubbles:true}));c.focus()}b.hidden=true};b.appendChild(z)});b.hidden=!a.length};c.addEventListener('input',handler);MENT.set(c,{box:b,handler})}
 function contextRows(r){return msgs(r).map(e=>({e,p:who(e)})).filter(x=>x.p.name||x.p.id)}
 function enhance(r){controls(r);mentions(r);const first=!ROOTS.has(r);msgs(r).forEach(e=>decorate(r,e,first));ROOTS.add(r)}
@@ -947,7 +965,7 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
   if(!document.body)return;
   let e=document.querySelector('[data-slx-standalone-registration="chat-intelligence"]');
   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','chat-intelligence');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.36'});
+  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.37'});
  };
  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
 })();

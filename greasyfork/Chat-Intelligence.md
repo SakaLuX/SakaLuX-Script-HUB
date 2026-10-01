@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.36**
+**v1.2.37**
 
 
 ## Repository synchronization
 
-- Verified: **2026-09-30**
-- Canonical version: **v1.2.36**
+- Verified: **2026-10-01**
+- Canonical version: **v1.2.37**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,10 +24,18 @@
 
 ## Current release note
 
-**v1.2.36 — Release documentation synchronized with the current Chat Intelligence userscript version**
-- Release documentation synchronized with the current Chat Intelligence userscript version.
+**v1.2.37 — Suppress duplicate toast when the active chat message is already visible**
+- Does not show a floating Chat Intelligence notification for a new message that is already visibly rendered inside the currently open chat window.
+- Keeps notifications for minimized, hidden or off-screen chat conversations so unread activity can still be surfaced.
+- Marks visible messages as seen to prevent the same message from producing a delayed duplicate toast after DOM rescans.
 
 ## Release history / Changelog
+
+
+### v1.2.37 — Suppress duplicate toast when the active chat message is already visible
+- Does not show a floating Chat Intelligence notification for a new message that is already visibly rendered inside the currently open chat window.
+- Keeps notifications for minimized, hidden or off-screen chat conversations so unread activity can still be surfaced.
+- Marks visible messages as seen to prevent the same message from producing a delayed duplicate toast after DOM rescans.
 
 ### v1.2.36 — Native-flow chat header controls
 - Replaced absolute right offsets with native header flow placement before Minimize/Close.
