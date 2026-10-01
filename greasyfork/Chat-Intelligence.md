@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.37**
+**v1.2.38**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.2.37**
+- Canonical version: **v1.2.38**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,19 @@
 
 ## Current release note
 
-**v1.2.37 — Suppress duplicate toast when the active chat message is already visible**
-- Does not show a floating Chat Intelligence notification for a new message that is already visibly rendered inside the currently open chat window.
-- Keeps notifications for minimized, hidden or off-screen chat conversations so unread activity can still be surfaced.
-- Marks visible messages as seen to prevent the same message from producing a delayed duplicate toast after DOM rescans.
+**v1.2.38 — Active-chat notification suppression recovery**
+- Fixes v1.2.37 suppressing every new toast merely because the newly rendered message element was visible.
+- Suppresses duplicate toasts only when the actual chat root and its composer are both visible and active on screen.
+- Keeps notifications available for minimized, hidden or background chat states while avoiding duplicate popups over the conversation currently being read.
 
 ## Release history / Changelog
 
+
+
+### v1.2.38 — Active-chat notification suppression recovery
+- Fixes v1.2.37 suppressing every new toast merely because the newly rendered message element was visible.
+- Suppresses duplicate toasts only when the actual chat root and its composer are both visible and active on screen.
+- Keeps notifications available for minimized, hidden or background chat states while avoiding duplicate popups over the conversation currently being read.
 
 ### v1.2.37 — Suppress duplicate toast when the active chat message is already visible
 - Does not show a floating Chat Intelligence notification for a new message that is already visibly rendered inside the currently open chat window.
