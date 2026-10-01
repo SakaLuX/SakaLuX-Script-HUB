@@ -40,6 +40,7 @@ on:
       - '.github/scripts/fix_company_catalog_mediawiki_api_v1850.py'
       - '.github/scripts/fix_company_catalog_tornpda_transport_v1851.py'
       - '.github/scripts/fix_company_rendered_wiki_fallback_v1852.py'
+      - '.github/scripts/fix_company_builtin_fallback_v1853.py'
       - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
 permissions:
@@ -115,6 +116,8 @@ jobs:
         run: python3 .github/scripts/fix_company_catalog_tornpda_transport_v1851.py
       - name: Parse rendered Torn Wiki Company Positions on TornPDA
         run: python3 .github/scripts/fix_company_rendered_wiki_fallback_v1852.py
+      - name: Add verified built-in Company Position fallback
+        run: python3 .github/scripts/fix_company_builtin_fallback_v1853.py
       - name: Correct Bazaar Smart Pricer v1.1.14 release metadata
         run: python3 .github/scripts/fix_bazaar_v1114_release.py
       - name: Repair historical changelog detail gaps
