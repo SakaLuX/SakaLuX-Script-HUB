@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.44**
+**v1.8.45**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.44**
+- Canonical version: **v1.8.45**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,18 @@
 
 ## Current release note
 
-**v1.8.44 — Position Advisor UI restoration and safe company-position parsing**
-- Restores the cleaner Position Advisor layout used before v1.8.43 while keeping the manual position-data editor.
-- Prevents headings such as `Primary Gains` and `Secondary Gains` from being interpreted as company positions.
-- Imports Company Positions requirements only when they match a real detected company position and removes invalid cached rows.
+**v1.8.45 — Complete position discovery and top-layer editor**
+- Discovers and remembers real role names from the Company Positions page, including currently unoccupied roles.
+- Keeps Primary/Secondary Gains separate from position requirements so gain values are never used as qualification thresholds.
+- Opens `EDIT POSITION DATA` as a true top-layer modal above Company Intelligence/TornPDA and lists every detected role for manual data entry.
 
 ## Release history / Changelog
+
+### v1.8.45 — Complete position discovery and editor layering
+- Learns all actual company role names from Company Positions and remembers them for the current company, including vacant roles.
+- Excludes headings such as `Primary Gains` / `Secondary Gains` and does not treat gain numbers as minimum work-stat requirements.
+- Keeps the clean v1.8.42-style Position Advisor while making `EDIT POSITION DATA` a topmost modal above the script.
+- Keeps saved manual position data isolated to the current company and clears it on company change.
 
 ### v1.8.44 — Position Advisor UI restoration and safe parsing
 - Restores the compact Position Advisor presentation from the previous stable layout.
