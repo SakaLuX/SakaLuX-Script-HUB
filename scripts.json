@@ -400,17 +400,17 @@
         }
       ],
       "release": {
-        "version": "1.8.46",
+        "version": "1.8.47",
         "date": "2026-10-02",
         "notes": [
-          "Deduplicates Company Positions by a canonical role name so the editor no longer shows the same role twice.",
-          "Strips Torn presentation-only suffixes such as slot counts and decorative icons from discovered position names.",
-          "Merges duplicate cached role rows while preserving manual Primary/Secondary values and detected company-position data."
+          "Replaces fragile Company Positions DOM scraping with Torn official structured Company Data for every company type.",
+          "Loads exact official role names and MAN/INT/END requirements, so labels such as Primary Gains and Primary Stat can no longer become fake positions.",
+          "Keeps per-company manual overrides in EDIT POSITION DATA, adds Reset to official, and removes poisoned scraper cache rows automatically."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.46",
+      "version": "1.8.47",
       "detailsRevision": 4,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",

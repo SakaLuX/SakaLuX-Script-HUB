@@ -1532,17 +1532,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.45",
+                    "version": "1.8.46",
                     "date": "2026-10-02",
                     "notes": [
-                        "Discovers and remembers all real company role names from Company Positions, including unoccupied positions, instead of only positions held by current employees.",
-                        "Stops Primary Gains and Secondary Gains values from being treated as work-stat requirements.",
-                        "Forces EDIT POSITION DATA into a top-layer modal above Company Intelligence and TornPDA, with all detected roles available for manual Primary/Secondary entry."
+                        "Deduplicates Company Positions by a canonical role name so the editor no longer shows the same role twice.",
+                        "Strips Torn presentation-only suffixes such as slot counts and decorative icons from discovered position names.",
+                        "Merges duplicate cached role rows while preserving manual Primary/Secondary values and detected company-position data."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.45",
+                "version": "1.8.46",
                 "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",

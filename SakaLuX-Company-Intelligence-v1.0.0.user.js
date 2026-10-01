@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.46
+// @version      1.8.47
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -12,6 +12,7 @@
 // @grant        GM_setValue
 // @grant        GM_deleteValue
 // @connect      api.torn.com
+// @connect      wiki.torn.com
 // @run-at       document-end
 // @downloadURL  https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js
 // @updateURL    https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js
@@ -633,7 +634,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.45';
+  let v = '1.8.46';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1011,7 +1012,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.46',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.47',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1020,7 +1021,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -1249,168 +1250,116 @@ function seededCompanyPositions(){const type=String(meta().type||'').toLowerCase
 function positionReqCache(){const all=get(KEY.positionReqs,{})||{},key=String(detectCompanyId()||meta().name||'unknown');return {all,key,rows:all[key]||{}}}
 function savePositionReqRows(rows){if(!rows?.length)return;const c=positionReqCache();for(const row of rows){if(!row?.name)continue;const old=c.rows[row.name]||{};c.rows[row.name]={...old,...row,primary:row.primary||old.primary,secondary:row.secondary||old.secondary,updated:now()}}c.all[c.key]=c.rows;set(KEY.positionReqs,c.all)}
 function normalizedPositionDisplayName(raw){
- let n=cleanPositionName(raw);
- if(!n)return'';
- // Torn can append slot counts, icons or decorative markers to the visible role label.
- // Strip those presentation-only suffixes before storing/deduplicating the role.
- let previous='';
- while(n&&n!==previous){
-  previous=n;
-  n=n.replace(/\s+(?:\d+|[^A-Za-z0-9&'()\/-]+)$/g,'').trim();
- }
- return n;
+ return cleanPositionName(raw);
 }
-function positionNameKey(raw){
- return normalizedPositionDisplayName(raw).toLowerCase().replace(/[^a-z0-9]+/g,'');
-}
+function positionNameKey(raw){return normalizedPositionDisplayName(raw).toLowerCase().replace(/[^a-z0-9]+/g,'')}
 function validPositionName(raw){
- const n=normalizedPositionDisplayName(raw);
- if(!n)return'';
- if(/^(?:position|positions|company positions|primary|secondary|primary gains?|secondary gains?|primary stat|secondary stat|gains?|requirements?|employees?|vacant|occupied|apply|hire|fire|save|cancel)$/i.test(n))return'';
+ const n=normalizedPositionDisplayName(raw);if(!n)return'';
+ if(/^(?:position|positions|company positions|primary|secondary|primary gains?|secondary gains?|primary stat|secondary stat|gains?|requirements?|employees?|vacant|occupied|apply|hire|fire|save|cancel)\s*[:\-–—]*$/i.test(n))return'';
+ if(/^(?:primary|secondary)\b/i.test(n)||/\b(?:gains?|stat|requirements?)\b/i.test(n))return'';
  if(/\b(?:MAN|INT|END)\b/i.test(n)||/^\d/.test(n))return'';
  return n;
 }
-function dedupePositionReqCache(){
- const c=positionReqCache(),groups=new Map();
- for(const [rawName,row] of Object.entries(c.rows||{})){
-  const name=validPositionName(rawName||row?.name);if(!name)continue;
-  const key=positionNameKey(name);if(!key)continue;
-  const old=groups.get(key);
-  if(!old){groups.set(key,{name,row:{...row,name}});continue}
-  const oldName=old.name;
-  // Prefer the shortest clean label (e.g. "Armorer" over "Armorer 3" / icon variants).
-  const chosen=name.length<oldName.length?name:oldName;
-  const manualOld=!!old.row?.manual,manualNew=!!row?.manual;
-  const preferred=manualNew&&!manualOld?row:old.row;
-  const fallback=preferred===row?old.row:row;
-  groups.set(key,{name:chosen,row:{...fallback,...preferred,name:chosen,primary:preferred?.primary||fallback?.primary||null,secondary:preferred?.secondary||fallback?.secondary||null,detected:!!(preferred?.detected||fallback?.detected),manual:!!(preferred?.manual||fallback?.manual),updated:Math.max(Number(preferred?.updated||0),Number(fallback?.updated||0))}});
+function officialCatalogCache(){
+ const c=get(KEY.companyCatalog,null);return c&&typeof c==='object'?c:null;
+}
+function wikiText(url){
+ return new Promise((resolve,reject)=>{
+  let done=false;const finish=(fn,v)=>{if(done)return;done=true;fn(v)};
+  const parse=r=>finish(resolve,String(r?.responseText??r?.response??''));
+  try{
+   const x=GM_xmlhttpRequest({method:'GET',url,timeout:15000,headers:{Accept:'text/plain'},onload:parse,onerror:()=>finish(reject,new Error('Official company catalogue request failed')),ontimeout:()=>finish(reject,new Error('Official company catalogue request timed out'))});
+   if(x&&typeof x.then==='function')x.then(parse).catch(e=>finish(reject,e));
+  }catch(e){fetch(url).then(r=>r.text()).then(t=>finish(resolve,t)).catch(err=>finish(reject,err))}
+ })
+}
+function parseOfficialCompanyModule(raw){
+ const src=String(raw||'');
+ const m=src.match(/mw\.text\.jsonDecode\(\"([\s\S]*)\"\)\s*$/);
+ if(!m)throw new Error('Official company catalogue format was not recognized');
+ let jsonText;try{jsonText=JSON.parse('"'+m[1]+'"')}catch{throw new Error('Official company catalogue could not be decoded')}
+ const data=JSON.parse(jsonText);if(!data?.companies||typeof data.companies!=='object')throw new Error('Official company catalogue has no companies data');return data.companies;
+}
+async function ensureOfficialCompanyCatalog(force=false){
+ const cached=officialCatalogCache();
+ if(!force&&cached?.companies&&now()-num(cached.updated)<7*86400000)return cached.companies;
+ try{
+  const raw=await wikiText('https://wiki.torn.com/wiki/Module:Company_Data?action=raw');
+  const companies=parseOfficialCompanyModule(raw);set(KEY.companyCatalog,{updated:now(),companies});return companies;
+ }catch(e){
+  if(cached?.companies)return cached.companies;
+  console.warn('[SakaLuX Company] official catalogue unavailable',e);return null;
  }
- const next={};for(const {name,row} of groups.values())next[name]=row;
+}
+function companyTypeKey(v){return String(v||'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'')}
+function currentOfficialCompanyType(companies=officialCatalogCache()?.companies){
+ if(!companies)return null;const wanted=companyTypeKey(meta().type);if(!wanted||wanted==='unknown')return null;
+ let fallback=null;
+ for(const [id,c] of Object.entries(companies)){
+  const key=companyTypeKey(c?.name);if(key===wanted)return{id,c};
+  if(key&&wanted&&(key.includes(wanted)||wanted.includes(key)))fallback={id,c};
+ }
+ return fallback;
+}
+function officialCompanyPositions(){
+ const match=currentOfficialCompanyType();if(!match?.c?.positions)return[];
+ const rows=[];
+ for(const [name,p] of Object.entries(match.c.positions)){
+  const req={manual:num(p?.man_required),intelligence:num(p?.int_required),endurance:num(p?.end_required)};
+  const active=[['manual',req.manual],['intelligence',req.intelligence],['endurance',req.endurance]].filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const primary=active[0]?{stat:active[0][0],value:active[0][1]}:null,secondary=active[1]?{stat:active[1][0],value:active[1][1]}:null;
+  rows.push({id:name,name,req,primary,secondary,gains:{manual:num(p?.man_gain),intelligence:num(p?.int_gain),endurance:num(p?.end_gain)},official:true,source:'Torn official company catalogue'});
+ }
+ return rows;
+}
+function cleanupPositionCacheAgainstOfficial(){
+ const official=officialCompanyPositions(),c=positionReqCache();if(!official.length)return c.rows||{};
+ const byKey=new Map(official.map(r=>[positionNameKey(r.name),r.name])),next={};
+ for(const [raw,row] of Object.entries(c.rows||{})){
+  const key=positionNameKey(raw||row?.name),canonical=byKey.get(key);if(!canonical)continue;
+  if(row?.manual)next[canonical]={...row,name:canonical};
+ }
  if(JSON.stringify(next)!==JSON.stringify(c.rows||{})){c.all[c.key]=next;set(KEY.positionReqs,c.all)}
  return next;
-}
-function rememberDetectedPositionNames(names){
- const byKey=new Map();
- for(const raw of names||[]){const name=validPositionName(raw),key=positionNameKey(name);if(!name||!key)continue;const old=byKey.get(key);if(!old||name.length<old.length)byKey.set(key,name)}
- const clean=[...byKey.values()];if(!clean.length)return clean;
- const c=positionReqCache();
- for(const name of clean){
-  const key=positionNameKey(name);let existingName=Object.keys(c.rows).find(x=>positionNameKey(x)===key);const old=existingName?c.rows[existingName]:{};
-  if(existingName&&existingName!==name)delete c.rows[existingName];
-  c.rows[name]={...old,name,detected:true,source:old.source||'Company Positions',updated:old.updated||now()};
- }
- c.all[c.key]=c.rows;set(KEY.positionReqs,c.all);dedupePositionReqCache();return clean;
-}
-function discoverCompanyPositionNamesFromPage(){
- if(document.hidden||!/(?:companies|joblist)\.php/i.test(location.pathname))return[];
- const bodyText=document.body?.innerText||'';if(!/Company Positions/i.test(bodyText))return[];
- const found=new Set();
- const add=value=>{const n=validPositionName(value);if(n)found.add(n)};
- // Prefer explicit Torn attributes/classes where available.
- document.querySelectorAll('[data-position-name],[data-position],[data-role-name],[class*=positionName],[class*=position-name],[class*=roleName],[class*=role-name]').forEach(el=>{
-  add(el.getAttribute?.('data-position-name')||el.getAttribute?.('data-position')||el.getAttribute?.('data-role-name')||el.textContent);
- });
- // Discover names from the smallest Company Positions row/card that also contains stat information.
- const containers=[...document.querySelectorAll('tr,li,[class*=position],[class*=role],[class*=job]')].filter(el=>!el.closest('#ci-root,#ci-position-editor'));
- for(const box of containers){
-  const full=String(box.innerText||'').replace(/\s+/g,' ').trim();
-  if(!full||full.length>500)continue;
-  if(!/\b(?:MAN|INT|END)\b/i.test(full)&&!/Primary\s+Gains?|Secondary\s+Gains?/i.test(full))continue;
-  const pieces=[...box.querySelectorAll('h1,h2,h3,h4,h5,strong,b,label,span,div')]
-   .map(el=>String(el.textContent||'').replace(/\s+/g,' ').trim())
-   .filter(t=>t&&t.length<=80)
-   .sort((a,b)=>a.length-b.length);
-  for(const piece of pieces){const n=validPositionName(piece);if(n){add(n);break}}
- }
- // Fallback: use short lines immediately before stat/gain lines, while excluding headings.
- const lines=String(bodyText).split(/\n+/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
- for(let i=0;i<lines.length;i++){
-  if(!/\b(?:MAN|INT|END)\b/i.test(lines[i])&&!/(?:Primary|Secondary)\s+Gains?/i.test(lines[i]))continue;
-  for(let j=i-1;j>=Math.max(0,i-3);j--){const n=validPositionName(lines[j]);if(n){add(n);break}}
- }
- return rememberDetectedPositionNames([...found]);
 }
 function detectedPositionNames(){
- dedupePositionReqCache();
- const names=new Map();
- const add=raw=>{const n=validPositionName(raw),k=positionNameKey(n);if(!n||!k)return;const old=names.get(k);if(!old||n.length<old.length)names.set(k,n)};
- for(const e of employees().map(normEmp))add(e.position);
- const current=currentPosition();if(current&&!/not currently|not returned/i.test(current))add(current);
- Object.keys(positionReqCache().rows).forEach(add);
- let raw=first(profile(),['positions','company_positions','type.positions'],[]);
- if(Array.isArray(raw))raw.forEach(p=>add(positionLabel(p?.name||p?.position)));
- else if(raw&&typeof raw==='object')Object.keys(raw).forEach(add);
- discoverCompanyPositionNamesFromPage().forEach(add);
+ const official=officialCompanyPositions();if(official.length){cleanupPositionCacheAgainstOfficial();return official.map(x=>x.name).sort((a,b)=>a.localeCompare(b))}
+ const names=new Map(),add=raw=>{const n=validPositionName(raw),k=positionNameKey(n);if(n&&k&&!names.has(k))names.set(k,n)};
+ for(const e of employees().map(normEmp))add(e.position);add(currentPosition());
+ for(const [n,row] of Object.entries(positionReqCache().rows||{}))if(row?.manual)add(n);
  return [...names.values()].sort((a,b)=>a.localeCompare(b));
 }
-function cleanPositionName(raw){
- let t=String(raw||'').replace(/\s+/g,' ').trim();
- if(!t||t.length>80||/^(?:primary|secondary)(?:\s+stat|\s+gains?)?$/i.test(t)||/company positions/i.test(t))return'';
- return t;
-}
-function sanitizePositionReqCache(){
- dedupePositionReqCache();
- const c=positionReqCache(),valid=new Set(detectedPositionNames().map(x=>String(x).toLowerCase())),next={};
- for(const [name,row] of Object.entries(c.rows||{})){
-  const n=cleanPositionName(name);
-  if(!n)continue;
-  if(/^(?:primary|secondary)(?:\s+stat|\s+gains?)?$/i.test(n))continue;
-  // Preserve manual entries and rows tied to an actually detected company position.
-  if(row?.manual||row?.detected||valid.has(n.toLowerCase()))next[n]=row;
- }
- if(JSON.stringify(next)!==JSON.stringify(c.rows||{})){c.all[c.key]=next;set(KEY.positionReqs,c.all)}
- return next;
-}
-function scrapePositionRequirements(){
- if(document.hidden||!/(?:companies|joblist)\.php/i.test(location.pathname))return [];
- const pageText=document.body?.innerText||'';if(!/Company Positions/i.test(pageText))return [];
- discoverCompanyPositionNamesFromPage();
- const known=detectedPositionNames().filter(validPositionName);
- if(!known.length)return [];
- // Only parse explicit requirement/stat labels. Do not interpret Primary/Secondary Gains as requirements.
- const hasPrimaryStat=/Primary\s+Stat/i.test(pageText),hasSecondaryStat=/Secondary\s+Stat/i.test(pageText);
- if(!hasPrimaryStat&&!hasSecondaryStat){sanitizePositionReqCache();return []}
- const out=[];
- for(const name of known){
-  const escaped=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const candidates=[...document.querySelectorAll('tr,li,[class*=position],[class*=role],[class*=job],div')].filter(el=>{
-   if(el.closest('#ci-root,#ci-position-editor'))return false;
-   const t=String(el.innerText||'').replace(/\s+/g,' ').trim();
-   return t.length>3&&t.length<500&&new RegExp('(^|\\b)'+escaped+'(\\b|$)','i').test(t)&&/Primary\s+Stat|Secondary\s+Stat/i.test(t)&&/\b(?:MAN|INT|END)\b/i.test(t);
-  }).sort((a,b)=>(a.innerText||'').length-(b.innerText||'').length);
-  const el=candidates[0];if(!el)continue;
-  const t=String(el.innerText||'').replace(/\s+/g,' ').trim();
-  const row={name,source:'Company Positions'};
-  const pm=t.match(/Primary\s+Stat[^\d]*(?:([\d,]+)\s*)?(MAN|INT|END)\b/i);
-  const sm=t.match(/Secondary\s+Stat[^\d]*(?:([\d,]+)\s*)?(MAN|INT|END)\b/i);
-  if(pm)row.primary={stat:statKey(pm[2]),value:num((pm[1]||'0').replace(/,/g,''))};
-  if(sm)row.secondary={stat:statKey(sm[2]),value:num((sm[1]||'0').replace(/,/g,''))};
-  if(row.primary?.stat||row.secondary?.stat)out.push(row);
- }
- if(out.length)savePositionReqRows(out);
- sanitizePositionReqCache();return out;
-}
+function scrapePositionRequirements(){return []}
 function apiCompanyPositions(){
  let x=first(profile(),['positions','company_positions','type.positions'],[]);
- if(!Array.isArray(x)&&x&&typeof x==='object')x=Object.entries(x).map(([name,v])=>({name,...v}));
- if(!Array.isArray(x))return[];
- return x.map((p,i)=>{const r=p.requirements||p.required_stats||p.stats||{},g=p.stat_gains||p.gains||p.daily_gains||{},req={manual:num(first(r,['manual_labor','manual','man'],first(p,['manual_labor_required'],0))),intelligence:num(first(r,['intelligence','int'],first(p,['intelligence_required'],0))),endurance:num(first(r,['endurance','end'],first(p,['endurance_required'],0)))},primary=p.primary?.stat?{stat:statKey(p.primary.stat),value:num(p.primary.value)}:null,secondary=p.secondary?.stat?{stat:statKey(p.secondary.stat),value:num(p.secondary.value)}:null;return {id:p.id||p.position_id||i,name:positionLabel(p.name||p.position)||`Position ${i+1}`,req,gains:{manual:num(first(g,['manual_labor','manual','man'],0)),intelligence:num(first(g,['intelligence','int'],0)),endurance:num(first(g,['endurance','end'],0))},primary,secondary,official:true,source:'API'}}).filter(p=>Object.values(p.req).some(v=>v>0)||p.primary||p.secondary);
+ if(!Array.isArray(x)&&x&&typeof x==='object')x=Object.entries(x).map(([name,v])=>({name,...v}));if(!Array.isArray(x))return[];
+ return x.map((p,i)=>{const r=p.requirements||p.required_stats||p.stats||{},req={manual:num(first(r,['manual_labor','manual','man'],first(p,['manual_labor_required'],0))),intelligence:num(first(r,['intelligence','int'],first(p,['intelligence_required'],0))),endurance:num(first(r,['endurance','end'],first(p,['endurance_required'],0)))},active=Object.entries(req).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),primary=p.primary?.stat?{stat:statKey(p.primary.stat),value:num(p.primary.value)}:(active[0]?{stat:active[0][0],value:active[0][1]}:null),secondary=p.secondary?.stat?{stat:statKey(p.secondary.stat),value:num(p.secondary.value)}:(active[1]?{stat:active[1][0],value:active[1][1]}:null);return{id:p.id||p.position_id||i,name:positionLabel(p.name||p.position)||`Position ${i+1}`,req,gains:{manual:0,intelligence:0,endurance:0},primary,secondary,official:true,source:'Torn API'}}).filter(p=>Object.values(p.req).some(v=>v>0)||p.primary||p.secondary)
 }
-function cachedOfficialPositions(){
- scrapePositionRequirements();const c=sanitizePositionReqCache(),seed=seededCompanyPositions(),names=new Set([...Object.keys(c),...seed.map(x=>x.name)]),out=[];
- for(const name of names){const base=seed.find(x=>x.name===name)||{},row=c[name]||{},primary=row.primary||base.primary,secondary=row.secondary||base.secondary;if(!primary&&!secondary)continue;const source=row.source||(row.manual?'Manual':(row.primary||row.secondary)?'Company Positions':'Pub requirements');out.push({name,primary,secondary,req:reqObj(primary,secondary),official:true,source})}
- return out
+function manualPositionRows(){
+ const official=officialCompanyPositions(),officialMap=new Map(official.map(x=>[positionNameKey(x.name),x.name]));const out=[];
+ for(const [raw,row] of Object.entries(positionReqCache().rows||{})){
+  if(!row?.manual)continue;const canonical=officialMap.get(positionNameKey(raw))||validPositionName(raw);if(!canonical)continue;
+  const primary=row.primary||null,secondary=row.secondary||null;if(!primary&&!secondary)continue;
+  out.push({name:canonical,primary,secondary,req:reqObj(primary,secondary),gains:{manual:0,intelligence:0,endurance:0},official:true,source:'Manual override'});
+ }
+ return out;
 }
-function positions(){const apiRows=apiCompanyPositions();if(apiRows.length)return apiRows;const cached=cachedOfficialPositions();if(cached.length)return cached.map((p,i)=>({id:i,name:p.name,req:p.req,gains:{manual:0,intelligence:0,endurance:0},primary:p.primary,secondary:p.secondary,official:true,source:p.source}));return []}
-function openPositionRequirementsEditor(){
- discoverCompanyPositionNamesFromPage();
- const names=detectedPositionNames();if(!names.length){alert('No company positions detected yet. Open the Torn Company Positions page once, then press EDIT POSITION DATA again.');return}
- const cache=positionReqCache().rows,back=document.createElement('div');back.className='ci-dialogback';back.id='ci-position-editor';
+function positions(){
+ const apiRows=apiCompanyPositions();if(apiRows.length)return apiRows;
+ const official=officialCompanyPositions();if(official.length){
+  const overrides=new Map(manualPositionRows().map(x=>[positionNameKey(x.name),x]));
+  return official.map(p=>{const m=overrides.get(positionNameKey(p.name));return m?{...p,primary:m.primary||p.primary,secondary:m.secondary||p.secondary,req:reqObj(m.primary||p.primary,m.secondary||p.secondary),source:'Manual override'}:p});
+ }
+ return manualPositionRows();
+}
+async function openPositionRequirementsEditor(){
+ await ensureOfficialCompanyCatalog();cleanupPositionCacheAgainstOfficial();const names=detectedPositionNames();
+ if(!names.length){alert('Official position data is not available yet for this company type. Check the company type/API data and try again.');return}
+ const cache=positionReqCache().rows,official=new Map(officialCompanyPositions().map(x=>[positionNameKey(x.name),x])),back=document.createElement('div');back.className='ci-dialogback';back.id='ci-position-editor';
  const statOptions=value=>['','manual','intelligence','endurance'].map(v=>`<option value="${v}" ${v===value?'selected':''}>${v?statShort(v):'— Select —'}</option>`).join('');
- back.innerHTML=`<div class="ci-dialog ci-position-editor"><h3>Company Position Requirements</h3><p class="ci-note">Company: <b>${esc(meta().name)}</b>. All detected company roles are listed here. API data has priority. Manual Primary/Secondary values are saved only for this company and are cleared automatically when you change company.</p><div class="ci-position-edit-list">${names.map(name=>{const row=cache[name]||{};return `<div class="ci-position-edit-row" data-pos-row data-name="${esc(name)}"><b>${esc(name)}</b><label>Primary<select data-primary-stat>${statOptions(row.primary?.stat||'')}</select><input data-primary-value type="number" min="0" value="${num(row.primary?.value)}"></label><label>Secondary<select data-secondary-stat>${statOptions(row.secondary?.stat||'')}</select><input data-secondary-value type="number" min="0" value="${num(row.secondary?.value)}"></label></div>`}).join('')}</div><div class="ci-actions"><button class="ci-btn primary" data-save>Save positions</button><button class="ci-btn" data-cancel>Cancel</button></div></div>`;
- document.body.appendChild(back);$('[data-cancel]',back).onclick=()=>back.remove();$('[data-save]',back).onclick=()=>{const rows=[];$$('[data-pos-row]',back).forEach(el=>{const name=el.dataset.name,ps=$('[data-primary-stat]',el)?.value,pv=num($('[data-primary-value]',el)?.value),ss=$('[data-secondary-stat]',el)?.value,sv=num($('[data-secondary-value]',el)?.value);if((ps&&pv)||(ss&&sv))rows.push({name,primary:ps&&pv?{stat:ps,value:pv}:null,secondary:ss&&sv?{stat:ss,value:sv}:null,manual:true,source:'Manual'})});const c=positionReqCache();c.all={[c.key]:{}};set(KEY.positionReqs,c.all);savePositionReqRows(rows);back.remove();render()};
+ back.innerHTML=`<div class="ci-dialog ci-position-editor"><h3>Company Position Requirements</h3><p class="ci-note">Company: <b>${esc(meta().name)}</b> · Type: <b>${esc(meta().type)}</b>. Positions come from Torn's structured official company catalogue. Change a value only when you want a manual override for this company.</p><div class="ci-position-edit-list">${names.map(name=>{const base=official.get(positionNameKey(name))||{},row=cache[name]?.manual?cache[name]:{},primary=row.primary||base.primary,secondary=row.secondary||base.secondary;return `<div class="ci-position-edit-row" data-pos-row data-name="${esc(name)}"><b>${esc(name)}</b><small>${row.manual?'MANUAL OVERRIDE':'OFFICIAL'}</small><label>Primary<select data-primary-stat>${statOptions(primary?.stat||'')}</select><input data-primary-value type="number" min="0" value="${num(primary?.value)}"></label><label>Secondary<select data-secondary-stat>${statOptions(secondary?.stat||'')}</select><input data-secondary-value type="number" min="0" value="${num(secondary?.value)}"></label></div>`}).join('')}</div><div class="ci-actions"><button class="ci-btn primary" data-save>Save overrides</button><button class="ci-btn" data-reset>Reset to official</button><button class="ci-btn" data-cancel>Cancel</button></div></div>`;
+ document.body.appendChild(back);$('[data-cancel]',back).onclick=()=>back.remove();$('[data-reset]',back).onclick=()=>{const c=positionReqCache();c.all[c.key]={};set(KEY.positionReqs,c.all);back.remove();render()};$('[data-save]',back).onclick=()=>{const rows=[];$$('[data-pos-row]',back).forEach(el=>{const name=el.dataset.name,base=official.get(positionNameKey(name))||{},ps=$('[data-primary-stat]',el)?.value,pv=num($('[data-primary-value]',el)?.value),ss=$('[data-secondary-stat]',el)?.value,sv=num($('[data-secondary-value]',el)?.value),bp=base.primary,bs=base.secondary;const changed=(ps||'')!==(bp?.stat||'')||pv!==num(bp?.value)||(ss||'')!==(bs?.stat||'')||sv!==num(bs?.value);if(changed&&((ps&&pv)||(ss&&sv)))rows.push({name,primary:ps&&pv?{stat:ps,value:pv}:null,secondary:ss&&sv?{stat:ss,value:sv}:null,manual:true,source:'Manual override'})});const c=positionReqCache();c.all[c.key]={};set(KEY.positionReqs,c.all);savePositionReqRows(rows);back.remove();render()};
 }
-
 function fit(stats,p){
  const rs=[['manual',p.req.manual],['intelligence',p.req.intelligence],['endurance',p.req.endurance]].filter(x=>x[1]>0);
  if(!rs.length)return 0;
@@ -1472,7 +1421,7 @@ async function refresh(){
   S.employment=employment;set(APP.key+':employment',employment);
   if(!employment.id){
    clearCurrentCompany();S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);
-   S.loading=false;S.updated=now();render();return;
+   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
   }
   if(previousId&&previousId!==employment.id)clearCurrentCompany();
  }

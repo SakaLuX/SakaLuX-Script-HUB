@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.46**
+**v1.8.47**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.46**
+- Canonical version: **v1.8.47**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,18 @@
 
 ## Current release note
 
-**v1.8.46 — Company Position duplicate cleanup**
-- Deduplicates discovered company roles using a canonical role-name key.
-- Removes presentation-only slot counts and decorative suffixes from Torn position labels.
-- Merges duplicate cached rows while preserving manual Primary/Secondary values.
+**v1.8.47 — Structured official Company Position catalogue**
+- Replaces heuristic page-text scraping with Torn's structured official Company Data catalogue for all company types.
+- Uses exact official role names and MAN/INT/END requirements, preventing headings such as `Primary Gains`, `Primary Stat`, or `Secondary Gains` from entering the position list.
+- Keeps the top-layer editor as a per-company manual override and adds `Reset to official`; stale scraper-generated rows are purged automatically.
 
 ## Release history / Changelog
+
+### v1.8.47 — Structured official Company Position catalogue
+- Stops discovering position names from arbitrary Company Positions DOM text.
+- Loads all roles and their recommended work-stat requirements from Torn's official structured Company Data module.
+- Makes the Position Advisor work for company types beyond Pub without relying on brittle label heuristics.
+- Preserves manual per-company overrides, clears invalid legacy scraper rows, and provides a Reset to official action.
 
 ### v1.8.46 — Company Position duplicate cleanup
 - Deduplicates the Position Data editor by canonical role name.
