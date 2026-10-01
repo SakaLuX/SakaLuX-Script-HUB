@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.49**
+**v1.8.50**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.49**
+- Canonical version: **v1.8.50**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,17 @@
 
 ## Current release note
 
-**v1.8.49 — Robust official Company Data parser**
-- Accepts direct JSON, Lua long-bracket `mw.text.jsonDecode` payloads, quoted payloads and HTML-wrapped source responses.
-- Fixes TornPDA cases where the official catalogue request succeeded but diagnostics showed `format was not recognized`.
-- Keeps the diagnostic panel and includes a short response preview only when parsing still fails, making any future format change immediately visible.
+**v1.8.50 — MediaWiki API Company catalogue loader**
+- Replaces the rendered `Module:Company_Data?action=raw` page request, which TornPDA was receiving as HTML, with MediaWiki revision API requests.
+- Extracts the module source from the API response and feeds that source into the existing structured Company Data parser.
+- Tries multiple standard Torn Wiki API paths and preserves diagnostics, cache fallback and per-company manual overrides.
 
 ## Release history / Changelog
+
+### v1.8.50 — MediaWiki API Company catalogue loader
+- Fixes the confirmed TornPDA failure where the Company Data request returned a full HTML page beginning with `<!DOCTYPE html>`.
+- Retrieves raw `Module:Company_Data` source through the MediaWiki revisions API instead of scraping/rendered page HTML.
+- Keeps structured position matching, diagnostics, cache fallback and manual overrides unchanged.
 
 ### v1.8.49 — Robust official Company Data parser
 - Replaces the single fragile jsonDecode regex with multiple safe parsing strategies.

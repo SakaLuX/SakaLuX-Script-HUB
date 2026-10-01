@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.49
+// @version      1.8.50
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -634,7 +634,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.48';
+  let v = '1.8.49';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1012,7 +1012,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.49',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.50',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1021,7 +1021,7 @@ const KEY={
  agreements:APP.key+':agreements', trains:APP.key+':trains',
  offers:APP.key+':offers', snapshots:APP.key+':snapshots', company:APP.key+':company',
  contracts:APP.key+':contracts', benchmarks:APP.key+':benchmarks', notes:APP.key+':notes',
- metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
+ metrics:APP.key+':metrics', ownEffectiveness:APP.key+':own_effectiveness', positionReqs:APP.key+':position_requirements', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog', companyCatalog:APP.key+':company_catalog'
 };
 const S={open:false,loading:false,mode:'employee',tab:'overview',compact:true,enabled:true,data:{},errors:[],updated:0};
 
@@ -1348,13 +1348,29 @@ async function ensureOfficialCompanyCatalog(force=false){
   S.companyCatalogDiag={state:'cached',error:'',updated:num(cached.updated),source:'cache'};
   return cached.companies;
  }
+ const endpoints=[
+  'https://wiki.torn.com/wiki/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data',
+  'https://wiki.torn.com/w/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data',
+  'https://wiki.torn.com/api.php?action=query&prop=revisions&rvslots=main&rvprop=content&format=json&formatversion=2&titles=Module%3ACompany_Data'
+ ];
  try{
   S.companyCatalogDiag={state:'loading',error:'',updated:num(cached?.updated),source:'network'};
-  const raw=await wikiText('https://wiki.torn.com/wiki/Module:Company_Data?action=raw');
-  const companies=parseOfficialCompanyModule(raw);
-  const updated=now();set(KEY.companyCatalog,{updated,companies});
-  S.companyCatalogDiag={state:'loaded',error:'',updated,source:'network'};
-  return companies;
+  let lastError='';
+  for(const url of endpoints){
+   try{
+    const raw=await wikiText(url);
+    const envelope=JSON.parse(String(raw||'').replace(/^\uFEFF/,'').trim());
+    const page=envelope?.query?.pages?.[0]||Object.values(envelope?.query?.pages||{})[0];
+    const rev=page?.revisions?.[0];
+    const source=rev?.slots?.main?.content??rev?.slots?.main?.['*']??rev?.content??rev?.['*'];
+    if(!source)throw new Error('MediaWiki API returned no Module:Company_Data source');
+    const companies=parseOfficialCompanyModule(source);
+    const updated=now();set(KEY.companyCatalog,{updated,companies});
+    S.companyCatalogDiag={state:'loaded',error:'',updated,source:'MediaWiki API'};
+    return companies;
+   }catch(e){lastError=String(e?.message||e||'Unknown MediaWiki API error')}
+  }
+  throw new Error(lastError||'All MediaWiki API endpoints failed');
  }catch(e){
   const error=String(e?.message||e||'Unknown catalogue error');
   if(cached?.companies){S.companyCatalogDiag={state:'stale-cache',error,updated:num(cached.updated),source:'cache'};return cached.companies}
@@ -1512,7 +1528,7 @@ async function refresh(){
   S.employment=employment;set(APP.key+':employment',employment);
   if(!employment.id){
    clearCurrentCompany();S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);
-   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
+   S.loading=false;S.updated=now();render();ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});ensureOfficialCompanyCatalog().then(()=>{cleanupPositionCacheAgainstOfficial();if(S.open)render()}).catch(()=>{});return;
   }
   if(previousId&&previousId!==employment.id)clearCurrentCompany();
  }
