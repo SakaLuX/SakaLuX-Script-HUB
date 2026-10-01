@@ -60,10 +60,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.967 — Target Alerts Hub API bridge and Torn API v2 profile recovery**
-- Reads the Torn API key directly from SakaLuX Script Hub through getApiKey(), fixing Target/Enemy lists that stayed on SYNC when the key existed only in Hub.
-- Moves avatar hydration from the legacy v1 profile request to the current v2 user/{id}/profile endpoint and reads profile.image.
-- Retains the current v2 contact-list status parser and existing refresh-loop protection while restoring the missing data path.
+**v0.9.967 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
 

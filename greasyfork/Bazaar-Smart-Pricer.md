@@ -39,7 +39,7 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.14 — Correct Torn City sell-price floor**
+**v1.1.14 — Release metadata synchronization**
 - Fixes the Torn City shop floor to use sell_price, the amount the NPC shop pays you, instead of buy_price.
 - Prevents Smart Pricer from incorrectly raising a Bazaar price to the NPC shop purchase price when market value is lower.
 - Resets stale pricing cache data and keeps the floor indicator aligned with sell_price.

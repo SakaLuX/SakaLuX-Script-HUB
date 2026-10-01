@@ -24,10 +24,8 @@
 
 ## Current release note
 
-**v1.2.38 — Active-chat notification suppression recovery**
-- Fixes v1.2.37 suppressing every new toast merely because the newly rendered message element was visible.
-- Suppresses duplicate toasts only when the actual chat root and its composer are both visible and active on screen.
-- Keeps notifications available for minimized, hidden or background chat states while avoiding duplicate popups over the conversation currently being read.
+**v1.2.38 — Release documentation synchronized with the current Chat Intelligence userscript version**
+- Release documentation synchronized with the current Chat Intelligence userscript version.
 
 ## Release history / Changelog
 

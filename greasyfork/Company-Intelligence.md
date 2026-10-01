@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.53**
+**v1.8.54**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-01**
-- Canonical version: **v1.8.53**
+- Canonical version: **v1.8.54**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,17 @@
 
 ## Current release note
 
-**v1.8.53 — Verified built-in Company Position fallback**
-- Adds a verified built-in `Private Security Firm` catalogue with all official positions and MAN/INT/END requirements.
-- Uses the built-in catalogue before Wiki network requests, avoiding TornPDA responses that return HTML without the expected Job Positions table.
-- Diagnostics reports `Built-in verified catalogue` when this source is active.
+**v1.8.54 — Release metadata synchronization**
+- Synchronizes the Company Intelligence userscript header, runtime version, canonical installed-version marker, Script Hub registry and release surfaces to the same final version.
+- Removes duplicate company-catalogue storage-key entries and repeated catalogue refresh calls accumulated by earlier incremental patches.
+- Prevents Script Hub from showing a false UPDATE AVAILABLE badge when the installed Company Intelligence script is already current.
 
 ## Release history / Changelog
+
+### v1.8.54 — Final version-surface synchronization and cleanup
+- Aligns `@version`, `APP.version`, the canonical installed-version marker, scripts.json and Hub fallback metadata so every version signal reports v1.8.54.
+- Cleans duplicate `companyCatalog` storage-key entries and repeated catalogue refresh calls accumulated by the previous Company Position fixes.
+- Keeps the verified Private Security Firm built-in catalogue from v1.8.53 unchanged while fixing the false Hub update state.
 
 ### v1.8.53 — Verified built-in Company Position fallback
 - Fixes the confirmed TornPDA error `Rendered company wiki page did not contain a Job Positions table` for Private Security Firm.

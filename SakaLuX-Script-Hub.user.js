@@ -1532,17 +1532,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.52",
+                    "version": "1.8.54",
                     "date": "2026-10-02",
                     "notes": [
-                        "Adds a TornPDA-first fallback that reads the public company Wiki page and parses its Job Positions table when MediaWiki API endpoints return HTML.",
-                        "Extracts every real position, recommended MAN/INT/END requirements and stat gains from the rendered company page for the detected company type.",
-                        "Diagnostics now show whether data came from the MediaWiki API, rendered Torn Wiki or stale cache."
+                        "Synchronizes the Company Intelligence userscript header, runtime version, canonical installed-version marker, Script Hub registry and release surfaces to the same final version.",
+                        "Removes duplicate company-catalogue storage-key entries and repeated catalogue refresh calls accumulated by earlier incremental patches.",
+                        "Prevents Script Hub from showing a false UPDATE AVAILABLE badge when the installed Company Intelligence script is already current."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.52",
+                "version": "1.8.54",
                 "detailsRevision": 4,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
