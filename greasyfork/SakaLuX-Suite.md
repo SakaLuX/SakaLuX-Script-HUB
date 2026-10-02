@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.967**
+**v0.9.968**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-02**
-- Canonical version: **v0.9.967**
+- Canonical version: **v0.9.968**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,8 +60,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.967 — Release documentation synchronized with the current Suite userscript version**
-- Release documentation synchronized with the current Suite userscript version.
+**v0.9.968 — Smart Daily Checklist v2 with API auto-completion**
+- Replaces the route-only Daily Progress logic with a full Smart Daily Checklist while preserving its public API and Master Control entry point.
+- Automatically checks Energy/Nerve refills, cooldowns, missions, virus coding, education, casino tokens, travel and organized crime through Torn API v2 when a shared API key is available.
+- Keeps Torn-route fallback detection for Gym, Crimes, Missions, Faction/OC, Travel, City, Shops, Racing, Job, Wheels and Prayer, so TornPDA activity can still complete supported tasks without extra API calls.
+- Adds DONE / ACTION / N/A / SYNC states, overall completion percentage, category filters, Show completed persistence, API refresh, custom tasks and 30-day local rollover history.
+- Uses Script Hub getApiKey() first and falls back to existing Suite/Hub local settings; no API key is stored by the checklist itself.
 
 ## Release history / Changelog
 
@@ -77,6 +81,14 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+
+### v0.9.968 — Smart Daily Checklist v2 with API auto-completion
+- Replaces the route-only Daily Progress logic with a full Smart Daily Checklist while preserving its public API and Master Control entry point.
+- Automatically checks Energy/Nerve refills, cooldowns, missions, virus coding, education, casino tokens, travel and organized crime through Torn API v2 when a shared API key is available.
+- Keeps Torn-route fallback detection for Gym, Crimes, Missions, Faction/OC, Travel, City, Shops, Racing, Job, Wheels and Prayer, so TornPDA activity can still complete supported tasks without extra API calls.
+- Adds DONE / ACTION / N/A / SYNC states, overall completion percentage, category filters, Show completed persistence, API refresh, custom tasks and 30-day local rollover history.
+- Uses Script Hub getApiKey() first and falls back to existing Suite/Hub local settings; no API key is stored by the checklist itself.
 
 ### v0.9.967 — Target Alerts Hub API bridge and Torn API v2 profile recovery
 - Reads the Torn API key directly from SakaLuX Script Hub through getApiKey(), fixing Target/Enemy lists that stayed on SYNC when the key existed only in Hub.

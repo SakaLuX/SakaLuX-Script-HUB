@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.967
+// @version      0.9.968
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.940';
+  const VERSION = '0.9.968';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46196,178 +46196,279 @@ function scan(){
 /* SakaLuX Suite Daily Progress — BEGIN */
 (() => {
   'use strict';
-  const VERSION = '1.0.0';
-  const STORAGE_KEY = 'sakalux_suite_daily_progress_v1';
-  const SUITE_SETTINGS_KEY = 'sakalux_master_suite_settings_v1';
-  const PANEL_ID = 'sakalux-suite-daily-progress';
-  const STYLE_ID = 'sakalux-suite-daily-progress-style';
-  const BRIDGE_ID = 'sakalux-module-bridge-suite-daily-progress';
-  const HISTORY_LIMIT = 30;
-  const DEFAULT_OBJECTIVES = Object.freeze([
-    { id: 'gym', label: 'Visit Gym', auto: 'gym' },
-    { id: 'crimes', label: 'Check Crimes', auto: 'crimes' },
-    { id: 'missions', label: 'Check Missions', auto: 'missions' },
-    { id: 'oc', label: 'Check Faction / OC', auto: 'faction' },
-    { id: 'travel', label: 'Check Travel', auto: 'travel' },
-    { id: 'review', label: 'Review daily plan', auto: '' }
+
+  const API_VERSION = '2.0.0';
+  const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
+  const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
+  const MAX_DAYS = 30;
+  const ROUTE_COALESCE_MS = 30000;
+  const g = globalThis;
+
+  const TASKS = Object.freeze([
+    { id:'energy_refill', label:'Energy refill', icon:'⚡', category:'Resources', auto:'api', endpoint:'refills' },
+    { id:'nerve_refill', label:'Nerve refill', icon:'🧠', category:'Resources', auto:'api', endpoint:'refills' },
+    { id:'drug', label:'Drug / drug cooldown', icon:'💊', category:'Resources', auto:'api', endpoint:'cooldowns' },
+    { id:'booster', label:'Booster cooldown', icon:'🍬', category:'Resources', auto:'api', endpoint:'cooldowns' },
+    { id:'medical', label:'Medical cooldown', icon:'🩸', category:'Resources', auto:'api', endpoint:'cooldowns', optional:true },
+    { id:'missions', label:'Daily missions', icon:'🎯', category:'Daily', auto:'api+route', endpoint:'missions', routes:['missions'] },
+    { id:'shops', label:'City shops 100/100', icon:'🛒', category:'Daily', auto:'route', routes:['shops'] },
+    { id:'virus', label:'Virus coding', icon:'💻', category:'Daily', auto:'api', endpoint:'virus', optional:true },
+    { id:'education', label:'Education course', icon:'🎓', category:'Daily', auto:'api', endpoint:'education', optional:true },
+    { id:'casino', label:'Casino tokens', icon:'🎰', category:'Daily', auto:'api', endpoint:'casino', optional:true },
+    { id:'wheels', label:'Daily wheels', icon:'🎡', category:'Daily', auto:'route', routes:['wheels'], optional:true },
+    { id:'city', label:'City / map check', icon:'🏙️', category:'Activity', auto:'route', routes:['city'] },
+    { id:'gym', label:'Gym / energy spent', icon:'🏋️', category:'Activity', auto:'route', routes:['gym'] },
+    { id:'crimes', label:'Crimes / nerve spent', icon:'🔫', category:'Activity', auto:'route', routes:['crimes'] },
+    { id:'travel', label:'Travel', icon:'✈️', category:'Activity', auto:'api+route', endpoint:'travel', routes:['travel'] },
+    { id:'racing', label:'Racing', icon:'🏎️', category:'Activity', auto:'route', routes:['racing'], optional:true },
+    { id:'job', label:'Job / company check', icon:'🏢', category:'Activity', auto:'route', routes:['job'], optional:true },
+    { id:'faction_oc', label:'Faction / OC readiness', icon:'👥', category:'Faction', auto:'api+route', endpoint:'organizedcrime', routes:['faction'], optional:true },
+    { id:'prayer', label:'Church prayer', icon:'⛪', category:'Daily', auto:'route', routes:['prayer'], optional:true },
+    { id:'review', label:'Review daily plan', icon:'📋', category:'Custom', auto:'manual' }
   ]);
 
-  const clone = value => JSON.parse(JSON.stringify(value));
-  function dayKey(date = new Date()) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
+  const ALIASES = Object.freeze({ faction:'faction_oc' });
+  const ENDPOINTS = Object.freeze({
+    refills:'https://api.torn.com/v2/user/refills',
+    cooldowns:'https://api.torn.com/v2/user/cooldowns',
+    missions:'https://api.torn.com/v2/user/missions',
+    virus:'https://api.torn.com/v2/user/virus',
+    education:'https://api.torn.com/v2/user/education',
+    casino:'https://api.torn.com/v2/user/casino',
+    travel:'https://api.torn.com/v2/user/travel',
+    organizedcrime:'https://api.torn.com/v2/user/organizedcrime'
+  });
+
+  const state = { showCompleted:true, filter:'all', syncing:false, apiError:'', lastApiAt:0, lastData:{} };
+
+  function dayKey(d = new Date()) {
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
   }
-  function safeParse(raw, fallback) { try { return JSON.parse(raw); } catch { return fallback; } }
-  function defaultDay(key = dayKey()) {
-    return { date: key, objectives: Object.fromEntries(DEFAULT_OBJECTIVES.map(x => [x.id, false])), custom: [], activities: [], updatedAt: Date.now() };
+  function startOfTodayMs() { const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); }
+  function nowSec(){ return Math.floor(Date.now()/1000); }
+  function clone(v){ return JSON.parse(JSON.stringify(v)); }
+  function safeJson(raw, fallback){ try { return raw ? JSON.parse(raw) : fallback; } catch { return fallback; } }
+  function rootData(x, key){ return x?.[key] ?? x?.data?.[key] ?? x?.data ?? x ?? {}; }
+  function first(obj, paths, fallback=undefined){
+    for(const p of paths){ let cur=obj; let ok=true; for(const k of p.split('.')){ if(cur==null || !(k in Object(cur))){ok=false;break;} cur=cur[k]; } if(ok && cur!==undefined) return cur; }
+    return fallback;
   }
-  function normalizeStore(raw) {
-    const store = raw && typeof raw === 'object' ? raw : {};
-    const days = store.days && typeof store.days === 'object' ? store.days : {};
-    return { schemaVersion: 1, days };
+  function asBool(v){ if(typeof v==='boolean') return v; if(typeof v==='number') return v>0; if(typeof v==='string') return /^(1|true|yes|used|complete|completed|done|active)$/i.test(v); return false; }
+  function fmtDuration(sec){ sec=Math.max(0,Number(sec)||0); const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60); return h?`${h}h ${m}m`:`${m}m`; }
+
+  function blankTask(t){ return { id:t.id, status:'pending', done:false, source:'none', detail:'Waiting for sync', updatedAt:0, optional:!!t.optional }; }
+  function freshDay(key=dayKey()){
+    const tasks={}; for(const t of TASKS) tasks[t.id]=blankTask(t);
+    return { date:key, tasks, custom:[], activities:[], manual:{}, api:{lastAt:0,error:''}, updatedAt:Date.now() };
   }
-  function loadStore() { return normalizeStore(safeParse(localStorage.getItem(STORAGE_KEY) || 'null', null)); }
-  function saveStore(store) {
-    const keys = Object.keys(store.days || {}).sort().reverse();
-    for (const key of keys.slice(HISTORY_LIMIT)) delete store.days[key];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-    return store;
-  }
-  function ensureToday() {
-    const store = loadStore();
-    const key = dayKey();
-    const day = store.days[key] && typeof store.days[key] === 'object' ? store.days[key] : defaultDay(key);
-    day.objectives = { ...defaultDay(key).objectives, ...(day.objectives || {}) };
-    day.custom = Array.isArray(day.custom) ? day.custom : [];
-    day.activities = Array.isArray(day.activities) ? day.activities : [];
-    day.updatedAt = Number(day.updatedAt) || Date.now();
-    store.days[key] = day;
-    saveStore(store);
-    return { store, day };
-  }
-  function mutate(mutator) {
-    const { store, day } = ensureToday();
-    mutator(day);
-    day.updatedAt = Date.now();
-    saveStore(store);
-    renderIfOpen();
-    return clone(day);
-  }
-  function setObjective(id, value) {
-    return mutate(day => {
-      if (Object.prototype.hasOwnProperty.call(day.objectives, id)) day.objectives[id] = !!value;
-      else {
-        const row = day.custom.find(x => x.id === id);
-        if (row) row.done = !!value;
+  function freshStore(){ return { schemaVersion:2, days:{}, prefs:{showCompleted:true,filter:'all'} }; }
+
+  function migrateLegacy(store){
+    if(store?.schemaVersion===2) return store;
+    const out=freshStore();
+    if(store?.days && typeof store.days==='object'){
+      for(const [k,v] of Object.entries(store.days)){
+        const d=freshDay(k);
+        const old=v?.objectives||{};
+        for(const [id,val] of Object.entries(old)){
+          const tid=ALIASES[id]||id; if(d.tasks[tid] && val){ d.tasks[tid]={...d.tasks[tid],status:'done',done:true,source:'legacy',detail:'Carried from Daily Progress',updatedAt:Number(v.updatedAt)||Date.now()}; }
+        }
+        d.custom=Array.isArray(v?.custom)?v.custom:[];
+        d.activities=Array.isArray(v?.activities)?v.activities:[];
+        out.days[k]=d;
       }
-    });
+    }
+    return out;
   }
-  function addObjective(label) {
-    const text = String(label || '').trim().slice(0, 90);
-    if (!text) return null;
-    const id = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    mutate(day => day.custom.push({ id, label: text, done: false }));
-    return id;
+  function load(){
+    let raw=null; try{raw=localStorage.getItem(STORAGE_KEY);}catch{}
+    if(!raw){ for(const k of LEGACY_KEYS){ try{const x=localStorage.getItem(k); if(x){raw=x;break;}}catch{} } }
+    const parsed=migrateLegacy(safeJson(raw,freshStore()));
+    parsed.prefs=parsed.prefs||{showCompleted:true,filter:'all'};
+    state.showCompleted=parsed.prefs.showCompleted!==false; state.filter=parsed.prefs.filter||'all';
+    return parsed;
   }
-  function removeObjective(id) { return mutate(day => { day.custom = day.custom.filter(x => x.id !== id); }); }
-  function resetToday() {
-    const store = loadStore();
-    store.days[dayKey()] = defaultDay();
-    saveStore(store);
-    renderIfOpen();
-    return clone(store.days[dayKey()]);
+  function prune(store){ const keys=Object.keys(store.days||{}).sort().reverse(); for(const k of keys.slice(MAX_DAYS)) delete store.days[k]; return store; }
+  function save(store){ store.prefs={showCompleted:state.showCompleted,filter:state.filter}; prune(store); try{localStorage.setItem(STORAGE_KEY,JSON.stringify(store));return true;}catch{return false;} }
+  function getStore(){ const s=load(); const k=dayKey(); if(!s.days[k]){s.days[k]=freshDay(k);save(s);} return s; }
+  function get(){ const s=getStore(); return clone(s.days[dayKey()]); }
+  function mutate(fn){ const s=getStore(), k=dayKey(), d=s.days[k]||freshDay(k); fn(d,s); d.updatedAt=Date.now(); s.days[k]=d; save(s); render(); return clone(d); }
+
+  function setTask(id, patch={}){
+    id=ALIASES[id]||id;
+    return mutate(d=>{ if(!d.tasks[id]) return; const prev=d.tasks[id]; const next={...prev,...patch,updatedAt:Date.now()}; next.done=next.status==='done'; d.tasks[id]=next; });
   }
-  function classifyRoute(loc = location) {
-    const text = `${loc.pathname || ''} ${loc.search || ''} ${loc.hash || ''}`.toLowerCase();
-    if (/gym/.test(text)) return 'gym';
-    if (/crime/.test(text)) return 'crimes';
-    if (/mission/.test(text)) return 'missions';
-    if (/faction|organized|oc\b/.test(text)) return 'faction';
-    if (/travel|travelagency/.test(text)) return 'travel';
+  function setObjective(id, done=true){
+    id=ALIASES[id]||id;
+    const custom=get().custom.find(x=>x.id===id);
+    if(custom) return mutate(d=>{ const x=d.custom.find(y=>y.id===id); if(x){x.done=!!done;x.updatedAt=Date.now();} });
+    return setTask(id,{status:done?'done':'action',source:'manual',detail:done?'Marked complete manually':'Marked incomplete manually'});
+  }
+  function addObjective(label){
+    const text=String(label||'').trim(); if(!text) return '';
+    const id='custom-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+    mutate(d=>d.custom.push({id,label:text,done:false,createdAt:Date.now(),updatedAt:Date.now()})); return id;
+  }
+  function removeObjective(id){ return mutate(d=>{ d.custom=d.custom.filter(x=>x.id!==id); }); }
+
+  function routeType(url=location.href){
+    const u=String(url).toLowerCase();
+    if(/gym\.php|sid=gym/.test(u)) return 'gym';
+    if(/loader\.php.*sid=crimes|crimes\.php|\/crimes/.test(u)) return 'crimes';
+    if(/sid=missions|missions\.php/.test(u)) return 'missions';
+    if(/factions\.php|faction/.test(u)) return 'faction';
+    if(/travelagency|sid=travel|travel/.test(u)) return 'travel';
+    if(/city\.php|sid=city|\/city/.test(u)) return 'city';
+    if(/race|racing/.test(u)) return 'racing';
+    if(/joblist|companies|company|jobs\.php/.test(u)) return 'job';
+    if(/church|pray/.test(u)) return 'prayer';
+    if(/casino.*wheel|wheel/.test(u)) return 'wheels';
+    if(/shops|shop\.php|points\.php/.test(u)) return 'shops';
     return '';
   }
-  function recordActivity(type, detail = '') {
-    const clean = String(type || '').trim();
-    if (!clean) return null;
-    return mutate(day => {
-      const now = Date.now();
-      const last = day.activities[day.activities.length - 1];
-      if (!last || last.type !== clean || now - Number(last.at || 0) > 30000) {
-        day.activities.push({ type: clean, detail: String(detail || '').slice(0, 120), at: now });
-        if (day.activities.length > 40) day.activities.splice(0, day.activities.length - 40);
+  function recordActivity(type, url=location.href){
+    type=ALIASES[type]||type; const now=Date.now();
+    return mutate(d=>{
+      const last=d.activities[d.activities.length-1];
+      if(!last || last.type!==type || now-Number(last.at||0)>ROUTE_COALESCE_MS) d.activities.push({type,url:String(url),at:now});
+      d.activities=d.activities.slice(-60);
+      const targets=TASKS.filter(t=>(t.routes||[]).includes(type) || t.id===type);
+      for(const t of targets){
+        const cur=d.tasks[t.id];
+        if(cur && cur.status!=='done') d.tasks[t.id]={...cur,status:'done',done:true,source:'route',detail:'Detected from Torn activity',updatedAt:now};
       }
-      for (const objective of DEFAULT_OBJECTIVES) if (objective.auto === clean) day.objectives[objective.id] = true;
     });
   }
-  function moduleStatus() {
-    const settings = safeParse(localStorage.getItem(SUITE_SETTINGS_KEY) || 'null', null);
-    const modules = settings?.modules && typeof settings.modules === 'object' ? settings.modules : {};
-    const values = Object.values(modules).filter(v => typeof v === 'boolean');
-    const enabled = values.filter(Boolean).length;
-    const rendered = document.querySelectorAll?.('[data-module-toggle]').length || 0;
-    return { enabled, total: Math.max(values.length, rendered, 23) };
+
+  function getApiKey(){
+    try{ const k=String(g.SakaLuXScriptHub?.getApiKey?.()||'').trim(); if(k) return k; }catch{}
+    const candidates=['sakalux_master_suite_settings_v1','SakaLuX_HUB_SETTINGS_V16','SakaLuX_HUB_SETTINGS_V15'];
+    const walk=o=>{ if(!o||typeof o!=='object') return ''; for(const [k,v] of Object.entries(o)){ if(/^(apikey|api_key|key)$/i.test(k)&&typeof v==='string'&&v.trim().length>=8) return v.trim(); if(typeof v==='object'){const f=walk(v);if(f)return f;} } return ''; };
+    for(const key of candidates){ try{const f=walk(safeJson(localStorage.getItem(key),null));if(f)return f;}catch{} }
+    return '';
   }
-  function summary() {
-    const { day } = ensureToday();
-    const fixed = DEFAULT_OBJECTIVES.map(x => ({ ...x, done: !!day.objectives[x.id] }));
-    const custom = day.custom.map(x => ({ id: x.id, label: x.label, done: !!x.done, custom: true }));
-    const all = [...fixed, ...custom];
-    const done = all.filter(x => x.done).length;
-    return { date: day.date, done, total: all.length, percent: all.length ? Math.round(done * 100 / all.length) : 0, objectives: all, activities: clone(day.activities), modules: moduleStatus() };
+  function httpJson(url){
+    const key=getApiKey(); if(!key) return Promise.reject(new Error('No Torn API key available'));
+    const full=url+(url.includes('?')?'&':'?')+'key='+encodeURIComponent(key)+'&striptags=true';
+    return new Promise((resolve,reject)=>{
+      try{
+        if(typeof GM_xmlhttpRequest==='function'){
+          GM_xmlhttpRequest({method:'GET',url:full,timeout:15000,onload:r=>{try{const j=JSON.parse(r.responseText||'{}');if(j?.error)reject(new Error(j.error.error||j.error.code||'API error'));else resolve(j);}catch(e){reject(e);}},onerror:()=>reject(new Error('Network error')),ontimeout:()=>reject(new Error('API timeout'))});
+          return;
+        }
+      }catch{}
+      fetch(full,{credentials:'omit'}).then(r=>r.json()).then(j=>{if(j?.error)throw new Error(j.error.error||j.error.code||'API error');return j;}).then(resolve,reject);
+    });
   }
-  function esc(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
-  function ensureStyle() {
-    if (document.getElementById(STYLE_ID)) return;
-    const style = document.createElement('style');
-    style.id = STYLE_ID;
-    style.textContent = `
-#${PANEL_ID}{position:fixed;inset:0;z-index:2147483645;display:none;align-items:center;justify-content:center;padding:10px;background:rgba(3,7,12,.76);box-sizing:border-box;font-family:Inter,Arial,sans-serif}
-#${PANEL_ID}.open{display:flex}#${PANEL_ID} .sdp-card{width:min(520px,100%);max-height:calc(100dvh - 24px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #344456;border-radius:16px;background:linear-gradient(155deg,#18212d,#0f161f);color:#e8eef5;box-shadow:0 22px 60px rgba(0,0,0,.6)}
-#${PANEL_ID} .sdp-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08)}#${PANEL_ID} .sdp-head b{font-size:15px}#${PANEL_ID} .sdp-close{border:0;background:transparent;color:#ddd;font-size:25px;line-height:1}
-#${PANEL_ID} .sdp-body{padding:12px;overflow:auto;min-height:0}#${PANEL_ID} .sdp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}#${PANEL_ID} .sdp-stat{padding:9px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:#111a24;text-align:center}#${PANEL_ID} .sdp-stat strong{display:block;font-size:18px;color:#e0a557}#${PANEL_ID} .sdp-stat small{color:#98a5b3}
-#${PANEL_ID} .sdp-bar{height:9px;margin:0 0 12px;border-radius:9px;background:#26313d;overflow:hidden}#${PANEL_ID} .sdp-bar>i{display:block;height:100%;background:#d89a48}
-#${PANEL_ID} .sdp-list{display:grid;gap:6px}#${PANEL_ID} .sdp-row{display:flex;align-items:center;gap:9px;padding:8px 9px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:#121c27}#${PANEL_ID} .sdp-row.done{opacity:.66}#${PANEL_ID} .sdp-row label{flex:1}#${PANEL_ID} .sdp-row button{border:0;background:transparent;color:#cf7d7d;font-size:16px}
-#${PANEL_ID} .sdp-section{margin-top:12px}#${PANEL_ID} .sdp-section h4{margin:0 0 7px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#aab5c1}#${PANEL_ID} .sdp-add{display:flex;gap:7px}#${PANEL_ID} input[type=text]{flex:1;min-width:0;padding:8px;border:1px solid #344456;border-radius:8px;background:#0d141d;color:#eef3f8}#${PANEL_ID} .sdp-btn{padding:8px 10px;border:1px solid #3c4b5c;border-radius:8px;background:#172432;color:#eef3f8;font-weight:800}#${PANEL_ID} .sdp-reset{color:#f0b0b0}
-#${PANEL_ID} .sdp-activity{font-size:11px;color:#9da9b6;display:grid;gap:4px}#${PANEL_ID} .sdp-foot{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.08)}#${PANEL_ID} .sdp-foot .sdp-btn{flex:1}
-@media(max-width:700px){#${PANEL_ID}{padding:4px;align-items:stretch}#${PANEL_ID} .sdp-card{width:100%;max-height:calc(100dvh - 8px);margin:0}}
-`;
-    (document.head || document.documentElement).appendChild(style);
-  }
-  function render() {
-    ensureStyle();
-    let panel = document.getElementById(PANEL_ID);
-    if (!panel) {
-      panel = document.createElement('div'); panel.id = PANEL_ID;
-      panel.addEventListener('click', e => { if (e.target === panel) close(); });
-      (document.body || document.documentElement).appendChild(panel);
+
+  function interpret(name,data){
+    const d=rootData(data,name);
+    if(name==='refills'){
+      const e=first(d,['energy','energy_refill','refills.energy'],{}), n=first(d,['nerve','nerve_refill','refills.nerve'],{});
+      const used=x=>asBool(first(x,['used','is_used','used_today'],false)) || first(x,['available','is_available'],undefined)===false || Number(first(x,['timestamp','used_at'],0))*1000>=startOfTodayMs();
+      setTask('energy_refill',{status:used(e)?'done':'action',source:'api',detail:used(e)?'Used today':'Available'});
+      setTask('nerve_refill',{status:used(n)?'done':'action',source:'api',detail:used(n)?'Used today':'Available'});
     }
-    const s = summary();
-    const activities = s.activities.slice(-8).reverse().map(x => `<div>• ${esc(x.type)}${x.detail ? ` — ${esc(x.detail)}` : ''}</div>`).join('') || '<div>No activity recorded today.</div>';
-    panel.innerHTML = `<div class="sdp-card"><div class="sdp-head"><div><b>📅 Daily Progress</b><div style="font-size:10px;color:#98a5b3">${esc(s.date)}</div></div><button class="sdp-close" type="button" data-sdp-close>×</button></div><div class="sdp-body"><div class="sdp-stats"><div class="sdp-stat"><strong>${s.percent}%</strong><small>progress</small></div><div class="sdp-stat"><strong>${s.done}/${s.total}</strong><small>objectives</small></div><div class="sdp-stat"><strong>${s.modules.enabled}/${s.modules.total}</strong><small>modules ON</small></div></div><div class="sdp-bar"><i style="width:${s.percent}%"></i></div><div class="sdp-list">${s.objectives.map(x => `<div class="sdp-row ${x.done?'done':''}"><input type="checkbox" data-sdp-id="${esc(x.id)}" ${x.done?'checked':''}><label>${esc(x.label)}</label>${x.custom?`<button type="button" data-sdp-remove="${esc(x.id)}" title="Remove">×</button>`:''}</div>`).join('')}</div><div class="sdp-section"><h4>Add objective</h4><div class="sdp-add"><input type="text" maxlength="90" data-sdp-new placeholder="Custom daily objective"><button class="sdp-btn" type="button" data-sdp-add>Add</button></div></div><div class="sdp-section"><h4>Recent activity</h4><div class="sdp-activity">${activities}</div></div></div><div class="sdp-foot"><button class="sdp-btn sdp-reset" type="button" data-sdp-reset>Reset today</button><button class="sdp-btn" type="button" data-sdp-close>Close</button></div></div>`;
-    panel.querySelectorAll('[data-sdp-id]').forEach(el => el.addEventListener('change', () => setObjective(el.dataset.sdpId, el.checked)));
-    panel.querySelectorAll('[data-sdp-remove]').forEach(el => el.addEventListener('click', () => removeObjective(el.dataset.sdpRemove)));
-    panel.querySelectorAll('[data-sdp-close]').forEach(el => el.addEventListener('click', close));
-    panel.querySelector('[data-sdp-add]')?.addEventListener('click', () => { const input=panel.querySelector('[data-sdp-new]'); if(addObjective(input?.value)) render(); });
-    panel.querySelector('[data-sdp-new]')?.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); const id=addObjective(e.currentTarget.value); if(id) render(); }});
-    panel.querySelector('[data-sdp-reset]')?.addEventListener('click', () => { if (confirm('Reset today\'s Daily Progress?')) resetToday(); });
-    return panel;
+    if(name==='cooldowns'){
+      const c=rootData(data,'cooldowns');
+      const drug=Number(first(c,['drug','drug_cooldown'],0))||0, booster=Number(first(c,['booster','booster_cooldown'],0))||0, med=Number(first(c,['medical','medical_cooldown'],0))||0;
+      setTask('drug',{status:drug>0?'done':'action',source:'api',detail:drug>0?`Cooldown ${fmtDuration(drug)}`:'No drug cooldown'});
+      setTask('booster',{status:booster>0?'done':'action',source:'api',detail:booster>0?`Cooldown ${fmtDuration(booster)}`:'No booster cooldown'});
+      setTask('medical',{status:med>0?'done':'na',source:'api',detail:med>0?`Cooldown ${fmtDuration(med)}`:'No medical cooldown'});
+    }
+    if(name==='missions'){
+      const arr=Array.isArray(d)?d:(Array.isArray(d?.missions)?d.missions:[]);
+      if(!arr.length) setTask('missions',{status:'done',source:'api',detail:'No active missions'});
+      else { const open=arr.filter(x=>!asBool(first(x,['completed','is_complete','done'],false))); setTask('missions',{status:open.length?'action':'done',source:'api',detail:open.length?`${open.length} active mission${open.length===1?'':'s'}`:'All missions complete'}); }
+    }
+    if(name==='virus'){
+      const v=rootData(data,'virus'); const active=!!first(v,['virus','name','item','started_at','time_started'],null); const left=Number(first(v,['time_left','remaining','seconds_left'],0))||0;
+      setTask('virus',{status:active?'done':'action',source:'api',detail:active?`Coding${left?` • ${fmtDuration(left)} left`:''}`:'No virus coding'});
+    }
+    if(name==='education'){
+      const e=rootData(data,'education'); const cur=first(e,['current','education_current','course','current_course'],null); const left=Number(first(e,['timeleft','time_left','remaining'],first(cur||{},['timeleft','time_left','remaining'],0)))||0;
+      const completed=Array.isArray(first(e,['completed','education_completed'],null));
+      setTask('education',{status:cur?'done':(completed?'na':'action'),source:'api',detail:cur?`Course active${left?` • ${fmtDuration(left)} left`:''}`:(completed?'No active course':'Start a course')});
+    }
+    if(name==='casino'){
+      const c=rootData(data,'casino'); const tokens=Number(first(c,['tokens','casino_tokens','token_refill'],NaN));
+      if(Number.isFinite(tokens)) setTask('casino',{status:tokens<=0?'done':'action',source:'api',detail:tokens<=0?'Tokens used':`${tokens} token${tokens===1?'':'s'} remaining`});
+      else setTask('casino',{status:'na',source:'api',detail:'Casino token state unavailable'});
+    }
+    if(name==='travel'){
+      const t=rootData(data,'travel'); const status=String(first(t,['status','state'],'')); const destination=String(first(t,['destination','country','name'],'')); const active=!!status && !/home|torn city|idle|none/i.test(status);
+      if(active||destination) setTask('travel',{status:'done',source:'api',detail:[status,destination].filter(Boolean).join(' • ')||'Travel detected'});
+    }
+    if(name==='organizedcrime'){
+      const oc=rootData(data,'organizedcrime'); const exists=oc && typeof oc==='object' && Object.keys(oc).length>0; const ready=asBool(first(oc,['ready','is_ready','ready_at'],false)); const status=String(first(oc,['status','state'],''));
+      setTask('faction_oc',{status:ready?'done':(exists?'action':'na'),source:'api',detail:ready?'OC ready':(exists?(status||'OC in progress'):'No current OC')});
+    }
   }
-  function renderIfOpen() { const panel=document.getElementById(PANEL_ID); if(panel?.classList.contains('open')) render().classList.add('open'); }
-  function open() { const panel=render(); panel.classList.add('open'); return true; }
-  function close() { document.getElementById(PANEL_ID)?.classList.remove('open'); return true; }
-  function ensureBridge() {
-    let bridge=document.getElementById(BRIDGE_ID);
-    if(!bridge){ bridge=document.createElement('button'); bridge.id=BRIDGE_ID; bridge.type='button'; bridge.hidden=true; (document.body||document.documentElement).appendChild(bridge); }
-    bridge.dataset.version=VERSION; bridge.onclick=()=>{ const action=bridge.dataset.action||'open'; if(action==='open') open(); else if(action==='reset') resetToday(); bridge.dataset.action=''; };
+
+  async function refreshApi(force=false){
+    if(state.syncing) return false;
+    if(!force && state.lastApiAt && Date.now()-state.lastApiAt<60000) return true;
+    const key=getApiKey(); if(!key){ state.apiError='API key unavailable'; render(); return false; }
+    state.syncing=true; state.apiError=''; render();
+    const entries=Object.entries(ENDPOINTS);
+    const results=await Promise.allSettled(entries.map(([,url])=>httpJson(url)));
+    let ok=0, err='';
+    results.forEach((r,i)=>{ const name=entries[i][0]; if(r.status==='fulfilled'){ok++;state.lastData[name]=r.value;try{interpret(name,r.value);}catch(e){err=String(e?.message||e);}} else err=String(r.reason?.message||r.reason||'API error'); });
+    state.lastApiAt=Date.now(); state.apiError=ok?err:(err||'API sync failed'); state.syncing=false;
+    mutate(d=>{d.api={lastAt:state.lastApiAt,error:state.apiError};});
+    return ok>0;
   }
-  function routeActivity() { const type=classifyRoute(); if(type) recordActivity(type, `${location.pathname}${location.search}${location.hash}`); }
-  document.addEventListener('click', e => { if(e.target?.closest?.('[data-action="daily-progress"]')) { e.preventDefault(); open(); } }, true);
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{ensureBridge();routeActivity();},{once:true}); else {ensureBridge();routeActivity();}
-  try { globalThis.SakaLuXCore?.router?.onChange?.(()=>{ensureBridge();routeActivity();}); globalThis.SakaLuXCore?.router?.bind?.(); } catch {}
-  globalThis.SakaLuXSuiteDailyProgress = Object.freeze({ version:VERSION, storageKey:STORAGE_KEY, dayKey, get:()=>clone(ensureToday().day), summary, setObjective, addObjective, removeObjective, recordActivity, resetToday, open, close, moduleStatus });
+
+  function summary(){
+    const d=get(); const defaults=TASKS.map(t=>({ ...t, ...(d.tasks[t.id]||blankTask(t)) }));
+    const custom=(d.custom||[]).map(x=>({id:x.id,label:x.label,icon:'➕',category:'Custom',status:x.done?'done':'action',done:!!x.done,source:'manual',detail:'Custom task'}));
+    const objectives=[...defaults,...custom]; const counted=objectives.filter(x=>x.status!=='na'); const done=counted.filter(x=>x.status==='done').length;
+    return {date:d.date,total:counted.length,done,percent:counted.length?Math.round(done*100/counted.length):100,objectives,api:d.api||{},showCompleted:state.showCompleted,filter:state.filter};
+  }
+  function moduleStatus(){
+    let settings={}; try{settings=safeJson(localStorage.getItem('sakalux_master_suite_settings_v1'),{})||{};}catch{}
+    const mods=settings.modules||{}; const vals=Object.values(mods); return {enabled:vals.filter(Boolean).length,total:Math.max(23,vals.length)};
+  }
+  function resetToday(){ const s=getStore(); s.days[dayKey()]=freshDay(); save(s); render(); return true; }
+
+  function css(){
+    if(document.getElementById('sdp-smart-style')) return;
+    const st=document.createElement('style'); st.id='sdp-smart-style'; st.textContent=`
+#sakalux-suite-daily-progress{position:fixed;inset:0;z-index:2147483200;display:none;background:rgba(5,7,10,.74);font-family:Arial,sans-serif;color:#eee;padding:8px;box-sizing:border-box}#sakalux-suite-daily-progress.open{display:flex;align-items:flex-start;justify-content:center}.sdp-shell{width:min(720px,100%);max-height:calc(100dvh - 16px);background:#12151b;border:1px solid #333a46;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 60px #000a}.sdp-head{padding:12px 14px;border-bottom:1px solid #2b3039;display:flex;gap:10px;align-items:center}.sdp-title{font-size:17px;font-weight:800;flex:1}.sdp-sub{font-size:11px;color:#9fa7b3;margin-top:2px}.sdp-close,.sdp-btn{border:1px solid #3b424e;background:#1a1f27;color:#eee;border-radius:9px;padding:8px 10px;font-weight:700}.sdp-close{font-size:18px;padding:4px 10px}.sdp-body{padding:12px;overflow:auto}.sdp-progress{display:flex;align-items:center;gap:10px;margin-bottom:10px}.sdp-track{height:9px;background:#272d36;border-radius:99px;overflow:hidden;flex:1}.sdp-bar{height:100%;background:linear-gradient(90deg,#c79427,#f0c45a);width:0}.sdp-count{font-size:12px;font-weight:800;color:#f0c45a}.sdp-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.sdp-btn{font-size:11px;padding:7px 9px}.sdp-btn.active{border-color:#d8a93d;color:#f1c45e}.sdp-sync{font-size:11px;color:#9099a8;margin-bottom:10px}.sdp-list{display:grid;gap:7px}.sdp-task{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:9px;padding:9px 10px;border:1px solid #2c323c;border-radius:11px;background:#171b22}.sdp-task.done{opacity:.66}.sdp-icon{font-size:21px;text-align:center}.sdp-label{font-size:13px;font-weight:800}.sdp-detail{font-size:10px;color:#929baa;margin-top:3px}.sdp-pill{font-size:10px;font-weight:900;border-radius:99px;padding:5px 7px;border:1px solid #444}.sdp-pill.done{color:#7be09c;border-color:#315d40}.sdp-pill.action{color:#f1c45e;border-color:#725a25}.sdp-pill.pending,.sdp-pill.sync{color:#8dc7ff;border-color:#315270}.sdp-pill.na{color:#9aa2ad}.sdp-custom{display:flex;gap:6px;margin-top:10px}.sdp-custom input{flex:1;min-width:0;background:#0e1116;color:#eee;border:1px solid #343b46;border-radius:8px;padding:9px}.sdp-foot{padding:8px 12px;border-top:1px solid #292f38;font-size:10px;color:#808894;text-align:center}@media(max-width:600px){#sakalux-suite-daily-progress{padding:4px}.sdp-shell{max-height:calc(100dvh - 8px);border-radius:12px}.sdp-body{padding:9px}.sdp-task{grid-template-columns:30px 1fr auto;padding:8px}.sdp-label{font-size:12px}}
+`;
+    document.head.appendChild(st);
+  }
+  function ensurePanel(){
+    css(); let p=document.getElementById('sakalux-suite-daily-progress'); if(p) return p;
+    p=document.createElement('div'); p.id='sakalux-suite-daily-progress'; p.innerHTML='<div class="sdp-shell"><div class="sdp-head"><div><div class="sdp-title">✅ Smart Daily Checklist</div><div class="sdp-sub">Auto-sync + Torn activity fallback</div></div><button class="sdp-close" data-sdp="close">×</button></div><div class="sdp-body"></div><div class="sdp-foot">SakaLuX Suite • Smart Daily Checklist v2</div></div>';
+    p.addEventListener('click',e=>{ const a=e.target.closest('[data-sdp]'); if(!a)return; const act=a.dataset.sdp,id=a.dataset.id;if(act==='close')close();if(act==='refresh')refreshApi(true);if(act==='toggle-completed'){state.showCompleted=!state.showCompleted;const s=getStore();save(s);render();}if(act==='filter'){state.filter=a.dataset.value||'all';const s=getStore();save(s);render();}if(act==='toggle-task')setObjective(id,summary().objectives.find(x=>x.id===id)?.status!=='done');if(act==='remove')removeObjective(id);if(act==='reset'&&confirm('Reset today checklist?'))resetToday();if(act==='add'){const input=p.querySelector('.sdp-custom input');const x=addObjective(input?.value);if(x&&input)input.value='';}});
+    p.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('.sdp-custom input'))p.querySelector('[data-sdp="add"]')?.click();});
+    document.body.appendChild(p); return p;
+  }
+  function render(){
+    const p=document.getElementById('sakalux-suite-daily-progress'); if(!p)return; const s=summary(); const body=p.querySelector('.sdp-body');
+    let rows=s.objectives.filter(x=>state.showCompleted||x.status!=='done').filter(x=>state.filter==='all'||x.category===state.filter);
+    const cats=['all',...new Set(TASKS.map(x=>x.category))];
+    body.innerHTML=`<div class="sdp-progress"><div class="sdp-track"><div class="sdp-bar" style="width:${s.percent}%"></div></div><div class="sdp-count">${s.done}/${s.total} • ${s.percent}%</div></div><div class="sdp-toolbar"><button class="sdp-btn" data-sdp="refresh">${state.syncing?'SYNCING…':'↻ SYNC API'}</button><button class="sdp-btn ${state.showCompleted?'active':''}" data-sdp="toggle-completed">Show completed</button>${cats.map(c=>`<button class="sdp-btn ${state.filter===c?'active':''}" data-sdp="filter" data-value="${c}">${c==='all'?'All':c}</button>`).join('')}<button class="sdp-btn" data-sdp="reset">Reset today</button></div><div class="sdp-sync">${state.apiError?'⚠ '+state.apiError:(s.api?.lastAt?`Last API sync ${new Date(s.api.lastAt).toLocaleTimeString()}`:'API not synced yet')}</div><div class="sdp-list">${rows.map(x=>`<div class="sdp-task ${x.status}"><div class="sdp-icon">${x.icon||'•'}</div><div><div class="sdp-label">${x.label}</div><div class="sdp-detail">${x.detail||x.source||''}</div></div><div><button class="sdp-pill ${x.status}" data-sdp="toggle-task" data-id="${x.id}">${x.status==='done'?'DONE':x.status==='action'?'ACTION':x.status==='na'?'N/A':'SYNC'}</button>${x.id.startsWith('custom-')?`<button class="sdp-btn" data-sdp="remove" data-id="${x.id}">×</button>`:''}</div></div>`).join('')||'<div class="sdp-sync">No tasks in this view.</div>'}</div><div class="sdp-custom"><input placeholder="Add custom task"><button class="sdp-btn" data-sdp="add">ADD</button></div>`;
+  }
+  function open(){ const p=ensurePanel(); p.classList.add('open'); render(); refreshApi(false); return true; }
+  function close(){ const p=document.getElementById('sakalux-suite-daily-progress'); if(p)p.classList.remove('open'); return true; }
+  function ensureBridge(){
+    let b=document.getElementById('sakalux-module-bridge-suite-daily-progress'); if(b)return b;
+    b=document.createElement('button'); b.id='sakalux-module-bridge-suite-daily-progress'; b.type='button'; b.hidden=true; b.addEventListener('click',()=>{ if((b.dataset.action||'open')==='close')close(); else open(); }); document.body.appendChild(b); return b;
+  }
+  function observeRoutes(){
+    let last=location.href; const hit=()=>{const t=routeType(location.href);if(t)recordActivity(t,location.href);}; hit();
+    try{g.SakaLuXCore?.router?.onChange?.(()=>setTimeout(hit,50)); g.SakaLuXCore?.router?.bind?.();}catch{}
+    setInterval(()=>{if(location.href!==last){last=location.href;hit();}},1800);
+  }
+
+  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey});
+  const init=()=>{ensureBridge();observeRoutes();setTimeout(()=>refreshApi(false),2500);};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
+/* SakaLuX Smart Daily Checklist v2.0.0 — v0.9.968 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
