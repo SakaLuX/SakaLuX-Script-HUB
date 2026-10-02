@@ -1,0 +1,73 @@
+name: Suite Smart Daily Checklist v0.9.968
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-smart-daily-checklist-v0968.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suite-smart-daily-checklist-v0968
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Smart Daily Checklist v0.9.968
+        run: python3 .github/scripts/add_suite_smart_daily_checklist_v0968.py
+
+      - name: Validate Suite JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+
+      - name: Install regression-test dependency
+        run: npm install --no-save --package-lock=false jsdom@24
+
+      - name: Run Smart Daily Checklist regression
+        run: node tests/suite-daily-progress-regression.cjs
+
+      - name: Check patch whitespace
+        run: git diff --check
+
+      - name: Commit Suite release
+        run: |
+          if git diff --quiet -- SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs; then
+            echo "Suite v0.9.968 already applied."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs
+            git commit -m "Release Suite v0.9.968 Smart Daily Checklist"
+            git push origin HEAD:main
+          fi
+
+      - name: Create Suite tag
+        run: |
+          TAG="suite-v0.9.968"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "$TAG already exists."
+          else
+            git tag -a "$TAG" -m "SakaLuX Suite v0.9.968"
+            git push origin "$TAG"
+          fi
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="suite-v0.9.968"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+          else
+            gh release create "$TAG" \
+              --title "SakaLuX Suite v0.9.968 — Smart Daily Checklist v2" \
+              --notes $'## Smart Daily Checklist v2\n\n- Replaces route-only Daily Progress with a full daily checklist while preserving the existing Master Control entry and public API.\n- Auto-checks Energy/Nerve refills, cooldowns, missions, virus coding, education, casino tokens, travel and organized crime through Torn API v2.\n- Keeps TornPDA route fallback for Gym, Crimes, Missions, Faction/OC, Travel, City, Shops, Racing, Job, Wheels and Prayer.\n- Adds DONE / ACTION / N/A / SYNC states, completion percentage, category filters, Show completed persistence, API refresh, custom tasks and 30-day history.\n- Uses the Script Hub API key bridge first and does not store a separate key in the checklist.'
