@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.969
+// @version      0.9.970
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.969';
+  const VERSION = '0.9.970';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.0.1';
+  const API_VERSION = '2.1.0';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46205,25 +46205,33 @@ function scan(){
   const g = globalThis;
 
   const TASKS = Object.freeze([
-    { id:'energy_refill', label:'Energy refill', icon:'⚡', category:'Resources', auto:'api', endpoint:'refills' },
-    { id:'nerve_refill', label:'Nerve refill', icon:'🧠', category:'Resources', auto:'api', endpoint:'refills' },
-    { id:'drug', label:'Drug / drug cooldown', icon:'💊', category:'Resources', auto:'api', endpoint:'cooldowns' },
-    { id:'booster', label:'Booster cooldown', icon:'🍬', category:'Resources', auto:'api', endpoint:'cooldowns' },
-    { id:'medical', label:'Medical cooldown', icon:'🩸', category:'Resources', auto:'api', endpoint:'cooldowns', optional:true },
+    { id:'energy_refill', label:'Energy refill', icon:'⚡', category:'Refills', auto:'api', endpoint:'refills' },
+    { id:'nerve_refill', label:'Nerve refill', icon:'🧠', category:'Refills', auto:'api', endpoint:'refills' },
+    { id:'token_refill', label:'Casino token refill', icon:'🎟️', category:'Refills', auto:'api', endpoint:'refills', optional:true },
+    { id:'drug', label:'Drug used today', icon:'💊', category:'Cooldowns', auto:'api+logs', endpoint:'cooldowns' },
+    { id:'booster', label:'Booster used today', icon:'🍬', category:'Cooldowns', auto:'api+logs', endpoint:'cooldowns' },
+    { id:'medical', label:'Medical item used today', icon:'🩸', category:'Cooldowns', auto:'api+logs', endpoint:'cooldowns', optional:true },
     { id:'missions', label:'Daily missions', icon:'🎯', category:'Daily', auto:'api+route', endpoint:'missions', routes:['missions'] },
-    { id:'shops', label:'City shops 100/100', icon:'🛒', category:'Daily', auto:'route', routes:['shops'] },
+    { id:'shops', label:'City shops 100/100', icon:'🛒', category:'Daily', auto:'logs+route', routes:['shops'] },
     { id:'virus', label:'Virus coding', icon:'💻', category:'Daily', auto:'api', endpoint:'virus', optional:true },
-    { id:'education', label:'Education course', icon:'🎓', category:'Daily', auto:'api', endpoint:'education', optional:true },
-    { id:'casino', label:'Casino tokens', icon:'🎰', category:'Daily', auto:'api', endpoint:'casino', optional:true },
-    { id:'wheels', label:'Daily wheels', icon:'🎡', category:'Daily', auto:'route', routes:['wheels'], optional:true },
-    { id:'city', label:'City / map check', icon:'🏙️', category:'Activity', auto:'route', routes:['city'] },
-    { id:'gym', label:'Gym / energy spent', icon:'🏋️', category:'Activity', auto:'route', routes:['gym'] },
-    { id:'crimes', label:'Crimes / nerve spent', icon:'🔫', category:'Activity', auto:'route', routes:['crimes'] },
-    { id:'travel', label:'Travel', icon:'✈️', category:'Activity', auto:'api+route', endpoint:'travel', routes:['travel'] },
-    { id:'racing', label:'Racing', icon:'🏎️', category:'Activity', auto:'route', routes:['racing'], optional:true },
-    { id:'job', label:'Job / company check', icon:'🏢', category:'Activity', auto:'route', routes:['job'], optional:true },
-    { id:'faction_oc', label:'Faction / OC readiness', icon:'👥', category:'Faction', auto:'api+route', endpoint:'organizedcrime', routes:['faction'], optional:true },
-    { id:'prayer', label:'Church prayer', icon:'⛪', category:'Daily', auto:'route', routes:['prayer'], optional:true },
+    { id:'education', label:'Education course active', icon:'🎓', category:'Daily', auto:'api', endpoint:'education', optional:true },
+    { id:'casino', label:'Use daily casino tokens', icon:'🎰', category:'Casino', auto:'api', endpoint:'casino', optional:true },
+    { id:'wheel_lame', label:'Wheel of Lame', icon:'🎡', category:'Casino', auto:'logs+route', routes:['wheels'], optional:true },
+    { id:'wheel_mediocrity', label:'Wheel of Mediocrity', icon:'🎡', category:'Casino', auto:'logs+route', routes:['wheels'], optional:true },
+    { id:'wheel_awesome', label:'Wheel of Awesome', icon:'🎡', category:'Casino', auto:'logs+route', routes:['wheels'], optional:true },
+    { id:'city', label:'Check City map', icon:'🏙️', category:'Activity', auto:'logs+route', routes:['city'] },
+    { id:'gym', label:'Spend energy / Gym', icon:'🏋️', category:'Activity', auto:'logs+route', routes:['gym'] },
+    { id:'crimes', label:'Spend nerve / Crimes', icon:'🔫', category:'Activity', auto:'logs+route', routes:['crimes'] },
+    { id:'travel', label:'Travel / fly', icon:'✈️', category:'Activity', auto:'api+logs+route', endpoint:'travel', routes:['travel'] },
+    { id:'racing', label:'Race today', icon:'🏎️', category:'Activity', auto:'logs+route', routes:['racing'], optional:true },
+    { id:'job', label:'Job / company check', icon:'🏢', category:'Activity', auto:'logs+route', routes:['job'], optional:true },
+    { id:'faction_oc', label:'Organized crime slot', icon:'👥', category:'Faction', auto:'api+route', endpoint:'organizedcrime', routes:['faction'], optional:true },
+    { id:'prayer', label:'Church prayer', icon:'⛪', category:'Daily', auto:'logs+route', routes:['prayer'], optional:true },
+    { id:'blood_bags', label:'Fill / use blood bags', icon:'🩸', category:'Daily', auto:'logs', optional:true },
+    { id:'item_market', label:'Check Item Market', icon:'📈', category:'Market', auto:'route', routes:['item_market'], optional:true },
+    { id:'bazaar', label:'Check Bazaar', icon:'🏪', category:'Market', auto:'route', routes:['bazaar'], optional:true },
+    { id:'stocks', label:'Check Stocks / benefits', icon:'📊', category:'Market', auto:'route', routes:['stocks'], optional:true },
+    { id:'points', label:'Check Points / refills', icon:'🔷', category:'Daily', auto:'route', routes:['points'], optional:true },
     { id:'review', label:'Review daily plan', icon:'📋', category:'Custom', auto:'manual' }
   ]);
 
@@ -46236,16 +46244,18 @@ function scan(){
     education:'https://api.torn.com/v2/user/education',
     casino:'https://api.torn.com/v2/user/casino',
     travel:'https://api.torn.com/v2/user/travel',
-    organizedcrime:'https://api.torn.com/v2/user/organizedcrime'
+    organizedcrime:'https://api.torn.com/v2/user/organizedcrime',
+    logs:'https://api.torn.com/v2/user/log'
   });
 
   const state = { showCompleted:true, filter:'all', syncing:false, apiError:'', lastApiAt:0, lastData:{} };
 
   function dayKey(d = new Date()) {
-    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    const y=d.getUTCFullYear(), m=String(d.getUTCMonth()+1).padStart(2,'0'), day=String(d.getUTCDate()).padStart(2,'0');
     return `${y}-${m}-${day}`;
   }
-  function startOfTodayMs() { const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); }
+  function startOfTodayMs() { const d=new Date(); return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()); }
+  function startOfTodaySec(){ return Math.floor(startOfTodayMs()/1000); }
   function nowSec(){ return Math.floor(Date.now()/1000); }
   function clone(v){ return JSON.parse(JSON.stringify(v)); }
   function safeJson(raw, fallback){ try { return raw ? JSON.parse(raw) : fallback; } catch { return fallback; } }
@@ -46324,7 +46334,11 @@ function scan(){
     if(/joblist|companies|company|jobs\.php/.test(u)) return 'job';
     if(/church|pray/.test(u)) return 'prayer';
     if(/casino.*wheel|wheel/.test(u)) return 'wheels';
-    if(/shops|shop\.php|points\.php/.test(u)) return 'shops';
+    if(/itemmarket|item-market|sid=itemmarket/.test(u)) return 'item_market';
+    if(/bazaar|sid=bazaar/.test(u)) return 'bazaar';
+    if(/stock|stocks/.test(u)) return 'stocks';
+    if(/points\.php|sid=points/.test(u)) return 'points';
+    if(/shops|shop\.php/.test(u)) return 'shops';
     return '';
   }
   function recordActivity(type, url=location.href){
@@ -46333,7 +46347,7 @@ function scan(){
       const last=d.activities[d.activities.length-1];
       if(!last || last.type!==type || now-Number(last.at||0)>ROUTE_COALESCE_MS) d.activities.push({type,url:String(url),at:now});
       d.activities=d.activities.slice(-60);
-      const targets=TASKS.filter(t=>(t.routes||[]).includes(type) || t.id===type);
+      const targets=TASKS.filter(t=>((t.routes||[]).includes(type) || t.id===type) && !(type==='wheels' && /^wheel_/.test(t.id)) && !(type==='shops' && t.id==='shops'));
       for(const t of targets){
         const cur=d.tasks[t.id];
         if(cur && cur.status!=='done') d.tasks[t.id]={...cur,status:'done',done:true,source:'route',detail:'Detected from Torn activity',updatedAt:now};
@@ -46406,15 +46420,126 @@ function scan(){
     }
   }
 
+
+  function deepText(v){
+    try{return JSON.stringify(v||{}).toLowerCase();}catch{return String(v||'').toLowerCase();}
+  }
+  function applyLogCompletion(data){
+    const logs=Array.isArray(data?.log)?data.log:(Array.isArray(data?.logs)?data.logs:[]);
+    if(!logs.length) return;
+    let shopQty=0;
+    const hit=id=>setTask(id,{status:'done',source:'logs',detail:'Detected in today\'s Torn logs'});
+    for(const row of logs){
+      const title=String(row?.details?.title||'').toLowerCase();
+      const category=String(row?.details?.category||'').toLowerCase();
+      const text=(title+' '+category+' '+deepText(row?.data)+' '+deepText(row?.params)).toLowerCase();
+      if(/xanax|drug (use|used)|used .*drug|take .*drug/.test(text)) hit('drug');
+      if(/booster|energy drink|candy|alcohol|feathery hotel coupon|fhc/.test(text)) hit('booster');
+      if(/medical|blood bag|first aid|morphine|small first aid|large first aid/.test(text)) hit('medical');
+      if(/blood bag|bloodbag/.test(text)) hit('blood_bags');
+      if(/gym|train|training/.test(text)) hit('gym');
+      if(/crime/.test(text) && !/organized crime/.test(text)) hit('crimes');
+      if(/travel|flight|flying|departed.*(mexico|cayman|canada|hawaii|uk|argentina|switzerland|japan|china|uae|south africa)/.test(text)) hit('travel');
+      if(/race (joined|finished|completed|started)|racing/.test(text)) hit('racing');
+      if(/pray|prayer|church/.test(text)) hit('prayer');
+      if(/wheel of lame/.test(text)) hit('wheel_lame');
+      if(/wheel of mediocrity/.test(text)) hit('wheel_mediocrity');
+      if(/wheel of awesome/.test(text)) hit('wheel_awesome');
+      if(/city (find|item)|found .*city/.test(text)) hit('city');
+      if(/shop/.test(text) && /buy|bought|purchase/.test(text)){
+        const q=Number(row?.data?.quantity ?? row?.data?.amount ?? row?.params?.quantity ?? row?.params?.amount ?? 1)||1;
+        shopQty+=Math.max(1,q);
+      }
+    }
+    if(shopQty>=100) setTask('shops',{status:'done',source:'logs',detail:`${shopQty}/100 shop items detected today`});
+    else if(shopQty>0) setTask('shops',{status:'action',source:'logs',detail:`${shopQty}/100 shop items detected today`});
+  }
+
+  function interpretV3(name,data){
+    if(name==='logs'){ applyLogCompletion(data); return; }
+    if(name==='refills'){
+      const r=data?.refills ?? data?.data?.refills ?? data?.data ?? {};
+      // API v2 schema: energy / nerve / token are booleans representing whether that daily refill has been used.
+      const apply=(id,key,label)=>{
+        const v=r?.[key];
+        if(typeof v==='boolean') setTask(id,{status:v?'done':'action',source:'api',detail:v?`${label} used today`:`${label} still available`});
+        else setTask(id,{status:'pending',source:'api',detail:`${label} state unavailable`});
+      };
+      apply('energy_refill','energy','Energy refill');
+      apply('nerve_refill','nerve','Nerve refill');
+      apply('token_refill','token','Token refill');
+      return;
+    }
+    if(name==='cooldowns'){
+      const c=data?.cooldowns ?? data?.data?.cooldowns ?? data?.data ?? {};
+      const drug=Number(c?.drug)||0, booster=Number(c?.booster)||0, medical=Number(c?.medical)||0;
+      if(drug>0) setTask('drug',{status:'done',source:'api',detail:`Drug cooldown ${fmtDuration(drug)}`});
+      else if(get().tasks?.drug?.source!=='logs') setTask('drug',{status:'action',source:'api',detail:'Drug cooldown ready'});
+      if(booster>0) setTask('booster',{status:'done',source:'api',detail:`Booster cooldown ${fmtDuration(booster)}`});
+      else if(get().tasks?.booster?.source!=='logs') setTask('booster',{status:'action',source:'api',detail:'Booster cooldown ready'});
+      if(medical>0) setTask('medical',{status:'done',source:'api',detail:`Medical cooldown ${fmtDuration(medical)}`});
+      else if(get().tasks?.medical?.source!=='logs') setTask('medical',{status:'action',source:'api',detail:'Medical cooldown ready'});
+      return;
+    }
+    if(name==='casino'){
+      const c=data?.casino ?? data?.data?.casino ?? data?.data ?? {};
+      const tokens=Number(c?.tokens);
+      if(Number.isFinite(tokens)) setTask('casino',{status:tokens<=0?'done':'action',source:'api',detail:tokens<=0?'Daily casino tokens used':`${tokens} casino tokens remaining`});
+      return;
+    }
+    if(name==='virus'){
+      const v=('virus' in (data||{}))?data.virus:data?.data?.virus;
+      setTask('virus',{status:v?'done':'action',source:'api',detail:v?`Coding ${v?.item?.name||'virus'}`:'No virus currently coding'});
+      return;
+    }
+    if(name==='education'){
+      const e=data?.education ?? data?.data?.education ?? {};
+      const cur=e?.current ?? null;
+      setTask('education',{status:cur?'done':'action',source:'api',detail:cur?`Course active${cur.until?` • ends ${new Date(cur.until*1000).toLocaleString()}`:''}`:'No active education course'});
+      return;
+    }
+    if(name==='missions'){
+      const m=data?.missions ?? data?.data?.missions ?? {};
+      const contracts=[];
+      for(const giver of (Array.isArray(m?.givers)?m.givers:[])) for(const c of (Array.isArray(giver?.contracts)?giver.contracts:[])) contracts.push(c);
+      const active=contracts.filter(c=>/available|accepted|active/i.test(String(c?.status||'')));
+      const today=contracts.filter(c=>Number(c?.created_at||c?.completed_at||0)>=startOfTodaySec());
+      setTask('missions',{status:active.length?'action':'done',source:'api',detail:active.length?`${active.length} mission${active.length===1?'':'s'} available/active`:(today.length?'Today\'s missions cleared':'No active missions')});
+      return;
+    }
+    if(name==='travel'){
+      const t=data?.travel ?? data?.data?.travel ?? {};
+      const departed=Number(t?.departed_at)||0;
+      const currentlyAway=(Number(t?.time_left)||0)>0 || (t?.destination && !/torn/i.test(String(t.destination)));
+      if(currentlyAway || departed>=startOfTodaySec()) setTask('travel',{status:'done',source:'api',detail:currentlyAway?`Travel active • ${t.destination||''}`:'Flight detected today'});
+      else if(get().tasks?.travel?.source!=='route' && get().tasks?.travel?.source!=='logs') setTask('travel',{status:'action',source:'api',detail:'No flight detected today'});
+      return;
+    }
+    if(name==='organizedcrime'){
+      const oc=data?.organizedCrime ?? data?.organizedcrime ?? data?.data?.organizedCrime ?? data?.data?.organizedcrime ?? null;
+      if(oc && !oc?.error) setTask('faction_oc',{status:'done',source:'api',detail:`OC assigned${oc?.name?` • ${oc.name}`:''}`});
+      else setTask('faction_oc',{status:'action',source:'api',detail:'No current OC assignment detected'});
+      return;
+    }
+    // Preserve compatibility for any endpoint shape not covered above.
+    try{ interpret(name,data); }catch{}
+  }
+
+  function logEndpoint(){
+    const from=startOfTodaySec();
+    const to=Math.floor(Date.now()/1000);
+    return `https://api.torn.com/v2/user/log?from=${from}&to=${to}&limit=100`;
+  }
+
   async function refreshApi(force=false){
     if(state.syncing) return false;
     if(!force && state.lastApiAt && Date.now()-state.lastApiAt<60000) return true;
     const key=getApiKey(); if(!key){ state.apiError='API key unavailable'; render(); return false; }
     state.syncing=true; state.apiError=''; render();
-    const entries=Object.entries(ENDPOINTS);
+    const entries=Object.entries(ENDPOINTS).map(([name,url])=>[name,name==='logs'?logEndpoint():url]);
     const results=await Promise.allSettled(entries.map(([,url])=>httpJson(url)));
     let ok=0, err='';
-    results.forEach((r,i)=>{ const name=entries[i][0]; if(r.status==='fulfilled'){ok++;state.lastData[name]=r.value;try{interpret(name,r.value);}catch(e){err=String(e?.message||e);}} else err=String(r.reason?.message||r.reason||'API error'); });
+    results.forEach((r,i)=>{ const name=entries[i][0]; if(r.status==='fulfilled'){ok++;state.lastData[name]=r.value;try{interpretV3(name,r.value);}catch(e){if(name!=='logs')err=String(e?.message||e);}} else if(name!=='logs') err=String(r.reason?.message||r.reason||'API error'); });
     state.lastApiAt=Date.now(); state.apiError=ok?err:(err||'API sync failed'); state.syncing=false;
     mutate(d=>{d.api={lastAt:state.lastApiAt,error:state.apiError};});
     return ok>0;
@@ -46464,7 +46589,7 @@ function scan(){
     setInterval(()=>{if(location.href!==last){last=location.href;hit();}},1800);
   }
 
-  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey});
+  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,applyApiSnapshot:interpretV3});
   function bindToolbarAction(){
     if(g.__sakaluxSuiteDailyProgressToolbarBound) return;
     g.__sakaluxSuiteDailyProgressToolbarBound=true;
@@ -46478,7 +46603,7 @@ function scan(){
   const init=()=>{ensureBridge();bindToolbarAction();observeRoutes();setTimeout(()=>refreshApi(false),2500);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.0.1 — v0.9.969 */
+/* SakaLuX Smart Daily Checklist v2.1.0 — v0.9.970 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
