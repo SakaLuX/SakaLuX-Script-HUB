@@ -1,0 +1,79 @@
+name: Suite Smart Daily Checklist v0.9.969
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-smart-daily-checklist-v0969.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suite-smart-daily-checklist-v0969
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Daily Progress button hotfix v0.9.969
+        run: python3 .github/scripts/fix_suite_daily_button_v0969.py
+
+      - name: Validate Suite JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+
+      - name: Install regression-test dependency
+        run: npm install --no-save --package-lock=false jsdom@24
+
+      - name: Run Smart Daily Checklist regression
+        run: node tests/suite-daily-progress-regression.cjs
+
+      - name: Check patch whitespace
+        run: git diff --check
+
+      - name: Commit Suite hotfix
+        run: |
+          if git diff --quiet -- SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs; then
+            echo "Suite v0.9.969 already applied."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs
+            git commit -m "Hotfix Suite v0.9.969 Daily Progress button"
+            git push origin HEAD:main
+          fi
+
+      - name: Create Suite tag
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.969"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "$TAG already exists."
+          else
+            git tag -a "$TAG" -m "SakaLuX Suite v0.9.969"
+            git push origin "$TAG"
+          fi
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="suite-v0.9.969"
+          REPO="$GITHUB_REPOSITORY"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+          else
+            gh release create "$TAG" \
+              --repo "$REPO" \
+              --verify-tag \
+              --title "SakaLuX Suite v0.9.969 — Daily Progress Button Hotfix" \
+              --notes $'## Daily Progress button hotfix\n\n- Restores the delegated Master Control click handler removed during the v0.9.968 Smart Daily Checklist migration.\n- Tapping Daily Progress now opens Smart Daily Checklist in TornPDA/Tampermonkey again.\n- Adds a real DOM click regression test so CI verifies behaviour, not only the presence of the button markup.\n- Smart Daily Checklist public API version: 2.0.1.'
+          fi
