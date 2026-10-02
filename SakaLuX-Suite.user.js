@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.968
+// @version      0.9.969
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.968';
+  const VERSION = '0.9.969';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.0.0';
+  const API_VERSION = '2.0.1';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46465,10 +46465,20 @@ function scan(){
   }
 
   g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey});
-  const init=()=>{ensureBridge();observeRoutes();setTimeout(()=>refreshApi(false),2500);};
+  function bindToolbarAction(){
+    if(g.__sakaluxSuiteDailyProgressToolbarBound) return;
+    g.__sakaluxSuiteDailyProgressToolbarBound=true;
+    document.addEventListener('click',e=>{
+      const trigger=e.target?.closest?.('[data-action="daily-progress"]');
+      if(!trigger) return;
+      e.preventDefault();
+      open();
+    },true);
+  }
+  const init=()=>{ensureBridge();bindToolbarAction();observeRoutes();setTimeout(()=>refreshApi(false),2500);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.0.0 — v0.9.968 */
+/* SakaLuX Smart Daily Checklist v2.0.1 — v0.9.969 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
