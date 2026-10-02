@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.57
+// @version      1.17.58
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -632,7 +632,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.57';
+  let v = '1.17.58';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1357,6 +1357,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     setInterval(enforceTravelPanelScope,1500);
 
     function paintTravelSessionSummary(){
+        if(!ensureTravelSurfaceRuntime())return;
         // v1.17.43: travel-only hard guard. These inline cards must never exist outside Travel.
         if (detectPage() !== 'travel') { document.getElementById('sl-mi-session')?.remove(); return; }
         const existing=document.getElementById('sl-mi-session');
@@ -1724,6 +1725,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if(!policy.sessionSummary)document.getElementById('sl-mi-session')?.remove();
         if(!policy.landedBestBuys)document.querySelectorAll('#sl-mi-country-best,#sl-mi-travel-plan').forEach(n=>n.remove());
         return policy;
+    }
+
+    /* SakaLuX Strict Travel Surface Isolation v1 */
+    function purgeTravelUiRuntime(){
+        document.querySelectorAll('#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-country-best,#sl-mi-travel-plan,#sl-mi-travel-inline-toggle').forEach(n=>n.remove());
+        document.querySelectorAll('.sl-mi-pda-badge-row,.sl-mi-pda-badge-block').forEach(w=>{
+            if(w.dataset?.miClass==='sl-mi-travel'||w.querySelector?.('.sl-mi-travel'))w.remove();
+        });
+        document.querySelectorAll('.sl-mi-travel').forEach(n=>n.remove());
+    }
+
+    function ensureTravelSurfaceRuntime(){
+        const ok=detectPage()==='travel';
+        if(!ok)purgeTravelUiRuntime();
+        return ok;
     }
 
     function detectDestination() { const body=document.body?.innerText||''; const m=body.match(/You are in ([A-Z][A-Za-z ]+?) and have/); return m?normalizeDestination(m[1]):null; }
@@ -2129,6 +2145,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function ensureTravelInlineInfoToggle(){
+        if(!ensureTravelSurfaceRuntime())return null;
         const landed=detectPage()==='travel'&&!detectInFlight()&&!!detectDestination();
         let bar=document.getElementById('sl-mi-travel-inline-toggle');
         if(!landed){bar?.remove();return null;}
@@ -2285,6 +2302,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     async function renderBestTravelRun(){
+        if(!ensureTravelSurfaceRuntime())return;
         const existing=document.getElementById('sl-mi-best-run');
         if(!settings.bestRun||detectPage()!=='travel'||detectInFlight()||detectDestination()){existing?.remove();return;}
         if(!existing){
@@ -2333,6 +2351,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     async function renderArrivalStock(){
+        if(!ensureTravelSurfaceRuntime())return;
         // v1.17.43: travel-only hard guard. These inline cards must never exist outside Travel.
         if (detectPage() !== 'travel') { document.getElementById('sl-mi-arrival')?.remove(); return; }
         const previousArrival=document.getElementById('sl-mi-arrival');
@@ -2531,6 +2550,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     function paintCountryBestBuys(destination,entries,marketMap,availableCash=null){
+        if(!ensureTravelSurfaceRuntime())return;
         document.getElementById('sl-mi-country-best')?.remove();
         const slots=Math.max(1,Number(settings.travelSlots)||29);
         const cash=Number.isFinite(Number(availableCash))?Math.max(0,Math.floor(Number(availableCash))):null;
@@ -2610,6 +2630,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function paintTravelBuyPlan(plan){
+        if(!ensureTravelSurfaceRuntime())return;
         document.getElementById('sl-mi-travel-plan')?.remove();
         state.travelPlanItems=plan?.rows?.length||0;
         state.travelPlanCost=plan?.totalCost||0;
@@ -2637,7 +2658,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     async function scanTravel(){
-        if(!settings.travel)return;
+        if(!ensureTravelSurfaceRuntime()){
+            state.travelState=TRAVEL_STATES.OTHER;
+            state.travelDestination='';
+            return;
+        }
+        if(!settings.travel){purgeTravelUiRuntime();return;}
         const travelCtx=detectTravelStateRuntime();
         const travelPolicy=reconcileTravelPanelsRuntime(travelCtx.state);
         state.travelState=travelCtx.state;
@@ -2653,6 +2679,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         ensureTravelInlineInfoToggle();
         if(settings.travelInlineInfo===false)removeTravelInlineInfo();
         const availableCash=await fetchAvailableCash(true);
+        if(!ensureTravelSurfaceRuntime())return;
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}
         const unique=[...new Map(entries.map(e=>[e.id,e])).values()].slice(0,MAX_LIVE_FETCHES);

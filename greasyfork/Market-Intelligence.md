@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.57**
+**v1.17.58**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-01**
-- Canonical version: **v1.17.57**
+- Verified: **2026-10-02**
+- Canonical version: **v1.17.58**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,13 +32,20 @@
 
 ## Current release note
 
-**v1.17.57 — Release metadata synchronization**
+**v1.17.58 — Release metadata synchronization**
 - Best Buys now detects the live Torn cash balance automatically, including a Torn-page fallback for PDA travel pages.
 - Every Best Buys option is selectable instead of always using the first recommendation.
 - The selected item persists per destination and recalculates quantity from live cash, travel slots and current stock.
 - MARK PLAN BOUGHT now records the currently selected option and its calculated quantity.
 
 ## Release history / Changelog
+
+
+### v1.17.58 — Release metadata synchronization
+- Best Buys now detects the live Torn cash balance automatically, including a Torn-page fallback for PDA travel pages.
+- Every Best Buys option is selectable instead of always using the first recommendation.
+- The selected item persists per destination and recalculates quantity from live cash, travel slots and current stock.
+- MARK PLAN BOUGHT now records the currently selected option and its calculated quantity.
 
 ### v1.17.57 — Automatic cash + selectable Best Buys
 - Best Buys detects the live Torn cash balance automatically, with the visible foreign-travel page balance preferred and Torn API used as fallback.
