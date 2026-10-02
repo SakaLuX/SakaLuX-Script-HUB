@@ -17,6 +17,7 @@ on:
       - '.github/scripts/fix_bazaar_smart_pricer_power.py'
       - '.github/scripts/fix_bazaar_pricer_sell_floor.py'
       - '.github/scripts/fix_market_intelligence_budget_cap.py'
+      - '.github/scripts/fix_market_travel_page_isolation.py'
       - '.github/scripts/fix_enhancer_inventory_market.py'
       - '.github/scripts/fix_suite_target_alerts_mobile.py'
       - '.github/scripts/fix_suite_target_alerts_render.py'
@@ -68,6 +69,8 @@ jobs:
         run: python3 .github/scripts/fix_bazaar_pricer_sell_floor.py
       - name: Enforce Market Intelligence travel budget cap
         run: python3 .github/scripts/fix_market_intelligence_budget_cap.py
+      - name: Keep Market Intelligence Travel UI on Travel only
+        run: python3 .github/scripts/fix_market_travel_page_isolation.py
       - name: Fix Enhancer inventory cache visibility and direct market links
         run: python3 .github/scripts/fix_enhancer_inventory_market.py
       - name: Normalize module, Hub, NEW and release surfaces
