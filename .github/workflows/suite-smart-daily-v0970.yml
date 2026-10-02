@@ -1,0 +1,81 @@
+name: Suite Smart Daily Checklist v0.9.970
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-smart-daily-v0970.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suite-smart-daily-v0970
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply Smart Daily Checklist v0.9.970
+        run: |
+          python3 .github/scripts/upgrade_suite_smart_daily_v0970.py
+          python3 .github/scripts/tune_suite_smart_daily_v0970.py
+
+      - name: Validate Suite JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+
+      - name: Install regression-test dependency
+        run: npm install --no-save --package-lock=false jsdom@24
+
+      - name: Run Smart Daily Checklist regression
+        run: node tests/suite-daily-progress-regression.cjs
+
+      - name: Check patch whitespace
+        run: git diff --check
+
+      - name: Commit Suite release
+        run: |
+          if git diff --quiet -- SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs; then
+            echo "Suite v0.9.970 already applied."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs
+            git commit -m "Release Suite v0.9.970 Smart Daily Checklist 28/28"
+            git push origin HEAD:main
+          fi
+
+      - name: Create Suite tag
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.970"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "$TAG already exists."
+          else
+            git tag -a "$TAG" -m "SakaLuX Suite v0.9.970"
+            git push origin "$TAG"
+          fi
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="suite-v0.9.970"
+          REPO="$GITHUB_REPOSITORY"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+          else
+            gh release create "$TAG" \
+              --repo "$REPO" \
+              --verify-tag \
+              --title "SakaLuX Suite v0.9.970 — Smart Daily Checklist 28/28" \
+              --notes $'## Smart Daily Checklist 28/28\n\n- Expands the built-in checklist to 28 rows.\n- Fixes Energy, Nerve and Casino Token refill auto-detection against the current Torn API v2 boolean schema.\n- Separates token refill from daily casino-token usage.\n- Corrects missions, education, virus, travel and organized-crime parsing.\n- Adds same-day Full Access log detection for drugs, boosters, medical use, blood bags, gym, crimes, racing, prayer, wheels, city and shop progress.\n- Uses Torn/TCT UTC day rollover.\n- Does not mark 100/100 City Shops or all three Wheels done merely because their page was opened.\n- Adds regression tests for the reported Energy refill and Casino cases.'
+          fi
