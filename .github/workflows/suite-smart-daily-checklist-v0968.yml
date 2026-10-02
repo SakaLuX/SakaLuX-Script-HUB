@@ -75,3 +75,4 @@ jobs:
               --verify-tag \
               --title "SakaLuX Suite v0.9.968 — Smart Daily Checklist v2" \
               --notes $'## Smart Daily Checklist v2\n\n- Replaces route-only Daily Progress with a full daily checklist while preserving the existing Master Control entry and public API.\n- Auto-checks Energy/Nerve refills, cooldowns, missions, virus coding, education, casino tokens, travel and organized crime through Torn API v2.\n- Keeps TornPDA route fallback for Gym, Crimes, Missions, Faction/OC, Travel, City, Shops, Racing, Job, Wheels and Prayer.\n- Adds DONE / ACTION / N/A / SYNC states, completion percentage, category filters, Show completed persistence, API refresh, custom tasks and 30-day history.\n- Uses the Script Hub API key bridge first and does not store a separate key in the checklist.'
+          fi
