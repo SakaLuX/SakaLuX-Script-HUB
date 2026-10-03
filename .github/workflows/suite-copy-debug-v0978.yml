@@ -1,0 +1,44 @@
+name: Suite COPY DEBUG v0.9.978
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-copy-debug-v0978.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply COPY DEBUG hotfix
+        run: python3 .github/scripts/fix_suite_copy_debug_v0978.py
+      - name: Validate syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Validate COPY DEBUG helpers
+        run: |
+          grep -q "function showDebugOverlay" SakaLuX-Suite.user.js
+          grep -q "document.execCommand('copy')" SakaLuX-Suite.user.js
+          grep -q "COPY DEBUG — copy manually" SakaLuX-Suite.user.js
+          grep -q "const VERSION = '0.9.978'" SakaLuX-Suite.user.js
+          grep -q "const API_VERSION = '2.1.8'" SakaLuX-Suite.user.js
+      - name: Commit hotfix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- SakaLuX-Suite.user.js; then echo "already applied"; else git add SakaLuX-Suite.user.js && git commit -m "Hotfix Suite v0.9.978 COPY DEBUG" && git push origin HEAD:main; fi
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.978"
+          if ! git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then git tag -a "$TAG" -m "SakaLuX Suite v0.9.978" && git push origin "$TAG"; fi
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "SakaLuX Suite v0.9.978 — COPY DEBUG Hotfix" --notes $'Fixes COPY DEBUG in TornPDA with three clipboard fallbacks and an always-visible manual debug overlay.'; fi
