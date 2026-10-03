@@ -1,0 +1,45 @@
+name: Suite Wheel Logtypes Schema v0.9.977
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-wheel-logtypes-schema-v0977.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply schema hotfix
+        run: python3 .github/scripts/fix_suite_wheel_logtypes_schema_v0977.py
+      - name: Validate syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Validate Wheel resolver
+        run: |
+          grep -q "const rows=Array.isArray(raw)" SakaLuX-Suite.user.js
+          grep -q "logtype_id" SakaLuX-Suite.user.js
+          grep -q "suite:VERSION,checklist:API_VERSION" SakaLuX-Suite.user.js
+          grep -q "const API_VERSION = '2.1.7';" SakaLuX-Suite.user.js
+      - name: Commit hotfix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git diff --cached --quiet || git commit -m "Hotfix Suite v0.9.977 Torn logtypes schema"
+          git push origin HEAD:main
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.977"
+          git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1 || { git tag -a "$TAG" -m "SakaLuX Suite v0.9.977"; git push origin "$TAG"; }
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "SakaLuX Suite v0.9.977 — Torn Logtypes Schema Fix" --notes $'Fixes Torn API v2 logtypes list-of-objects parsing for Leslie Wheels. Also fixes COPY DEBUG Suite version reporting to use the live runtime VERSION.'
