@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.971**
+**v0.9.972**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-02**
-- Canonical version: **v0.9.971**
+- Canonical version: **v0.9.972**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,16 +60,17 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.970 — Smart Daily Checklist 28/28 + API accuracy pass**
-- Expands the built-in checklist to exactly **28 rows**.
-- Fixes Torn API v2 refill parsing: `refills.energy`, `refills.nerve` and `refills.token` are handled as booleans instead of objects, fixing used refills incorrectly showing ACTION.
-- Separates **Casino token refill** from **Use daily casino tokens**; the former comes from `/user/refills`, while remaining tokens come from `/user/casino`.
-- Corrects API parsing for missions, education, virus coding, travel and organized crime against the current official v2 schemas.
-- Uses Full Access `/user/log` as a second detection layer for same-day drug/booster/medical use, blood bags, gym, crimes, travel, racing, prayer, wheels, city activity and city-shop purchase progress.
-- Uses Torn day rollover at **00:00 TCT / UTC** instead of browser-local midnight.
-- Keeps route detection as a fallback for TornPDA where API/log evidence is unavailable.
+**v0.9.972 — Torn log object parser hotfix**
+- Fixes Smart Daily Checklist log parsing for the real Torn API v2 `/user/log` response, where `log` is an object keyed by log ID rather than an array.
+- Daily Wheels and every other log-backed auto-check can now consume `Object.values(log)` correctly.
+- Preserves the v0.9.971 DOM wheel detection as an independent fallback.
+- Adds a regression test using an object-mapped Wheel of Lame log entry.
 
 ## Release history / Changelog
+### v0.9.972 — Torn log object parser hotfix
+- Fixes `/user/log` object-map parsing and wheel auto-completion.
+- Adds regression coverage for the real keyed-log response shape.
+
 
 
 ### v0.9.971 — Daily Wheels auto-detection hotfix

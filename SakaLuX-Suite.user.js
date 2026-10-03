@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.971
+// @version      0.9.972
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.971';
+  const VERSION = '0.9.972';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.1';
+  const API_VERSION = '2.1.2';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46483,7 +46483,8 @@ function scan(){
     try{return JSON.stringify(v||{}).toLowerCase();}catch{return String(v||'').toLowerCase();}
   }
   function applyLogCompletion(data){
-    const logs=Array.isArray(data?.log)?data.log:(Array.isArray(data?.logs)?data.logs:[]);
+    const rawLogs=data?.log ?? data?.logs ?? data?.data?.log ?? data?.data?.logs ?? [];
+    const logs=Array.isArray(rawLogs)?rawLogs:(rawLogs&&typeof rawLogs==='object'?Object.values(rawLogs):[]);
     if(!logs.length) return;
     let shopQty=0;
     const hit=id=>setTask(id,{status:'done',source:'logs',detail:'Detected in today\'s Torn logs'});
@@ -46662,7 +46663,7 @@ function scan(){
   const init=()=>{ensureBridge();bindToolbarAction();bindWheelDetection();observeRoutes();setTimeout(()=>refreshApi(false),2500);setTimeout(scanWheelPage,900);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.1.1 — v0.9.971 */
+/* SakaLuX Smart Daily Checklist v2.1.2 — v0.9.972 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
