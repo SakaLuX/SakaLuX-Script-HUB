@@ -1,0 +1,62 @@
+name: Suite Wheel Direct API v0.9.976
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-wheel-direct-api-v0976.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suite-wheel-direct-api-v0976
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply direct Wheel API hotfix v0.9.976
+        run: python3 .github/scripts/fix_suite_wheel_direct_api_v0976.py
+      - name: Validate Suite JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Install regression-test dependency
+        run: npm install --no-save --package-lock=false jsdom@24
+      - name: Run Smart Daily Checklist regression
+        run: node tests/suite-daily-progress-regression.cjs
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Commit Suite hotfix
+        run: |
+          if git diff --quiet -- SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs; then
+            echo "Suite v0.9.976 already applied."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs
+            git commit -m "Hotfix Suite v0.9.976 direct Wheel API detection"
+            git push origin HEAD:main
+          fi
+      - name: Create Suite tag
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.976"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then echo "$TAG exists"; else git tag -a "$TAG" -m "SakaLuX Suite v0.9.976" && git push origin "$TAG"; fi
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="suite-v0.9.976"
+          REPO="$GITHUB_REPOSITORY"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release exists"
+          else
+            gh release create "$TAG" --repo "$REPO" --verify-tag --title "SakaLuX Suite v0.9.976 — Direct Wheel API Detection" --notes $'## Direct Wheel API detection\n\n- Resolves Leslie Wheel log IDs dynamically through /torn/logtypes.\n- Calls /user/log with log=<resolved IDs> for today only.\n- Avoids the generic first-100-log limitation.\n- Keeps events, generic logs and DOM detection as fallbacks.\n- Extends COPY DEBUG with resolved Wheel IDs and direct response shape.'
+          fi
