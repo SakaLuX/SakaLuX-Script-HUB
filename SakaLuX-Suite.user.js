@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.977
+// @version      0.9.978
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.977';
+  const VERSION = '0.9.978';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.7';
+  const API_VERSION = '2.1.8';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46531,20 +46531,36 @@ function scan(){
     for(const name of Object.keys(ENDPOINTS)) endpoints[name]={received:Object.prototype.hasOwnProperty.call(state.lastData,name),error:state.endpointErrors[name]||'',shape:endpointShape(name)};
     return {suite:VERSION,checklist:API_VERSION,utcDay:dayKey(),href:String(location.href),apiKeyPresent:!!getApiKey(),isWheelPage:isWheelPage(),activeWheel:activeWheelFromDom(),logTypesCount:Object.keys(state.logTypes||{}).length,wheelLogIds:resolveWheelLogIds(),wheelLogsShape:endpointShape('wheelLogs'),endpoints,wheels,logCandidates,eventCandidates};
   }
+  function showDebugOverlay(text,title='COPY DEBUG'){
+    try{document.getElementById('sdp-debug-overlay')?.remove();}catch{}
+    const o=document.createElement('div');o.id='sdp-debug-overlay';o.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:14px;';
+    const box=document.createElement('div');box.style.cssText='width:min(94vw,760px);max-height:88vh;background:#111722;border:1px solid #586273;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;';
+    const h=document.createElement('div');h.textContent=title;h.style.cssText='font-weight:800;color:#fff;font-size:14px;';
+    const ta=document.createElement('textarea');ta.value=text;ta.readOnly=true;ta.style.cssText='width:100%;height:62vh;resize:none;background:#0b0f16;color:#dbe5f3;border:1px solid #3b4656;border-radius:7px;padding:9px;font:12px monospace;box-sizing:border-box;';
+    const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;justify-content:flex-end;';
+    const copy=document.createElement('button');copy.textContent='COPY';copy.type='button';
+    const close=document.createElement('button');close.textContent='CLOSE';close.type='button';
+    for(const b of [copy,close]) b.style.cssText='padding:8px 12px;border:1px solid #5d6675;border-radius:7px;background:#202733;color:#fff;font-weight:700;';
+    copy.onclick=()=>{ta.focus();ta.select();let ok=false;try{ok=document.execCommand('copy');}catch{} if(ok)copy.textContent='COPIED';};
+    close.onclick=()=>o.remove();
+    row.append(copy,close);box.append(h,ta,row);o.append(box);document.body.append(o);ta.focus();ta.select();return o;
+  }
   async function copyWheelDiagnostics(){
-    const text=JSON.stringify(wheelDiagnostics(),null,2);
+    let text='';
+    try{text=JSON.stringify(wheelDiagnostics(),null,2);}catch(e){text=JSON.stringify({suite:VERSION,checklist:API_VERSION,error:'wheelDiagnostics failed: '+String(e?.message||e)},null,2);}
     let copied=false;
     try{if(typeof GM_setClipboard==='function'){GM_setClipboard(text,'text');copied=true;}}catch{}
-    if(!copied){try{await navigator.clipboard.writeText(text);copied=true;}catch{}}
-    if(!copied){try{window.prompt('COPY DEBUG — select all and copy',text);}catch{}}
-    return text;
+    if(!copied){try{if(navigator?.clipboard?.writeText){await navigator.clipboard.writeText(text);copied=true;}}catch{}}
+    if(!copied){try{const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px;top:-9999px;';document.body.appendChild(ta);ta.focus();ta.select();copied=!!document.execCommand('copy');ta.remove();}catch{}}
+    if(!copied) showDebugOverlay(text,'COPY DEBUG — copy manually');
+    return {text,copied};
   }
   function ensureDiagnosticsButton(p){
     if(!p||p.querySelector('#sdp-copy-debug')) return;
     const head=p.querySelector('.sdp-head'); if(!head) return;
     const b=document.createElement('button'); b.type='button'; b.id='sdp-copy-debug'; b.textContent='COPY DEBUG';
     b.style.cssText='margin-left:auto;margin-right:8px;padding:7px 10px;border:1px solid #5d6675;border-radius:7px;background:#202733;color:#fff;font-weight:700;font-size:11px;';
-    b.addEventListener('click',async()=>{const old=b.textContent;try{await copyWheelDiagnostics();b.textContent='COPIED';}catch{b.textContent='SHOW DEBUG';}setTimeout(()=>{b.textContent=old;},1800);});
+    b.addEventListener('click',async()=>{const old=b.textContent;try{const r=await copyWheelDiagnostics();b.textContent=r?.copied?'COPIED':'SHOW DEBUG';if(!r?.copied)showDebugOverlay(r?.text||'','COPY DEBUG — copy manually');}catch(e){b.textContent='SHOW DEBUG';showDebugOverlay(JSON.stringify({suite:VERSION,checklist:API_VERSION,error:String(e?.message||e)},null,2),'COPY DEBUG ERROR');}setTimeout(()=>{b.textContent=old;},1800);});
     const close=head.querySelector('.sdp-close'); if(close) head.insertBefore(b,close); else head.appendChild(b);
   }
 
@@ -46769,7 +46785,7 @@ function scan(){
     setInterval(()=>{if(location.href!==last){last=location.href;hit();}},1800);
   }
 
-  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,resolveWheelLogIds,refreshWheelLogsDirect,wheelDiagnostics,copyWheelDiagnostics,applyApiSnapshot:interpretV3});
+  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,resolveWheelLogIds,refreshWheelLogsDirect,wheelDiagnostics,copyWheelDiagnostics,showDebugOverlay,applyApiSnapshot:interpretV3});
   function bindToolbarAction(){
     if(g.__sakaluxSuiteDailyProgressToolbarBound) return;
     g.__sakaluxSuiteDailyProgressToolbarBound=true;
@@ -46783,7 +46799,7 @@ function scan(){
   const init=()=>{ensureBridge();bindToolbarAction();bindWheelDetection();observeRoutes();setTimeout(()=>refreshApi(false),2500);setTimeout(scanWheelPage,900);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.1.7 — v0.9.977 */
+/* SakaLuX Smart Daily Checklist v2.1.8 — v0.9.978 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
