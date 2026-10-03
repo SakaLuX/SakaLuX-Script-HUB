@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.974**
+**v0.9.976**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-02**
-- Canonical version: **v0.9.974**
+- Canonical version: **v0.9.976**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,13 +60,19 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.974 — Wheel diagnostics**
-- Adds a `COPY DEBUG` button to Smart Daily Checklist so TornPDA users can copy the exact Wheel detection state.
-- Records per-endpoint success/error for `/user/log`, `/user/events`, `/torn/logtypes` and the rest of the checklist API calls.
-- Debug output includes only endpoint shapes, Wheel task state and Wheel-related candidates; the API key is never included.
-- Exposes `wheelDiagnostics()` and `copyWheelDiagnostics()` through `SakaLuXSuiteDailyProgress`.
+**v0.9.976 — Direct filtered Wheel API detection**
+- Resolves Wheel of Lame / Mediocrity / Awesome log IDs dynamically from `/torn/logtypes`.
+- Queries `/user/log` directly with the resolved `log=` IDs and today's TCT/UTC `from`/`to` window.
+- No longer relies on finding a Wheel entry among the first 100 generic account logs.
+- Keeps generic log, events and DOM detection as independent fallbacks.
+- COPY DEBUG now includes resolved Wheel log IDs and the filtered Wheel-log response shape.
 
 ## Release history / Changelog
+### v0.9.976 — Direct filtered Wheel API detection
+- Uses official log type IDs to request only Leslie Wheel logs for the current Torn day.
+- Avoids the generic 100-log limit that caused Wheels to stay at SYNC on active accounts.
+
+
 ### v0.9.974 — Wheel diagnostics
 - Adds mobile-friendly COPY DEBUG and per-endpoint diagnostics for Daily Wheels without exposing the API key.
 
