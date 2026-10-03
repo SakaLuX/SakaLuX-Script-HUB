@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.972**
+**v0.9.973**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-02**
-- Canonical version: **v0.9.972**
+- Canonical version: **v0.9.973**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,13 +60,18 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.972 — Torn log object parser hotfix**
-- Fixes Smart Daily Checklist log parsing for the real Torn API v2 `/user/log` response, where `log` is an object keyed by log ID rather than an array.
-- Daily Wheels and every other log-backed auto-check can now consume `Object.values(log)` correctly.
-- Preserves the v0.9.971 DOM wheel detection as an independent fallback.
-- Adds a regression test using an object-mapped Wheel of Lame log entry.
+**v0.9.973 — Wheel detection via official log types + events**
+- Resolves numeric `user/log` IDs against Torn's official `/torn/logtypes` endpoint before matching checklist tasks.
+- Adds `/user/events` as an independent fallback for Wheel of Lame, Mediocrity and Awesome.
+- Scans the complete log row (including top-level fields), not only `details/data/params`.
+- Keeps the direct Spin The Wheel DOM/click detection from v0.9.971.
+- Adds regression tests for numeric log IDs and events-based wheel completion.
 
 ## Release history / Changelog
+### v0.9.973 — Wheel log-type resolver + events fallback
+- Resolves numeric Torn log IDs through `/torn/logtypes`.
+- Adds `/user/events` fallback for all three Leslie wheels.
+
 ### v0.9.972 — Torn log object parser hotfix
 - Fixes `/user/log` object-map parsing and wheel auto-completion.
 - Adds regression coverage for the real keyed-log response shape.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.972
+// @version      0.9.973
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.972';
+  const VERSION = '0.9.973';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.2';
+  const API_VERSION = '2.1.3';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46245,10 +46245,12 @@ function scan(){
     casino:'https://api.torn.com/v2/user/casino',
     travel:'https://api.torn.com/v2/user/travel',
     organizedcrime:'https://api.torn.com/v2/user/organizedcrime',
+    events:'https://api.torn.com/v2/user/events',
+    logtypes:'https://api.torn.com/v2/torn/logtypes',
     logs:'https://api.torn.com/v2/user/log'
   });
 
-  const state = { showCompleted:true, filter:'all', syncing:false, apiError:'', lastApiAt:0, lastData:{} };
+  const state = { showCompleted:true, filter:'all', syncing:false, apiError:'', lastApiAt:0, lastData:{}, logTypes:{} };
 
   function dayKey(d = new Date()) {
     const y=d.getUTCFullYear(), m=String(d.getUTCMonth()+1).padStart(2,'0'), day=String(d.getUTCDate()).padStart(2,'0');
@@ -46482,6 +46484,29 @@ function scan(){
   function deepText(v){
     try{return JSON.stringify(v||{}).toLowerCase();}catch{return String(v||'').toLowerCase();}
   }
+  function applyLogTypes(data){
+    const raw=data?.logtypes ?? data?.data?.logtypes ?? data?.data ?? [];
+    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.entries(raw).map(([id,v])=>({id,...(typeof v==='object'?v:{title:String(v)})})):[]);
+    const map={...state.logTypes};
+    for(const row of rows){
+      const id=String(row?.id ?? row?.log ?? row?.log_id ?? '');
+      const title=String(row?.title ?? row?.name ?? row?.description ?? '');
+      if(id && title) map[id]=title;
+    }
+    state.logTypes=map;
+  }
+  function applyEventCompletion(data){
+    const raw=data?.events ?? data?.data?.events ?? data?.data ?? [];
+    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.values(raw):[]);
+    for(const row of rows){
+      const ts=Number(row?.timestamp ?? row?.time ?? 0)||0;
+      if(ts && ts<startOfTodaySec()) continue;
+      const text=deepText(row);
+      if(/wheel of lame/.test(text)) setTask('wheel_lame',{status:'done',source:'events',detail:'Detected in today\'s Torn events'});
+      if(/wheel of mediocrity/.test(text)) setTask('wheel_mediocrity',{status:'done',source:'events',detail:'Detected in today\'s Torn events'});
+      if(/wheel of awesome/.test(text)) setTask('wheel_awesome',{status:'done',source:'events',detail:'Detected in today\'s Torn events'});
+    }
+  }
   function applyLogCompletion(data){
     const rawLogs=data?.log ?? data?.logs ?? data?.data?.log ?? data?.data?.logs ?? [];
     const logs=Array.isArray(rawLogs)?rawLogs:(rawLogs&&typeof rawLogs==='object'?Object.values(rawLogs):[]);
@@ -46489,9 +46514,10 @@ function scan(){
     let shopQty=0;
     const hit=id=>setTask(id,{status:'done',source:'logs',detail:'Detected in today\'s Torn logs'});
     for(const row of logs){
-      const title=String(row?.details?.title||'').toLowerCase();
-      const category=String(row?.details?.category||'').toLowerCase();
-      const text=(title+' '+category+' '+deepText(row?.data)+' '+deepText(row?.params)).toLowerCase();
+      const mappedTitle=state.logTypes[String(row?.log ?? row?.log_id ?? '')]||'';
+      const title=String(row?.title ?? row?.details?.title ?? mappedTitle ?? '').toLowerCase();
+      const category=String(row?.category ?? row?.details?.category ?? '').toLowerCase();
+      const text=(title+' '+mappedTitle+' '+category+' '+deepText(row)).toLowerCase();
       if(/xanax|drug (use|used)|used .*drug|take .*drug/.test(text)) hit('drug');
       if(/booster|energy drink|candy|alcohol|feathery hotel coupon|fhc/.test(text)) hit('booster');
       if(/medical|blood bag|first aid|morphine|small first aid|large first aid/.test(text)) hit('medical');
@@ -46516,6 +46542,8 @@ function scan(){
   }
 
   function interpretV3(name,data){
+    if(name==='events'){ applyEventCompletion(data); return; }
+    if(name==='logtypes'){ applyLogTypes(data); return; }
     if(name==='logs'){ applyLogCompletion(data); return; }
     if(name==='refills'){
       const r=data?.refills ?? data?.data?.refills ?? data?.data ?? {};
@@ -46663,7 +46691,7 @@ function scan(){
   const init=()=>{ensureBridge();bindToolbarAction();bindWheelDetection();observeRoutes();setTimeout(()=>refreshApi(false),2500);setTimeout(scanWheelPage,900);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.1.2 — v0.9.972 */
+/* SakaLuX Smart Daily Checklist v2.1.3 — v0.9.973 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
