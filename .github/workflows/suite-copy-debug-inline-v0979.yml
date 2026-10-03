@@ -1,0 +1,44 @@
+name: Suite COPY DEBUG Inline v0.9.979
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-copy-debug-inline-v0979.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Apply inline COPY DEBUG hotfix
+        run: python3 .github/scripts/fix_suite_copy_debug_inline_v0979.py
+      - name: Validate syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Validate inline debug helper
+        run: |
+          grep -q "function showDebugInline" SakaLuX-Suite.user.js
+          grep -q "COPY DEBUG — selecteaza textul de mai jos" SakaLuX-Suite.user.js
+      - name: Commit hotfix
+        run: |
+          if git diff --quiet -- SakaLuX-Suite.user.js; then echo "Already applied"; else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add SakaLuX-Suite.user.js
+            git commit -m "Hotfix Suite v0.9.979 inline COPY DEBUG"
+            git push origin HEAD:main
+          fi
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.979"
+          if ! git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then git tag -a "$TAG" -m "SakaLuX Suite v0.9.979" && git push origin "$TAG"; fi
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "SakaLuX Suite v0.9.979 — Inline COPY DEBUG" --notes "Shows debug JSON directly inside Daily Progress when TornPDA blocks clipboard/overlay fallbacks."; fi
