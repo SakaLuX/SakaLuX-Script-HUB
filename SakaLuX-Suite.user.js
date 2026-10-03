@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.973
+// @version      0.9.974
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.973';
+  const VERSION = '0.9.974';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.3';
+  const API_VERSION = '2.1.4';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46250,7 +46250,7 @@ function scan(){
     logs:'https://api.torn.com/v2/user/log'
   });
 
-  const state = { showCompleted:true, filter:'all', syncing:false, apiError:'', lastApiAt:0, lastData:{}, logTypes:{} };
+  const state = { showCompleted:true, filter:'all', syncing:false, apiError:'', lastApiAt:0, lastData:{}, logTypes:{}, endpointErrors:{} };
 
   function dayKey(d = new Date()) {
     const y=d.getUTCFullYear(), m=String(d.getUTCMonth()+1).padStart(2,'0'), day=String(d.getUTCDate()).padStart(2,'0');
@@ -46507,6 +46507,47 @@ function scan(){
       if(/wheel of awesome/.test(text)) setTask('wheel_awesome',{status:'done',source:'events',detail:'Detected in today\'s Torn events'});
     }
   }
+  function endpointShape(name){
+    const d=state.lastData?.[name];
+    if(d==null) return null;
+    if(Array.isArray(d)) return {type:'array',length:d.length};
+    if(typeof d!=='object') return {type:typeof d};
+    const out={type:'object',keys:Object.keys(d).slice(0,20)};
+    const raw=d?.log ?? d?.logs ?? d?.events ?? d?.logtypes ?? d?.data?.log ?? d?.data?.logs ?? d?.data?.events ?? d?.data?.logtypes;
+    if(Array.isArray(raw)) out.rows=raw.length;
+    else if(raw&&typeof raw==='object') out.rows=Object.keys(raw).length;
+    return out;
+  }
+  function wheelDiagnostics(){
+    const day=get();
+    const wheels=['wheel_lame','wheel_mediocrity','wheel_awesome'].map(id=>({id,status:day.tasks?.[id]?.status||'pending',source:day.tasks?.[id]?.source||'',detail:day.tasks?.[id]?.detail||'',updatedAt:day.tasks?.[id]?.updatedAt||0}));
+    const rawLogs=state.lastData?.logs?.log ?? state.lastData?.logs?.logs ?? state.lastData?.logs?.data?.log ?? state.lastData?.logs?.data?.logs ?? [];
+    const logs=Array.isArray(rawLogs)?rawLogs:(rawLogs&&typeof rawLogs==='object'?Object.values(rawLogs):[]);
+    const logCandidates=logs.map(row=>{const id=String(row?.log ?? row?.log_id ?? '');const mapped=state.logTypes[id]||'';return {id,timestamp:Number(row?.timestamp??row?.time??0)||0,mappedTitle:mapped,wheelWord:/wheel|spin|lame|mediocrity|awesome/i.test(mapped+' '+deepText(row))};}).filter(x=>x.wheelWord).slice(0,20);
+    const rawEvents=state.lastData?.events?.events ?? state.lastData?.events?.data?.events ?? state.lastData?.events?.data ?? [];
+    const events=Array.isArray(rawEvents)?rawEvents:(rawEvents&&typeof rawEvents==='object'?Object.values(rawEvents):[]);
+    const eventCandidates=events.map(row=>({timestamp:Number(row?.timestamp??row?.time??0)||0,text:String(row?.event??row?.title??row?.message??'').slice(0,220)})).filter(x=>/wheel|spin|lame|mediocrity|awesome/i.test(x.text)).slice(0,20);
+    const endpoints={};
+    for(const name of Object.keys(ENDPOINTS)) endpoints[name]={received:Object.prototype.hasOwnProperty.call(state.lastData,name),error:state.endpointErrors[name]||'',shape:endpointShape(name)};
+    return {suite:'0.9.974',checklist:API_VERSION,utcDay:dayKey(),href:String(location.href),apiKeyPresent:!!getApiKey(),isWheelPage:isWheelPage(),activeWheel:activeWheelFromDom(),logTypesCount:Object.keys(state.logTypes||{}).length,endpoints,wheels,logCandidates,eventCandidates};
+  }
+  async function copyWheelDiagnostics(){
+    const text=JSON.stringify(wheelDiagnostics(),null,2);
+    let copied=false;
+    try{if(typeof GM_setClipboard==='function'){GM_setClipboard(text,'text');copied=true;}}catch{}
+    if(!copied){try{await navigator.clipboard.writeText(text);copied=true;}catch{}}
+    if(!copied){try{window.prompt('COPY DEBUG — select all and copy',text);}catch{}}
+    return text;
+  }
+  function ensureDiagnosticsButton(p){
+    if(!p||p.querySelector('#sdp-copy-debug')) return;
+    const head=p.querySelector('.sdp-head'); if(!head) return;
+    const b=document.createElement('button'); b.type='button'; b.id='sdp-copy-debug'; b.textContent='COPY DEBUG';
+    b.style.cssText='margin-left:auto;margin-right:8px;padding:7px 10px;border:1px solid #5d6675;border-radius:7px;background:#202733;color:#fff;font-weight:700;font-size:11px;';
+    b.addEventListener('click',async()=>{const old=b.textContent;try{await copyWheelDiagnostics();b.textContent='COPIED';}catch{b.textContent='SHOW DEBUG';}setTimeout(()=>{b.textContent=old;},1800);});
+    const close=head.querySelector('.sdp-close'); if(close) head.insertBefore(b,close); else head.appendChild(b);
+  }
+
   function applyLogCompletion(data){
     const rawLogs=data?.log ?? data?.logs ?? data?.data?.log ?? data?.data?.logs ?? [];
     const logs=Array.isArray(rawLogs)?rawLogs:(rawLogs&&typeof rawLogs==='object'?Object.values(rawLogs):[]);
@@ -46627,7 +46668,7 @@ function scan(){
     const entries=Object.entries(ENDPOINTS).map(([name,url])=>[name,name==='logs'?logEndpoint():url]);
     const results=await Promise.allSettled(entries.map(([,url])=>httpJson(url)));
     let ok=0, err='';
-    results.forEach((r,i)=>{ const name=entries[i][0]; if(r.status==='fulfilled'){ok++;state.lastData[name]=r.value;try{interpretV3(name,r.value);}catch(e){if(name!=='logs')err=String(e?.message||e);}} else if(name!=='logs') err=String(r.reason?.message||r.reason||'API error'); });
+    results.forEach((r,i)=>{ const name=entries[i][0]; if(r.status==='fulfilled'){ok++;state.lastData[name]=r.value;delete state.endpointErrors[name];try{interpretV3(name,r.value);}catch(e){const msg=String(e?.message||e);state.endpointErrors[name]='interpret: '+msg;if(name!=='logs'&&name!=='events'&&name!=='logtypes')err=msg;}} else {const msg=String(r.reason?.message||r.reason||'API error');state.endpointErrors[name]=msg;if(name!=='logs'&&name!=='events'&&name!=='logtypes')err=msg;} });
     state.lastApiAt=Date.now(); state.apiError=ok?err:(err||'API sync failed'); state.syncing=false;
     mutate(d=>{d.api={lastAt:state.lastApiAt,error:state.apiError};});
     return ok>0;
@@ -46665,7 +46706,7 @@ function scan(){
     const cats=['all',...new Set(TASKS.map(x=>x.category))];
     body.innerHTML=`<div class="sdp-progress"><div class="sdp-track"><div class="sdp-bar" style="width:${s.percent}%"></div></div><div class="sdp-count">${s.done}/${s.total} • ${s.percent}%</div></div><div class="sdp-toolbar"><button class="sdp-btn" data-sdp="refresh">${state.syncing?'SYNCING…':'↻ SYNC API'}</button><button class="sdp-btn ${state.showCompleted?'active':''}" data-sdp="toggle-completed">Show completed</button>${cats.map(c=>`<button class="sdp-btn ${state.filter===c?'active':''}" data-sdp="filter" data-value="${c}">${c==='all'?'All':c}</button>`).join('')}<button class="sdp-btn" data-sdp="reset">Reset today</button></div><div class="sdp-sync">${state.apiError?'⚠ '+state.apiError:(s.api?.lastAt?`Last API sync ${new Date(s.api.lastAt).toLocaleTimeString()}`:'API not synced yet')}</div><div class="sdp-list">${rows.map(x=>`<div class="sdp-task ${x.status}"><div class="sdp-icon">${x.icon||'•'}</div><div><div class="sdp-label">${x.label}</div><div class="sdp-detail">${x.detail||x.source||''}</div></div><div><button class="sdp-pill ${x.status}" data-sdp="toggle-task" data-id="${x.id}">${x.status==='done'?'DONE':x.status==='action'?'ACTION':x.status==='na'?'N/A':'SYNC'}</button>${x.id.startsWith('custom-')?`<button class="sdp-btn" data-sdp="remove" data-id="${x.id}">×</button>`:''}</div></div>`).join('')||'<div class="sdp-sync">No tasks in this view.</div>'}</div><div class="sdp-custom"><input placeholder="Add custom task"><button class="sdp-btn" data-sdp="add">ADD</button></div>`;
   }
-  function open(){ const p=ensurePanel(); p.classList.add('open'); render(); refreshApi(false); return true; }
+  function open(){ const p=ensurePanel(); ensureDiagnosticsButton(p); p.classList.add('open'); render(); refreshApi(false); return true; }
   function close(){ const p=document.getElementById('sakalux-suite-daily-progress'); if(p)p.classList.remove('open'); return true; }
   function ensureBridge(){
     let b=document.getElementById('sakalux-module-bridge-suite-daily-progress'); if(b)return b;
@@ -46677,7 +46718,7 @@ function scan(){
     setInterval(()=>{if(location.href!==last){last=location.href;hit();}},1800);
   }
 
-  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,applyApiSnapshot:interpretV3});
+  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,wheelDiagnostics,copyWheelDiagnostics,applyApiSnapshot:interpretV3});
   function bindToolbarAction(){
     if(g.__sakaluxSuiteDailyProgressToolbarBound) return;
     g.__sakaluxSuiteDailyProgressToolbarBound=true;
@@ -46691,7 +46732,7 @@ function scan(){
   const init=()=>{ensureBridge();bindToolbarAction();bindWheelDetection();observeRoutes();setTimeout(()=>refreshApi(false),2500);setTimeout(scanWheelPage,900);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.1.3 — v0.9.973 */
+/* SakaLuX Smart Daily Checklist v2.1.4 — v0.9.974 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */

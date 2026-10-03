@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.973**
+**v0.9.974**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-02**
-- Canonical version: **v0.9.973**
+- Canonical version: **v0.9.974**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,14 +60,16 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.973 — Wheel detection via official log types + events**
-- Resolves numeric `user/log` IDs against Torn's official `/torn/logtypes` endpoint before matching checklist tasks.
-- Adds `/user/events` as an independent fallback for Wheel of Lame, Mediocrity and Awesome.
-- Scans the complete log row (including top-level fields), not only `details/data/params`.
-- Keeps the direct Spin The Wheel DOM/click detection from v0.9.971.
-- Adds regression tests for numeric log IDs and events-based wheel completion.
+**v0.9.974 — Wheel diagnostics**
+- Adds a `COPY DEBUG` button to Smart Daily Checklist so TornPDA users can copy the exact Wheel detection state.
+- Records per-endpoint success/error for `/user/log`, `/user/events`, `/torn/logtypes` and the rest of the checklist API calls.
+- Debug output includes only endpoint shapes, Wheel task state and Wheel-related candidates; the API key is never included.
+- Exposes `wheelDiagnostics()` and `copyWheelDiagnostics()` through `SakaLuXSuiteDailyProgress`.
 
 ## Release history / Changelog
+### v0.9.974 — Wheel diagnostics
+- Adds mobile-friendly COPY DEBUG and per-endpoint diagnostics for Daily Wheels without exposing the API key.
+
 ### v0.9.973 — Wheel log-type resolver + events fallback
 - Resolves numeric Torn log IDs through `/torn/logtypes`.
 - Adds `/user/events` fallback for all three Leslie wheels.
