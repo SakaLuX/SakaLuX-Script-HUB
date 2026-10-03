@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.976
+// @version      0.9.977
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.976';
+  const VERSION = '0.9.977';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.6';
+  const API_VERSION = '2.1.7';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46486,12 +46486,12 @@ function scan(){
   }
   function applyLogTypes(data){
     const raw=data?.logtypes ?? data?.data?.logtypes ?? data?.data ?? [];
-    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.entries(raw).map(([id,v])=>({id,...(typeof v==='object'?v:{title:String(v)})})):[]);
+    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.entries(raw).map(([id,v])=>({id,...(typeof v==='object'?v:{value:v})})):[]);
     const map={...state.logTypes};
     for(const row of rows){
-      const id=String(row?.id ?? row?.log ?? row?.log_id ?? '');
-      const title=String(row?.title ?? row?.name ?? row?.description ?? '');
-      if(id && title) map[id]=title;
+      const id=String(row?.id ?? row?.log ?? row?.log_id ?? row?.logtype_id ?? row?.type_id ?? '');
+      const text=deepText(row);
+      if(id && text) map[id]=text;
     }
     state.logTypes=map;
   }
@@ -46529,7 +46529,7 @@ function scan(){
     const eventCandidates=events.map(row=>({timestamp:Number(row?.timestamp??row?.time??0)||0,text:String(row?.event??row?.title??row?.message??'').slice(0,220)})).filter(x=>/wheel|spin|lame|mediocrity|awesome/i.test(x.text)).slice(0,20);
     const endpoints={};
     for(const name of Object.keys(ENDPOINTS)) endpoints[name]={received:Object.prototype.hasOwnProperty.call(state.lastData,name),error:state.endpointErrors[name]||'',shape:endpointShape(name)};
-    return {suite:'0.9.974',checklist:API_VERSION,utcDay:dayKey(),href:String(location.href),apiKeyPresent:!!getApiKey(),isWheelPage:isWheelPage(),activeWheel:activeWheelFromDom(),logTypesCount:Object.keys(state.logTypes||{}).length,wheelLogIds:resolveWheelLogIds(),wheelLogsShape:endpointShape('wheelLogs'),endpoints,wheels,logCandidates,eventCandidates};
+    return {suite:VERSION,checklist:API_VERSION,utcDay:dayKey(),href:String(location.href),apiKeyPresent:!!getApiKey(),isWheelPage:isWheelPage(),activeWheel:activeWheelFromDom(),logTypesCount:Object.keys(state.logTypes||{}).length,wheelLogIds:resolveWheelLogIds(),wheelLogsShape:endpointShape('wheelLogs'),endpoints,wheels,logCandidates,eventCandidates};
   }
   async function copyWheelDiagnostics(){
     const text=JSON.stringify(wheelDiagnostics(),null,2);
@@ -46550,13 +46550,25 @@ function scan(){
 
   function resolveWheelLogIds(){
     const out={wheel_lame:[],wheel_mediocrity:[],wheel_awesome:[]};
-    for(const [id,titleRaw] of Object.entries(state.logTypes||{})){
-      const title=String(titleRaw||'').toLowerCase();
-      const wheelish=/wheel|spin/.test(title);
-      if((/wheel of lame/.test(title)||(wheelish&&/\blame\b/.test(title)))) out.wheel_lame.push(String(id));
-      if((/wheel of mediocrity/.test(title)||(wheelish&&/\bmediocrity\b/.test(title)))) out.wheel_mediocrity.push(String(id));
-      if((/wheel of awesome/.test(title)||(wheelish&&/\bawesome\b/.test(title)))) out.wheel_awesome.push(String(id));
+    const add=(id,textRaw)=>{
+      const idStr=String(id??'');
+      const text=String(textRaw??'').toLowerCase();
+      if(!idStr) return;
+      const wheelish=/wheel|spin|leslie/.test(text);
+      if(/wheel of lame/.test(text)||(wheelish&&/lame/.test(text))) out.wheel_lame.push(idStr);
+      if(/wheel of mediocrity/.test(text)||(wheelish&&/mediocrity/.test(text))) out.wheel_mediocrity.push(idStr);
+      if(/wheel of awesome/.test(text)||(wheelish&&/awesome/.test(text))) out.wheel_awesome.push(idStr);
+    };
+    // Normalized map built by applyLogTypes.
+    for(const [id,text] of Object.entries(state.logTypes||{})) add(id,text);
+    // Also inspect the raw API rows directly so future schema field-name changes do not break detection.
+    const raw=state.lastData?.logtypes?.logtypes ?? state.lastData?.logtypes?.data?.logtypes ?? state.lastData?.logtypes?.data ?? [];
+    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.entries(raw).map(([id,v])=>({id,...(typeof v==='object'?v:{value:v})})):[]);
+    for(const row of rows){
+      const id=row?.id ?? row?.log ?? row?.log_id ?? row?.logtype_id ?? row?.type_id;
+      add(id,deepText(row));
     }
+    for(const k of Object.keys(out)) out[k]=[...new Set(out[k])];
     return out;
   }
   async function refreshWheelLogsDirect(){
@@ -46771,7 +46783,7 @@ function scan(){
   const init=()=>{ensureBridge();bindToolbarAction();bindWheelDetection();observeRoutes();setTimeout(()=>refreshApi(false),2500);setTimeout(scanWheelPage,900);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.1.6 — v0.9.976 */
+/* SakaLuX Smart Daily Checklist v2.1.7 — v0.9.977 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
