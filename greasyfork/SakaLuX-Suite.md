@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.970**
+**v0.9.971**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-02**
-- Canonical version: **v0.9.970**
+- Canonical version: **v0.9.971**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -70,6 +70,12 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Keeps route detection as a fallback for TornPDA where API/log evidence is unavailable.
 
 ## Release history / Changelog
+
+
+### v0.9.971 — Daily Wheels auto-detection hotfix
+- Adds DOM-level wheel state detection and real SPIN-action tracking for all three Leslie wheels.
+- Keeps API-log detection as an additional source, with broader matching for structured log payloads.
+
 
 ### v0.9.970 — Smart Daily Checklist 28/28 + API accuracy pass
 - 28 built-in checklist rows.

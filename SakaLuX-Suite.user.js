@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.970
+// @version      0.9.971
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.970';
+  const VERSION = '0.9.971';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.0';
+  const API_VERSION = '2.1.1';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46355,6 +46355,64 @@ function scan(){
     });
   }
 
+  function wheelIdFromText(value){
+    const text=String(value||'').toLowerCase();
+    if(/wheel of lame|\blame\b/.test(text)) return 'wheel_lame';
+    if(/wheel of mediocrity|\bmediocrity\b/.test(text)) return 'wheel_mediocrity';
+    if(/wheel of awesome|\bawesome\b/.test(text)) return 'wheel_awesome';
+    return '';
+  }
+  function isWheelPage(){ return /(?:loader\.php.*sid=spinthewheel|sid=spinthewheel|spin.?the.?wheel)/i.test(String(location.href)); }
+  function activeWheelFromDom(startEl=null){
+    const fromUrl=wheelIdFromText(location.href); if(fromUrl) return fromUrl;
+    let el=startEl;
+    for(let i=0;el&&i<6;i++,el=el.parentElement){ const id=wheelIdFromText(el.textContent); if(id && String(el.textContent||'').length<2500) return id; }
+    const active=[...document.querySelectorAll('[aria-selected="true"],.active,.selected,[data-active="true"]')];
+    for(const node of active){ const id=wheelIdFromText(node.textContent); if(id) return id; }
+    const headings=[...document.querySelectorAll('h1,h2,h3,h4,[role="tab"],button')];
+    const visible=headings.filter(x=>{ try{const s=getComputedStyle(x);return s.display!=='none'&&s.visibility!=='hidden';}catch{return true;} });
+    const ids=[...new Set(visible.map(x=>wheelIdFromText(x.textContent)).filter(Boolean))];
+    return ids.length===1?ids[0]:'';
+  }
+  function markWheelDone(id,detail='Detected on Spin The Wheel page'){
+    if(!/^wheel_(?:lame|mediocrity|awesome)$/.test(String(id))) return false;
+    setTask(id,{status:'done',source:'wheel-page',detail}); return true;
+  }
+  function scanWheelPage(){
+    if(!isWheelPage()) return false;
+    let changed=false;
+    const names={wheel_lame:/wheel of lame|\blame\b/i,wheel_mediocrity:/wheel of mediocrity|\bmediocrity\b/i,wheel_awesome:/wheel of awesome|\bawesome\b/i};
+    const stateRx=/already (?:spun|used|played)|spun (?:it )?today|come back (?:again )?tomorrow|available (?:again )?(?:in|tomorrow)|next spin|try again tomorrow|used today|played today/i;
+    const nodes=[...document.querySelectorAll('section,article,div,li,tr')];
+    for(const [id,nameRx] of Object.entries(names)){
+      let best=null;
+      for(const node of nodes){ const txt=String(node.textContent||'').trim(); if(txt.length<20||txt.length>2200||!nameRx.test(txt)||!stateRx.test(txt)) continue; if(!best||txt.length<String(best.textContent||'').length) best=node; }
+      if(best){ markWheelDone(id,'Wheel already spun today'); changed=true; }
+    }
+    const current=activeWheelFromDom();
+    if(current){
+      const buttons=[...document.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]')];
+      const spin=buttons.find(b=>/\bspin\b/i.test(String(b.textContent||b.value||'')));
+      if(spin && (spin.disabled || spin.getAttribute('aria-disabled')==='true')){ markWheelDone(current,'Spin unavailable — already used today'); changed=true; }
+    }
+    return changed;
+  }
+  function bindWheelDetection(){
+    if(g.__sakaluxSuiteWheelDetectionBound) return;
+    g.__sakaluxSuiteWheelDetectionBound=true;
+    document.addEventListener('click',e=>{
+      if(!isWheelPage()) return;
+      const btn=e.target?.closest?.('button,[role="button"],input[type="button"],input[type="submit"],a'); if(!btn) return;
+      const label=String(btn.textContent||btn.value||'').trim();
+      if(!/^spin\b/i.test(label)) return;
+      const id=activeWheelFromDom(btn); if(id) markWheelDone(id,'SPIN action detected on Torn');
+      setTimeout(scanWheelPage,800); setTimeout(scanWheelPage,3500);
+    },true);
+    const run=()=>{ if(isWheelPage()) scanWheelPage(); };
+    run();
+    try{ new MutationObserver(()=>{ if(isWheelPage()) { clearTimeout(g.__sakaluxWheelScanTimer); g.__sakaluxWheelScanTimer=setTimeout(scanWheelPage,200); } }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled','aria-disabled','class']}); }catch{}
+  }
+
   function getApiKey(){
     try{ const k=String(g.SakaLuXScriptHub?.getApiKey?.()||'').trim(); if(k) return k; }catch{}
     const candidates=['sakalux_master_suite_settings_v1','SakaLuX_HUB_SETTINGS_V16','SakaLuX_HUB_SETTINGS_V15'];
@@ -46442,9 +46500,10 @@ function scan(){
       if(/travel|flight|flying|departed.*(mexico|cayman|canada|hawaii|uk|argentina|switzerland|japan|china|uae|south africa)/.test(text)) hit('travel');
       if(/race (joined|finished|completed|started)|racing/.test(text)) hit('racing');
       if(/pray|prayer|church/.test(text)) hit('prayer');
-      if(/wheel of lame/.test(text)) hit('wheel_lame');
-      if(/wheel of mediocrity/.test(text)) hit('wheel_mediocrity');
-      if(/wheel of awesome/.test(text)) hit('wheel_awesome');
+      const wheelish=/wheel|spin|casino/.test(text);
+      if(/wheel of lame|wheel[_ -]?lame|(?:wheel|type|name)[^a-z0-9]{0,8}lame|lame[^a-z0-9]{0,8}(?:wheel|spin)/.test(text) || (wheelish && /["']lame["']/.test(text))) hit('wheel_lame');
+      if(/wheel of mediocrity|wheel[_ -]?mediocrity|(?:wheel|type|name)[^a-z0-9]{0,8}mediocrity|mediocrity[^a-z0-9]{0,8}(?:wheel|spin)/.test(text) || (wheelish && /["']mediocrity["']/.test(text))) hit('wheel_mediocrity');
+      if(/wheel of awesome|wheel[_ -]?awesome|(?:wheel|type|name)[^a-z0-9]{0,8}awesome|awesome[^a-z0-9]{0,8}(?:wheel|spin)/.test(text) || (wheelish && /["']awesome["']/.test(text))) hit('wheel_awesome');
       if(/city (find|item)|found .*city/.test(text)) hit('city');
       if(/shop/.test(text) && /buy|bought|purchase/.test(text)){
         const q=Number(row?.data?.quantity ?? row?.data?.amount ?? row?.params?.quantity ?? row?.params?.amount ?? 1)||1;
@@ -46589,7 +46648,7 @@ function scan(){
     setInterval(()=>{if(location.href!==last){last=location.href;hit();}},1800);
   }
 
-  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,applyApiSnapshot:interpretV3});
+  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,applyApiSnapshot:interpretV3});
   function bindToolbarAction(){
     if(g.__sakaluxSuiteDailyProgressToolbarBound) return;
     g.__sakaluxSuiteDailyProgressToolbarBound=true;
@@ -46600,10 +46659,10 @@ function scan(){
       open();
     },true);
   }
-  const init=()=>{ensureBridge();bindToolbarAction();observeRoutes();setTimeout(()=>refreshApi(false),2500);};
+  const init=()=>{ensureBridge();bindToolbarAction();bindWheelDetection();observeRoutes();setTimeout(()=>refreshApi(false),2500);setTimeout(scanWheelPage,900);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.1.0 — v0.9.970 */
+/* SakaLuX Smart Daily Checklist v2.1.1 — v0.9.971 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
