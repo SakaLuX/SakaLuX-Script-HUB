@@ -1,0 +1,68 @@
+name: Suite Rollback v0.9.980
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-rollback-v0980.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suite-rollback-v0980
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore known-good v0.9.974 Suite
+        run: |
+          git show 0f5eab5ac063605cf46714584641478839887720:SakaLuX-Suite.user.js > SakaLuX-Suite.user.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('SakaLuX-Suite.user.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('// @version      0.9.974','// @version      0.9.980',1)
+          s=s.replace("const VERSION = '0.9.974';","const VERSION = '0.9.980';",1)
+          s=s.replace("return {suite:'0.9.974',checklist:API_VERSION", "return {suite:'0.9.980',checklist:API_VERSION",1)
+          s=s.replace('/* SakaLuX Smart Daily Checklist v2.1.4 — v0.9.974 */','/* SakaLuX Smart Daily Checklist v2.1.4 — rollback v0.9.980 */',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Validate restored Suite
+        run: |
+          node --check SakaLuX-Suite.user.js
+          grep -q "@version      0.9.980" SakaLuX-Suite.user.js
+          grep -q "const API_VERSION = '2.1.4'" SakaLuX-Suite.user.js
+          grep -q "function wheelDiagnostics" SakaLuX-Suite.user.js
+          grep -q "window.prompt('COPY DEBUG — select all and copy',text)" SakaLuX-Suite.user.js
+          if grep -q "function showDebugOverlay" SakaLuX-Suite.user.js; then echo 'New debug overlay still present' && exit 1; fi
+          if grep -q "function showInlineDebug" SakaLuX-Suite.user.js; then echo 'Inline debug still present' && exit 1; fi
+          if grep -q "function refreshWheelLogsDirect" SakaLuX-Suite.user.js; then echo 'Direct wheel API experiment still present' && exit 1; fi
+
+      - name: Commit rollback
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Suite.user.js
+          git commit -m "Rollback Suite to v0.9.974 behavior as v0.9.980"
+          git push origin HEAD:main
+
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.980"
+          git tag -a "$TAG" -m "SakaLuX Suite v0.9.980 rollback"
+          git push origin "$TAG"
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "SakaLuX Suite v0.9.980 — Rollback to 0.9.974" --notes $'Restores the exact known-good Daily Progress / COPY DEBUG implementation from Suite v0.9.974. Removes the later Wheel direct-API and debug UI experiments. Version number is kept forward at 0.9.980 so TornPDA/Tampermonkey can update normally. Checklist logic is intentionally back to 2.1.4.'
