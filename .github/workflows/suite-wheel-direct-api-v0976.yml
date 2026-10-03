@@ -1,5 +1,6 @@
 name: Suite Wheel Direct API v0.9.976
 
+# retrigger after patcher regression fix
 on:
   push:
     branches: [main]
@@ -26,6 +27,11 @@ jobs:
         run: python3 .github/scripts/fix_suite_wheel_direct_api_v0976.py
       - name: Validate Suite JavaScript syntax
         run: node --check SakaLuX-Suite.user.js
+      - name: Validate direct Wheel API helpers
+        run: |
+          grep -q "function resolveWheelLogIds" SakaLuX-Suite.user.js
+          grep -q "async function refreshWheelLogsDirect" SakaLuX-Suite.user.js
+          grep -q "await refreshWheelLogsDirect" SakaLuX-Suite.user.js
       - name: Install regression-test dependency
         run: npm install --no-save --package-lock=false jsdom@24
       - name: Run Smart Daily Checklist regression
