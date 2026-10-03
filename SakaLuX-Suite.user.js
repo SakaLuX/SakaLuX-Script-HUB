@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.978
+// @version      0.9.979
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.978';
+  const VERSION = '0.9.979';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.8';
+  const API_VERSION = '2.1.9';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46545,6 +46545,26 @@ function scan(){
     close.onclick=()=>o.remove();
     row.append(copy,close);box.append(h,ta,row);o.append(box);document.body.append(o);ta.focus();ta.select();return o;
   }
+  function showDebugInline(panel,text){
+    if(!panel) return false;
+    try{panel.querySelector('#sdp-debug-inline')?.remove();}catch{}
+    const wrap=document.createElement('div');wrap.id='sdp-debug-inline';
+    wrap.style.cssText='margin:10px;padding:10px;border:1px solid #596579;border-radius:9px;background:#0f141d;position:relative;z-index:2147483647;';
+    const h=document.createElement('div');h.textContent='COPY DEBUG — selecteaza textul de mai jos';h.style.cssText='font-weight:800;color:#fff;margin-bottom:8px;font-size:13px;';
+    const ta=document.createElement('textarea');ta.value=String(text||'');ta.readOnly=true;
+    ta.style.cssText='display:block;width:100%;height:48vh;min-height:260px;box-sizing:border-box;background:#080c12;color:#dbe5f3;border:1px solid #3b4656;border-radius:7px;padding:9px;font:12px monospace;';
+    const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;justify-content:flex-end;margin-top:8px;';
+    const select=document.createElement('button');select.type='button';select.textContent='SELECT ALL';
+    const close=document.createElement('button');close.type='button';close.textContent='CLOSE';
+    for(const b of [select,close]) b.style.cssText='padding:8px 12px;border:1px solid #5d6675;border-radius:7px;background:#202733;color:#fff;font-weight:700;';
+    select.onclick=()=>{ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);};
+    close.onclick=()=>wrap.remove();
+    row.append(select,close);wrap.append(h,ta,row);
+    const head=panel.querySelector('.sdp-head'); if(head?.nextSibling) panel.insertBefore(wrap,head.nextSibling); else panel.appendChild(wrap);
+    ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);
+    try{wrap.scrollIntoView({block:'nearest'});}catch{}
+    return true;
+  }
   async function copyWheelDiagnostics(){
     let text='';
     try{text=JSON.stringify(wheelDiagnostics(),null,2);}catch(e){text=JSON.stringify({suite:VERSION,checklist:API_VERSION,error:'wheelDiagnostics failed: '+String(e?.message||e)},null,2);}
@@ -46560,7 +46580,7 @@ function scan(){
     const head=p.querySelector('.sdp-head'); if(!head) return;
     const b=document.createElement('button'); b.type='button'; b.id='sdp-copy-debug'; b.textContent='COPY DEBUG';
     b.style.cssText='margin-left:auto;margin-right:8px;padding:7px 10px;border:1px solid #5d6675;border-radius:7px;background:#202733;color:#fff;font-weight:700;font-size:11px;';
-    b.addEventListener('click',async()=>{const old=b.textContent;try{const r=await copyWheelDiagnostics();b.textContent=r?.copied?'COPIED':'SHOW DEBUG';if(!r?.copied)showDebugOverlay(r?.text||'','COPY DEBUG — copy manually');}catch(e){b.textContent='SHOW DEBUG';showDebugOverlay(JSON.stringify({suite:VERSION,checklist:API_VERSION,error:String(e?.message||e)},null,2),'COPY DEBUG ERROR');}setTimeout(()=>{b.textContent=old;},1800);});
+    b.addEventListener('click',async()=>{const old=b.textContent;try{const r=await copyWheelDiagnostics();b.textContent=r?.copied?'COPIED':'SHOW DEBUG';if(!r?.copied)showDebugInline(p,r?.text||'');}catch(e){b.textContent='SHOW DEBUG';showDebugInline(p,JSON.stringify({suite:VERSION,checklist:API_VERSION,error:String(e?.message||e)},null,2));}setTimeout(()=>{b.textContent=old;},1800);});
     const close=head.querySelector('.sdp-close'); if(close) head.insertBefore(b,close); else head.appendChild(b);
   }
 
@@ -46785,7 +46805,7 @@ function scan(){
     setInterval(()=>{if(location.href!==last){last=location.href;hit();}},1800);
   }
 
-  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,resolveWheelLogIds,refreshWheelLogsDirect,wheelDiagnostics,copyWheelDiagnostics,showDebugOverlay,applyApiSnapshot:interpretV3});
+  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,resolveWheelLogIds,refreshWheelLogsDirect,wheelDiagnostics,copyWheelDiagnostics,showDebugOverlay,showDebugInline,applyApiSnapshot:interpretV3});
   function bindToolbarAction(){
     if(g.__sakaluxSuiteDailyProgressToolbarBound) return;
     g.__sakaluxSuiteDailyProgressToolbarBound=true;
@@ -46799,7 +46819,7 @@ function scan(){
   const init=()=>{ensureBridge();bindToolbarAction();bindWheelDetection();observeRoutes();setTimeout(()=>refreshApi(false),2500);setTimeout(scanWheelPage,900);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.1.8 — v0.9.978 */
+/* SakaLuX Smart Daily Checklist v2.1.9 — v0.9.979 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
