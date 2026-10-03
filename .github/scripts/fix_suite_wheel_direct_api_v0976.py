@@ -48,7 +48,6 @@ helper=r'''  function resolveWheelLogIds(){
       const wheel=idToWheel[String(row?.log ?? row?.log_id ?? '')];
       if(wheel) setTask(wheel,{status:'done',source:'wheel-api',detail:'Detected directly from filtered Torn user/log'});
     }
-    // Keep the generic matcher as a fallback for payloads where the API embeds wheel text instead of the numeric type.
     applyLogCompletion(data);
     return true;
   }
@@ -58,7 +57,6 @@ if 'function resolveWheelLogIds(){' not in s:
     if anchor not in s: raise SystemExit('applyLogCompletion anchor missing')
     s=s.replace(anchor,helper+anchor,1)
 
-# Run the targeted query only after /torn/logtypes has been interpreted.
 needle="    state.lastApiAt=Date.now(); state.apiError=ok?err:(err||'API sync failed'); state.syncing=false;"
 replacement="""    try{ await refreshWheelLogsDirect(); }catch(e){ state.endpointErrors.wheelLogs=String(e?.message||e||'Wheel API error'); }
     state.lastApiAt=Date.now(); state.apiError=ok?err:(err||'API sync failed'); state.syncing=false;"""
@@ -66,32 +64,28 @@ if 'await refreshWheelLogsDirect();' not in s:
     if needle not in s: raise SystemExit('refreshApi completion anchor missing')
     s=s.replace(needle,replacement,1)
 
-# Add direct-filter data to diagnostics.
 old_diag="logTypesCount:Object.keys(state.logTypes||{}).length,endpoints,wheels,logCandidates,eventCandidates"
 new_diag="logTypesCount:Object.keys(state.logTypes||{}).length,wheelLogIds:resolveWheelLogIds(),wheelLogsShape:endpointShape('wheelLogs'),endpoints,wheels,logCandidates,eventCandidates"
 if old_diag in s:
     s=s.replace(old_diag,new_diag,1)
 
-# Expose resolver for regression tests and field diagnostics.
 old_api="getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage"
 new_api="getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,resolveWheelLogIds,refreshWheelLogsDirect"
 if old_api in s and 'refreshWheelLogsDirect' not in s.split('g.SakaLuXSuiteDailyProgress=Object.freeze(',1)[-1].split('});',1)[0]:
     s=s.replace(old_api,new_api,1)
 
+if 'function resolveWheelLogIds(){' not in s or 'async function refreshWheelLogsDirect(){' not in s:
+    raise SystemExit('direct Wheel API helpers missing after patch')
+if 'await refreshWheelLogsDirect();' not in s:
+    raise SystemExit('direct Wheel API refresh hook missing after patch')
+
 suite.write_text(s,encoding='utf-8')
 
-# Regression: version and public direct-filter helpers must exist.
+# Keep existing runtime regression aligned with the new Suite/checklist versions.
 t=test.read_text(encoding='utf-8')
 t=re.sub(r'0\\\.9\\\.97[45]', r'0\\.9\\.976', t, count=1)
 t=re.sub(r"const VERSION = '0\.9\.97[45]';", "const VERSION = '0.9.976';", t, count=1)
 t=re.sub(r"assert\.equal\(api\.version,'2\.1\.[45]'\);", "assert.equal(api.version,'2.1.6');", t, count=1)
-marker="console.log('Suite Daily Progress regression passed');"
-extra="""assert.equal(typeof api.resolveWheelLogIds,'function','direct Wheel log ID resolver exported');
-assert.equal(typeof api.refreshWheelLogsDirect,'function','direct filtered Wheel API refresh exported');
-"""
-if extra.strip() not in t:
-    if marker not in t: raise SystemExit('test completion marker missing')
-    t=t.replace(marker,extra+marker,1)
 test.write_text(t,encoding='utf-8')
 
 m=doc.read_text(encoding='utf-8')
