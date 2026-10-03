@@ -1,0 +1,69 @@
+name: Suite Smart Daily Checklist v0.9.971
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-smart-daily-v0971.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suite-smart-daily-v0971
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply wheel auto-detection hotfix v0.9.971
+        run: python3 .github/scripts/fix_suite_wheels_v0971.py
+      - name: Validate Suite JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Install regression-test dependency
+        run: npm install --no-save --package-lock=false jsdom@24
+      - name: Run Smart Daily Checklist regression
+        run: node tests/suite-daily-progress-regression.cjs
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Commit Suite hotfix
+        run: |
+          if git diff --quiet -- SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs; then
+            echo "Suite v0.9.971 already applied."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs
+            git commit -m "Hotfix Suite v0.9.971 Daily Wheels detection"
+            git push origin HEAD:main
+          fi
+      - name: Create Suite tag
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.971"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "$TAG already exists."
+          else
+            git tag -a "$TAG" -m "SakaLuX Suite v0.9.971"
+            git push origin "$TAG"
+          fi
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="suite-v0.9.971"
+          REPO="$GITHUB_REPOSITORY"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+          else
+            gh release create "$TAG" --repo "$REPO" --verify-tag \
+              --title "SakaLuX Suite v0.9.971 — Daily Wheels Auto-Detection" \
+              --notes $'## Daily Wheels auto-detection hotfix\n\n- Detects actual SPIN actions directly on Torn Spin The Wheel, without requiring Full Access logs.\n- Detects already-spun / next-spin / disabled wheel states from the Torn page.\n- Tracks Wheel of Lame, Mediocrity and Awesome independently and only marks the selected/completed wheel.\n- Expands Torn log matching for structured wheel payloads.\n- Adds regression coverage for Wheel of Lame log completion and Wheel of Awesome DOM SPIN completion.'
+          fi
