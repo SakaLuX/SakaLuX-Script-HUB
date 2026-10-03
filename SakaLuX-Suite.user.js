@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.979
+// @version      0.9.980
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.979';
+  const VERSION = '0.9.980';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.9';
+  const API_VERSION = '2.1.4';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46486,12 +46486,12 @@ function scan(){
   }
   function applyLogTypes(data){
     const raw=data?.logtypes ?? data?.data?.logtypes ?? data?.data ?? [];
-    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.entries(raw).map(([id,v])=>({id,...(typeof v==='object'?v:{value:v})})):[]);
+    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.entries(raw).map(([id,v])=>({id,...(typeof v==='object'?v:{title:String(v)})})):[]);
     const map={...state.logTypes};
     for(const row of rows){
-      const id=String(row?.id ?? row?.log ?? row?.log_id ?? row?.logtype_id ?? row?.type_id ?? '');
-      const text=deepText(row);
-      if(id && text) map[id]=text;
+      const id=String(row?.id ?? row?.log ?? row?.log_id ?? '');
+      const title=String(row?.title ?? row?.name ?? row?.description ?? '');
+      if(id && title) map[id]=title;
     }
     state.logTypes=map;
   }
@@ -46529,109 +46529,23 @@ function scan(){
     const eventCandidates=events.map(row=>({timestamp:Number(row?.timestamp??row?.time??0)||0,text:String(row?.event??row?.title??row?.message??'').slice(0,220)})).filter(x=>/wheel|spin|lame|mediocrity|awesome/i.test(x.text)).slice(0,20);
     const endpoints={};
     for(const name of Object.keys(ENDPOINTS)) endpoints[name]={received:Object.prototype.hasOwnProperty.call(state.lastData,name),error:state.endpointErrors[name]||'',shape:endpointShape(name)};
-    return {suite:VERSION,checklist:API_VERSION,utcDay:dayKey(),href:String(location.href),apiKeyPresent:!!getApiKey(),isWheelPage:isWheelPage(),activeWheel:activeWheelFromDom(),logTypesCount:Object.keys(state.logTypes||{}).length,wheelLogIds:resolveWheelLogIds(),wheelLogsShape:endpointShape('wheelLogs'),endpoints,wheels,logCandidates,eventCandidates};
-  }
-  function showDebugOverlay(text,title='COPY DEBUG'){
-    try{document.getElementById('sdp-debug-overlay')?.remove();}catch{}
-    const o=document.createElement('div');o.id='sdp-debug-overlay';o.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:14px;';
-    const box=document.createElement('div');box.style.cssText='width:min(94vw,760px);max-height:88vh;background:#111722;border:1px solid #586273;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;';
-    const h=document.createElement('div');h.textContent=title;h.style.cssText='font-weight:800;color:#fff;font-size:14px;';
-    const ta=document.createElement('textarea');ta.value=text;ta.readOnly=true;ta.style.cssText='width:100%;height:62vh;resize:none;background:#0b0f16;color:#dbe5f3;border:1px solid #3b4656;border-radius:7px;padding:9px;font:12px monospace;box-sizing:border-box;';
-    const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;justify-content:flex-end;';
-    const copy=document.createElement('button');copy.textContent='COPY';copy.type='button';
-    const close=document.createElement('button');close.textContent='CLOSE';close.type='button';
-    for(const b of [copy,close]) b.style.cssText='padding:8px 12px;border:1px solid #5d6675;border-radius:7px;background:#202733;color:#fff;font-weight:700;';
-    copy.onclick=()=>{ta.focus();ta.select();let ok=false;try{ok=document.execCommand('copy');}catch{} if(ok)copy.textContent='COPIED';};
-    close.onclick=()=>o.remove();
-    row.append(copy,close);box.append(h,ta,row);o.append(box);document.body.append(o);ta.focus();ta.select();return o;
-  }
-  function showDebugInline(panel,text){
-    if(!panel) return false;
-    try{panel.querySelector('#sdp-debug-inline')?.remove();}catch{}
-    const wrap=document.createElement('div');wrap.id='sdp-debug-inline';
-    wrap.style.cssText='margin:10px;padding:10px;border:1px solid #596579;border-radius:9px;background:#0f141d;position:relative;z-index:2147483647;';
-    const h=document.createElement('div');h.textContent='COPY DEBUG — selecteaza textul de mai jos';h.style.cssText='font-weight:800;color:#fff;margin-bottom:8px;font-size:13px;';
-    const ta=document.createElement('textarea');ta.value=String(text||'');ta.readOnly=true;
-    ta.style.cssText='display:block;width:100%;height:48vh;min-height:260px;box-sizing:border-box;background:#080c12;color:#dbe5f3;border:1px solid #3b4656;border-radius:7px;padding:9px;font:12px monospace;';
-    const row=document.createElement('div');row.style.cssText='display:flex;gap:8px;justify-content:flex-end;margin-top:8px;';
-    const select=document.createElement('button');select.type='button';select.textContent='SELECT ALL';
-    const close=document.createElement('button');close.type='button';close.textContent='CLOSE';
-    for(const b of [select,close]) b.style.cssText='padding:8px 12px;border:1px solid #5d6675;border-radius:7px;background:#202733;color:#fff;font-weight:700;';
-    select.onclick=()=>{ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);};
-    close.onclick=()=>wrap.remove();
-    row.append(select,close);wrap.append(h,ta,row);
-    const head=panel.querySelector('.sdp-head'); if(head?.nextSibling) panel.insertBefore(wrap,head.nextSibling); else panel.appendChild(wrap);
-    ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);
-    try{wrap.scrollIntoView({block:'nearest'});}catch{}
-    return true;
+    return {suite:'0.9.980',checklist:API_VERSION,utcDay:dayKey(),href:String(location.href),apiKeyPresent:!!getApiKey(),isWheelPage:isWheelPage(),activeWheel:activeWheelFromDom(),logTypesCount:Object.keys(state.logTypes||{}).length,endpoints,wheels,logCandidates,eventCandidates};
   }
   async function copyWheelDiagnostics(){
-    let text='';
-    try{text=JSON.stringify(wheelDiagnostics(),null,2);}catch(e){text=JSON.stringify({suite:VERSION,checklist:API_VERSION,error:'wheelDiagnostics failed: '+String(e?.message||e)},null,2);}
+    const text=JSON.stringify(wheelDiagnostics(),null,2);
     let copied=false;
     try{if(typeof GM_setClipboard==='function'){GM_setClipboard(text,'text');copied=true;}}catch{}
-    if(!copied){try{if(navigator?.clipboard?.writeText){await navigator.clipboard.writeText(text);copied=true;}}catch{}}
-    if(!copied){try{const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px;top:-9999px;';document.body.appendChild(ta);ta.focus();ta.select();copied=!!document.execCommand('copy');ta.remove();}catch{}}
-    if(!copied) showDebugOverlay(text,'COPY DEBUG — copy manually');
-    return {text,copied};
+    if(!copied){try{await navigator.clipboard.writeText(text);copied=true;}catch{}}
+    if(!copied){try{window.prompt('COPY DEBUG — select all and copy',text);}catch{}}
+    return text;
   }
   function ensureDiagnosticsButton(p){
     if(!p||p.querySelector('#sdp-copy-debug')) return;
     const head=p.querySelector('.sdp-head'); if(!head) return;
     const b=document.createElement('button'); b.type='button'; b.id='sdp-copy-debug'; b.textContent='COPY DEBUG';
     b.style.cssText='margin-left:auto;margin-right:8px;padding:7px 10px;border:1px solid #5d6675;border-radius:7px;background:#202733;color:#fff;font-weight:700;font-size:11px;';
-    b.addEventListener('click',async()=>{const old=b.textContent;try{const r=await copyWheelDiagnostics();b.textContent=r?.copied?'COPIED':'SHOW DEBUG';if(!r?.copied)showDebugInline(p,r?.text||'');}catch(e){b.textContent='SHOW DEBUG';showDebugInline(p,JSON.stringify({suite:VERSION,checklist:API_VERSION,error:String(e?.message||e)},null,2));}setTimeout(()=>{b.textContent=old;},1800);});
+    b.addEventListener('click',async()=>{const old=b.textContent;try{await copyWheelDiagnostics();b.textContent='COPIED';}catch{b.textContent='SHOW DEBUG';}setTimeout(()=>{b.textContent=old;},1800);});
     const close=head.querySelector('.sdp-close'); if(close) head.insertBefore(b,close); else head.appendChild(b);
-  }
-
-  function resolveWheelLogIds(){
-    const out={wheel_lame:[],wheel_mediocrity:[],wheel_awesome:[]};
-    const add=(id,textRaw)=>{
-      const idStr=String(id??'');
-      const text=String(textRaw??'').toLowerCase();
-      if(!idStr) return;
-      const wheelish=/wheel|spin|leslie/.test(text);
-      if(/wheel of lame/.test(text)||(wheelish&&/lame/.test(text))) out.wheel_lame.push(idStr);
-      if(/wheel of mediocrity/.test(text)||(wheelish&&/mediocrity/.test(text))) out.wheel_mediocrity.push(idStr);
-      if(/wheel of awesome/.test(text)||(wheelish&&/awesome/.test(text))) out.wheel_awesome.push(idStr);
-    };
-    // Normalized map built by applyLogTypes.
-    for(const [id,text] of Object.entries(state.logTypes||{})) add(id,text);
-    // Also inspect the raw API rows directly so future schema field-name changes do not break detection.
-    const raw=state.lastData?.logtypes?.logtypes ?? state.lastData?.logtypes?.data?.logtypes ?? state.lastData?.logtypes?.data ?? [];
-    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.entries(raw).map(([id,v])=>({id,...(typeof v==='object'?v:{value:v})})):[]);
-    for(const row of rows){
-      const id=row?.id ?? row?.log ?? row?.log_id ?? row?.logtype_id ?? row?.type_id;
-      add(id,deepText(row));
-    }
-    for(const k of Object.keys(out)) out[k]=[...new Set(out[k])];
-    return out;
-  }
-  async function refreshWheelLogsDirect(){
-    const idsByWheel=resolveWheelLogIds();
-    const allIds=[...new Set(Object.values(idsByWheel).flat())];
-    if(!allIds.length){
-      state.endpointErrors.wheelLogs='No Leslie Wheel log IDs resolved from /torn/logtypes';
-      return false;
-    }
-    const from=startOfTodaySec();
-    const to=Math.floor(Date.now()/1000);
-    const url=`https://api.torn.com/v2/user/log?log=${encodeURIComponent(allIds.join(','))}&from=${from}&to=${to}&limit=100&sort=asc`;
-    const data=await httpJson(url);
-    state.lastData.wheelLogs=data;
-    delete state.endpointErrors.wheelLogs;
-    const raw=data?.log ?? data?.logs ?? data?.data?.log ?? data?.data?.logs ?? [];
-    const rows=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.values(raw):[]);
-    const idToWheel={};
-    for(const [wheel,ids] of Object.entries(idsByWheel)) for(const id of ids) idToWheel[String(id)]=wheel;
-    for(const row of rows){
-      const ts=Number(row?.timestamp ?? row?.time ?? 0)||0;
-      if(ts && ts<from) continue;
-      const wheel=idToWheel[String(row?.log ?? row?.log_id ?? '')];
-      if(wheel) setTask(wheel,{status:'done',source:'wheel-api',detail:'Detected directly from filtered Torn user/log'});
-    }
-    applyLogCompletion(data);
-    return true;
   }
 
   function applyLogCompletion(data){
@@ -46755,7 +46669,6 @@ function scan(){
     const results=await Promise.allSettled(entries.map(([,url])=>httpJson(url)));
     let ok=0, err='';
     results.forEach((r,i)=>{ const name=entries[i][0]; if(r.status==='fulfilled'){ok++;state.lastData[name]=r.value;delete state.endpointErrors[name];try{interpretV3(name,r.value);}catch(e){const msg=String(e?.message||e);state.endpointErrors[name]='interpret: '+msg;if(name!=='logs'&&name!=='events'&&name!=='logtypes')err=msg;}} else {const msg=String(r.reason?.message||r.reason||'API error');state.endpointErrors[name]=msg;if(name!=='logs'&&name!=='events'&&name!=='logtypes')err=msg;} });
-    try{ await refreshWheelLogsDirect(); }catch(e){ state.endpointErrors.wheelLogs=String(e?.message||e||'Wheel API error'); }
     state.lastApiAt=Date.now(); state.apiError=ok?err:(err||'API sync failed'); state.syncing=false;
     mutate(d=>{d.api={lastAt:state.lastApiAt,error:state.apiError};});
     return ok>0;
@@ -46805,7 +46718,7 @@ function scan(){
     setInterval(()=>{if(location.href!==last){last=location.href;hit();}},1800);
   }
 
-  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,resolveWheelLogIds,refreshWheelLogsDirect,wheelDiagnostics,copyWheelDiagnostics,showDebugOverlay,showDebugInline,applyApiSnapshot:interpretV3});
+  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,wheelDiagnostics,copyWheelDiagnostics,applyApiSnapshot:interpretV3});
   function bindToolbarAction(){
     if(g.__sakaluxSuiteDailyProgressToolbarBound) return;
     g.__sakaluxSuiteDailyProgressToolbarBound=true;
@@ -46819,7 +46732,7 @@ function scan(){
   const init=()=>{ensureBridge();bindToolbarAction();bindWheelDetection();observeRoutes();setTimeout(()=>refreshApi(false),2500);setTimeout(scanWheelPage,900);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })();
-/* SakaLuX Smart Daily Checklist v2.1.9 — v0.9.979 */
+/* SakaLuX Smart Daily Checklist v2.1.4 — rollback v0.9.980 */
 /* SakaLuX Suite Daily Progress — END */
 
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
