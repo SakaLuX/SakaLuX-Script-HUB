@@ -1,0 +1,62 @@
+name: Suite Smart Daily Checklist v0.9.974
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/suite-smart-daily-v0974.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: suite-smart-daily-v0974
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply wheel diagnostics v0.9.974
+        run: python3 .github/scripts/add_suite_wheel_diagnostics_v0974.py
+      - name: Validate Suite JavaScript syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Install regression-test dependency
+        run: npm install --no-save --package-lock=false jsdom@24
+      - name: Run Smart Daily Checklist regression
+        run: node tests/suite-daily-progress-regression.cjs
+      - name: Check patch whitespace
+        run: git diff --check
+      - name: Commit Suite diagnostics
+        run: |
+          if git diff --quiet -- SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs; then
+            echo "Suite v0.9.974 already applied."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs
+            git commit -m "Add Suite v0.9.974 wheel diagnostics"
+            git push origin HEAD:main
+          fi
+      - name: Create Suite tag
+        run: |
+          git fetch origin main --tags
+          git reset --hard origin/main
+          TAG="suite-v0.9.974"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then echo "$TAG exists"; else git tag -a "$TAG" -m "SakaLuX Suite v0.9.974" && git push origin "$TAG"; fi
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="suite-v0.9.974"
+          REPO="$GITHUB_REPOSITORY"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release exists"
+          else
+            gh release create "$TAG" --repo "$REPO" --verify-tag --title "SakaLuX Suite v0.9.974 — Wheel Diagnostics" --notes $'## Wheel diagnostics\n\n- Adds COPY DEBUG directly to Smart Daily Checklist.\n- Captures per-endpoint success/error for logs, events and logtypes.\n- Shows Wheel DOM detection, mapped log candidates and current task state.\n- Never includes the Torn API key in debug output.\n- Adds regression coverage for the diagnostics API.'
+          fi
