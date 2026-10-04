@@ -20,16 +20,26 @@ jobs:
         run: node --check SakaLuX-Suite.user.js
       - name: Validate stable checklist preserved
         run: |
+          grep -q "// @version      0.9.981" SakaLuX-Suite.user.js
           grep -q "const API_VERSION = '2.1.4'" SakaLuX-Suite.user.js
           grep -q "function wheelDiagnostics" SakaLuX-Suite.user.js
+          grep -q "function copyWheelDiagnostics" SakaLuX-Suite.user.js
           grep -q "function navigateToTask" SakaLuX-Suite.user.js
           grep -q "data-nav-id" SakaLuX-Suite.user.js
           grep -q "spinTheWheel" SakaLuX-Suite.user.js
-      - name: Commit hotfix
+          grep -q "page.php?sid=crimes" SakaLuX-Suite.user.js
+          grep -q "v0.9.981 — Clickable Daily Checklist" greasyfork/SakaLuX-Suite.md
+      - name: Run Daily Progress regression
+        run: |
+          if [ -f tests/suite-daily-progress-regression.cjs ]; then
+            npm install --no-save jsdom >/dev/null 2>&1
+            node tests/suite-daily-progress-regression.cjs
+          fi
+      - name: Commit feature
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add SakaLuX-Suite.user.js
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
           git commit -m "Feature Suite v0.9.981 clickable Daily Checklist rows"
           git push
       - name: Tag and release
@@ -38,4 +48,4 @@ jobs:
         run: |
           git tag suite-v0.9.981
           git push origin suite-v0.9.981
-          gh release create suite-v0.9.981 --title "SakaLuX Suite v0.9.981 — Clickable Daily Checklist" --notes "Adds direct Torn navigation when tapping Daily Checklist cards. Preserves the known-good v0.9.974/rollback checklist logic and COPY DEBUG behavior. Status buttons remain independent; custom tasks do not navigate."
+          gh release create suite-v0.9.981 --title "SakaLuX Suite v0.9.981 — Clickable Daily Checklist" --notes "Adds direct Torn navigation when tapping standard Daily Checklist cards. Preserves the known-good v0.9.980 rollback logic, checklist API 2.1.4 and COPY DEBUG behavior. DONE/ACTION/SYNC buttons remain independent, all three Wheels open Spin The Wheel, and custom tasks do not navigate."
