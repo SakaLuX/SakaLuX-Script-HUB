@@ -27,7 +27,7 @@ assert.equal(api.summary().objectives.find(x=>x.id==='wheel_mediocrity').status,
 api.applyApiSnapshot('events',{events:[{timestamp:1999999999,event:'You won a prize on the Wheel of Awesome'}]});
 assert.equal(api.summary().objectives.find(x=>x.id==='wheel_awesome').status,'done','Wheel of Awesome completes from Torn events fallback');
 assert.equal(typeof api.wheelDiagnostics,'function','wheel diagnostics API exposed');
-const dbg=api.wheelDiagnostics(); assert.equal(dbg.suite,'0.9.974'); assert.ok(dbg.endpoints&&dbg.wheels&&Array.isArray(dbg.wheels),'diagnostics contains endpoint and wheel state'); assert.equal(Object.prototype.hasOwnProperty.call(dbg,'apiKey'),false,'diagnostics never expose API key');
+const dbg=api.wheelDiagnostics(); assert.equal(dbg.suite,'0.9.980'); assert.ok(dbg.endpoints&&dbg.wheels&&Array.isArray(dbg.wheels),'diagnostics contains endpoint and wheel state'); assert.equal(Object.prototype.hasOwnProperty.call(dbg,'apiKey'),false,'diagnostics never expose API key');
 api.applyApiSnapshot('logs',{log:{abc123:{log:999,timestamp:1999999999,details:{title:'Wheel of Lame',category:'Casino'},data:{wheel:'lame'}}}});
 assert.equal(api.summary().objectives.find(x=>x.id==='wheel_lame').status,'done','object-mapped Torn logs auto-complete Wheel of Lame');
 api.applyApiSnapshot('logs',{log:[{details:{title:'Casino spin'},data:{wheel:'lame'}}]}); assert.equal(api.summary().objectives.find(x=>x.id==='wheel_lame').status,'done','Wheel of Lame completes from structured spin log');
