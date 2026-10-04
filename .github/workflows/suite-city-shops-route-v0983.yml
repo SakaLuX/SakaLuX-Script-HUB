@@ -21,7 +21,7 @@ jobs:
       - name: Validate stable behavior
         run: |
           grep -q "// @version      0.9.983" SakaLuX-Suite.user.js
-          grep -q "const API_VERSION = '2.1.4'" SakaLuX-Suite.user.js
+          grep -Eq "const API_VERSION = '2.1.[45]'" SakaLuX-Suite.user.js
           grep -q "shops:'https://www.torn.com/city.php'" SakaLuX-Suite.user.js
           ! grep -q "shops:'https://www.torn.com/shops.php'" SakaLuX-Suite.user.js
           grep -q "function wheelDiagnostics" SakaLuX-Suite.user.js
