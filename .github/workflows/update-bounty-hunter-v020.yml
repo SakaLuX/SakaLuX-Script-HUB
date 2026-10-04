@@ -26,13 +26,23 @@ jobs:
         run: node --check SakaLuX-Bounty-Hunter.user.js
       - name: Verify
         run: |
-          grep -q '@version      0.2.0' SakaLuX-Bounty-Hunter.user.js
-          grep -q "const VERSION='0.2.0'" SakaLuX-Bounty-Hunter.user.js
-          grep -q 'api.torn.com/v2/torn/bounties' SakaLuX-Bounty-Hunter.user.js
-          grep -q 'hospitalWindowMin' SakaLuX-Bounty-Hunter.user.js
-          grep -q 'notifyTargets' SakaLuX-Bounty-Hunter.user.js
-          grep -q '### v0.2.0' greasyfork/Bounty-Hunter.md
-          grep -q '"version": "0.2.0"' scripts.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          s=Path('SakaLuX-Bounty-Hunter.user.js').read_text(encoding='utf-8')
+          d=Path('greasyfork/Bounty-Hunter.md').read_text(encoding='utf-8')
+          r=json.loads(Path('scripts.json').read_text(encoding='utf-8'))
+          assert '@version      0.2.0' in s
+          assert "const VERSION='0.2.0'" in s
+          assert 'api.torn.com/v2/torn/bounties' in s
+          assert 'hospitalWindowMin' in s
+          assert 'notifyTargets' in s
+          assert '### v0.2.0' in d
+          item=next(x for x in r['scripts'] if x.get('id')=='bounty-hunter')
+          assert item['version']=='0.2.0'
+          assert item['release']['version']=='0.2.0'
+          print('verified Bounty Hunter v0.2.0')
+          PY
       - name: Commit registry
         run: |
           git config user.name 'github-actions[bot]'
