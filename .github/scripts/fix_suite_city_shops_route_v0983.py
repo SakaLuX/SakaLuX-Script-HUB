@@ -10,14 +10,24 @@ api_match=re.search(r"const API_VERSION = '(2\.1\.[45])';", s)
 if not api_match:
     raise SystemExit('expected checklist API 2.1.4 or 2.1.5')
 api_version=api_match.group(1)
-if "shops:'https://www.torn.com/shops.php'" not in s:
+
+bad_routes=[
+    "shops:'https://www.torn.com/shops.php'",
+    "shops:'https://www.torn.com/city.php?step=shops'",
+    "shops:'/shops.php'",
+    "shops:'/city.php?step=shops'"
+]
+if not any(x in s for x in bad_routes):
     raise SystemExit('bad City Shops route not found')
 
 s=re.sub(r'// @version      0\.9\.98[12]', '// @version      0.9.983', s, count=1)
 s=re.sub(r"const VERSION = '0\.9\.98[12]';", "const VERSION = '0.9.983';", s, count=1)
 s=s.replace("return {suite:'0.9.981',checklist:API_VERSION", "return {suite:'0.9.983',checklist:API_VERSION",1)
 s=s.replace("return {suite:'0.9.982',checklist:API_VERSION", "return {suite:'0.9.983',checklist:API_VERSION",1)
-s=s.replace("shops:'https://www.torn.com/shops.php'", "shops:'https://www.torn.com/city.php'",1)
+for old in bad_routes:
+    if old in s:
+        s=s.replace(old, "shops:'https://www.torn.com/city.php'", 1)
+        break
 
 # Preserve every other route and all sync/debug logic.
 for needle in [
@@ -31,8 +41,9 @@ for needle in [
 ]:
     if needle not in s:
         raise SystemExit('missing '+needle)
-if "shops:'https://www.torn.com/shops.php'" in s:
-    raise SystemExit('legacy broken shops route still present')
+for old in bad_routes:
+    if old in s:
+        raise SystemExit('broken shops route still present: '+old)
 
 p.write_text(s,encoding='utf-8')
 
@@ -46,12 +57,12 @@ if doc.exists():
         section="""## Current release note
 
 **v0.9.983 — City Shops navigation hotfix**
-- Fixes the Smart Daily Checklist `City shops` card opening the obsolete bare `/shops.php` route.
+- Fixes the Smart Daily Checklist `City shops` card opening obsolete shop routes that trigger Torn's `actionShops` error.
 - `City shops` now opens `/city.php`, where Torn exposes the East Side city shops.
 - No changes to checklist detection, sync, Wheels, COPY DEBUG, or other task routes.
 
 """
         m=m[:start]+section+m[hist:]
         pos=m.find('## Release history / Changelog')+len('## Release history / Changelog')
-        m=m[:pos]+"\n\n### v0.9.983 — City Shops route hotfix\n- Replaces the broken bare `/shops.php` task route with `/city.php`.\n"+m[pos:]
+        m=m[:pos]+"\n\n### v0.9.983 — City Shops route hotfix\n- Replaces broken `/shops.php` and `/city.php?step=shops` routes with `/city.php`.\n"+m[pos:]
     doc.write_text(m,encoding='utf-8')
