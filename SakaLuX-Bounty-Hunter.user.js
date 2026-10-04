@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bounty Hunter
 // @namespace    sakalux.bounty.hunter
-// @version      0.2.0
+// @version      0.2.1
 // @description  Mobile-first Torn bounty intelligence with full-board API paging, FF/BS hints, hospital countdown, target alerts, Safe/Profit modes, watchlist and blacklist.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -11,6 +11,23 @@
 // @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // ==/UserScript==
+
+/* SakaLuX Canonical Installed Version — BEGIN */
+(() => {
+  'use strict';
+  let v = '0.2.1';
+  try {
+    const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
+    if (meta) v = String(meta);
+  } catch {}
+  const g = globalThis;
+  g.__SakaLuXInstalledVersions = g.__SakaLuXInstalledVersions || Object.create(null);
+  g.__SakaLuXInstalledVersions['bounty-hunter'] = v;
+  try {
+    document.documentElement?.setAttribute('data-sakalux-installed-bounty-hunter', v);
+  } catch {}
+})();
+/* SakaLuX Canonical Installed Version — END */
 (()=>{'use strict';
 const VERSION='0.2.0',ID='bounty-hunter',API='SakaLuXBountyHunter';
 const KS='SLX_BOUNTY_SETTINGS_V2',KW='SLX_BOUNTY_WATCH_V1',KB='SLX_BOUNTY_BLACK_V1',KK='SakaLuX_BOUNTY_API_KEY',KC='SLX_BOUNTY_CACHE_V1';
