@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/scripts/fix_suite_city_shops_route_v0983.py'
       - '.github/workflows/suite-city-shops-route-v0983.yml'
+      - 'tests/suite-daily-progress-regression.cjs'
   workflow_dispatch:
 permissions:
   contents: write
@@ -24,20 +25,19 @@ jobs:
           grep -Eq "const API_VERSION = '2.1.[45]'" SakaLuX-Suite.user.js
           grep -q "shops:'https://www.torn.com/city.php'" SakaLuX-Suite.user.js
           ! grep -q "shops:'https://www.torn.com/shops.php'" SakaLuX-Suite.user.js
+          ! grep -q "shops:'https://www.torn.com/city.php?step=shops'" SakaLuX-Suite.user.js
           grep -q "function wheelDiagnostics" SakaLuX-Suite.user.js
           grep -q "function copyWheelDiagnostics" SakaLuX-Suite.user.js
           grep -q "spinTheWheel" SakaLuX-Suite.user.js
       - name: Run Daily Progress regression
         run: |
-          if [ -f tests/suite-daily-progress-regression.cjs ]; then
-            npm install --no-save jsdom >/dev/null 2>&1
-            node tests/suite-daily-progress-regression.cjs
-          fi
+          npm install --no-save jsdom >/dev/null 2>&1
+          node tests/suite-daily-progress-regression.cjs
       - name: Commit hotfix
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs
           git commit -m "Hotfix Suite v0.9.983 City Shops route"
           git push
       - name: Tag and release
@@ -46,4 +46,4 @@ jobs:
         run: |
           git tag suite-v0.9.983
           git push origin suite-v0.9.983
-          gh release create suite-v0.9.983 --title "SakaLuX Suite v0.9.983 — City Shops Route Hotfix" --notes "Fixes the Smart Daily Checklist City Shops card so it opens Torn City instead of the obsolete bare /shops.php route. No changes to Wheels, sync, COPY DEBUG, or other task routes."
+          gh release create suite-v0.9.983 --title "SakaLuX Suite v0.9.983 — City Shops Route Hotfix" --notes "Fixes the Smart Daily Checklist City Shops card so it opens Torn City instead of the obsolete /shops.php or /city.php?step=shops routes. No changes to Wheels, sync, COPY DEBUG, or other task routes."
