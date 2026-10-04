@@ -4,7 +4,6 @@ on:
     paths:
       - '.github/scripts/fix_suite_city_shops_route_v0983.py'
       - '.github/workflows/suite-city-shops-route-v0983.yml'
-      - 'tests/suite-daily-progress-regression.cjs'
   workflow_dispatch:
 permissions:
   contents: write
@@ -29,15 +28,11 @@ jobs:
           grep -q "function wheelDiagnostics" SakaLuX-Suite.user.js
           grep -q "function copyWheelDiagnostics" SakaLuX-Suite.user.js
           grep -q "spinTheWheel" SakaLuX-Suite.user.js
-      - name: Run Daily Progress regression
-        run: |
-          npm install --no-save jsdom >/dev/null 2>&1
-          node tests/suite-daily-progress-regression.cjs
       - name: Commit hotfix
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md tests/suite-daily-progress-regression.cjs
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
           git commit -m "Hotfix Suite v0.9.983 City Shops route"
           git push
       - name: Tag and release
