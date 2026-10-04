@@ -60,14 +60,16 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.976 — Direct filtered Wheel API detection**
-- Resolves Wheel of Lame / Mediocrity / Awesome log IDs dynamically from `/torn/logtypes`.
-- Queries `/user/log` directly with the resolved `log=` IDs and today's TCT/UTC `from`/`to` window.
-- No longer relies on finding a Wheel entry among the first 100 generic account logs.
-- Keeps generic log, events and DOM detection as independent fallbacks.
-- COPY DEBUG now includes resolved Wheel log IDs and the filtered Wheel-log response shape.
+**v0.9.983 — City Shops navigation hotfix**
+- Fixes the Smart Daily Checklist `City shops` card opening obsolete shop routes that trigger Torn's `actionShops` error.
+- `City shops` now opens `/city.php`, where Torn exposes the East Side city shops.
+- No changes to checklist detection, sync, Wheels, COPY DEBUG, or other task routes.
 
 ## Release history / Changelog
+
+### v0.9.983 — City Shops route hotfix
+- Replaces broken `/shops.php` and `/city.php?step=shops` routes with `/city.php`.
+
 ### v0.9.976 — Direct filtered Wheel API detection
 - Uses official log type IDs to request only Leslie Wheel logs for the current Torn day.
 - Avoids the generic 100-log limit that caused Wheels to stay at SYNC on active accounts.
