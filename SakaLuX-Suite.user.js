@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.980
+// @version      0.9.981
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -752,7 +752,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.980';
+  const VERSION = '0.9.981';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -46197,7 +46197,7 @@ function scan(){
 (() => {
   'use strict';
 
-  const API_VERSION = '2.1.4';
+  const API_VERSION = '2.1.5';
   const STORAGE_KEY = 'sakalux_suite_smart_daily_v2';
   const LEGACY_KEYS = ['sakalux_suite_daily_progress_v1', 'sakalux_suite_daily_progress'];
   const MAX_DAYS = 30;
@@ -46324,6 +46324,48 @@ function scan(){
   }
   function removeObjective(id){ return mutate(d=>{ d.custom=d.custom.filter(x=>x.id!==id); }); }
 
+  const TASK_NAV = Object.freeze({
+    energy_refill:'/points.php',
+    nerve_refill:'/points.php',
+    token_refill:'/points.php',
+    drug:'/item.php',
+    booster:'/item.php',
+    medical:'/item.php',
+    missions:'/loader.php?sid=missions',
+    shops:'/city.php?step=shops',
+    virus:'/item.php',
+    education:'/education.php',
+    casino:'/casino.php',
+    wheel_lame:'/page.php?sid=spinTheWheel',
+    wheel_mediocrity:'/page.php?sid=spinTheWheel',
+    wheel_awesome:'/page.php?sid=spinTheWheel',
+    city:'/city.php',
+    gym:'/gym.php',
+    crimes:'/loader.php?sid=crimes',
+    travel:'/travelagency.php',
+    racing:'/loader.php?sid=racing',
+    job:'/joblist.php',
+    faction_oc:'/factions.php?step=your&type=1#/tab=crimes',
+    prayer:'/church.php',
+    blood_bags:'/item.php',
+    item_market:'/page.php?sid=ItemMarket',
+    bazaar:'/bazaar.php',
+    stocks:'/page.php?sid=stocks',
+    points:'/points.php'
+  });
+  function taskNavUrl(id){ return TASK_NAV[String(id||'')]||''; }
+  function navigateTask(id){
+    const target=taskNavUrl(id); if(!target) return false;
+    close();
+    try{
+      const url=new URL(target,location.origin).href;
+      if(typeof g.SakaLuXCore?.router?.navigate==='function'){ g.SakaLuXCore.router.navigate(url); return true; }
+      location.assign(url); return true;
+    }catch{
+      try{ location.href=target; return true; }catch{}
+    }
+    return false;
+  }
   function routeType(url=location.href){
     const u=String(url).toLowerCase();
     if(/gym\.php|sid=gym/.test(u)) return 'gym';
@@ -46696,15 +46738,15 @@ function scan(){
   function ensurePanel(){
     css(); let p=document.getElementById('sakalux-suite-daily-progress'); if(p) return p;
     p=document.createElement('div'); p.id='sakalux-suite-daily-progress'; p.innerHTML='<div class="sdp-shell"><div class="sdp-head"><div><div class="sdp-title">✅ Smart Daily Checklist</div><div class="sdp-sub">Auto-sync + Torn activity fallback</div></div><button class="sdp-close" data-sdp="close">×</button></div><div class="sdp-body"></div><div class="sdp-foot">SakaLuX Suite • Smart Daily Checklist v2</div></div>';
-    p.addEventListener('click',e=>{ const a=e.target.closest('[data-sdp]'); if(!a)return; const act=a.dataset.sdp,id=a.dataset.id;if(act==='close')close();if(act==='refresh')refreshApi(true);if(act==='toggle-completed'){state.showCompleted=!state.showCompleted;const s=getStore();save(s);render();}if(act==='filter'){state.filter=a.dataset.value||'all';const s=getStore();save(s);render();}if(act==='toggle-task')setObjective(id,summary().objectives.find(x=>x.id===id)?.status!=='done');if(act==='remove')removeObjective(id);if(act==='reset'&&confirm('Reset today checklist?'))resetToday();if(act==='add'){const input=p.querySelector('.sdp-custom input');const x=addObjective(input?.value);if(x&&input)input.value='';}});
-    p.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('.sdp-custom input'))p.querySelector('[data-sdp="add"]')?.click();});
+    p.addEventListener('click',e=>{ const a=e.target.closest('[data-sdp]'); if(a){const act=a.dataset.sdp,id=a.dataset.id;if(act==='close')close();if(act==='refresh')refreshApi(true);if(act==='toggle-completed'){state.showCompleted=!state.showCompleted;const s=getStore();save(s);render();}if(act==='filter'){state.filter=a.dataset.value||'all';const s=getStore();save(s);render();}if(act==='toggle-task')setObjective(id,summary().objectives.find(x=>x.id===id)?.status!=='done');if(act==='remove')removeObjective(id);if(act==='reset'&&confirm('Reset today checklist?'))resetToday();if(act==='add'){const input=p.querySelector('.sdp-custom input');const x=addObjective(input?.value);if(x&&input)input.value='';}return;} const row=e.target.closest('[data-nav-task]'); if(row&&!e.target.closest('button,input,textarea,select,a')) navigateTask(row.dataset.navTask);});
+    p.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('.sdp-custom input'))p.querySelector('[data-sdp="add"]')?.click();else if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-nav-task]')){e.preventDefault();navigateTask(e.target.dataset.navTask);}});
     document.body.appendChild(p); return p;
   }
   function render(){
     const p=document.getElementById('sakalux-suite-daily-progress'); if(!p)return; const s=summary(); const body=p.querySelector('.sdp-body');
     let rows=s.objectives.filter(x=>state.showCompleted||x.status!=='done').filter(x=>state.filter==='all'||x.category===state.filter);
     const cats=['all',...new Set(TASKS.map(x=>x.category))];
-    body.innerHTML=`<div class="sdp-progress"><div class="sdp-track"><div class="sdp-bar" style="width:${s.percent}%"></div></div><div class="sdp-count">${s.done}/${s.total} • ${s.percent}%</div></div><div class="sdp-toolbar"><button class="sdp-btn" data-sdp="refresh">${state.syncing?'SYNCING…':'↻ SYNC API'}</button><button class="sdp-btn ${state.showCompleted?'active':''}" data-sdp="toggle-completed">Show completed</button>${cats.map(c=>`<button class="sdp-btn ${state.filter===c?'active':''}" data-sdp="filter" data-value="${c}">${c==='all'?'All':c}</button>`).join('')}<button class="sdp-btn" data-sdp="reset">Reset today</button></div><div class="sdp-sync">${state.apiError?'⚠ '+state.apiError:(s.api?.lastAt?`Last API sync ${new Date(s.api.lastAt).toLocaleTimeString()}`:'API not synced yet')}</div><div class="sdp-list">${rows.map(x=>`<div class="sdp-task ${x.status}"><div class="sdp-icon">${x.icon||'•'}</div><div><div class="sdp-label">${x.label}</div><div class="sdp-detail">${x.detail||x.source||''}</div></div><div><button class="sdp-pill ${x.status}" data-sdp="toggle-task" data-id="${x.id}">${x.status==='done'?'DONE':x.status==='action'?'ACTION':x.status==='na'?'N/A':'SYNC'}</button>${x.id.startsWith('custom-')?`<button class="sdp-btn" data-sdp="remove" data-id="${x.id}">×</button>`:''}</div></div>`).join('')||'<div class="sdp-sync">No tasks in this view.</div>'}</div><div class="sdp-custom"><input placeholder="Add custom task"><button class="sdp-btn" data-sdp="add">ADD</button></div>`;
+    body.innerHTML=`<div class="sdp-progress"><div class="sdp-track"><div class="sdp-bar" style="width:${s.percent}%"></div></div><div class="sdp-count">${s.done}/${s.total} • ${s.percent}%</div></div><div class="sdp-toolbar"><button class="sdp-btn" data-sdp="refresh">${state.syncing?'SYNCING…':'↻ SYNC API'}</button><button class="sdp-btn ${state.showCompleted?'active':''}" data-sdp="toggle-completed">Show completed</button>${cats.map(c=>`<button class="sdp-btn ${state.filter===c?'active':''}" data-sdp="filter" data-value="${c}">${c==='all'?'All':c}</button>`).join('')}<button class="sdp-btn" data-sdp="reset">Reset today</button></div><div class="sdp-sync">${state.apiError?'⚠ '+state.apiError:(s.api?.lastAt?`Last API sync ${new Date(s.api.lastAt).toLocaleTimeString()}`:'API not synced yet')}</div><div class="sdp-list">${rows.map(x=>`<div class="sdp-task ${x.status}" ${taskNavUrl(x.id)?`data-nav-task="${x.id}" role="link" tabindex="0" style="cursor:pointer"`:''}><div class="sdp-icon">${x.icon||'•'}</div><div><div class="sdp-label">${x.label}</div><div class="sdp-detail">${x.detail||x.source||''}</div></div><div><button class="sdp-pill ${x.status}" data-sdp="toggle-task" data-id="${x.id}">${x.status==='done'?'DONE':x.status==='action'?'ACTION':x.status==='na'?'N/A':'SYNC'}</button>${x.id.startsWith('custom-')?`<button class="sdp-btn" data-sdp="remove" data-id="${x.id}">×</button>`:''}</div></div>`).join('')||'<div class="sdp-sync">No tasks in this view.</div>'}</div><div class="sdp-custom"><input placeholder="Add custom task"><button class="sdp-btn" data-sdp="add">ADD</button></div>`;
   }
   function open(){ const p=ensurePanel(); ensureDiagnosticsButton(p); p.classList.add('open'); render(); refreshApi(false); return true; }
   function close(){ const p=document.getElementById('sakalux-suite-daily-progress'); if(p)p.classList.remove('open'); return true; }
@@ -46718,7 +46760,7 @@ function scan(){
     setInterval(()=>{if(location.href!==last){last=location.href;hit();}},1800);
   }
 
-  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,wheelDiagnostics,copyWheelDiagnostics,applyApiSnapshot:interpretV3});
+  g.SakaLuXSuiteDailyProgress=Object.freeze({version:API_VERSION,storageKey:STORAGE_KEY,dayKey,get,summary,setObjective,addObjective,removeObjective,recordActivity,refreshApi,moduleStatus,open,close,resetToday,routeType,getApiKey,wheelIdFromText,activeWheelFromDom,scanWheelPage,wheelDiagnostics,copyWheelDiagnostics,taskNavUrl,navigateTask,applyApiSnapshot:interpretV3});
   function bindToolbarAction(){
     if(g.__sakaluxSuiteDailyProgressToolbarBound) return;
     g.__sakaluxSuiteDailyProgressToolbarBound=true;
