@@ -5,9 +5,11 @@ p=Path('SakaLuX-Suite.user.js')
 doc=Path('greasyfork/SakaLuX-Suite.md')
 s=p.read_text(encoding='utf-8')
 
-# Keep the stable clickable-checklist implementation; change only the City Shops destination.
-if "const API_VERSION = '2.1.4';" not in s:
-    raise SystemExit('expected stable checklist API 2.1.4')
+# Keep the installed clickable-checklist implementation; change only the City Shops destination.
+api_match=re.search(r"const API_VERSION = '(2\.1\.[45])';", s)
+if not api_match:
+    raise SystemExit('expected checklist API 2.1.4 or 2.1.5')
+api_version=api_match.group(1)
 if "shops:'https://www.torn.com/shops.php'" not in s:
     raise SystemExit('bad City Shops route not found')
 
@@ -21,7 +23,7 @@ s=s.replace("shops:'https://www.torn.com/shops.php'", "shops:'https://www.torn.c
 for needle in [
     '// @version      0.9.983',
     "const VERSION = '0.9.983';",
-    "const API_VERSION = '2.1.4';",
+    f"const API_VERSION = '{api_version}';",
     "shops:'https://www.torn.com/city.php'",
     'function wheelDiagnostics',
     'function copyWheelDiagnostics',
