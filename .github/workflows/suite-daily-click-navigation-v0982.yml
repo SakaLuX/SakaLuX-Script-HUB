@@ -1,0 +1,51 @@
+name: Suite Daily Click Navigation v0.9.982
+on:
+  push:
+    paths:
+      - '.github/scripts/add_suite_daily_click_navigation_v0982.py'
+      - '.github/workflows/suite-daily-click-navigation-v0982.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply clickable navigation patch
+        run: python .github/scripts/add_suite_daily_click_navigation_v0982.py
+      - name: Validate syntax
+        run: node --check SakaLuX-Suite.user.js
+      - name: Validate stable logic and navigation
+        run: |
+          grep -q "// @version      0.9.982" SakaLuX-Suite.user.js
+          grep -q "const API_VERSION = '2.1.4'" SakaLuX-Suite.user.js
+          grep -q "function wheelDiagnostics" SakaLuX-Suite.user.js
+          grep -q "function copyWheelDiagnostics" SakaLuX-Suite.user.js
+          grep -q "function navigateToTask" SakaLuX-Suite.user.js
+          grep -q "data-nav-id" SakaLuX-Suite.user.js
+          grep -q "spinTheWheel" SakaLuX-Suite.user.js
+          grep -q "page.php?sid=crimes" SakaLuX-Suite.user.js
+          grep -q "v0.9.982 — Clickable Daily Checklist" greasyfork/SakaLuX-Suite.md
+      - name: Run Daily Progress regression
+        run: |
+          if [ -f tests/suite-daily-progress-regression.cjs ]; then
+            npm install --no-save jsdom >/dev/null 2>&1
+            node tests/suite-daily-progress-regression.cjs
+          fi
+      - name: Commit feature
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SakaLuX-Suite.user.js greasyfork/SakaLuX-Suite.md
+          git commit -m "Feature Suite v0.9.982 clickable Daily Checklist rows"
+          git push
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag suite-v0.9.982
+          git push origin suite-v0.9.982
+          gh release create suite-v0.9.982 --title "SakaLuX Suite v0.9.982 — Clickable Daily Checklist" --notes "Tap standard Daily Checklist cards to open their relevant Torn pages. Preserves the proven v0.9.980 rollback logic, checklist API 2.1.4 and COPY DEBUG. DONE/ACTION/SYNC remain independent, Wheels open Spin The Wheel, and custom tasks do not navigate."
