@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.977**
+**v0.9.983**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-02**
-- Canonical version: **v0.9.977**
+- Verified: **2026-10-04**
+- Canonical version: **v0.9.983**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,10 +60,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.983 — City Shops navigation hotfix**
-- Fixes the Smart Daily Checklist `City shops` card opening obsolete shop routes that trigger Torn's `actionShops` error.
-- `City shops` now opens `/city.php`, where Torn exposes the East Side city shops.
-- No changes to checklist detection, sync, Wheels, COPY DEBUG, or other task routes.
+**v0.9.983 — Release documentation synchronized with the current Suite userscript version**
+- Release documentation synchronized with the current Suite userscript version.
 
 ## Release history / Changelog
 
