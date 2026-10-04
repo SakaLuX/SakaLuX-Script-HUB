@@ -28,10 +28,10 @@ nav=r'''  const TASK_LINKS = Object.freeze({
 if anchor not in s: raise SystemExit('ALIASES anchor missing')
 s=s.replace(anchor,nav+anchor,1)
 
-old="    p.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('.sdp-custom input'))p.querySelector('[data-sdp=\"add\"]')?.click();});"
-new="    p.addEventListener('click',e=>{if(e.target.closest('button,input,textarea,select,a'))return;const row=e.target.closest('.sdp-task[data-nav-id]');if(row)navigateToTask(row.dataset.navId);});\n"+old
-if old not in s: raise SystemExit('keydown anchor missing')
-s=s.replace(old,new,1)
+mount='    document.body.appendChild(p); return p;'
+listener="    p.addEventListener('click',e=>{if(e.target.closest('button,input,textarea,select,a'))return;const row=e.target.closest('.sdp-task[data-nav-id]');if(row)navigateToTask(row.dataset.navId);});\n"
+if mount not in s: raise SystemExit('panel mount anchor missing')
+s=s.replace(mount,listener+mount,1)
 
 oldrow='${rows.map(x=>`<div class="sdp-task ${x.status}"><div class="sdp-icon">${x.icon||\'•\'}'
 newrow='${rows.map(x=>`<div class="sdp-task ${x.status}"${TASK_LINKS[x.id]?` data-nav-id="${x.id}" style="cursor:pointer"`:\'\'}><div class="sdp-icon">${x.icon||\'•\'}'
