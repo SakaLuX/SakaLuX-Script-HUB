@@ -312,12 +312,12 @@
         }
       ],
       "release": {
-        "version": "0.3.0",
+        "version": "0.3.1",
         "date": "2026-10-05",
         "notes": [
-          "Adds a Bounty Hunter launcher directly in Torn Chat V3.",
-          "Adds FFScouter bulk lookup and Beatable only filtering with default FF 1.0–3.0.",
-          "Scans the full Torn bounty board from any Torn page and hides unknown-FF targets by default."
+          "Fixes the API/key panel visibility in TornPDA.",
+          "Adds FFScouter test and FF-known/beatable diagnostics.",
+          "Fixes Safe-mode unknown-status filtering and migrates stale v0.2.x defaults."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -325,7 +325,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },
