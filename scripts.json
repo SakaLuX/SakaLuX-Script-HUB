@@ -283,10 +283,10 @@
       "apiGlobal": "SakaLuXBountyHunter",
       "buttonSelector": "#slx-bh-btn",
       "category": "Combat",
-      "description": "Mobile-first Torn bounty scanner with Safe/Profit modes, grouped rewards, watchlist, blacklist and direct attack links.",
+      "description": "Mobile-first Torn bounty intelligence with full-board API paging, live target enrichment, FF/BS hints, hospital countdowns, alerts, Safe/Profit modes, watchlist and blacklist.",
       "icon": "🎯",
       "id": "bounty-hunter",
-      "info": "Purpose\nBounty Hunter scans the bounty rows already loaded by Torn and builds a compact hunt list for TornPDA and desktop.\n\nModes\nSafe mode prioritizes currently available targets. Profit mode prioritizes reward value while still weighting availability.\n\nFilters and actions\nIncludes minimum reward, maximum level, status filters, grouped rewards per player, direct Attack, watchlist and blacklist. Settings are stored locally.\n\nCurrent scope\nv0.1.0 is a DOM scanner and does not require a Torn API key. Full-board API paging and optional FF/BS estimation are planned for later versions.",
+      "info": "Purpose\nBounty Hunter builds a compact hunt list from Torn bounties for TornPDA and desktop. It can use the full Torn API v2 bounty board or fall back to the currently loaded DOM.\n\nTarget intelligence\nSupports live /user/{id}/basic enrichment for top candidates, hospital countdowns, FF/BS hints from compatible rendered helpers, grouped bounty totals, watchlist and blacklist.\n\nFilters and sorting\nIncludes Safe/Profit modes, reward and level limits, Max FF/BS, hospital-window filtering, search by player/ID, Watch-only mode, and Smart/Reward/Hospital/FF/BS sorting.\n\nAPI\nUses the shared Script Hub Torn API key first, with a local fallback key. API calls use short caches and fall back to DOM scanning when unavailable.",
       "name": "Bounty Hunter",
       "quickActions": [
         {
@@ -313,12 +313,12 @@
       ],
       "release": {
         "version": "0.2.2",
-        "date": "2026-10-04",
+        "date": "2026-10-05",
         "notes": [
-          "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-          "Initial SakaLuX bounty hunting module.",
-          "Adds Safe / Profit modes with reward, level and status filters.",
-          "Adds grouped bounty totals, direct attacks, watchlist, blacklist and Hub integration."
+          "Adds live user/basic enrichment for the highest-priority bounty targets.",
+          "Adds player/ID search, multiple sort modes, Auto/API/DOM source selection and Watch-only filtering.",
+          "Adds live hospital countdown updates, direct profile actions and expanded API/source diagnostics.",
+          "Synchronizes userscript header, runtime version, changelog and Hub registry to v0.2.2."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -327,7 +327,7 @@
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
       "version": "0.2.2",
-      "detailsRevision": 1,
+      "detailsRevision": 2,
       "license": "All Rights Reserved"
     },
     {
