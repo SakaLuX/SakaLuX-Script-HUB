@@ -28,7 +28,9 @@ jobs:
         run: |
           git config user.name 'SakaLuX'
           git config user.email 'sakalutzu92@yahoo.com'
-          git add SakaLuX-Bounty-Hunter.user.js CHANGELOG.md scripts.json
+          git add SakaLuX-Bounty-Hunter.user.js scripts.json
+          if [ -f CHANGELOG.md ]; then git add CHANGELOG.md; fi
           git diff --cached --quiet && exit 0
           git commit -m 'Update Bounty Hunter to v0.3.6'
+          git pull --rebase origin main
           git push
