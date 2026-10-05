@@ -27,16 +27,6 @@ new="async function fetchPage(offset,key){const q='limit=100&offset='+offset+'&k
 if old not in s: raise SystemExit('fetchPage anchor not found')
 s=s.replace(old,new,1)
 
-# Preserve the API error in DOM fallback diagnostics instead of clearing it later.
-# collect() already assigns lastError on API failure; make sure successful DOM scan doesn't hide it.
-s=s.replace("lastSource='DOM fallback';rows=scanDom()","lastSource='DOM fallback';rows=scanDom()")
-
-# Make the UI self-heal invalid beatable range at render/filter time.
-old="function allowed(x){if(BLACK[x.id])return false;"
-new="function allowed(x){if(S.onlyBeatable&&num(S.maxFF)<num(S.minFF)){S.maxFF=Math.max(3,num(S.minFF));save()}if(BLACK[x.id])return false;"
-if old not in s: raise SystemExit('allowed anchor not found')
-s=s.replace(old,new,1)
-
 # Add a one-tap conservative preset chip near Beatable only.
 needle="chip('Beatable only',S.onlyBeatable,()=>{S.onlyBeatable=!S.onlyBeatable;save();rebuild();render(false)}),"
 if needle not in s: raise SystemExit('Beatable chip anchor not found')
