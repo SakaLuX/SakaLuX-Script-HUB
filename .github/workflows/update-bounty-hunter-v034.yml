@@ -1,0 +1,47 @@
+name: Update Bounty Hunter v0.3.4
+
+on:
+  push:
+    paths:
+      - '.github/scripts/update_bounty_hunter_v034.py'
+      - '.github/workflows/update-bounty-hunter-v034.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Patch Bounty Hunter
+        run: python .github/scripts/update_bounty_hunter_v034.py
+      - name: Syntax check
+        run: node --check SakaLuX-Bounty-Hunter.user.js
+      - name: Verify
+        run: |
+          grep -q '@version      0.3.4' SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.3.4'" SakaLuX-Bounty-Hunter.user.js
+          grep -q "prof.target='_blank'" SakaLuX-Bounty-Hunter.user.js
+          grep -q "prof.rel='noopener noreferrer'" SakaLuX-Bounty-Hunter.user.js
+          grep -q '### v0.3.4' greasyfork/Bounty-Hunter.md
+          python - <<'PY'
+          import json
+          d=json.load(open('scripts.json'))
+          x=next(x for x in d['scripts'] if x.get('id')=='bounty-hunter')
+          assert x['version']=='0.3.4'
+          PY
+      - name: Commit release
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SakaLuX-Bounty-Hunter.user.js greasyfork/Bounty-Hunter.md scripts.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Update Bounty Hunter to v0.3.4'
+          git push
