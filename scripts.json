@@ -283,7 +283,7 @@
       "apiGlobal": "SakaLuXBountyHunter",
       "buttonSelector": "#slx-bh-btn",
       "category": "Combat",
-      "description": "Full-board Torn bounty hunter with Chat V3 launcher, FFScouter beatable-only filtering, hospital timing, watchlist and alerts.",
+      "description": "Full-board Torn bounty hunter with Shared Core, Hub-aligned UI, FFScouter beatable filtering, strict live status and hospital timing.",
       "icon": "🎯",
       "id": "bounty-hunter",
       "info": "Purpose\nBounty Hunter scans the full Torn bounty board and shows a compact list of targets worth attacking. v0.3.0 adds a launcher directly beside the Chat V3 message composer.\n\nBeatable-only filtering\nWith an FFScouter key, the module checks bounty targets in bulk and keeps only targets inside the configured fair-fight range. Default: FF 1.0–3.0; unknown FF targets are excluded.\n\nBoard scanning\nTorn API v2 pages through the global bounty board from any Torn page. Hospital countdowns, watchlist, blacklist, alerts, Attack/Profile actions and Safe/Profit sorting remain available.",
@@ -325,7 +325,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.3.8",
+      "version": "0.4.0",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },

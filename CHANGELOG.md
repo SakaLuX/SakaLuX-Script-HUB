@@ -11,3 +11,12 @@
 - Hospital window no longer has a watchlist bypass; a 5-minute setting strictly hides hospital targets with more than 5 minutes remaining or without a valid release timestamp.
 - Live status validation now checks candidates progressively until it finds enough genuinely attack-ready targets instead of validating only a fixed top-24 reward list.
 - Status lookup now tries multiple Torn v2/v1 basic/profile routes for better TornPDA compatibility.
+
+## Bounty Hunter v0.4.0
+- Embedded SakaLuX Shared Core v1 into the standalone Bounty Hunter build.
+- Registered Bounty Hunter in Shared Core settings protection and dock ordering.
+- Settings/cache storage now uses Shared Core storage when available, with localStorage fallback.
+- Torn/FFScouter requests now consistently benefit from the Shared Core API broker, request dedupe, TTL cache, retry/backoff, concurrency control and route-scoped cancellation.
+- Enabled the Shared Core Hub skin and added a Bounty-specific professional UI layer using the same SakaLuX design tokens.
+- Tightened mobile spacing, card hierarchy, filters, controls, focus states and footer/list readability.
+- Added Shared Core performance debounce plumbing for future incremental renders.
