@@ -16,11 +16,16 @@
 (() => {
   'use strict';
   let v = '0.2.2';
-  try { const meta = globalThis.GM_info?.script?.version; if (meta) v = String(meta); } catch {}
+  try {
+    const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
+    if (meta) v = String(meta);
+  } catch {}
   const g = globalThis;
   g.__SakaLuXInstalledVersions = g.__SakaLuXInstalledVersions || Object.create(null);
   g.__SakaLuXInstalledVersions['bounty-hunter'] = v;
-  try { document.documentElement?.setAttribute('data-sakalux-installed-bounty-hunter', v); } catch {}
+  try {
+    document.documentElement?.setAttribute('data-sakalux-installed-bounty-hunter', v);
+  } catch {}
 })();
 /* SakaLuX Canonical Installed Version — END */
 

@@ -1444,7 +1444,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.2.1",
+                    "version": "0.2.2",
                     "date": "2026-10-04",
                     "notes": [
                         "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
@@ -1458,7 +1458,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
-                "version": "0.2.1",
+                "version": "0.2.2",
                 "detailsRevision": 1,
                 "license": "All Rights Reserved"
             },
