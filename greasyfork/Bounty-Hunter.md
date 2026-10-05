@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.3.1**
+**v0.3.2**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -40,6 +40,13 @@ When Torn/API data exposes a hospital-until timestamp, Bounty Hunter shows a liv
 Target alerts can notify when a matching target is Okay or is close to hospital release. Watched targets can bypass the normal reward threshold. A per-target cooldown prevents repeated alert spam.
 
 ## Changelog
+### v0.3.2 — Full-board recovery + FF range repair
+- Repairs the accidentally persisted `FF 1.0–1.0` range to the intended conservative `1.0–3.0` preset.
+- Adds a one-tap `Safe FF 1–3` preset.
+- Torn API requests now fall back from Shared Core broker to direct fetch instead of immediately dropping to DOM mode.
+- Adds a second API v2 URL fallback (`/v2/torn?selections=bounties`) if the dedicated `/v2/torn/bounties` path fails.
+- Keeps API errors visible in diagnostics so `DOM fallback` is actionable rather than silent.
+
 ### v0.3.1 — API panel + zero-match diagnostics
 - Fixes the key/API button so the API panel opens immediately below the Bounty Hunter header instead of below the clipped results area.
 - Reuses the active Torn/Hub API key for FFScouter by default, matching FFScouter's registered-key model.
