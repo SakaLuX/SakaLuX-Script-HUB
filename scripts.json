@@ -312,11 +312,12 @@
         }
       ],
       "release": {
-        "version": "0.3.4",
+        "version": "0.3.5",
         "date": "2026-10-05",
         "notes": [
-          "Profile/person action now opens the selected Torn profile in a new tab.",
-          "Adds safe new-tab isolation with noopener/noreferrer."
+          "Reliable full-board paging follows Torn API next links with pacing/retries.",
+          "Keeps partial API results instead of dropping to DOM after a later page failure.",
+          "Clarifies Status ? and grouped total bounty reward on target cards."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -324,7 +325,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.3.4",
+      "version": "0.3.5",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },
