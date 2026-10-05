@@ -312,12 +312,11 @@
         }
       ],
       "release": {
-        "version": "0.3.3",
+        "version": "0.3.4",
         "date": "2026-10-05",
         "notes": [
-          "Collapses advanced settings so targets fill the mobile panel.",
-          "Raises full-board scanning to 60 default / 100 max API pages.",
-          "Shows beatable targets, unique targets and raw bounty count separately."
+          "Profile/person action now opens the selected Torn profile in a new tab.",
+          "Adds safe new-tab isolation with noopener/noreferrer."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -325,7 +324,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },

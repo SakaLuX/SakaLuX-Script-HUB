@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.3.3**
+**v0.3.4**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -40,6 +40,10 @@ When Torn/API data exposes a hospital-until timestamp, Bounty Hunter shows a liv
 Target alerts can notify when a matching target is Okay or is close to hospital release. Watched targets can bypass the normal reward threshold. A per-target cooldown prevents repeated alert spam.
 
 ## Changelog
+### v0.3.4 — Profile in new tab
+- The blue Profile/person action now opens the selected Torn profile in a new tab/window instead of replacing the current Bounty Hunter page.
+- Adds `noopener noreferrer` isolation for the new profile tab.
+
 ### v0.3.3 — Compact target-first UI + complete board paging
 - Collapses advanced filters and toggles behind a single Filters button so bounty targets occupy most of the mobile panel.
 - Keeps Search, Sort, Refresh and API access visible at all times.
