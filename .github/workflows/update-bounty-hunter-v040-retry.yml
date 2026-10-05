@@ -1,0 +1,49 @@
+name: Update Bounty Hunter v0.4.0 retry
+on:
+  push:
+    paths:
+      - '.github/workflows/update-bounty-hunter-v040-retry.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Patch Bounty Hunter + Shared Core
+        run: python .github/scripts/update_bounty_hunter_v040.py
+      - name: Syntax checks
+        run: |
+          node --check src/core/sakalux-core.js
+          node --check SakaLuX-Bounty-Hunter.user.js
+          node --check tools/embed-shared-core.cjs
+      - name: Shared Core regression
+        run: |
+          node tests/shared-core-v1-embedding.cjs
+          node tests/shared-core-v1-regression.cjs
+      - name: Verify release
+        run: |
+          grep -q '@version      0.4.0' SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.4.0'" SakaLuX-Bounty-Hunter.user.js
+          grep -q 'SakaLuX Shared Core — BEGIN' SakaLuX-Bounty-Hunter.user.js
+          test "$(grep -c 'SakaLuX Shared Core — BEGIN' SakaLuX-Bounty-Hunter.user.js)" -eq 1
+          grep -q "match: /Bounty Hunter/i" src/core/sakalux-core.js
+          grep -q 'ensureBountyProSkin' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'ensureSharedSkin' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'CORE.storage.get' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'bounty-hunter-render' SakaLuX-Bounty-Hunter.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Bounty-Hunter.user.js src/core/sakalux-core.js scripts.json CHANGELOG.md
+          git diff --cached --quiet && exit 0
+          git commit -m 'Update Bounty Hunter to v0.4.0 with Shared Core and Hub UI'
+          git push
