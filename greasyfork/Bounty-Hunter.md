@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.3.2**
+**v0.3.3**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -40,6 +40,14 @@ When Torn/API data exposes a hospital-until timestamp, Bounty Hunter shows a liv
 Target alerts can notify when a matching target is Okay or is close to hospital release. Watched targets can bypass the normal reward threshold. A per-target cooldown prevents repeated alert spam.
 
 ## Changelog
+### v0.3.3 — Compact target-first UI + complete board paging
+- Collapses advanced filters and toggles behind a single Filters button so bounty targets occupy most of the mobile panel.
+- Keeps Search, Sort, Refresh and API access visible at all times.
+- Raises the full-board paging ceiling from 20 to 100 pages and migrates the default to 60 pages, enough for boards well above 4,000 bounty rows.
+- Stops automatically when the API returns a short page, so it does not request unused pages.
+- Footer now distinguishes raw bounty records from grouped unique target players (`beatable / targets / bounties`).
+- Preserves raw bounty count in cache and shows the same distinction in zero-result diagnostics.
+
 ### v0.3.2 — Full-board recovery + FF range repair
 - Repairs the accidentally persisted `FF 1.0–1.0` range to the intended conservative `1.0–3.0` preset.
 - Adds a one-tap `Safe FF 1–3` preset.
