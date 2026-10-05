@@ -1,0 +1,45 @@
+name: Update Bounty Hunter v0.2.2
+
+on:
+  push:
+    paths:
+      - '.github/scripts/update_bounty_hunter_v022.py'
+      - '.github/workflows/update-bounty-hunter-v022.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Update registry
+        run: python .github/scripts/update_bounty_hunter_v022.py
+      - name: Syntax check
+        run: node --check SakaLuX-Bounty-Hunter.user.js
+      - name: Verify
+        run: |
+          grep -q '@version      0.2.2' SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.2.2'" SakaLuX-Bounty-Hunter.user.js
+          grep -q 'v0.2.2' greedy.txt 2>/dev/null || true
+          grep -q '/user/' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'Watch only' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'Smart sort' SakaLuX-Bounty-Hunter.user.js
+          grep -q '### v0.2.2' greasyfork/Bounty-Hunter.md
+          grep -q '"id": "bounty-hunter"' scripts.json
+          grep -q '"version": "0.2.2"' scripts.json
+      - name: Commit registry
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add scripts.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Register Bounty Hunter v0.2.2'
+          git push
