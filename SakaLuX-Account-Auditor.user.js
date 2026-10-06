@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.27.5
+// @version      1.3.27.6
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -639,7 +639,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.1.8';
+  const VERSION = '1.1.9';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -734,7 +734,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 #${IDS.dock} .sl-dock-row:last-child{margin-bottom:0}#${IDS.dock} .sl-dock-row[disabled]{opacity:.45}
 #${IDS.dock} .slx-dock-install{display:block;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);color:#d8a45c;text-align:center;text-decoration:none;font-size:10px;font-weight:800}
 #${IDS.fallback}{position:fixed;right:10px;bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:2147482900;width:38px;height:38px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#0b1118;color:#e9a84d;font:800 15px/1 Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-#${IDS.native}{all:unset!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;align-self:center!important;vertical-align:middle!important;box-sizing:border-box!important;flex:0 0 24px!important;width:24px!important;min-width:24px!important;max-width:24px!important;height:24px!important;min-height:24px!important;max-height:24px!important;margin:0 3px 0 0!important;padding:0!important;border:0!important;border-radius:0!important;list-style:none!important;background:transparent!important;background-image:none!important;box-shadow:none!important;filter:none!important;transform:none!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;overflow:visible!important}#${IDS.native}::before,#${IDS.native}::after,#${IDS.native} .slx-s-link::before,#${IDS.native} .slx-s-link::after{content:none!important;display:none!important;background:none!important;background-image:none!important}#${IDS.native} .slx-s-link{all:unset!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;filter:none!important;transform:none!important;color:#dfbd61!important;font:900 17px/24px Arial,sans-serif!important;line-height:24px!important;text-align:center!important;text-decoration:none!important;text-shadow:0 1px 1px rgba(0,0,0,.75),0 0 4px rgba(223,189,97,.2)!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}#${IDS.native} .slx-s-link:active{transform:scale(.92)!important}
+#${IDS.native}{all:unset!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;align-self:center!important;vertical-align:middle!important;box-sizing:border-box!important;flex:0 0 24px!important;width:24px!important;min-width:24px!important;max-width:24px!important;height:24px!important;min-height:24px!important;max-height:24px!important;margin:0 3px 0 0!important;padding:0!important;border:0!important;border-radius:0!important;list-style:none!important;background:transparent!important;background-image:none!important;box-shadow:none!important;filter:none!important;transform:none!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;overflow:visible!important}#${IDS.native}::before,#${IDS.native}::after,#${IDS.native} .slx-s-link::before,#${IDS.native} .slx-s-link::after{content:none!important;display:none!important;background:none!important;background-image:none!important}#${IDS.native} .slx-s-link{all:unset!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;filter:none!important;transform:translateY(1px)!important;color:#dfbd61!important;font:900 17px/24px Arial,sans-serif!important;line-height:24px!important;text-align:center!important;text-decoration:none!important;text-shadow:0 1px 1px rgba(0,0,0,.75),0 0 4px rgba(223,189,97,.2)!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}#${IDS.native} .slx-s-link:active{transform:translateY(1px) scale(.92)!important}
 
 #${IDS.prompt}{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483600;width:min(360px,calc(100vw - 20px));padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0b1118;color:#eef3f8;font:600 11px/1.35 Arial,sans-serif;box-shadow:0 16px 42px rgba(0,0,0,.45)}
 #${IDS.prompt} .slx-prompt-actions{display:flex;gap:7px;margin-top:8px}#${IDS.prompt} button{flex:1;min-height:30px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#17212d;color:#eef3f8;font-weight:800}
@@ -950,7 +950,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.27.5" }));
+  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.27.6" }));
   const API_GLOBAL = "";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -981,7 +981,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.27.5';
+    const VERSION = '1.3.27.6';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const AUDITOR_API_CREATE_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Account%20Auditor&user=profile,bars,cooldowns,travel,education,jobpoints,merits,refills,notifications,money,stocks,properties,discord,weaponexp,workstats,skills,battlestats,networth,display,icons,criminalrecord,bazaar,crimes,hof,ammo,attacksfull,bounties,calendar,casino,competition,enlistedcars,equipment,faction,forumfeed,forumfriends,forumposts,forumsubscribedthreads,forumthreads,gym,honors,itemmarket,itemmods,job,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,snapshot,personalstats,list,inventory,messages,events,log&torn=merits,education';

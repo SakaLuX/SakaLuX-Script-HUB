@@ -138,3 +138,8 @@
 - Removed anchor heuristics entirely.
 - Forced 24x24 flex centering with zero positional offset and no inherited Torn/racing artwork.
 - Runtime-only .5 maintenance releases; Hub unchanged.
+
+## Standalone Runtime v1.1.9 — optical S centering
+- Moves the plain gold S down by 1px for optical alignment with Torn status icons.
+- Keeps S permanently first in the status bar.
+- Runtime-only .6 maintenance releases; Hub unchanged.
