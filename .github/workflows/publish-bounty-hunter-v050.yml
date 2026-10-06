@@ -1,0 +1,50 @@
+name: Publish Bounty Hunter v0.5.0
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-bounty-hunter-v050.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply Bounty Hunter v0.5.0
+        run: python .github/scripts/update_bounty_hunter_v050.py
+      - name: Re-embed Shared Core
+        run: node tools/embed-shared-core.cjs SakaLuX-Bounty-Hunter.user.js src/core/sakalux-core.js SakaLuX-Bounty-Hunter.user.js
+      - name: Syntax checks
+        run: |
+          node --check SakaLuX-Bounty-Hunter.user.js
+          node --check src/core/sakalux-core.js
+          node --check SakaLuX-Script-Hub.user.js
+      - name: Verify v0.5.0 features
+        run: |
+          grep -q '@version      0.5.0' SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.5.0'" SakaLuX-Bounty-Hunter.user.js
+          grep -q "let v = '0.5.0'" SakaLuX-Bounty-Hunter.user.js
+          grep -q 'SLX_BOUNTY_FF_CACHE_V1' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'SLX_BOUNTY_SCAN_STATE_V1' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'adaptiveDelay' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'scanResumeOffset' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'data-progress-bar' SakaLuX-Bounty-Hunter.user.js
+          grep -q '12\*60\*60\*1000' SakaLuX-Bounty-Hunter.user.js
+          grep -q '### v0.5.0' greasyfork/Bounty-Hunter.md
+          grep -q '"version": "0.5.0"' scripts.json
+          grep -q 'Adaptive scanner' scripts.json
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Bounty-Hunter.user.js src/core/sakalux-core.js SakaLuX-Script-Hub.user.js scripts.json CHANGELOG.md greasyfork/Bounty-Hunter.md
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish Bounty Hunter v0.5.0 adaptive scanner'
+          git push
