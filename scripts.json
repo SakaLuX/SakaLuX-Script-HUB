@@ -312,12 +312,13 @@
         }
       ],
       "release": {
-        "version": "0.4.6",
+        "version": "0.4.7",
         "date": "2026-10-06",
         "notes": [
-          "Fixes Bounty Hunter toggle buttons so ON/OFF state is immediately visible on TornPDA.",
-          "Active controls are painted orange with inline !important styles to override generic Shared Core/Hub button rules.",
-          "Adds stronger active-state selectors, pointer-events and touch-action safeguards for mobile taps."
+          "Adds Torn API rate-limit protection with a shared cooldown window.",
+          "Stops broker/direct/fallback request fan-out on Too many requests / HTTP 429.",
+          "Paces full-board paging to roughly one request per second and extends board cache to two minutes.",
+          "Uses the last good board cache during cooldown instead of collapsing to a tiny partial/DOM board."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -325,7 +326,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.4.6",
+      "version": "0.4.7",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },

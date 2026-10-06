@@ -51,3 +51,10 @@
 - Active controls now render orange through both high-specificity CSS and inline important state painting.
 - Added mobile pointer/touch safeguards so taps reliably execute on TornPDA.
 
+## Bounty Hunter v0.4.7
+- Added rate-limit-aware Torn API paging.
+- Stops duplicate broker/direct/fallback calls on Too many requests / HTTP 429.
+- Full-board pages are paced at ~950ms and cached for 2 minutes.
+- Activates a 65-second cooldown after a rate-limit response and reuses the last successful board cache during cooldown.
+- Keeps partial progress instead of discarding it.
+

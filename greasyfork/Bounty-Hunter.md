@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.4.6**
+**v0.4.7**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -41,12 +41,21 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.4.6 — Reliable orange ON/OFF controls**
-- Fixes filter/toggle buttons that stayed visually dark even when their setting was enabled.
-- Active controls are now force-painted orange on TornPDA, while inactive controls remain dark.
-- Adds stronger state selectors plus pointer/touch safeguards so mobile taps reliably execute.
+**v0.4.7 — Torn API rate-limit protection**
+- Prevents the full-board scanner from hammering Torn after Too many requests / HTTP 429.
+- Stops broker → direct → fallback fan-out on rate-limit errors.
+- Paces board pages to about one request per second and keeps a two-minute full-board cache.
+- Uses the last good board cache during cooldown instead of collapsing to a tiny partial/DOM result set.
+- Keeps partial progress if a rate limit happens mid-scan.
 
 ## Changelog
+### v0.4.7 — Torn API rate-limit protection
+- Adds a 65-second cooldown after Too many requests / HTTP 429.
+- Stops duplicate broker/direct/fallback requests during rate limiting.
+- Paces full-board pages at roughly one request per second.
+- Extends board cache to two minutes and reuses the last successful full-board scan during cooldown.
+- Keeps partial progress instead of discarding it.
+
 ### v0.4.6 — Reliable orange ON/OFF controls
 - Fixes filter/toggle controls that visually stayed dark because generic button styles could override the active-state class.
 - Active controls now use inline important painting plus high-specificity CSS for a clearly orange ON state.
