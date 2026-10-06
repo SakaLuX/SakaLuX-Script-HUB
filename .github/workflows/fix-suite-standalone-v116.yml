@@ -1,0 +1,41 @@
+name: Fix Suite and plain Standalone S v1.1.6
+on:
+  push:
+    paths: ['.github/workflows/fix-suite-standalone-v116.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '20'}
+      - run: python .github/scripts/fix_suite_standalone_v116.py
+      - name: Embed v1.1.6 everywhere
+        run: |
+          for f in SakaLuX-Enhancer-Guard.user.js SakaLuX-Account-Auditor.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Bazaar-Smart-Pricer.user.js SakaLuX-Elimination-Assistant.user.js SakaLuX-Market-Intelligence.user.js SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js SakaLuX-Bounty-Hunter.user.js; do node tools/embed-shared-dock-runtime.cjs "$f" src/core/sakalux-dock-runtime.js "$f"; done
+      - name: Verify
+        run: |
+          node --check src/core/sakalux-dock-runtime.js
+          node --check SakaLuX-Suite.user.js
+          grep -q "const VERSION = '1.1.6'" src/core/sakalux-dock-runtime.js
+          grep -q "item.className='slx-standalone-native'" src/core/sakalux-dock-runtime.js
+          ! grep -q "copyNativeCell(item,list)" src/core/sakalux-dock-runtime.js
+          grep -q "preferredStatusAnchor" src/core/sakalux-dock-runtime.js
+          ! grep -q "SakaLuX Standalone Dock Bootstrap — BEGIN" SakaLuX-Suite.user.js
+          grep -q 'customItem.className = "sakalux-master-status-icon"' SakaLuX-Suite.user.js
+          grep -q "@version      1.3.56.3" SakaLuX-Enhancer-Guard.user.js
+          grep -q "@version      0.5.6.3" SakaLuX-Bounty-Hunter.user.js
+          grep -q "@version      1.9.93" SakaLuX-Script-Hub.user.js
+      - name: Commit
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add src/core/sakalux-dock-runtime.js SakaLuX-Suite.user.js SakaLuX-*.user.js scripts.json CHANGELOG.md
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix Suite conflict and restore plain Standalone S v1.1.6'
+          git push
