@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.54
+// @version      1.3.55
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -629,7 +629,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.54';
+  let v = '1.3.55';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1039,7 +1039,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.54';
+    const VERSION = '1.3.55';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';

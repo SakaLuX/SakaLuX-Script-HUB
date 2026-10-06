@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.5.4**
+**v0.5.5**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -41,14 +41,17 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.4 — Standalone Dock v1.1.1 compatibility repair**
-- Restores the previous Standalone panel header/logo and native Torn-style S launcher.
-- Removes the separate X control; the original S mark in the panel header can close the panel.
-- Adds hard close enforcement so older installed SakaLuX scripts cannot leave the shared panel open.
-- The native S launcher is handled by the newest runtime even if stale scripts attached older click handlers.
-- Bounty Hunter remains available only through the shared Standalone Dock when Hub is absent.
+**v0.5.5 — Shared Standalone Dock Runtime v1.1.2 maintenance**
+- Embeds the repaired shared Standalone Dock Runtime v1.1.2.
+- No module feature changes in this maintenance release.
+- Makes this installed module compatible with the common singleton Standalone Dock and its fixed open/close lifecycle.
 
 ## Changelog
+### v0.5.5 — Shared Standalone Dock Runtime v1.1.2 maintenance
+- Runtime-only maintenance update.
+- Embeds Standalone Dock v1.1.2 so all installed SakaLuX standalone modules share the repaired singleton behavior.
+- No module feature changes.
+
 ### v0.5.4 — Standalone Dock v1.1.1 compatibility repair
 - Restores the old logo/header and native S launcher visuals.
 - Adds stale-runtime protection and hard outside-tap/startup close enforcement.

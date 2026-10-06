@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.48**
+**v1.3.49**
 
 
 ## Repository synchronization
@@ -33,12 +33,17 @@
 
 ## Current release note
 
-**v1.3.48 — Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0**
-- Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.
-- Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.
-- Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt.
+**v1.3.49 — Shared Standalone Dock Runtime v1.1.2 maintenance**
+- Embeds the repaired shared Standalone Dock Runtime v1.1.2.
+- No module feature changes in this maintenance release.
+- Makes this installed module compatible with the common singleton Standalone Dock and its fixed open/close lifecycle.
 
 ## Release history / Changelog
+### v1.3.49 — Shared Standalone Dock Runtime v1.1.2 maintenance
+- Runtime-only maintenance update.
+- Embeds Standalone Dock v1.1.2 so all installed SakaLuX standalone modules share the repaired singleton behavior.
+- No module feature changes.
+
 
 
 ### v1.3.48 — Settings Schema v1 and safe automatic migrations

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.54**
+**v1.3.55**
 
 
 ## Repository synchronization
@@ -29,12 +29,17 @@
 
 ## Current release note
 
-**v1.3.54 — Release metadata synchronization**
-- Fixes Enhancer item links so they open Item Market directly in the selected item search instead of only opening the generic market page.
-- Reads Torn API inventory.timestamp and shows a visible stale-cache warning when the inventory snapshot is old, explaining why a newly purchased enhancer can still appear as NOT OWNED.
-- Keeps manual Refresh accurate about Torn server-side inventory caching instead of implying that a refresh can bypass the API cache.
+**v1.3.55 — Shared Standalone Dock Runtime v1.1.2 maintenance**
+- Embeds the repaired shared Standalone Dock Runtime v1.1.2.
+- No module feature changes in this maintenance release.
+- Makes this installed module compatible with the common singleton Standalone Dock and its fixed open/close lifecycle.
 
 ## Release history / Changelog
+### v1.3.55 — Shared Standalone Dock Runtime v1.1.2 maintenance
+- Runtime-only maintenance update.
+- Embeds Standalone Dock v1.1.2 so all installed SakaLuX standalone modules share the repaired singleton behavior.
+- No module feature changes.
+
 
 
 ### v1.3.54 — Inventory cache visibility and direct market search

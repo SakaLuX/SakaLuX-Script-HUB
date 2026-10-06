@@ -92,4 +92,18 @@
 - Adds a DOM close enforcer so stale runtimes cannot reopen/leave the panel open.
 - Hard-closes on startup, registration, route change, outside tap, module launch, Escape and timeout.
 - Bounty Hunter remains Dock-only; no chat or floating Bounties launcher.
+## Standalone Runtime v1.1.2 — batch maintenance releases
+- Runtime-only maintenance release across every userscript that embeds Shared Standalone Dock.
+- Enhancer Guard 1.3.55
+- Account Auditor 1.3.26
+- Mission Rewards 1.0.48
+- Bazaar Thanker 5.3.46
+- Bazaar Smart Pricer 1.1.15
+- Elimination Assistant 1.3.49
+- Market Intelligence 1.17.59
+- Stock Manager & Advisor 0.8.17
+- Company Intelligence 1.8.55
+- Bounty Hunter 0.5.5
+- No module feature changes; the version bumps exist so installed copies actually receive Dock Runtime v1.1.2.
+- Script Hub is intentionally not version-bumped by this batch.
 

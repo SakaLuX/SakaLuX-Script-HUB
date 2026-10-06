@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.14
+// @version      1.1.15
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
 // @license      MIT
@@ -632,7 +632,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.1.14';
+  let v = '1.1.15';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1014,7 +1014,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"}, { version: "1.1.14" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"}, { version: "1.1.15" }));
   const API_GLOBAL = "SakaLuXBazaarSmartPricer";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {

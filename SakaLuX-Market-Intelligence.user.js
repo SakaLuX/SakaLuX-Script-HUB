@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.58
+// @version      1.17.59
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -632,7 +632,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.58';
+  let v = '1.17.59';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);

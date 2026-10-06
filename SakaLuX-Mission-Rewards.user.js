@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.47
+// @version      1.0.48
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -630,7 +630,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.0.47';
+  let v = '1.0.48';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -976,7 +976,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"}, { version: "1.0.47" }));
+  const SELF = Object.freeze(Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"}, { version: "1.0.48" }));
   const API_GLOBAL = "SakaLuXMissionRewards";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1040,7 +1040,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.0.47';
+    const VERSION = '1.0.48';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.45
+// @version      5.3.46
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -628,7 +628,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '5.3.45';
+  let v = '5.3.46';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -974,7 +974,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.45" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.46" }));
   const API_GLOBAL = "SakaLuXBazaarThanker";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {

@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.14**
+**v1.1.15**
 
 ## Repository synchronization
 
@@ -39,12 +39,17 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.14 — Release metadata synchronization**
-- Fixes the Torn City shop floor to use sell_price, the amount the NPC shop pays you, instead of buy_price.
-- Prevents Smart Pricer from incorrectly raising a Bazaar price to the NPC shop purchase price when market value is lower.
-- Resets stale pricing cache data and keeps the floor indicator aligned with sell_price.
+**v1.1.15 — Shared Standalone Dock Runtime v1.1.2 maintenance**
+- Embeds the repaired shared Standalone Dock Runtime v1.1.2.
+- No module feature changes in this maintenance release.
+- Makes this installed module compatible with the common singleton Standalone Dock and its fixed open/close lifecycle.
 
 ## Release history / Changelog
+### v1.1.15 — Shared Standalone Dock Runtime v1.1.2 maintenance
+- Runtime-only maintenance update.
+- Embeds Standalone Dock v1.1.2 so all installed SakaLuX standalone modules share the repaired singleton behavior.
+- No module feature changes.
+
 
 
 

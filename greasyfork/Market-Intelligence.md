@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.58**
+**v1.17.59**
 
 
 ## Repository synchronization
@@ -32,13 +32,17 @@
 
 ## Current release note
 
-**v1.17.58 — Release metadata synchronization**
-- Best Buys now detects the live Torn cash balance automatically, including a Torn-page fallback for PDA travel pages.
-- Every Best Buys option is selectable instead of always using the first recommendation.
-- The selected item persists per destination and recalculates quantity from live cash, travel slots and current stock.
-- MARK PLAN BOUGHT now records the currently selected option and its calculated quantity.
+**v1.17.59 — Shared Standalone Dock Runtime v1.1.2 maintenance**
+- Embeds the repaired shared Standalone Dock Runtime v1.1.2.
+- No module feature changes in this maintenance release.
+- Makes this installed module compatible with the common singleton Standalone Dock and its fixed open/close lifecycle.
 
 ## Release history / Changelog
+### v1.17.59 — Shared Standalone Dock Runtime v1.1.2 maintenance
+- Runtime-only maintenance update.
+- Embeds Standalone Dock v1.1.2 so all installed SakaLuX standalone modules share the repaired singleton behavior.
+- No module feature changes.
+
 
 
 ### v1.17.58 — Release metadata synchronization

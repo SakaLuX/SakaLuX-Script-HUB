@@ -34,18 +34,18 @@
         }
       ],
       "release": {
-        "version": "1.3.54",
-        "date": "2026-09-30",
+        "version": "1.3.55",
+        "date": "2026-10-06",
         "notes": [
-          "Fixes Enhancer item links so they open Item Market directly in the selected item search instead of only opening the generic market page.",
-          "Reads Torn API inventory.timestamp and shows a visible stale-cache warning when the inventory snapshot is old, explaining why a newly purchased enhancer can still appear as NOT OWNED.",
-          "Keeps manual Refresh accurate about Torn server-side inventory caching instead of implying that a refresh can bypass the API cache."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.54",
-      "detailsRevision": 6,
+      "version": "1.3.55",
+      "detailsRevision": 7,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -86,18 +86,18 @@
         }
       ],
       "release": {
-        "version": "5.3.45",
-        "date": "2026-09-26",
+        "version": "5.3.46",
+        "date": "2026-10-06",
         "notes": [
-          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.45",
-      "detailsRevision": 4,
+      "version": "5.3.46",
+      "detailsRevision": 5,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -139,15 +139,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 27,
-      "version": "1.1.14",
+      "detailsRevision": 28,
+      "version": "1.1.15",
       "release": {
-        "version": "1.1.14",
-        "date": "2026-09-30",
+        "version": "1.1.15",
+        "date": "2026-10-06",
         "notes": [
-          "Fixes the Torn City shop floor to use sell_price, the amount the NPC shop pays you, instead of buy_price.",
-          "Prevents Smart Pricer from incorrectly raising a Bazaar price to the NPC shop purchase price when market value is lower.",
-          "Resets stale pricing cache data and keeps the floor indicator aligned with sell_price."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -194,18 +194,18 @@
         }
       ],
       "release": {
-        "version": "1.0.47",
-        "date": "2026-09-26",
+        "version": "1.0.48",
+        "date": "2026-10-06",
         "notes": [
-          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.47",
-      "detailsRevision": 4,
+      "version": "1.0.48",
+      "detailsRevision": 5,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -260,19 +260,18 @@
         }
       ],
       "release": {
-        "version": "1.17.58",
-        "date": "2026-09-30",
+        "version": "1.17.59",
+        "date": "2026-10-06",
         "notes": [
-          "Best Buys now detects the live Torn cash balance automatically, including a Torn-page fallback for PDA travel pages.",
-          "Every Best Buys option is selectable instead of always using the first recommendation.",
-          "The selected item persists per destination and recalculates quantity from live cash, travel slots and current stock.",
-          "MARK PLAN BOUGHT now records the currently selected option and its calculated quantity."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.58",
-      "detailsRevision": 15,
+      "version": "1.17.59",
+      "detailsRevision": 16,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -326,13 +325,12 @@
         }
       ],
       "release": {
-        "version": "0.5.4",
+        "version": "0.5.5",
         "date": "2026-10-06",
         "notes": [
-          "Shared Standalone Dock v1.1.1 restores the previous header/logo appearance and original native S launcher styling.",
-          "Adds a hard close enforcer that also corrects stale older dock runtimes loaded by other installed scripts.",
-          "Standalone starts closed and closes on outside tap, module launch, route change, Escape and timeout.",
-          "Bounty Hunter remains Standalone-Dock only with no chat or floating page launcher."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -340,8 +338,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.4",
-      "detailsRevision": 6,
+      "version": "0.5.5",
+      "detailsRevision": 7,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -418,18 +416,18 @@
         }
       ],
       "release": {
-        "version": "1.3.48",
-        "date": "2026-09-26",
+        "version": "1.3.49",
+        "date": "2026-10-06",
         "notes": [
-          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.48",
-      "detailsRevision": 5,
+      "version": "1.3.49",
+      "detailsRevision": 6,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -469,18 +467,18 @@
         }
       ],
       "release": {
-        "version": "1.8.54",
-        "date": "2026-10-02",
+        "version": "1.8.55",
+        "date": "2026-10-06",
         "notes": [
-          "Synchronizes the Company Intelligence userscript header, runtime version, canonical installed-version marker, Script Hub registry and release surfaces to the same final version.",
-          "Removes duplicate company-catalogue storage-key entries and repeated catalogue refresh calls accumulated by earlier incremental patches.",
-          "Prevents Script Hub from showing a false UPDATE AVAILABLE badge when the installed Company Intelligence script is already current."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.54",
-      "detailsRevision": 4,
+      "version": "1.8.55",
+      "detailsRevision": 5,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -526,18 +524,18 @@
         }
       ],
       "release": {
-        "version": "0.8.16",
-        "date": "2026-09-26",
+        "version": "0.8.17",
+        "date": "2026-10-06",
         "notes": [
-          "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-          "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-          "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+          "Maintenance release: embeds Shared Standalone Dock Runtime v1.1.2.",
+          "No module feature changes in this release.",
+          "Ensures every installed standalone module participates in the same singleton dock runtime and receives the fixed open/close behavior."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.16",
-      "detailsRevision": 8,
+      "version": "0.8.17",
+      "detailsRevision": 9,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
