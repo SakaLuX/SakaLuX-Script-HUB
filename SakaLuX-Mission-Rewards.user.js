@@ -654,7 +654,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.1.1';
+  const VERSION = '1.1.2';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -690,10 +690,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function readOpen() { return false; }
   function writeOpen(value) { openState = Boolean(value); try { localStorage.removeItem(OPEN_KEY); } catch {} }
   function armAutoClose() { clearTimeout(autoCloseTimer); if (!openState) return; autoCloseTimer = setTimeout(() => toggleDock(false), 6000); }
-  let userOpenUntil = 0;
-  function markUserOpen(){ userOpenUntil = Date.now()+1600; }
+  let userOpened = false;
+  function markUserOpen(){ userOpened = true; }
   function forceCloseDock(){
-    openState=false; clearTimeout(autoCloseTimer);
+    userOpened=false; openState=false; clearTimeout(autoCloseTimer);
     const p=doc()?.getElementById(IDS.dock);
     if(p){p.dataset.open='0';p.hidden=true;p.style?.removeProperty?.('display')}
     try{localStorage.removeItem(OPEN_KEY)}catch{}
@@ -703,7 +703,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const p=doc()?.getElementById(IDS.dock);
     if(!p)return;
     const visiblyOpen=p.dataset.open==='1'||p.hidden===false;
-    if(visiblyOpen && Date.now()>userOpenUntil) forceCloseDock();
+    if(visiblyOpen && !userOpened) forceCloseDock();
   }
 
   function normalize(entry = {}) {
@@ -784,7 +784,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const link = item.querySelector('a') || item.appendChild(d.createElement('a'));
       link.href = '#'; link.className = 'slx-s-link'; link.textContent = 'S'; link.title = 'SakaLuX Scripts';
       link.setAttribute?.('aria-label', 'SakaLuX Scripts');
-      link.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); markUserOpen(); toggleDock(); };
+      link.onclick = null;
       copyNativeCell(item, list);
       const children = [...(list.children || [])].filter(x => x !== item);
       const cashIndex = children.findIndex(x => /\$|cash|money/i.test((x.textContent || '') + ' ' + (x.className || '')));
@@ -800,7 +800,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       button.type = 'button';
       button.textContent = 'S';
       button.title = 'SakaLuX Scripts';
-      button.addEventListener?.('click', e => { e?.preventDefault?.(); e?.stopPropagation?.(); markUserOpen(); toggleDock(); });
+      button.onclick = null;
       (d.body || d.documentElement).appendChild(button);
     }
     removeNode(IDS.native);
@@ -818,8 +818,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       panel.hidden = true;
       writeOpen(false);
       const head = d.createElement('div'); head.className = 'slx-dock-head';
-      const mark = d.createElement('button'); mark.type='button'; mark.className = 'slx-dock-mark'; mark.textContent = 'S'; mark.title='Close SakaLuX Scripts'; mark.setAttribute?.('aria-label','Close SakaLuX Scripts');
-      mark.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); forceCloseDock(); };
+      const mark = d.createElement('div'); mark.className = 'slx-dock-mark'; mark.textContent = 'S'; mark.setAttribute?.('aria-hidden','true');
       const title = d.createElement('div'); title.className = 'slx-dock-title'; title.textContent = 'SakaLuX Scripts';
       const sub = d.createElement('div'); sub.className = 'slx-dock-sub'; sub.textContent = 'Standalone';
       head.appendChild(mark); head.appendChild(title); head.appendChild(sub);
@@ -828,7 +827,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       panel.appendChild(head); panel.appendChild(items); panel.appendChild(install);
       (d.body || d.documentElement).appendChild(panel);
     }
-    const mark = panel.querySelector('.slx-dock-mark'); if (mark) mark.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); forceCloseDock(); };
     return panel;
   }
 
@@ -838,8 +836,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const panel = doc()?.getElementById(IDS.dock);
     if (!panel) return false;
     const next = typeof force === 'boolean' ? force : panel.dataset.open !== '1';
-    if(next){ markUserOpen(); panel.dataset.open='1'; panel.hidden=false; writeOpen(true); armAutoClose(); }
-    else { forceCloseDock(); }
+    if(next){ userOpened=true; panel.dataset.open='1'; panel.hidden=false; writeOpen(true); armAutoClose(); }
+    else forceCloseDock();
     return next;
   }
 
@@ -874,7 +872,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       });
       box.appendChild(button);
     }
-    if(Date.now()>userOpenUntil) forceCloseDock(); else panel.hidden = panel.dataset.open !== '1';
+    if(!userOpened) forceCloseDock(); else panel.hidden = panel.dataset.open !== '1';
     return panel;
   }
 
@@ -910,16 +908,30 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       core()?.router?.bind?.();
     } catch {}
     try { g.addEventListener?.('SakaLuX:ScriptHubReady', () => removeUi(), { passive: true }); } catch {}
-    try { doc()?.addEventListener?.('click', e => {
-      const launcher=e?.target?.closest?.('#'+IDS.native+' .slx-s-link,#'+IDS.fallback);
-      if(launcher){e.preventDefault?.();e.stopPropagation?.();e.stopImmediatePropagation?.();markUserOpen();toggleDock();return}
-    }, true); } catch {}
-    try { doc()?.addEventListener?.('pointerdown', e => { const panel=doc()?.getElementById(IDS.dock); if (!panel || (panel.dataset.open!=='1'&&panel.hidden!==false)) return; const t=e?.target; if (t?.closest?.('#'+IDS.dock+',#'+IDS.native+',#'+IDS.fallback)) return; forceCloseDock(); }, true); } catch {}
-    try { g.addEventListener?.('keydown',e=>{if(e?.key==='Escape')toggleDock(false)},{passive:true}); } catch {}
+    try {
+      const outsideClose = e => {
+        const d=doc(), panel=d?.getElementById(IDS.dock), t=e?.target;
+        const launcher=t?.closest?.('#'+IDS.native+' .slx-s-link,#'+IDS.fallback);
+        if(launcher){
+          if(e.type==='click'){
+            e.preventDefault?.();e.stopPropagation?.();e.stopImmediatePropagation?.();
+            const isOpen=panel?.dataset.open==='1'&&panel.hidden===false;
+            if(isOpen) forceCloseDock(); else { markUserOpen(); toggleDock(true); }
+          }
+          return;
+        }
+        if(!panel || (panel.dataset.open!=='1'&&panel.hidden!==false)) return;
+        if(t?.closest?.('#'+IDS.dock)) return;
+        forceCloseDock();
+      };
+      for(const ev of ['pointerdown','touchstart','mousedown','click']) doc()?.addEventListener?.(ev,outsideClose,true);
+    } catch {}
+    try { g.addEventListener?.('keydown',e=>{if(e?.key==='Escape')forceCloseDock()},{passive:true}); } catch {}
     try {
       if (!observer && typeof MutationObserver === 'function' && doc()?.body) {
         observer = new MutationObserver(records => {
           enforceClosedUnlessUserOpened();
+          if(!userOpened) forceCloseDock();
           if (core()?.perf?.unrelated?.(records)) return;
           scheduleRefresh(240);
         });
@@ -933,6 +945,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     modules.set(normalized.id, normalized); // latest registration wins
     forceCloseDock();
     render();
+    forceCloseDock();
     bindRuntimeSignals();
     if (!promptScheduled) {
       promptScheduled = true;
