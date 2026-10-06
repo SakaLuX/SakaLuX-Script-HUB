@@ -312,12 +312,12 @@
         }
       ],
       "release": {
-        "version": "0.4.2",
+        "version": "0.4.3",
         "date": "2026-10-06",
         "notes": [
-          "Fixes the v0.4.1 mobile layout regression caused by the donation footer being inserted beside the panel instead of inside it.",
-          "Moves the professional Shared Core skin from the full-screen overlay to the actual Bounty Hunter panel section.",
-          "Keeps SEND MONEY, SEND ITEMS and the Made with love footer full-width at the bottom without shrinking the target list."
+          "Expands the TornPDA Bounty Hunter panel to nearly the full available phone viewport.",
+          "Keeps the full-screen overlay at full size instead of accidentally constraining it on narrow screens.",
+          "Makes the target list flex and scroll inside the panel while the header, filters, status and donation footer remain accessible."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -325,7 +325,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },

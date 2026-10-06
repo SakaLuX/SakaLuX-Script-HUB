@@ -30,4 +30,9 @@
 - Donation footer now lives inside the panel section and spans its full width.
 - Hub/Shared Core professional skin now applies to the actual panel section instead of styling the full-screen overlay.
 - Preserves SEND MONEY, SEND ITEMS and Made with ❤️ by SakaLuX [2380374].
+## Bounty Hunter v0.4.3
+- TornPDA/mobile panel now uses almost the full available screen: full width minus 8px and viewport height minus the top app area.
+- Fixed the mobile media rule that was shrinking the full overlay itself.
+- Target results now flex to fill remaining space and scroll independently.
+- Footer remains compact at the bottom while results keep maximum usable space.
 
