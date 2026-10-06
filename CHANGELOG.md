@@ -40,4 +40,10 @@
 - Added reusable Shared Core v1.2.0 workspace layout helper.
 - Bounty Hunter now fills the usable TornPDA viewport from the top while reserving the bottom chat/navigation zone.
 - Uses visualViewport so panel geometry stays correct across phone viewport changes.
+## Bounty Hunter v0.4.5
+- Aligns the mobile workspace with Script Hub: top 0, side 4px and bottom reserve 36px so the panel reaches down to just above the TornPDA chat/navigation area.
+- Removes overlay and footer blur/dim effects.
+- Active filter/toggle chips now use a clear orange ON state; inactive controls stay dark.
+- Adds aria-pressed/data-state to filter chips for reliable visual/semantic state.
+- Shared Core updated to v1.2.1 with Hub-aligned workspace defaults for reuse by other modules.
 

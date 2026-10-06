@@ -60,7 +60,7 @@ function loadCore({ hub = false } = {}) {
 (async () => {
   const { core, context, elements, html, store, eventHandlers } = loadCore();
   assert.ok(core, 'core exported');
-  assert.equal(core.version, '1.1.0');
+  assert.equal(core.version, '1.2.1');
   assert.equal(context.SakaLuXPerf, core.perf, 'legacy SakaLuXPerf alias preserved');
   assert.equal(typeof core.ui?.ensureSharedSkin, 'function', 'shared UI skin moved into Core');
   assert.equal(typeof core.api?.requestJson, 'function', 'API Request Broker exported');

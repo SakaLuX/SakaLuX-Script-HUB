@@ -6,7 +6,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.0';
+  const CORE_VERSION = '1.2.1';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -577,8 +577,8 @@
   const ui = {
     applyWorkspaceLayout(overlay, panel, options = {}) {
       if (!overlay || !panel || typeof window === 'undefined') return null;
-      const top = Math.max(0, Number(options.top ?? 8));
-      const bottom = Math.max(0, Number(options.bottom ?? 92));
+      const top = Math.max(0, Number(options.top ?? 0));
+      const bottom = Math.max(0, Number(options.bottom ?? 36));
       const side = Math.max(0, Number(options.side ?? 4));
       const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
       const apply = () => {
