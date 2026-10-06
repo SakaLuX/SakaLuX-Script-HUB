@@ -312,12 +312,11 @@
         }
       ],
       "release": {
-        "version": "0.3.5",
+        "version": "0.4.1",
         "date": "2026-10-05",
         "notes": [
-          "Reliable full-board paging follows Torn API next links with pacing/retries.",
-          "Keeps partial API results instead of dropping to DOM after a later page failure.",
-          "Clarifies Status ? and grouped total bounty reward on target cards."
+          "Adds the compact SakaLuX donation/footer block with SEND MONEY, SEND ITEMS and Made with ❤️ by SakaLuX [2380374].",
+          "Keeps the footer inside the Bounty Hunter panel and matches the Shared Core / Script Hub visual language on TornPDA."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -325,7 +324,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },

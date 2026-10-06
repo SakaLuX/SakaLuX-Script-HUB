@@ -20,3 +20,8 @@
 - Enabled the Shared Core Hub skin and added a Bounty-specific professional UI layer using the same SakaLuX design tokens.
 - Tightened mobile spacing, card hierarchy, filters, controls, focus states and footer/list readability.
 - Added Shared Core performance debounce plumbing for future incremental renders.
+
+## Bounty Hunter v0.4.1
+- Adds the compact SakaLuX footer used by the other modules: SEND MONEY, SEND ITEMS and Made with ❤️ by SakaLuX [2380374].
+- Donation buttons and author link open the SakaLuX Torn profile, matching Script Hub behavior.
+- Footer styling follows Shared Core / Hub tokens and remains compact on TornPDA.
