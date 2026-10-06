@@ -1,0 +1,55 @@
+name: Repair Shared Standalone Dock v1.1.0
+on:
+  push:
+    paths:
+      - '.github/workflows/repair-shared-standalone-v110.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply source fixes
+        run: python .github/scripts/repair_shared_standalone_v110.py
+      - name: Embed canonical runtime in every standalone module
+        run: |
+          for f in             SakaLuX-Bounty-Hunter.user.js             SakaLuX-Enhancer-Guard.user.js             SakaLuX-Account-Auditor.user.js             SakaLuX-Mission-Rewards.user.js             SakaLuX-Bazaar-Thanker-PDA.user.js             SakaLuX-Bazaar-Smart-Pricer.user.js             SakaLuX-Elimination-Assistant.user.js             SakaLuX-Market-Intelligence.user.js             SakaLuX-Stock-Manager-Advisor.user.js             SakaLuX-Company-Intelligence-v1.0.0.user.js
+          do
+            node tools/embed-shared-dock-runtime.cjs "$f" src/core/sakalux-dock-runtime.js "$f"
+          done
+      - name: Syntax checks
+        run: |
+          node --check src/core/sakalux-dock-runtime.js
+          node --check SakaLuX-Bounty-Hunter.user.js
+          node --check SakaLuX-Script-Hub.user.js
+      - name: Verify runtime in all scripts
+        run: |
+          grep -q "const VERSION = '1.1.0'" src/core/sakalux-dock-runtime.js
+          grep -q "slx-dock-close" src/core/sakalux-dock-runtime.js
+          grep -q "setTimeout(() => toggleDock(false), 6000)" src/core/sakalux-dock-runtime.js
+          grep -q "__SakaLuXDockRuntimeCurrent" src/core/sakalux-dock-runtime.js
+          for f in SakaLuX-Bounty-Hunter.user.js SakaLuX-Enhancer-Guard.user.js SakaLuX-Account-Auditor.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Bazaar-Smart-Pricer.user.js SakaLuX-Elimination-Assistant.user.js SakaLuX-Market-Intelligence.user.js SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js; do
+            grep -q "const VERSION = '1.1.0'" "$f"
+            grep -q "slx-dock-close" "$f"
+          done
+          grep -q "@version      0.5.3" SakaLuX-Bounty-Hunter.user.js
+          ! grep -q "function mountChatButtons" SakaLuX-Bounty-Hunter.user.js
+          grep -q "@version      1.9.92" SakaLuX-Script-Hub.user.js
+          grep -q '"version": "0.5.3"' scripts.json
+          grep -q '### v0.5.3' greasyfork/Bounty-Hunter.md
+      - name: Commit repair
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add src/core/sakalux-dock-runtime.js SakaLuX-Bounty-Hunter.user.js SakaLuX-Script-Hub.user.js scripts.json CHANGELOG.md greasyfork/Bounty-Hunter.md greasyfork/Script-Hub.md SakaLuX-Enhancer-Guard.user.js SakaLuX-Account-Auditor.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Bazaar-Smart-Pricer.user.js SakaLuX-Elimination-Assistant.user.js SakaLuX-Market-Intelligence.user.js SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Repair shared Standalone Dock v1.1.0'
+          git push
