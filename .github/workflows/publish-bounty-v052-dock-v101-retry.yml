@@ -1,0 +1,70 @@
+name: Publish Bounty v0.5.2 + Standalone Dock v1.0.1 retry
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-bounty-v052-dock-v101-retry.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply patch
+        run: python .github/scripts/publish_bounty_v052_dock_v101.py
+      - name: Re-embed canonical dock runtime
+        run: |
+          for f in SakaLuX-Enhancer-Guard.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Bazaar-Smart-Pricer.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Market-Intelligence.user.js SakaLuX-Elimination-Assistant.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Account-Auditor.user.js
+          do
+            node tools/embed-shared-dock-runtime.cjs "$f" src/core/sakalux-dock-runtime.js "$f"
+          done
+      - name: Add Bounty to shared dock
+        run: |
+          node tools/embed-shared-dock-runtime.cjs SakaLuX-Bounty-Hunter.user.js src/core/sakalux-dock-runtime.js SakaLuX-Bounty-Hunter.user.js
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('SakaLuX-Bounty-Hunter.user.js'); s=p.read_text()
+          begin='/* SakaLuX Shared Dock Registration — BEGIN */'; end='/* SakaLuX Shared Dock Registration — END */'
+          if begin in s:
+              a=s.index(begin); b=s.index(end,a)+len(end); s=s[:a]+s[b:]
+          marker='/* SakaLuX Shared Dock Runtime — END */'
+          reg="""/* SakaLuX Shared Dock Registration — BEGIN */
+          (() => {
+            'use strict';
+            const SELF=Object.freeze({id:'bounty-hunter',name:'Bounty Hunter',icon:'🎯',version:'0.5.2',fallback:'https://www.torn.com/bounties.php'});
+            function openSelf(){try{const api=window.SakaLuXBountyHunter;if(api&&typeof api.open==='function'){api.open();return}}catch{}const bridge=document.getElementById('sakalux-module-bridge-'+SELF.id);if(bridge){bridge.dataset.action = 'open';bridge.click();return}if(SELF.fallback)location.href=SELF.fallback}
+            function register(){const dock=globalThis.SakaLuXDockRuntime;if(!dock||typeof dock.register!=='function')throw new Error('SakaLuX Shared Dock Runtime is unavailable');dock.register({...SELF,open:openSelf})}
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',register,{once:true});else register();
+          })();
+          /* SakaLuX Shared Dock Registration — END */"""
+          pos=s.index(marker)+len(marker); s=s[:pos]+'\n\n'+reg+s[pos:]; p.write_text(s)
+          PY
+      - name: Syntax and regression
+        run: |
+          node --check src/core/sakalux-dock-runtime.js
+          node --check SakaLuX-Bounty-Hunter.user.js
+          node tests/priority6-shared-dock-migration-regression.cjs
+      - name: Verify
+        run: |
+          grep -q '@version      0.5.2' SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.5.2'" SakaLuX-Bounty-Hunter.user.js
+          grep -q "id:'bounty-hunter',name:'Bounty Hunter'" SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION = '1.0.1'" src/core/sakalux-dock-runtime.js
+          grep -q "bridge.dataset.action = 'open'" SakaLuX-Bounty-Hunter.user.js
+          grep -q 'setTimeout(() => toggleDock(false), 8000)' src/core/sakalux-dock-runtime.js
+          grep -q '### v0.5.2' greasyfork/Bounty-Hunter.md
+      - name: Commit
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add src/core/sakalux-dock-runtime.js SakaLuX-Bounty-Hunter.user.js SakaLuX-Enhancer-Guard.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Bazaar-Smart-Pricer.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Market-Intelligence.user.js SakaLuX-Elimination-Assistant.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Account-Auditor.user.js scripts.json CHANGELOG.md greasyfork/Bounty-Hunter.md tests/priority6-shared-dock-migration-regression.cjs
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix standalone dock and publish Bounty Hunter v0.5.2'
+          git push
