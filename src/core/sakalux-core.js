@@ -6,7 +6,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.1.0';
+  const CORE_VERSION = '1.2.0';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -575,6 +575,51 @@
   })();
 
   const ui = {
+    applyWorkspaceLayout(overlay, panel, options = {}) {
+      if (!overlay || !panel || typeof window === 'undefined') return null;
+      const top = Math.max(0, Number(options.top ?? 8));
+      const bottom = Math.max(0, Number(options.bottom ?? 92));
+      const side = Math.max(0, Number(options.side ?? 4));
+      const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
+      const apply = () => {
+        const vv = window.visualViewport;
+        const width = Math.max(0, Number(vv?.width || window.innerWidth || 0));
+        const height = Math.max(0, Number(vv?.height || window.innerHeight || 0));
+        const offsetTop = Math.max(0, Number(vv?.offsetTop || 0));
+        const offsetLeft = Math.max(0, Number(vv?.offsetLeft || 0));
+        Object.assign(overlay.style, {
+          position: 'fixed',
+          inset: '0px',
+          width: 'auto',
+          height: 'auto',
+          maxHeight: 'none',
+          display: 'block'
+        });
+        const usable = Math.max(240, height - top - bottom);
+        const panelWidth = Math.min(maxWidth, Math.max(240, width - side * 2));
+        Object.assign(panel.style, {
+          position: 'fixed',
+          top: (offsetTop + top) + 'px',
+          bottom: 'auto',
+          left: (offsetLeft + Math.max(side, (width - panelWidth) / 2)) + 'px',
+          width: panelWidth + 'px',
+          height: usable + 'px',
+          maxHeight: usable + 'px',
+          margin: '0',
+          boxSizing: 'border-box'
+        });
+      };
+      apply();
+      const vv = window.visualViewport;
+      vv?.addEventListener?.('resize', apply);
+      vv?.addEventListener?.('scroll', apply);
+      window.addEventListener?.('resize', apply);
+      return () => {
+        vv?.removeEventListener?.('resize', apply);
+        vv?.removeEventListener?.('scroll', apply);
+        window.removeEventListener?.('resize', apply);
+      };
+    },
     ensureSharedSkin() {
       if (typeof document === 'undefined' || typeof document.createElement !== 'function' || document.getElementById('sakalux-shared-hub-skin')) return;
       const st = document.createElement('style');

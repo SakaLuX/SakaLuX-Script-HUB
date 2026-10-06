@@ -36,3 +36,8 @@
 - Target results now flex to fill remaining space and scroll independently.
 - Footer remains compact at the bottom while results keep maximum usable space.
 
+## Bounty Hunter v0.4.4
+- Added reusable Shared Core v1.2.0 workspace layout helper.
+- Bounty Hunter now fills the usable TornPDA viewport from the top while reserving the bottom chat/navigation zone.
+- Uses visualViewport so panel geometry stays correct across phone viewport changes.
+
