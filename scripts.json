@@ -326,14 +326,12 @@
         }
       ],
       "release": {
-        "version": "0.5.1",
+        "version": "0.5.2",
         "date": "2026-10-06",
         "notes": [
-          "Moves public install/update distribution to GreasyFork script 598988 while keeping GitHub as source.",
-          "Adds explicit Torn: Bounties access diagnostics and one-tap shared Hub key replacement.",
-          "Transient rate-limit/cache warnings no longer report as Script Hub API ERROR.",
-          "Adds cache pruning for stale FFScouter/live-status entries and caps cache growth.",
-          "Exposes API access status, warning state, cache sizes and GreasyFork distribution in Hub health diagnostics."
+          "Moves Bounty Hunter into the shared Standalone Dock.",
+          "Removes its chat and floating Bounties-page launchers.",
+          "Fixes Standalone Dock close/auto-close behavior and restores the native S launcher."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -341,8 +339,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.1",
-      "detailsRevision": 3,
+      "version": "0.5.2",
+      "detailsRevision": 4,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",

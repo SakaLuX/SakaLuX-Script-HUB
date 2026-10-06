@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.5.1**
+**v0.5.2**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -41,14 +41,16 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.1 — GreasyFork distribution + API access diagnostics**
-- Public updates now use GreasyFork #598988; GitHub remains the canonical source.
-- Adds a Torn Bounties permission check and a one-tap shared Hub key replacement action.
-- Temporary rate-limit/cache warnings no longer show as Script Hub API ERROR.
-- Prunes stale FFScouter/live-status cache records and caps cache growth.
-- Health diagnostics now expose API access state, warnings, cache sizes and distribution.
+**v0.5.2 — Shared Standalone Dock integration**
+- Bounty Hunter is now in the common Standalone Dock.
+- Removes the separate chat and floating Bounty Hunter buttons.
+- Dock v1.0.1 fixes close/toggle behavior, auto-closes, and restores the compact native S launcher.
 
 ## Changelog
+### v0.5.2 — Shared Standalone Dock integration
+- Adds Bounty Hunter to shared Standalone Dock and removes dedicated launch buttons.
+- Fixes Dock close/auto-close/native S behavior.
+
 ### v0.5.1 — GreasyFork distribution + API access diagnostics
 - Moves install/update URLs to GreasyFork #598988.
 - Adds Torn: Bounties permission diagnostics and shared Hub-key replacement.

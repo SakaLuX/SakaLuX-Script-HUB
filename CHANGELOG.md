@@ -73,3 +73,8 @@
 - Bounty Hunter separates transient rate-limit/cache warnings from fatal health errors, preventing false Hub API ERROR badges.
 - Adds stale/capped FFScouter and live-status cache pruning.
 
+## Bounty Hunter v0.5.2 + Shared Standalone Dock v1.0.1
+- Adds Bounty Hunter to the common Standalone Dock.
+- Removes Bounty Hunter chat/floating launchers.
+- Dock no longer persists open state; closes on S, module selection, route change, outside tap, or after 8 seconds.
+- Restores and rebinds the compact native S launcher.

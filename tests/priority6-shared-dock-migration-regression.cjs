@@ -4,6 +4,7 @@ const assert=require('node:assert/strict');
 const {embedSharedDockRuntime,BEGIN,END}=require('../tools/embed-shared-dock-runtime.cjs');
 
 const targets=[
+  'SakaLuX-Bounty-Hunter.user.js',
   'SakaLuX-Enhancer-Guard.user.js',
   'SakaLuX-Bazaar-Thanker-PDA.user.js',
   'SakaLuX-Bazaar-Smart-Pricer.user.js',

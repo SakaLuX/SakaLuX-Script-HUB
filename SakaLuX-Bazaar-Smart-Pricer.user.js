@@ -692,7 +692,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.0.0-test.3';
+  const VERSION = '1.0.1';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -706,6 +706,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   });
 
   if (g[NS]?.version === VERSION) return;
+  try { if (g[NS] && g[NS].version !== VERSION) g[NS].removeUi?.(); } catch {}
 
   const modules = g.__SakaLuXDockRuntimeModules instanceof Map
     ? g.__SakaLuXDockRuntimeModules
@@ -719,8 +720,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function core() { return g.SakaLuXCore || null; }
   function doc() { return typeof document === 'undefined' ? null : document; }
   function hubInstalled() { return Boolean(core()?.hub?.installed?.()); }
-  function readOpen() { try { return localStorage.getItem(OPEN_KEY) === '1'; } catch { return false; } }
-  function writeOpen(value) { try { localStorage.setItem(OPEN_KEY, value ? '1' : '0'); } catch {} }
+  let openState = false;
+  let autoCloseTimer = 0;
+  function readOpen() { return openState; }
+  function writeOpen(value) { openState = Boolean(value); try { localStorage.removeItem(OPEN_KEY); } catch {} }
+  function armAutoClose() { clearTimeout(autoCloseTimer); if (!openState) return; autoCloseTimer = setTimeout(() => toggleDock(false), 8000); }
 
   function normalize(entry = {}) {
     const id = String(entry.id || '').trim();
@@ -766,7 +770,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 #${IDS.dock} .sl-dock-row:last-child{margin-bottom:0}#${IDS.dock} .sl-dock-row[disabled]{opacity:.45}
 #${IDS.dock} .slx-dock-install{display:block;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);color:#d8a45c;text-align:center;text-decoration:none;font-size:10px;font-weight:800}
 #${IDS.fallback}{position:fixed;right:10px;bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:2147482900;width:38px;height:38px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#0b1118;color:#e9a84d;font:800 15px/1 Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-#${IDS.native} .slx-s-link{display:flex!important;align-items:center!important;justify-content:center!important;font-weight:900!important;color:#e9a84d!important;text-decoration:none!important}
+#${IDS.native}{display:flex!important;align-items:center!important;justify-content:center!important}#${IDS.native} .slx-s-link{display:flex!important;align-items:center!important;justify-content:center!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;padding:0!important;margin:0!important;border:0!important;border-radius:8px!important;background:transparent!important;box-shadow:none!important;font:900 14px/28px Arial,sans-serif!important;color:#e9a84d!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important}
 #${IDS.prompt}{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483600;width:min(360px,calc(100vw - 20px));padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0b1118;color:#eef3f8;font:600 11px/1.35 Arial,sans-serif;box-shadow:0 16px 42px rgba(0,0,0,.45)}
 #${IDS.prompt} .slx-prompt-actions{display:flex;gap:7px;margin-top:8px}#${IDS.prompt} button{flex:1;min-height:30px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#17212d;color:#eef3f8;font-weight:800}
 `;
@@ -796,18 +800,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const list = findStatusIconList();
     if (list && typeof d.createElement === 'function') {
       let item = d.getElementById(IDS.native);
-      if (!item) {
-        item = d.createElement('li');
-        item.id = IDS.native;
-        const link = d.createElement('a');
-        link.href = '#';
-        link.className = 'slx-s-link';
-        link.textContent = 'S';
-        link.title = 'SakaLuX Scripts';
-        link.setAttribute?.('aria-label', 'SakaLuX Scripts');
-        link.addEventListener?.('click', e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(); });
-        item.appendChild(link);
-      }
+      if (!item) { item = d.createElement('li'); item.id = IDS.native; item.appendChild(d.createElement('a')); }
+      const link = item.querySelector('a') || item.appendChild(d.createElement('a'));
+      link.href = '#'; link.className = 'slx-s-link'; link.textContent = 'S'; link.title = 'SakaLuX Scripts';
+      link.setAttribute?.('aria-label', 'SakaLuX Scripts');
+      link.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(); };
       copyNativeCell(item, list);
       const children = [...(list.children || [])].filter(x => x !== item);
       const cashIndex = children.findIndex(x => /\$|cash|money/i.test((x.textContent || '') + ' ' + (x.className || '')));
@@ -837,10 +834,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (!panel) {
       panel = d.createElement('div');
       panel.id = IDS.dock;
-      panel.dataset.open = readOpen() ? '1' : '0';
+      panel.dataset.open = '0';
       const head = d.createElement('div'); head.className = 'slx-dock-head';
       const close = d.createElement('button'); close.type = 'button'; close.className = 'slx-dock-mark'; close.textContent = 'S'; close.title = 'Close SakaLuX Scripts';
-      close.addEventListener?.('click', e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); });
+      close.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); };
       const title = d.createElement('div'); title.className = 'slx-dock-title'; title.textContent = 'SakaLuX Scripts';
       const sub = d.createElement('div'); sub.className = 'slx-dock-sub'; sub.textContent = 'Standalone';
       head.appendChild(close); head.appendChild(title); head.appendChild(sub);
@@ -849,6 +846,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       panel.appendChild(head); panel.appendChild(items); panel.appendChild(install);
       (d.body || d.documentElement).appendChild(panel);
     }
+    const close = panel.querySelector('.slx-dock-mark'); if (close) close.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); };
     return panel;
   }
 
@@ -861,6 +859,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     panel.dataset.open = next ? '1' : '0';
     panel.hidden = !next;
     writeOpen(next);
+    if (next) armAutoClose(); else clearTimeout(autoCloseTimer);
     return next;
   }
 
@@ -927,10 +926,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (runtimeSignalsBound) return;
     runtimeSignalsBound = true;
     try {
-      core()?.router?.onChange?.(() => scheduleRefresh(180));
+      core()?.router?.onChange?.(() => { toggleDock(false); scheduleRefresh(180); });
       core()?.router?.bind?.();
     } catch {}
     try { g.addEventListener?.('SakaLuX:ScriptHubReady', () => removeUi(), { passive: true }); } catch {}
+    try { doc()?.addEventListener?.('pointerdown', e => { if (!openState) return; const t=e?.target; if (t?.closest?.('#'+IDS.dock+',#'+IDS.native+',#'+IDS.fallback)) return; toggleDock(false); }, true); } catch {}
     try {
       if (!observer && typeof MutationObserver === 'function' && doc()?.body) {
         observer = new MutationObserver(records => {
