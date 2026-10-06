@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bounty Hunter
 // @namespace    sakalux.bounty.hunter
-// @version      0.4.1
+// @version      0.4.2
 // @description  Mobile-first Torn bounty intelligence with full-board API paging, live target enrichment, FF/BS hints, hospital countdowns, alerts, Safe/Profit modes, watchlist and blacklist.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -627,7 +627,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '0.4.1';
+  let v = '0.4.2';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -642,7 +642,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — END */
 
 (()=>{'use strict';
-const VERSION='0.4.1',ID='bounty-hunter',API='SakaLuXBountyHunter';
+const VERSION='0.4.2',ID='bounty-hunter',API='SakaLuXBountyHunter';
 const CORE=globalThis.SakaLuXCore||null;
 try{CORE?.ui?.ensureSharedSkin?.();CORE?.settings?.register?.({id:ID,version:1,keys:['SLX_BOUNTY_SETTINGS_V3','SLX_BOUNTY_WATCH_V1','SLX_BOUNTY_BLACK_V1','SLX_BOUNTY_CACHE_V2','SLX_BOUNTY_USER_CACHE_V1']});CORE?.api?.configure?.({maxConcurrent:4});}catch{}
 const PERF=globalThis.SakaLuXPerf||CORE?.perf||null;
@@ -700,7 +700,7 @@ function scheduleBountyRender(fn,wait=180){if(PERF?.debounce)return PERF.debounc
 function bestRows(){return lastRows.filter(allowed).sort(sortRows)}
 
 function ensureBountyProSkin(){try{CORE?.ui?.ensureSharedSkin?.()}catch{}if(document.getElementById('slx-bh-pro-skin'))return;const st=document.createElement('style');st.id='slx-bh-pro-skin';st.textContent=`
-#slx-bh{--bh-bg:var(--slx-bg,#0b1118);--bh-card:var(--slx-card,#111a24);--bh-card2:var(--slx-card2,#172331);--bh-border:var(--slx-border,#34465b);--bh-text:var(--slx-text,#edf3fa);--bh-muted:var(--slx-muted,#93a4b7);--bh-blue:var(--slx-blue,#4f8fe8);--bh-gold:var(--slx-gold,#dfbd61);--bh-green:var(--slx-green,#45d483);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif!important;background:linear-gradient(180deg,rgba(17,26,36,.985),rgba(8,14,21,.985))!important;border:1px solid color-mix(in srgb,var(--bh-border) 82%,transparent)!important;border-radius:18px!important;box-shadow:0 22px 70px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.035)!important;overflow:hidden!important;color:var(--bh-text)!important;}
+#slx-bh>section{--bh-bg:var(--slx-bg,#0b1118);--bh-card:var(--slx-card,#111a24);--bh-card2:var(--slx-card2,#172331);--bh-border:var(--slx-border,#34465b);--bh-text:var(--slx-text,#edf3fa);--bh-muted:var(--slx-muted,#93a4b7);--bh-blue:var(--slx-blue,#4f8fe8);--bh-gold:var(--slx-gold,#dfbd61);--bh-green:var(--slx-green,#45d483);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif!important;background:linear-gradient(180deg,rgba(17,26,36,.985),rgba(8,14,21,.985))!important;border:1px solid color-mix(in srgb,var(--bh-border) 82%,transparent)!important;border-radius:18px!important;box-shadow:0 22px 70px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.035)!important;overflow:hidden!important;color:var(--bh-text)!important;}
 #slx-bh .head{min-height:58px!important;padding:10px 12px!important;background:linear-gradient(180deg,rgba(28,43,59,.96),rgba(18,29,40,.96))!important;border-bottom:1px solid rgba(255,255,255,.08)!important;display:flex!important;align-items:center!important;gap:8px!important;}
 #slx-bh .head b,#slx-bh .head strong{font-size:15px!important;letter-spacing:.1px!important;}
 #slx-bh button,#slx-bh input,#slx-bh select{font:inherit!important;border-radius:11px!important;border:1px solid color-mix(in srgb,var(--bh-border) 88%,transparent)!important;background:linear-gradient(180deg,rgba(25,39,54,.98),rgba(16,27,38,.98))!important;color:var(--bh-text)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;transition:border-color .16s ease,background .16s ease,transform .12s ease,box-shadow .16s ease!important;}
@@ -718,7 +718,7 @@ function ensureBountyProSkin(){try{CORE?.ui?.ensureSharedSkin?.()}catch{}if(docu
 .slx-bh-chat-btn{border-radius:10px!important;background:linear-gradient(180deg,var(--slx-card2,#172331),var(--slx-card,#111a24))!important;border:1px solid var(--slx-border,#34465b)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important}
 @media(max-width:520px){#slx-bh{width:min(96vw,760px)!important;max-height:74vh!important;border-radius:16px!important}#slx-bh .head{min-height:52px!important;padding:8px 10px!important}#slx-bh .slx-bh-list{padding:7px 8px 68px!important;gap:7px!important}#slx-bh .slx-bh-list>div{padding:9px 10px!important;border-radius:12px!important}#slx-bh .slx-bh-settings{margin:6px 8px 8px!important;padding:8px!important}#slx-bh [data-filters]{margin:7px 8px!important;width:calc(100% - 16px)!important}}
 
-#slx-bh-donation-footer{flex:0 0 auto!important;border-top:1px solid rgba(255,255,255,.08)!important;background:linear-gradient(180deg,rgba(13,22,31,.98),rgba(9,15,22,.99))!important;padding:6px 10px 7px!important;box-shadow:0 -8px 22px rgba(0,0,0,.14)!important;z-index:8!important}
+#slx-bh-donation-footer{width:100%!important;box-sizing:border-box!important;flex:0 0 auto!important;border-top:1px solid rgba(255,255,255,.08)!important;background:linear-gradient(180deg,rgba(13,22,31,.98),rgba(9,15,22,.99))!important;padding:6px 10px 7px!important;box-shadow:0 -8px 22px rgba(0,0,0,.14)!important;z-index:8!important}
 #slx-bh-donation-footer .slx-bh-donate-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;margin-bottom:4px!important}
 #slx-bh-donation-footer .slx-bh-donate-actions button{height:28px!important;min-height:28px!important;padding:0 10px!important;border-radius:9px!important;font-size:11px!important;font-weight:800!important;letter-spacing:.2px!important;background:linear-gradient(180deg,rgba(36,53,71,.98),rgba(22,35,48,.98))!important;border:1px solid rgba(87,115,145,.62)!important;color:var(--bh-text,#edf3fa)!important}
 #slx-bh-donation-footer .slx-bh-made{text-align:center!important;font-size:11px!important;line-height:14px!important;color:#f2a54a!important;font-weight:700!important}
@@ -729,8 +729,14 @@ function ensureBountyProSkin(){try{CORE?.ui?.ensureSharedSkin?.()}catch{}if(docu
 
 const SAKALUX_PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 function ensureBountyFooter(){
- const panel=document.getElementById('slx-bh');
- if(!panel||panel.querySelector('#slx-bh-donation-footer'))return;
+ const overlay=document.getElementById('slx-bh');
+ const panel=overlay?.querySelector(':scope > section');
+ if(!panel)return;
+ const existing=overlay.querySelector('#slx-bh-donation-footer');
+ if(existing){
+   if(existing.parentElement!==panel)panel.appendChild(existing);
+   return;
+ }
  const f=document.createElement('div');
  f.id='slx-bh-donation-footer';
  f.innerHTML='<div class="slx-bh-donate-actions"><button type="button" data-bh-donate="money">💸 SEND MONEY</button><button type="button" data-bh-donate="items">🎁 SEND ITEMS</button></div><div class="slx-bh-made">Made with ❤️ by <a href="'+SAKALUX_PROFILE_URL+'">SakaLuX [2380374]</a></div>';

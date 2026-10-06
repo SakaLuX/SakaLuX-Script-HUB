@@ -312,11 +312,12 @@
         }
       ],
       "release": {
-        "version": "0.4.1",
-        "date": "2026-10-05",
+        "version": "0.4.2",
+        "date": "2026-10-06",
         "notes": [
-          "Adds the compact SakaLuX donation/footer block with SEND MONEY, SEND ITEMS and Made with ❤️ by SakaLuX [2380374].",
-          "Keeps the footer inside the Bounty Hunter panel and matches the Shared Core / Script Hub visual language on TornPDA."
+          "Fixes the v0.4.1 mobile layout regression caused by the donation footer being inserted beside the panel instead of inside it.",
+          "Moves the professional Shared Core skin from the full-screen overlay to the actual Bounty Hunter panel section.",
+          "Keeps SEND MONEY, SEND ITEMS and the Made with love footer full-width at the bottom without shrinking the target list."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -324,7 +325,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.4.1",
+      "version": "0.4.2",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },

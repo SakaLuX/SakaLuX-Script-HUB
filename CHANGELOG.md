@@ -25,3 +25,9 @@
 - Adds the compact SakaLuX footer used by the other modules: SEND MONEY, SEND ITEMS and Made with ❤️ by SakaLuX [2380374].
 - Donation buttons and author link open the SakaLuX Torn profile, matching Script Hub behavior.
 - Footer styling follows Shared Core / Hub tokens and remains compact on TornPDA.
+## Bounty Hunter v0.4.2
+- Fixed the v0.4.1 TornPDA layout regression where the donation footer became a sibling of the panel and squeezed the Bounty Hunter UI into a narrow left column.
+- Donation footer now lives inside the panel section and spans its full width.
+- Hub/Shared Core professional skin now applies to the actual panel section instead of styling the full-screen overlay.
+- Preserves SEND MONEY, SEND ITEMS and Made with ❤️ by SakaLuX [2380374].
+
