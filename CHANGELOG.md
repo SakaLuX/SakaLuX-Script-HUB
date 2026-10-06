@@ -132,3 +132,9 @@
 - Fixed escaped CSS selectors introduced in v1.1.6.
 - Plain gold S styles now target the real launcher.
 - Added all:unset to block inherited Torn/racing/status backgrounds.
+
+## Standalone Runtime v1.1.8 — fixed first-slot S
+- Standalone S is always inserted as the first status icon.
+- Removed anchor heuristics entirely.
+- Forced 24x24 flex centering with zero positional offset and no inherited Torn/racing artwork.
+- Runtime-only .5 maintenance releases; Hub unchanged.
