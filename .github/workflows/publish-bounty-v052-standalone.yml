@@ -1,0 +1,50 @@
+name: Publish Bounty v0.5.2 + Standalone Dock v1.1.0
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-bounty-v052-standalone.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply Standalone/Bounty release
+        run: python .github/scripts/publish_bounty_v052_standalone.py
+      - name: Embed new Standalone Dock runtime into Bounty
+        run: node tools/embed-shared-dock-runtime.cjs SakaLuX-Bounty-Hunter.user.js src/core/sakalux-dock-runtime.js SakaLuX-Bounty-Hunter.user.js
+      - name: Syntax checks
+        run: |
+          node --check src/core/sakalux-dock-runtime.js
+          node --check SakaLuX-Bounty-Hunter.user.js
+          node --check SakaLuX-Script-Hub.user.js
+      - name: Standalone runtime regression
+        run: node tests/priority6-shared-dock-runtime-regression.cjs
+      - name: Verify release
+        run: |
+          grep -q "@version      0.5.2" SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.5.2'" SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION = '1.1.0'" src/core/sakalux-dock-runtime.js
+          grep -q "slx-dock-close" src/core/sakalux-dock-runtime.js
+          grep -q "function readOpen() { return false; }" src/core/sakalux-dock-runtime.js
+          grep -q "Bounty Hunter',icon:'🎯'" SakaLuX-Bounty-Hunter.user.js
+          ! grep -q "function mountChatButtons" SakaLuX-Bounty-Hunter.user.js
+          grep -q "@version      1.9.92" SakaLuX-Script-Hub.user.js
+          grep -q '"version": "0.5.2"' scripts.json
+          grep -q '### v0.5.2' greasyfork/Bounty-Hunter.md
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add src/core/sakalux-dock-runtime.js SakaLuX-Bounty-Hunter.user.js SakaLuX-Script-Hub.user.js scripts.json CHANGELOG.md greasyfork/Bounty-Hunter.md greasyfork/Script-Hub.md tests/priority6-shared-dock-runtime-regression.cjs tests/module-active-alpha-sort-regression.cjs SakaLuX-Enhancer-Guard.user.js SakaLuX-Account-Auditor.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Bazaar-Smart-Pricer.user.js SakaLuX-Elimination-Assistant.user.js SakaLuX-Market-Intelligence.user.js SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish Bounty v0.5.2 and repair Standalone Dock'
+          git push
