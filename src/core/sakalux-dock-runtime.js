@@ -7,7 +7,7 @@
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.1.3';
+  const VERSION = '1.1.4';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -40,23 +40,22 @@
   function hubInstalled() { return Boolean(core()?.hub?.installed?.()); }
   let openState = false;
   let autoCloseTimer = 0;
+  let userOpened = false;
   function readOpen() { return false; }
   function writeOpen(value) { openState = Boolean(value); try { localStorage.removeItem(OPEN_KEY); } catch {} }
-  function armAutoClose() { clearTimeout(autoCloseTimer); if (!openState) return; autoCloseTimer = setTimeout(() => toggleDock(false), 6000); }
-  let userOpened = false;
-  function markUserOpen(){ userOpened = true; }
-  function forceCloseDock(){
-    userOpened=false; openState=false; clearTimeout(autoCloseTimer);
-    const p=doc()?.getElementById(IDS.dock);
-    if(p){p.dataset.open='0';p.hidden=true;p.style?.removeProperty?.('display')}
-    try{localStorage.removeItem(OPEN_KEY)}catch{}
+  function forceCloseDock() {
+    userOpened = false;
+    openState = false;
+    clearTimeout(autoCloseTimer);
+    const p = doc()?.getElementById(IDS.dock);
+    if (p) { p.dataset.open = '0'; p.hidden = true; }
+    try { localStorage.removeItem(OPEN_KEY); } catch {}
     return false;
   }
-  function enforceClosedUnlessUserOpened(){
-    const p=doc()?.getElementById(IDS.dock);
-    if(!p)return;
-    const visiblyOpen=p.dataset.open==='1'||p.hidden===false;
-    if(visiblyOpen && !userOpened) forceCloseDock();
+  function armAutoClose() {
+    clearTimeout(autoCloseTimer);
+    if (!openState) return;
+    autoCloseTimer = setTimeout(() => forceCloseDock(), 6000);
   }
 
   function normalize(entry = {}) {
@@ -103,7 +102,7 @@
 #${IDS.dock} .sl-dock-row:last-child{margin-bottom:0}#${IDS.dock} .sl-dock-row[disabled]{opacity:.45}
 #${IDS.dock} .slx-dock-install{display:block;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);color:#d8a45c;text-align:center;text-decoration:none;font-size:10px;font-weight:800}
 #${IDS.fallback}{position:fixed;right:10px;bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:2147482900;width:38px;height:38px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#0b1118;color:#e9a84d;font:800 15px/1 Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-#${IDS.native}{position:absolute!important;z-index:50!important;display:flex!important;align-items:center!important;justify-content:center!important;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;padding:0!important;margin:0!important;border:0!important;border-radius:50%!important;background:rgba(15,20,26,.92)!important;box-shadow:0 0 0 1px rgba(255,255,255,.09)!important;font:900 12px/22px Arial,sans-serif!important;color:#e9a84d!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important}
+#${IDS.native} .slx-s-link{display:flex!important;align-items:center!important;justify-content:center!important;font-weight:900!important;color:#e9a84d!important;text-decoration:none!important}
 #${IDS.prompt}{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483600;width:min(360px,calc(100vw - 20px));padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0b1118;color:#eef3f8;font:600 11px/1.35 Arial,sans-serif;box-shadow:0 16px 42px rgba(0,0,0,.45)}
 #${IDS.prompt} .slx-prompt-actions{display:flex;gap:7px;margin-top:8px}#${IDS.prompt} button{flex:1;min-height:30px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#17212d;color:#eef3f8;font-weight:800}
 `;
@@ -118,22 +117,13 @@
     return lists.find(list => list?.isConnected !== false && [...(list.children || [])].some(item => item.querySelector?.('a'))) || null;
   }
 
-
-  function statusAnchorItem(list) {
-    const items=[...(list?.children||[])].filter(x=>x?.id!==IDS.native);
-    const hay=x=>[(x?.textContent||''),(x?.className||''),x?.getAttribute?.('title')||'',x?.getAttribute?.('aria-label')||'',x?.querySelector?.('a')?.getAttribute?.('title')||'',x?.querySelector?.('a')?.getAttribute?.('aria-label')||''].join(' ').toLowerCase();
-    return items.find(x=>/drug|xanax|booster|cooldown|medical|addiction/.test(hay(x))) || items[3] || items[items.length-1] || null;
-  }
-
-  function placeNativeLauncher(link,list){
-    try{
-      if(getComputedStyle(list).position==='static') list.style.position='relative';
-      const target=statusAnchorItem(list);
-      if(!target)return;
-      const left=Math.max(0,(target.offsetLeft||0)+(target.offsetWidth||28)-5);
-      const top=Math.max(0,(target.offsetTop||0)+Math.round(((target.offsetHeight||28)-22)/2));
-      link.style.left=left+'px';link.style.top=top+'px';
-    }catch{}
+  function copyNativeCell(item, list) {
+    try {
+      const ref = [...list.children].find(x => x !== item && x.querySelector?.('a'));
+      if (!ref) return;
+      const native = [...(ref.classList || [])].filter(x => x && !x.startsWith('slx-') && !x.startsWith('sakalux-'));
+      item.className = [...native, 'slx-standalone-native'].join(' ');
+    } catch {}
   }
 
   function ensureLauncher() {
@@ -141,23 +131,31 @@
     if (!d || hubInstalled()) { removeUi(); return null; }
     const list = findStatusIconList();
     if (list && typeof d.createElement === 'function') {
-      let link = d.getElementById(IDS.native);
-      if (!link) {
-        link = d.createElement('a');
-        link.id = IDS.native;
+      let item = d.getElementById(IDS.native);
+      if (!item) {
+        item = d.createElement('li');
+        item.id = IDS.native;
+        const link = d.createElement('a');
         link.href = '#';
+        link.className = 'slx-s-link';
         link.textContent = 'S';
         link.title = 'SakaLuX Scripts';
-        link.setAttribute?.('aria-label','SakaLuX Scripts');
-        list.appendChild(link);
-      } else if (link.parentElement !== list) {
-        link.remove();
-        list.appendChild(link);
+        link.setAttribute?.('aria-label', 'SakaLuX Scripts');
+        link.addEventListener?.('click', e => {
+          e?.preventDefault?.(); e?.stopPropagation?.();
+          const panel=d.getElementById(IDS.dock);
+          const isOpen=panel?.dataset.open==='1' && panel.hidden===false;
+          if(isOpen) forceCloseDock(); else { userOpened=true; toggleDock(true); }
+        });
+        item.appendChild(link);
       }
-      link.href='#'; link.textContent='S'; link.onclick=null;
-      placeNativeLauncher(link,list);
+      copyNativeCell(item, list);
+      const children = [...(list.children || [])].filter(x => x !== item);
+      const cashIndex = children.findIndex(x => /\$|cash|money/i.test((x.textContent || '') + ' ' + (x.className || '')));
+      const anchor = cashIndex >= 0 ? children[cashIndex] : children[0];
+      try { if (anchor?.insertAdjacentElement) anchor.insertAdjacentElement('afterend', item); else list.appendChild(item); } catch { list.appendChild?.(item); }
       removeNode(IDS.fallback);
-      return link;
+      return item;
     }
     let button = d.getElementById(IDS.fallback);
     if (!button) {
@@ -166,7 +164,12 @@
       button.type = 'button';
       button.textContent = 'S';
       button.title = 'SakaLuX Scripts';
-      button.onclick = null;
+      button.addEventListener?.('click', e => {
+        e?.preventDefault?.(); e?.stopPropagation?.();
+        const panel=d.getElementById(IDS.dock);
+        const isOpen=panel?.dataset.open==='1' && panel.hidden===false;
+        if(isOpen) forceCloseDock(); else { userOpened=true; toggleDock(true); }
+      });
       (d.body || d.documentElement).appendChild(button);
     }
     removeNode(IDS.native);
@@ -184,10 +187,11 @@
       panel.hidden = true;
       writeOpen(false);
       const head = d.createElement('div'); head.className = 'slx-dock-head';
-      const mark = d.createElement('div'); mark.className = 'slx-dock-mark'; mark.textContent = 'S'; mark.setAttribute?.('aria-hidden','true');
+      const close = d.createElement('button'); close.type = 'button'; close.className = 'slx-dock-mark'; close.textContent = 'S'; close.title = 'Close SakaLuX Scripts';
+      close.addEventListener?.('click', e => { e?.preventDefault?.(); e?.stopPropagation?.(); forceCloseDock(); });
       const title = d.createElement('div'); title.className = 'slx-dock-title'; title.textContent = 'SakaLuX Scripts';
       const sub = d.createElement('div'); sub.className = 'slx-dock-sub'; sub.textContent = 'Standalone';
-      head.appendChild(mark); head.appendChild(title); head.appendChild(sub);
+      head.appendChild(close); head.appendChild(title); head.appendChild(sub);
       const items = d.createElement('div'); items.className = 'slx-dock-items';
       const install = d.createElement('a'); install.className = 'slx-dock-install'; install.href = HUB_URL; install.textContent = 'Install SakaLuX Hub';
       panel.appendChild(head); panel.appendChild(items); panel.appendChild(install);
@@ -202,8 +206,14 @@
     const panel = doc()?.getElementById(IDS.dock);
     if (!panel) return false;
     const next = typeof force === 'boolean' ? force : panel.dataset.open !== '1';
-    if(next){ userOpened=true; panel.dataset.open='1'; panel.hidden=false; writeOpen(true); armAutoClose(); }
-    else forceCloseDock();
+    if (next) {
+      userOpened = true;
+      openState = true;
+      panel.dataset.open = '1';
+      panel.hidden = false;
+      writeOpen(true);
+      armAutoClose();
+    } else forceCloseDock();
     return next;
   }
 
@@ -275,33 +285,23 @@
     } catch {}
     try { g.addEventListener?.('SakaLuX:ScriptHubReady', () => removeUi(), { passive: true }); } catch {}
     try {
-      const outsideClose = e => {
-        const d=doc(), panel=d?.getElementById(IDS.dock), t=e?.target;
-        const launcher=t?.closest?.('#'+IDS.native+',#'+IDS.fallback);
-        if(launcher){
-          if(e.type==='click'){
-            e.preventDefault?.();e.stopPropagation?.();e.stopImmediatePropagation?.();
-            const isOpen=panel?.dataset.open==='1'&&panel.hidden===false;
-            if(isOpen) forceCloseDock(); else { markUserOpen(); toggleDock(true); }
-          }
-          return;
-        }
-        if(!panel || (panel.dataset.open!=='1'&&panel.hidden!==false)) return;
-        if(t?.closest?.('#'+IDS.dock)) return;
+      const outside = e => {
+        const panel = doc()?.getElementById(IDS.dock);
+        if (!panel || panel.dataset.open !== '1' || panel.hidden) return;
+        const t=e?.target;
+        if (t?.closest?.('#'+IDS.dock) || t?.closest?.('#'+IDS.native) || t?.closest?.('#'+IDS.fallback)) return;
         forceCloseDock();
       };
-      for(const ev of ['pointerdown','touchstart','mousedown','click']) doc()?.addEventListener?.(ev,outsideClose,true);
+      for (const ev of ['pointerdown','touchstart','mousedown','click']) doc()?.addEventListener?.(ev,outside,true);
     } catch {}
-    try { g.addEventListener?.('keydown',e=>{if(e?.key==='Escape')forceCloseDock()},{passive:true}); } catch {}
+    try { g.addEventListener?.('keydown', e => { if(e?.key==='Escape') forceCloseDock(); }, {passive:true}); } catch {}
     try {
       if (!observer && typeof MutationObserver === 'function' && doc()?.body) {
         observer = new MutationObserver(records => {
-          enforceClosedUnlessUserOpened();
-          if(!userOpened) forceCloseDock();
           if (core()?.perf?.unrelated?.(records)) return;
           scheduleRefresh(240);
         });
-        observer.observe(doc().body, { childList: true, subtree: true });
+        observer.observe(doc().body, { childList:true, subtree:true });
       }
     } catch {}
   }
@@ -309,9 +309,7 @@
   function register(entry) {
     const normalized = normalize(entry);
     modules.set(normalized.id, normalized); // latest registration wins
-    forceCloseDock();
     render();
-    forceCloseDock();
     bindRuntimeSignals();
     if (!promptScheduled) {
       promptScheduled = true;

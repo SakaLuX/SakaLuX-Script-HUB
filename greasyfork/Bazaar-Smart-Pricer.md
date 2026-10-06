@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.16**
+**v1.1.16.1**
 
 ## Repository synchronization
 
@@ -39,10 +39,10 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.16 — Standalone Dock Runtime v1.1.3 status-bar fix**
-- Embeds Shared Standalone Dock Runtime v1.1.3.
-- Fixes the TornPDA status bar so native icons after Points/Merits/Refill/Cooldowns are no longer displaced or hidden.
-- Standalone S is now an absolutely positioned overlay anchored near the cooldown area and does not consume a native status-list slot.
+**v1.1.16.1 — Standalone Dock Runtime v1.1.4 legacy-launcher restore**
+- Maintenance-only release.
+- Restores the exact old/native Standalone S launcher implementation that previously worked correctly in TornPDA.
+- Keeps singleton and close-state fixes without redesigning the Torn status bar.
 - No module feature changes.
 
 ## Release history / Changelog

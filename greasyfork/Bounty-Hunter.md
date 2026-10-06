@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.5.6**
+**v0.5.6.1**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -41,13 +41,18 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.6 — Standalone Dock Runtime v1.1.3 status-bar fix**
-- Embeds Shared Standalone Dock Runtime v1.1.3.
-- Fixes the TornPDA status bar so native icons after Points/Merits/Refill/Cooldowns are no longer displaced or hidden.
-- Standalone S is now an absolutely positioned overlay anchored near the cooldown area and does not consume a native status-list slot.
+**v0.5.6.1 — Standalone Dock Runtime v1.1.4 legacy-launcher restore**
+- Maintenance-only release.
+- Restores the exact old/native Standalone S launcher implementation that previously worked correctly in TornPDA.
+- Keeps singleton and close-state fixes without redesigning the Torn status bar.
 - No module feature changes.
 
 ## Changelog
+### v0.5.6.1 — Standalone Dock Runtime v1.1.4 legacy-launcher restore
+- Runtime-only maintenance update.
+- Restores the previously working native S launcher.
+- Keeps singleton/open-close fixes only.
+
 ### v0.5.6 — Standalone Dock Runtime v1.1.3 status-bar fix
 - Runtime-only maintenance update.
 - Prevents Standalone from changing Torn's native status-list child count/order.

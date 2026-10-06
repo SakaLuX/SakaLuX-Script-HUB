@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.18**
+**v0.8.18.1**
 
 
 ## Repository synchronization
@@ -34,10 +34,10 @@
 
 ## Current release note
 
-**v0.8.18 — Standalone Dock Runtime v1.1.3 status-bar fix**
-- Embeds Shared Standalone Dock Runtime v1.1.3.
-- Fixes the TornPDA status bar so native icons after Points/Merits/Refill/Cooldowns are no longer displaced or hidden.
-- Standalone S is now an absolutely positioned overlay anchored near the cooldown area and does not consume a native status-list slot.
+**v0.8.18.1 — Standalone Dock Runtime v1.1.4 legacy-launcher restore**
+- Maintenance-only release.
+- Restores the exact old/native Standalone S launcher implementation that previously worked correctly in TornPDA.
+- Keeps singleton and close-state fixes without redesigning the Torn status bar.
 - No module feature changes.
 
 ## Release history / Changelog

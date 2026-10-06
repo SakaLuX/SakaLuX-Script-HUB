@@ -112,4 +112,11 @@
 - Fixes native status icons disappearing after Points/Merits/Refill on TornPDA.
 - Runtime-only maintenance bumps: Enhancer 1.3.56, Auditor 1.3.27, Missions 1.0.49, Bazaar Thanker 5.3.47, Smart Pricer 1.1.16, Elimination 1.3.50, Market 1.17.60, Stocks 0.8.18, Company 1.8.56, Bounty 0.5.6.
 - Script Hub version is unchanged.
+## Standalone Runtime v1.1.4 — legacy launcher restore
+- Restores the exact native S launcher implementation from the previously working runtime.
+- No status-bar redesign/repositioning.
+- Keeps singleton/version arbitration and deterministic close lifecycle.
+- Maintenance releases use a fourth numeric component .1 as requested.
+- Enhancer 1.3.56.1, Auditor 1.3.27.1, Missions 1.0.49.1, Bazaar Thanker 5.3.47.1, Smart Pricer 1.1.16.1, Elimination 1.3.50.1, Market 1.17.60.1, Stocks 0.8.18.1, Company 1.8.56.1, Bounty 0.5.6.1.
+- Script Hub is intentionally unchanged.
 
