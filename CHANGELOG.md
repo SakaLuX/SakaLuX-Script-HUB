@@ -120,3 +120,4 @@
 - Enhancer 1.3.56.1, Auditor 1.3.27.1, Missions 1.0.49.1, Bazaar Thanker 5.3.47.1, Smart Pricer 1.1.16.1, Elimination 1.3.50.1, Market 1.17.60.1, Stocks 0.8.18.1, Company 1.8.56.1, Bounty 0.5.6.1.
 - Script Hub is intentionally unchanged.
 
+\n## Standalone Runtime v1.1.5 Sep-15 restore\n- Restores Sep-15 plain gold S launcher and old Standalone visuals.\n- Keeps singleton/open-close fixes.\n- Uses .2 maintenance suffixes; Hub unchanged.\n
