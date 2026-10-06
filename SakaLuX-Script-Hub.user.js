@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.90
+// @version      1.9.91
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -655,7 +655,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
     const LOCALES_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/locales.json';
-    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks&company=profile,employees,stock&torn=items,elimination,eliminationteam,stocks&market=itemmarket';
+    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks&company=profile,employees,stock&torn=items,elimination,eliminationteam,stocks,bounties&market=itemmarket';
     const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
 
     const IDS = {
@@ -670,6 +670,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {version:'1.9.91',date:'2026-10-06',changes:['Adds Torn: Bounties to the shared Hub API-key permission superset for Bounty Hunter.','Shared API CHECK now validates both User: Battle Stats and Torn: Bounties and reports a specific missing-permission message.','Bounty Hunter moves update/install distribution to GreasyFork #598988 and transient rate-limit/cache warnings no longer appear as Hub API ERROR.']},
         {"version": "1.9.90", "date": "2026-09-30", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.89", "date": "2026-09-26", "changes": ["Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.", "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.", "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."]},
         {"version": "1.9.88", "date": "2026-09-26", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
@@ -1444,7 +1445,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                "version": "0.5.0",
+                "version": "0.5.1",
                 "date": "2026-10-06",
                 "notes": [
                                 "Adaptive resumable scanner + smart cache + progress UI.",
@@ -1452,8 +1453,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ]
 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
-                "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
-                "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
+                "downloadUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.user.js",
+                "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.user.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
                 "version": "0.2.2",
@@ -1769,9 +1770,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
     async function testSharedApiKey(key = getSharedApiKey()) {
         if (!key) throw new Error('Paste or create the shared Torn API key first.');
-        const raw = await httpGet('https://api.torn.com/v2/user/battlestats?key=' + encodeURIComponent(key));
-        const data = JSON.parse(String(raw || '{}'));
-        if (data?.error) throw new Error(data.error.error || data.error.message || 'Torn rejected the API key.');
+        const checks = [
+            ['User: Battle Stats', 'https://api.torn.com/v2/user/battlestats?key=' + encodeURIComponent(key)],
+            ['Torn: Bounties', 'https://api.torn.com/v2/torn/bounties?limit=1&key=' + encodeURIComponent(key)]
+        ];
+        for (const [label,url] of checks) {
+            const raw = await httpGet(url);
+            const data = JSON.parse(String(raw || '{}'));
+            if (data?.error) {
+                const message = data.error.error || data.error.message || 'Torn rejected the API key.';
+                if (label === 'Torn: Bounties') throw new Error('Missing Torn: Bounties access. Replace the shared Hub key. · ' + message);
+                throw new Error(label + ' failed · ' + message);
+            }
+        }
         return true;
     }
 

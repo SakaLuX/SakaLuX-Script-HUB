@@ -286,7 +286,7 @@
       "description": "Full-board Torn bounty hunter with Shared Core, Hub-aligned UI, FFScouter beatable filtering, strict live status and hospital timing.",
       "icon": "🎯",
       "id": "bounty-hunter",
-      "info": "Purpose\nBounty Hunter scans the full Torn bounty board and builds a target-first hunt list for TornPDA and desktop. v0.5.0 adds an adaptive, resumable scanner with smart caching and live progress.\n\nAdaptive scanner\nFull-board API paging is paced automatically, reacts to latency/rate limits, preserves partial progress and can resume from the last saved offset instead of always starting over.\n\nSmart cache\nBoard results are cached separately from FF/BS and live status. FFScouter estimates are cached per target for up to 12 hours, while live status stays short-lived.\n\nBeatable filtering\nFF 1–3, reward, level, BS, Hospital window, Okay/Hospital, watchlist/blacklist and verified live status can all participate in the final list.\n\nUI and integration\nThe Hub-style panel shows scan/FF/status progress, launches from Chat V3, uses Shared Core API/storage/workspace helpers and exposes health diagnostics to Script Hub.",
+      "info": "Purpose\nBounty Hunter scans the full Torn bounty board and builds a target-first hunt list for TornPDA and desktop. v0.5.0 adds an adaptive, resumable scanner with smart caching and live progress.\n\nAdaptive scanner\nFull-board API paging is paced automatically, reacts to latency/rate limits, preserves partial progress and can resume from the last saved offset instead of always starting over.\n\nSmart cache\nBoard results are cached separately from FF/BS and live status. FFScouter estimates are cached per target for up to 12 hours, while live status stays short-lived.\n\nBeatable filtering\nFF 1–3, reward, level, BS, Hospital window, Okay/Hospital, watchlist/blacklist and verified live status can all participate in the final list.\n\nUI and integration\nThe Hub-style panel shows scan/FF/status progress, launches from Chat V3, uses Shared Core API/storage/workspace helpers and exposes health diagnostics to Script Hub.\n\nAPI Access\nThe shared Script Hub key now requires Torn: Bounties in addition to the existing User Basic/Profile access. API diagnostics distinguish missing Bounties permission from temporary rate limiting. Distribution and update checks now use GreasyFork #598988.",
       "name": "Bounty Hunter",
       "quickActions": [
         {
@@ -309,27 +309,44 @@
           "label": "BOUNTIES",
           "method": "goToBounties",
           "fallbackUrl": "https://www.torn.com/bounties.php"
+        },
+        {
+          "icon": "🧪",
+          "id": "test-key",
+          "label": "TEST API",
+          "method": "testTornAccess",
+          "fallbackUrl": "https://www.torn.com/bounties.php"
+        },
+        {
+          "icon": "🔑",
+          "id": "create-key",
+          "label": "API KEY",
+          "method": "createRequiredTornKey",
+          "fallbackUrl": "https://www.torn.com/preferences.php#tab=api"
         }
       ],
       "release": {
-        "version": "0.5.0",
+        "version": "0.5.1",
         "date": "2026-10-06",
         "notes": [
-          "Adaptive full-board scanner adjusts pacing from API latency and rate-limit feedback.",
-          "Resumable incremental scans persist next offset and partial board progress for up to 10 minutes.",
-          "FFScouter FF/BS results are cached per target for 12 hours; live Torn status remains short-lived.",
-          "Adds progress UI for board paging, FFScouter enrichment, live-status checks and cooldowns.",
-          "Synchronizes Script Hub module info and exposes richer health diagnostics."
+          "Moves public install/update distribution to GreasyFork script 598988 while keeping GitHub as source.",
+          "Adds explicit Torn: Bounties access diagnostics and one-tap shared Hub key replacement.",
+          "Transient rate-limit/cache warnings no longer report as Script Hub API ERROR.",
+          "Adds cache pruning for stale FFScouter/live-status entries and caps cache growth.",
+          "Exposes API access status, warning state, cache sizes and GreasyFork distribution in Hub health diagnostics."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
-      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
-      "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
+      "downloadUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.user.js",
+      "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.0",
-      "detailsRevision": 2,
-      "license": "All Rights Reserved"
+      "version": "0.5.1",
+      "detailsRevision": 3,
+      "license": "All Rights Reserved",
+      "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
+      "greasyForkId": "598988",
+      "greasyForkUrl": "https://greasyfork.org/scripts/598988"
     },
     {
       "active": true,

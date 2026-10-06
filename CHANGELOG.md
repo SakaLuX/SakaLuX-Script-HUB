@@ -66,4 +66,10 @@
 - Adds live progress UI for board scan, FFScouter, status enrichment and API cooldown.
 - Expands Script Hub health diagnostics and synchronizes the module info/release description.
 - Fixes the canonical installed-version fallback to report 0.5.0 instead of the stale 0.4.2.
+## Bounty Hunter v0.5.1 + Script Hub v1.9.91
+- Bounty Hunter public distribution moves to GreasyFork #598988; GitHub remains the source repository.
+- Shared Hub API key creation now includes Torn: Bounties.
+- Hub API CHECK validates Bounties access and reports a specific missing-permission error.
+- Bounty Hunter separates transient rate-limit/cache warnings from fatal health errors, preventing false Hub API ERROR badges.
+- Adds stale/capped FFScouter and live-status cache pruning.
 

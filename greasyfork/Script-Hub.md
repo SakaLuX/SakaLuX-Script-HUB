@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.90**
+**v1.9.91**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-05**
-- Canonical version: **v1.9.90**
+- Canonical version: **v1.9.91**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -347,3 +347,9 @@ Latest Hub refresh improvement: overlapping registry/update checks share one act
 - Rebased on Quick Pricer v2.9.3 behavior with native per-item Quick Add/Undo.
 - Adds Hub-styled settings and Hub SETTINGS / QUICK FILL / REFRESH actions.
 - RW and generic bonus-item safety defaults to ON.
+
+### v1.9.91 — Shared Bounties API access
+- Adds Torn: Bounties to the shared Script Hub API-key creation URL.
+- Shared API CHECK now validates Bounties access and reports a specific replace-key message when missing.
+- Integrates Bounty Hunter GreasyFork #598988 distribution and avoids treating temporary rate-limit/cache warnings as fatal module health errors.
+
