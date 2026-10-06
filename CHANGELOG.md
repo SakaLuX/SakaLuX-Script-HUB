@@ -106,4 +106,10 @@
 - Bounty Hunter 0.5.5
 - No module feature changes; the version bumps exist so installed copies actually receive Dock Runtime v1.1.2.
 - Script Hub is intentionally not version-bumped by this batch.
+## Standalone Runtime v1.1.3 — Torn status-bar regression fix
+- Stops injecting an extra <li> into Torn's native statusIcons list.
+- The S launcher is now an absolutely positioned overlay anchored near the drug/cooldown area, so Torn's responsive child-count rules remain untouched.
+- Fixes native status icons disappearing after Points/Merits/Refill on TornPDA.
+- Runtime-only maintenance bumps: Enhancer 1.3.56, Auditor 1.3.27, Missions 1.0.49, Bazaar Thanker 5.3.47, Smart Pricer 1.1.16, Elimination 1.3.50, Market 1.17.60, Stocks 0.8.18, Company 1.8.56, Bounty 0.5.6.
+- Script Hub version is unchanged.
 

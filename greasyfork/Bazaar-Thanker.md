@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.46**
+**v5.3.47**
 
 
 ## Repository synchronization
@@ -26,12 +26,18 @@
 
 ## Current release note
 
-**v5.3.46 — Shared Standalone Dock Runtime v1.1.2 maintenance**
-- Embeds the repaired shared Standalone Dock Runtime v1.1.2.
-- No module feature changes in this maintenance release.
-- Makes this installed module compatible with the common singleton Standalone Dock and its fixed open/close lifecycle.
+**v5.3.47 — Standalone Dock Runtime v1.1.3 status-bar fix**
+- Embeds Shared Standalone Dock Runtime v1.1.3.
+- Fixes the TornPDA status bar so native icons after Points/Merits/Refill/Cooldowns are no longer displaced or hidden.
+- Standalone S is now an absolutely positioned overlay anchored near the cooldown area and does not consume a native status-list slot.
+- No module feature changes.
 
 ## Release history / Changelog
+### v5.3.47 — Standalone Dock Runtime v1.1.3 status-bar fix
+- Runtime-only maintenance update.
+- Prevents Standalone from changing Torn's native status-list child count/order.
+- Restores all native status icons while keeping the S launcher near cooldowns.
+
 ### v5.3.46 — Shared Standalone Dock Runtime v1.1.2 maintenance
 - Runtime-only maintenance update.
 - Embeds Standalone Dock v1.1.2 so all installed SakaLuX standalone modules share the repaired singleton behavior.

@@ -7,7 +7,7 @@
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.1.2';
+  const VERSION = '1.1.3';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -103,7 +103,7 @@
 #${IDS.dock} .sl-dock-row:last-child{margin-bottom:0}#${IDS.dock} .sl-dock-row[disabled]{opacity:.45}
 #${IDS.dock} .slx-dock-install{display:block;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);color:#d8a45c;text-align:center;text-decoration:none;font-size:10px;font-weight:800}
 #${IDS.fallback}{position:fixed;right:10px;bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:2147482900;width:38px;height:38px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#0b1118;color:#e9a84d;font:800 15px/1 Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-#${IDS.native}{display:flex!important;align-items:center!important;justify-content:center!important}#${IDS.native} .slx-s-link{display:flex!important;align-items:center!important;justify-content:center!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;padding:0!important;margin:0!important;border:0!important;border-radius:8px!important;background:transparent!important;box-shadow:none!important;font:900 14px/28px Arial,sans-serif!important;color:#e9a84d!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important}
+#${IDS.native}{position:absolute!important;z-index:50!important;display:flex!important;align-items:center!important;justify-content:center!important;width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;padding:0!important;margin:0!important;border:0!important;border-radius:50%!important;background:rgba(15,20,26,.92)!important;box-shadow:0 0 0 1px rgba(255,255,255,.09)!important;font:900 12px/22px Arial,sans-serif!important;color:#e9a84d!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important}
 #${IDS.prompt}{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483600;width:min(360px,calc(100vw - 20px));padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0b1118;color:#eef3f8;font:600 11px/1.35 Arial,sans-serif;box-shadow:0 16px 42px rgba(0,0,0,.45)}
 #${IDS.prompt} .slx-prompt-actions{display:flex;gap:7px;margin-top:8px}#${IDS.prompt} button{flex:1;min-height:30px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#17212d;color:#eef3f8;font-weight:800}
 `;
@@ -118,13 +118,22 @@
     return lists.find(list => list?.isConnected !== false && [...(list.children || [])].some(item => item.querySelector?.('a'))) || null;
   }
 
-  function copyNativeCell(item, list) {
-    try {
-      const ref = [...list.children].find(x => x !== item && x.querySelector?.('a'));
-      if (!ref) return;
-      const native = [...(ref.classList || [])].filter(x => x && !x.startsWith('slx-') && !x.startsWith('sakalux-'));
-      item.className = [...native, 'slx-standalone-native'].join(' ');
-    } catch {}
+
+  function statusAnchorItem(list) {
+    const items=[...(list?.children||[])].filter(x=>x?.id!==IDS.native);
+    const hay=x=>[(x?.textContent||''),(x?.className||''),x?.getAttribute?.('title')||'',x?.getAttribute?.('aria-label')||'',x?.querySelector?.('a')?.getAttribute?.('title')||'',x?.querySelector?.('a')?.getAttribute?.('aria-label')||''].join(' ').toLowerCase();
+    return items.find(x=>/drug|xanax|booster|cooldown|medical|addiction/.test(hay(x))) || items[3] || items[items.length-1] || null;
+  }
+
+  function placeNativeLauncher(link,list){
+    try{
+      if(getComputedStyle(list).position==='static') list.style.position='relative';
+      const target=statusAnchorItem(list);
+      if(!target)return;
+      const left=Math.max(0,(target.offsetLeft||0)+(target.offsetWidth||28)-5);
+      const top=Math.max(0,(target.offsetTop||0)+Math.round(((target.offsetHeight||28)-22)/2));
+      link.style.left=left+'px';link.style.top=top+'px';
+    }catch{}
   }
 
   function ensureLauncher() {
@@ -132,19 +141,23 @@
     if (!d || hubInstalled()) { removeUi(); return null; }
     const list = findStatusIconList();
     if (list && typeof d.createElement === 'function') {
-      let item = d.getElementById(IDS.native);
-      if (!item) { item = d.createElement('li'); item.id = IDS.native; item.appendChild(d.createElement('a')); }
-      const link = item.querySelector('a') || item.appendChild(d.createElement('a'));
-      link.href = '#'; link.className = 'slx-s-link'; link.textContent = 'S'; link.title = 'SakaLuX Scripts';
-      link.setAttribute?.('aria-label', 'SakaLuX Scripts');
-      link.onclick = null;
-      copyNativeCell(item, list);
-      const children = [...(list.children || [])].filter(x => x !== item);
-      const cashIndex = children.findIndex(x => /\$|cash|money/i.test((x.textContent || '') + ' ' + (x.className || '')));
-      const anchor = cashIndex >= 0 ? children[cashIndex] : children[0];
-      try { if (anchor?.insertAdjacentElement) anchor.insertAdjacentElement('afterend', item); else list.appendChild(item); } catch { list.appendChild?.(item); }
+      let link = d.getElementById(IDS.native);
+      if (!link) {
+        link = d.createElement('a');
+        link.id = IDS.native;
+        link.href = '#';
+        link.textContent = 'S';
+        link.title = 'SakaLuX Scripts';
+        link.setAttribute?.('aria-label','SakaLuX Scripts');
+        list.appendChild(link);
+      } else if (link.parentElement !== list) {
+        link.remove();
+        list.appendChild(link);
+      }
+      link.href='#'; link.textContent='S'; link.onclick=null;
+      placeNativeLauncher(link,list);
       removeNode(IDS.fallback);
-      return item;
+      return link;
     }
     let button = d.getElementById(IDS.fallback);
     if (!button) {
@@ -264,7 +277,7 @@
     try {
       const outsideClose = e => {
         const d=doc(), panel=d?.getElementById(IDS.dock), t=e?.target;
-        const launcher=t?.closest?.('#'+IDS.native+' .slx-s-link,#'+IDS.fallback);
+        const launcher=t?.closest?.('#'+IDS.native+',#'+IDS.fallback);
         if(launcher){
           if(e.type==='click'){
             e.preventDefault?.();e.stopPropagation?.();e.stopImmediatePropagation?.();
