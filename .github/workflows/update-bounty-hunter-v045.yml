@@ -1,0 +1,49 @@
+name: Update Bounty Hunter v0.4.5
+on:
+  push:
+    paths:
+      - '.github/workflows/update-bounty-hunter-v045.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Patch Shared Core and Bounty Hunter UI
+        run: python .github/scripts/update_bounty_hunter_v045.py
+      - name: Re-embed Shared Core
+        run: node tools/embed-shared-core.cjs SakaLuX-Bounty-Hunter.user.js src/core/sakalux-core.js SakaLuX-Bounty-Hunter.user.js
+      - name: Syntax checks
+        run: |
+          node --check src/core/sakalux-core.js
+          node --check SakaLuX-Bounty-Hunter.user.js
+      - name: Shared Core regression
+        run: |
+          node tests/shared-core-v1-embedding.cjs
+          node tests/shared-core-v1-regression.cjs
+      - name: Verify release
+        run: |
+          grep -q '@version      0.4.5' SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.4.5'" SakaLuX-Bounty-Hunter.user.js
+          grep -q "const CORE_VERSION = '1.2.1'" src/core/sakalux-core.js
+          grep -q "{top:0,bottom:36,side:4,maxWidth:760}" SakaLuX-Bounty-Hunter.user.js
+          grep -q 'background:transparent!important;backdrop-filter:none!important' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'border-color:#f2a54a!important' SakaLuX-Bounty-Hunter.user.js
+          grep -q "aria-pressed" SakaLuX-Bounty-Hunter.user.js
+          test "$(grep -c 'SakaLuX Shared Core — BEGIN' SakaLuX-Bounty-Hunter.user.js)" -eq 1
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Bounty-Hunter.user.js src/core/sakalux-core.js scripts.json CHANGELOG.md
+          git diff --cached --quiet && exit 0
+          git commit -m 'Polish Bounty Hunter v0.4.5 Hub-aligned mobile UI'
+          git push
