@@ -121,3 +121,9 @@
 - Script Hub is intentionally unchanged.
 
 \n## Standalone Runtime v1.1.5 Sep-15 restore\n- Restores Sep-15 plain gold S launcher and old Standalone visuals.\n- Keeps singleton/open-close fixes.\n- Uses .2 maintenance suffixes; Hub unchanged.\n
+## Standalone Runtime v1.1.6 + Suite launcher cleanup
+- Shared Standalone S is now a neutral plain-gold glyph and never inherits Torn/racing icon classes.
+- Launcher prefers placement beside Drug/Cooldown status.
+- Removed Suite's obsolete Standalone collector bootstrap, which was independently creating/moving standalone UI.
+- Suite master launcher no longer clones Torn icon classes.
+- Maintenance suffix .3 distributed to standalone modules; Hub unchanged.

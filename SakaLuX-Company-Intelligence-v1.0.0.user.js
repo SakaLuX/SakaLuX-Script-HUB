@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.56.2
+// @version      1.8.56.3
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -634,7 +634,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.56.2';
+  let v = '1.8.56.3';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -658,7 +658,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.1.5';
+  const VERSION = '1.1.6';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -766,26 +766,56 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const lists=selectors.flatMap(q=>[...d.querySelectorAll(q)]);
     return lists.find(list=>list.isConnected&&[...list.children].some(item=>item.querySelector?.('a')))||null;
   }
-  function copyNativeCell(item,list){
-    const ref=[...list.children].find(x=>x!==item&&x.querySelector?.('a'));if(!ref)return;
-    const native=[...ref.classList].filter(x=>x&&!x.startsWith('slx-')&&!x.startsWith('sakalux-'));
-    item.className=[...native,'slx-standalone-native'].join(' ');
+  function itemHaystack(item){
+    if(!item)return '';
+    const a=item.querySelector?.('a');
+    return [
+      item.textContent||'', item.className||'',
+      item.getAttribute?.('title')||'', item.getAttribute?.('aria-label')||'',
+      a?.getAttribute?.('title')||'', a?.getAttribute?.('aria-label')||'',
+      a?.getAttribute?.('href')||'', item.innerHTML||''
+    ].join(' ').toLowerCase();
+  }
+  function preferredStatusAnchor(list){
+    const children=[...(list?.children||[])].filter(x=>x?.id!==IDS.native);
+    return children.find(x=>/drug|xanax|booster|cooldown|addiction/.test(itemHaystack(x)))
+      || children.find(x=>/merit|point/.test(itemHaystack(x)))
+      || children[3] || children[children.length-1] || null;
   }
   function ensureLauncher(){
     const d=doc();if(!d||hubInstalled()){removeNode(IDS.native);removeNode(IDS.fallback);return null;}
     const list=findStatusIconList();let item=d.getElementById(IDS.native);
     if(list){
-      if(!item){item=d.createElement('li');item.id=IDS.native;item.innerHTML='<a href="#" class="slx-s-link" aria-label="SakaLuX Scripts" title="SakaLuX Scripts">S</a>';}
-      const link=item.querySelector('a');
-      if(link)link.onclick=e=>{e.preventDefault();e.stopPropagation();const p=d.getElementById(IDS.dock);const o=p?.dataset.open==='1'&&!p.hidden;if(o)forceCloseDock();else{userOpened=true;toggleDock(true);}};
-      copyNativeCell(item,list);
-      const children=[...list.children].filter(x=>x!==item);
-      const cashIndex=children.findIndex(x=>/\$|cash|money/i.test((x.textContent||'')+' '+(x.className||'')));
-      const anchor=cashIndex>=0?children[cashIndex]:children[0];
-      if(anchor)anchor.insertAdjacentElement('afterend',item);else list.appendChild(item);
-      removeNode(IDS.fallback);return item;
+      if(!item){
+        item=d.createElement('li');
+        item.id=IDS.native;
+      }
+      item.className='slx-standalone-native';
+      item.removeAttribute?.('style');
+      let link=item.querySelector('a.slx-s-link');
+      if(!link){
+        item.replaceChildren();
+        link=d.createElement('a');
+        link.href='#';link.className='slx-s-link';link.textContent='S';
+        link.title='SakaLuX Scripts';link.setAttribute('aria-label','SakaLuX Scripts');
+        item.appendChild(link);
+      }else{
+        link.textContent='S';link.href='#';link.className='slx-s-link';
+      }
+      link.onclick=e=>{
+        e.preventDefault();e.stopPropagation();e.stopImmediatePropagation?.();
+        const p=d.getElementById(IDS.dock);
+        const open=p?.dataset.open==='1'&&!p.hidden;
+        if(open)forceCloseDock();else{userOpened=true;toggleDock(true);}
+      };
+      const anchor=preferredStatusAnchor(list);
+      if(anchor && anchor.nextElementSibling!==item) anchor.insertAdjacentElement('afterend',item);
+      else if(!anchor && item.parentElement!==list) list.appendChild(item);
+      removeNode(IDS.fallback);
+      return item;
     }
-    item?.remove();return null;
+    item?.remove();
+    return null;
   }
 
   function ensureDock() {
@@ -1028,7 +1058,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.56.2',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.56.3',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';

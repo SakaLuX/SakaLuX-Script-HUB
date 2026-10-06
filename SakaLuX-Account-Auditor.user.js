@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.27.2
+// @version      1.3.27.3
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -639,7 +639,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.1.5';
+  const VERSION = '1.1.6';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -747,26 +747,56 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const lists=selectors.flatMap(q=>[...d.querySelectorAll(q)]);
     return lists.find(list=>list.isConnected&&[...list.children].some(item=>item.querySelector?.('a')))||null;
   }
-  function copyNativeCell(item,list){
-    const ref=[...list.children].find(x=>x!==item&&x.querySelector?.('a'));if(!ref)return;
-    const native=[...ref.classList].filter(x=>x&&!x.startsWith('slx-')&&!x.startsWith('sakalux-'));
-    item.className=[...native,'slx-standalone-native'].join(' ');
+  function itemHaystack(item){
+    if(!item)return '';
+    const a=item.querySelector?.('a');
+    return [
+      item.textContent||'', item.className||'',
+      item.getAttribute?.('title')||'', item.getAttribute?.('aria-label')||'',
+      a?.getAttribute?.('title')||'', a?.getAttribute?.('aria-label')||'',
+      a?.getAttribute?.('href')||'', item.innerHTML||''
+    ].join(' ').toLowerCase();
+  }
+  function preferredStatusAnchor(list){
+    const children=[...(list?.children||[])].filter(x=>x?.id!==IDS.native);
+    return children.find(x=>/drug|xanax|booster|cooldown|addiction/.test(itemHaystack(x)))
+      || children.find(x=>/merit|point/.test(itemHaystack(x)))
+      || children[3] || children[children.length-1] || null;
   }
   function ensureLauncher(){
     const d=doc();if(!d||hubInstalled()){removeNode(IDS.native);removeNode(IDS.fallback);return null;}
     const list=findStatusIconList();let item=d.getElementById(IDS.native);
     if(list){
-      if(!item){item=d.createElement('li');item.id=IDS.native;item.innerHTML='<a href="#" class="slx-s-link" aria-label="SakaLuX Scripts" title="SakaLuX Scripts">S</a>';}
-      const link=item.querySelector('a');
-      if(link)link.onclick=e=>{e.preventDefault();e.stopPropagation();const p=d.getElementById(IDS.dock);const o=p?.dataset.open==='1'&&!p.hidden;if(o)forceCloseDock();else{userOpened=true;toggleDock(true);}};
-      copyNativeCell(item,list);
-      const children=[...list.children].filter(x=>x!==item);
-      const cashIndex=children.findIndex(x=>/\$|cash|money/i.test((x.textContent||'')+' '+(x.className||'')));
-      const anchor=cashIndex>=0?children[cashIndex]:children[0];
-      if(anchor)anchor.insertAdjacentElement('afterend',item);else list.appendChild(item);
-      removeNode(IDS.fallback);return item;
+      if(!item){
+        item=d.createElement('li');
+        item.id=IDS.native;
+      }
+      item.className='slx-standalone-native';
+      item.removeAttribute?.('style');
+      let link=item.querySelector('a.slx-s-link');
+      if(!link){
+        item.replaceChildren();
+        link=d.createElement('a');
+        link.href='#';link.className='slx-s-link';link.textContent='S';
+        link.title='SakaLuX Scripts';link.setAttribute('aria-label','SakaLuX Scripts');
+        item.appendChild(link);
+      }else{
+        link.textContent='S';link.href='#';link.className='slx-s-link';
+      }
+      link.onclick=e=>{
+        e.preventDefault();e.stopPropagation();e.stopImmediatePropagation?.();
+        const p=d.getElementById(IDS.dock);
+        const open=p?.dataset.open==='1'&&!p.hidden;
+        if(open)forceCloseDock();else{userOpened=true;toggleDock(true);}
+      };
+      const anchor=preferredStatusAnchor(list);
+      if(anchor && anchor.nextElementSibling!==item) anchor.insertAdjacentElement('afterend',item);
+      else if(!anchor && item.parentElement!==list) list.appendChild(item);
+      removeNode(IDS.fallback);
+      return item;
     }
-    item?.remove();return null;
+    item?.remove();
+    return null;
   }
 
   function ensureDock() {
@@ -933,7 +963,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.27.2" }));
+  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.27.3" }));
   const API_GLOBAL = "";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -964,7 +994,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.27.2';
+    const VERSION = '1.3.27.3';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const AUDITOR_API_CREATE_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Account%20Auditor&user=profile,bars,cooldowns,travel,education,jobpoints,merits,refills,notifications,money,stocks,properties,discord,weaponexp,workstats,skills,battlestats,networth,display,icons,criminalrecord,bazaar,crimes,hof,ammo,attacksfull,bounties,calendar,casino,competition,enlistedcars,equipment,faction,forumfeed,forumfriends,forumposts,forumsubscribedthreads,forumthreads,gym,honors,itemmarket,itemmods,job,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,snapshot,personalstats,list,inventory,messages,events,log&torn=merits,education';
