@@ -85,4 +85,11 @@
 - Closes on module launch, route change, outside tap, Escape and a six-second idle timeout.
 - Protects runtime v1.1.0 from older embedded dock copies loaded later by other scripts.
 - Bounty Hunter remains Dock-only; legacy chat and floating page launchers are removed.
+## Bounty Hunter v0.5.4 + Script Hub v1.9.93 — Standalone Dock v1.1.1
+- Restores the previous Standalone panel header/logo design; removes the separate X button.
+- Restores the original compact native S launcher styling beside Torn status/cooldown icons.
+- Adds capture-phase launcher handling so the S button works even if an older installed userscript injected stale handlers.
+- Adds a DOM close enforcer so stale runtimes cannot reopen/leave the panel open.
+- Hard-closes on startup, registration, route change, outside tap, module launch, Escape and timeout.
+- Bounty Hunter remains Dock-only; no chat or floating Bounties launcher.
 

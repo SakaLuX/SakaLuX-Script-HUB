@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.92**
+**v1.9.93**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-05**
-- Canonical version: **v1.9.92**
+- Canonical version: **v1.9.93**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -359,4 +359,10 @@ Latest Hub refresh improvement: overlapping registry/update checks share one act
 - Adds an explicit X close control and restores the native gold S launcher.
 - Newer runtime copies cannot be overwritten by older embedded runtime versions.
 - Bounty Hunter v0.5.3 is Dock-only with legacy launch buttons removed.
+
+### v1.9.93 — Standalone Dock v1.1.1 compatibility repair
+- Restores the previous panel logo/header and native status-bar S launcher visuals.
+- Removes the separate X button.
+- Adds hard-close enforcement and capture-phase launcher handling against stale older embedded runtimes.
+- Standalone starts closed and closes on outside tap, module launch, route change, Escape and timeout.
 

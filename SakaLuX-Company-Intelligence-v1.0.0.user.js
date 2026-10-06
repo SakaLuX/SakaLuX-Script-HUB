@@ -658,7 +658,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -694,6 +694,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function readOpen() { return false; }
   function writeOpen(value) { openState = Boolean(value); try { localStorage.removeItem(OPEN_KEY); } catch {} }
   function armAutoClose() { clearTimeout(autoCloseTimer); if (!openState) return; autoCloseTimer = setTimeout(() => toggleDock(false), 6000); }
+  let userOpenUntil = 0;
+  function markUserOpen(){ userOpenUntil = Date.now()+1600; }
+  function forceCloseDock(){
+    openState=false; clearTimeout(autoCloseTimer);
+    const p=doc()?.getElementById(IDS.dock);
+    if(p){p.dataset.open='0';p.hidden=true;p.style?.removeProperty?.('display')}
+    try{localStorage.removeItem(OPEN_KEY)}catch{}
+    return false;
+  }
+  function enforceClosedUnlessUserOpened(){
+    const p=doc()?.getElementById(IDS.dock);
+    if(!p)return;
+    const visiblyOpen=p.dataset.open==='1'||p.hidden===false;
+    if(visiblyOpen && Date.now()>userOpenUntil) forceCloseDock();
+  }
 
   function normalize(entry = {}) {
     const id = String(entry.id || '').trim();
@@ -731,16 +746,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     style.textContent = `
 #${IDS.dock}{position:fixed;right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:2147483000;width:min(220px,calc(100vw - 20px));max-height:calc(100dvh - 190px);overflow:hidden;padding:10px;background:linear-gradient(180deg,rgba(10,14,20,.992),rgba(7,10,15,.992));border:1px solid rgba(255,255,255,.09);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);font-family:Inter,Arial,sans-serif;display:none;flex-direction:column;box-sizing:border-box}
 #${IDS.dock}[data-open="1"]{display:flex}
-#${IDS.dock} .slx-dock-head{display:grid;grid-template-columns:28px 1fr 30px;gap:7px;align-items:center;margin-bottom:8px}
-#${IDS.dock} .slx-dock-mark{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:0;border-radius:8px;background:#d79b49;color:#111;font:900 15px/1 Arial,sans-serif}
-#${IDS.dock} .slx-dock-close{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#17212d;color:#eef3f8;font:900 18px/1 Arial,sans-serif}
+#${IDS.dock} .slx-dock-head{display:grid;grid-template-columns:28px 1fr auto;gap:7px;align-items:center;margin-bottom:8px}
+#${IDS.dock} .slx-dock-mark{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:0;border-radius:8px;background:#d79b49;color:#111;font:900 15px/1 Arial,sans-serif;cursor:pointer}
 #${IDS.dock} .slx-dock-title{font-size:12px;font-weight:900;color:#f5f7fa}.slx-dock-sub{font-size:9px;color:#8d98a6}
 #${IDS.dock} .slx-dock-items{overflow:auto;min-height:0}
 #${IDS.dock} .sl-dock-row{display:flex;align-items:center;gap:8px;width:100%;min-height:34px;margin:0 0 6px;padding:7px 9px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#111b26;color:#eaf0f6;text-align:left;font:700 11px/1.2 Arial,sans-serif}
 #${IDS.dock} .sl-dock-row:last-child{margin-bottom:0}#${IDS.dock} .sl-dock-row[disabled]{opacity:.45}
 #${IDS.dock} .slx-dock-install{display:block;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);color:#d8a45c;text-align:center;text-decoration:none;font-size:10px;font-weight:800}
 #${IDS.fallback}{position:fixed;right:10px;bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:2147482900;width:38px;height:38px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#0b1118;color:#e9a84d;font:800 15px/1 Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-#${IDS.native}{display:flex!important;align-items:center!important;justify-content:center!important}#${IDS.native} .slx-s-link{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;min-width:28px!important;min-height:28px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;font:900 16px/1 Arial,sans-serif!important;color:#e9a84d!important;text-decoration:none!important;text-indent:0!important;letter-spacing:0!important;cursor:pointer!important;touch-action:manipulation!important}#${IDS.native} .slx-s-link:before,#${IDS.native} .slx-s-link:after{content:none!important;display:none!important}
+#${IDS.native}{display:flex!important;align-items:center!important;justify-content:center!important}#${IDS.native} .slx-s-link{display:flex!important;align-items:center!important;justify-content:center!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;padding:0!important;margin:0!important;border:0!important;border-radius:8px!important;background:transparent!important;box-shadow:none!important;font:900 14px/28px Arial,sans-serif!important;color:#e9a84d!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important}
 #${IDS.prompt}{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483600;width:min(360px,calc(100vw - 20px));padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0b1118;color:#eef3f8;font:600 11px/1.35 Arial,sans-serif;box-shadow:0 16px 42px rgba(0,0,0,.45)}
 #${IDS.prompt} .slx-prompt-actions{display:flex;gap:7px;margin-top:8px}#${IDS.prompt} button{flex:1;min-height:30px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#17212d;color:#eef3f8;font-weight:800}
 `;
@@ -774,7 +788,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const link = item.querySelector('a') || item.appendChild(d.createElement('a'));
       link.href = '#'; link.className = 'slx-s-link'; link.textContent = 'S'; link.title = 'SakaLuX Scripts';
       link.setAttribute?.('aria-label', 'SakaLuX Scripts');
-      link.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(); };
+      link.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); markUserOpen(); toggleDock(); };
       copyNativeCell(item, list);
       const children = [...(list.children || [])].filter(x => x !== item);
       const cashIndex = children.findIndex(x => /\$|cash|money/i.test((x.textContent || '') + ' ' + (x.className || '')));
@@ -790,7 +804,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       button.type = 'button';
       button.textContent = 'S';
       button.title = 'SakaLuX Scripts';
-      button.addEventListener?.('click', () => toggleDock());
+      button.addEventListener?.('click', e => { e?.preventDefault?.(); e?.stopPropagation?.(); markUserOpen(); toggleDock(); });
       (d.body || d.documentElement).appendChild(button);
     }
     removeNode(IDS.native);
@@ -808,20 +822,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       panel.hidden = true;
       writeOpen(false);
       const head = d.createElement('div'); head.className = 'slx-dock-head';
-      const mark = d.createElement('div'); mark.className = 'slx-dock-mark'; mark.textContent = 'S'; mark.setAttribute?.('aria-hidden','true');
-      const titleBox = d.createElement('div');
+      const mark = d.createElement('button'); mark.type='button'; mark.className = 'slx-dock-mark'; mark.textContent = 'S'; mark.title='Close SakaLuX Scripts'; mark.setAttribute?.('aria-label','Close SakaLuX Scripts');
+      mark.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); forceCloseDock(); };
       const title = d.createElement('div'); title.className = 'slx-dock-title'; title.textContent = 'SakaLuX Scripts';
       const sub = d.createElement('div'); sub.className = 'slx-dock-sub'; sub.textContent = 'Standalone';
-      titleBox.appendChild(title); titleBox.appendChild(sub);
-      const close = d.createElement('button'); close.type = 'button'; close.className = 'slx-dock-close'; close.textContent = '×'; close.title = 'Close'; close.setAttribute?.('aria-label','Close SakaLuX Scripts');
-      close.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); };
-      head.appendChild(mark); head.appendChild(titleBox); head.appendChild(close);
+      head.appendChild(mark); head.appendChild(title); head.appendChild(sub);
       const items = d.createElement('div'); items.className = 'slx-dock-items';
       const install = d.createElement('a'); install.className = 'slx-dock-install'; install.href = HUB_URL; install.textContent = 'Install SakaLuX Hub';
       panel.appendChild(head); panel.appendChild(items); panel.appendChild(install);
       (d.body || d.documentElement).appendChild(panel);
     }
-    const close = panel.querySelector('.slx-dock-close'); if (close) close.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); };
+    const mark = panel.querySelector('.slx-dock-mark'); if (mark) mark.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); forceCloseDock(); };
     return panel;
   }
 
@@ -831,10 +842,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const panel = doc()?.getElementById(IDS.dock);
     if (!panel) return false;
     const next = typeof force === 'boolean' ? force : panel.dataset.open !== '1';
-    panel.dataset.open = next ? '1' : '0';
-    panel.hidden = !next;
-    writeOpen(next);
-    if (next) armAutoClose(); else clearTimeout(autoCloseTimer);
+    if(next){ markUserOpen(); panel.dataset.open='1'; panel.hidden=false; writeOpen(true); armAutoClose(); }
+    else { forceCloseDock(); }
     return next;
   }
 
@@ -869,7 +878,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       });
       box.appendChild(button);
     }
-    panel.hidden = panel.dataset.open !== '1';
+    if(Date.now()>userOpenUntil) forceCloseDock(); else panel.hidden = panel.dataset.open !== '1';
     return panel;
   }
 
@@ -901,15 +910,20 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (runtimeSignalsBound) return;
     runtimeSignalsBound = true;
     try {
-      core()?.router?.onChange?.(() => { toggleDock(false); scheduleRefresh(180); });
+      core()?.router?.onChange?.(() => { forceCloseDock(); scheduleRefresh(180); });
       core()?.router?.bind?.();
     } catch {}
     try { g.addEventListener?.('SakaLuX:ScriptHubReady', () => removeUi(), { passive: true }); } catch {}
-    try { doc()?.addEventListener?.('pointerdown', e => { const panel=doc()?.getElementById(IDS.dock); if (!panel || panel.dataset.open!=='1') return; const t=e?.target; if (t?.closest?.('#'+IDS.dock+',#'+IDS.native+',#'+IDS.fallback)) return; toggleDock(false); }, true); } catch {}
+    try { doc()?.addEventListener?.('click', e => {
+      const launcher=e?.target?.closest?.('#'+IDS.native+' .slx-s-link,#'+IDS.fallback);
+      if(launcher){e.preventDefault?.();e.stopPropagation?.();e.stopImmediatePropagation?.();markUserOpen();toggleDock();return}
+    }, true); } catch {}
+    try { doc()?.addEventListener?.('pointerdown', e => { const panel=doc()?.getElementById(IDS.dock); if (!panel || (panel.dataset.open!=='1'&&panel.hidden!==false)) return; const t=e?.target; if (t?.closest?.('#'+IDS.dock+',#'+IDS.native+',#'+IDS.fallback)) return; forceCloseDock(); }, true); } catch {}
     try { g.addEventListener?.('keydown',e=>{if(e?.key==='Escape')toggleDock(false)},{passive:true}); } catch {}
     try {
       if (!observer && typeof MutationObserver === 'function' && doc()?.body) {
         observer = new MutationObserver(records => {
+          enforceClosedUnlessUserOpened();
           if (core()?.perf?.unrelated?.(records)) return;
           scheduleRefresh(240);
         });
@@ -921,6 +935,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function register(entry) {
     const normalized = normalize(entry);
     modules.set(normalized.id, normalized); // latest registration wins
+    forceCloseDock();
     render();
     bindRuntimeSignals();
     if (!promptScheduled) {

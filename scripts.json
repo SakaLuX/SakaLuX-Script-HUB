@@ -326,13 +326,13 @@
         }
       ],
       "release": {
-        "version": "0.5.3",
+        "version": "0.5.4",
         "date": "2026-10-06",
         "notes": [
-          "Moves Bounty Hunter exclusively into Shared Standalone Dock and removes any legacy chat/floating launchers.",
-          "Ships Shared Dock Runtime v1.1.0 with deterministic closed startup and dedicated X close control.",
-          "Standalone closes on outside tap, Escape, route change, module launch, or six-second idle timeout.",
-          "Newest runtime is protected from older embedded dock runtimes loaded by another SakaLuX userscript."
+          "Shared Standalone Dock v1.1.1 restores the previous header/logo appearance and original native S launcher styling.",
+          "Adds a hard close enforcer that also corrects stale older dock runtimes loaded by other installed scripts.",
+          "Standalone starts closed and closes on outside tap, module launch, route change, Escape and timeout.",
+          "Bounty Hunter remains Standalone-Dock only with no chat or floating page launcher."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -340,8 +340,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.3",
-      "detailsRevision": 5,
+      "version": "0.5.4",
+      "detailsRevision": 6,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
