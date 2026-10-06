@@ -1,0 +1,41 @@
+name: Center Standalone S v1.1.9
+on:
+  push:
+    paths:
+      - '.github/workflows/center-standalone-s-v119.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: python .github/scripts/center_standalone_s_v119.py
+      - name: Embed v1.1.9 everywhere
+        run: |
+          for f in SakaLuX-Enhancer-Guard.user.js SakaLuX-Account-Auditor.user.js SakaLuX-Mission-Rewards.user.js SakaLuX-Bazaar-Thanker-PDA.user.js SakaLuX-Bazaar-Smart-Pricer.user.js SakaLuX-Elimination-Assistant.user.js SakaLuX-Market-Intelligence.user.js SakaLuX-Stock-Manager-Advisor.user.js SakaLuX-Company-Intelligence-v1.0.0.user.js SakaLuX-Bounty-Hunter.user.js; do
+            node tools/embed-shared-dock-runtime.cjs "$f" src/core/sakalux-dock-runtime.js "$f"
+          done
+      - name: Verify
+        run: |
+          node --check src/core/sakalux-dock-runtime.js
+          grep -q "const VERSION = '1.1.9'" src/core/sakalux-dock-runtime.js
+          grep -q "transform:translateY(1px)!important" src/core/sakalux-dock-runtime.js
+          grep -q "list.insertBefore(item,first)" src/core/sakalux-dock-runtime.js
+          grep -q "@version      0.8.18.6" SakaLuX-Stock-Manager-Advisor.user.js
+          grep -q "@version      0.5.6.6" SakaLuX-Bounty-Hunter.user.js
+      - name: Commit
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add src/core/sakalux-dock-runtime.js SakaLuX-*.user.js scripts.json CHANGELOG.md
+          git diff --cached --quiet && exit 0
+          git commit -m 'Optically center Standalone S v1.1.9'
+          git push
