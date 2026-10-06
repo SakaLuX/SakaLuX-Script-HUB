@@ -1,0 +1,35 @@
+name: Update Bounty Hunter v0.4.3
+on:
+  push:
+    paths:
+      - '.github/workflows/update-bounty-hunter-v043.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Expand Bounty Hunter mobile panel
+        run: python .github/scripts/update_bounty_hunter_v043.py
+      - name: Syntax check
+        run: node --check SakaLuX-Bounty-Hunter.user.js
+      - name: Verify release
+        run: |
+          grep -q '@version      0.4.3' SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.4.3'" SakaLuX-Bounty-Hunter.user.js
+          grep -q 'width:calc(100vw - 8px)' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'height:calc(100dvh - 72px)' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'flex:1 1 auto!important;min-height:0!important;overflow:auto!important' SakaLuX-Bounty-Hunter.user.js
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Bounty-Hunter.user.js scripts.json CHANGELOG.md
+          git diff --cached --quiet && exit 0
+          git commit -m 'Expand Bounty Hunter v0.4.3 TornPDA layout'
+          git push
