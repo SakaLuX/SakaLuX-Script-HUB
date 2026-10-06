@@ -639,7 +639,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const g = globalThis;
   const NS = 'SakaLuXDockRuntime';
-  const VERSION = '1.0.1';
+  const VERSION = '1.1.0';
   const HUB_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
   const OPEN_KEY = 'SakaLuX_STANDALONE_DOCK_OPEN';
   const PROMPT_KEY = 'SakaLuX_HUB_INSTALL_PROMPT_LAST';
@@ -652,8 +652,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     style: 'sakalux-standalone-dock-runtime-style'
   });
 
-  if (g[NS]?.version === VERSION) return;
-  try { if (g[NS] && g[NS].version !== VERSION) g[NS].removeUi?.(); } catch {}
+  function versionParts(v){return String(v||'0').match(/\d+/g)?.map(Number)||[0]}
+  function compareVersion(a,b){const x=versionParts(a),y=versionParts(b);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0?1:-1}return 0}
+  const currentRuntime=g.__SakaLuXDockRuntimeCurrent||g[NS];
+  if(currentRuntime?.version&&compareVersion(currentRuntime.version,VERSION)>=0)return;
+  try { currentRuntime?.removeUi?.(); } catch {}
 
   const modules = g.__SakaLuXDockRuntimeModules instanceof Map
     ? g.__SakaLuXDockRuntimeModules
@@ -669,9 +672,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function hubInstalled() { return Boolean(core()?.hub?.installed?.()); }
   let openState = false;
   let autoCloseTimer = 0;
-  function readOpen() { return openState; }
+  function readOpen() { return false; }
   function writeOpen(value) { openState = Boolean(value); try { localStorage.removeItem(OPEN_KEY); } catch {} }
-  function armAutoClose() { clearTimeout(autoCloseTimer); if (!openState) return; autoCloseTimer = setTimeout(() => toggleDock(false), 8000); }
+  function armAutoClose() { clearTimeout(autoCloseTimer); if (!openState) return; autoCloseTimer = setTimeout(() => toggleDock(false), 6000); }
 
   function normalize(entry = {}) {
     const id = String(entry.id || '').trim();
@@ -709,15 +712,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     style.textContent = `
 #${IDS.dock}{position:fixed;right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:2147483000;width:min(220px,calc(100vw - 20px));max-height:calc(100dvh - 190px);overflow:hidden;padding:10px;background:linear-gradient(180deg,rgba(10,14,20,.992),rgba(7,10,15,.992));border:1px solid rgba(255,255,255,.09);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);font-family:Inter,Arial,sans-serif;display:none;flex-direction:column;box-sizing:border-box}
 #${IDS.dock}[data-open="1"]{display:flex}
-#${IDS.dock} .slx-dock-head{display:grid;grid-template-columns:28px 1fr auto;gap:7px;align-items:center;margin-bottom:8px}
-#${IDS.dock} .slx-dock-mark{width:28px;height:28px;border:0;border-radius:8px;background:#d79b49;color:#111;font-weight:900}
+#${IDS.dock} .slx-dock-head{display:grid;grid-template-columns:28px 1fr 30px;gap:7px;align-items:center;margin-bottom:8px}
+#${IDS.dock} .slx-dock-mark{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:0;border-radius:8px;background:#d79b49;color:#111;font:900 15px/1 Arial,sans-serif}
+#${IDS.dock} .slx-dock-close{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#17212d;color:#eef3f8;font:900 18px/1 Arial,sans-serif}
 #${IDS.dock} .slx-dock-title{font-size:12px;font-weight:900;color:#f5f7fa}.slx-dock-sub{font-size:9px;color:#8d98a6}
 #${IDS.dock} .slx-dock-items{overflow:auto;min-height:0}
 #${IDS.dock} .sl-dock-row{display:flex;align-items:center;gap:8px;width:100%;min-height:34px;margin:0 0 6px;padding:7px 9px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#111b26;color:#eaf0f6;text-align:left;font:700 11px/1.2 Arial,sans-serif}
 #${IDS.dock} .sl-dock-row:last-child{margin-bottom:0}#${IDS.dock} .sl-dock-row[disabled]{opacity:.45}
 #${IDS.dock} .slx-dock-install{display:block;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.08);color:#d8a45c;text-align:center;text-decoration:none;font-size:10px;font-weight:800}
 #${IDS.fallback}{position:fixed;right:10px;bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:2147482900;width:38px;height:38px;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#0b1118;color:#e9a84d;font:800 15px/1 Arial,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-#${IDS.native}{display:flex!important;align-items:center!important;justify-content:center!important}#${IDS.native} .slx-s-link{display:flex!important;align-items:center!important;justify-content:center!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;padding:0!important;margin:0!important;border:0!important;border-radius:8px!important;background:transparent!important;box-shadow:none!important;font:900 14px/28px Arial,sans-serif!important;color:#e9a84d!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important}
+#${IDS.native}{display:flex!important;align-items:center!important;justify-content:center!important}#${IDS.native} .slx-s-link{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;min-width:28px!important;min-height:28px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;font:900 16px/1 Arial,sans-serif!important;color:#e9a84d!important;text-decoration:none!important;text-indent:0!important;letter-spacing:0!important;cursor:pointer!important;touch-action:manipulation!important}#${IDS.native} .slx-s-link:before,#${IDS.native} .slx-s-link:after{content:none!important;display:none!important}
 #${IDS.prompt}{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483600;width:min(360px,calc(100vw - 20px));padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0b1118;color:#eef3f8;font:600 11px/1.35 Arial,sans-serif;box-shadow:0 16px 42px rgba(0,0,0,.45)}
 #${IDS.prompt} .slx-prompt-actions{display:flex;gap:7px;margin-top:8px}#${IDS.prompt} button{flex:1;min-height:30px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:#17212d;color:#eef3f8;font-weight:800}
 `;
@@ -782,18 +786,23 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       panel = d.createElement('div');
       panel.id = IDS.dock;
       panel.dataset.open = '0';
+      panel.hidden = true;
+      writeOpen(false);
       const head = d.createElement('div'); head.className = 'slx-dock-head';
-      const close = d.createElement('button'); close.type = 'button'; close.className = 'slx-dock-mark'; close.textContent = 'S'; close.title = 'Close SakaLuX Scripts';
-      close.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); };
+      const mark = d.createElement('div'); mark.className = 'slx-dock-mark'; mark.textContent = 'S'; mark.setAttribute?.('aria-hidden','true');
+      const titleBox = d.createElement('div');
       const title = d.createElement('div'); title.className = 'slx-dock-title'; title.textContent = 'SakaLuX Scripts';
       const sub = d.createElement('div'); sub.className = 'slx-dock-sub'; sub.textContent = 'Standalone';
-      head.appendChild(close); head.appendChild(title); head.appendChild(sub);
+      titleBox.appendChild(title); titleBox.appendChild(sub);
+      const close = d.createElement('button'); close.type = 'button'; close.className = 'slx-dock-close'; close.textContent = '×'; close.title = 'Close'; close.setAttribute?.('aria-label','Close SakaLuX Scripts');
+      close.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); };
+      head.appendChild(mark); head.appendChild(titleBox); head.appendChild(close);
       const items = d.createElement('div'); items.className = 'slx-dock-items';
       const install = d.createElement('a'); install.className = 'slx-dock-install'; install.href = HUB_URL; install.textContent = 'Install SakaLuX Hub';
       panel.appendChild(head); panel.appendChild(items); panel.appendChild(install);
       (d.body || d.documentElement).appendChild(panel);
     }
-    const close = panel.querySelector('.slx-dock-mark'); if (close) close.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); };
+    const close = panel.querySelector('.slx-dock-close'); if (close) close.onclick = e => { e?.preventDefault?.(); e?.stopPropagation?.(); toggleDock(false); };
     return panel;
   }
 
@@ -877,7 +886,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       core()?.router?.bind?.();
     } catch {}
     try { g.addEventListener?.('SakaLuX:ScriptHubReady', () => removeUi(), { passive: true }); } catch {}
-    try { doc()?.addEventListener?.('pointerdown', e => { if (!openState) return; const t=e?.target; if (t?.closest?.('#'+IDS.dock+',#'+IDS.native+',#'+IDS.fallback)) return; toggleDock(false); }, true); } catch {}
+    try { doc()?.addEventListener?.('pointerdown', e => { const panel=doc()?.getElementById(IDS.dock); if (!panel || panel.dataset.open!=='1') return; const t=e?.target; if (t?.closest?.('#'+IDS.dock+',#'+IDS.native+',#'+IDS.fallback)) return; toggleDock(false); }, true); } catch {}
+    try { g.addEventListener?.('keydown',e=>{if(e?.key==='Escape')toggleDock(false)},{passive:true}); } catch {}
     try {
       if (!observer && typeof MutationObserver === 'function' && doc()?.body) {
         observer = new MutationObserver(records => {
@@ -910,7 +920,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function list() { return Object.freeze(sorted().map(item => Object.freeze({ ...item }))); }
 
   const api = Object.freeze({ version: VERSION, ids: IDS, register, unregister, list, render, toggleDock, removeUi, hubInstalled, maybePrompt });
-  g[NS] = api;
+  g.__SakaLuXDockRuntimeCurrent = api;
+  try {
+    const desc=Object.getOwnPropertyDescriptor(g,NS);
+    if(!desc||desc.configurable){
+      Object.defineProperty(g,NS,{configurable:true,enumerable:true,get(){return g.__SakaLuXDockRuntimeCurrent},set(v){if(v?.version&&compareVersion(v.version,g.__SakaLuXDockRuntimeCurrent?.version)>=0)g.__SakaLuXDockRuntimeCurrent=v}});
+    } else g[NS]=api;
+  } catch { try { g[NS]=api; } catch {} }
 })();
 /* SakaLuX Shared Dock Runtime — END */
 

@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.91**
+**v1.9.92**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-05**
-- Canonical version: **v1.9.91**
+- Canonical version: **v1.9.92**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -352,4 +352,11 @@ Latest Hub refresh improvement: overlapping registry/update checks share one act
 - Adds Torn: Bounties to the shared Script Hub API-key creation URL.
 - Shared API CHECK now validates Bounties access and reports a specific replace-key message when missing.
 - Integrates Bounty Hunter GreasyFork #598988 distribution and avoids treating temporary rate-limit/cache warnings as fatal module health errors.
+
+### v1.9.92 — Shared Standalone Dock v1.1.0
+- Rebuilds the common Standalone Dock runtime used by all managed standalone scripts.
+- Dock starts closed and closes on module launch, route changes, outside taps, Escape or a six-second timeout.
+- Adds an explicit X close control and restores the native gold S launcher.
+- Newer runtime copies cannot be overwritten by older embedded runtime versions.
+- Bounty Hunter v0.5.3 is Dock-only with legacy launch buttons removed.
 

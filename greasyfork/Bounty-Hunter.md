@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.5.2**
+**v0.5.3**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -41,12 +41,19 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.2 — Shared Standalone Dock integration**
-- Bounty Hunter is now in the common Standalone Dock.
-- Removes the separate chat and floating Bounty Hunter buttons.
-- Dock v1.0.1 fixes close/toggle behavior, auto-closes, and restores the compact native S launcher.
+**v0.5.3 — Standalone Dock v1.1.0 repair**
+- Bounty Hunter is available only through the common SakaLuX Standalone Dock when Hub is absent.
+- Removes legacy Bounty chat/floating launchers.
+- Dock always starts closed, has a dedicated X close control and auto-closes after six seconds.
+- Also closes on outside tap, Escape, route change or module launch.
+- Protects the newest Dock Runtime from older embedded copies loaded by another SakaLuX script.
 
 ## Changelog
+### v0.5.3 — Standalone Dock v1.1.0 repair
+- Rebuilds the shared standalone lifecycle and close behavior.
+- Keeps Bounty Hunter Dock-only and removes duplicate launchers.
+- Protects the newest shared runtime from older embedded copies.
+
 ### v0.5.2 — Shared Standalone Dock integration
 - Adds Bounty Hunter to shared Standalone Dock and removes dedicated launch buttons.
 - Fixes Dock close/auto-close/native S behavior.

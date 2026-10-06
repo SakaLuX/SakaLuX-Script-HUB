@@ -78,3 +78,11 @@
 - Removes Bounty Hunter chat/floating launchers.
 - Dock no longer persists open state; closes on S, module selection, route change, outside tap, or after 8 seconds.
 - Restores and rebinds the compact native S launcher.
+## Bounty Hunter v0.5.3 + Script Hub v1.9.92 — Shared Standalone Dock v1.1.0
+- Audits and rebuilds the Standalone Dock runtime used by every managed standalone SakaLuX userscript.
+- Dock now always starts closed instead of inheriting a stale open state.
+- Adds a dedicated X close button and restores the compact native gold S launcher.
+- Closes on module launch, route change, outside tap, Escape and a six-second idle timeout.
+- Protects runtime v1.1.0 from older embedded dock copies loaded later by other scripts.
+- Bounty Hunter remains Dock-only; legacy chat and floating page launchers are removed.
+

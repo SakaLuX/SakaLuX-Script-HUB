@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.91
+// @version      1.9.92
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -670,6 +670,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {version:'1.9.92',date:'2026-10-06',changes:['Rebuilds Shared Standalone Dock runtime v1.1.0 across every managed standalone userscript.','Standalone now always starts closed, has a dedicated X close control, closes on outside tap, Escape, route change, module launch and after six seconds.','Protects the newest shared runtime from older embedded runtime copies loaded by another userscript.','Bounty Hunter v0.5.3 remains Dock-only and removes its legacy chat/floating launchers.']},
         {version:'1.9.91',date:'2026-10-06',changes:['Adds Torn: Bounties to the shared Hub API-key permission superset for Bounty Hunter.','Shared API CHECK now validates both User: Battle Stats and Torn: Bounties and reports a specific missing-permission message.','Bounty Hunter moves update/install distribution to GreasyFork #598988 and transient rate-limit/cache warnings no longer appear as Hub API ERROR.']},
         {"version": "1.9.90", "date": "2026-09-30", "changes": ["Uses metadata-derived canonical installed versions for managed modules to prevent false UPDATE AVAILABLE states.", "Synchronizes scripts.json, the offline Hub registry, NEW release details and release markdown surfaces from the same release metadata."]},
         {"version": "1.9.89", "date": "2026-09-26", "changes": ["Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.", "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.", "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."]},
