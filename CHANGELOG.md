@@ -57,4 +57,13 @@
 - Full-board pages are paced at ~950ms and cached for 2 minutes.
 - Activates a 65-second cooldown after a rate-limit response and reuses the last successful board cache during cooldown.
 - Keeps partial progress instead of discarding it.
+## Bounty Hunter v0.5.0
+- Major scanner optimization release.
+- Adds adaptive API pacing based on latency and rate-limit feedback.
+- Adds resumable/incremental full-board scanning with persisted next offset and partial progress.
+- Adds a separate 12-hour per-target FFScouter cache for FF/BS estimates.
+- Keeps live Torn status on a short cache and prioritizes relevant beatable candidates.
+- Adds live progress UI for board scan, FFScouter, status enrichment and API cooldown.
+- Expands Script Hub health diagnostics and synchronizes the module info/release description.
+- Fixes the canonical installed-version fallback to report 0.5.0 instead of the stale 0.4.2.
 

@@ -1418,7 +1418,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "description": "Mobile-first Torn bounty scanner with Safe/Profit modes, grouped rewards, watchlist, blacklist and direct attack links.",
                 "icon": "🎯",
                 "id": "bounty-hunter",
-                "info": "Purpose\nBounty Hunter scans the bounty rows already loaded by Torn and builds a compact hunt list for TornPDA and desktop.\n\nModes\nSafe mode prioritizes currently available targets. Profit mode prioritizes reward value while still weighting availability.\n\nFilters and actions\nIncludes minimum reward, maximum level, status filters, grouped rewards per player, direct Attack, watchlist and blacklist. Settings are stored locally.\n\nCurrent scope\nv0.1.0 is a DOM scanner and does not require a Torn API key. Full-board API paging and optional FF/BS estimation are planned for later versions.",
+                "info": "Purpose\nBounty Hunter scans the full Torn bounty board and builds a target-first hunt list for TornPDA and desktop. v0.5.0 adds an adaptive, resumable scanner with smart caching and live progress.\n\nAdaptive scanner\nFull-board API paging is paced automatically, reacts to latency/rate limits, preserves partial progress and can resume from the last saved offset instead of always starting over.\n\nSmart cache\nBoard results are cached separately from FF/BS and live status. FFScouter estimates are cached per target for up to 12 hours, while live status stays short-lived.\n\nBeatable filtering\nFF 1\u20133, reward, level, BS, Hospital window, Okay/Hospital, watchlist/blacklist and verified live status can all participate in the final list.\n\nUI and integration\nThe Hub-style panel shows scan/FF/status progress, launches from Chat V3, uses Shared Core API/storage/workspace helpers and exposes health diagnostics to Script Hub.",
                 "name": "Bounty Hunter",
                 "quickActions": [
                     {
@@ -1444,15 +1444,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.2.2",
-                    "date": "2026-10-04",
-                    "notes": [
-                        "Uses the userscript metadata version as the canonical installed-version signal for Script Hub, preventing false UPDATE AVAILABLE states.",
-                        "Initial SakaLuX bounty hunting module.",
-                        "Adds Safe / Profit modes with reward, level and status filters.",
-                        "Adds grouped bounty totals, direct attacks, watchlist, blacklist and Hub integration."
-                    ]
-                },
+                "version": "0.5.0",
+                "date": "2026-10-06",
+                "notes": [
+                                "Adaptive resumable scanner + smart cache + progress UI.",
+                                "FFScouter per-target cache and richer Hub health diagnostics."
+                ]
+},
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
                 "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",

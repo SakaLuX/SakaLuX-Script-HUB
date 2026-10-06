@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.4.7**
+**v0.5.0**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -41,14 +41,22 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.4.7 — Torn API rate-limit protection**
-- Prevents the full-board scanner from hammering Torn after Too many requests / HTTP 429.
-- Stops broker → direct → fallback fan-out on rate-limit errors.
-- Paces board pages to about one request per second and keeps a two-minute full-board cache.
-- Uses the last good board cache during cooldown instead of collapsing to a tiny partial/DOM result set.
-- Keeps partial progress if a rate limit happens mid-scan.
+**v0.5.0 — Adaptive scanner + resume + smart cache**
+- Full-board scanning now adapts request pacing from observed API latency and rate-limit feedback.
+- Scan progress is persisted, so an interrupted/rate-limited board scan can resume from its last offset instead of always restarting.
+- FFScouter FF/BS estimates use a dedicated per-target cache for up to 12 hours; live Torn status stays short-lived.
+- Adds live progress indicators for board paging, FFScouter enrichment, live-status validation and API cooldown.
+- Script Hub info/health diagnostics are synchronized with the current Bounty Hunter feature set.
 
 ## Changelog
+### v0.5.0 — Adaptive scanner + resume + smart cache
+- Adds adaptive full-board API pacing.
+- Persists partial scan progress and next offset for resumable scans.
+- Adds 12-hour per-target FFScouter FF/BS cache.
+- Adds board/FF/status/cooldown progress UI.
+- Expands Script Hub health diagnostics and updates module documentation.
+- Fixes stale canonical installed-version fallback.
+
 ### v0.4.7 — Torn API rate-limit protection
 - Adds a 65-second cooldown after Too many requests / HTTP 429.
 - Stops duplicate broker/direct/fallback requests during rate limiting.

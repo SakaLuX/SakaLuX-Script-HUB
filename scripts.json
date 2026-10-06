@@ -286,7 +286,7 @@
       "description": "Full-board Torn bounty hunter with Shared Core, Hub-aligned UI, FFScouter beatable filtering, strict live status and hospital timing.",
       "icon": "🎯",
       "id": "bounty-hunter",
-      "info": "Purpose\nBounty Hunter scans the full Torn bounty board and shows a compact list of targets worth attacking. v0.3.0 adds a launcher directly beside the Chat V3 message composer.\n\nBeatable-only filtering\nWith an FFScouter key, the module checks bounty targets in bulk and keeps only targets inside the configured fair-fight range. Default: FF 1.0–3.0; unknown FF targets are excluded.\n\nBoard scanning\nTorn API v2 pages through the global bounty board from any Torn page. Hospital countdowns, watchlist, blacklist, alerts, Attack/Profile actions and Safe/Profit sorting remain available.",
+      "info": "Purpose\nBounty Hunter scans the full Torn bounty board and builds a target-first hunt list for TornPDA and desktop. v0.5.0 adds an adaptive, resumable scanner with smart caching and live progress.\n\nAdaptive scanner\nFull-board API paging is paced automatically, reacts to latency/rate limits, preserves partial progress and can resume from the last saved offset instead of always starting over.\n\nSmart cache\nBoard results are cached separately from FF/BS and live status. FFScouter estimates are cached per target for up to 12 hours, while live status stays short-lived.\n\nBeatable filtering\nFF 1–3, reward, level, BS, Hospital window, Okay/Hospital, watchlist/blacklist and verified live status can all participate in the final list.\n\nUI and integration\nThe Hub-style panel shows scan/FF/status progress, launches from Chat V3, uses Shared Core API/storage/workspace helpers and exposes health diagnostics to Script Hub.",
       "name": "Bounty Hunter",
       "quickActions": [
         {
@@ -312,13 +312,14 @@
         }
       ],
       "release": {
-        "version": "0.4.7",
+        "version": "0.5.0",
         "date": "2026-10-06",
         "notes": [
-          "Adds Torn API rate-limit protection with a shared cooldown window.",
-          "Stops broker/direct/fallback request fan-out on Too many requests / HTTP 429.",
-          "Paces full-board paging to roughly one request per second and extends board cache to two minutes.",
-          "Uses the last good board cache during cooldown instead of collapsing to a tiny partial/DOM board."
+          "Adaptive full-board scanner adjusts pacing from API latency and rate-limit feedback.",
+          "Resumable incremental scans persist next offset and partial board progress for up to 10 minutes.",
+          "FFScouter FF/BS results are cached per target for 12 hours; live Torn status remains short-lived.",
+          "Adds progress UI for board paging, FFScouter enrichment, live-status checks and cooldowns.",
+          "Synchronizes Script Hub module info and exposes richer health diagnostics."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -326,7 +327,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.4.7",
+      "version": "0.5.0",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },
