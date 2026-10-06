@@ -1,6 +1,6 @@
 # SakaLuX Bounty Hunter
 
-**v0.4.5**
+**v0.4.6**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -41,14 +41,18 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.4.5 — Hub-aligned mobile workspace + clear toggle states**
-- Matches Script Hub mobile geometry: full usable width, top aligned, and extended down to 36px above TornPDA chat/navigation.
-- Removes overlay/footer blur and dimming for a cleaner native TornPDA feel.
-- Active filter/toggle controls now use a clear orange ON state; inactive controls remain dark.
-- Adds semantic aria-pressed and data-state attributes so control state is visually and programmatically consistent.
-- Updates Shared Core workspace defaults to v1.2.1 for reuse by future SakaLuX modules.
+**v0.4.6 — Reliable orange ON/OFF controls**
+- Fixes filter/toggle buttons that stayed visually dark even when their setting was enabled.
+- Active controls are now force-painted orange on TornPDA, while inactive controls remain dark.
+- Adds stronger state selectors plus pointer/touch safeguards so mobile taps reliably execute.
 
 ## Changelog
+### v0.4.6 — Reliable orange ON/OFF controls
+- Fixes filter/toggle controls that visually stayed dark because generic button styles could override the active-state class.
+- Active controls now use inline important painting plus high-specificity CSS for a clearly orange ON state.
+- Inactive controls remain dark.
+- Adds pointer-events and touch-action safeguards for TornPDA/mobile taps.
+
 ### v0.4.5 — Hub-aligned mobile workspace + clear toggle states
 - Aligns the Bounty Hunter panel with Script Hub geometry on TornPDA.
 - Removes blur/dim effects from the overlay and footer.

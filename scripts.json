@@ -312,13 +312,12 @@
         }
       ],
       "release": {
-        "version": "0.4.5",
+        "version": "0.4.6",
         "date": "2026-10-06",
         "notes": [
-          "Matches Script Hub mobile workspace geometry: top aligned and extended down to 36px above the bottom chat/navigation bar.",
-          "Removes overlay/footer blur and dimming for a clean non-blurred TornPDA view.",
-          "Active filter/toggle buttons are now orange; inactive buttons remain dark for immediate state recognition.",
-          "Shared Core workspace defaults updated to v1.2.1 so future modules can reuse the same Hub geometry."
+          "Fixes Bounty Hunter toggle buttons so ON/OFF state is immediately visible on TornPDA.",
+          "Active controls are painted orange with inline !important styles to override generic Shared Core/Hub button rules.",
+          "Adds stronger active-state selectors, pointer-events and touch-action safeguards for mobile taps."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -326,7 +325,7 @@
       "updateUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.4.5",
+      "version": "0.4.6",
       "detailsRevision": 2,
       "license": "All Rights Reserved"
     },

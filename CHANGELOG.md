@@ -46,4 +46,8 @@
 - Active filter/toggle chips now use a clear orange ON state; inactive controls stay dark.
 - Adds aria-pressed/data-state to filter chips for reliable visual/semantic state.
 - Shared Core updated to v1.2.1 with Hub-aligned workspace defaults for reuse by other modules.
+## Bounty Hunter v0.4.6
+- Fixed filter/toggle controls that visually remained dark even when enabled.
+- Active controls now render orange through both high-specificity CSS and inline important state painting.
+- Added mobile pointer/touch safeguards so taps reliably execute on TornPDA.
 
