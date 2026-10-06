@@ -127,3 +127,8 @@
 - Removed Suite's obsolete Standalone collector bootstrap, which was independently creating/moving standalone UI.
 - Suite master launcher no longer clones Torn icon classes.
 - Maintenance suffix .3 distributed to standalone modules; Hub unchanged.
+
+## Standalone Runtime v1.1.7 — plain S CSS selector fix
+- Fixed escaped CSS selectors introduced in v1.1.6.
+- Plain gold S styles now target the real launcher.
+- Added all:unset to block inherited Torn/racing/status backgrounds.

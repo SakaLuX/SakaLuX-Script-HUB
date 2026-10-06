@@ -34,18 +34,18 @@
         }
       ],
       "release": {
-        "version": "1.3.56.3",
+        "version": "1.3.56.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.56.3",
-      "detailsRevision": 11,
+      "version": "1.3.56.4",
+      "detailsRevision": 12,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -86,18 +86,18 @@
         }
       ],
       "release": {
-        "version": "5.3.47.3",
+        "version": "5.3.47.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.47.3",
-      "detailsRevision": 9,
+      "version": "5.3.47.4",
+      "detailsRevision": 10,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -139,15 +139,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 32,
-      "version": "1.1.16.3",
+      "detailsRevision": 33,
+      "version": "1.1.16.4",
       "release": {
-        "version": "1.1.16.3",
+        "version": "1.1.16.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -194,18 +194,18 @@
         }
       ],
       "release": {
-        "version": "1.0.49.3",
+        "version": "1.0.49.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.49.3",
-      "detailsRevision": 9,
+      "version": "1.0.49.4",
+      "detailsRevision": 10,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -260,18 +260,18 @@
         }
       ],
       "release": {
-        "version": "1.17.60.3",
+        "version": "1.17.60.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.60.3",
-      "detailsRevision": 20,
+      "version": "1.17.60.4",
+      "detailsRevision": 21,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -325,12 +325,12 @@
         }
       ],
       "release": {
-        "version": "0.5.6.3",
+        "version": "0.5.6.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -338,8 +338,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.6.3",
-      "detailsRevision": 11,
+      "version": "0.5.6.4",
+      "detailsRevision": 12,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -416,18 +416,18 @@
         }
       ],
       "release": {
-        "version": "1.3.50.3",
+        "version": "1.3.50.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.50.3",
-      "detailsRevision": 10,
+      "version": "1.3.50.4",
+      "detailsRevision": 11,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -467,18 +467,18 @@
         }
       ],
       "release": {
-        "version": "1.8.56.3",
+        "version": "1.8.56.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.56.3",
-      "detailsRevision": 9,
+      "version": "1.8.56.4",
+      "detailsRevision": 10,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -524,18 +524,18 @@
         }
       ],
       "release": {
-        "version": "0.8.18.3",
+        "version": "0.8.18.4",
         "date": "2026-10-06",
         "notes": [
-          "Maintenance-only: Shared Standalone Dock Runtime v1.1.6",
-          "Plain gold S no longer clones Torn/racing icon classes",
-          "Anchors S beside drug/cooldown status when available"
+          "Maintenance-only: Shared Standalone Dock Runtime v1.1.7",
+          "Fix escaped CSS selectors so plain-gold S styling applies",
+          "Reset inherited Torn status-icon background"
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.18.3",
-      "detailsRevision": 13,
+      "version": "0.8.18.4",
+      "detailsRevision": 14,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
