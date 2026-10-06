@@ -1,0 +1,45 @@
+name: Publish Bounty Hunter v0.4.7
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-bounty-hunter-v047.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply Bounty Hunter v0.4.7
+        run: python .github/scripts/update_bounty_hunter_v047.py
+      - name: Re-embed Shared Core
+        run: node tools/embed-shared-core.cjs SakaLuX-Bounty-Hunter.user.js src/core/sakalux-core.js SakaLuX-Bounty-Hunter.user.js
+      - name: Syntax checks
+        run: |
+          node --check SakaLuX-Bounty-Hunter.user.js
+          node --check src/core/sakalux-core.js
+      - name: Verify rate-limit protection
+        run: |
+          grep -q '@version      0.4.7' SakaLuX-Bounty-Hunter.user.js
+          grep -q "const VERSION='0.4.7'" SakaLuX-Bounty-Hunter.user.js
+          grep -q 'BH_RATE_KEY' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'isRateLimitError' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'setRateCooldown' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'setTimeout(r,950)' SakaLuX-Bounty-Hunter.user.js
+          grep -q 'age<120000' SakaLuX-Bounty-Hunter.user.js
+          grep -q '### v0.4.7' greasyfork/Bounty-Hunter.md
+      - name: Commit release
+        run: |
+          git config user.name 'SakaLuX'
+          git config user.email 'sakalutzu92@yahoo.com'
+          git add SakaLuX-Bounty-Hunter.user.js scripts.json CHANGELOG.md greasyfork/Bounty-Hunter.md
+          git diff --cached --quiet && exit 0
+          git commit -m 'Publish Bounty Hunter v0.4.7 rate-limit protection'
+          git push
