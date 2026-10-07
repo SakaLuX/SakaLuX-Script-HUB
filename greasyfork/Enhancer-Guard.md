@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.56.1**
+**v1.3.57**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-05**
-- Canonical version: **v1.3.54**
+- Verified: **2026-10-07**
+- Canonical version: **v1.3.57**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -29,13 +29,20 @@
 
 ## Current release note
 
-**v1.3.56.1 — Standalone Dock Runtime v1.1.4 legacy-launcher restore**
-- Maintenance-only release.
-- Restores the exact old/native Standalone S launcher implementation that previously worked correctly in TornPDA.
-- Keeps singleton and close-state fixes without redesigning the Torn status bar.
-- No module feature changes.
+**v1.3.57 — Version and release synchronization**
+- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
+- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
+- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
+- Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.3.57 — 2026-10-07
+- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
+- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
+- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
+- Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
+
 ### v1.3.56 — Standalone Dock Runtime v1.1.3 status-bar fix
 - Runtime-only maintenance update.
 - Prevents Standalone from changing Torn's native status-list child count/order.

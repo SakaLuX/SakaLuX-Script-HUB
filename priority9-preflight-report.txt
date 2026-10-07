@@ -1,1 +1,41 @@
-Release preflight passed for 12 script(s).
+SakaLuX release preflight — 2026-10-07
+
+Release preflight passed for 13 script(s).
+
+Release consistency audit
+  OK   Enhancer Guard v1.3.57
+  OK   Bazaar Thanker v5.3.48
+  OK   Bazaar Smart Pricer v1.1.17
+  OK   Mission Rewards v1.0.50
+  OK   Market Intelligence v1.17.61
+  OK   Bounty Hunter v0.5.7
+  OK   Elimination Assistant v1.3.51
+  OK   Company Intelligence v1.8.57
+  OK   Stock Manager & Advisor v0.8.19
+  OK   Script Hub v1.9.94
+  OK   Chat Intelligence v1.2.39
+  OK   Account Auditor v1.3.28
+  OK   SakaLuX Suite v0.9.984
+PASS: 13 release surfaces are version/changelog consistent, including detailed history entries.
+
+Runtime version-signal audit
+  OK   SakaLuX-Account-Auditor.user.js v1.3.28
+  OK   SakaLuX-Bazaar-Smart-Pricer.user.js v1.1.17
+  OK   SakaLuX-Bazaar-Thanker-PDA.user.js v5.3.48
+  OK   SakaLuX-Bounty-Hunter.user.js v0.5.7
+  OK   SakaLuX-Chat-Intelligence.user.js v1.2.39
+  OK   SakaLuX-Company-Intelligence-v1.0.0.user.js v1.8.57
+  OK   SakaLuX-Elimination-Assistant.user.js v1.3.51
+  OK   SakaLuX-Enhancer-Guard.user.js v1.3.57
+  OK   SakaLuX-Market-Intelligence.user.js v1.17.61
+  OK   SakaLuX-Mission-Rewards.user.js v1.0.50
+  OK   SakaLuX-Script-Hub.user.js v1.9.94
+  OK   SakaLuX-Stock-Manager-Advisor.user.js v0.8.19
+  OK   SakaLuX-Suite.user.js v0.9.984
+PASS: 13 userscripts have synchronized authoritative version signals.
+
+All 13 release packages built and all SHA256SUMS verified.
+Hub INFO/NEW DOM regression: PASS.
+Hub update-source/cache regression: PASS.
+Required runtime, settings, health, power, Stocks, Suite and state-machine regressions: PASS.
+All-script performance workload budgets: PASS, including all native Suite modules enabled.

@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.38**
+**v1.2.39**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-05**
-- Canonical version: **v1.2.38**
+- Verified: **2026-10-07**
+- Canonical version: **v1.2.39**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,12 +24,20 @@
 
 ## Current release note
 
-**v1.2.38 — Release documentation synchronized with the current Chat Intelligence userscript version**
-- Release documentation synchronized with the current Chat Intelligence userscript version.
+**v1.2.39 — Version and release synchronization**
+- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
+- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
+- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
 
 ## Release history / Changelog
 
 
+
+
+### v1.2.39 — 2026-10-07
+- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
+- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
+- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
 
 ### v1.2.38 — Active-chat notification suppression recovery
 - Fixes v1.2.37 suppressing every new toast merely because the newly rendered message element was visible.

@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / 'scripts.json'
 
 DOC_BY_ID = {
+    'bounty-hunter': 'greasyfork/Bounty-Hunter.md',
     'enhancer': 'greasyfork/Enhancer-Guard.md',
     'bazaar': 'greasyfork/Bazaar-Thanker.md',
     'bazaar-smart-pricer': 'greasyfork/Bazaar-Smart-Pricer.md',

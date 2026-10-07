@@ -3,13 +3,13 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.25**
+**v1.3.28**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-05**
-- Canonical version: **v1.3.25**
+- Verified: **2026-10-07**
+- Canonical version: **v1.3.28**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Account-Auditor.md
@@ -30,11 +30,21 @@
 
 ## Current release note
 
-**v1.3.25 — Release documentation synchronized with the current Account Auditor userscript version**
-- Release documentation synchronized with the current Account Auditor userscript version.
+**v1.3.28 — Version and release synchronization**
+- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
+- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
+- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
+- Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
 
+
+
+### v1.3.28 — 2026-10-07
+- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
+- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
+- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
+- Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ### v1.3.25 — Settings Schema v1 and safe automatic migrations
 - Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.

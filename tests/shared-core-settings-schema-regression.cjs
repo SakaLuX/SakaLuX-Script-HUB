@@ -35,7 +35,7 @@ function boot(name, initial = {}) {
     SakaLuX_MI_SETTINGS_V2: JSON.stringify({ enabled: true, compact: false })
   });
   const status = context.SakaLuXCore.settings.status('market-intelligence');
-  assert.equal(context.SakaLuXCore.version, '1.1.0');
+  assert.equal(context.SakaLuXCore.version, '1.2.1');
   assert.equal(status.version, 1);
   assert.equal(status.fallback, false);
   assert.deepEqual(JSON.parse(values.get('SakaLuX_MI_SETTINGS_V2')), { enabled: true, compact: false });

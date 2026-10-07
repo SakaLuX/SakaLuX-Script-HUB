@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');
 
 const src=fs.readFileSync('src/core/sakalux-dock-runtime.js','utf8');
 assert.match(src,/SakaLuX Shared Dock Runtime v1/);
-assert.match(src,/const VERSION = '1\.0\.0-test\.3'/);
+assert.match(src,/const VERSION = '1\.1\.10'/);
 assert.ok(src.includes("dock: 'sakalux-standalone-dock'"));
 assert.ok(src.includes('latest registration wins'));
 assert.ok(src.includes("SakaLuX:ScriptHubReady"));
@@ -59,6 +59,6 @@ const rows=panel.children[1].children;
 assert.deepEqual(Array.from(rows,x=>x.dataset.moduleId),['a','b']);
 assert.equal(rt.toggleDock(true),true);assert.equal(panel.dataset.open,'1');assert.equal(panel.hidden,false);
 rows[0].listeners.click();assert.equal(opened,1);assert.equal(panel.dataset.open,'0');assert.equal(panel.hidden,true);
-assert.equal(localStorage.getItem('SakaLuX_STANDALONE_DOCK_OPEN'),'0');
+assert.equal(localStorage.getItem('SakaLuX_STANDALONE_DOCK_OPEN'),null);
 hub=true;assert.equal(rt.render(),null);assert.equal(document.getElementById(rt.ids.dock),null);assert.equal(document.getElementById(rt.ids.fallback),null);
 console.log('Priority 6 shared dock runtime regression passed.');

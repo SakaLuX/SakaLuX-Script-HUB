@@ -16,13 +16,13 @@
 - Module-row matching prefers the smallest valid row instead of broad container elements.
 
 ## Current version
-**v0.9.983**
+**v0.9.984**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-05**
-- Canonical version: **v0.9.983**
+- Verified: **2026-10-07**
+- Canonical version: **v0.9.984**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -60,10 +60,18 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.983 — Release documentation synchronized with the current Suite userscript version**
-- Release documentation synchronized with the current Suite userscript version.
+**v0.9.984 — Version and release synchronization**
+- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
+- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
+- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
 
 ## Release history / Changelog
+
+
+### v0.9.984 — 2026-10-07
+- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
+- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
+- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
 
 ### v0.9.983 — City Shops route hotfix
 - Replaces broken `/shops.php` and `/city.php?step=shops` routes with `/city.php`.

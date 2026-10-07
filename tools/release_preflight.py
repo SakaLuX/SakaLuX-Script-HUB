@@ -91,6 +91,8 @@ def validate_entry(entry, registry_by_id):
     download = metadata(source, 'downloadURL')
     update = metadata(source, 'updateURL')
     if not version: errors.append(f"{entry['id']}: missing @version")
+    elif not re.fullmatch(r'\d+\.\d+\.\d+', version):
+        errors.append(f"{entry['id']}: release version must have three numeric components")
     if not name: errors.append(f"{entry['id']}: missing @name")
     if not license_name: errors.append(f"{entry['id']}: missing @license")
     if not download: errors.append(f"{entry['id']}: missing @downloadURL")

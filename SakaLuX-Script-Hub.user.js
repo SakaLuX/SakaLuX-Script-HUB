@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.93
+// @version      1.9.94
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -650,13 +650,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.89';
+    const VERSION = '1.9.94';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
     const LOCALES_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/locales.json';
     const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks&company=profile,employees,stock&torn=items,elimination,eliminationteam,stocks,bounties&market=itemmarket';
-    const UPDATE_CACHE_TIME = 24 * 60 * 60 * 1000;
+    const UPDATE_CACHE_TIME = 60 * 60 * 1000;
 
     const IDS = {
         button: 'sakalux-hub-button',
@@ -670,6 +670,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.94", "date": "2026-10-07", "changes": ["Repairs installed-version detection after updates and synchronizes all module versions with scripts.json and the offline registry.", "Verifies GitHub source metadata when GreasyFork is behind or unavailable, and offers the verified current installer.", "Refreshes stale update metadata; INFO describes module features and NEW shows the current version, date and actual changes."]},
         {version:'1.9.93',date:'2026-10-06',changes:['Shared Standalone Dock v1.1.1 restores the previous panel logo/header design and original native S launcher styling.','Adds a canonical capture-phase launcher handler and DOM enforcer so stale embedded dock runtimes cannot leave Standalone open or break outside-tap close.','Standalone now hard-closes on startup, registration, route change, outside tap, module launch and timeout; Bounty Hunter v0.5.4 remains Dock-only.']},
         {version:'1.9.92',date:'2026-10-06',changes:['Rebuilds Shared Standalone Dock runtime v1.1.0 across every managed standalone userscript.','Standalone now always starts closed, has a dedicated X close control, closes on outside tap, Escape, route change, module launch and after six seconds.','Protects the newest shared runtime from older embedded runtime copies loaded by another userscript.','Bounty Hunter v0.5.3 remains Dock-only and removes its legacy chat/floating launchers.']},
         {version:'1.9.91',date:'2026-10-06',changes:['Adds Torn: Bounties to the shared Hub API-key permission superset for Bounty Hunter.','Shared API CHECK now validates both User: Battle Stats and Torn: Bounties and reports a specific missing-permission message.','Bounty Hunter moves update/install distribution to GreasyFork #598988 and transient rate-limit/cache warnings no longer appear as Hub API ERROR.']},
@@ -1118,7 +1119,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         settings: 'SakaLuX_HUB_SETTINGS_V16',
         favorites: 'SakaLuX_HUB_FAVORITES_V16',
         usage: 'SakaLuX_HUB_USAGE_V16',
-        updates: 'SakaLuX_HUB_UPDATES_V19',
+        updates: 'SakaLuX_HUB_UPDATES_V20',
         registry: 'SakaLuX_HUB_REGISTRY_V21',
         locales: 'SakaLuX_HUB_LOCALES_V1',
         modulePower: 'SakaLuX_HUB_MODULE_POWER_V19',
@@ -1169,18 +1170,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.54",
-                    "date": "2026-09-30",
+                    "version": "1.3.57",
+                    "date": "2026-10-07",
                     "notes": [
-                        "Fixes Enhancer item links so they open Item Market directly in the selected item search instead of only opening the generic market page.",
-                        "Reads Torn API inventory.timestamp and shows a visible stale-cache warning when the inventory snapshot is old, explaining why a newly purchased enhancer can still appear as NOT OWNED.",
-                        "Keeps manual Refresh accurate about Torn server-side inventory caching instead of implying that a refresh can bypass the API cache."
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.54",
-                "detailsRevision": 6,
+                "version": "1.3.57",
+                "detailsRevision": 16,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -1221,18 +1223,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.45",
-                    "date": "2026-09-26",
+                    "version": "5.3.48",
+                    "date": "2026-10-07",
                     "notes": [
-                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.45",
-                "detailsRevision": 4,
+                "version": "5.3.48",
+                "detailsRevision": 14,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -1247,7 +1250,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "downloadUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.user.js",
                 "icon": "💰",
                 "id": "bazaar-smart-pricer",
-                "info": "Purpose\\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\\n\\nBulk workflow\\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\\n\\nSafety\\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\\n\\nHub integration\\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. API Access automatically prefers the Hub shared key when Hub is installed and keeps a local fallback. Manage Bazaar Update All can open collapsed rows sequentially, fill prices, and leaves Torn SAVE CHANGES as the final confirmation step. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.\\n\\nPricing source\\nAutomatic pricing uses Torn market_value with the configured discount/markup. If Torn City shop-floor enforcement is enabled, sell_price is the hard minimum because it is the amount the NPC shop pays you; buy_price is not used as the Bazaar price floor.",
+                "info": "Purpose\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\n\nBulk workflow\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\n\nSafety\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\n\nHub integration\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. API Access automatically prefers the Hub shared key when Hub is installed and keeps a local fallback. Manage Bazaar Update All can open collapsed rows sequentially, fill prices, and leaves Torn SAVE CHANGES as the final confirmation step. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.\n\nPricing source\nAutomatic pricing uses Torn market_value with the configured discount/markup. If Torn City shop-floor enforcement is enabled, sell_price is the hard minimum because it is the amount the NPC shop pays you; buy_price is not used as the Bazaar price floor.",
                 "name": "Bazaar Smart Pricer",
                 "quickActions": [
                     {
@@ -1274,15 +1277,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 27,
-                "version": "1.1.14",
+                "detailsRevision": 37,
+                "version": "1.1.17",
                 "release": {
-                    "version": "1.1.14",
-                    "date": "2026-09-30",
+                    "version": "1.1.17",
+                    "date": "2026-10-07",
                     "notes": [
-                        "Fixes the Torn City shop floor to use sell_price, the amount the NPC shop pays you, instead of buy_price.",
-                        "Prevents Smart Pricer from incorrectly raising a Bazaar price to the NPC shop purchase price when market value is lower.",
-                        "Resets stale pricing cache data and keeps the floor indicator aligned with sell_price."
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1302,7 +1306,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "greasyForkId": "592711",
                 "icon": "🎯",
                 "id": "mission-rewards",
-                "info": "Purpose\nMission Rewards adds practical purchase information to Torn's Mission Shop, helping compare rewards before spending mission credits. It decorates supported reward cards and provides a more detailed reward panel.\n\nReward value\nShows estimated market value and value per mission credit, so offers with different prices can be compared on the same basis. Values are estimates based on available item data; they are guidance rather than guaranteed resale prices.\n\nSpecial ammunition\nReads currently owned special ammunition through the configured API key and shows ownership context alongside relevant rewards. This helps distinguish ammunition you already have from offers you may want to buy.\n\nWeapon-mod price learning\nTracks normal and special weapon-mod credit ranges from offers seen locally. Learned ranges build up as you use the script on the device. They describe observed offers and do not guarantee the price of future Mission Shop rewards.\n\nAPI and refresh\nDedicated API Access uses User: Ammo and Torn: Items permissions. Includes key setup and validation, refresh controls and local item/ammo caches. Compatible shared Hub key access can be used where available. No API write permission is required for reward information.\n\nWhere it runs\nRegisters with Hub on every Torn page, but Mission Shop scanning only runs on Missions. Settings and learned ranges are stored locally. The current stable branch is v1.0.41; the rolled-back experimental Mission Hints branch is not part of the active feature set. Reward purchases remain normal player actions.",
+                "info": "Purpose\nMission Rewards adds practical purchase information to Torn's Mission Shop, helping compare rewards before spending mission credits. It decorates supported reward cards and provides a more detailed reward panel.\n\nReward value\nShows estimated market value and value per mission credit, so offers with different prices can be compared on the same basis. Values are estimates based on available item data; they are guidance rather than guaranteed resale prices.\n\nSpecial ammunition\nReads currently owned special ammunition through the configured API key and shows ownership context alongside relevant rewards. This helps distinguish ammunition you already have from offers you may want to buy.\n\nWeapon-mod price learning\nTracks normal and special weapon-mod credit ranges from offers seen locally. Learned ranges build up as you use the script on the device. They describe observed offers and do not guarantee the price of future Mission Shop rewards.\n\nAPI and refresh\nDedicated API Access uses User: Ammo and Torn: Items permissions. Includes key setup and validation, refresh controls and local item/ammo caches. Compatible shared Hub key access can be used where available. No API write permission is required for reward information.\n\nWhere it runs\nRegisters with Hub on every Torn page, but Mission Shop scanning only runs on Missions. Settings and learned ranges are stored locally. the rolled-back experimental Mission Hints branch is not part of the active feature set. Reward purchases remain normal player actions.",
                 "metaUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "name": "Mission Rewards",
                 "quickActions": [
@@ -1329,18 +1333,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.47",
-                    "date": "2026-09-26",
+                    "version": "1.0.50",
+                    "date": "2026-10-07",
                     "notes": [
-                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.47",
-                "detailsRevision": 4,
+                "version": "1.0.50",
+                "detailsRevision": 14,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -1395,19 +1400,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.58",
-                    "date": "2026-09-30",
+                    "version": "1.17.61",
+                    "date": "2026-10-07",
                     "notes": [
-                        "Best Buys now detects the live Torn cash balance automatically, including a Torn-page fallback for PDA travel pages.",
-                        "Every Best Buys option is selectable instead of always using the first recommendation.",
-                        "The selected item persists per destination and recalculates quantity from live cash, travel slots and current stock.",
-                        "MARK PLAN BOUGHT now records the currently selected option and its calculated quantity."
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.58",
-                "detailsRevision": 15,
+                "version": "1.17.61",
+                "detailsRevision": 25,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -1418,10 +1423,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "apiGlobal": "SakaLuXBountyHunter",
                 "buttonSelector": "#slx-bh-btn",
                 "category": "Combat",
-                "description": "Mobile-first Torn bounty scanner with Safe/Profit modes, grouped rewards, watchlist, blacklist and direct attack links.",
+                "description": "Full-board Torn bounty hunter with Shared Core, Hub-aligned UI, FFScouter beatable filtering, strict live status and hospital timing.",
                 "icon": "🎯",
                 "id": "bounty-hunter",
-                "info": "Purpose\nBounty Hunter scans the full Torn bounty board and builds a target-first hunt list for TornPDA and desktop. v0.5.0 adds an adaptive, resumable scanner with smart caching and live progress.\n\nAdaptive scanner\nFull-board API paging is paced automatically, reacts to latency/rate limits, preserves partial progress and can resume from the last saved offset instead of always starting over.\n\nSmart cache\nBoard results are cached separately from FF/BS and live status. FFScouter estimates are cached per target for up to 12 hours, while live status stays short-lived.\n\nBeatable filtering\nFF 1\u20133, reward, level, BS, Hospital window, Okay/Hospital, watchlist/blacklist and verified live status can all participate in the final list.\n\nUI and integration\nThe Hub-style panel shows scan/FF/status progress, launches from Chat V3, uses Shared Core API/storage/workspace helpers and exposes health diagnostics to Script Hub.",
+                "info": "Purpose\nBounty Hunter scans the full Torn bounty board and builds a target-first hunt list for TornPDA and desktop. v0.5.0 adds an adaptive, resumable scanner with smart caching and live progress.\n\nAdaptive scanner\nFull-board API paging is paced automatically, reacts to latency/rate limits, preserves partial progress and can resume from the last saved offset instead of always starting over.\n\nSmart cache\nBoard results are cached separately from FF/BS and live status. FFScouter estimates are cached per target for up to 12 hours, while live status stays short-lived.\n\nBeatable filtering\nFF 1–3, reward, level, BS, Hospital window, Okay/Hospital, watchlist/blacklist and verified live status can all participate in the final list.\n\nUI and integration\nThe Hub-style panel shows scan/FF/status progress, launches from Chat V3, uses Shared Core API/storage/workspace helpers and exposes health diagnostics to Script Hub.\n\nAPI Access\nThe shared Script Hub key now requires Torn: Bounties in addition to the existing User Basic/Profile access. API diagnostics distinguish missing Bounties permission from temporary rate limiting. Distribution and update checks now use GreasyFork #598988.",
                 "name": "Bounty Hunter",
                 "quickActions": [
                     {
@@ -1444,24 +1449,43 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                         "label": "BOUNTIES",
                         "method": "goToBounties",
                         "fallbackUrl": "https://www.torn.com/bounties.php"
+                    },
+                    {
+                        "icon": "🧪",
+                        "id": "test-key",
+                        "label": "TEST API",
+                        "method": "testTornAccess",
+                        "fallbackUrl": "https://www.torn.com/bounties.php"
+                    },
+                    {
+                        "icon": "🔑",
+                        "id": "create-key",
+                        "label": "API KEY",
+                        "method": "createRequiredTornKey",
+                        "fallbackUrl": "https://www.torn.com/preferences.php#tab=api"
                     }
                 ],
                 "release": {
-                "version": "0.5.1",
-                "date": "2026-10-06",
-                "notes": [
-                                "Adaptive resumable scanner + smart cache + progress UI.",
-                                "FFScouter per-target cache and richer Hub health diagnostics."
-                ]
-},
+                    "version": "0.5.7",
+                    "date": "2026-10-07",
+                    "notes": [
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                    ]
+                },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
                 "downloadUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.user.js",
-                "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.user.js",
+                "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
-                "version": "0.2.2",
-                "detailsRevision": 1,
-                "license": "All Rights Reserved"
+                "version": "0.5.7",
+                "detailsRevision": 16,
+                "license": "All Rights Reserved",
+                "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
+                "greasyForkId": "598988",
+                "greasyForkUrl": "https://greasyfork.org/scripts/598988"
             },
             {
                 "active": true,
@@ -1534,18 +1558,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.48",
-                    "date": "2026-09-26",
+                    "version": "1.3.51",
+                    "date": "2026-10-07",
                     "notes": [
-                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.48",
-                "detailsRevision": 5,
+                "version": "1.3.51",
+                "detailsRevision": 15,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -1585,18 +1610,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.54",
-                    "date": "2026-10-02",
+                    "version": "1.8.57",
+                    "date": "2026-10-07",
                     "notes": [
-                        "Synchronizes the Company Intelligence userscript header, runtime version, canonical installed-version marker, Script Hub registry and release surfaces to the same final version.",
-                        "Removes duplicate company-catalogue storage-key entries and repeated catalogue refresh calls accumulated by earlier incremental patches.",
-                        "Prevents Script Hub from showing a false UPDATE AVAILABLE badge when the installed Company Intelligence script is already current."
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.54",
-                "detailsRevision": 4,
+                "version": "1.8.57",
+                "detailsRevision": 14,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -1642,18 +1668,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.16",
-                    "date": "2026-09-26",
+                    "version": "0.8.19",
+                    "date": "2026-10-07",
                     "notes": [
-                        "Adds versioned settings schemas for every SakaLuX userscript through Shared Core v1.1.0.",
-                        "Automatically advances legacy settings through ordered per-version migrations without downgrading newer data.",
-                        "Keeps a last-known-good backup and restores it, or safely falls back to script defaults, when stored JSON is corrupt."
+                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.16",
-                "detailsRevision": 8,
+                "version": "0.8.19",
+                "detailsRevision": 18,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",
@@ -1661,7 +1688,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "license": "All Rights Reserved"
             }
         ],
-        "lastVerified": "2026-09-26",
+        "lastVerified": "2026-10-07",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 
@@ -1826,10 +1853,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function canonicalLatestVersion(script, publishedVersion) {
         const registryVersion = String(script?.expectedVersion || script?.version || '0');
         const published = publishedVersion ? String(publishedVersion) : null;
-        return published || registryVersion;
+        return published && compareVersions(published, registryVersion) > 0 ? published : registryVersion;
     }
 
     function getInstallUrl(script) {
+        const data = updateCache[script.id];
+        if (data?.sourceLatest && (!data.publishedLatest || compareVersions(data.sourceLatest, data.publishedLatest) > 0)) {
+            return script.sourceUrl || script.downloadUrl || '';
+        }
         return script.downloadUrl || script.sourceUrl || '';
     }
 
@@ -1839,8 +1870,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const rows = Array.isArray(data?.scripts) ? data.scripts : FALLBACK_REGISTRY.scripts;
         return rows.filter(s => s?.active !== false).map(s => {
             const baseline = FALLBACK_REGISTRY.scripts.find(item => item.id === s.id);
-            if (baseline && compareVersions(s.version, baseline.version) <= 0 &&
-                Number(s.detailsRevision || 0) < Number(baseline.detailsRevision || 0)) {
+            if (baseline && (compareVersions(s.version, baseline.version) < 0 ||
+                (compareVersions(s.version, baseline.version) === 0 &&
+                Number(s.detailsRevision || 0) < Number(baseline.detailsRevision || 0)))) {
                 s = { ...s, version: baseline.version, info: baseline.info,
                     release: baseline.release, detailsRevision: baseline.detailsRevision };
             }
@@ -1896,7 +1928,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
     async function loadRegistry(force = false) {
         try {
-            const raw = await httpGet(REGISTRY_URL + (force ? '?t=' + Date.now() : ''));
+            const raw = await httpGet(REGISTRY_URL + '?v=' + VERSION + (force ? '&t=' + Date.now() : ''));
             const data = JSON.parse(raw);
             if (!Array.isArray(data?.scripts)) throw new Error('Invalid registry');
             registry = data;
@@ -1965,6 +1997,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const installed = getInstalledVersion(script);
         return Boolean(
             data?.checkedAt &&
+            !data.error &&
             Date.now() - Number(data.checkedAt) < UPDATE_CACHE_TIME &&
             String(data.installed || '') === String(installed || '') &&
             String(data.expected || '') === String(script.expectedVersion || '')
@@ -1976,9 +2009,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (!data) return null;
         const installed = getInstalledVersion(script);
         const publishedLatest = data.publishedLatest ? String(data.publishedLatest) : null;
-        const latest = canonicalLatestVersion(script, publishedLatest);
-        const distributionBehind = Boolean(publishedLatest && compareVersions(publishedLatest, script.expectedVersion) < 0);
-        const available = Boolean(installed && publishedLatest && compareVersions(publishedLatest, installed) > 0);
+        const sourceLatest = data.sourceLatest ? String(data.sourceLatest) : null;
+        const verifiedLatest = [publishedLatest, sourceLatest].filter(Boolean).sort(compareVersions).pop();
+        const latest = canonicalLatestVersion(script, verifiedLatest);
+        const distributionBehind = Boolean(verifiedLatest && compareVersions(verifiedLatest, script.expectedVersion) < 0);
+        const available = Boolean(installed && verifiedLatest && compareVersions(verifiedLatest, installed) > 0);
         if (String(data.installed || '') !== String(installed || '') || String(data.latest || '') !== latest || String(data.expected || '') !== String(script.expectedVersion || '') || Boolean(data.available) !== available || Boolean(data.distributionBehind) !== distributionBehind) {
             updateCache[script.id] = { ...data, installed, expected: script.expectedVersion, publishedLatest, latest, distributionBehind, available };
             saveJson(STORAGE.updates, updateCache);
@@ -1990,25 +2025,38 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (!force && isUpdateCacheFresh(script)) return normalizeCachedUpdate(script);
         const installed = getInstalledVersion(script);
         let publishedLatest = null;
+        let sourceLatest = null;
         let sourceError = null;
+        let githubError = null;
         try {
-            publishedLatest = parseMetaVersion(await httpGet(script.metaUrl));
+            publishedLatest = parseMetaVersion(await httpGet(script.metaUrl + (force ? '?t=' + Date.now() : '')));
             if (!publishedLatest) throw new Error('No @version found');
         } catch (error) {
             sourceError = String(error?.message || error);
         }
-        const latest = canonicalLatestVersion(script, publishedLatest);
-        const distributionBehind = Boolean(publishedLatest && compareVersions(publishedLatest, script.expectedVersion) < 0);
+        if ((!publishedLatest || compareVersions(publishedLatest, script.expectedVersion) < 0) && script.sourceUrl) {
+            try {
+                sourceLatest = parseMetaVersion(await httpGet(script.sourceUrl + '?v=' + script.expectedVersion + (force ? '&t=' + Date.now() : '')));
+                if (!sourceLatest) throw new Error('No @version found in GitHub source');
+            } catch (error) {
+                githubError = String(error?.message || error);
+            }
+        }
+        const verifiedLatest = [publishedLatest, sourceLatest].filter(Boolean).sort(compareVersions).pop();
+        const latest = canonicalLatestVersion(script, verifiedLatest);
+        const distributionBehind = Boolean(verifiedLatest && compareVersions(verifiedLatest, script.expectedVersion) < 0);
         const data = {
             installed,
             expected: script.expectedVersion,
             publishedLatest,
+            sourceLatest,
             latest,
             distributionBehind,
-            available: Boolean(installed && publishedLatest && compareVersions(publishedLatest, installed) > 0),
+            available: Boolean(installed && verifiedLatest && compareVersions(verifiedLatest, installed) > 0),
             checkedAt: Date.now(),
             sourceError,
-            error: null
+            githubError,
+            error: verifiedLatest ? null : (githubError || sourceError || 'No verified update source')
         };
         updateCache[script.id] = data;
         saveJson(STORAGE.updates, updateCache);
@@ -3666,4 +3714,3 @@ new MutationObserver(schedule).observe(document.documentElement,{childList:true,
 window.addEventListener('SakaLuX:ModuleReady',schedule,{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',schedule,{passive:true});
 setInterval(run,1000);setTimeout(run,60);
 })();
-

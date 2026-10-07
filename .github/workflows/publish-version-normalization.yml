@@ -1,0 +1,55 @@
+name: Publish normalized script releases
+on:
+  push:
+    branches: [main]
+    paths: ['releases/version-normalization-2026-10-07.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-normalized-releases
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Install validation dependencies
+        run: |
+          python3 -m pip install PyYAML==6.0.3
+          npm install --prefix "$RUNNER_TEMP/dom-tests" jsdom@30.1.0 --no-audit --no-fund
+      - name: Validate sources, version signals and release surfaces
+        run: |
+          python3 .github/scripts/validate_repository.py
+          python3 .github/scripts/verify_release_consistency.py
+          python3 .github/scripts/verify_runtime_version_signals.py
+          NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/hub-details-regression.cjs
+          NODE_PATH="$RUNNER_TEMP/dom-tests/node_modules" node tests/hub-update-regression.cjs
+          python3 tools/release_preflight.py --all --build
+      - name: Verify package checksums
+        run: |
+          find dist/releases -name SHA256SUMS -print0 | while IFS= read -r -d '' sums; do
+            (cd "$(dirname "$sums")" && sha256sum -c SHA256SUMS)
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: normalized-script-release-packages
+          path: dist/releases
+      - name: Publish each validated package without overwriting releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          index = json.loads(pathlib.Path('dist/releases/release-index.json').read_text())
+          for package in index['packages']:
+              tag = package['tag']
+              if subprocess.run(['gh', 'release', 'view', tag], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                  print(f'Preserving existing release {tag}')
+                  continue
+              folder = pathlib.Path(package['package'])
+              subprocess.run(['gh', 'release', 'create', tag, *map(str, sorted(folder.iterdir())), '--target', __import__('os').environ['GITHUB_SHA'], '--title', package['name']+' v'+package['version'], '--notes-file', str(folder/'RELEASE_INFO.md')], check=True)
+          PY

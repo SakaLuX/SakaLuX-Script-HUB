@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.93**
+**v1.9.94**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-05**
-- Canonical version: **v1.9.93**
+- Verified: **2026-10-07**
+- Canonical version: **v1.9.94**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -34,14 +34,20 @@
 
 ## Current release note
 
-**v1.9.90 — Persistent native Fly-out launcher + release synchronization**
-- Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.
-- Keeps SakaLuX Hub permanently as the first row of the vertical list while that Torn menu exists; scrolling no longer removes or recreates it.
-- Keeps module INFO, NEW, scripts.json, offline fallback data, release documentation and version labels synchronized to the userscript metadata versions.
+**v1.9.94 — Version and release synchronization**
+- Repairs installed-version detection after updates and synchronizes all module versions with scripts.json and the offline registry.
+- Verifies GitHub source metadata when GreasyFork is behind or unavailable, and offers the verified current installer.
+- Refreshes stale update metadata; INFO describes module features and NEW shows the current version, date and actual changes.
 
 ## Release history / Changelog
 
 
+
+
+### v1.9.94 — 2026-10-07
+- Repairs installed-version detection after updates and synchronizes all module versions with scripts.json and the offline registry.
+- Verifies GitHub source metadata when GreasyFork is behind or unavailable, and offers the verified current installer.
+- Refreshes stale update metadata; INFO describes module features and NEW shows the current version, date and actual changes.
 
 ### v1.9.90 — Persistent native Fly-out launcher + release synchronization
 - Makes the Fly-out Hub launcher a persistent native child of Torn's vertical navigation list, matching CAT-style behavior instead of viewport-driven mounting.

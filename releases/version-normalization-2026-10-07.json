@@ -1,0 +1,77 @@
+{
+  "account-auditor": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "bazaar-smart-pricer": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "bazaar": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "chat-intelligence": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes."
+  ],
+  "company-intelligence": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "elimination-assistant": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "enhancer": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "market-intelligence": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "mission-rewards": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "script-hub": [
+    "Repairs installed-version detection after updates and synchronizes all module versions with scripts.json and the offline registry.",
+    "Verifies GitHub source metadata when GreasyFork is behind or unavailable, and offers the verified current installer.",
+    "Refreshes stale update metadata; INFO describes module features and NEW shows the current version, date and actual changes."
+  ],
+  "stock-manager-advisor": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ],
+  "suite": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes."
+  ],
+  "bounty-hunter": [
+    "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
+    "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
+    "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
+    "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+  ]
+}

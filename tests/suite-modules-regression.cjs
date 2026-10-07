@@ -13,8 +13,9 @@ window.eval(instrumented);
 const api = window.__suite;
 assert(api);
 const ids = ['enhancer', 'bazaar', 'market', 'missions', 'elimination', 'company', 'stocks', 'chat', 'auditor'];
-assert.equal(api.MODULES.length, 23);
-assert.equal(new Set(api.MODULES.map(x => x.id)).size, 23);
+assert.equal(api.MODULES.length, 24);
+assert.equal(new Set(api.MODULES.map(x => x.id)).size, 24);
+assert(api.MODULES.some(x => x.id === 'graffitiSprayGuide'), 'Graffiti module remains registered');
 const merged = api.mergeSettings(api.DEFAULT_SETTINGS, { modules: { enhancer: true, companyManagement: true }, api: { key: 'existing-local-key' } });
 assert.equal(merged.modules.enhancer, true);
 assert.equal(merged.modules.companyManagement, true);
@@ -52,4 +53,4 @@ for (const id of ids) {
   assert.equal(JSON.parse(window.localStorage.getItem(api.SUITE.storageKey)).modules[id], false);
 }
 dom.window.close();
-console.log('Suite: all 23 modules, nine rendered tool bridges, API/button launch, missing scripts and saved preferences passed.');
+console.log('Suite: all 24 modules, nine rendered tool bridges, API/button launch, missing scripts and saved preferences passed.');
