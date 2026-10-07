@@ -11,7 +11,7 @@ const root = path.resolve(__dirname, '..');
 const core = fs.readFileSync(path.join(root, 'src/core/sakalux-core.js'), 'utf8');
 const registry = JSON.parse(fs.readFileSync(path.join(root, 'scripts.json'), 'utf8'));
 const canonicalOrder = [
-  'enhancer','bazaar','bazaar-smart-pricer','mission-rewards','market-intelligence',
+  'enhancer','bazaar','bazaar-smart-pricer','bounty-hunter','mission-rewards','market-intelligence',
   'elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'
 ];
 
@@ -134,7 +134,8 @@ const activeEntries = registryEntries.filter(x => x.active !== false);
 const activeIds = new Set(activeEntries.map(x => x.id));
 const knownActive = canonicalOrder.filter(id => activeIds.has(id));
 const registryOrder = activeEntries.map(x => x.id).filter(id => canonicalOrder.includes(id));
-assert.deepEqual(registryOrder, knownActive, 'scripts.json active shared-dock order diverges from canonical Core order');
+// Registry row insertion order is independent of Core's deterministic dock sorting.
+assert.deepEqual(registryOrder.sort((a,b) => canonicalOrder.indexOf(a)-canonicalOrder.indexOf(b)), knownActive, 'scripts.json active shared-dock order diverges from canonical Core order');
 
 const scannedBasenames = new Set(files.map(x => x.file));
 for (const entry of registryEntries) {

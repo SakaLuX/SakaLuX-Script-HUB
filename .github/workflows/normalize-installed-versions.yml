@@ -6,148 +6,33 @@ on:
       - '*.user.js'
       - 'scripts.json'
       - 'greasyfork/*.md'
-      - '.github/scripts/normalize_installed_versions.py'
-      - '.github/scripts/sync_release_doc_headers.py'
+      - 'release-config.json'
+      - 'tools/sync_release_metadata.py'
+      - 'tools/release_preflight.py'
       - '.github/scripts/verify_release_consistency.py'
       - '.github/scripts/verify_runtime_version_signals.py'
-      - '.github/scripts/fix_historical_changelog_details.py'
-      - '.github/scripts/fix_bazaar_v1114_release.py'
-      - '.github/scripts/fix_standalone_hub_navigation.py'
-      - '.github/scripts/ensure_auditor_draggable.py'
-      - '.github/scripts/fix_bazaar_smart_pricer_power.py'
-      - '.github/scripts/fix_bazaar_pricer_sell_floor.py'
-      - '.github/scripts/fix_market_intelligence_budget_cap.py'
-      - '.github/scripts/fix_market_travel_page_isolation.py'
-      - '.github/scripts/fix_enhancer_inventory_market.py'
-      - '.github/scripts/fix_suite_target_alerts_mobile.py'
-      - '.github/scripts/fix_suite_target_alerts_render.py'
-      - '.github/scripts/polish_suite_target_alerts_ui.py'
-      - '.github/scripts/fix_suite_target_alerts_mobile_width.py'
-      - '.github/scripts/fix_suite_target_alerts_controls_status.py'
-      - '.github/scripts/fix_suite_target_alerts_controls_freeze.py'
-      - '.github/scripts/fix_suite_target_alerts_refresh_loop.py'
-      - '.github/scripts/fix_suite_target_alerts_async_repaint.py'
-      - '.github/scripts/fix_suite_target_alerts_hub_api_v2.py'
-      - '.github/scripts/update_chat_v137_visible_toast.py'
-      - '.github/scripts/fix_chat_visible_toast_v1238.py'
-      - '.github/scripts/fix_company_position_requirements.py'
-      - '.github/scripts/fix_company_release_note_1843.py'
-      - '.github/scripts/fix_company_position_ui_v1844.py'
-      - '.github/scripts/fix_company_position_ui_v1845.py'
-      - '.github/scripts/fix_company_position_dedupe_v1846.py'
-      - '.github/scripts/fix_company_structured_catalog_v1847.py'
-      - '.github/scripts/fix_company_catalog_name_helper.py'
-      - '.github/scripts/add_company_catalog_diagnostics_v1848.py'
-      - '.github/scripts/fix_company_catalog_parser_v1849.py'
-      - '.github/scripts/fix_company_catalog_mediawiki_api_v1850.py'
-      - '.github/scripts/fix_company_catalog_tornpda_transport_v1851.py'
-      - '.github/scripts/fix_company_rendered_wiki_fallback_v1852.py'
-      - '.github/scripts/fix_company_builtin_fallback_v1853.py'
-      - '.github/scripts/fix_company_release_surfaces_v1854.py'
       - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: normalize-installed-versions-main
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   normalize:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Fix standalone dock order and module navigation
-        run: python3 .github/scripts/fix_standalone_hub_navigation.py
-      - name: Make Account Auditor launcher draggable
-        run: python3 .github/scripts/ensure_auditor_draggable.py
-      - name: Make Bazaar Smart Pricer power global
-        run: python3 .github/scripts/fix_bazaar_smart_pricer_power.py
-      - name: Fix Bazaar Smart Pricer city sell floor
-        run: python3 .github/scripts/fix_bazaar_pricer_sell_floor.py
-      - name: Enforce Market Intelligence travel budget cap
-        run: python3 .github/scripts/fix_market_intelligence_budget_cap.py
-      - name: Keep Market Intelligence Travel UI on Travel only
-        run: python3 .github/scripts/fix_market_travel_page_isolation.py
-      - name: Fix Enhancer inventory cache visibility and direct market links
-        run: python3 .github/scripts/fix_enhancer_inventory_market.py
-      - name: Normalize module, Hub, NEW and release surfaces
-        run: python3 .github/scripts/normalize_installed_versions.py
-      - name: Fix Suite Target Alerts People panel on TornPDA
-        run: python3 .github/scripts/fix_suite_target_alerts_mobile.py
-      - name: Recover Suite Target Alerts list rendering
-        run: python3 .github/scripts/fix_suite_target_alerts_render.py
-      - name: Polish Suite Target Alerts People panel
-        run: python3 .github/scripts/polish_suite_target_alerts_ui.py
-      - name: Contain Suite Target Alerts inside mobile viewport
-        run: python3 .github/scripts/fix_suite_target_alerts_mobile_width.py
-      - name: Add Target Alerts controls, avatars and live status recovery
-        run: python3 .github/scripts/fix_suite_target_alerts_controls_status.py
-      - name: Fix Target Alerts Back and Minimize freezes
-        run: python3 .github/scripts/fix_suite_target_alerts_controls_freeze.py
-      - name: Stop Target Alerts refresh loop
-        run: python3 .github/scripts/fix_suite_target_alerts_refresh_loop.py
-      - name: Repaint Target Alerts after async data loads
-        run: python3 .github/scripts/fix_suite_target_alerts_async_repaint.py
-      - name: Bridge Hub API key and use Torn API v2 profiles
-        run: python3 .github/scripts/fix_suite_target_alerts_hub_api_v2.py
-      - name: Suppress Chat Intelligence toast for visible messages
-        run: python3 .github/scripts/update_chat_v137_visible_toast.py
-      - name: Recover Chat Intelligence notifications outside active chat
-        run: python3 .github/scripts/fix_chat_visible_toast_v1238.py
-      - name: Add generic Company Position requirements and editor
-        run: python3 .github/scripts/fix_company_position_requirements.py
-      - name: Fix Company Intelligence current release note
-        run: python3 .github/scripts/fix_company_release_note_1843.py
-      - name: Restore Company Position advisor UI and safe scraping
-        run: python3 .github/scripts/fix_company_position_ui_v1844.py
-      - name: Discover all Company Positions and layer editor above module
-        run: python3 .github/scripts/fix_company_position_ui_v1845.py
-      - name: Deduplicate Company Position names
-        run: python3 .github/scripts/fix_company_position_dedupe_v1846.py
-      - name: Use structured official Company Position catalogue
-        run: python3 .github/scripts/fix_company_structured_catalog_v1847.py
-      - name: Restore Company position name helper
-        run: python3 .github/scripts/fix_company_catalog_name_helper.py
-      - name: Add Company Position catalogue diagnostics
-        run: python3 .github/scripts/add_company_catalog_diagnostics_v1848.py
-      - name: Parse Company catalogue across TornPDA response formats
-        run: python3 .github/scripts/fix_company_catalog_parser_v1849.py
-      - name: Load Company catalogue through MediaWiki API
-        run: python3 .github/scripts/fix_company_catalog_mediawiki_api_v1850.py
-      - name: Use TornPDA-safe Company catalogue transport
-        run: python3 .github/scripts/fix_company_catalog_tornpda_transport_v1851.py
-      - name: Parse rendered Torn Wiki Company Positions on TornPDA
-        run: python3 .github/scripts/fix_company_rendered_wiki_fallback_v1852.py
-      - name: Add verified built-in Company Position fallback
-        run: python3 .github/scripts/fix_company_builtin_fallback_v1853.py
-      - name: Finalize Company version surfaces and clean duplicate patch residue
-        run: python3 .github/scripts/fix_company_release_surfaces_v1854.py
-      - name: Correct Bazaar Smart Pricer v1.1.14 release metadata
-        run: python3 .github/scripts/fix_bazaar_v1114_release.py
-      - name: Re-synchronize final runtime, Hub and release surfaces
-        run: python3 .github/scripts/normalize_installed_versions.py
-      - name: Repair historical changelog detail gaps
-        run: python3 .github/scripts/fix_historical_changelog_details.py
-      - name: Synchronize release documentation headers
-        run: python3 .github/scripts/sync_release_doc_headers.py
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      # Historical one-shot patch migrations are already part of production.
+      # Reapplying them can restore stale releases and fail on newer metadata.
+      # Version changes use tools/sync_release_metadata.py with explicit notes;
+      # CI verifies the committed release without silently rewriting it.
       - name: Verify release and changelog consistency
         run: python3 .github/scripts/verify_release_consistency.py
-      - name: Verify runtime version signals
+      - name: Verify application version signals
         run: python3 .github/scripts/verify_runtime_version_signals.py
-      - name: Validate JavaScript syntax
-        run: |
-          for f in *.user.js; do node --check "$f"; done
-      - name: Commit normalization if needed
-        run: |
-          if git diff --quiet; then
-            echo "Version, release and changelog surfaces already synchronized."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A -- '*.user.js' scripts.json greasyfork/*.md
-          git commit -m "Synchronize versions releases and changelogs"
-          git push
+      - name: Verify complete release metadata
+        run: python3 tools/release_preflight.py --all

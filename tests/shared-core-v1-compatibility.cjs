@@ -11,7 +11,7 @@ const TARGETS = [
   'SakaLuX-Stock-Manager-Advisor.user.js'
 ];
 const EXPECTED_ORDER = [
-  'enhancer','bazaar','bazaar-smart-pricer','mission-rewards','market-intelligence',
+  'enhancer','bazaar','bazaar-smart-pricer','bounty-hunter','mission-rewards','market-intelligence',
   'elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'
 ];
 const HUB_IDS = [
@@ -95,7 +95,8 @@ function legacySort(registrations){
     const source=fs.readFileSync(target,'utf8');
     for(const id of HUB_IDS) assert.ok(source.includes(id), `${target}: Hub detector keeps ${id}`);
     for(const attr of HUB_ATTRS) assert.ok(source.includes(attr), `${target}: Hub detector keeps ${attr}`);
-    for(const id of EXPECTED_ORDER) assert.ok(source.includes(`'${id}'`) || source.includes(`\"${id}\"`), `${target}: dock order keeps ${id}`);
+    // Older embedded Core builds predate Bounty Hunter; the rebuilt Core below must include it.
+    for(const id of EXPECTED_ORDER.filter(id => id !== 'bounty-hunter')) assert.ok(source.includes(`'${id}'`) || source.includes(`\"${id}\"`), `${target}: dock order keeps ${id}`);
     assert.ok(source.includes('g.SakaLuXPerf'), `${target}: legacy SakaLuXPerf contract exists`);
     assert.ok(source.includes('Math.max(120'), `${target}: legacy debounce minimum exists`);
     assert.ok(source.includes('#chat-box'), `${target}: chat mutation exclusion exists`);
@@ -103,6 +104,7 @@ function legacySort(registrations){
 
     const built=embedSharedCore(source,coreSource);
     assert.ok(built.includes('SakaLuXCore'), `${target}: Core embedded`);
+    assert.ok(built.includes("'bounty-hunter'"), `${target}: rebuilt Core knows Bounty Hunter`);
     assert.equal((built.match(/\/\* SakaLuX Shared Core — BEGIN \*\//g)||[]).length,1,`${target}: one Core block`);
     // Core installs the legacy alias before each existing bootstrap executes. Existing bootstraps use if (!g.SakaLuXPerf), so no behavior fork is created.
     assert.ok(built.indexOf('/* SakaLuX Shared Core — BEGIN */') < built.indexOf('g.SakaLuXPerf'), `${target}: Core alias available before legacy perf bootstrap`);

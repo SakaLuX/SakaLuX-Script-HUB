@@ -71,7 +71,7 @@ function emit(handlers, type) {
 
 (async () => {
   const scripts = userscripts();
-  assert.equal(scripts.length, 12, 'repository-wide TornPDA navigation suite expects all 12 userscripts');
+  assert.equal(scripts.length, 13, 'repository-wide TornPDA navigation suite expects all 13 userscripts');
   for (const file of scripts) {
     const source = fs.readFileSync(path.join(ROOT, file), 'utf8');
     assert(source.includes('/* SakaLuX Shared Core — BEGIN */'), `${file}: embedded Shared Core missing`);

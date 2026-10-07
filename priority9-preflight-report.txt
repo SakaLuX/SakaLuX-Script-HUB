@@ -39,3 +39,5 @@ Hub INFO/NEW DOM regression: PASS.
 Hub update-source/cache regression: PASS.
 Required runtime, settings, health, power, Stocks, Suite and state-machine regressions: PASS.
 All-script performance workload budgets: PASS, including all native Suite modules enabled.
+Shared Core compatibility, API broker, embedding and TornPDA navigation suites: PASS for all 13 userscripts.
+Legacy normalization workflow now validates committed release metadata instead of reapplying historical patch migrations.
