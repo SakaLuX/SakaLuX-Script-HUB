@@ -650,7 +650,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.94';
+    const VERSION = '1.9.95';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -670,6 +670,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {version:'1.9.95',date:'2026-10-08',changes:['Adds WEBSITE access to SakaLuX.ro from the Hub toolbar.','Adds a module DOCS action opening the related SakaLuX.ro information page while keeping INFO and NEW local.']},
         {"version": "1.9.94", "date": "2026-10-07", "changes": ["Repairs installed-version detection after updates and synchronizes all module versions with scripts.json and the offline registry.", "Verifies GitHub source metadata when GreasyFork is behind or unavailable, and offers the verified current installer.", "Refreshes stale update metadata; INFO describes module features and NEW shows the current version, date and actual changes."]},
         {version:'1.9.93',date:'2026-10-06',changes:['Shared Standalone Dock v1.1.1 restores the previous panel logo/header design and original native S launcher styling.','Adds a canonical capture-phase launcher handler and DOM enforcer so stale embedded dock runtimes cannot leave Standalone open or break outside-tap close.','Standalone now hard-closes on startup, registration, route change, outside tap, module launch and timeout; Bounty Hunter v0.5.4 remains Dock-only.']},
         {version:'1.9.92',date:'2026-10-06',changes:['Rebuilds Shared Standalone Dock runtime v1.1.0 across every managed standalone userscript.','Standalone now always starts closed, has a dedicated X close control, closes on outside tap, Escape, route change, module launch and after six seconds.','Protects the newest shared runtime from older embedded runtime copies loaded by another userscript.','Bounty Hunter v0.5.3 remains Dock-only and removes its legacy chat/floating launchers.']},
