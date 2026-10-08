@@ -1,0 +1,49 @@
+name: Deploy SakaLuX.ro
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/**'
+      - '.github/workflows/deploy-sakalux-site.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sakalux-ro-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: sakalux-production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify FTPS settings
+        env:
+          FTP_SERVER: ${{ secrets.SAKALUX_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.SAKALUX_FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.SAKALUX_FTP_PASSWORD }}
+          FTP_REMOTE_DIR: ${{ secrets.SAKALUX_FTP_REMOTE_DIR }}
+        run: |
+          for key in FTP_SERVER FTP_USERNAME FTP_PASSWORD FTP_REMOTE_DIR; do
+            if [ -z "${!key}" ]; then
+              echo "::error::Missing deployment secret: $key"
+              exit 1
+            fi
+          done
+          case "$FTP_REMOTE_DIR" in
+            */) ;;
+            *) echo "::error::SAKALUX_FTP_REMOTE_DIR must end with /"; exit 1 ;;
+          esac
+      - name: Deploy website over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.SAKALUX_FTP_SERVER }}
+          username: ${{ secrets.SAKALUX_FTP_USERNAME }}
+          password: ${{ secrets.SAKALUX_FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./website/
+          server-dir: ${{ secrets.SAKALUX_FTP_REMOTE_DIR }}
+          dangerous-clean-slate: false
+          log-level: standard
