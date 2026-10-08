@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.94
+// @version      1.9.95
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3095,7 +3095,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     <button class="slh-tool" id="slh-update-all" title="Refresh registry and update all"><span>⇧</span>UPDATE</button>
                     <button class="slh-tool" id="slh-health" title="System check"><span>◉</span>HEALTH</button>
                     <button class="slh-tool whatsnew" id="slh-whats-new" title="What's new"><span>✦</span>NEW</button>
-                    <button class="slh-tool settings" id="slh-settings" title="Settings"><span>⚙</span>SETTINGS</button>
+                    <button class="slh-tool" id="slh-website" title="SakaLuX website"><span>↗</span>WEBSITE</button><button class="slh-tool settings" id="slh-settings" title="Settings"><span>⚙</span>SETTINGS</button>
                 </div>
                 <div class="slh-cats" id="slh-cats"></div>
             </div>
@@ -3109,6 +3109,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         document.getElementById('slh-health').onclick = openSystemCheck;
         document.getElementById('slh-whats-new').onclick = openWhatsNew;
         document.getElementById('slh-settings').onclick = openSettings;
+        document.getElementById('slh-website').onclick = () => window.open('https://sakalux.ro/', '_blank', 'noopener,noreferrer');
         document.getElementById('slh-money').onclick = () => location.href = PROFILE_URL;
         document.getElementById('slh-items').onclick = () => location.href = PROFILE_URL;
         document.getElementById('slh-author').onclick = event => { event.preventDefault(); location.href = PROFILE_URL; };
@@ -3214,11 +3215,12 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
                 </div>
             </div>
-            <div class="slh-module-controls">${controls}</div>
+            <div class="slh-module-controls">${controls}<button class="slh-card-tool" type="button" data-module-docs="${escapeHtml(script.id)}" title="Open module documentation on SakaLuX.ro">↗ DOCS</button></div>
         </div>`;
     }
 
     function bindCards() {
+        document.querySelectorAll('[data-module-docs]').forEach(button => { button.onclick = () => { const script = SCRIPTS.find(item => item.id === button.dataset.moduleDocs); if (script) window.open('https://sakalux.ro/#script/' + encodeURIComponent(script.id) + '/info', '_blank', 'noopener,noreferrer'); }; });
         document.querySelectorAll('[data-module-info]').forEach(button => { button.onclick = () => openModuleInfo(SCRIPTS.find(item => item.id === button.dataset.moduleInfo)); });
         document.querySelectorAll('[data-module-new]').forEach(button => { button.onclick = () => openModuleRelease(SCRIPTS.find(item => item.id === button.dataset.moduleNew)); });
         document.querySelectorAll('[data-remediate]').forEach(button => {
