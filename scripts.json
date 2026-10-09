@@ -34,17 +34,18 @@
         }
       ],
       "release": {
-        "version": "1.3.65",
-        "date": "2026-10-09",
+        "version": "1.3.66",
+        "date": "2026-10-10",
         "notes": [
-          "Reuses the server-confirmed Hub PRO state for the matching API key and entitlement.",
-          "Checks shared PRO entitlement again when users open Enhancer Guard."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.65",
-      "detailsRevision": 24,
+      "version": "1.3.66",
+      "detailsRevision": 25,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -88,17 +89,18 @@
         }
       ],
       "release": {
-        "version": "5.3.64",
-        "date": "2026-10-09",
+        "version": "5.3.65",
+        "date": "2026-10-10",
         "notes": [
-          "Fixes an incorrect PRO popup by reusing the verified Hub entitlement.",
-          "Migrates reset settings and reset history confirmations to branded non-blocking dialogs."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.64",
-      "detailsRevision": 28,
+      "version": "5.3.65",
+      "detailsRevision": 29,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -143,15 +145,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 43,
-      "version": "1.1.22",
+      "detailsRevision": 44,
+      "version": "1.1.23",
       "release": {
-        "version": "1.1.22",
+        "version": "1.1.23",
         "date": "2026-10-10",
         "notes": [
-          "Security hardening: selected PRO-only execution functions verify a current entitlement before performing work, not only the UI button.",
-          "Client-side PRO state is initialized on startup; expired/unverified entitlements fail closed.",
-          "Client-side protection is not a tamper-proof paywall; server-hosted premium computations require authenticated server authorization."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -211,18 +213,18 @@
         }
       ],
       "release": {
-        "version": "1.0.54",
+        "version": "1.0.55",
         "date": "2026-10-10",
         "notes": [
-          "Security hardening: selected PRO-only execution functions verify a current entitlement before performing work, not only the UI button.",
-          "Client-side PRO state is initialized on startup; expired/unverified entitlements fail closed.",
-          "Client-side protection is not a tamper-proof paywall; server-hosted premium computations require authenticated server authorization."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.54",
-      "detailsRevision": 18,
+      "version": "1.0.55",
+      "detailsRevision": 19,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -289,18 +291,18 @@
         }
       ],
       "release": {
-        "version": "1.17.66",
+        "version": "1.17.67",
         "date": "2026-10-10",
         "notes": [
-          "Security hardening: selected PRO-only execution functions verify a current entitlement before performing work, not only the UI button.",
-          "Client-side PRO state is initialized on startup; expired/unverified entitlements fail closed.",
-          "Client-side protection is not a tamper-proof paywall; server-hosted premium computations require authenticated server authorization."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.66",
-      "detailsRevision": 31,
+      "version": "1.17.67",
+      "detailsRevision": 32,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -369,11 +371,12 @@
         }
       ],
       "release": {
-        "version": "0.5.12",
+        "version": "0.5.13",
         "date": "2026-10-10",
         "notes": [
-          "Added entitlement check inside the direct live enrichment execution function, not only UI controls.",
-          "Without PRO, background FF/status enrichment is skipped and the basic target list remains available."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -381,8 +384,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.12",
-      "detailsRevision": 21,
+      "version": "0.5.13",
+      "detailsRevision": 22,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -471,18 +474,18 @@
         }
       ],
       "release": {
-        "version": "1.3.58",
+        "version": "1.3.59",
         "date": "2026-10-10",
         "notes": [
-          "Security hardening: selected PRO-only execution functions verify a current entitlement before performing work, not only the UI button.",
-          "Client-side PRO state is initialized on startup; expired/unverified entitlements fail closed.",
-          "Client-side protection is not a tamper-proof paywall; server-hosted premium computations require authenticated server authorization."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.58",
-      "detailsRevision": 23,
+      "version": "1.3.59",
+      "detailsRevision": 24,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -536,18 +539,18 @@
         }
       ],
       "release": {
-        "version": "1.8.67",
-        "date": "2026-10-09",
+        "version": "1.8.68",
+        "date": "2026-10-10",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.67",
-      "detailsRevision": 23,
+      "version": "1.8.68",
+      "detailsRevision": 24,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -602,17 +605,18 @@
         }
       ],
       "release": {
-        "version": "0.8.23",
+        "version": "0.8.24",
         "date": "2026-10-10",
         "notes": [
-          "Added an additional PRO entitlement check at the PANIC preview execution entry point.",
-          "PANIC execution and its preview are blocked without PRO; existing portfolio and benefit views stay free."
+          "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+          "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+          "No premium permissions or server-side entitlements were changed."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.23",
-      "detailsRevision": 22,
+      "version": "0.8.24",
+      "detailsRevision": 23,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
