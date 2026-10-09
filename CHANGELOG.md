@@ -1,5 +1,11 @@
 # Changelog
 
+## Market and Elimination syntax hotfix — 2026-10-10
+
+- Market Intelligence v1.17.65: fixed duplicate `async` on Museum scan PRO guard.
+- Elimination Assistant v1.3.57: fixed duplicate `async` on calibration PRO guard.
+- Updated scripts.json and corresponding GreasyFork release documentation.
+
 ## Freemium execution-path audit — 2026-10-10
 
 - Bazaar Smart Pricer v1.1.20: PRO checks inside Quick Fill / Update All execution paths; fixed an invalid non-async declaration using await.
