@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.57
+// @version      1.3.58
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45,7 +45,7 @@
    else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
  }
  globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
- globalThis.SakaLuXFreemium['elimination-assistant']={isPro,locked};
+ globalThis.SakaLuXFreemium['elimination-assistant']={isPro,locked,isActive:()=>verifiedKey===key()&&verifiedUntil>Date.now()};void isPro();
  const bypass=new WeakSet();
  document.addEventListener('click',async e=>{
    const button=e.target?.closest?.('button,[role="button"],a');if(!button||bypass.has(button))return;
@@ -708,7 +708,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.57';
+  let v = '1.3.58';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1043,7 +1043,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.57" }));
+  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.58" }));
   const API_GLOBAL = "SakaLuXEliminationAssistant";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1105,7 +1105,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  */
 (() => {
 'use strict';
-const VERSION = '1.3.57';
+const VERSION = '1.3.58';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -1165,8 +1165,8 @@ function attackable(p){return presence(p).key==='torn'}
 function unavailable(p){return/^(hospital|jail|federal|fallen|dormant|awoken|flying|abroad)$/.test(presence(p).key)}
 function learn(id){const x=state.learning[String(id)]||{};return{wins:Number(x.wins||0),losses:Number(x.losses||0)}}
 function risk(p){let n=50;const l=learn(p.id);const edge=state.my.total&&p.bs?state.my.total/Math.max(1,p.bs):null;if(edge!==null){if(edge>=5)n-=38;else if(edge>=2)n-=27;else if(edge>=1.25)n-=14;else if(edge<.8)n+=34;else n+=8}else if(p.ff){if(p.ff>=5)n-=34;else if(p.ff>=3)n-=25;else if(p.ff>=1.5)n-=7;else n+=27}else{if(p.level&&p.level<=10)n-=22;else if(p.level<=25)n-=13;else if(p.level<=50)n+=4;else if(p.level<=75)n+=15;else if(p.level>75)n+=26}if(p.last){const h=(Date.now()/1000-p.last)/3600;if(h>=168)n-=16;else if(h>=24)n-=10;else if(h<4)n+=8}if(l.wins+l.losses){const wr=l.wins/(l.wins+l.losses);if(l.wins+l.losses>=2&&wr>=.75)n-=14;else if(l.wins+l.losses>=2&&wr<=.4)n+=22}if(unavailable(p))n=100;n=Math.max(0,Math.min(100,Math.round(n)));return{score:n,label:n<=34?'SAFE':n<=64?'RISKY':'SKIP',edge}}
-function smart(p){const r=risk(p);let s=100-r.score;if(p.ff)s+=Math.max(-8,Math.min(16,(p.ff-1)*4));if(r.edge!==null)s+=Math.max(-18,Math.min(20,Math.log2(Math.max(.1,r.edge))*8));if(unavailable(p))s=0;return Math.max(0,Math.min(100,Math.round(s)))}
-function signal(p){const r=risk(p);const top=`${p.ff?'FF '+p.ff.toFixed(2):'FF —'} · ${p.bs?'BS '+fmtBS(p.bs):'BS —'}`;const bottom=`${r.edge!==null?r.edge.toFixed(1)+'× · ':''}${r.label} · ${smart(p)}/100`;return top+'\n'+bottom}
+function smart(p){if(!globalThis.SakaLuXFreemium['elimination-assistant'].isActive())return 0;const r=risk(p);let s=100-r.score;if(p.ff)s+=Math.max(-8,Math.min(16,(p.ff-1)*4));if(r.edge!==null)s+=Math.max(-18,Math.min(20,Math.log2(Math.max(.1,r.edge))*8));if(unavailable(p))s=0;return Math.max(0,Math.min(100,Math.round(s)))}
+function signal(p){if(!globalThis.SakaLuXFreemium['elimination-assistant'].isActive())return 'Advanced target analysis · PRO';const r=risk(p);const top=`${p.ff?'FF '+p.ff.toFixed(2):'FF —'} · ${p.bs?'BS '+fmtBS(p.bs):'BS —'}`;const bottom=`${r.edge!==null?r.edge.toFixed(1)+'× · ':''}${r.label} · ${smart(p)}/100`;return top+'\n'+bottom}
 function syncHubPower(){
   for(const b of $$('[data-script="elimination-assistant"][data-action="toggle"]')){
     const txt=state.enabled?'⏻ ON':'⏻ OFF';
