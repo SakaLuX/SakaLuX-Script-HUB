@@ -1,5 +1,17 @@
 # Changelog
 
+## FREE/PRO execution-path hardening and security audit — 2026-10-10
+
+- Bazaar Smart Pricer v1.1.22: verified premium entry points for Quick Fill and Update All; added cached entitlement state helper.
+- Mission Rewards v1.0.54: guarded weapon-mod history observation and premium badge rendering, beyond button interception.
+- Market Intelligence v1.17.66: guarded Route Basket and Travel Planner/Best Travel Run calculations; existing Museum scan gate retained.
+- Elimination Assistant v1.3.58: guarded advanced Smart Score and tactical signal output; existing FF loading, calibration and WIN/LOSS recording checks retained.
+- These are **client-side** defenses and can be modified by anyone controlling the userscript/runtime; they are NOT tamper-proof licensing.
+- Server audit: premium-check endpoint verifies Torn identity and license in DB; manual PRO grant enforces owner + CSRF + validated days + prepared statements; PRO Bazaar ranking verifies active subscription.
+- Open findings: premium analytics still execute locally, so determined users may bypass the paywall; Bazaar ranking totals originate from untrusted client-provided data; independent PRO verification requests can hit the 20/15min/IP rate limit; no live penetration or authenticated TornPDA tests were performed.
+- All updates retain GreasyFork metadata and require publishing there for normal userscript auto-update.
+
+
 ## Execution-entry PRO review — 2026-10-10
 
 - Bounty Hunter v0.5.12: added PRO check within live target enrichment; FREE users retain basic target records.
