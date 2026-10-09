@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.61
+// @version      1.17.62
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -17,6 +17,41 @@
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
+
+/* SakaLuX Unified Dialogs v1.0 — BEGIN */
+(() => {
+  'use strict';
+  if (globalThis.SakaLuXDialog?.version === '1.0') return;
+  const STYLE='sakalux-unified-dialog-style';
+  const esc=v=>String(v??'');
+  function ensure(){
+    if(!document.getElementById(STYLE)){
+      const style=document.createElement('style');style.id=STYLE;
+      style.textContent=`.slx-dialog-shade{position:fixed!important;inset:0!important;z-index:2147483647!important;background:rgba(2,8,19,.78)!important;backdrop-filter:blur(5px)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;box-sizing:border-box!important}.slx-dialog-panel{box-sizing:border-box!important;width:min(100%,420px)!important;max-height:90dvh!important;overflow:auto!important;background:linear-gradient(155deg,#172638,#0b1421)!important;border:1px solid #405874!important;border-radius:20px!important;color:#edf4ff!important;box-shadow:0 24px 65px #000a!important;font:14px/1.55 system-ui,Arial,sans-serif!important}.slx-dialog-head{display:flex!important;align-items:center!important;gap:12px!important;padding:20px 20px 6px!important}.slx-dialog-icon{display:grid!important;place-items:center!important;flex:none!important;width:43px!important;height:43px!important;background:#26394e!important;color:#e8c577!important;border:1px solid #56617a!important;border-radius:13px!important;font-size:21px!important}.slx-dialog-title{font-size:20px!important;font-weight:800!important;line-height:1.2!important}.slx-dialog-tag{font-size:10px!important;font-weight:800!important;letter-spacing:.1em!important;color:#e9c779!important}.slx-dialog-x{margin-left:auto!important;border:0!important;border-radius:10px!important;background:#233348!important;color:#fff!important;padding:7px 12px!important;font-size:16px!important}.slx-dialog-message{white-space:pre-wrap!important;overflow-wrap:anywhere!important;color:#d8e5f7!important;padding:14px 20px 4px!important;font-size:15px!important}.slx-dialog-actions{display:flex!important;gap:10px!important;padding:18px 20px 20px!important}.slx-dialog-btn{min-height:43px!important;flex:1!important;border:1px solid #536a84!important;border-radius:12px!important;color:white!important;background:#26394e!important;font-weight:800!important}.slx-dialog-btn.primary{background:linear-gradient(#3d93e9,#2769b5)!important;border-color:#60a6ef!important}`;
+      (document.head||document.documentElement).appendChild(style);
+    }
+  }
+  function show({title='SakaLuX',message='',type='info',actions}={}){
+    ensure();const old=document.getElementById('sakalux-unified-dialog');old?.remove();
+    const shade=document.createElement('div');shade.id='sakalux-unified-dialog';shade.className='slx-dialog-shade';
+    const panel=document.createElement('section');panel.className='slx-dialog-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
+    const head=document.createElement('div');head.className='slx-dialog-head';
+    const icon=document.createElement('div');icon.className='slx-dialog-icon';icon.textContent=type==='error'?'!':type==='success'?'✓':type==='pro'?'✦':type==='update'?'↻':'i';
+    const group=document.createElement('div'),heading=document.createElement('div'),tag=document.createElement('div');
+    heading.className='slx-dialog-title';heading.textContent=title;tag.className='slx-dialog-tag';tag.textContent=type.toUpperCase();group.append(heading,tag);
+    const x=document.createElement('button');x.type='button';x.className='slx-dialog-x';x.textContent='×';x.setAttribute('aria-label','Close');x.onclick=()=>shade.remove();head.append(icon,group,x);
+    const body=document.createElement('div');body.className='slx-dialog-message';body.textContent=esc(message);
+    const foot=document.createElement('div');foot.className='slx-dialog-actions';
+    for(const action of actions||[{label:'CLOSE',primary:true}]){const b=document.createElement('button');b.type='button';b.className='slx-dialog-btn'+(action.primary?' primary':'');b.textContent=action.label||'OK';b.onclick=()=>{shade.remove();action.onClick?.()};foot.append(b)}
+    panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
+    shade.addEventListener('click',e=>{if(e.target===shade)shade.remove()});return shade;
+  }
+  function notice(message,type){const m=esc(message);return show({title:/error|failed|unavailable/i.test(m)?'Action failed':/pro|premium|license/i.test(m)?'SakaLuX PRO':'SakaLuX',message:m,type:type||(/error|failed|unavailable/i.test(m)?'error':/pro|premium|license/i.test(m)?'pro':'info')})}
+  function confirmAsync(message){return new Promise(resolve=>show({title:'Please confirm',message,type:'info',actions:[{label:'CANCEL',onClick:()=>resolve(false)},{label:'CONFIRM',primary:true,onClick:()=>resolve(true)}]}))}
+  globalThis.SakaLuXDialog={version:'1.0',show,notice,confirmAsync};
+})();
+/* SakaLuX Unified Dialogs v1.0 — END */
+
 
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
@@ -632,7 +667,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.61';
+  let v = '1.17.62';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -967,7 +1002,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.61" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.62" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1030,7 +1065,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 (function () {
     'use strict';
-    const VERSION = '1.17.61';
+    const VERSION = '1.17.62';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
