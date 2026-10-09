@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.62**
+**v1.17.63**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.17.62**
+- Canonical version: **v1.17.63**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -39,6 +39,12 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.17.63 — 2026-10-10 · FREE/PRO
+- FREE: Market price context; BUY/WAIT indicators; Basic watchlist.
+- PRO: Bazaar Flip; Best Travel Run; Route Basket; Travel Planner; Museum.
+- PANIC and other destructive execution paths retain explicit confirmation requirements. Client-side feature gates are not tamper-proof.
+
 
 ### v1.17.62 — 2026-10-09
 - Added shared SakaLuX branded dialogs for informational, PRO and error notices.
