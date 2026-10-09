@@ -3,13 +3,20 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.70**
+**v1.17.71**
+
+### License Manager v2 · 2026-10-10
+- Shared Hub license broker, short FREE cache, and bounded PRO cache.
+- Temporary network errors no longer count as confirmed FREE for upgrade prompts.
+- Account/key switch protection and verification-result validation.
+- Client-side entitlement guards are not tamper-proof; server operations require independent checks.
+
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.17.70**
+- Canonical version: **v1.17.71**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,13 +39,13 @@
 
 ## Current release note
 
-**v1.17.70 — 2026-10-10**
+**v1.17.71 — 2026-10-10**
 - Saved Best Run, Arrival Basket and Museum settings are not overwritten when PRO is absent.
 - Premium views and calculations use effective license status and restore previously enabled features after renewed verification.
 
 ## Release history / Changelog
 
-### v1.17.70 — 2026-10-10
+### v1.17.71 — 2026-10-10
 - Saved Best Run, Arrival Basket and Museum settings are not overwritten when PRO is absent.
 - Premium views and calculations use effective license status and restore previously enabled features after renewed verification.
 
