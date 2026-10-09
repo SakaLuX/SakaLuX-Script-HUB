@@ -2109,7 +2109,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (moduleEnabled) startRuntime();
         else stopRuntime();
         window.dispatchEvent(new CustomEvent('SakaLuX:BazaarThankerStateChanged', { detail: { version: BAZAAR_VERSION, enabled: moduleEnabled } }));
-        syncHubBridge('bazaar', moduleEnabled);
+        syncHubBridge('bazaar', moduleEnabled && slxProCurrent());
         return moduleEnabled;
     }
 
@@ -2147,7 +2147,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         },
         setEnabled,
         toggleEnabled,
-        isEnabled() { return moduleEnabled; },
+        isEnabled() { return moduleEnabled && slxProCurrent(); },
 
         stats() {
             if (!location.href.includes('sid=events')) {
@@ -2241,14 +2241,32 @@ function slxShowProNotice(){
  buttons.append(open,close);card.append(title,badge,desc,plan,trial,buttons);backdrop.append(card);document.body.append(backdrop);
  backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.remove()});
 }
+    /* PRO entitlement changes suspend execution without changing saved ON/OFF preference. */
+    function slxApplyEntitlement(allowed){
+        slxProAllowed=Boolean(allowed);
+        const active=moduleEnabled&&slxProCurrent();
+        if(active)startRuntime();else stopRuntime();
+        syncHubBridge('bazaar',active);
+        window.dispatchEvent(new CustomEvent('SakaLuX:BazaarThankerStateChanged',{detail:{version:BAZAAR_VERSION,enabled:active,preferredEnabled:moduleEnabled}}));
+    }
+    window.addEventListener('SakaLuX:PremiumStatus',e=>{
+        const d=e.detail||{},end=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');
+        const ok=d.premium_active===true&&d.entitlements?.includes('bazaar_thanker')&&Number.isFinite(end)&&end>Date.now();
+        slxProExpiry=ok?end:0;slxApplyEntitlement(ok);
+    });
+    let slxLicenseCheckBusy=false;
+    async function slxRefreshEntitlement(){
+        if(slxLicenseCheckBusy)return;
+        slxLicenseCheckBusy=true;
+        try{slxApplyEntitlement(await slxCheckProAccess());}
+        finally{slxLicenseCheckBusy=false;}
+    }
     async function init() {
         try { localStorage.setItem('SakaLuX_Installed_bazaar', BAZAAR_VERSION); } catch {}
         installHubBridge('bazaar', openSettingsPanel);
-        slxProAllowed=await slxCheckProAccess();
-        if (moduleEnabled && slxProCurrent()) {
-            startRuntime();
-            scheduleHubInstallPrompt();
-        }
+        await slxRefreshEntitlement();
+        if (moduleEnabled && slxProCurrent()) scheduleHubInstallPrompt();
+        setInterval(()=>{if(!document.hidden)void slxRefreshEntitlement()},5*60*1000);
     }
 
     if (document.readyState === 'loading') {
