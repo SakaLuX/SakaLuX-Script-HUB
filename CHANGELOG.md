@@ -1,5 +1,12 @@
 # Changelog
 
+## Market Intelligence v1.17.69 — 2026-10-10
+
+- Added ✦ PRO badges to premium travel and museum switches, including the previously unmarked Arrival Basket Planner.
+- Moved the Bazaar Flip Intelligence widget away from the top of Bazaar and limited full premium deal rankings to licensed users.
+- FREE players see a compact Bazaar Flip PRO teaser; tapping it opens the SakaLuX PRO dialog.
+
+
 ## Market Intelligence v1.17.68 — PRO toggle enforcement — 2026-10-10
 
 - Prevents FREE users from switching on Best Travel Run, Arrival Basket Planner and Museum intelligence.
