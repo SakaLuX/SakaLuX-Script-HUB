@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.54**
+**v1.3.55**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.3.54**
+- Canonical version: **v1.3.55**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -40,6 +40,12 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.3.55 — 2026-10-10
+- Added direct execution-entry checks for covered PRO functionality, including stock rebalance, Bazaar bulk updates, Museum scan and Elimination FF/calibration.
+- Retains basic FREE functions and GreasyFork distribution URLs.
+- Remaining execution paths and browser integration still need verification; JavaScript alone is not a secure server-side paywall.
+
 
 ### v1.3.54 — 2026-10-10 · FREE/PRO
 - FREE: Elimination teams; Player search; Availability status.
