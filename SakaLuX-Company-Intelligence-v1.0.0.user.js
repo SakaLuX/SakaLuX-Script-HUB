@@ -20,6 +20,40 @@
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
+/* SakaLuX Premium Badges v1 — BEGIN */
+(()=>{
+ 'use strict';
+ const MATCH=new RegExp("director",'i');
+ const ROOT=new RegExp("company|slx-ci|sak-ci",'i');
+ const STYLE_ID='slx-premium-badge-style';
+ function decorate(){
+  if(!document.body)return;
+  if(!document.getElementById(STYLE_ID)){
+   const style=document.createElement('style');style.id=STYLE_ID;
+   style.textContent='.slx-premium-badge{display:inline-flex!important;align-items:center!important;margin-inline-start:5px!important;padding:1px 5px!important;border:1px solid #bd9a4c!important;border-radius:5px!important;background:#372b14!important;color:#f9dc8d!important;font:800 10px/1.5 system-ui,sans-serif!important;letter-spacing:.035em!important;white-space:nowrap!important;vertical-align:middle!important;pointer-events:none!important}';
+   (document.head||document.documentElement).appendChild(style);
+  }
+  for(const el of document.querySelectorAll('button,[role="button"],[role="tab"],label')){
+   if(el.dataset.slxProBadgeChecked==='1')continue;
+   if(el.closest('#sakalux-unified-dialog,#sakalux-hub,#sakalux-script-hub,.slx-dialog-shade'))continue;
+   const identity=(String(el.id||'')+' '+String(el.className||'')+' '+String(el.parentElement?.id||'')+' '+String(el.parentElement?.className||'')).toLowerCase();
+   if(!ROOT.test(identity))continue;
+   const label=String(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
+   if(!MATCH.test(label))continue;
+   el.dataset.slxProBadgeChecked='1';
+   if(el.querySelector('.slx-premium-badge'))continue;
+   const tag=document.createElement('span');tag.className='slx-premium-badge';tag.textContent='✦ PRO';tag.setAttribute('aria-hidden','true');
+   el.append(tag);
+   if(!el.title)el.title='SakaLuX PRO feature';
+  }
+ }
+ let timer=0;
+ const schedule=()=>{if(timer)return;timer=setTimeout(()=>{timer=0;decorate()},180)};
+ const start=()=>{decorate();new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true})};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+/* SakaLuX Premium Badges v1 — END */
+
 
 /* SakaLuX Unified Dialogs v1.0 — BEGIN */
 (() => {
