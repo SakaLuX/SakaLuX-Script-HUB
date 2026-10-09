@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.120
+// @version      1.9.121
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -687,7 +687,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.120';
+    const VERSION = '1.9.121';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -3142,7 +3142,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const button=document.getElementById('slh-premium');
         if(!button)return;
         const key=getSharedApiKey();
-        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;}
+        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;}
         if(!key){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';return;}
         if(typeof GM_xmlhttpRequest!=='function'){button.title='Premium status unavailable';return;}
         if(!force&&hubProCache&&Date.now()-hubProCheckedAt<15*60*1000){
@@ -3158,7 +3158,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             onload:r=>{try{const d=JSON.parse(r.responseText||'{}');if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);resolve(d);}catch(e){reject(e);}},
             onerror:()=>reject(Error('Network unavailable')),ontimeout:()=>reject(Error('Timeout'))
         }));
-        try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();paintHubProStatus(document.getElementById('slh-premium'),d);}
+        try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};paintHubProStatus(document.getElementById('slh-premium'),d);}
         catch(error){if(button.isConnected){const reason=String(error?.message||'connection error');button.title='PRO verification unavailable: '+reason+' — tap for details';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
         finally{hubProPending=null;}
     }
