@@ -34,12 +34,16 @@
 
 ## Current release note
 
-**v1.9.111 — Current release**
-- Aligns published release documentation with the current userscript metadata.
-- See `scripts.json` and the version-specific changelog for detailed changes.
-
+**v1.9.111 — 2026-10-09**
+- Current Script Hub release; see the version-specific notes in the repository and embedded Hub changelog.
+- Maintains the installed-module, INFO and NEW release surfaces.
 
 ## Release history / Changelog
+
+
+### v1.9.111 — 2026-10-09
+- Current Script Hub release; see the version-specific notes in the repository and embedded Hub changelog.
+- Maintains the installed-module, INFO and NEW release surfaces.
 
 ### v1.9.98 — 2026-10-09
 - Adds one-time Premium device pairing with SakaLuX.ro using GM storage.
