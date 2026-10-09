@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.68**
+**v1.17.69**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.17.68**
+- Canonical version: **v1.17.69**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,12 +32,18 @@
 
 ## Current release note
 
-**v1.17.68 — 2026-10-10**
-- Prevents FREE accounts from enabling premium Best Travel Run, Arrival Basket and Museum toggles.
-- Checks license entitlement before saving ON state and opens the SakaLuX PRO dialog when locked.
-- Keeps FREE switches available.
+**v1.17.69 — 2026-10-10**
+- Adds visible ✦ PRO labels for Best Travel Run, Arrival Basket Planner, and Museum Intelligence in Settings.
+- Fixes intrusive Bazaar Flip Intelligence panel positioning; FREE visitors see a compact PRO teaser instead of premium ranking data.
+- A locked feature opens the existing SakaLuX PRO dialog; FREE controls remain available.
 
 ## Release history / Changelog
+
+### v1.17.69 — 2026-10-10
+- Adds visible ✦ PRO labels for Best Travel Run, Arrival Basket Planner, and Museum Intelligence in Settings.
+- Fixes intrusive Bazaar Flip Intelligence panel positioning; FREE visitors see a compact PRO teaser instead of premium ranking data.
+- A locked feature opens the existing SakaLuX PRO dialog; FREE controls remain available.
+
 
 ### v1.17.68 — 2026-10-10
 - Prevents FREE accounts from enabling premium Best Travel Run, Arrival Basket and Museum toggles.
