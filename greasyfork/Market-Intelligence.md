@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.67**
+**v1.17.68**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.17.67**
+- Canonical version: **v1.17.68**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -32,11 +32,18 @@
 
 ## Current release note
 
-**v1.17.67 — 2026-10-10**
-- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
-- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
+**v1.17.68 — 2026-10-10**
+- Prevents FREE accounts from enabling premium Best Travel Run, Arrival Basket and Museum toggles.
+- Checks license entitlement before saving ON state and opens the SakaLuX PRO dialog when locked.
+- Keeps FREE switches available.
 
 ## Release history / Changelog
+
+### v1.17.68 — 2026-10-10
+- Prevents FREE accounts from enabling premium Best Travel Run, Arrival Basket and Museum toggles.
+- Checks license entitlement before saving ON state and opens the SakaLuX PRO dialog when locked.
+- Keeps FREE switches available.
+
 
 
 ### v1.17.67 — 2026-10-10
