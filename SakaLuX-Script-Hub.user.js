@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.116
+// @version      1.9.117
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -653,7 +653,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.116';
+    const VERSION = '1.9.117';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -3336,7 +3336,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             ? `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
             : `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
         return `<div class="slh-card ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''} ${!missing && !enabled ? 'off' : ''}">
-            <div class="slh-card-side"><button class="slh-card-doc" type="button" data-module-docs="${escapeHtml(script.id)}" title="Open module documentation">↗ DOCS</button><div class="slh-icon">${script.icon || '🧩'}</div></div>
+            <div class="slh-card-side"><button class="slh-card-doc" type="button" data-module-docs="${escapeHtml(script.id)}" title="Open module documentation">↗ DOCS</button>${update.state === "available" ? `<button class="slh-card-doc slh-install-update" type="button" data-update="${escapeHtml(script.id)}" title="Install latest update from GitHub">↑ UPDATE</button>` : ""}<div class="slh-icon">${script.icon || '🧩'}</div></div>
             <div class="slh-card-copy">
                 <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
                 <div class="slh-chips">
