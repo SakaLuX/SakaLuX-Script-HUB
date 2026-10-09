@@ -34,17 +34,18 @@
         }
       ],
       "release": {
-        "version": "1.3.61",
+        "version": "1.3.62",
         "date": "2026-10-09",
         "notes": [
-          "Synchronizes userscript and runtime version for reliable Hub installed/update detection.",
-          "Preserves PRO verification and module functionality."
+          "Updates are distributed directly from the current GitHub source to avoid stale GreasyFork installers.",
+          "Both the userscript metadata and runtime version are synchronized.",
+          "Once installed, future automatic updates use the GitHub source."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.61",
-      "detailsRevision": 20,
+      "version": "1.3.62",
+      "detailsRevision": 21,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -88,17 +89,18 @@
         }
       ],
       "release": {
-        "version": "5.3.59",
+        "version": "5.3.60",
         "date": "2026-10-09",
         "notes": [
-          "Synchronizes userscript and runtime version for reliable Hub installed/update detection.",
-          "Preserves PRO verification and module functionality."
+          "Updates are distributed directly from the current GitHub source to avoid stale GreasyFork installers.",
+          "Both the userscript metadata and runtime version are synchronized.",
+          "Once installed, future automatic updates use the GitHub source."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.59",
-      "detailsRevision": 24,
+      "version": "5.3.60",
+      "detailsRevision": 25,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -481,17 +483,18 @@
         }
       ],
       "release": {
-        "version": "1.8.61",
+        "version": "1.8.62",
         "date": "2026-10-09",
         "notes": [
-          "Fixes the Director/Employee action error caused by querySelector instead of querySelectorAll.",
-          "Synchronizes runtime and metadata version so Hub detects installed updates."
+          "Updates are distributed directly from the current GitHub source to avoid stale GreasyFork installers.",
+          "Both the userscript metadata and runtime version are synchronized.",
+          "Once installed, future automatic updates use the GitHub source."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.61",
-      "detailsRevision": 17,
+      "version": "1.8.62",
+      "detailsRevision": 18,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
