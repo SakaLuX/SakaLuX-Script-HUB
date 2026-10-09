@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.95**
+**v1.9.96**
 
 
 ## Repository synchronization
@@ -40,6 +40,11 @@
 - Refreshes stale update metadata; INFO describes module features and NEW shows the current version, date and actual changes.
 
 ## Release history / Changelog
+
+### v1.9.96 — 2026-10-09
+- Adds PREMIUM navigation to the account license status page on SakaLuX.ro.
+- Monthly billing is not active; existing modules remain free.
+
 
 ### v1.9.95 — 2026-10-08
 - Adds WEBSITE navigation in the Hub toolbar.
