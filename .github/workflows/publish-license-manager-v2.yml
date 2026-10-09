@@ -1,0 +1,49 @@
+name: Publish License Manager v2 Releases
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'releases/license-manager-v2-2026-10-10.json'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-license-v2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install preflight dependencies
+        run: python3 -m pip install PyYAML==6.0.3
+      - name: Strict syntax and release validation
+        run: |
+          set -euo pipefail
+          for f in SakaLuX-*.user.js; do node --check "$f"; done
+          python3 .github/scripts/validate_repository.py
+          python3 tools/release_preflight.py --all --build
+      - name: Release only the License Manager v2 versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          wanted=json.loads(pathlib.Path('releases/license-manager-v2-2026-10-10.json').read_text())['versions']
+          idx=json.loads(pathlib.Path('dist/releases/release-index.json').read_text())
+          published=set()
+          for p in idx['packages']:
+              if p['id'] not in wanted or str(p['version'])!=str(wanted[p['id']]): continue
+              folder=pathlib.Path(p['package'])
+              subprocess.run(['bash','-c','cd "$1" && sha256sum -c SHA256SUMS','--',str(folder)],check=True)
+              tag=p['tag']
+              if subprocess.run(['gh','release','view',tag],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
+                  subprocess.run(['gh','release','create',tag,*map(str,sorted(folder.iterdir())),'--target',__import__('os').environ['GITHUB_SHA'],'--title',p['name']+' v'+p['version'],'--notes-file',str(folder/'RELEASE_INFO.md')],check=True)
+              published.add(p['id'])
+          missing=set(wanted)-published
+          if missing: raise SystemExit('Release packages missing: '+str(sorted(missing)))
+          PY
