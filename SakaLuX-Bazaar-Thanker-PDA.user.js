@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.57
+// @version      5.3.58
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2145,9 +2145,9 @@ function slxShowProNotice(){
  backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.remove()});
 }
     async function init() {
-        slxProAllowed=await slxCheckProAccess();
         try { localStorage.setItem('SakaLuX_Installed_bazaar', BAZAAR_VERSION); } catch {}
         installHubBridge('bazaar', openSettingsPanel);
+        slxProAllowed=await slxCheckProAccess();
         if (moduleEnabled && slxProCurrent()) {
             startRuntime();
             scheduleHubInstallPrompt();
