@@ -34,18 +34,18 @@
         }
       ],
       "release": {
-        "version": "1.3.62",
+        "version": "1.3.63",
         "date": "2026-10-09",
         "notes": [
-          "Updates are distributed directly from the current GitHub source to avoid stale GreasyFork installers.",
-          "Both the userscript metadata and runtime version are synchronized.",
-          "Once installed, future automatic updates use the GitHub source."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.62",
-      "detailsRevision": 21,
+      "version": "1.3.63",
+      "detailsRevision": 22,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -89,18 +89,18 @@
         }
       ],
       "release": {
-        "version": "5.3.60",
+        "version": "5.3.61",
         "date": "2026-10-09",
         "notes": [
-          "Updates are distributed directly from the current GitHub source to avoid stale GreasyFork installers.",
-          "Both the userscript metadata and runtime version are synchronized.",
-          "Once installed, future automatic updates use the GitHub source."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.60",
-      "detailsRevision": 25,
+      "version": "5.3.61",
+      "detailsRevision": 26,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -145,16 +145,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 37,
-      "version": "1.1.17",
+      "detailsRevision": 38,
+      "version": "1.1.18",
       "release": {
-        "version": "1.1.17",
-        "date": "2026-10-07",
+        "version": "1.1.18",
+        "date": "2026-10-09",
         "notes": [
-          "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-          "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-          "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-          "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -202,19 +201,18 @@
         }
       ],
       "release": {
-        "version": "1.0.50",
-        "date": "2026-10-07",
+        "version": "1.0.51",
+        "date": "2026-10-09",
         "notes": [
-          "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-          "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-          "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-          "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.50",
-      "detailsRevision": 14,
+      "version": "1.0.51",
+      "detailsRevision": 15,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -270,19 +268,18 @@
         }
       ],
       "release": {
-        "version": "1.17.61",
-        "date": "2026-10-07",
+        "version": "1.17.62",
+        "date": "2026-10-09",
         "notes": [
-          "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-          "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-          "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-          "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.61",
-      "detailsRevision": 25,
+      "version": "1.17.62",
+      "detailsRevision": 26,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -337,13 +334,12 @@
         }
       ],
       "release": {
-        "version": "0.5.7",
-        "date": "2026-10-07",
+        "version": "0.5.8",
+        "date": "2026-10-09",
         "notes": [
-          "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-          "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-          "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-          "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -351,8 +347,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.7",
-      "detailsRevision": 16,
+      "version": "0.5.8",
+      "detailsRevision": 17,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -430,19 +426,18 @@
         }
       ],
       "release": {
-        "version": "1.3.51",
-        "date": "2026-10-07",
+        "version": "1.3.52",
+        "date": "2026-10-09",
         "notes": [
-          "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-          "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-          "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-          "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.51",
-      "detailsRevision": 15,
+      "version": "1.3.52",
+      "detailsRevision": 16,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -483,18 +478,18 @@
         }
       ],
       "release": {
-        "version": "1.8.66",
+        "version": "1.8.67",
         "date": "2026-10-09",
         "notes": [
-          "Rechecks the active PRO entitlement before entering Director; saved Director mode no longer bypasses initial verification.",
-          "Distinguishes server/network/429 verification failures from inactive PRO and replaces the contradictory native alert with an inline error.",
-          "Keeps Employee free and checks Torn director role separately from PRO; improved key-bound expiry validation."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.66",
-      "detailsRevision": 22,
+      "version": "1.8.67",
+      "detailsRevision": 23,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -549,19 +544,18 @@
         }
       ],
       "release": {
-        "version": "0.8.19",
-        "date": "2026-10-07",
+        "version": "0.8.20",
+        "date": "2026-10-09",
         "notes": [
-          "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-          "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-          "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-          "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
+          "Existing alert messages now open branded dialogs with accessible close control.",
+          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.19",
-      "detailsRevision": 18,
+      "version": "0.8.20",
+      "detailsRevision": 19,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
@@ -570,6 +564,6 @@
       "accessTier": "free"
     }
   ],
-  "lastVerified": "2026-10-07",
+  "lastVerified": "2026-10-09",
   "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
 }
