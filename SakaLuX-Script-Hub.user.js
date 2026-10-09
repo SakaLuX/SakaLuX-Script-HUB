@@ -1470,18 +1470,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.68",
+                    "version": "1.17.69",
                     "date": "2026-10-10",
                     "notes": [
-                        "Prevents FREE users from enabling PRO-only Market Intelligence settings, including Best Travel Run, Arrival Basket and Museum intelligence.",
-                        "Checks verified entitlement before committing premium toggle state and opens the SakaLuX PRO dialog when access is unavailable.",
-                        "Preserves FREE toggles and existing premium execution checks."
+                        "Adds explicit ✦ PRO labels to Best Travel Run, Arrival Basket Planner and Museum Intelligence switches.",
+                        "Moves Bazaar Flip Intelligence below the Bazaar header instead of injecting above the page and hides premium deal rankings for FREE users.",
+                        "FREE players see a compact Bazaar Flip ✦ PRO teaser that opens the existing SakaLuX PRO dialog; existing premium checks remain in place."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.68",
-                "detailsRevision": 33,
+                "version": "1.17.69",
+                "detailsRevision": 34,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
