@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.63**
+**v5.3.64**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v5.3.63**
+- Canonical version: **v5.3.64**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -32,6 +32,11 @@
 - Installed copies subsequently use the GitHub source for automatic updates.
 
 ## Release history / Changelog
+
+### v5.3.64 — 2026-10-09
+- Migrates reset confirmations from native browser dialogs to the shared branded SakaLuX confirmation popup.
+- Cancelling a confirmation preserves existing data.
+
 
 ### v5.3.63 — 2026-10-09
 - Reuses the verified Hub PRO status for the same Torn API key and entitlement.
