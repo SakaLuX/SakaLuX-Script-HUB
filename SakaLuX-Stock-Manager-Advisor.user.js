@@ -2694,6 +2694,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     $$('[data-slx-preset]',box).forEach(b=>b.onclick=()=>{const v=b.dataset.slxPreset;const input=$('#slx-inline-withdraw-value',card);if(input)input.value=v;set(K.withdraw,v);inlineStatus(`Withdraw preset: ${v.toUpperCase()}`,'ok');});
   }
 
+  window.addEventListener('SakaLuX:PremiumStatus',()=>{setTimeout(()=>{try{applyInlineButtonPrefs()}catch(_){}} ,0)});
   function applyInlineButtonPrefs(card=$('#slx-stock-inline')) {
     if(!card) return;
     const pref=inlineButtonPrefs();
