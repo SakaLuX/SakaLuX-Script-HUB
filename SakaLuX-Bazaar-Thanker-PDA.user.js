@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.48
+// @version      5.3.49
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1443,6 +1443,42 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return groups;
     }
 
+    // Explicit export of events currently visible on Torn Events.
+    // This is a snapshot, not the full historical purchase ledger.
+    function exportVisibleBuyers() {
+        const buyers = [...getBuyerGroups().values()].map(group => ({
+            torn_id: Number(group.id),
+            name: String(group.name).slice(0, 100),
+            purchases: group.events.length,
+            items: group.totalItems,
+            spent: group.totalSpent
+        }));
+        return JSON.stringify({
+            format: 'sakalux-bazaar-visible-v1',
+            exported_at: new Date().toISOString(),
+            scope: 'visible_events_only',
+            buyers
+        }, null, 2);
+    }
+
+    function ensureExportButton() {
+        if (!location.href.includes('sid=events') || !moduleEnabled) return;
+        if (document.getElementById('sakalux-bt-export-visible')) return;
+        const button = document.createElement('button');
+        button.id = 'sakalux-bt-export-visible';
+        button.type = 'button';
+        button.textContent = 'Export Bazaar buyers';
+        button.title = 'Copy a JSON snapshot of Bazaar buyers visible on this Events page';
+        button.style.cssText = 'position:fixed;right:14px;bottom:78px;z-index:999998;padding:10px 14px;background:#172235;color:#e9c778;border:1px solid #bb984a;border-radius:10px;font-weight:bold;cursor:pointer';
+        button.addEventListener('click', async () => {
+            const payload = exportVisibleBuyers();
+            const success = await copyText(payload);
+            button.textContent = success ? 'Buyer JSON copied' : 'Could not copy JSON';
+            setTimeout(() => { button.textContent = 'Export Bazaar buyers'; }, 3000);
+        });
+        document.body.appendChild(button);
+    }
+
     function isBigBuyer(group) {
         const settings = loadSettings();
         return group.totalItems >= Number(settings.bigBuyerItems || 0) ||
@@ -1706,6 +1742,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function processBuyerGroups() {
         if (!moduleEnabled || !location.href.includes('sid=events')) return;
         const groups = getBuyerGroups();
+        ensureExportButton();
 
         document.querySelectorAll('.sakalux-bt-ui[data-buyer-id]').forEach(ui => {
             const xid = ui.dataset.buyerId;
