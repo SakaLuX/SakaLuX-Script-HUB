@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.60**
+**v5.3.61**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v5.3.60**
+- Canonical version: **v5.3.61**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -32,6 +32,12 @@
 - Installed copies subsequently use the GitHub source for automatic updates.
 
 ## Release history / Changelog
+
+### v5.3.61 — 2026-10-09
+- Added shared SakaLuX branded dialogs for informational, PRO and error notices.
+- Replaced existing blocking alert messages with styled notices.
+- Existing synchronous confirmations and prompts remain native for action safety.
+
 
 
 
