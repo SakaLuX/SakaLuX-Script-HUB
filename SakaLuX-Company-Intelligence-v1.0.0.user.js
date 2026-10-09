@@ -2067,20 +2067,26 @@ function init(){
  S.employment=get(APP.key+':employment',null);
  if(!S.data.profile&&!(S.employment?.known&&!S.employment.id)){const cached=get(KEY.company,null),last=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>b.ts-a.ts)[0]?.company;if(cached||last)S.data.profile=cached||last}
  installHubBridge();syncHubBridge();
- if(get(KEY.mode,'employee')==='director'){
-   void ciCheckDirectorPro(false).then(allowed=>{
-     if(get(KEY.mode,'employee')!=='director')return;
-     S.mode=allowed?'director':'employee';
+ async function reconcileDirectorPreference(){
+   const desired=get(KEY.mode,'employee');
+   let allowed=false;
+   if(desired==='director')try{allowed=Boolean(await ciCheckDirectorPro(true));}catch(_){}
+   const effective=desired==='director'&&allowed?'director':'employee';
+   if(S.mode!==effective){
+     S.mode=effective;S.tab='overview';
      if(S.open)render();
-     if(allowed&&!S.data.employees&&!S.loading)void refresh();
-   }).catch(()=>{S.mode='employee';if(S.open)render()});
+     if(effective==='director'&&!S.data.employees&&!S.loading)void refresh();
+   }
  }
+ void reconcileDirectorPreference();
+ setInterval(()=>{if(!document.hidden)void reconcileDirectorPreference()},5*60*1000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)void reconcileDirectorPreference()});
 
  try{localStorage.setItem('SakaLuX_Installed_company-intelligence',APP.version)}catch{}
  $('#ci-launch')?.remove();
  try{
   window.SakaLuX=window.SakaLuX||{};
-  window.SakaLuX.companyIntelligence={name:APP.name,version:APP.version,open:()=>{if(!S.enabled)setEnabled(true);S.open=true;render()},refresh,mode:m=>{if(['employee','director'].includes(m)){S.mode=m;S.tab='overview';set(KEY.mode,m);set(KEY.tab,S.tab);render()}},getApiKey:apiKey,setEnabled,toggleEnabled:()=>setEnabled(!S.enabled),isEnabled:()=>S.enabled};
+  window.SakaLuX.companyIntelligence={name:APP.name,version:APP.version,open:()=>{if(!S.enabled)setEnabled(true);S.open=true;render()},refresh,mode:m=>{if(['employee','director'].includes(m)){set(KEY.mode,m);S.mode=m==='director'&&ciDirectorProActive()?'director':'employee';S.tab='overview';set(KEY.tab,S.tab);render();if(m==='director')void reconcileDirectorPreference()}},getApiKey:apiKey,setEnabled,toggleEnabled:()=>setEnabled(!S.enabled),isEnabled:()=>S.enabled};
   window.SakaLuXCompanyIntelligence=window.SakaLuX.companyIntelligence;
   window.dispatchEvent(new CustomEvent('SakaLuX:ModuleReady',{detail:{id:'company-intelligence',name:APP.name,version:APP.version,actions:['OPEN','REFRESH','EMPLOYEE','DIRECTOR']}}));
  }catch{}
