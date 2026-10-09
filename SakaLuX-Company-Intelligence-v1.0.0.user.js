@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.57
+// @version      1.8.58
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -12,6 +12,7 @@
 // @grant        GM_setValue
 // @grant        GM_deleteValue
 // @connect      api.torn.com
+// @connect      sakalux.ro
 // @connect      wiki.torn.com
 // @run-at       document-end
 // @downloadURL  https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js
@@ -1701,8 +1702,8 @@ async function refresh(){
    try{freshProfile=await legacyApi('company',companyId,'profile')}catch{if(!S.data.profile)S.errors.push(e.code===7?'Company profile access is unavailable for this API key.':e.message||String(e))}
   }
   if(freshProfile){S.data.profile=freshProfile;set(KEY.company,freshProfile)}
-  if(isDirector()&&get(KEY.mode,null)==null)S.mode='director';
-  if(S.mode==='director'&&isDirector()){
+  if(isDirector()&&get(KEY.mode,null)==null)S.mode='employee';
+  if(S.mode==='director'&&isDirector()&&ciProVerified&&Date.now()<ciProExpires){
    const directorEndpoints={stock:`/company/${companyId}/stock`};
    const directorResults=await Promise.allSettled(Object.entries(directorEndpoints).map(async([k,p])=>[k,await api(p)]));
    for(const x of directorResults){if(x.status==='fulfilled')S.data[x.value[0]]=x.value[1];else S.errors.push(x.reason?.code===7?'Director access required for private company data.':x.reason?.message||String(x.reason))}
@@ -1838,9 +1839,28 @@ function settings(){
  ${card('Interface',`<label class="ci-check"><input id="ci-compact" type="checkbox" ${S.compact?'checked':''}> Compact PDA mode</label>`)}
  ${card('Local data',`<div class="ci-actions"><button class="ci-btn" data-act="export">Export</button><button class="ci-btn" data-act="import">Import</button><button class="ci-btn danger" data-act="clear">Clear history</button></div>`)}</div>`;
 }
+// Director workspace is a PRO feature. The server checks the key owner's Torn ID.
+let ciProVerified=false,ciProExpires=0,ciProChecking=null;
+function ciHubApiKey(){try{return String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}}
+async function ciCheckDirectorPro(force=false){
+ const key=ciHubApiKey();
+ if(!/^[a-zA-Z0-9]{16}$/.test(key)){ciProVerified=false;return false}
+ if(!force&&ciProVerified&&Date.now()<ciProExpires)return true;
+ if(ciProChecking)return ciProChecking;
+ if(typeof GM_xmlhttpRequest!=='function')return false;
+ ciProChecking=new Promise(resolve=>GM_xmlhttpRequest({
+  method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+  headers:{'Content-Type':'application/json','Accept':'application/json'},
+  data:JSON.stringify({api_key:key}),timeout:12000,
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const date=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const active=r.status===200&&d.status==='ok'&&d.premium_active===true&&Number.isFinite(date)&&date>Date.now()&&key===ciHubApiKey();ciProVerified=active;ciProExpires=active?Math.min(date,Date.now()+5*60*1000):0;resolve(active)}catch{resolve(false)}},
+  onerror:()=>resolve(false),ontimeout:()=>resolve(false)
+ }));
+ try{return await ciProChecking}finally{ciProChecking=null}
+}
 function body(){
  if(S.tab==='settings')return settings();
  if(S.mode==='director'){
+  if(!ciProVerified||Date.now()>=ciProExpires)return card('Director · PRO',`<p class="ci-note">Director tools require an active PRO license. Employee tools remain free. Configure your Torn API key in SakaLuX Hub and use DIRECTOR to verify access.</p><p class="ci-note"><a href="https://sakalux.ro/premium.html" target="_blank" rel="noopener noreferrer">View PRO plans</a></p>`);
   if(S.updated&&!isDirector())return card('Director access required',`<p class="ci-note">Torn only exposes private Employees and Stock data to the company director. Switch to EMPLOYEE mode for your personal company intelligence.</p>`);
   if(S.tab==='growth')return growthCenter();
   if(S.tab==='employees')return directorEmployees()+employeeOptimizer();
@@ -1911,7 +1931,7 @@ function render(){
  root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button type="button" data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button type="button" data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button type="button" class="ci-icon" data-act="refresh" title="Refresh">↻</button><button type="button" class="ci-icon api" data-act="settings" title="API Access">🔑</button><button type="button" class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button type="button" data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div></div>`;
  const content=$('.ci-shell > .ci-body',root),tabBar=$('.ci-tabs',root);if(content)content.scrollTop=scrollTop;if(tabBar)tabBar.scrollLeft=tabsLeft;
  $$('button',root).forEach(b=>{if(!b.type)b.type='button'});
- $$('[data-mode]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
+ $('[data-mode]',root).forEach(b=>b.onclick=async e=>{e.preventDefault();e.stopPropagation();if(b.dataset.mode==='director'){b.disabled=true;const allowed=await ciCheckDirectorPro(true);b.disabled=false;if(!allowed){S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);render();alert('Director requires an active SakaLuX PRO license. Check your Hub API key or visit sakalux.ro/premium.html.');return;}}S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
  $$('[data-tab]',root).forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();if(S.tab===b.dataset.tab)return;S.tab=b.dataset.tab;set(KEY.tab,S.tab);render()});
  $$('[data-act]',root).forEach(b=>b.onclick=()=>act(b.dataset.act));
  $$('[data-contract-paid]',root).forEach(b=>b.onclick=()=>{const x=arr(KEY.contracts),c=x.find(v=>String(v.id)===b.dataset.contractPaid);if(c)c.paid=!c.paid;set(KEY.contracts,x);render()});
