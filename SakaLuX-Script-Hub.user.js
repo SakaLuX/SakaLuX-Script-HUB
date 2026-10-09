@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.111
+// @version      1.9.112
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -653,7 +653,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.111';
+    const VERSION = '1.9.112';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -1865,6 +1865,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function getInstallUrl(script) {
+        // PRO and mixed modules publish their newest builds to GitHub first.
+        // Never send users to an older GreasyFork build when the registry knows a newer source.
+        if (['enhancer','bazaar','company-intelligence'].includes(script.id) && script.sourceUrl) {
+            return script.sourceUrl;
+        }
         const data = updateCache[script.id];
         if (data?.sourceLatest && (!data.publishedLatest || compareVersions(data.sourceLatest, data.publishedLatest) > 0)) {
             return script.sourceUrl || script.downloadUrl || '';
@@ -3308,7 +3313,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${statusChipClass}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(moduleStatus.label)}</span>
                     ${`<span class="slh-chip ${["pro","mixed"].includes(script.accessTier) || ["bazaar","enhancer","company-intelligence"].includes(script.id) ? "info" : "good"}" title="${script.id === "company-intelligence" ? "Employee: FREE / Director: PRO (enforcement pending)" : script.accessTier === "pro" || ["bazaar","enhancer"].includes(script.id) ? "PRO module (enforcement pending)" : "Free module"}">${script.id === "company-intelligence" ? "FREE / PRO" : script.accessTier === "pro" || ["bazaar","enhancer"].includes(script.id) ? "PRO" : "FREE"}</span>`}
-                    ${getRemediationAction(script) ? `<button class="slh-chip ${statusChipClass} slh-remedy" type="button" data-remediate="${escapeHtml(script.id)}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(getRemediationAction(script).label)}</button>` : ''}
+                    ${getRemediationAction(script) && update.state !== 'available' ? `<button class="slh-chip ${statusChipClass} slh-remedy" type="button" data-remediate="${escapeHtml(script.id)}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(getRemediationAction(script).label)}</button>` : ''}
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
                     ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
