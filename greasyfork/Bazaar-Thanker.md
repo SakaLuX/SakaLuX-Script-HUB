@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.59**
+**v5.3.60**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v5.3.59**
+- Canonical version: **v5.3.60**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -26,13 +26,19 @@
 
 ## Current release note
 
-**v5.3.59 — 2026-10-09**
-- Synchronizes userscript and runtime version for reliable Hub installed/update detection.
-- Preserves PRO verification and module functionality.
-- Repairs the malformed buyer-ranking handler and removes a duplicated corrupted code block that prevented Greasy Fork synchronization.
+**v5.3.60 — 2026-10-09**
+- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
+- Synchronizes userscript metadata and runtime version.
+- Installed copies subsequently use the GitHub source for automatic updates.
 
 ## Release history / Changelog
 
+
+
+### v5.3.60 — 2026-10-09
+- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
+- Synchronizes userscript metadata and runtime version.
+- Installed copies subsequently use the GitHub source for automatic updates.
 
 ### v5.3.59 — 2026-10-09
 - Synchronizes userscript and runtime version for reliable Hub installed/update detection.
