@@ -1213,17 +1213,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.67",
+                    "version": "1.3.68",
                     "date": "2026-10-10",
                     "notes": [
-                        "Paid module runtime and observers suspend without PRO while the preferred ON/OFF state remains saved.",
-                        "Automatically resumes previously enabled functionality after license verification."
+                        "License Manager v2: shared status broker reduces duplicate checks across modules.",
+                        "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
+                        "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.67",
-                "detailsRevision": 26,
+                "version": "1.3.68",
+                "detailsRevision": 27,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -1267,17 +1268,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.66",
+                    "version": "5.3.67",
                     "date": "2026-10-10",
                     "notes": [
-                        "Paid buyer-thanking runtime suspends without PRO without modifying saved ON/OFF preference.",
-                        "Automatically resumes previous enabled state after license verification."
+                        "License Manager v2: shared status broker reduces duplicate checks across modules.",
+                        "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
+                        "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.66",
-                "detailsRevision": 30,
+                "version": "5.3.67",
+                "detailsRevision": 31,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -1322,14 +1324,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 45,
-                "version": "1.1.24",
+                "detailsRevision": 46,
+                "version": "1.1.25",
                 "release": {
-                    "version": "1.1.24",
+                    "version": "1.1.25",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO entitlement changes immediately invalidate privileged bulk pricing actions; user preferences remain saved.",
-                        "FREE quick pricing remains available, and premium actions resume after PRO verification."
+                        "License Manager v2: shared status broker reduces duplicate checks across modules.",
+                        "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
+                        "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1389,17 +1392,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.56",
+                    "version": "1.0.57",
                     "date": "2026-10-10",
                     "notes": [
-                        "Temporarily displays weapon-mod learning OFF without PRO while retaining the saved preference.",
-                        "Restores the saved learning switch after PRO verification; FREE mission information remains available."
+                        "License Manager v2: shared status broker reduces duplicate checks across modules.",
+                        "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
+                        "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.56",
-                "detailsRevision": 20,
+                "version": "1.0.57",
+                "detailsRevision": 21,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -1466,17 +1470,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.70",
+                    "version": "1.17.71",
                     "date": "2026-10-10",
                     "notes": [
-                        "Saved Best Run, Arrival Basket and Museum settings are not overwritten when PRO is absent.",
-                        "Premium views and calculations use effective license status and restore previously enabled features after renewed verification."
+                        "License Manager v2: shared status broker reduces duplicate checks across modules.",
+                        "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
+                        "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.70",
-                "detailsRevision": 35,
+                "version": "1.17.71",
+                "detailsRevision": 36,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -1545,11 +1550,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.5.14",
+                    "version": "0.5.15",
                     "date": "2026-10-10",
                     "notes": [
-                        "Premium full-board, enrichment, smart/FF/BS sorting and advanced filters are inactive without PRO.",
-                        "Original premium choices are preserved and used again once entitlement is verified."
+                        "License Manager v2: shared status broker reduces duplicate checks across modules.",
+                        "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
+                        "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -1557,8 +1563,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
-                "version": "0.5.14",
-                "detailsRevision": 23,
+                "version": "0.5.15",
+                "detailsRevision": 24,
                 "license": "All Rights Reserved",
                 "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "greasyForkId": "598988",
@@ -1647,17 +1653,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.60",
+                    "version": "1.3.61",
                     "date": "2026-10-10",
                     "notes": [
-                        "Premium scoring, learning and tactical actions respond to entitlement status changes.",
-                        "Existing FREE functions and user settings remain intact."
+                        "License Manager v2: shared status broker reduces duplicate checks across modules.",
+                        "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
+                        "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.60",
-                "detailsRevision": 25,
+                "version": "1.3.61",
+                "detailsRevision": 26,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -1776,17 +1783,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.25",
+                    "version": "0.8.26",
                     "date": "2026-10-10",
                     "notes": [
-                        "Advisor, Rebalance and PANIC inline controls become effectively OFF without PRO.",
-                        "Saved control visibility choices are preserved and restored on license verification."
+                        "License Manager v2: shared status broker reduces duplicate checks across modules.",
+                        "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
+                        "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.25",
-                "detailsRevision": 24,
+                "version": "0.8.26",
+                "detailsRevision": 25,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",
