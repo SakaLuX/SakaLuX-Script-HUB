@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.96
+// @version      1.9.97
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -670,6 +670,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {version:'1.9.97',date:'2026-10-09',changes:['Marks Bazaar Thanker as a planned PRO module in Hub without disabling existing installations.','Adds canonical account license plans on SakaLuX.ro; billing is not yet active.']},
         {version:'1.9.96',date:'2026-10-09',changes:['Adds PREMIUM navigation to SakaLuX.ro account license status.','Keeps existing modules free; billing is disabled during test rollout.']},
         {version:'1.9.95',date:'2026-10-08',changes:['Adds WEBSITE access to SakaLuX.ro from the Hub toolbar.','Adds a module DOCS action opening the related SakaLuX.ro information page while keeping INFO and NEW local.']},
         {"version": "1.9.94", "date": "2026-10-07", "changes": ["Repairs installed-version detection after updates and synchronizes all module versions with scripts.json and the offline registry.", "Verifies GitHub source metadata when GreasyFork is behind or unavailable, and offers the verified current installer.", "Refreshes stale update metadata; INFO describes module features and NEW shows the current version, date and actual changes."]},
@@ -3212,6 +3213,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 <div class="slh-chips">
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${statusChipClass}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(moduleStatus.label)}</span>
+                    ${script.id === "bazaar" ? `<span class="slh-chip info" title="PRO licensing will be enforced after secure account pairing is ready">PRO SOON</span>` : ""}
                     ${getRemediationAction(script) ? `<button class="slh-chip ${statusChipClass} slh-remedy" type="button" data-remediate="${escapeHtml(script.id)}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(getRemediationAction(script).label)}</button>` : ''}
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
