@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.119
+// @version      1.9.120
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -19,6 +19,40 @@
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
+
+/* SakaLuX Unified Dialogs v1.0 — BEGIN */
+(() => {
+  'use strict';
+  if (globalThis.SakaLuXDialog?.version === '1.0') return;
+  const STYLE='sakalux-unified-dialog-style';
+  const esc=v=>String(v??'');
+  function ensure(){
+    if(!document.getElementById(STYLE)){
+      const style=document.createElement('style');style.id=STYLE;
+      style.textContent=`.slx-dialog-shade{position:fixed!important;inset:0!important;z-index:2147483647!important;background:rgba(2,8,19,.78)!important;backdrop-filter:blur(5px)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;box-sizing:border-box!important}.slx-dialog-panel{box-sizing:border-box!important;width:min(100%,420px)!important;max-height:90dvh!important;overflow:auto!important;background:linear-gradient(155deg,#172638,#0b1421)!important;border:1px solid #405874!important;border-radius:20px!important;color:#edf4ff!important;box-shadow:0 24px 65px #000a!important;font:14px/1.55 system-ui,Arial,sans-serif!important}.slx-dialog-head{display:flex!important;align-items:center!important;gap:12px!important;padding:20px 20px 6px!important}.slx-dialog-icon{display:grid!important;place-items:center!important;flex:none!important;width:43px!important;height:43px!important;background:#26394e!important;color:#e8c577!important;border:1px solid #56617a!important;border-radius:13px!important;font-size:21px!important}.slx-dialog-title{font-size:20px!important;font-weight:800!important;line-height:1.2!important}.slx-dialog-tag{font-size:10px!important;font-weight:800!important;letter-spacing:.1em!important;color:#e9c779!important}.slx-dialog-x{margin-left:auto!important;border:0!important;border-radius:10px!important;background:#233348!important;color:#fff!important;padding:7px 12px!important;font-size:16px!important}.slx-dialog-message{white-space:pre-wrap!important;overflow-wrap:anywhere!important;color:#d8e5f7!important;padding:14px 20px 4px!important;font-size:15px!important}.slx-dialog-actions{display:flex!important;gap:10px!important;padding:18px 20px 20px!important}.slx-dialog-btn{min-height:43px!important;flex:1!important;border:1px solid #536a84!important;border-radius:12px!important;color:white!important;background:#26394e!important;font-weight:800!important}.slx-dialog-btn.primary{background:linear-gradient(#3d93e9,#2769b5)!important;border-color:#60a6ef!important}`;
+      (document.head||document.documentElement).appendChild(style);
+    }
+  }
+  function show({title='SakaLuX',message='',type='info',actions}={}){
+    ensure();const old=document.getElementById('sakalux-unified-dialog');old?.remove();
+    const shade=document.createElement('div');shade.id='sakalux-unified-dialog';shade.className='slx-dialog-shade';
+    const panel=document.createElement('section');panel.className='slx-dialog-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
+    const head=document.createElement('div');head.className='slx-dialog-head';
+    const icon=document.createElement('div');icon.className='slx-dialog-icon';icon.textContent=type==='error'?'!':type==='success'?'✓':type==='pro'?'✦':type==='update'?'↻':'i';
+    const group=document.createElement('div'),heading=document.createElement('div'),tag=document.createElement('div');
+    heading.className='slx-dialog-title';heading.textContent=title;tag.className='slx-dialog-tag';tag.textContent=type.toUpperCase();group.append(heading,tag);
+    const x=document.createElement('button');x.type='button';x.className='slx-dialog-x';x.textContent='×';x.setAttribute('aria-label','Close');x.onclick=()=>shade.remove();head.append(icon,group,x);
+    const body=document.createElement('div');body.className='slx-dialog-message';body.textContent=esc(message);
+    const foot=document.createElement('div');foot.className='slx-dialog-actions';
+    for(const action of actions||[{label:'CLOSE',primary:true}]){const b=document.createElement('button');b.type='button';b.className='slx-dialog-btn'+(action.primary?' primary':'');b.textContent=action.label||'OK';b.onclick=()=>{shade.remove();action.onClick?.()};foot.append(b)}
+    panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
+    shade.addEventListener('click',e=>{if(e.target===shade)shade.remove()});return shade;
+  }
+  function notice(message,type){const m=esc(message);return show({title:/error|failed|unavailable/i.test(m)?'Action failed':/pro|premium|license/i.test(m)?'SakaLuX PRO':'SakaLuX',message:m,type:type||(/error|failed|unavailable/i.test(m)?'error':/pro|premium|license/i.test(m)?'pro':'info')})}
+  function confirmAsync(message){return new Promise(resolve=>show({title:'Please confirm',message,type:'info',actions:[{label:'CANCEL',onClick:()=>resolve(false)},{label:'CONFIRM',primary:true,onClick:()=>resolve(true)}]}))}
+  globalThis.SakaLuXDialog={version:'1.0',show,notice,confirmAsync};
+})();
+/* SakaLuX Unified Dialogs v1.0 — END */
 
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
@@ -653,7 +687,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.119';
+    const VERSION = '1.9.120';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -3358,7 +3392,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             button.onclick = async () => {
                 button.disabled = true;
                 try { await runRemediationAction(button.dataset.remediate); }
-                catch (error) { console.error('[SakaLuX Hub remediation]', error); alert('Repair action failed: ' + String(error?.message || error)); renderList(); }
+                catch (error) { console.error('[SakaLuX Hub remediation]', error); globalThis.SakaLuXDialog.notice('Repair action failed: ' + String(error?.message || error)); renderList(); }
             };
         });
         document.querySelectorAll('[data-module-toggle]').forEach(button => {
@@ -3367,7 +3401,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 const next = button.getAttribute('aria-checked') !== 'true';
                 button.disabled = true;
                 try { await setModulePower(id, next); }
-                catch (error) { console.error('[SakaLuX Hub]', error); alert('Power control failed: ' + String(error?.message || error)); renderList(); }
+                catch (error) { console.error('[SakaLuX Hub]', error); globalThis.SakaLuXDialog.notice('Power control failed: ' + String(error?.message || error)); renderList(); }
             };
         });
         document.querySelectorAll('[data-install]').forEach(button => button.onclick = () => {
@@ -3422,7 +3456,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 return;
             }
             if (getInstalledVersion(script)) {
-                alert(script.name + ' is installed but its panel is not available on this page. Open the module page and press SETTINGS again.');
+                globalThis.SakaLuXDialog.notice(script.name + ' is installed but its panel is not available on this page. Open the module page and press SETTINGS again.');
                 return;
             }
             const url = getInstallUrl(script);
@@ -3447,23 +3481,23 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             }
             if (action.fallbackUrl) { recordUsage(id); location.href = action.fallbackUrl; return; }
             if (isPanelAction && script.fallbackOpen()) { recordUsage(id); closeHub(); return; }
-            alert(script.name + ' is not available on this page.');
+            globalThis.SakaLuXDialog.notice(script.name + ' is not available on this page.');
         } catch (error) {
             console.error('[SakaLuX Hub]', error);
-            alert('Action failed: ' + String(error?.message || error));
+            globalThis.SakaLuXDialog.notice('Action failed: ' + String(error?.message || error));
         }
     }
 
     async function updateAll() {
         await refreshRegistryAndCheck();
         const updates = SCRIPTS.filter(script => getUpdateState(script).state === 'available' && getInstallUrl(script));
-        if (!updates.length) { alert('All installed SakaLuX add-ons are up to date.'); return; }
+        if (!updates.length) { globalThis.SakaLuXDialog.notice('All installed SakaLuX add-ons are up to date.'); return; }
         if (!confirm('Open ' + updates.length + ' update installer' + (updates.length === 1 ? '' : 's') + ' now?')) return;
         let opened = 0;
         for (const script of updates) {
             try { const win = window.open(getInstallUrl(script), '_blank'); if (win) opened++; } catch {}
         }
-        if (opened < updates.length) alert('Some installer tabs were blocked. Use the individual update installer for the remaining add-ons.');
+        if (opened < updates.length) globalThis.SakaLuXDialog.notice('Some installer tabs were blocked. Use the individual update installer for the remaining add-ons.');
     }
 
     function openWhatsNew() {
@@ -3603,7 +3637,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
     async function backupSettings() {
         const text = JSON.stringify({ app: 'SakaLuX Script Hub', version: VERSION, created: Date.now(), settings, favorites: [...favorites], usage });
-        try { await navigator.clipboard.writeText(text); alert('Hub backup copied to clipboard.'); }
+        try { await navigator.clipboard.writeText(text); globalThis.SakaLuXDialog.notice('Hub backup copied to clipboard.'); }
         catch { prompt('Copy this backup:', text); }
     }
 
@@ -3618,8 +3652,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             favorites = new Set(Array.isArray(data.favorites) ? data.favorites : []);
             usage = data.usage && typeof data.usage === 'object' ? data.usage : {};
             saveJson(STORAGE.settings, settings); saveJson(STORAGE.favorites, [...favorites]); saveJson(STORAGE.usage, usage);
-            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); alert('Backup restored.'); openHub();
-        } catch { alert('Invalid Hub backup.'); }
+            updateHiddenButtons(); positionButton(); document.getElementById(IDS.topSkull)?.remove(); document.getElementById(IDS.navSkull)?.remove(); createTopbarSkull(); createNavSkull(); syncFloatingButtonVisibility(); globalThis.SakaLuXDialog.notice('Backup restored.'); openHub();
+        } catch { globalThis.SakaLuXDialog.notice('Invalid Hub backup.'); }
     }
 
     function resetHub() {
