@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.66**
+**v1.8.67**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v1.8.66**
+- Canonical version: **v1.8.67**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -57,6 +57,12 @@
 - Aligns canonical installed-version markers and Hub release metadata; GreasyFork remains the configured download/update source.
 
 ## Release history / Changelog
+
+### v1.8.67 — 2026-10-09
+- Added shared SakaLuX branded dialogs for informational, PRO and error notices.
+- Replaced existing blocking alert messages with styled notices.
+- Existing synchronous confirmations and prompts remain native for action safety.
+
 
 ### v1.8.66 — 2026-10-09
 - Hardened key-bound PRO validation, Director selection and first-load state.
