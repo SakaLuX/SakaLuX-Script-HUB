@@ -15,8 +15,8 @@
 // @connect      sakalux.ro
 // @connect      wiki.torn.com
 // @run-at       document-end
-// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
-// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
+// @downloadURL  https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js
+// @updateURL    https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
