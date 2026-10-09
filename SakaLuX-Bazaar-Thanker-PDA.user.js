@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.62
+// @version      5.3.63
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -663,7 +663,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '5.3.62';
+  let v = '5.3.63';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -998,7 +998,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.62" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.63" }));
   const API_GLOBAL = "SakaLuXBazaarThanker";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -2002,7 +2002,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.62';
+    const BAZAAR_VERSION='5.3.63';
 
     function openSettingsPanel() {
         if (!slxProCurrent()) { slxShowProNotice(); return false; }
@@ -2181,7 +2181,15 @@ async function slxCheckProAccess(){
   onerror:()=>resolve(false),ontimeout:()=>resolve(false)
  }));
 }
-function slxProCurrent(){return slxProAllowed&&Date.now()<slxProExpiry;}
+function slxProCurrent(){
+ const hub=globalThis.__SakaLuXPremiumVerified;
+ let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
+ if(hub?.key===key&&hub.data?.premium_active===true&&hub.data.entitlements?.includes('bazaar_thanker')&&Date.now()-hub.at<5*60*1000){
+  const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
+  if(Number.isFinite(expiry)&&expiry>Date.now()){slxProAllowed=true;slxProExpiry=expiry}
+ }
+ return slxProAllowed&&Date.now()<slxProExpiry;
+}
 function slxShowProNotice(){
  const existing=document.getElementById('slx-pro-access-modal');if(existing)return;
  const backdrop=document.createElement('div');backdrop.id='slx-pro-access-modal';
