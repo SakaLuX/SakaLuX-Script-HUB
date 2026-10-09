@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.62
+// @version      1.17.63
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -17,6 +17,49 @@
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
+
+/* SakaLuX Freemium Control — BEGIN */
+(()=>{
+ 'use strict';
+ const ENT='market_intelligence_pro', MATCH=/bazaar flip|best travel run|route basket|travel buy planner|museum/i, ROOT=/sl-mi|market/i;
+ let verifiedUntil=0,verifiedKey='',pending=null;
+ const key=()=>{try{return String(globalThis.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}};
+ const accepts=(data,k)=>{
+   const expiry=Date.parse(String(data?.expires_at||'').replace(' ','T')+'Z');
+   return !!(data?.premium_active===true&&data?.entitlements?.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now()&&k===key());
+ };
+ async function isPro(){
+   const k=key();if(!/^[A-Za-z0-9]{16}$/.test(k))return false;
+   if(k===verifiedKey&&verifiedUntil>Date.now())return true;
+   const hub=globalThis.__SakaLuXPremiumVerified;
+   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));return true}
+   if(pending)return pending;
+   if(typeof GM_xmlhttpRequest!=='function')return false;
+   pending=new Promise(resolve=>{
+    GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:k}),timeout:12000,
+     onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ok=r.status===200&&accepts(d,k);if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}resolve(ok)}catch{resolve(false)}},
+     onerror:()=>resolve(false),ontimeout:()=>resolve(false)
+    })
+   });try{return await pending}finally{pending=null}
+ }
+ function locked(){
+   if(globalThis.SakaLuXDialog?.show)globalThis.SakaLuXDialog.show({title:'SakaLuX PRO',type:'pro',message:'This advanced feature requires active SakaLuX PRO. Basic features remain FREE. 1 Xanax = 7 days PRO.',actions:[{label:'CLOSE'},{label:'OPEN PREMIUM',primary:true,onClick:()=>location.assign('https://sakalux.ro/premium.html')}]});
+   else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
+ }
+ globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
+ globalThis.SakaLuXFreemium['market-intelligence']={isPro,locked};
+ const bypass=new WeakSet();
+ document.addEventListener('click',async e=>{
+   const button=e.target?.closest?.('button,[role="button"],a');if(!button||bypass.has(button))return;
+   const owner=button.closest?.('[id],[class]');const scope=(button.closest?.('[id*="slx"],[id*="sakalux"],[id*="qp"],[id*="mission"],[class*="slx"],[class*="sakalux"]')?.id||button.closest?.('[id*="slx"],[id*="sakalux"],[id*="qp"],[id*="mission"]')?.className||'');
+   if(!ROOT.test(String(scope))&&!ROOT.test(String(owner?.id||'')))return;
+   const label=String(button.textContent||button.title||button.getAttribute('aria-label')||'').trim();
+   if(!MATCH.test(label))return;
+   e.preventDefault();e.stopImmediatePropagation();
+   if(await isPro()){bypass.add(button);try{button.click()}finally{bypass.delete(button)}}else locked();
+ },true);
+})();
+/* SakaLuX Freemium Control — END */
 
 /* SakaLuX Unified Dialogs v1.0 — BEGIN */
 (() => {
@@ -667,7 +710,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.62';
+  let v = '1.17.63';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1002,7 +1045,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.62" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.63" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1065,7 +1108,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 (function () {
     'use strict';
-    const VERSION = '1.17.62';
+    const VERSION = '1.17.63';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
