@@ -3225,7 +3225,9 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null}}));}
         if(!key){if(button){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';}return;}
         if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';return;}
-        if(!force&&hubProCache&&Date.now()-hubProCheckedAt<5*60*1000){
+        const cachedExpiry=hubProCache?.expires_at?Date.parse(String(hubProCache.expires_at).replace(' ','T')+'Z'):NaN;
+        if(!force&&hubProCache&&Date.now()-hubProCheckedAt<5*60*1000&&
+            (!hubProCache.premium_active||(Number.isFinite(cachedExpiry)&&cachedExpiry>Date.now())){
             paintHubProStatus(button,hubProCache);return;
         }
         if(hubProPending)return hubProPending;
@@ -3239,7 +3241,27 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             onerror:()=>reject(Error('Network unavailable')),ontimeout:()=>reject(Error('Timeout'))
         }));
         try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
-        catch(error){hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null}}));if(button?.isConnected){const reason=String(error?.message||'connection error');button.title='PRO verification unavailable: '+reason+' — tap for details';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
+        catch(error){
+            // A transport/rate-limit failure is UNKNOWN, not FREE. Preserve an unexpired,
+            // same-key verified grant for its normal 5-minute validity, never beyond expiry.
+            const verified=globalThis.__SakaLuXPremiumVerified;
+            const expiry=verified?.data?.expires_at?Date.parse(String(verified.data.expires_at).replace(' ','T')+'Z'):NaN;
+            const stillValid=verified?.key===getSharedApiKey()&&verified?.data?.premium_active===true&&
+                Number.isFinite(expiry)&&expiry>Date.now()&&Date.now()-verified.at<5*60*1000;
+            if(!stillValid){
+                hubProCache=null;hubProCheckedAt=0;
+                delete globalThis.__SakaLuXPremiumVerified;
+                window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{
+                    detail:{premium_active:false,entitlements:[],expires_at:null,verification_state:'unavailable'}
+                }));
+            }
+            if(button?.isConnected){
+                const reason=String(error?.message||'connection error');
+                button.title='PRO verification temporarily unavailable: '+reason;
+                button.textContent=stillValid?'PRO ✓':'PRO ?';
+                button.style.borderColor=stillValid?'#348c65':'#8a7541';
+            }
+        }
         finally{hubProPending=null;}
     }
     setInterval(()=>{if(!document.hidden)void refreshHubProStatus()},5*60*1000);
