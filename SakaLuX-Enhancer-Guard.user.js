@@ -1357,7 +1357,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     let inventoryProtectionObserver = null;
     let inventoryProtectionTimer = null;
     function installInventoryProtection() {
-        if (!document.body || inventoryProtectionObserver) return;
+        if (!slxProCurrent() || !document.body || inventoryProtectionObserver) return;
         const refresh = records => {
             if (records && (window.SakaLuXPerf?.unrelated?.(records) || records.every(r => (r.target.nodeType === 1 ? r.target : r.target.parentElement)?.closest?.("[data-sl-eg-inventory-lock]") || (r.addedNodes.length > 0 && !r.removedNodes.length && [...r.addedNodes].every(n => n.nodeType === 1 && n.matches("[data-sl-eg-inventory-lock]")))))) return;
             if (records && !records.some(r => (r.target.nodeType === 1 ? r.target : r.target.parentElement)?.closest?.('.items-list,li,.item,.thumbnail-wrap,span.image-wrap') || [...r.addedNodes].some(n => n.nodeType === 1 && (n.matches('.thumbnail-wrap,span.image-wrap') || n.querySelector('.thumbnail-wrap,span.image-wrap'))))) return;
@@ -1933,7 +1933,7 @@ hideProtectedSaleRows();
             clearInterval(state.autoRefreshTimer);
             state.autoRefreshTimer = null;
         }
-        if (!state.enabled || state.autoRefreshMinutes <= 0) return;
+        if (!state.enabled || !slxProCurrent() || state.autoRefreshMinutes <= 0) return;
         state.autoRefreshTimer = setInterval(() => refreshData(), state.autoRefreshMinutes * 60 * 1000);
     }
 
@@ -2472,6 +2472,9 @@ function slxShowProNotice(){
             if(state.autoRefreshTimer)clearInterval(state.autoRefreshTimer);
             state.autoRefreshTimer=null;
             if(saleObserver){saleObserver.disconnect();saleObserver=null;}
+            if(inventoryProtectionObserver){inventoryProtectionObserver.disconnect();inventoryProtectionObserver=null;}
+            if(inventoryProtectionTimer){clearTimeout(inventoryProtectionTimer);inventoryProtectionTimer=null;}
+            document.querySelectorAll('[data-sl-eg-inventory-lock]').forEach(el=>el.remove());
             document.getElementById('sl-eg-overlay')?.remove();
             document.getElementById('sl-eg-api-overlay')?.remove();
         }
