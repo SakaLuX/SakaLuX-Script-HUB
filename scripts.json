@@ -37,15 +37,14 @@
         "version": "1.3.65",
         "date": "2026-10-09",
         "notes": [
-          "Uses active PRO verification already confirmed by Script Hub for the same Torn API key and entitlement.",
-          "Rechecks shared PRO status at the time of opening the module to avoid showing a false subscription-required popup.",
-          "Keeps server verification as the source of truth and GreasyFork as the download/update provider."
+          "Reuses the server-confirmed Hub PRO state for the matching API key and entitlement.",
+          "Checks shared PRO entitlement again when users open Enhancer Guard."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
       "version": "1.3.65",
-      "detailsRevision": 23,
+      "detailsRevision": 24,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -89,18 +88,17 @@
         }
       ],
       "release": {
-        "version": "5.3.63",
+        "version": "5.3.64",
         "date": "2026-10-09",
         "notes": [
-          "Uses active PRO verification already confirmed by Script Hub for the same Torn API key and entitlement.",
-          "Rechecks shared PRO status at the time of opening the module to avoid showing a false subscription-required popup.",
-          "Keeps server verification as the source of truth and GreasyFork as the download/update provider."
+          "Fixes an incorrect PRO popup by reusing the verified Hub entitlement.",
+          "Migrates reset settings and reset history confirmations to branded non-blocking dialogs."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.63",
-      "detailsRevision": 27,
+      "version": "5.3.64",
+      "detailsRevision": 28,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -201,18 +199,17 @@
         }
       ],
       "release": {
-        "version": "1.0.51",
+        "version": "1.0.52",
         "date": "2026-10-09",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Migrates the module's destructive-data reset confirmation to the shared SakaLuX popup.",
+          "Cancel keeps existing data unchanged."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.51",
-      "detailsRevision": 15,
+      "version": "1.0.52",
+      "detailsRevision": 16,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -426,18 +423,17 @@
         }
       ],
       "release": {
-        "version": "1.3.52",
+        "version": "1.3.53",
         "date": "2026-10-09",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Migrates the module's destructive-data reset confirmation to the shared SakaLuX popup.",
+          "Cancel keeps existing data unchanged."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.52",
-      "detailsRevision": 16,
+      "version": "1.3.53",
+      "detailsRevision": 17,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
