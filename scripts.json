@@ -483,18 +483,18 @@
         }
       ],
       "release": {
-        "version": "1.8.62",
+        "version": "1.8.63",
         "date": "2026-10-09",
         "notes": [
-          "Updates are distributed directly from the current GitHub source to avoid stale GreasyFork installers.",
-          "Both the userscript metadata and runtime version are synchronized.",
-          "Once installed, future automatic updates use the GitHub source."
+          "Fixed Employee/Director mode buttons failing with '$(...).forEach is not a function'.",
+          "Changed mode button iteration to a multi-element selector ($$) instead of a single-element selector ($).",
+          "Synchronized script runtime, canonical installed-version marker, Hub registry and release documentation."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
       "version": "1.8.63",
-      "detailsRevision": 18,
+      "detailsRevision": 19,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
