@@ -2428,6 +2428,18 @@ async function slxCheckProAccess(){
    slxProExpiry=expiry;return true;
   }
  }
+ const broker=globalThis.SakaLuXLicenseBroker;
+ if(broker?.check){
+  try{
+   const d=await broker.check(key);
+   const expiry=Date.parse(String(d?.expires_at||'').replace(' ','T')+'Z');
+   const allowed=d?.status==='ok'&&d?.premium_active===true&&Array.isArray(d.entitlements)&&
+     d.entitlements.includes('enhancer_guard')&&
+     Number.isFinite(expiry)&&expiry>Date.now();
+   slxProExpiry=allowed?expiry:0;
+   return allowed;
+  }catch{return false;}
+ }
  if(typeof GM_xmlhttpRequest!=='function')return false;
  return new Promise(resolve=>GM_xmlhttpRequest({
   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
