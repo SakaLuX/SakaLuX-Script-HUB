@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.61**
+**v1.3.62**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v1.3.61**
+- Canonical version: **v1.3.62**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -29,12 +29,19 @@
 
 ## Current release note
 
-**v1.3.61 — 2026-10-09**
-- Synchronizes userscript and runtime version for reliable Hub installed/update detection.
-- Preserves PRO verification and enhancer functionality.
+**v1.3.62 — 2026-10-09**
+- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
+- Synchronizes userscript metadata and runtime version.
+- Installed copies subsequently use the GitHub source for automatic updates.
 
 ## Release history / Changelog
 
+
+
+### v1.3.62 — 2026-10-09
+- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
+- Synchronizes userscript metadata and runtime version.
+- Installed copies subsequently use the GitHub source for automatic updates.
 
 ### v1.3.61 — 2026-10-09
 - Synchronizes userscript and runtime version for reliable Hub installed/update detection.
