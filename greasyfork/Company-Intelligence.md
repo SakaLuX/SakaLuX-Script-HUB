@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.65**
+**v1.8.66**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v1.8.65**
+- Canonical version: **v1.8.66**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,6 +32,13 @@
 
 ## Current release note
 
+**v1.8.66 — 2026-10-09**
+- Revalidates PRO before entering Director; remembered Director selections do not skip verification.
+- Distinguishes inactive PRO from connection failures, expired keys and rate limits.
+- Displays verification feedback inside the panel instead of a contradictory native alert.
+- Employee remains FREE; Director requires active PRO and Torn director status for private company data.
+
+
 **v1.8.65 — 2026-10-09**
 - Displays **EMPLOYEE · FREE** and **DIRECTOR · PRO** on the mode buttons.
 - Employee features remain free, while Director checks the active SakaLuX PRO entitlement.
@@ -50,6 +57,12 @@
 - Aligns canonical installed-version markers and Hub release metadata; GreasyFork remains the configured download/update source.
 
 ## Release history / Changelog
+
+### v1.8.66 — 2026-10-09
+- Hardened key-bound PRO validation, Director selection and first-load state.
+- Improved error diagnostics for unavailable license verification.
+- Kept separate Torn director permissions for private employee and stock data.
+
 
 ### v1.8.65 — 2026-10-09
 - Clearly labels Employee as FREE and Director as PRO in the Company Intelligence interface.
