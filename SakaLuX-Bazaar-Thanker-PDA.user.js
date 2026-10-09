@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.55
+// @version      5.3.56
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1746,6 +1746,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             <div style="font-size:11px;color:#94a3b8;margin-bottom:15px;">Version ${BAZAAR_VERSION} · buyer messages and bazaar analytics</div>
             </div><div class="sbt-settings-content">
             <div id="sbtStats" style="background:linear-gradient(145deg,#172334,#111923);border:1px solid #334155;border-radius:12px;padding:12px;margin-bottom:15px;"></div>
+            <button id="sbtProRanking" type="button" style="background:#72522c;color:#fff;border-radius:9px;padding:10px;margin-bottom:10px">PRO BUYER LEADERBOARD</button><div id="sbtProRankingResults" style="margin-bottom:12px"></div>
             <label>Your Torn ID</label><input id="sbtSellerId" value="${escapeHtml(settings.sellerId)}" style="${inputStyle()}">
             <label>Bazaar URL</label><input id="sbtBazaarUrl" value="${escapeHtml(settings.bazaarUrl)}" style="${inputStyle()}">
             <label>Bazaar Name <span style="color:#777;font-size:11px;">(leave empty for automatic detection)</span></label>
