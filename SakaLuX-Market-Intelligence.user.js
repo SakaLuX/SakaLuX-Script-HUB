@@ -2898,7 +2898,24 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             state.decorated++;
         }
         deals.sort((a,b)=>b.profit-a.profit || b.roi-a.roi);
-        paintBazaarBoard(deals);
+        const premium=globalThis.SakaLuXFreemium?.['market-intelligence'];
+        let canFlip=false;
+        try{canFlip=Boolean(await premium?.isPro?.());}catch(_){}
+        if(canFlip){document.getElementById('sl-mi-bazaar-pro-teaser')?.remove();paintBazaarBoard(deals);}
+        else {
+            document.getElementById('sl-mi-bazaar-board')?.remove();
+            let teaser=document.getElementById('sl-mi-bazaar-pro-teaser');
+            if(!teaser){
+                teaser=document.createElement('button');
+                teaser.id='sl-mi-bazaar-pro-teaser';
+                teaser.type='button';
+                teaser.style.cssText='display:block;width:100%;margin:8px 0;padding:9px;border:1px solid #8f733c;border-radius:8px;background:#201b12;color:#f5d999;text-align:left;font-weight:700';
+                teaser.textContent='Bazaar Flip Intelligence  ✦ PRO';
+                teaser.onclick=()=>premium?.locked?.();
+                const host=document.querySelector('#bazaarContainer,[class*="bazaarContent"],#mainContainer .content-wrapper');
+                (host||document.body).appendChild(teaser);
+            }
+        }
     }
 
     function percentile(values,p){
