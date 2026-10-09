@@ -1,5 +1,12 @@
 # Changelog
 
+## Additional premium pathway checks — 2026-10-10
+
+- Bazaar Smart Pricer v1.1.21: corrected `async async` parser regression and retained direct Update All PRO validation.
+- Bounty Hunter v0.5.11: checked PRO entitlement before full-board loading or FFScouter enrichment, while keeping the basic DOM list FREE.
+- JavaScript syntax for all seven mixed modules was checked using a parser (not browser runtime testing).
+- Continued audit is necessary for other non-click entry points, and true tamper resistance requires server-hosted premium operations.
+
 ## Freemium execution-path audit — 2026-10-10
 
 - Checked the six mixed-tier modules for UI-only access guards.
