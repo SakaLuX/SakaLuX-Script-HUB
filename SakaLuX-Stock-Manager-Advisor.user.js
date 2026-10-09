@@ -2552,7 +2552,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   async function previewPanic() {
-    if(!(await globalThis.SakaLuXFreemium['stock-manager-advisor'].isPro())){globalThis.SakaLuXFreemium['stock-manager-advisor'].locked();return null;}
+    if(!(await globalThis.SakaLuXFreemium['stock-manager-advisor'].isPro())){globalThis.SakaLuXFreemium['stock-manager-advisor'].locked();throw new Error('PANIC preview requires PRO');}
     try {
       status('PANIC preview: calculating exact order…','warn');
       const x=await resolvePanicPreview();
