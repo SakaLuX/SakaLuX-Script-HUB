@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.100
+// @version      1.9.101
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3136,12 +3136,13 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 else if(pro){const expiry=data.expires_at?Date.parse(String(data.expires_at).replace(' ','T')+'Z'):NaN;const hours=Number.isFinite(expiry)?Math.max(0,Math.ceil((expiry-Date.now())/3600000)):null;info.textContent='Expires: '+(data.expires_at||'Unknown')+' UTC'+(hours!==null?' · '+Math.floor(hours/24)+'d '+(hours%24)+'h remaining':'');}
                 else info.textContent='No active PRO license. 1 Xanax = 7 days PRO.';
                 const recipient=document.createElement('a');recipient.href='https://www.torn.com/profiles.php?XID=2380374';recipient.target='_blank';recipient.rel='noopener noreferrer';recipient.textContent='Send Xanax to SakaLuX [2380374] ↗';recipient.style.cssText='display:block;margin-top:16px;font-size:13px;color:#f3d082;text-decoration:underline';
+                const trial=document.createElement('a');trial.href='https://www.torn.com/messages.php#/p=compose&XID=2380374';trial.target='_blank';trial.rel='noopener noreferrer';trial.textContent='🎁 Want a FREE TRIAL? Just message SakaLuX about it ↗';trial.style.cssText='display:block;margin-top:12px;padding:12px;border:1px solid #5d4a2c;border-radius:11px;background:rgba(215,169,74,.09);color:#f3d68c;font-size:12px;line-height:1.5;font-weight:800;text-decoration:none';
                 const actions=document.createElement('div');actions.style.cssText='display:flex;gap:9px;justify-content:flex-end;margin-top:22px';
                 const visit=document.createElement('button');visit.type='button';visit.textContent='OPEN PREMIUM';visit.style.cssText='border:1px solid #4779b5;border-radius:10px;background:#254e83;color:white;padding:10px 13px;font-weight:800';
                 visit.onclick=()=>window.open('https://sakalux.ro/premium.html','_blank','noopener,noreferrer');
                 const close=document.createElement('button');close.type='button';close.textContent='CLOSE';close.style.cssText='border:1px solid #45566b;border-radius:10px;background:#1f2d3d;color:#e5edf8;padding:10px 13px;font-weight:800';
                 close.onclick=()=>overlay.remove();overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
-                actions.append(visit,close);card.append(title,person,status,info,recipient,actions);overlay.append(card);document.body.append(overlay);
+                actions.append(visit,close);card.append(title,person,status,info,recipient,trial,actions);overlay.append(card);document.body.append(overlay);
             };
             if(!key){showPremium({},'Set your Torn API key in Hub Settings → API Access first');return;}
             if(typeof GM_xmlhttpRequest!=='function'){showPremium({},'GM requests are unavailable in this userscript manager');return;}
