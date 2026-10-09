@@ -1711,6 +1711,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 <button class="sl-mr-settings-btn gray" id="sl-mr-clear-mods">🧩 CLEAR LEARNED MOD RANGES</button>
             </div></div>`;
         document.body.appendChild(overlay);
+        const modLearningToggle=overlay.querySelector('#sl-mr-learn-mods');
+        modLearningToggle?.addEventListener('click',event=>{
+            if(globalThis.SakaLuXFreemium?.['mission-rewards']?.isActive?.())return;
+            event.preventDefault();event.stopImmediatePropagation();
+            modLearningToggle.checked=false;
+            globalThis.SakaLuXFreemium?.['mission-rewards']?.locked?.();
+        },true);
+        void globalThis.SakaLuXFreemium?.['mission-rewards']?.isPro?.().then(active=>{
+            if(modLearningToggle?.isConnected)modLearningToggle.checked=Boolean(active&&settings.learnModPrices);
+        }).catch(()=>{if(modLearningToggle?.isConnected)modLearningToggle.checked=false;});
         document.getElementById('sl-mr-settings-close').onclick = () => overlay.remove();
         document.getElementById('sl-mr-api-open').onclick = openApiSettings;
         overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
