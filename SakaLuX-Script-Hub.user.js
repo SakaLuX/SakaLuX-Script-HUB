@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.110
+// @version      1.9.111
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -653,7 +653,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.110';
+    const VERSION = '1.9.111';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -3107,7 +3107,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             onerror:()=>reject(Error('Network unavailable')),ontimeout:()=>reject(Error('Timeout'))
         }));
         try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();paintHubProStatus(document.getElementById('slh-premium'),d);}
-        catch{if(button.isConnected){button.title='Premium check unavailable — tap to retry';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
+        catch(error){if(button.isConnected){const reason=String(error?.message||'connection error');button.title='PRO verification unavailable: '+reason+' — tap for details';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
         finally{hubProPending=null;}
     }
     function paintHubProStatus(button,data){
