@@ -34,18 +34,17 @@
         }
       ],
       "release": {
-        "version": "1.3.60",
+        "version": "1.3.61",
         "date": "2026-10-09",
         "notes": [
-          "Replace the native gray PRO alert with a dark in-app modal.",
-          "Show PRO license requirements, 1 Xanax = 7 days, and Free Trial contact.",
-          "Add Open Premium and Close actions; avoid duplicate popups."
+          "Synchronizes userscript and runtime version for reliable Hub installed/update detection.",
+          "Preserves PRO verification and module functionality."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.60",
-      "detailsRevision": 19,
+      "version": "1.3.61",
+      "detailsRevision": 20,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -89,18 +88,17 @@
         }
       ],
       "release": {
-        "version": "5.3.57",
+        "version": "5.3.59",
         "date": "2026-10-09",
         "notes": [
-          "Replace the native gray PRO alert with a dark in-app modal.",
-          "Show PRO license requirements, 1 Xanax = 7 days, and Free Trial contact.",
-          "Add Open Premium and Close actions; avoid duplicate popups."
+          "Synchronizes userscript and runtime version for reliable Hub installed/update detection.",
+          "Preserves PRO verification and module functionality."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.57",
-      "detailsRevision": 23,
+      "version": "5.3.59",
+      "detailsRevision": 24,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -483,18 +481,17 @@
         }
       ],
       "release": {
-        "version": "1.8.59",
+        "version": "1.8.61",
         "date": "2026-10-09",
         "notes": [
-          "Director mode now requires the server-issued company_director entitlement.",
-          "Employee workspace continues to be free.",
-          "PRO entitlement is checked against the verified Torn identity and license expiry."
+          "Fixes the Director/Employee action error caused by querySelector instead of querySelectorAll.",
+          "Synchronizes runtime and metadata version so Hub detects installed updates."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.59",
-      "detailsRevision": 16,
+      "version": "1.8.61",
+      "detailsRevision": 17,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
