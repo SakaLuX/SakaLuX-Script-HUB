@@ -3,12 +3,12 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.23**
+**v1.1.24**
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.1.23**
+- Canonical version: **v1.1.24**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md
@@ -39,11 +39,16 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.23 — 2026-10-10**
-- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
-- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
+**v1.1.24 — 2026-10-10**
+- PRO entitlement changes immediately invalidate privileged bulk pricing actions; user preferences remain saved.
+- FREE quick pricing remains available, and premium actions resume after PRO verification.
 
 ## Release history / Changelog
+
+### v1.1.24 — 2026-10-10
+- PRO entitlement changes immediately invalidate privileged bulk pricing actions; user preferences remain saved.
+- FREE quick pricing remains available, and premium actions resume after PRO verification.
+
 
 
 ### v1.1.23 — 2026-10-10
