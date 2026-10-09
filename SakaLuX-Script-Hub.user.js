@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.115
+// @version      1.9.116
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -653,7 +653,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.115';
+    const VERSION = '1.9.116';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -3304,12 +3304,16 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             if (a.favorite !== b.favorite) return a.favorite ? -1 : 1;
             return b.usage.count - a.usage.count;
         });
-        list.innerHTML = `<div class="slh-section-label">${category === 'ALL' ? 'MANAGED MODULES' : escapeHtml(category) + ' MODULES'} · ${rows.length}</div>` + (rows.map(renderCard).join('') || '<div style="padding:30px;text-align:center;color:#78889b">No modules found.</div>');
-        // Final DOM pass: use the rendered switch itself as the sorting authority.
-        // This also handles stale runtime/state caches and guarantees OFF cards follow ON cards.
-        const cards=Array.from(list.querySelectorAll(':scope > .slh-card'));
-        const offCards=cards.filter(card=>card.querySelector('.slh-switch[aria-checked="false"]'));
-        for(const card of offCards)list.appendChild(card);
+        // Render separate groups, rather than moving cards after insertion.
+        // The displayed ON/OFF condition and the group classification share the same predicate.
+        const installedOn=rows.filter(row=>row.health.state!=='missing'&&!moduleIsOff(row.script));
+        const installedOff=rows.filter(row=>row.health.state!=='missing'&&moduleIsOff(row.script));
+        const notInstalled=rows.filter(row=>row.health.state==='missing');
+        const section=(label,items)=>items.length?'<section class="slh-module-group" data-group="'+label+'"><div class="slh-section-label">'+label+' · '+items.length+'</div>'+items.map(renderCard).join('')+'</section>':'';
+        list.innerHTML=section(category==='ALL'?'ACTIVE MODULES':escapeHtml(category)+' · ACTIVE',installedOn)
+            +section('DISABLED MODULES',installedOff)
+            +section('NOT INSTALLED',notInstalled);
+        if(!rows.length)list.innerHTML='<div class="slh-section-label">No modules found.</div>';
         bindCards();
     }
 
