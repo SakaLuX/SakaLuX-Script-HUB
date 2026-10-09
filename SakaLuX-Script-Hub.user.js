@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.104
+// @version      1.9.105
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3299,7 +3299,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 <div class="slh-chips">
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${statusChipClass}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(moduleStatus.label)}</span>
-                    ${`<span class="slh-chip ${script.accessTier === "pro" || script.id === "bazaar" ? "info" : "good"}" title="${script.accessTier === "pro" || script.id === "bazaar" ? "PRO tier — secure enforcement pending; existing features remain available" : "Free module"}">${script.accessTier === "pro" || script.id === "bazaar" ? "PRO" : "FREE"}</span>`}
+                    ${`<span class="slh-chip ${["pro","mixed"].includes(script.accessTier) || ["bazaar","enhancer","company-intelligence"].includes(script.id) ? "info" : "good"}" title="${script.id === "company-intelligence" ? "Employee: FREE / Director: PRO (enforcement pending)" : script.accessTier === "pro" || ["bazaar","enhancer"].includes(script.id) ? "PRO module (enforcement pending)" : "Free module"}">${script.id === "company-intelligence" ? "FREE / PRO" : script.accessTier === "pro" || ["bazaar","enhancer"].includes(script.id) ? "PRO" : "FREE"}</span>`}
                     ${getRemediationAction(script) ? `<button class="slh-chip ${statusChipClass} slh-remedy" type="button" data-remediate="${escapeHtml(script.id)}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(getRemediationAction(script).label)}</button>` : ''}
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
