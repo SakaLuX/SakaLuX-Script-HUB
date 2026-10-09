@@ -1534,7 +1534,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             });
         }
         bar.querySelector('.sl-mi-session-head').onclick=()=>bar.classList.toggle('open');
-        if(!existing)mountTop(bar);
+        if(!existing){
+            const bazaarHost=document.querySelector('#bazaarContainer, [class*="bazaarContent"], [class*="bazaar-content"], #mainContainer .content-wrapper');
+            const heading=[...(bazaarHost?.querySelectorAll('h1,h2,h3,[class*="title"],[class*="header"]')||[])].find(el=>/LuX Bargain Vault|Bazaar/i.test(el.textContent||''));
+            const anchor=heading?.closest('section,[class*="header"],[class*="title"]')||heading;
+            if(anchor?.parentElement)anchor.insertAdjacentElement('afterend',bar);
+            else (bazaarHost||document.body).appendChild(bar);
+        }
     }
 
     function museumNameKey(name) {
@@ -3158,7 +3164,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},force?80:500);
     }
 
-    function toggle(key,label){return '<label class="sl-mi-toggle"><span class="sl-mi-toggle-label">'+esc(label)+'</span><span class="sl-mi-switch"><input data-mi-toggle="1" data-setting="'+esc(key)+'" id="sl-mi-'+key+'" type="checkbox" '+(settings[key]?'checked':'')+'><span class="sl-mi-switch-ui"></span></span></label>';}
+    function toggle(key,label){const premium=new Set(['bestRun','arrivalBasket','museum']);const badge=premium.has(key)?'<span class="slx-premium-badge" aria-label="PRO feature">✦ PRO</span>':'';return '<label class="sl-mi-toggle"><span class="sl-mi-toggle-label">'+esc(label)+'</span>'+badge+'<span class="sl-mi-switch"><input data-mi-toggle="1" data-setting="'+esc(key)+'" id="sl-mi-'+key+'" type="checkbox" '+(settings[key]?'checked':'')+'><span class="sl-mi-switch-ui"></span></span></label>';}
     function removeNodes(selector){document.querySelectorAll(selector).forEach(n=>n.remove());}
     function cleanupLiveFeature(key){
         const map={
