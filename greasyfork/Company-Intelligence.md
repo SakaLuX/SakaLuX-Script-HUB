@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.64**
+**v1.8.65**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v1.8.64**
+- Canonical version: **v1.8.65**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,6 +32,12 @@
 
 ## Current release note
 
+**v1.8.65 — 2026-10-09**
+- Displays **EMPLOYEE · FREE** and **DIRECTOR · PRO** on the mode buttons.
+- Employee features remain free, while Director checks the active SakaLuX PRO entitlement.
+- Retains GreasyFork update/download metadata.
+
+
 **v1.8.64 — 2026-10-09**
 - Fixes the remaining `$(...).forEach is not a function` error in Employee/Director mode rendering.
 - Verified source uses `$('[data-mode]', root).forEach(...)` after the commit.
@@ -44,6 +50,11 @@
 - Aligns canonical installed-version markers and Hub release metadata; GreasyFork remains the configured download/update source.
 
 ## Release history / Changelog
+
+### v1.8.65 — 2026-10-09
+- Clearly labels Employee as FREE and Director as PRO in the Company Intelligence interface.
+- Preserves server-verified PRO check on Director selection and free Employee mode.
+
 
 ### v1.8.64 — 2026-10-09
 - Corrects the single-element mode selector that remained in the actual published source.
