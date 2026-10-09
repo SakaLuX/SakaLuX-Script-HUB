@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.66**
+**v1.3.67**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.3.66**
+- Canonical version: **v1.3.67**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -29,11 +29,16 @@
 
 ## Current release note
 
-**v1.3.66 — 2026-10-10**
-- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
-- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
+**v1.3.67 — 2026-10-10**
+- Paid module runtime and observers suspend without PRO while the preferred ON/OFF state remains saved.
+- Automatically resumes previously enabled functionality after license verification.
 
 ## Release history / Changelog
+
+### v1.3.67 — 2026-10-10
+- Paid module runtime and observers suspend without PRO while the preferred ON/OFF state remains saved.
+- Automatically resumes previously enabled functionality after license verification.
+
 
 
 ### v1.3.66 — 2026-10-10
