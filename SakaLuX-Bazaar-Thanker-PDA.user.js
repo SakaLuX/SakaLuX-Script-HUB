@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.59
+// @version      5.3.60
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
 // @license      All Rights Reserved
-// @downloadURL  https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js
-// @updateURL    https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js
+// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
+// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
@@ -1967,7 +1967,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.59';
+    const BAZAAR_VERSION='5.3.60';
 
     function openSettingsPanel() {
         if (!slxProCurrent()) { slxShowProNotice(); return false; }
