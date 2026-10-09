@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.57**
+**v1.3.58**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.3.57**
+- Canonical version: **v1.3.58**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -40,6 +40,11 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.3.58 — 2026-10-10
+- Security audit: added internal entitlement checks to additional PRO-only execution paths rather than relying solely on button interception.
+- Script remains a client-side userscript; JavaScript-level restrictions can be modified by the client.
+
 
 ### v1.3.57 — 2026-10-10
 - Corrected duplicate async keyword after PRO entrypoint guard integration.
