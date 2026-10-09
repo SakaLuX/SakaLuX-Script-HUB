@@ -1213,18 +1213,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.66",
+                    "version": "1.3.67",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
-                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
-                        "No premium permissions or server-side entitlements were changed."
+                        "Paid module runtime and observers suspend without PRO while the preferred ON/OFF state remains saved.",
+                        "Automatically resumes previously enabled functionality after license verification."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.66",
-                "detailsRevision": 25,
+                "version": "1.3.67",
+                "detailsRevision": 26,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -1268,18 +1267,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.65",
+                    "version": "5.3.66",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
-                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
-                        "No premium permissions or server-side entitlements were changed."
+                        "Paid buyer-thanking runtime suspends without PRO without modifying saved ON/OFF preference.",
+                        "Automatically resumes previous enabled state after license verification."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.65",
-                "detailsRevision": 29,
+                "version": "5.3.66",
+                "detailsRevision": 30,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -1324,15 +1322,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 44,
-                "version": "1.1.23",
+                "detailsRevision": 45,
+                "version": "1.1.24",
                 "release": {
-                    "version": "1.1.23",
+                    "version": "1.1.24",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
-                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
-                        "No premium permissions or server-side entitlements were changed."
+                        "PRO entitlement changes immediately invalidate privileged bulk pricing actions; user preferences remain saved.",
+                        "FREE quick pricing remains available, and premium actions resume after PRO verification."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1392,18 +1389,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.55",
+                    "version": "1.0.56",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
-                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
-                        "No premium permissions or server-side entitlements were changed."
+                        "Temporarily displays weapon-mod learning OFF without PRO while retaining the saved preference.",
+                        "Restores the saved learning switch after PRO verification; FREE mission information remains available."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.55",
-                "detailsRevision": 19,
+                "version": "1.0.56",
+                "detailsRevision": 20,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -1470,18 +1466,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.69",
+                    "version": "1.17.70",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds explicit ✦ PRO labels to Best Travel Run, Arrival Basket Planner and Museum Intelligence switches.",
-                        "Moves Bazaar Flip Intelligence below the Bazaar header instead of injecting above the page and hides premium deal rankings for FREE users.",
-                        "FREE players see a compact Bazaar Flip ✦ PRO teaser that opens the existing SakaLuX PRO dialog; existing premium checks remain in place."
+                        "Saved Best Run, Arrival Basket and Museum settings are not overwritten when PRO is absent.",
+                        "Premium views and calculations use effective license status and restore previously enabled features after renewed verification."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.69",
-                "detailsRevision": 34,
+                "version": "1.17.70",
+                "detailsRevision": 35,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -1550,12 +1545,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.5.13",
+                    "version": "0.5.14",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
-                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
-                        "No premium permissions or server-side entitlements were changed."
+                        "Premium full-board, enrichment, smart/FF/BS sorting and advanced filters are inactive without PRO.",
+                        "Original premium choices are preserved and used again once entitlement is verified."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -1563,8 +1557,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
-                "version": "0.5.13",
-                "detailsRevision": 22,
+                "version": "0.5.14",
+                "detailsRevision": 23,
                 "license": "All Rights Reserved",
                 "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "greasyForkId": "598988",
@@ -1653,18 +1647,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.59",
+                    "version": "1.3.60",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
-                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
-                        "No premium permissions or server-side entitlements were changed."
+                        "Premium scoring, learning and tactical actions respond to entitlement status changes.",
+                        "Existing FREE functions and user settings remain intact."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.59",
-                "detailsRevision": 24,
+                "version": "1.3.60",
+                "detailsRevision": 25,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -1718,18 +1711,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.68",
+                    "version": "1.8.69",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
-                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
-                        "No premium permissions or server-side entitlements were changed."
+                        "Director mode falls back to Employee when PRO is inactive without deleting the saved Director preference.",
+                        "Revalidates and restores the preferred Director mode automatically when entitlement becomes active."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.68",
-                "detailsRevision": 24,
+                "version": "1.8.69",
+                "detailsRevision": 25,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -1784,18 +1776,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.24",
+                    "version": "0.8.25",
                     "date": "2026-10-10",
                     "notes": [
-                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
-                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
-                        "No premium permissions or server-side entitlements were changed."
+                        "Advisor, Rebalance and PANIC inline controls become effectively OFF without PRO.",
+                        "Saved control visibility choices are preserved and restored on license verification."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.24",
-                "detailsRevision": 23,
+                "version": "0.8.25",
+                "detailsRevision": 24,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",
