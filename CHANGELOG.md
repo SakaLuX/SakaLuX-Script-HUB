@@ -1,5 +1,13 @@
 # Changelog
 
+## PRO synchronization and confirmation dialogs — 2026-10-09
+
+- Hub v1.9.121 publishes its successful server-confirmed PRO status to installed modules for the matching API key.
+- Enhancer Guard v1.3.65 and Bazaar Thanker v5.3.64 consult Hub's verified PRO state when opened, avoiding false paywall messages after a previous failed verification.
+- Bazaar Thanker v5.3.64, Mission Rewards v1.0.52 and Elimination Assistant v1.3.53 move selected destructive reset confirmations to branded asynchronous SakaLuX popups.
+- Other synchronous confirmations, notably Stock Manager trade confirmations, remain native until each transaction flow can be safely converted.
+- Synchronized scripts.json and affected GreasyFork documentation.
+
 ## Unified SakaLuX Dialogs — 2026-10-09
 
 - Introduced a reusable branded dialog component in all 9 managed userscripts and Script Hub v1.9.120.
@@ -51,9 +59,9 @@ The following newer versions supersede the earlier release-documentation reconci
 
 | Script | Current source version |
 |---|---|
-| Bazaar Thanker | 5.3.60 |
+| Bazaar Thanker | 5.3.64 |
 | Company Intelligence | 1.8.66 |
-| Enhancer Guard | 1.3.62 |
+| Enhancer Guard | 1.3.65 |
 | Script Hub | 1.9.119 |
 | SakaLuX Suite | 0.9.984 |
 
