@@ -12,5 +12,5 @@
     "enhancer": "1.3.68",
     "bazaar": "5.3.67"
   },
-  "publication_retry": "2026-10-10 retry after correcting JS syntax in Hub"
+  "publication_retry": "2026-10-10 retry after synchronizing offline fallback registry"
 }
