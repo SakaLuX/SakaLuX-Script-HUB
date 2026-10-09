@@ -3,13 +3,20 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.66**
+**v5.3.67**
+
+### License Manager v2 · 2026-10-10
+- Shared Hub license broker, short FREE cache, and bounded PRO cache.
+- Temporary network errors no longer count as confirmed FREE for upgrade prompts.
+- Account/key switch protection and verification-result validation.
+- Client-side entitlement guards are not tamper-proof; server operations require independent checks.
+
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v5.3.66**
+- Canonical version: **v5.3.67**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -26,13 +33,13 @@
 
 ## Current release note
 
-**v5.3.66 — 2026-10-10**
+**v5.3.67 — 2026-10-10**
 - Paid buyer-thanking runtime suspends without PRO without modifying saved ON/OFF preference.
 - Automatically resumes previous enabled state after license verification.
 
 ## Release history / Changelog
 
-### v5.3.66 — 2026-10-10
+### v5.3.67 — 2026-10-10
 - Paid buyer-thanking runtime suspends without PRO without modifying saved ON/OFF preference.
 - Automatically resumes previous enabled state after license verification.
 
