@@ -2698,7 +2698,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(!card) return;
     const pref=inlineButtonPrefs();
     const map={advisor:'[data-slx-inline-tab="advisor"]',trade:'[data-slx-inline-tab="trade"]',rebalance:'[data-slx-inline-tab="rebalance"]',panic:'#slx-inline-panic',full:'#slx-inline-full'};
-    Object.entries(map).forEach(([k,sel])=>{const el=$(sel,card);if(el)el.hidden=!pref[k];});
+    const premium=new Set(['advisor','rebalance','panic']);
+    const active=globalThis.SakaLuXFreemium?.['stock-manager-advisor']?.isActive?.()===true;
+    Object.entries(map).forEach(([k,sel])=>{const el=$(sel,card);if(el)el.hidden=!pref[k]||(premium.has(k)&&!active);});
+    $('[data-inline-button]',card).forEach(cb=>{if(premium.has(cb.dataset.inlineButton))cb.checked=active&&Boolean(pref[cb.dataset.inlineButton]);});
   }
 
   function openPanelAt(selector) {
@@ -2772,7 +2775,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const ho=$('#slx-history-open',card); if(ho) ho.onclick=()=>{openPanel();setTimeout(()=>$('#slx-stock-tx-history')?.scrollIntoView({behavior:'smooth',block:'center'}),50);};
     const compactBtn=$('#slx-inline-compact',card); if(compactBtn){const syncCompact=()=>{const on=bool(K.compactMode,false);card.dataset.compact=on?'1':'0';compactBtn.dataset.active=on?'1':'0';compactBtn.textContent=on?'Compact ✓':'Compact';};syncCompact();compactBtn.onclick=()=>{set(K.compactMode,bool(K.compactMode,false)?'0':'1');syncCompact();renderInlineWorkspace(get(K.inlineTab,''));};}
     $('#slx-inline-save-presets',card).onclick=()=>{const raw=$('#slx-inline-preset-input',card).value;set(K.inlinePresets,raw);renderInlinePresetButtons(card);inlineStatus('Withdrawal presets saved.','ok');};
-    $$('[data-inline-button]',card).forEach(cb=>{const key=cb.dataset.inlineButton;cb.checked=!!inlineButtonPrefs()[key];cb.onchange=()=>{saveInlineButtonPrefs({[key]:cb.checked});applyInlineButtonPrefs(card);};});
+    $('[data-inline-button]',card).forEach(cb=>{
+      const key=cb.dataset.inlineButton,premium=new Set(['advisor','rebalance','panic']);
+      const guard=globalThis.SakaLuXFreemium?.['stock-manager-advisor'];
+      cb.checked=!!inlineButtonPrefs()[key]&&(!premium.has(key)||guard?.isActive?.());
+      cb.onchange=async()=>{
+        if(premium.has(key)&&cb.checked){
+          cb.checked=false;
+          const authorized=await guard?.isPro?.().catch(()=>false);
+          if(!cb.isConnected)return;
+          if(!authorized){guard?.locked?.();return;}
+          cb.checked=true;
+        }
+        saveInlineButtonPrefs({[key]:cb.checked});applyInlineButtonPrefs(card);
+      };
+    });
     $('#slx-inline-benefit-lock',card).checked=bool(K.benefitLock,true);
     $('#slx-inline-benefit-lock',card).onchange=e=>{set(K.benefitLock,e.target.checked?'1':'0');renderPortfolio();renderOptimizer();refreshInlinePanel();};
     $('#slx-inline-dry',card).checked=bool(K.dryRun,true);
