@@ -370,12 +370,11 @@
         }
       ],
       "release": {
-        "version": "0.5.11",
+        "version": "0.5.12",
         "date": "2026-10-10",
         "notes": [
-          "Added PRO checks to full-board API loading and FFScouter enrichment execution paths.",
-          "FREE DOM target list remains accessible.",
-          "Validated JavaScript syntax; device integration is still untested."
+          "Added entitlement check inside the direct live enrichment execution function, not only UI controls.",
+          "Without PRO, background FF/status enrichment is skipped and the basic target list remains available."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -383,8 +382,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.11",
-      "detailsRevision": 20,
+      "version": "0.5.12",
+      "detailsRevision": 21,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -604,18 +603,17 @@
         }
       ],
       "release": {
-        "version": "0.8.22",
+        "version": "0.8.23",
         "date": "2026-10-10",
         "notes": [
-          "Added direct PRO entitlement checks at selected execution functions, not only UI buttons.",
-          "Blocked premium operations through covered alternative call paths.",
-          "Other paths still require validation; client-side checks are not server-side security."
+          "Added an additional PRO entitlement check at the PANIC preview execution entry point.",
+          "PANIC execution and its preview are blocked without PRO; existing portfolio and benefit views stay free."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.22",
-      "detailsRevision": 21,
+      "version": "0.8.23",
+      "detailsRevision": 22,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
