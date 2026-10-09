@@ -1975,6 +1975,7 @@ hideProtectedSaleRows();
     }
 
     function setEnabled(value) {
+        if (value && !slxProAllowed) { slxShowProNotice(); return false; }
         state.enabled = Boolean(value);
         setBool(STORAGE.enabled, state.enabled);
         if (state.enabled && slxProAllowed) {
