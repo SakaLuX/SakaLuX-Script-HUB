@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.64**
+**v5.3.65**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-09**
-- Canonical version: **v5.3.64**
+- Verified: **2026-10-10**
+- Canonical version: **v5.3.65**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -26,12 +26,16 @@
 
 ## Current release note
 
-**v5.3.60 — 2026-10-09**
-- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
-- Synchronizes userscript metadata and runtime version.
-- Installed copies subsequently use the GitHub source for automatic updates.
+**v5.3.65 — 2026-10-10**
+- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
+- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
 
 ## Release history / Changelog
+
+
+### v5.3.65 — 2026-10-10
+- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
+- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
 
 ### v5.3.64 — 2026-10-09
 - Migrates reset confirmations from native browser dialogs to the shared branded SakaLuX confirmation popup.
