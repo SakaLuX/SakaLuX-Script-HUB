@@ -3,12 +3,12 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.19**
+**v1.1.20**
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.1.19**
+- Canonical version: **v1.1.20**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md
@@ -46,6 +46,12 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.1.20 — 2026-10-10
+- Added direct execution-entry checks for covered PRO functionality, including stock rebalance, Bazaar bulk updates, Museum scan and Elimination FF/calibration.
+- Retains basic FREE functions and GreasyFork distribution URLs.
+- Remaining execution paths and browser integration still need verification; JavaScript alone is not a secure server-side paywall.
+
 
 ### v1.1.19 — 2026-10-10 · FREE/PRO
 - FREE: Per-item Quick Add and Undo; Individual pricing; RW/bonus item safety controls.
