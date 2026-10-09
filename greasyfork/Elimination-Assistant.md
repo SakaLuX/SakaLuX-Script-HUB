@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.53**
+**v1.3.54**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.3.53**
+- Canonical version: **v1.3.54**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -40,6 +40,12 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.3.54 — 2026-10-10 · FREE/PRO
+- FREE: Elimination teams; Player search; Availability status.
+- PRO: SAFE/RISKY/SKIP recommendations; FFScouter; Calibration; Target learning.
+- PANIC and other destructive execution paths retain explicit confirmation requirements. Client-side feature gates are not tamper-proof.
+
 
 ### v1.3.53 — 2026-10-09
 - Migrates reset confirmations from native browser dialogs to the shared branded SakaLuX confirmation popup.
