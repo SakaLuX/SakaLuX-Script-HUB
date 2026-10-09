@@ -2701,7 +2701,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const map={advisor:'[data-slx-inline-tab="advisor"]',trade:'[data-slx-inline-tab="trade"]',rebalance:'[data-slx-inline-tab="rebalance"]',panic:'#slx-inline-panic',full:'#slx-inline-full'};
     const premium=new Set(['advisor','rebalance','panic']);
     const active=globalThis.SakaLuXFreemium?.['stock-manager-advisor']?.isActive?.()===true;
-    Object.entries(map).forEach(([k,sel])=>{const el=$(sel,card);if(el)el.hidden=!pref[k]||(premium.has(k)&&!active);});
+    Object.entries(map).forEach(([k,sel])=>{const el=$(sel,card);if(!el)return;el.hidden=!pref[k];if(premium.has(k)){el.dataset.slxProLocked=String(!active);if(!active)el.title='SakaLuX PRO required — preference saved';else el.removeAttribute('title');}});
     $('[data-inline-button]',card).forEach(cb=>{if(premium.has(cb.dataset.inlineButton))cb.checked=active&&Boolean(pref[cb.dataset.inlineButton]);});
   }
 
