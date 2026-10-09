@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.64
+// @version      1.8.65
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -635,7 +635,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.64';
+  let v = '1.8.65';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -970,7 +970,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"}, { version: "1.8.64" }));
+  const SELF = Object.freeze(Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"}, { version: "1.8.65" }));
   const API_GLOBAL = "SakaLuXCompanyIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1046,7 +1046,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.64',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.65',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1928,7 +1928,7 @@ function render(){
  let root=$('#ci-root');if(!S.open){root?.remove();return}
  if(!root){root=document.createElement('div');root.id='ci-root';document.body.appendChild(root)}
  const oldBody=$('.ci-shell > .ci-body',root),oldTabs=$('.ci-tabs',root),scrollTop=oldBody?.scrollTop||0,tabsLeft=oldTabs?.scrollLeft||0;
- root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee & Director Intelligence</small></div><div class="ci-mode"><button type="button" data-mode="employee" class="${S.mode==='employee'?'active':''}">EMPLOYEE</button><button type="button" data-mode="director" class="${S.mode==='director'?'active':''}">DIRECTOR</button></div><button type="button" class="ci-icon" data-act="refresh" title="Refresh">↻</button><button type="button" class="ci-icon api" data-act="settings" title="API Access">🔑</button><button type="button" class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button type="button" data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div></div>`;
+ root.innerHTML=`<div class="ci-shell ${S.compact?'ci-compact':''}"><div class="ci-head"><div class="ci-brand"><b>🏢 ${APP.name}</b><small>v${APP.version} · Employee FREE · Director PRO</small></div><div class="ci-mode"><button type="button" data-mode="employee" title="Employee intelligence · Free" class="${S.mode==='employee'?'active':''}">EMPLOYEE · FREE</button><button type="button" data-mode="director" title="Director intelligence · Requires active SakaLuX PRO" class="${S.mode==='director'?'active':''}">DIRECTOR · PRO</button></div><button type="button" class="ci-icon" data-act="refresh" title="Refresh">↻</button><button type="button" class="ci-icon api" data-act="settings" title="API Access">🔑</button><button type="button" class="ci-icon" data-act="close" title="Close">✕</button></div><div class="ci-tabs">${tabs().map(([k,n])=>`<button type="button" data-tab="${k}" class="${S.tab===k?'active':''}">${n}</button>`).join('')}</div><div class="ci-body">${S.loading?`<p class="ci-note">Loading Torn API data…</p>`:''}${S.errors.slice(0,4).map(e=>`<div class="ci-error">${esc(e)}</div>`).join('')}${body()}</div></div>`;
  const content=$('.ci-shell > .ci-body',root),tabBar=$('.ci-tabs',root);if(content)content.scrollTop=scrollTop;if(tabBar)tabBar.scrollLeft=tabsLeft;
  $$('button',root).forEach(b=>{if(!b.type)b.type='button'});
  $$('[data-mode]',root).forEach(b=>b.onclick=async e=>{e.preventDefault();e.stopPropagation();if(b.dataset.mode==='director'){b.disabled=true;const allowed=await ciCheckDirectorPro(true);b.disabled=false;if(!allowed){S.mode='employee';S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);render();alert('Director requires an active SakaLuX PRO license. Check your Hub API key or visit sakalux.ro/premium.html.');return;}}S.mode=b.dataset.mode;S.tab='overview';set(KEY.mode,S.mode);set(KEY.tab,S.tab);render();if(S.mode==='director'&&!S.data.employees&&!S.loading)refresh()});
