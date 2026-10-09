@@ -3,13 +3,20 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.56**
+**v1.0.57**
+
+### License Manager v2 · 2026-10-10
+- Shared Hub license broker, short FREE cache, and bounded PRO cache.
+- Temporary network errors no longer count as confirmed FREE for upgrade prompts.
+- Account/key switch protection and verification-result validation.
+- Client-side entitlement guards are not tamper-proof; server operations require independent checks.
+
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.0.56**
+- Canonical version: **v1.0.57**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md
@@ -29,13 +36,13 @@
 
 ## Current release note
 
-**v1.0.56 — 2026-10-10**
+**v1.0.57 — 2026-10-10**
 - Temporarily displays weapon-mod learning OFF without PRO while retaining the saved preference.
 - Restores the saved learning switch after PRO verification; FREE mission information remains available.
 
 ## Release history / Changelog
 
-### v1.0.56 — 2026-10-10
+### v1.0.57 — 2026-10-10
 - Temporarily displays weapon-mod learning OFF without PRO while retaining the saved preference.
 - Restores the saved learning switch after PRO verification; FREE mission information remains available.
 
