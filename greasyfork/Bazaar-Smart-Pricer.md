@@ -48,6 +48,11 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 ## Release history / Changelog
 
 ### v1.1.20 — 2026-10-10
+- Guards Quick Fill and Update All at their execution entry points. Also fixes Update All async declaration.
+- Client-side checks are usability controls; server-hosting premium calculations is required to prevent code bypass.
+
+
+### v1.1.20 — 2026-10-10
 - Added direct execution-entry checks for covered PRO functionality, including stock rebalance, Bazaar bulk updates, Museum scan and Elimination FF/calibration.
 - Retains basic FREE functions and GreasyFork distribution URLs.
 - Remaining execution paths and browser integration still need verification; JavaScript alone is not a secure server-side paywall.
