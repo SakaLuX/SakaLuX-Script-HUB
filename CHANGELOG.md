@@ -1,5 +1,11 @@
 # Changelog
 
+## Company Intelligence v1.8.64 — 2026-10-09
+
+- Fixed the still-present single-element `$('[data-mode]', root).forEach(...)` crash by using `$('[data-mode]', root).forEach(...)`.
+- Verified the saved source uses `$` for the mode buttons.
+- Updated the Hub registry release details and GreasyFork documentation; GreasyFork remains the update/download provider.
+
 ## Company Intelligence v1.8.63 — 2026-10-09
 
 - Fixed `$(...).forEach is not a function` when initializing Employee/Director mode buttons.
@@ -16,7 +22,7 @@ The following newer versions supersede the earlier release-documentation reconci
 | Script | Current source version |
 |---|---|
 | Bazaar Thanker | 5.3.60 |
-| Company Intelligence | 1.8.63 |
+| Company Intelligence | 1.8.64 |
 | Enhancer Guard | 1.3.62 |
 | Script Hub | 1.9.119 |
 | SakaLuX Suite | 0.9.984 |
