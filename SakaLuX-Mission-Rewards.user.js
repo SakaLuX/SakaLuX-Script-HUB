@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.53
+// @version      1.0.54
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -45,7 +45,7 @@
    else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
  }
  globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
- globalThis.SakaLuXFreemium['mission-rewards']={isPro,locked};
+ globalThis.SakaLuXFreemium['mission-rewards']={isPro,locked,isActive:()=>verifiedKey===key()&&verifiedUntil>Date.now()};void isPro();
  const bypass=new WeakSet();
  document.addEventListener('click',async e=>{
    const button=e.target?.closest?.('button,[role="button"],a');if(!button||bypass.has(button))return;
@@ -708,7 +708,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.0.53';
+  let v = '1.0.54';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1043,7 +1043,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"}, { version: "1.0.53" }));
+  const SELF = Object.freeze(Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"}, { version: "1.0.54" }));
   const API_GLOBAL = "SakaLuXMissionRewards";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1107,7 +1107,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.0.53';
+    const VERSION = '1.0.54';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -1385,6 +1385,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function saveModObservation(name, price, special) {
+        if(!globalThis.SakaLuXFreemium['mission-rewards'].isActive())return;
         if (!settings.learnModPrices) return;
         const points = Number(price);
         if (!name || !Number.isFinite(points) || points <= 0) return;
@@ -1472,6 +1473,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function renderModBadge(box, data) {
+        if(!globalThis.SakaLuXFreemium['mission-rewards'].isActive()){box.textContent='Weapon mod history · PRO';return;}
         const special = data.label === 'special-offer';
         saveModObservation(data.name, data.points, special);
         const range = getModRange(data.name);
