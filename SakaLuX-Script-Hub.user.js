@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.108
+// @version      1.9.109
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3266,6 +3266,10 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         let rows = getAllHealth().map(row => ({ ...row, favorite: favorites.has(row.script.id), usage: usage[row.script.id] || { count: 0, lastUsed: 0 }, update: getUpdateState(row.script) }));
         rows = rows.filter(row => category === 'ALL' || row.script.category === category);
         rows.sort((a, b) => {
+            // Disabled modules belong below enabled modules regardless of update state.
+            const aOff=a.health.state!=='missing'&&!isModuleEnabled(a.script);
+            const bOff=b.health.state!=='missing'&&!isModuleEnabled(b.script);
+            if(aOff!==bOff)return aOff?1:-1;
             if (a.health.state === 'missing' && b.health.state !== 'missing') return -1;
             if (b.health.state === 'missing' && a.health.state !== 'missing') return 1;
             if (a.update.state === 'available' && b.update.state !== 'available') return -1;
