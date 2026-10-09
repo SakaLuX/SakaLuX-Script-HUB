@@ -67,6 +67,18 @@
    if(k===verifiedKey&&verifiedUntil>Date.now())return true;
    const hub=globalThis.__SakaLuXPremiumVerified;
    if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));return true}
+   // Prefer the Hub's shared broker: one in-flight request for all modules.
+   // A server outage is unknown, never proof that the account is FREE.
+   const broker=globalThis.SakaLuXLicenseBroker;
+   if(broker?.check){
+     try{
+       const d=await broker.check(k);
+       const ok=d?.status==='ok'&&accepts(d,k);
+       if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));}
+       else {verifiedKey='';verifiedUntil=0;}
+       return ok;
+     }catch{return false;}
+   }
    if(pending)return pending;
    if(typeof GM_xmlhttpRequest!=='function')return false;
    pending=new Promise(resolve=>{
