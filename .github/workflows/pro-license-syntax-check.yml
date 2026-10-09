@@ -1,0 +1,28 @@
+name: PRO License JavaScript Syntax
+on:
+  pull_request:
+    paths:
+      - 'SakaLuX-*.user.js'
+      - '.github/workflows/pro-license-syntax-check.yml'
+  workflow_dispatch:
+jobs:
+  check-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check all SakaLuX userscript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(SakaLuX-*.user.js)
+          if (( ${#files[@]} == 0 )); then
+            echo "No userscripts found"; exit 1
+          fi
+          for file in "${files[@]}"; do
+            echo "Checking $file"
+            node --check "$file"
+          done
