@@ -1,7 +1,7 @@
 # SakaLuX Bounty Hunter
 
 ## Current version
-**v0.5.10**
+**v0.5.11**
 
 ## Purpose
 SakaLuX Bounty Hunter is a mobile-first helper for Torn's bounty board. It can scan the visible Torn board or, when a Torn API key is available, page through the full Torn API v2 bounty board and build one grouped target list.
@@ -49,6 +49,11 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v0.5.11 — 2026-10-10
+- Added execution-entry PRO checks beyond UI labels and click interceptors.
+- Verified JavaScript parses successfully; device behavior remains to be tested.
+
 
 ### v0.5.10 — 2026-10-10
 - Protects full-board API fetching and FFScouter enrichment at execution; basic DOM bounty list remains free.
