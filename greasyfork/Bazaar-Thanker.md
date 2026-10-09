@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.48**
+**v5.3.59**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-07**
-- Canonical version: **v5.3.48**
+- Verified: **2026-10-09**
+- Canonical version: **v5.3.59**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -26,11 +26,10 @@
 
 ## Current release note
 
-**v5.3.48 — Version and release synchronization**
-- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
-- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
-- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
-- Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
+**v5.3.59 — Current release**
+- Aligns published release documentation with the current userscript metadata.
+- See `scripts.json` and the version-specific changelog for detailed changes.
+
 
 ## Release history / Changelog
 
