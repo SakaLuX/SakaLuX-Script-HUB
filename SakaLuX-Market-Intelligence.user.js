@@ -3203,13 +3203,20 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       }
       if(authorized&&settings.enabled)scheduleScan(false);
     }
-    window.addEventListener('SakaLuX:PremiumStatus',()=>{const panel=document.getElementById('sl-mi-overlay');if(panel)void restorePremiumSettingsUI(panel);});
+    window.addEventListener('SakaLuX:PremiumStatus',()=>{
+        const panel=document.getElementById('sl-mi-overlay');
+        if(panel)void restorePremiumSettingsUI(panel);
+        if(!premiumSettingActive('arrivalBasket')){
+            document.getElementById('sl-mi-arrival')?.remove();
+        }
+        if(settings.enabled)scheduleScan(false);
+    });
     function removeNodes(selector){document.querySelectorAll(selector).forEach(n=>n.remove());}
     function cleanupLiveFeature(key){
         const map={
             enabled:'.sl-mi-travel,.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,.sl-mi-items,#sl-mi-market-bar,#sl-mi-points-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-bazaar-board,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session',
             travel:'.sl-mi-travel,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-travel-plan,#sl-mi-country-best,#sl-mi-session',
-            bestRun:'#sl-mi-best-run',countryBestBuys:'#sl-mi-country-best',arrivalStock:'#sl-mi-arrival',sessionSummary:'#sl-mi-session',
+            arrivalBasket:'#sl-mi-arrival',bestRun:'#sl-mi-best-run',countryBestBuys:'#sl-mi-country-best',arrivalStock:'#sl-mi-arrival',sessionSummary:'#sl-mi-session',
             bazaar:'.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,#sl-mi-bazaar-board',itemMarket:'#sl-mi-market-bar',loadoutComparator:'.sl-mi-loadout',
             items:'.sl-mi-items',museum:'#sl-mi-museum-bar',points:'#sl-mi-points-bar'
         };
