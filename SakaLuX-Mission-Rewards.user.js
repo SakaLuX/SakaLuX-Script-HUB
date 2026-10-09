@@ -1721,6 +1721,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         void globalThis.SakaLuXFreemium?.['mission-rewards']?.isPro?.().then(active=>{
             if(modLearningToggle?.isConnected)modLearningToggle.checked=Boolean(active&&settings.learnModPrices);
         }).catch(()=>{if(modLearningToggle?.isConnected)modLearningToggle.checked=false;});
+        window.addEventListener('SakaLuX:PremiumStatus',()=>{
+            if(modLearningToggle?.isConnected)modLearningToggle.checked=Boolean(globalThis.SakaLuXFreemium?.['mission-rewards']?.isActive?.()&&settings.learnModPrices);
+        },{once:true});
         document.getElementById('sl-mr-settings-close').onclick = () => overlay.remove();
         document.getElementById('sl-mr-api-open').onclick = openApiSettings;
         overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
