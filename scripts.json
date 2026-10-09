@@ -51,7 +51,9 @@
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
       "license": "All Rights Reserved",
-      "accessTier": "free"
+      "accessTier": "pro",
+      "accessEnforcement": "pending_server_side",
+      "premiumNote": "PRO module; license enforcement is pending."
     },
     {
       "active": true,
@@ -500,7 +502,15 @@
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
       "license": "All Rights Reserved",
-      "accessTier": "free"
+      "accessTier": "mixed",
+      "freeFeatures": [
+        "employee"
+      ],
+      "proFeatures": [
+        "director"
+      ],
+      "accessEnforcement": "pending_server_side",
+      "premiumNote": "Employee: FREE. Director: PRO. License enforcement is pending."
     },
     {
       "active": true,
