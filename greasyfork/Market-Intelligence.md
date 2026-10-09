@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.65**
+**v1.17.66**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.17.65**
+- Canonical version: **v1.17.66**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -39,6 +39,11 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.17.66 — 2026-10-10
+- Security audit: added internal entitlement checks to additional PRO-only execution paths rather than relying solely on button interception.
+- Script remains a client-side userscript; JavaScript-level restrictions can be modified by the client.
+
 
 ### v1.17.65 — 2026-10-10
 - Corrected duplicate async keyword after PRO entrypoint guard integration.
