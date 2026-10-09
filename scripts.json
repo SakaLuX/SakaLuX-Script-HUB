@@ -143,15 +143,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 42,
-      "version": "1.1.21",
+      "detailsRevision": 43,
+      "version": "1.1.22",
       "release": {
-        "version": "1.1.21",
+        "version": "1.1.22",
         "date": "2026-10-10",
         "notes": [
-          "Fixed syntax regression in Update All premium execution gate.",
-          "Premium bulk price updates now check entitlement at the execution function.",
-          "Validated userscript JavaScript syntax after the fix."
+          "Security hardening: selected PRO-only execution functions verify a current entitlement before performing work, not only the UI button.",
+          "Client-side PRO state is initialized on startup; expired/unverified entitlements fail closed.",
+          "Client-side protection is not a tamper-proof paywall; server-hosted premium computations require authenticated server authorization."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -211,19 +211,18 @@
         }
       ],
       "release": {
-        "version": "1.0.53",
+        "version": "1.0.54",
         "date": "2026-10-10",
         "notes": [
-          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
-          "Advanced reward offer analysis designated PRO.",
-          "Weapon mod price history designated PRO.",
-          "Safety features and baseline functionality remain FREE."
+          "Security hardening: selected PRO-only execution functions verify a current entitlement before performing work, not only the UI button.",
+          "Client-side PRO state is initialized on startup; expired/unverified entitlements fail closed.",
+          "Client-side protection is not a tamper-proof paywall; server-hosted premium computations require authenticated server authorization."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.53",
-      "detailsRevision": 17,
+      "version": "1.0.54",
+      "detailsRevision": 18,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -290,18 +289,18 @@
         }
       ],
       "release": {
-        "version": "1.17.65",
+        "version": "1.17.66",
         "date": "2026-10-10",
         "notes": [
-          "Fixed duplicate async keyword introduced by initial premium execution guard; JavaScript source now parses correctly.",
-          "Museum calculations require active PRO at execution.",
-          "Further live-device and non-click route validation remains necessary."
+          "Security hardening: selected PRO-only execution functions verify a current entitlement before performing work, not only the UI button.",
+          "Client-side PRO state is initialized on startup; expired/unverified entitlements fail closed.",
+          "Client-side protection is not a tamper-proof paywall; server-hosted premium computations require authenticated server authorization."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.65",
-      "detailsRevision": 30,
+      "version": "1.17.66",
+      "detailsRevision": 31,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -472,18 +471,18 @@
         }
       ],
       "release": {
-        "version": "1.3.57",
+        "version": "1.3.58",
         "date": "2026-10-10",
         "notes": [
-          "Fixed duplicate async keyword introduced by initial premium execution guard; JavaScript source now parses correctly.",
-          "FFScouter loading and calibration require active PRO at execution.",
-          "Further live-device and non-click route validation remains necessary."
+          "Security hardening: selected PRO-only execution functions verify a current entitlement before performing work, not only the UI button.",
+          "Client-side PRO state is initialized on startup; expired/unverified entitlements fail closed.",
+          "Client-side protection is not a tamper-proof paywall; server-hosted premium computations require authenticated server authorization."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.57",
-      "detailsRevision": 22,
+      "version": "1.3.58",
+      "detailsRevision": 23,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
