@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.51
+// @version      5.3.52
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -628,7 +628,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '5.3.51';
+  let v = '5.3.52';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -963,7 +963,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.51" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.52" }));
   const API_GLOBAL = "SakaLuXBazaarThanker";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1462,7 +1462,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function ensureExportButton() {
-        if (!location.href.includes('sid=events') || !moduleEnabled) return;
+        if (!location.href.includes('sid=events') || !moduleEnabled || !isSakaLuXOwnerAccount()) return;
         if (document.getElementById('sakalux-bt-export-visible')) return;
         const button = document.createElement('button');
         button.id = 'sakalux-bt-export-visible';
@@ -1488,6 +1488,27 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.body.appendChild(button);
     }
 
+    // SakaLuX private beta: hide owner-only controls unless Torn page identifies the logged-in owner.
+    function isSakaLuXOwnerAccount() {
+        const ids = [];
+        try {
+            const globals = [window.userID,window.userId,window.user_id,window.playerId,window.playerID];
+            for(const id of globals) if(id !== undefined && id !== null && /^\\d+$/.test(String(id))) ids.push(Number(id));
+        } catch {}
+        const selectors = [
+            '#sidebar a[href*="profiles.php?XID="]',
+            '.header-profile a[href*="profiles.php?XID="]',
+            'a[class*="user-menu"][href*="XID="]',
+            'a[aria-label="My Profile"][href*="XID="]'
+        ];
+        for(const selector of selectors) {
+            const element=document.querySelector(selector);
+            const value=element?.getAttribute('href')?.match(/[?&]XID=(\\d+)/i);
+            if(value)ids.push(Number(value[1]));
+        }
+        // Never infer the current account from purchase event links or other players.
+        return ids.length>0 && ids.every(id=>id===2380374);
+    }
     // Bazaar Sync: user-authorized device pairing; no Torn API key is transferred.
     const SYNC_PAIR_KEY = 'sakalux_bazaar_sync_pair_v1';
     let syncBusy = false;
@@ -1502,7 +1523,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return match ? 'torn:'+match[1] : null;
     }
     function ensureSyncControls() {
-        if (!moduleEnabled || !location.href.includes('sid=events') || document.getElementById('sakalux-bt-sync-controls')) return;
+        if (!moduleEnabled || !location.href.includes('sid=events') || !isSakaLuXOwnerAccount() || document.getElementById('sakalux-bt-sync-controls')) return;
         const root=document.createElement('div');
         root.id='sakalux-bt-sync-controls';
         root.style.cssText='position:fixed;right:14px;bottom:125px;z-index:999998;display:flex;gap:6px;flex-wrap:wrap;max-width:330px';
@@ -1521,7 +1542,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         root.append(pair,sync,status);document.body.appendChild(root);
     }
     async function syncVisibleEvents(status,manual=false) {
-        if(syncBusy || !moduleEnabled || !location.href.includes('sid=events'))return;
+        if(syncBusy || !moduleEnabled || !location.href.includes('sid=events') || !isSakaLuXOwnerAccount())return;
         const token=localStorage.getItem(SYNC_PAIR_KEY);
         if(!token){if(manual)status.textContent='Pair SakaLuX first.';return;}
         if(!manual&&Date.now()-syncLastAttempt<120000)return;
