@@ -483,18 +483,18 @@
         }
       ],
       "release": {
-        "version": "1.8.64",
+        "version": "1.8.65",
         "date": "2026-10-09",
         "notes": [
-          "Fixed the remaining Employee/Director UI startup exception: mode buttons now use $$('[data-mode]', root).forEach.",
-          "Verified the saved source contains the two-dollar collection selector rather than the single-element $ selector.",
-          "Synchronized installed-version markers, release documentation and update registry."
+          "Company mode tabs now explicitly display EMPLOYEE · FREE and DIRECTOR · PRO.",
+          "Employee features remain accessible without a PRO license.",
+          "Director mode continues to validate the active PRO entitlement with sakalux.ro before granting access."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.64",
-      "detailsRevision": 20,
+      "version": "1.8.65",
+      "detailsRevision": 21,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
