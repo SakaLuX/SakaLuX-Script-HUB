@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.121
+// @version      1.9.122
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -687,7 +687,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.121';
+    const VERSION = '1.9.122';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -707,6 +707,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version":"1.9.122","date":"2026-10-10","changes":["Adds explicit ✦ PRO and FREE / ✦ PRO labels in module cards.","Updates the offline registry and release information for all nine badge-enabled add-ons.","Preserves INFO details and displays release-specific NEW notes."]},
         {version:'1.9.98',date:'2026-10-09',changes:['Adds secure one-time pairing from Premium web account to Hub on TornPDA/Tampermonkey.','Checks server-issued PRO license with revocable device token; existing Bazaar Thanker stays available during beta.']},
         {version:'1.9.97',date:'2026-10-09',changes:['Marks Bazaar Thanker as a planned PRO module in Hub without disabling existing installations.','Adds canonical account license plans on SakaLuX.ro; billing is not yet active.']},
         {version:'1.9.96',date:'2026-10-09',changes:['Adds PREMIUM navigation to SakaLuX.ro account license status.','Keeps existing modules free; billing is disabled during test rollout.']},
@@ -1212,23 +1213,25 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.57",
-                    "date": "2026-10-07",
+                    "version": "1.3.66",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.57",
-                "detailsRevision": 16,
+                "version": "1.3.66",
+                "detailsRevision": 25,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
-                "license": "All Rights Reserved"
+                "license": "All Rights Reserved",
+                "accessTier": "pro",
+                "accessEnforcement": "client_entitlement_check",
+                "premiumNote": "Client validates the server-issued enhancer_guard entitlement before starting. JavaScript can be modified; server-side protected operations are still needed for tamper resistance."
             },
             {
                 "active": true,
@@ -1265,23 +1268,25 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.48",
-                    "date": "2026-10-07",
+                    "version": "5.3.65",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.48",
-                "detailsRevision": 14,
+                "version": "5.3.65",
+                "detailsRevision": 29,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
-                "license": "All Rights Reserved"
+                "license": "All Rights Reserved",
+                "accessTier": "pro",
+                "accessEnforcement": "client_entitlement_check",
+                "premiumNote": "Client validates the server-issued bazaar_thanker entitlement before starting. JavaScript can be modified; server-side protected operations are still needed for tamper resistance."
             },
             {
                 "active": true,
@@ -1319,16 +1324,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 37,
-                "version": "1.1.17",
+                "detailsRevision": 44,
+                "version": "1.1.23",
                 "release": {
-                    "version": "1.1.17",
-                    "date": "2026-10-07",
+                    "version": "1.1.23",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1336,7 +1340,20 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "greasyForkId": "596672",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596672",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md",
-                "license": "MIT"
+                "license": "MIT",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Per-item Quick Add and Undo",
+                    "Individual pricing",
+                    "RW/bonus item safety controls"
+                ],
+                "proFeatures": [
+                    "Bulk Pricing",
+                    "Update All",
+                    "Quick Fill"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
             },
             {
                 "active": true,
@@ -1375,23 +1392,34 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.50",
-                    "date": "2026-10-07",
+                    "version": "1.0.55",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.50",
-                "detailsRevision": 14,
+                "version": "1.0.55",
+                "detailsRevision": 19,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
-                "license": "All Rights Reserved"
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Reward values",
+                    "Value per credit",
+                    "Owned ammunition"
+                ],
+                "proFeatures": [
+                    "Advanced reward offer analysis",
+                    "Weapon mod price history"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
             },
             {
                 "active": true,
@@ -1442,23 +1470,37 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.61",
-                    "date": "2026-10-07",
+                    "version": "1.17.67",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.61",
-                "detailsRevision": 25,
+                "version": "1.17.67",
+                "detailsRevision": 32,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
-                "license": "All Rights Reserved"
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Market price context",
+                    "BUY/WAIT indicators",
+                    "Basic watchlist"
+                ],
+                "proFeatures": [
+                    "Bazaar Flip",
+                    "Best Travel Run",
+                    "Route Basket",
+                    "Travel Planner",
+                    "Museum"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
             },
             {
                 "active": true,
@@ -1508,13 +1550,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.5.7",
-                    "date": "2026-10-07",
+                    "version": "0.5.13",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -1522,12 +1563,24 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
-                "version": "0.5.7",
-                "detailsRevision": 16,
+                "version": "0.5.13",
+                "detailsRevision": 22,
                 "license": "All Rights Reserved",
                 "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "greasyForkId": "598988",
-                "greasyForkUrl": "https://greasyfork.org/scripts/598988"
+                "greasyForkUrl": "https://greasyfork.org/scripts/598988",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Basic target list",
+                    "Basic search and filtering"
+                ],
+                "proFeatures": [
+                    "Full-board Scanner",
+                    "FF/BS filtering",
+                    "Smart Sort"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
             },
             {
                 "active": true,
@@ -1600,23 +1653,36 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.51",
-                    "date": "2026-10-07",
+                    "version": "1.3.59",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.51",
-                "detailsRevision": 15,
+                "version": "1.3.59",
+                "detailsRevision": 24,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
-                "license": "All Rights Reserved"
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Elimination teams",
+                    "Player search",
+                    "Availability status"
+                ],
+                "proFeatures": [
+                    "SAFE/RISKY/SKIP recommendations",
+                    "FFScouter",
+                    "Calibration",
+                    "Target learning"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
             },
             {
                 "active": true,
@@ -1652,23 +1718,31 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.58",
-                    "date": "2026-10-07",
+                    "version": "1.8.68",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.57",
-                "detailsRevision": 14,
+                "version": "1.8.68",
+                "detailsRevision": 24,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
-                "license": "All Rights Reserved"
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "employee"
+                ],
+                "proFeatures": [
+                    "director"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Employee FREE; Director PRO. Server-calculated entitlement is checked by client; complete code-level protection requires server-hosted features."
             },
             {
                 "active": true,
@@ -1710,27 +1784,43 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.19",
-                    "date": "2026-10-07",
+                    "version": "0.8.24",
+                    "date": "2026-10-10",
                     "notes": [
-                        "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-                        "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-                        "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-                        "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+                        "Adds visible ✦ PRO badges to premium actions while keeping FREE controls visible.",
+                        "Retains existing license checks and SakaLuX PRO notices when a locked action is selected.",
+                        "No premium permissions or server-side entitlements were changed."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.19",
-                "detailsRevision": 18,
+                "version": "0.8.24",
+                "detailsRevision": 23,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md",
-                "license": "All Rights Reserved"
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Portfolio",
+                    "Prices",
+                    "Profit/loss",
+                    "Stock benefits",
+                    "Safety confirmations"
+                ],
+                "proFeatures": [
+                    "Financial Advisor",
+                    "Technical Assistant",
+                    "Portfolio Simulator",
+                    "Smart Rebalance",
+                    "PANIC floating button and execution"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
             }
         ],
-        "lastVerified": "2026-10-07",
+        "lastVerified": "2026-10-10",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 
