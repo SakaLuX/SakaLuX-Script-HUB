@@ -5,6 +5,10 @@
 ## Current version
 **v1.0.57**
 
+### License Manager v2 (2026-10-10)
+- Shared entitlement broker; improved cache and outage handling.
+
+
 ### License Manager v2 · 2026-10-10
 - Shared Hub license broker, short FREE cache, and bounded PRO cache.
 - Temporary network errors no longer count as confirmed FREE for upgrade prompts.
