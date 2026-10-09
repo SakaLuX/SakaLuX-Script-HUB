@@ -3276,7 +3276,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';return;}
         const cachedExpiry=hubProCache?.expires_at?Date.parse(String(hubProCache.expires_at).replace(' ','T')+'Z'):NaN;
         if(!force&&hubProCache&&Date.now()-hubProCheckedAt<(hubProCache.premium_active?5*60*1000:30*1000)&&
-            (!hubProCache.premium_active||(Number.isFinite(cachedExpiry)&&cachedExpiry>Date.now())){
+            (!hubProCache.premium_active||(Number.isFinite(cachedExpiry)&&cachedExpiry>Date.now()))){
             paintHubProStatus(button,hubProCache);return;
         }
         if(hubProPending)return hubProPending;
