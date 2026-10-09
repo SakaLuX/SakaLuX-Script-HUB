@@ -3235,7 +3235,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;}
         if(!key){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';return;}
         if(typeof GM_xmlhttpRequest!=='function'){button.title='Premium status unavailable';return;}
-        if(!force&&hubProCache&&Date.now()-hubProCheckedAt<15*60*1000){
+        if(!force&&hubProCache&&Date.now()-hubProCheckedAt<5*60*1000){
             paintHubProStatus(button,hubProCache);return;
         }
         if(hubProPending)return hubProPending;
@@ -3248,7 +3248,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             onload:r=>{try{const d=JSON.parse(r.responseText||'{}');if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);resolve(d);}catch(e){reject(e);}},
             onerror:()=>reject(Error('Network unavailable')),ontimeout:()=>reject(Error('Timeout'))
         }));
-        try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};paintHubProStatus(document.getElementById('slh-premium'),d);}
+        try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
         catch(error){if(button.isConnected){const reason=String(error?.message||'connection error');button.title='PRO verification unavailable: '+reason+' — tap for details';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
         finally{hubProPending=null;}
     }
