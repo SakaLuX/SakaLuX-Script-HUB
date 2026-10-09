@@ -34,18 +34,18 @@
         }
       ],
       "release": {
-        "version": "1.3.58",
+        "version": "1.3.59",
         "date": "2026-10-09",
         "notes": [
-          "Check an active server-issued PRO entitlement using the Hub Torn API key before starting the module.",
-          "When PRO is not verified, display activation / Free Trial contact details.",
-          "This is client-side access control, not tamper-proof protection."
+          "PRO access requires a server-confirmed license matching the Torn API key.",
+          "Access validity is bounded by the actual license expiry.",
+          "A fully tamper-resistant implementation requires server-hosted premium operations."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.58",
-      "detailsRevision": 17,
+      "version": "1.3.59",
+      "detailsRevision": 18,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -89,18 +89,18 @@
         }
       ],
       "release": {
-        "version": "5.3.54",
+        "version": "5.3.55",
         "date": "2026-10-09",
         "notes": [
-          "Check an active server-issued PRO entitlement using the Hub Torn API key before starting the module.",
-          "When PRO is not verified, display activation / Free Trial contact details.",
-          "This is client-side access control, not tamper-proof protection."
+          "PRO access requires a server-confirmed license matching the Torn API key.",
+          "Access validity is bounded by the actual license expiry.",
+          "A fully tamper-resistant implementation requires server-hosted premium operations."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.54",
-      "detailsRevision": 20,
+      "version": "5.3.55",
+      "detailsRevision": 21,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
