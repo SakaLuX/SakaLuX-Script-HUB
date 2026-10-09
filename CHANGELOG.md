@@ -1,5 +1,12 @@
 # Changelog
 
+## Market Intelligence v1.17.68 — PRO toggle enforcement — 2026-10-10
+
+- Prevents FREE users from switching on Best Travel Run, Arrival Basket Planner and Museum intelligence.
+- Revalidates PRO before applying the ON state and displays the existing SakaLuX popup when access is denied.
+- Preserves the FREE settings and existing execution-level PRO checks.
+
+
 ## Premium badges distribution — 2026-10-10
 
 Premium actions in nine scripts now have ✦ PRO visual labels. Script Hub uses ✦ PRO and FREE / ✦ PRO module badges. Existing license checks and PRO dialogs remain unchanged; FREE actions are not deliberately hidden.
