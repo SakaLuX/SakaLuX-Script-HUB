@@ -2011,6 +2011,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function setEnabled(value) {
+        if (value && !slxProAllowed) { slxShowProNotice(); return false; }
         moduleEnabled = Boolean(value);
         localStorage.setItem(ENABLED_KEY, moduleEnabled ? '1' : '0');
         if (moduleEnabled) startRuntime();
