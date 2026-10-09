@@ -3,13 +3,13 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.22**
+**v0.8.23**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v0.8.22**
+- Canonical version: **v0.8.23**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -41,6 +41,10 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v0.8.23 — 2026-10-10
+- PRO check now runs inside PANIC preview as well as execution; FREE portfolio remains available.
+
 
 ### v0.8.22 — 2026-10-10
 - Added direct execution-entry checks for covered PRO functionality, including stock rebalance, Bazaar bulk updates, Museum scan and Elimination FF/calibration.
