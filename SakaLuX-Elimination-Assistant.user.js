@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.52
+// @version      1.3.53
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -665,7 +665,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.52';
+  let v = '1.3.53';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1000,7 +1000,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.52" }));
+  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.53" }));
   const API_GLOBAL = "SakaLuXEliminationAssistant";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1062,7 +1062,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  */
 (() => {
 'use strict';
-const VERSION = '1.3.52';
+const VERSION = '1.3.53';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -1265,7 +1265,7 @@ function rememberSafeTargets(){cleanSafeTargets();const map=new Map(state.safeTa
 function renderSafeTargets(){cleanSafeTargets();const count=state.safeTargets.length,badge=$('#slx-safe-count');if(badge)badge.textContent=String(count);const total=$('#slx-safe-total');if(total)total.textContent=`${count} remembered SAFE target${count===1?'':'s'}`;const list=$('#slx-safe-list');if(!list)return;const rows=[...state.safeTargets].sort((a,b)=>b.addedAt-a.addedAt);list.innerHTML=rows.length?rows.map(x=>`<div class="slx-safe-row"><div class="slx-safe-player"><a href="https://www.torn.com/profiles.php?XID=${x.id}" target="_blank" rel="noopener noreferrer">${esc(x.name)} [${x.id}]</a><small>Score ${x.score}/100${x.level?' · Level '+x.level:''} · saved ${age(Math.floor(x.addedAt/1000))} ago</small></div><button class="slx-a slx-safe-remove" data-id="${x.id}" title="Remove saved target">✕</button></div>`).join(''):'<div class="slx-safe-empty">SAFE targets will be remembered automatically while loading and scanning batches.</div>';$$('.slx-safe-remove',list).forEach(b=>b.onclick=()=>removeSafeTarget(Number(b.dataset.id)))}
 function openSafeTargets(){renderSafeTargets();$('#slx-safe-list-modal')?.classList.add('open')}
 function removeSafeTarget(id){state.safeTargets=state.safeTargets.filter(x=>Number(x.id)!==Number(id));save(K.safe,state.safeTargets);renderSafeTargets();setStatus(`Removed target ${id} from SAFE list`)}
-function clearSafeTargets(){if(!state.safeTargets.length)return;if(!confirm(`Clear all ${state.safeTargets.length} remembered SAFE targets?`))return;state.safeTargets=[];save(K.safe,state.safeTargets);renderSafeTargets();setStatus('Remembered SAFE targets cleared')}
+async function clearSafeTargets(){if(!state.safeTargets.length)return;if(!(await globalThis.SakaLuXDialog.confirmAsync(`Clear all ${state.safeTargets.length} remembered SAFE targets?`)))return;state.safeTargets=[];save(K.safe,state.safeTargets);renderSafeTargets();setStatus('Remembered SAFE targets cleared')}
 async function copyAllSafe(){cleanSafeTargets();if(!state.safeTargets.length)throw new Error('No remembered SAFE targets yet');await copyText(state.safeTargets.map(x=>`https://www.torn.com/profiles.php?XID=${x.id}`).join('\n'));setStatus(`Copied ${state.safeTargets.length} remembered SAFE profile links`);return state.safeTargets.length}
 async function exportSafeTargets(){cleanSafeTargets();if(!state.safeTargets.length)throw new Error('No remembered SAFE targets yet');const payload={target_backup:state.safeTargets.map(x=>({id:x.id,notes:`SakaLuX SAFE · Score ${x.score}/100`,notes_color:'green'}))};await copyText(JSON.stringify(payload));setStatus(`Copied ${state.safeTargets.length} remembered SAFE targets · TornPDA: Chaining → Targets → Import / Export → paste → Add`);return state.safeTargets.length}
 async function exportTargets(){if(!state.view.length)throw new Error('Load and filter targets first');const list=state.view.filter(p=>attackable(p)&&risk(p).label!=='SKIP');if(!list.length)throw new Error('No attackable SAFE/RISKY targets in the current filtered list');const payload={target_backup:list.map(p=>{const r=risk(p);return{id:p.id,notes:`SakaLuX ${r.label} · Score ${smart(p)}/100 · ${presence(p).label}`,notes_color:r.label==='SAFE'?'green':'red'}})};await copyText(JSON.stringify(payload));setStatus(`Copied ${list.length} targets · TornPDA: Chaining → Targets → Import / Export → paste → Add`);return list.length}
