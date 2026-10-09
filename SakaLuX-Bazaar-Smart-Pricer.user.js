@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.18
+// @version      1.1.19
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374]
 // @license      MIT
@@ -17,6 +17,49 @@
 // @downloadURL  https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.user.js
 // @updateURL    https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js
 // ==/UserScript==
+
+/* SakaLuX Freemium Control — BEGIN */
+(()=>{
+ 'use strict';
+ const ENT='bazaar_smart_pricer_pro', MATCH=/quick fill|update all|bulk pricing|bulk fill/i, ROOT=/qp|pricer|sakalux/i;
+ let verifiedUntil=0,verifiedKey='',pending=null;
+ const key=()=>{try{return String(globalThis.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}};
+ const accepts=(data,k)=>{
+   const expiry=Date.parse(String(data?.expires_at||'').replace(' ','T')+'Z');
+   return !!(data?.premium_active===true&&data?.entitlements?.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now()&&k===key());
+ };
+ async function isPro(){
+   const k=key();if(!/^[A-Za-z0-9]{16}$/.test(k))return false;
+   if(k===verifiedKey&&verifiedUntil>Date.now())return true;
+   const hub=globalThis.__SakaLuXPremiumVerified;
+   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));return true}
+   if(pending)return pending;
+   if(typeof GM_xmlhttpRequest!=='function')return false;
+   pending=new Promise(resolve=>{
+    GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:k}),timeout:12000,
+     onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ok=r.status===200&&accepts(d,k);if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}resolve(ok)}catch{resolve(false)}},
+     onerror:()=>resolve(false),ontimeout:()=>resolve(false)
+    })
+   });try{return await pending}finally{pending=null}
+ }
+ function locked(){
+   if(globalThis.SakaLuXDialog?.show)globalThis.SakaLuXDialog.show({title:'SakaLuX PRO',type:'pro',message:'This advanced feature requires active SakaLuX PRO. Basic features remain FREE. 1 Xanax = 7 days PRO.',actions:[{label:'CLOSE'},{label:'OPEN PREMIUM',primary:true,onClick:()=>location.assign('https://sakalux.ro/premium.html')}]});
+   else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
+ }
+ globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
+ globalThis.SakaLuXFreemium['bazaar-smart-pricer']={isPro,locked};
+ const bypass=new WeakSet();
+ document.addEventListener('click',async e=>{
+   const button=e.target?.closest?.('button,[role="button"],a');if(!button||bypass.has(button))return;
+   const owner=button.closest?.('[id],[class]');const scope=(button.closest?.('[id*="slx"],[id*="sakalux"],[id*="qp"],[id*="mission"],[class*="slx"],[class*="sakalux"]')?.id||button.closest?.('[id*="slx"],[id*="sakalux"],[id*="qp"],[id*="mission"]')?.className||'');
+   if(!ROOT.test(String(scope))&&!ROOT.test(String(owner?.id||'')))return;
+   const label=String(button.textContent||button.title||button.getAttribute('aria-label')||'').trim();
+   if(!MATCH.test(label))return;
+   e.preventDefault();e.stopImmediatePropagation();
+   if(await isPro()){bypass.add(button);try{button.click()}finally{bypass.delete(button)}}else locked();
+ },true);
+})();
+/* SakaLuX Freemium Control — END */
 
 /* SakaLuX Unified Dialogs v1.0 — BEGIN */
 (() => {
@@ -667,7 +710,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.1.18';
+  let v = '1.1.19';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -684,7 +727,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Bazaar Smart Pricer Global Power Bridge — BEGIN */
 (() => {
   'use strict';
-  const VERSION = '1.1.18';
+  const VERSION = '1.1.19';
   const LOCAL_KEY = 'SakaLuX_BAZAAR_SMART_PRICER_ENABLED';
   const GM_KEY = 'moduleEnabled';
   function readEnabled() {
@@ -1038,7 +1081,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"}, { version: "1.1.18" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"}, { version: "1.1.19" }));
   const API_GLOBAL = "SakaLuXBazaarSmartPricer";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
