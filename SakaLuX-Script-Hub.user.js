@@ -3241,7 +3241,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                         try{
                             const d=JSON.parse(r.responseText||'{}');
                             if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);
-                            if(currentKey===requestKey){cached=d;cachedAt=Date.now();}
+                            if(currentKey!==requestKey){reject(Error('identity_changed'));return;}
+                            cached=d;cachedAt=Date.now();
                             resolve(d);
                         }catch(e){reject(e);}
                     },
@@ -3262,7 +3263,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     async function refreshHubProStatus(force=false){
         const button=document.getElementById('slh-premium');
         const key=getSharedApiKey();
-        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null}}));}
+        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;hubProPending=null;slxLicenseBroker.clear();delete globalThis.__SakaLuXPremiumVerified;window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null,verification_state:'checking'}}));}
         if(!key){if(button){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';}return;}
         if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';return;}
         const cachedExpiry=hubProCache?.expires_at?Date.parse(String(hubProCache.expires_at).replace(' ','T')+'Z'):NaN;
@@ -3273,9 +3274,11 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if(hubProPending)return hubProPending;
         hubProRequestKey=key;
         if(button)button.title='Checking PRO license…';
-        hubProPending=slxLicenseBroker.check(key,{force});
-        try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
+        const request=slxLicenseBroker.check(key,{force});
+        hubProPending=request;
+        try{const d=await request;if(getSharedApiKey()!==key)return;hubProCache=d;hubProCheckedAt=Date.now();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
         catch(error){
+            if(getSharedApiKey()!==key)return; // stale in-flight response after account switch
             // A transport/rate-limit failure is UNKNOWN, not FREE. Preserve an unexpired,
             // same-key verified grant for its normal 5-minute validity, never beyond expiry.
             const verified=globalThis.__SakaLuXPremiumVerified;
@@ -3296,7 +3299,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 button.style.borderColor=stillValid?'#348c65':'#8a7541';
             }
         }
-        finally{hubProPending=null;}
+        finally{if(hubProPending===request)hubProPending=null;}
     }
     setInterval(()=>{if(!document.hidden)void refreshHubProStatus()},5*60*1000);
     function paintHubProStatus(button,data){
