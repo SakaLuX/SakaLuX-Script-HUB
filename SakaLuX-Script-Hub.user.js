@@ -1,15 +1,18 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.97
+// @version      1.9.98
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @connect      update.greasyfork.org
 // @connect      raw.githubusercontent.com
 // @connect      api.torn.com
+// @connect      sakalux.ro
 // @license      All Rights Reserved
 // @downloadURL  https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js
 // @updateURL    https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js
@@ -670,6 +673,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {version:'1.9.98',date:'2026-10-09',changes:['Adds secure one-time pairing from Premium web account to Hub on TornPDA/Tampermonkey.','Checks server-issued PRO license with revocable device token; existing Bazaar Thanker stays available during beta.']},
         {version:'1.9.97',date:'2026-10-09',changes:['Marks Bazaar Thanker as a planned PRO module in Hub without disabling existing installations.','Adds canonical account license plans on SakaLuX.ro; billing is not yet active.']},
         {version:'1.9.96',date:'2026-10-09',changes:['Adds PREMIUM navigation to SakaLuX.ro account license status.','Keeps existing modules free; billing is disabled during test rollout.']},
         {version:'1.9.95',date:'2026-10-08',changes:['Adds WEBSITE access to SakaLuX.ro from the Hub toolbar.','Adds a module DOCS action opening the related SakaLuX.ro information page while keeping INFO and NEW local.']},
@@ -3113,7 +3117,43 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         document.getElementById('slh-whats-new').onclick = openWhatsNew;
         document.getElementById('slh-settings').onclick = openSettings;
         document.getElementById('slh-website').onclick = () => window.open('https://sakalux.ro/', '_blank', 'noopener,noreferrer');
-        document.getElementById('slh-premium').onclick = () => window.open('https://sakalux.ro/premium.html', '_blank', 'noopener,noreferrer');
+        document.getElementById('slh-premium').onclick = async () => {
+            const url='https://sakalux.ro/premium.html';
+            if(typeof GM_xmlhttpRequest!=='function'||typeof GM_getValue!=='function'||typeof GM_setValue!=='function'){
+                alert('Secure pairing requires TornPDA or a userscript manager supporting GM requests and storage.');
+                window.open(url,'_blank','noopener,noreferrer');return;
+            }
+            const request=(path,method,body,token)=>new Promise((resolve,reject)=>{
+                GM_xmlhttpRequest({method,url:'https://sakalux.ro/api/'+path,
+                    headers:{'Accept':'application/json',...(body?{'Content-Type':'application/json'}:{}),...(token?{'Authorization':'Bearer '+token}:{})},
+                    data:body?JSON.stringify(body):undefined,timeout:18000,
+                    onload:r=>{try{const data=JSON.parse(r.responseText||'{}');if(r.status<200||r.status>=300)reject(new Error(data.status||'HTTP '+r.status));else resolve(data);}catch(e){reject(e);}},
+                    onerror:()=>reject(new Error('Connection unavailable')),ontimeout:()=>reject(new Error('Connection timed out'))
+                });
+            });
+            try{
+                const token=await GM_getValue('slx_premium_device_token','');
+                if(token){
+                    try{
+                        const data=await request('premium-device-status.php','GET',null,token);
+                        const license=data.premium||{};
+                        const msg=license.premium_active?'PRO active until '+(license.expires_at||'expiry unknown'):'Device paired · Free plan';
+                        if(!confirm(msg+'.\nPress OK to manage Premium on the website, or Cancel to stay here.'))return;
+                        window.open(url,'_blank','noopener,noreferrer');return;
+                    }catch(e){
+                        if(String(e.message).includes('device_revoked')||String(e.message).includes('unauthorized'))await GM_setValue('slx_premium_device_token','');
+                        else{alert('License check unavailable: '+e.message);return;}
+                    }
+                }
+                const code=prompt('Open sakalux.ro/premium.html, sign in and generate a pairing code. Paste the 32-character code here (Cancel opens the website).');
+                if(!code){window.open(url,'_blank','noopener,noreferrer');return;}
+                const trimmed=code.trim().toLowerCase();
+                if(!/^[a-f0-9]{32}$/.test(trimmed)){alert('Invalid pairing code.');return;}
+                const paired=await request('premium-pair-redeem.php','POST',{pair_code:trimmed});
+                await GM_setValue('slx_premium_device_token',paired.device_token);
+                alert('Hub linked to Torn #'+paired.torn_player_id+'. '+(paired.premium?.premium_active?'PRO active':'Free plan'));
+            }catch(e){alert('Premium pairing: '+e.message);}
+        };
         document.getElementById('slh-money').onclick = () => location.href = PROFILE_URL;
         document.getElementById('slh-items').onclick = () => location.href = PROFILE_URL;
         document.getElementById('slh-author').onclick = event => { event.preventDefault(); location.href = PROFILE_URL; };
