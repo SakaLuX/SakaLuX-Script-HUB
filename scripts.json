@@ -143,15 +143,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 41,
-      "version": "1.1.20",
+      "detailsRevision": 42,
+      "version": "1.1.21",
       "release": {
-        "version": "1.1.20",
+        "version": "1.1.21",
         "date": "2026-10-10",
         "notes": [
-          "Guards Quick Fill and Update All at their execution entry points, not only click handlers.",
-          "Corrects Update All's asynchronous function declaration.",
-          "Per-item Quick Add and Undo and item protection remain free."
+          "Fixed syntax regression in Update All premium execution gate.",
+          "Premium bulk price updates now check entitlement at the execution function.",
+          "Validated userscript JavaScript syntax after the fix."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -370,12 +370,12 @@
         }
       ],
       "release": {
-        "version": "0.5.10",
+        "version": "0.5.11",
         "date": "2026-10-10",
         "notes": [
-          "Full-board API retrieval now verifies Bounty Hunter PRO entitlement at execution.",
-          "FFScouter enrichment also checks PRO before contacting the service.",
-          "FREE mode retains DOM-based bounty discovery and basic filtering."
+          "Added PRO checks to full-board API loading and FFScouter enrichment execution paths.",
+          "FREE DOM target list remains accessible.",
+          "Validated JavaScript syntax; device integration is still untested."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -383,8 +383,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.10",
-      "detailsRevision": 19,
+      "version": "0.5.11",
+      "detailsRevision": 20,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
