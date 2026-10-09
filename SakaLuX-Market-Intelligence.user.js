@@ -3181,7 +3181,20 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},force?80:500);
     }
 
-    function toggle(key,label){const premium=new Set(['bestRun','arrivalBasket','museum']);const badge=premium.has(key)?'<span class="slx-premium-badge" aria-label="PRO feature">✦ PRO</span>':'';return '<label class="sl-mi-toggle"><span class="sl-mi-toggle-label">'+esc(label)+'</span>'+badge+'<span class="sl-mi-switch"><input data-mi-toggle="1" data-setting="'+esc(key)+'" id="sl-mi-'+key+'" type="checkbox" '+(settings[key]?'checked':'')+'><span class="sl-mi-switch-ui"></span></span></label>';}
+    const PREMIUM_SETTING_KEYS=new Set(['bestRun','arrivalBasket','museum']);
+    function premiumSettingActive(key){return !PREMIUM_SETTING_KEYS.has(key)||Boolean(globalThis.SakaLuXFreemium?.['market-intelligence']?.isActive?.());}
+    function toggle(key,label){const isPremium=PREMIUM_SETTING_KEYS.has(key);const badge=isPremium?'<span class="slx-premium-badge" aria-label="PRO feature">✦ PRO</span>':'';const active=Boolean(settings[key])&&premiumSettingActive(key);return '<label class="sl-mi-toggle"><span class="sl-mi-toggle-label">'+esc(label)+'</span>'+badge+'<span class="sl-mi-switch"><input data-mi-toggle="1" data-setting="'+esc(key)+'" id="sl-mi-'+key+'" type="checkbox" '+(active?'checked':'')+'><span class="sl-mi-switch-ui"></span></span></label>';}
+    async function restorePremiumSettingsUI(root){
+      const entitlement=globalThis.SakaLuXFreemium?.['market-intelligence'];
+      let authorized=false;try{authorized=Boolean(await entitlement?.isPro?.());}catch(_){}
+      if(!root.isConnected)return;
+      for(const key of PREMIUM_SETTING_KEYS){
+        const input=root.querySelector('input[data-setting="'+key+'"]');
+        if(input)input.checked=authorized&&Boolean(settings[key]);
+        if(!authorized)cleanupLiveFeature(key);
+      }
+      if(authorized&&settings.enabled)scheduleScan(false);
+    }
     function removeNodes(selector){document.querySelectorAll(selector).forEach(n=>n.remove());}
     function cleanupLiveFeature(key){
         const map={
@@ -3289,18 +3302,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         overlay.querySelector('#sl-mi-close').onclick=()=>overlay.remove();
         overlay.querySelector('#sl-mi-api-access').onclick=()=>openApiAccess();
         overlay.querySelectorAll('input[data-mi-toggle="1"]').forEach(input=>input.addEventListener('change',async()=>{
-            const premiumSettings=new Set(['bestRun','arrivalBasket','museum']);
-            if(premiumSettings.has(input.dataset.setting)&&input.checked){
+            const key=input.dataset.setting;
+            if(PREMIUM_SETTING_KEYS.has(key)&&input.checked){
                 input.checked=false;
                 const entitlement=globalThis.SakaLuXFreemium?.['market-intelligence'];
-                let authorized=false;
-                try{authorized=Boolean(await entitlement?.isPro?.());}catch(_){}
+                let authorized=false;try{authorized=Boolean(await entitlement?.isPro?.());}catch(_){}
                 if(!input.isConnected)return;
                 if(!authorized){entitlement?.locked?.();return;}
                 input.checked=true;
             }
-            applyLiveToggle(input.dataset.setting,input.checked);
+            applyLiveToggle(key,input.checked);
         }));
+        void restorePremiumSettingsUI(overlay);
         overlay.querySelector('#sl-mi-save').onclick=()=>{settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;settings.priceNetworkEndpoint=normalizeNetworkEndpoint(overlay.querySelector('#sl-mi-network-endpoint')?.value||'');saveJson(STORAGE.settings,settings);if(settings.priceNetwork)schedulePriceNetworkFlush(500);const b=overlay.querySelector('#sl-mi-save');if(b){const t=b.textContent;b.textContent='SAVED ✓';setTimeout(()=>{if(b.isConnected)b.textContent=t;},900);}scheduleScan(false);};
         overlay.querySelector('#sl-mi-clear-sessions').onclick=()=>{travelSessions={current:null,history:[]};saveTravelSessions();overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-refresh').onclick=()=>{overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-hard').onclick=()=>{marketCache={};saveJson(STORAGE.marketCache,marketCache);overlay.remove();scheduleScan(true);};
     }
