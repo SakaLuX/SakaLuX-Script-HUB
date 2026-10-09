@@ -1,4 +1,4 @@
-name: Publish Premium Badge Releases v1
+name: Publish Premium Lifecycle Releases
 on:
   push:
     branches: [main]
@@ -19,9 +19,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate badges and synchronized metadata
+      - name: Validate PRO lifecycle and synchronized metadata
         run: |
           python3 tools/verify_premium_badge_release.py
+          python3 tools/verify_premium_lifecycle.py
           python3 tools/release_preflight.py --all --build
       - name: Verify and publish the ten changed releases
         env:
