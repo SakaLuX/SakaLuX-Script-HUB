@@ -1,5 +1,28 @@
 # Changelog
 
+## Release documentation reconciliation — 2026-10-09
+
+Current version sources are the userscript `@version` fields. Earlier entries below are retained as historical records, not overwritten.
+
+| Script | Current checked version | Release documentation |
+|---|---|---|
+| Account Auditor | 1.3.28 | matches |
+| Bazaar Smart Pricer | 1.1.17 | matches |
+| Bazaar Thanker | 5.3.59 | corrected |
+| Chat Intelligence | 1.2.39 | matches |
+| Company Intelligence | 1.8.61 | corrected |
+| Elimination Assistant | 1.3.51 | matches |
+| Enhancer Guard | 1.3.61 | corrected |
+| Market Intelligence | 1.17.61 | matches |
+| Mission Rewards | 1.0.50 | matches |
+| Script Hub | 1.9.111 | corrected |
+| Stock Manager & Advisor | 0.8.19 | matches |
+| Bounty Hunter | 0.5.7 | matches |
+| SakaLuX Suite | requires separate full-file version validation | pending |
+
+Bazaar Thanker v5.3.59 fixes malformed ranking code and a duplicated corrupt block that prevented Greasy Fork from parsing the updated userscript. The release documentation for Bazaar Thanker, Company Intelligence, Enhancer Guard and Script Hub is now aligned with the published repository userscript metadata.
+
+
 ## Version normalization — 2026-10-07
 
 Fixes mismatched userscript headers and installed-version signals, stale offline registry data, release documentation and update-cache behavior. Versions use three numeric components, increasing the patch before removing the fourth component. Shared runtime versions remain independent.
