@@ -34,18 +34,18 @@
         }
       ],
       "release": {
-        "version": "1.3.63",
+        "version": "1.3.65",
         "date": "2026-10-09",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Uses active PRO verification already confirmed by Script Hub for the same Torn API key and entitlement.",
+          "Rechecks shared PRO status at the time of opening the module to avoid showing a false subscription-required popup.",
+          "Keeps server verification as the source of truth and GreasyFork as the download/update provider."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.63",
-      "detailsRevision": 22,
+      "version": "1.3.65",
+      "detailsRevision": 23,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -89,18 +89,18 @@
         }
       ],
       "release": {
-        "version": "5.3.61",
+        "version": "5.3.63",
         "date": "2026-10-09",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Uses active PRO verification already confirmed by Script Hub for the same Torn API key and entitlement.",
+          "Rechecks shared PRO status at the time of opening the module to avoid showing a false subscription-required popup.",
+          "Keeps server verification as the source of truth and GreasyFork as the download/update provider."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.61",
-      "detailsRevision": 26,
+      "version": "5.3.63",
+      "detailsRevision": 27,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
