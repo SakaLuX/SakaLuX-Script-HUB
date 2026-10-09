@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.58
+// @version      1.8.59
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1852,7 +1852,7 @@ async function ciCheckDirectorPro(force=false){
   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
   headers:{'Content-Type':'application/json','Accept':'application/json'},
   data:JSON.stringify({api_key:key}),timeout:12000,
-  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const date=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const active=r.status===200&&d.status==='ok'&&d.premium_active===true&&Number.isFinite(date)&&date>Date.now()&&key===ciHubApiKey();ciProVerified=active;ciProExpires=active?Math.min(date,Date.now()+5*60*1000):0;resolve(active)}catch{resolve(false)}},
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const date=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const active=r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('company_director')&&Number.isFinite(date)&&date>Date.now()&&key===ciHubApiKey();ciProVerified=active;ciProExpires=active?Math.min(date,Date.now()+5*60*1000):0;resolve(active)}catch{resolve(false)}},
   onerror:()=>resolve(false),ontimeout:()=>resolve(false)
  }));
  try{return await ciProChecking}finally{ciProChecking=null}
