@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.68**
+**v1.8.69**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.8.68**
+- Canonical version: **v1.8.69**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,11 +32,16 @@
 
 ## Current release note
 
-**v1.8.68 — 2026-10-10**
-- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
-- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
+**v1.8.69 — 2026-10-10**
+- Director mode falls back to Employee when PRO is inactive without deleting the saved Director preference.
+- Revalidates and restores the preferred Director mode automatically when entitlement becomes active.
 
 ## Release history / Changelog
+
+### v1.8.69 — 2026-10-10
+- Director mode falls back to Employee when PRO is inactive without deleting the saved Director preference.
+- Revalidates and restores the preferred Director mode automatically when entitlement becomes active.
+
 
 
 ### v1.8.68 — 2026-10-10
