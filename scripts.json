@@ -290,17 +290,18 @@
         }
       ],
       "release": {
-        "version": "1.17.64",
+        "version": "1.17.65",
         "date": "2026-10-10",
         "notes": [
-          "Fixed invalid asynchronous Museum scanner declaration so the premium check can execute.",
-          "Museum scanning remains subject to PRO verification; market price indicators stay free."
+          "Fixed duplicate async keyword introduced by initial premium execution guard; JavaScript source now parses correctly.",
+          "Museum calculations require active PRO at execution.",
+          "Further live-device and non-click route validation remains necessary."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.64",
-      "detailsRevision": 29,
+      "version": "1.17.65",
+      "detailsRevision": 30,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -472,17 +473,18 @@
         }
       ],
       "release": {
-        "version": "1.3.56",
+        "version": "1.3.57",
         "date": "2026-10-10",
         "notes": [
-          "Fixed invalid asynchronous calibration declaration.",
-          "Protected target learning data writes and calibration at execution time; team search remains free."
+          "Fixed duplicate async keyword introduced by initial premium execution guard; JavaScript source now parses correctly.",
+          "FFScouter loading and calibration require active PRO at execution.",
+          "Further live-device and non-click route validation remains necessary."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.56",
-      "detailsRevision": 21,
+      "version": "1.3.57",
+      "detailsRevision": 22,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
