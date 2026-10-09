@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.99
+// @version      1.9.100
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2263,6 +2263,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 #${IDS.overlay}{position:fixed;inset:0;z-index:2147483647;background:rgba(4,8,13,.84);backdrop-filter:none!important;display:flex;align-items:flex-end;justify-content:center;font-family:Inter,Arial,sans-serif;color:#e7edf5}
 #${IDS.panel}{--sl-bg:#0f141c;--sl-soft:#151c26;--sl-panel:#18212d;--sl-panel2:#1d2836;--sl-elev:#223041;--sl-border:#314154;--sl-border2:#43566e;--sl-text:#e7edf5;--sl-softtext:#a9b7c8;--sl-muted:#7f90a6;--sl-blue:#4f8fe8;--sl-blue2:#2f6ebf;--sl-green:#18b26b;--sl-red:#cc3d57;--sl-gold:#d7a94a;width:min(680px,100%);max-height:95vh;display:flex;flex-direction:column;overflow:hidden;background:var(--sl-bg);color:var(--sl-text);border:1px solid var(--sl-border);border-radius:22px 22px 0 0;box-shadow:0 -22px 70px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.025)}
 .slh-header{padding:16px 16px 12px;flex-shrink:0;background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 40%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-bottom:1px solid var(--sl-border)}.slh-headrow{display:flex;align-items:center;justify-content:space-between;gap:12px}.slh-brand{display:flex;align-items:center;gap:11px;min-width:0}.slh-brand-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #41536b;border-radius:13px;background:linear-gradient(145deg,#263448,#17212e);box-shadow:inset 0 1px rgba(255,255,255,.05),0 7px 20px rgba(0,0,0,.25);font-size:22px}.slh-brand-copy{min-width:0}.slh-kicker{font-size:8px;line-height:1.2;letter-spacing:.18em;font-weight:900;color:#6fa6ef;text-transform:uppercase}.slh-title{margin-top:2px;font-size:18px;line-height:1.15;font-weight:900;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slh-sub{margin-top:4px;color:var(--sl-muted);font-size:9px;line-height:1.3}.slh-registry-dot{display:inline-block;width:6px;height:6px;margin-right:4px;border-radius:50%;background:#64748b}.slh-registry-dot.online{background:var(--sl-green);box-shadow:0 0 8px rgba(24,178,107,.6)}.slh-close{width:38px;height:38px;flex:0 0 auto;border:1px solid var(--sl-border);border-radius:11px;background:#1b2532;color:#c8d3df;font-size:21px;line-height:1;transition:.15s ease}.slh-close:active{transform:scale(.96)}
+.slh-head-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}.slh-mini-action{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border:1px solid #41536b;border-radius:10px;background:#1b2532;color:#e6efff;font-size:16px;font-weight:900;cursor:pointer}.slh-mini-pro{font-size:10px;letter-spacing:.02em;color:#f5d58c;border-color:#74603b;background:linear-gradient(155deg,#3b3020,#1b2532)}.slh-mini-action:disabled{opacity:.55}.slh-head-actions .slh-close{width:34px;height:34px;border-radius:10px}
 .slh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:13px}.slh-stat{position:relative;overflow:hidden;background:rgba(24,33,45,.86);border:1px solid var(--sl-border);border-radius:11px;padding:9px 7px 8px}.slh-stat:before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#4f8fe8;opacity:.8}.slh-stat.warn:before{background:var(--sl-gold)}.slh-stat.bad:before{background:var(--sl-red)}.slh-stat.good:before{background:var(--sl-green)}.slh-stat strong{display:block;color:#f8fafc;font-size:15px;line-height:1}.slh-stat span{display:block;margin-top:5px;color:var(--sl-muted);font-size:7px;font-weight:800;letter-spacing:.08em}.slh-stat small{display:block;margin-top:3px;color:#64748b;font-size:7px}
 .slh-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:9px}.slh-tool{min-width:0;height:42px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--sl-border);border-radius:10px;background:linear-gradient(180deg,#202c3a,#17212d);color:#d9e3ee;font-size:9px;font-weight:900;white-space:nowrap;touch-action:manipulation}.slh-tool span{font-size:13px}.slh-tool.checking{opacity:.56}.slh-tool.whatsnew{border-color:#54446b;background:linear-gradient(180deg,#3a2b4d,#271d35)}.slh-tool.settings{border-color:#4a5262}.slh-tool:active,.slh-bottom-btn:active,.slh-primary:active,.slh-switch:active,.slh-cat:active,.slh-setting-toggle:active{transform:translateY(1px)}
 .slh-cats{display:flex;gap:6px;margin-top:9px;padding-bottom:1px;overflow-x:auto;scrollbar-width:none}.slh-cats::-webkit-scrollbar{display:none}.slh-cat{flex-shrink:0;border:1px solid #2c394b;border-radius:999px;padding:6px 10px;background:#111923;color:#8999ac;font-size:8px;font-weight:900;letter-spacing:.05em}.slh-cat.active{border-color:#4c84cc;background:#1d3b60;color:#dcebff;box-shadow:inset 0 0 0 1px rgba(111,166,239,.08)}
@@ -3094,7 +3095,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                             <div class="slh-sub"><span class="slh-registry-dot ${registryClass}"></span>v${VERSION} · Registry ${escapeHtml(registryStatus)} · ${SCRIPTS.length} managed add-ons</div>
                         </div>
                     </div>
-                    <button class="slh-close" id="slh-close" aria-label="Close">×</button>
+                    <div class="slh-head-actions"><button class="slh-mini-action" id="slh-website" aria-label="Open SakaLuX website" title="Website">🌐</button><button class="slh-mini-action slh-mini-pro" id="slh-premium" aria-label="Check Premium status" title="Premium">PRO</button><button class="slh-close" id="slh-close" aria-label="Close">×</button></div>
                 </div>
                 <div class="slh-stats" id="slh-stats"></div>
                 <div class="slh-tools">
@@ -3102,7 +3103,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     <button class="slh-tool" id="slh-update-all" title="Refresh registry and update all"><span>⇧</span>UPDATE</button>
                     <button class="slh-tool" id="slh-health" title="System check"><span>◉</span>HEALTH</button>
                     <button class="slh-tool whatsnew" id="slh-whats-new" title="What's new"><span>✦</span>NEW</button>
-                    <button class="slh-tool" id="slh-website" title="SakaLuX website"><span>↗</span>WEBSITE</button><button class="slh-tool" id="slh-premium" title="Your SakaLuX Premium account"><span>★</span>PREMIUM</button><button class="slh-tool settings" id="slh-settings" title="Settings"><span>⚙</span>SETTINGS</button>
+                    <button class="slh-tool settings" id="slh-settings" title="Settings"><span>⚙</span>SETTINGS</button>
                 </div>
                 <div class="slh-cats" id="slh-cats"></div>
             </div>
@@ -3119,34 +3120,46 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         document.getElementById('slh-website').onclick = () => window.open('https://sakalux.ro/', '_blank', 'noopener,noreferrer');
         document.getElementById('slh-premium').onclick = async () => {
             const key=getSharedApiKey();
-            if(!key){alert('Set your shared Torn API key under Hub → Settings → API Access first.');return;}
-            if(typeof GM_xmlhttpRequest!=='function'){
-                alert('PRO license lookup needs GM requests in TornPDA or Tampermonkey. Your scripts remain available.');return;
-            }
+            const showPremium=(data={},error='')=>{
+                document.getElementById('slh-premium-dialog')?.remove();
+                const overlay=document.createElement('div');overlay.id='slh-premium-dialog';
+                overlay.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(3,7,14,.78);backdrop-filter:blur(5px)';
+                const card=document.createElement('div');
+                card.style.cssText='box-sizing:border-box;width:min(410px,100%);max-height:85vh;overflow:auto;padding:22px;border-radius:18px;border:1px solid #3f526b;background:linear-gradient(160deg,#1b2a3d,#0e1725);box-shadow:0 25px 75px rgba(0,0,0,.7);color:#eaf1fb;font-family:Arial,sans-serif';
+                const title=document.createElement('div');title.textContent='✦ SakaLuX Premium';title.style.cssText='font-size:21px;font-weight:900;color:#f1cd7d;margin-bottom:12px';
+                const person=document.createElement('div');person.textContent=data.user?.name?data.user.name+' ['+data.user.id+']':'Premium license check';person.style.cssText='font-size:13px;color:#aabbd2;margin-bottom:16px;overflow-wrap:anywhere';
+                const status=document.createElement('div');const pro=!error&&!!data.premium_active;
+                status.textContent=error?'CHECK UNAVAILABLE':pro?'✦ PRO ACTIVE':'FREE ACCOUNT';
+                status.style.cssText='display:inline-block;padding:8px 13px;border-radius:10px;font-size:12px;font-weight:900;border:1px solid '+(error?'#805b45':pro?'#267c57':'#8a7541')+';background:'+(error?'#382820':pro?'#153e30':'#39301d')+';color:'+(error?'#ffc7a6':pro?'#8cf2b9':'#f5d58c');
+                const info=document.createElement('div');info.style.cssText='font-size:13px;line-height:1.65;color:#dae4f2;margin-top:16px';
+                if(error)info.textContent=error+' — existing free modules remain available.';
+                else if(pro){const expiry=data.expires_at?Date.parse(String(data.expires_at).replace(' ','T')+'Z'):NaN;const hours=Number.isFinite(expiry)?Math.max(0,Math.ceil((expiry-Date.now())/3600000)):null;info.textContent='Expires: '+(data.expires_at||'Unknown')+' UTC'+(hours!==null?' · '+Math.floor(hours/24)+'d '+(hours%24)+'h remaining':'');}
+                else info.textContent='No active PRO license. 1 Xanax = 7 days PRO.';
+                const recipient=document.createElement('a');recipient.href='https://www.torn.com/profiles.php?XID=2380374';recipient.target='_blank';recipient.rel='noopener noreferrer';recipient.textContent='Send Xanax to SakaLuX [2380374] ↗';recipient.style.cssText='display:block;margin-top:16px;font-size:13px;color:#f3d082;text-decoration:underline';
+                const actions=document.createElement('div');actions.style.cssText='display:flex;gap:9px;justify-content:flex-end;margin-top:22px';
+                const visit=document.createElement('button');visit.type='button';visit.textContent='OPEN PREMIUM';visit.style.cssText='border:1px solid #4779b5;border-radius:10px;background:#254e83;color:white;padding:10px 13px;font-weight:800';
+                visit.onclick=()=>window.open('https://sakalux.ro/premium.html','_blank','noopener,noreferrer');
+                const close=document.createElement('button');close.type='button';close.textContent='CLOSE';close.style.cssText='border:1px solid #45566b;border-radius:10px;background:#1f2d3d;color:#e5edf8;padding:10px 13px;font-weight:800';
+                close.onclick=()=>overlay.remove();overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
+                actions.append(visit,close);card.append(title,person,status,info,recipient,actions);overlay.append(card);document.body.append(overlay);
+            };
+            if(!key){showPremium({},'Set your Torn API key in Hub Settings → API Access first');return;}
+            if(typeof GM_xmlhttpRequest!=='function'){showPremium({},'GM requests are unavailable in this userscript manager');return;}
             const button=document.getElementById('slh-premium');
             if(button?.disabled)return;
-            if(button)button.disabled=true;
+            button.disabled=true;
             try{
-                const result=await new Promise((resolve,reject)=>{
-                    GM_xmlhttpRequest({
-                        method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-                        headers:{'Content-Type':'application/json','Accept':'application/json'},
-                        data:JSON.stringify({api_key:key}),timeout:15000,
-                        onload:r=>{
-                            let d;
-                            try{d=JSON.parse(r.responseText||'{}');}catch{reject(new Error('Invalid server response'));return;}
-                            if(r.status<200||r.status>=300){reject(new Error(d.status||'HTTP '+r.status));return;}
-                            resolve(d);
-                        },
-                        onerror:()=>reject(new Error('Network unavailable')),
-                        ontimeout:()=>reject(new Error('Request timed out'))
-                    });
-                });
-                const player=String(result.user?.name||'Player')+' ['+String(result.user?.id||'?')+']';
-                const status=result.premium_active?'PRO ACTIVE — expires '+(result.expires_at||'unknown')+' UTC':'FREE — no active PRO license';
-                alert(player+'\\n'+status+'\\n\\n1 Xanax = 7 days PRO. Send Xanax to SakaLuX [2380374].');
-            }catch(e){alert('Unable to check PRO: '+String(e.message||'unknown error')+'\\nYour free scripts remain available.');}
-            finally{if(button)button.disabled=false;}
+                const data=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
+                    method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+                    headers:{'Content-Type':'application/json','Accept':'application/json'},
+                    data:JSON.stringify({api_key:key}),timeout:15000,
+                    onload:r=>{let d;try{d=JSON.parse(r.responseText||'{}')}catch{reject(new Error('Invalid server response'));return}if(r.status<200||r.status>=300){reject(new Error(d.status||'HTTP '+r.status));return}resolve(d)},
+                    onerror:()=>reject(new Error('Network unavailable')),
+                    ontimeout:()=>reject(new Error('Request timed out'))
+                }));
+                showPremium(data);
+            }catch(error){showPremium({},String(error?.message||'License check failed'));}
+            finally{button.disabled=false;}
         };
         document.getElementById('slh-money').onclick = () => location.href = PROFILE_URL;
         document.getElementById('slh-items').onclick = () => location.href = PROFILE_URL;
