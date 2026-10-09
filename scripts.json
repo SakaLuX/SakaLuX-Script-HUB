@@ -34,26 +34,25 @@
         }
       ],
       "release": {
-        "version": "1.3.57",
-        "date": "2026-10-07",
+        "version": "1.3.58",
+        "date": "2026-10-09",
         "notes": [
-          "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-          "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-          "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-          "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+          "Check an active server-issued PRO entitlement using the Hub Torn API key before starting the module.",
+          "When PRO is not verified, display activation / Free Trial contact details.",
+          "This is client-side access control, not tamper-proof protection."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.57",
-      "detailsRevision": 16,
+      "version": "1.3.58",
+      "detailsRevision": 17,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
       "license": "All Rights Reserved",
       "accessTier": "pro",
-      "accessEnforcement": "pending_server_side",
-      "premiumNote": "PRO module; license enforcement is pending."
+      "accessEnforcement": "client_entitlement_check",
+      "premiumNote": "Client validates the server-issued enhancer_guard entitlement before starting. JavaScript can be modified; server-side protected operations are still needed for tamper resistance."
     },
     {
       "active": true,
@@ -90,26 +89,25 @@
         }
       ],
       "release": {
-        "version": "5.3.53",
+        "version": "5.3.54",
         "date": "2026-10-09",
         "notes": [
-          "Rolls Bazaar Thanker back to the v5.3.48 feature set, before all Dashboard and MySQL integration experiments.",
-          "Removes Pair SakaLuX, Sync Now, automatic website synchronization and Export Bazaar buyers buttons.",
-          "Retains original Bazaar buyer grouping, statistics, purchase details, thank-you messaging and existing settings.",
-          "Version increased to allow auto-updates from 5.3.52."
+          "Check an active server-issued PRO entitlement using the Hub Torn API key before starting the module.",
+          "When PRO is not verified, display activation / Free Trial contact details.",
+          "This is client-side access control, not tamper-proof protection."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.53",
-      "detailsRevision": 19,
+      "version": "5.3.54",
+      "detailsRevision": 20,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
       "license": "All Rights Reserved",
       "accessTier": "pro",
-      "accessEnforcement": "pending_server_side",
-      "premiumNote": "Bazaar Thanker is designated PRO; the current standalone userscript remains available until secure server-side premium features are launched."
+      "accessEnforcement": "client_entitlement_check",
+      "premiumNote": "Client validates the server-issued bazaar_thanker entitlement before starting. JavaScript can be modified; server-side protected operations are still needed for tamper resistance."
     },
     {
       "active": true,
