@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.122**
+**v1.9.123**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.9.122**
+- Canonical version: **v1.9.123**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -34,11 +34,18 @@
 
 ## Current release note
 
-**v1.9.122 — 2026-10-10**
-- Hub displays ✦ PRO and FREE / ✦ PRO labels according to the module's premium tier.
-- Synchronizes scripts.json with the embedded offline registry and NEW release notes.
+**v1.9.123 — 2026-10-10**
+- Broadcasts verified premium entitlement status to installed SakaLuX modules.
+- Refreshes PRO status every five minutes while Torn is visible, including with Hub panel closed.
+- Updates the embedded module registry and release NEWS for license-sensitive preference restoration.
 
 ## Release history / Changelog
+
+### v1.9.123 — 2026-10-10
+- Broadcasts verified premium entitlement status to installed SakaLuX modules.
+- Refreshes PRO status every five minutes while Torn is visible, including with Hub panel closed.
+- Updates the embedded module registry and release NEWS for license-sensitive preference restoration.
+
 
 
 
