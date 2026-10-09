@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.65
+// @version      1.17.66
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -47,7 +47,7 @@
    else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
  }
  globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
- globalThis.SakaLuXFreemium['market-intelligence']={isPro,locked};
+ globalThis.SakaLuXFreemium['market-intelligence']={isPro,locked,isActive:()=>verifiedKey===key()&&verifiedUntil>Date.now()};void isPro();
  const bypass=new WeakSet();
  document.addEventListener('click',async e=>{
    const button=e.target?.closest?.('button,[role="button"],a');if(!button||bypass.has(button))return;
@@ -710,7 +710,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.65';
+  let v = '1.17.66';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1045,7 +1045,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.65" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.66" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1108,7 +1108,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 (function () {
     'use strict';
-    const VERSION = '1.17.65';
+    const VERSION = '1.17.66';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -2330,10 +2330,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function routeBasketEntries(rows){
+        if(!globalThis.SakaLuXFreemium['market-intelligence'].isActive())return [];
         return rows.map(r=>({id:r.itemId,name:r.name,buy:r.buyPrice,stock:r.stock,row:null,destination:r.destination}));
     }
 
     function buildBestRunRows(candidates,marketMap,actualTimes){
+        if(!globalThis.SakaLuXFreemium['market-intelligence'].isActive())return [];
         const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),grouped=new Map(),ranked=[];
         for(const r of candidates){if(!grouped.has(r.destination))grouped.set(r.destination,[]);grouped.get(r.destination).push(r);}
         let blocked=0,totalBasketItems=0;
@@ -2541,6 +2543,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function travelPlannerCandidates(entries,marketMap,slots){
+        if(!globalThis.SakaLuXFreemium['market-intelligence'].isActive())return [];
         const ranked=[];
         for(const e of entries){
             const market=marketMap.get(e.id);if(!market)continue;
