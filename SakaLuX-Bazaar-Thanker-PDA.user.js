@@ -1978,6 +1978,289 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (!panel) return false;
         panel.style.display = 'flex';
         updateStats();
+        const rank=document.getElementById('sbtProRanking');
+        if(rank)rank.onclick=async()=>{
+            const target=document.getElementById('sbtProRankingResults');
+            const key=String(localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim();
+            if(!key){target.textContent='Configure the Torn API key in Hub Settings.';return;}
+            const buyers=[...getBuyerGroups().values()].slice(0,100).map(b=>({id:+b.id,name:b.name,spent:b.totalSpent,items:b.totalItems,purchases:b.events.length}));
+            target.textContent='Calculating PRO buyer ranking…';
+            GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/pro-bazaar-ranking.php',headers:{'Content-Type':'application/json'},data:JSON.stringify({api_key:key,buyers}),timeout:15000,
+              onload:r=>{try{const d=JSON.parse(r.responseText);if(r.status!==200)throw Error(d.status||'HTTP '+r.status);
+                target.replaceChildren();const note=document.createElement('p');note.textContent='TOP BUYERS · Loaded Torn events only';target.append(note);
+                for(const [i,b] of (d.buyers||[]).entries()){const line=document.createElement('div');line.textContent=(i+1)+'. '+b.name+' ['+b.id+'] — 
+    }
+
+    function closeSettingsPanel() {
+        const panel = document.getElementById('sakalux-bt-settings');
+        if (!panel) return false;
+        panel.style.display = 'none';
+        return true;
+    }
+
+    function startRuntime() {
+        if (!moduleEnabled || !slxProCurrent()) return;
+        if (location.href.includes('sid=events')) {
+            createSettings();
+            processBuyerGroups();
+            startEventObserver();
+        }
+        if (location.pathname.includes('messages.php')) startMessageObserver();
+    }
+
+    function stopRuntime() {
+        eventObserver?.disconnect();
+        messageObserver?.disconnect();
+        eventObserver = null;
+        messageObserver = null;
+        if (eventProcessTimer) clearTimeout(eventProcessTimer);
+        eventProcessTimer = null;
+        document.querySelectorAll('.sakalux-bt-ui').forEach(element => element.remove());
+        document.getElementById('sakalux-bt-details')?.remove();
+        document.getElementById('sakalux-bt-settings')?.remove();
+        document.getElementById(HUB_PROMPT_ID)?.remove();
+    }
+
+    function setEnabled(value) {
+        if (value && !slxProCurrent()) { slxShowProNotice(); return false; }
+        moduleEnabled = Boolean(value);
+        localStorage.setItem(ENABLED_KEY, moduleEnabled ? '1' : '0');
+        if (moduleEnabled) startRuntime();
+        else stopRuntime();
+        window.dispatchEvent(new CustomEvent('SakaLuX:BazaarThankerStateChanged', { detail: { version: BAZAAR_VERSION, enabled: moduleEnabled } }));
+        syncHubBridge('bazaar', moduleEnabled);
+        return moduleEnabled;
+    }
+
+    function toggleEnabled() {
+        return setEnabled(!moduleEnabled);
+    }
+
+    function syncHubBridge(id, value) { const bridge = document.getElementById('sakalux-module-bridge-' + id); if (bridge) bridge.dataset.enabled = String(Boolean(value)); }
+    function installHubBridge(id, openHandler) {
+        let bridge = document.getElementById('sakalux-module-bridge-' + id);
+        if (!bridge) { bridge = document.createElement('button'); bridge.type = 'button'; bridge.id = 'sakalux-module-bridge-' + id; bridge.hidden = true; (document.body || document.documentElement).appendChild(bridge); }
+        bridge.dataset.version = BAZAAR_VERSION; bridge.dataset.enabled = String(Boolean(moduleEnabled));
+        bridge.onclick = () => { const action = bridge.dataset.action; if (action === 'open') openHandler(); else if (action === 'toggle') toggleEnabled(); else if (action === 'on' || action === 'off') setEnabled(action === 'on'); bridge.dataset.action = ''; syncHubBridge(id, moduleEnabled); };
+    }
+
+    window.SakaLuXBazaarThanker = {
+        id: 'bazaar-thanker',
+        name: 'Bazaar Thanker',
+        version: BAZAAR_VERSION,
+
+        open() {
+            return openSettingsPanel();
+        },
+
+        close() {
+            return closeSettingsPanel();
+        },
+
+        refresh() {
+            if (location.href.includes('sid=events')) {
+                processBuyerGroups();
+                updateStats();
+            }
+            return true;
+        },
+        setEnabled,
+        toggleEnabled,
+        isEnabled() { return moduleEnabled; },
+
+        stats() {
+            if (!location.href.includes('sid=events')) {
+                return { buyers: 0, purchases: 0, items: 0, spent: 0 };
+            }
+            return getStatistics();
+        },
+
+        health() {
+            const onEvents = location.href.includes('sid=events');
+            const onMessages = location.pathname.includes('messages.php');
+            let statistics = { buyers: 0, purchases: 0, items: 0, spent: 0 };
+
+            if (onEvents) {
+                try {
+                    statistics = getStatistics();
+                } catch (e) {
+                    console.error('[SakaLuX Bazaar Thanker] Health stats error:', e);
+                }
+            }
+
+            return {
+                ready: true,
+                version: BAZAAR_VERSION,
+                enabled: moduleEnabled,
+                onEvents,
+                onMessages,
+                settingsAvailable: Boolean(document.getElementById('sakalux-bt-settings')),
+                buttonAvailable: Boolean(document.getElementById('sakalux-bt-settings-button')),
+                observerActive: Boolean(eventObserver || messageObserver),
+                detectedBazaarName: detectedBazaarName || '',
+                buyers: statistics.buyers,
+                purchases: statistics.purchases,
+                items: statistics.items,
+                spent: statistics.spent
+            };
+        },
+
+        goToEvents() {
+            location.href = 'https://www.torn.com/page.php?sid=events';
+            return true;
+        }
+    };
+
+    window.dispatchEvent(new CustomEvent('SakaLuX:BazaarThankerReady', {
+        detail: { version: BAZAAR_VERSION, enabled: moduleEnabled }
+    }));
+
+    let slxProAllowed=false,slxProExpiry=0;
+async function slxCheckProAccess(){
+ let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
+ if(!/^[a-zA-Z0-9]{16}$/.test(key)||typeof GM_xmlhttpRequest!=='function')return false;
+ return new Promise(resolve=>GM_xmlhttpRequest({
+  method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+  headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('bazaar_thanker')&&Number.isFinite(ends)&&ends>Date.now());slxProExpiry=allowed?ends:0;resolve(allowed)}catch{resolve(false)}},
+  onerror:()=>resolve(false),ontimeout:()=>resolve(false)
+ }));
+}
+function slxProCurrent(){return slxProAllowed&&Date.now()<slxProExpiry;}
+function slxShowProNotice(){alert('This is a SakaLuX PRO module. Set your Torn API key in SakaLuX Hub and activate PRO at sakalux.ro/premium.html. FREE TRIAL: message SakaLuX [2380374].');}
+    async function init() {
+        slxProAllowed=await slxCheckProAccess();
+        try { localStorage.setItem('SakaLuX_Installed_bazaar', BAZAAR_VERSION); } catch {}
+        installHubBridge('bazaar', openSettingsPanel);
+        if (moduleEnabled && slxProCurrent()) {
+            startRuntime();
+            scheduleHubInstallPrompt();
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+
+
+    /* SakaLuX Unified Control Center UI — visual layer only. */
+    function installSakaLuXUnifiedTheme_bazaar() {
+        if (document.getElementById('sakalux-unified-theme-bazaar')) return;
+        const style = document.createElement('style');
+        style.id = 'sakalux-unified-theme-bazaar';
+        style.textContent = `
+:where([id^="sakalux-bt-"],[class*="sakalux-bt-"]){font-family:Inter,Arial,sans-serif!important;box-sizing:border-box}
+:where([id^="sakalux-bt-"][id*="panel" i],[id^="sakalux-bt-"][id*="settings" i],[id^="sakalux-bt-"][id*="modal" i],[id^="sakalux-bt-"][id*="details" i]){background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.15),transparent 38%),linear-gradient(155deg,#18212d 0%,#101720 72%)!important;color:#e7edf5!important;border:1px solid #314154!important;border-radius:16px!important;box-shadow:0 18px 52px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.025)!important}
+:where([class*="sakalux-bt-"][class*="header" i],[id^="sakalux-bt-"][id*="header" i]){background:linear-gradient(155deg,#1b2634,#111923)!important;border-color:#314154!important;color:#f8fafc!important}
+:where([class*="sakalux-bt-"][class*="card" i],[class*="sakalux-bt-"][class*="row" i],[class*="sakalux-bt-"][class*="section" i],[class*="sakalux-bt-"][class*="note" i]){background:linear-gradient(145deg,#18212d,#131b25)!important;border-color:#2d3c4e!important;border-radius:12px!important;color:#dce6f0!important;box-shadow:0 6px 18px rgba(0,0,0,.14)!important}
+:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"]){border:1px solid #3d78bf!important;border-radius:10px!important;background:linear-gradient(180deg,#377fcf,#275f9f)!important;color:#fff!important;font-weight:900!important;box-shadow:none!important;transition:transform .12s ease,filter .12s ease!important}
+:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"]):active{transform:translateY(1px)!important}
+:where(input[id^="sakalux-bt-"],select[id^="sakalux-bt-"],textarea[id^="sakalux-bt-"],[id^="sakalux-bt-"] input,[id^="sakalux-bt-"] select,[id^="sakalux-bt-"] textarea){background:#0d141d!important;border:1px solid #3a4b61!important;border-radius:9px!important;color:#f4f7fb!important;outline:none!important}
+:where(input[type="checkbox"][id^="sakalux-bt-"]){appearance:none!important;-webkit-appearance:none!important;width:38px!important;height:21px!important;min-width:38px!important;margin:0 8px 0 0!important;vertical-align:middle!important;border:1px solid #546276!important;border-radius:999px!important;background:radial-gradient(circle at 10px 50%,#e7edf5 0 6px,transparent 6.5px),#465365!important;cursor:pointer!important;transition:.18s ease!important;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)!important}
+:where(input[type="checkbox"][id^="sakalux-bt-"]):checked{border-color:#24754f!important;background:radial-gradient(circle at 27px 50%,#fff 0 6px,transparent 6.5px),#1eb36a!important}
+:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="close" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="close" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="back" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="gray" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="secondary" i]{background:linear-gradient(180deg,#253243,#1a2431)!important;border-color:#3a4a5d!important;color:#d7e1eb!important}
+:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="clear" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="reset" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[id*="delete" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="danger" i],:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"])[class*="red" i]{background:linear-gradient(180deg,#733344,#54232f)!important;border-color:#864354!important;color:#ffd7df!important}
+@media(max-width:520px){:where([id^="sakalux-bt-"][id*="panel" i],[id^="sakalux-bt-"][id*="settings" i],[id^="sakalux-bt-"][id*="modal" i],[id^="sakalux-bt-"][id*="details" i]){border-radius:15px!important}:where(button[id^="sakalux-bt-"],button[class*="sakalux-bt-"]){min-height:34px!important}}
+`;
+        (document.head || document.documentElement).appendChild(style);
+    }
+    installSakaLuXUnifiedTheme_bazaar();
+
+})();
+
+
+
+
+
+/* slx-host-scroll-contract-v3 */
+(()=>{if(document.getElementById('slx-host-scroll-contract-v3'))return;const s=document.createElement('style');s.id='slx-host-scroll-contract-v3';s.textContent=`@media(max-width:820px){
+[data-slx-fullsheet-v2="1"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)){position:relative!important;inset:auto!important;width:100%!important;max-width:100%!important;height:100%!important;min-height:0!important;max-height:100%!important;margin:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;background:rgba(9,15,22,.94)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+}`;(document.head||document.documentElement).appendChild(s)})();
+
+
+/* SakaLuX Mobile Full-Screen Performance Contract */
+(()=>{
+  if(document.getElementById('sakalux-fullscreen-performance-contract')) return;
+  const s=document.createElement('style');
+  s.id='sakalux-fullscreen-performance-contract';
+  s.textContent=`@media(max-width:820px){
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="overlay"],
+    [id^="slx-"][id*="overlay"],
+    [id^="sl-"][id*="overlay"]{
+      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
+      width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+      margin:0!important;padding:0!important;border-radius:0!important;overflow:hidden!important;
+      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#0b1118!important;box-shadow:none!important
+    }
+    [data-slx-fullsheet-v2="1"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)),
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"],[id^="slx-"][id*="panel"],[id^="sl-"][id*="panel"],
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"],[id^="slx-"][id*="modal"],[id^="sl-"][id*="modal"]{
+      position:fixed!important;inset:0!important;top:0!important;right:0!important;bottom:0!important;left:0!important;
+      width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-width:none!important;max-height:none!important;
+      margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow:auto!important;
+      touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;
+      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important
+    }
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) *,[id^="slx-"] *,[id^="sl-"] *{ -webkit-backdrop-filter:none!important;backdrop-filter:none!important }
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"] *,[id^="slx-"][id*="panel"] *,[id^="sl-"][id*="panel"] *,
+    [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"] *,[id^="slx-"][id*="modal"] *,[id^="sl-"][id*="modal"] *{
+      animation:none!important;transition:none!important
+    }
+  }`;
+  (document.head||document.documentElement).appendChild(s);
+})();
+
+
+/* SakaLuX Hub footer v3: native module root only; compact donation controls. */
+(()=>{
+ const selector="#sakalux-bt-settings",id="sakalux-inline-footer-bazaar-thanker",profile='https://www.torn.com/profiles.php?XID=2380374';
+ const st=document.createElement('style');st.textContent=`
+ #${id}#${id}{position:sticky!important;bottom:0!important;inset-inline:auto!important;display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;max-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;z-index:5!important;font-family:Arial,sans-serif!important;overflow:hidden!important;border-radius:10px!important}
+ #${id}#${id} *{box-sizing:border-box!important}
+ #${id}#${id} .slh-bottom{height:28px!important;margin:0!important;padding:4px 14px!important;background:#0b1118!important;border-top:1px solid rgba(255,255,255,.08)!important;border-radius:10px 10px 0 0!important;overflow:hidden!important}
+ #${id}#${id} .slh-bottom-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;height:20px!important}
+ #${id}#${id} .slh-bottom-btn{display:block!important;width:100%!important;min-width:0!important;height:20px!important;min-height:20px!important;max-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:10px!important;background:#151f2a!important;color:#b9c7d6!important;font:900 8px/1.2 Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important;cursor:pointer!important}
+ #${id}#${id} .slh-footer{height:22px!important;min-height:22px!important;max-height:22px!important;margin:0!important;padding:0 6px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;border-top:1px solid rgba(223,154,55,.52)!important;border-radius:0 0 10px 10px!important;background:#080d13!important;color:#df9a37!important;font:400 9px/20px Arial,sans-serif!important;white-space:nowrap!important;overflow:hidden!important}
+ #${id}#${id} .slh-author{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}
+ `;(document.head||document.documentElement).appendChild(st);
+ function ensure(){
+  const panel=document.querySelector(selector);if(!panel||panel.closest('#sakalux-hub-overlay, #sakalux-hub-panel'))return;
+  if(panel.querySelector('#'+id))return;
+  const f=document.createElement('div');f.id=id;
+  f.innerHTML='<div class="slh-bottom"><div class="slh-bottom-grid"><button type="button" class="slh-bottom-btn" data-slx-donate>💸 SEND MONEY</button><button type="button" class="slh-bottom-btn" data-slx-donate>🎁 SEND ITEMS</button></div></div><div class="slh-footer">Made with ❤️ by <a class="slh-author" href="'+profile+'">SakaLuX [2380374]</a></div>';
+  f.querySelectorAll('[data-slx-donate]').forEach(b=>b.onclick=()=>{location.href=profile});panel.appendChild(f);
+ }
+ function start(){ensure();let scheduled=false;new MutationObserver(records=>{
+  const nativeRoot=selector.split(/[ >]/)[0];
+  const relevant=records.some(r=>{
+   if(r.target?.closest?.('[id^="sakalux-inline-footer-"]'))return false;
+   return r.target?.closest?.(nativeRoot)||[...r.addedNodes].some(n=>n.nodeType===1&&n.matches?.(nativeRoot));
+  });
+  if(scheduled||!relevant)return;
+  scheduled=true;requestAnimationFrame(()=>{scheduled=false;ensure()});
+ }).observe(document.body,{childList:true,subtree:true});}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+
+/* Compact donation controls and Elimination mobile panel geometry 5.3.37 */
+(()=>{const s=document.createElement('style');s.textContent="@media(max-width:820px){\n#sakalux-bt-settings#sakalux-bt-settings#sakalux-bt-settings{position:fixed!important;inset:0 4px 36px!important;top:0!important;bottom:36px!important;left:4px!important;right:4px!important;width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;transform:none!important;box-sizing:border-box!important;border-radius:14px!important;overflow-y:auto!important;overscroll-behavior:contain!important;}\n\n}";(document.head||document.documentElement).appendChild(s)})();
+
+/* Bazaar v5.3.38: fixed title/footer, separately scrollable settings. */
+(()=>{const s=document.createElement('style');s.textContent=`
+#sakalux-bt-settings#sakalux-bt-settings#sakalux-bt-settings{flex-direction:column!important;padding:0!important;overflow:hidden!important}
+#sakalux-bt-settings#sakalux-bt-settings>.sbt-settings-head{flex:0 0 auto!important;padding:14px 18px 0!important}
+#sakalux-bt-settings#sakalux-bt-settings>.sbt-settings-content{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0 18px 14px!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+#sakalux-bt-settings#sakalux-bt-settings .sbt-settings-content input,
+#sakalux-bt-settings#sakalux-bt-settings .sbt-settings-content textarea{box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important}
+#sakalux-bt-settings#sakalux-bt-settings>#sakalux-inline-footer-bazaar-thanker{position:relative!important;inset:auto!important;flex:0 0 50px!important;width:100%!important;margin:0!important;padding:0!important;border-radius:10px 10px 14px 14px!important}
+@media(min-width:821px){#sakalux-bt-settings#sakalux-bt-settings#sakalux-bt-settings{height:min(820px,calc(100vh - 104px))!important}}
+`;(document.head||document.documentElement).appendChild(s)})();
++formatMoney(b.spent)+' · '+b.purchases+' purchases';target.append(line);}
+              }catch(e){target.textContent='PRO ranking unavailable: '+e.message;}},
+              onerror:()=>{target.textContent='Network error';},ontimeout:()=>{target.textContent='Timed out';}});
+        };
         return true;
     }
 
