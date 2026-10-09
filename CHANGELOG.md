@@ -1,5 +1,15 @@
 # Changelog
 
+## Freemium execution-path audit — 2026-10-10
+
+- Bazaar Smart Pricer v1.1.20: PRO checks inside Quick Fill / Update All execution paths; fixed an invalid non-async declaration using await.
+- Bounty Hunter v0.5.10: PRO guard inside full-board API fetch and FFScouter enrichment; basic DOM target listing remains free.
+- Elimination Assistant v1.3.56: guards WIN/LOSS learning data mutations and fixes invalid async calibration declaration.
+- Market Intelligence v1.17.64: fixes invalid async PRO Museum scanner declaration.
+- Confirmed Stock Manager PANIC and rebalance execution already have explicit isPro checks (further alternative invocation audit remains).
+- Limitation: JavaScript gating cannot prevent a user from modifying locally executed source. Strong protection requires moving premium calculations/operations to a server endpoint with license authorization.
+
+
 ## Additional premium pathway checks — 2026-10-10
 
 - Bazaar Smart Pricer v1.1.21: corrected `async async` parser regression and retained direct Update All PRO validation.
