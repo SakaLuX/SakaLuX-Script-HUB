@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.117
+// @version      1.9.118
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -653,7 +653,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.117';
+    const VERSION = '1.9.118';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -1865,11 +1865,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function getInstallUrl(script) {
-        // PRO and mixed modules publish their newest builds to GitHub first.
-        // Never send users to an older GreasyFork build when the registry knows a newer source.
-        if (['enhancer','bazaar','company-intelligence'].includes(script.id) && script.sourceUrl) {
-            return script.sourceUrl;
-        }
+        // User-facing installation and updates use the GreasyFork distribution URL.
+        if (script.downloadUrl) return script.downloadUrl;
         const data = updateCache[script.id];
         if (data?.sourceLatest && (!data.publishedLatest || compareVersions(data.sourceLatest, data.publishedLatest) > 0)) {
             return script.sourceUrl || script.downloadUrl || '';
