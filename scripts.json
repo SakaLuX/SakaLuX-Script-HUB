@@ -483,18 +483,18 @@
         }
       ],
       "release": {
-        "version": "1.8.65",
+        "version": "1.8.66",
         "date": "2026-10-09",
         "notes": [
-          "Company mode tabs now explicitly display EMPLOYEE · FREE and DIRECTOR · PRO.",
-          "Employee features remain accessible without a PRO license.",
-          "Director mode continues to validate the active PRO entitlement with sakalux.ro before granting access."
+          "Rechecks the active PRO entitlement before entering Director; saved Director mode no longer bypasses initial verification.",
+          "Distinguishes server/network/429 verification failures from inactive PRO and replaces the contradictory native alert with an inline error.",
+          "Keeps Employee free and checks Torn director role separately from PRO; improved key-bound expiry validation."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.65",
-      "detailsRevision": 21,
+      "version": "1.8.66",
+      "detailsRevision": 22,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
