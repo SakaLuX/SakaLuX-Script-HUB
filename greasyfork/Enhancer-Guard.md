@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.63**
+**v1.3.65**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v1.3.63**
+- Canonical version: **v1.3.65**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -35,6 +35,12 @@
 - Installed copies subsequently use the GitHub source for automatic updates.
 
 ## Release history / Changelog
+
+### v1.3.65 — 2026-10-09
+- Reuses the verified Hub PRO status for the same Torn API key and entitlement.
+- Prevents a previous failed check from showing an incorrect paywall after Hub confirms PRO.
+- GreasyFork remains the update and download provider.
+
 
 ### v1.3.63 — 2026-10-09
 - Added shared SakaLuX branded dialogs for informational, PRO and error notices.
