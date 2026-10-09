@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.53
+// @version      1.3.54
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -15,6 +15,49 @@
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
+
+/* SakaLuX Freemium Control — BEGIN */
+(()=>{
+ 'use strict';
+ const ENT='elimination_assistant_pro', MATCH=/smart target|calibrat|ffscouter|target learning|record win|record loss/i, ROOT=/slx-elim|slx-ea|elimination/i;
+ let verifiedUntil=0,verifiedKey='',pending=null;
+ const key=()=>{try{return String(globalThis.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}};
+ const accepts=(data,k)=>{
+   const expiry=Date.parse(String(data?.expires_at||'').replace(' ','T')+'Z');
+   return !!(data?.premium_active===true&&data?.entitlements?.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now()&&k===key());
+ };
+ async function isPro(){
+   const k=key();if(!/^[A-Za-z0-9]{16}$/.test(k))return false;
+   if(k===verifiedKey&&verifiedUntil>Date.now())return true;
+   const hub=globalThis.__SakaLuXPremiumVerified;
+   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));return true}
+   if(pending)return pending;
+   if(typeof GM_xmlhttpRequest!=='function')return false;
+   pending=new Promise(resolve=>{
+    GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:k}),timeout:12000,
+     onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ok=r.status===200&&accepts(d,k);if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}resolve(ok)}catch{resolve(false)}},
+     onerror:()=>resolve(false),ontimeout:()=>resolve(false)
+    })
+   });try{return await pending}finally{pending=null}
+ }
+ function locked(){
+   if(globalThis.SakaLuXDialog?.show)globalThis.SakaLuXDialog.show({title:'SakaLuX PRO',type:'pro',message:'This advanced feature requires active SakaLuX PRO. Basic features remain FREE. 1 Xanax = 7 days PRO.',actions:[{label:'CLOSE'},{label:'OPEN PREMIUM',primary:true,onClick:()=>location.assign('https://sakalux.ro/premium.html')}]});
+   else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
+ }
+ globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
+ globalThis.SakaLuXFreemium['elimination-assistant']={isPro,locked};
+ const bypass=new WeakSet();
+ document.addEventListener('click',async e=>{
+   const button=e.target?.closest?.('button,[role="button"],a');if(!button||bypass.has(button))return;
+   const owner=button.closest?.('[id],[class]');const scope=(button.closest?.('[id*="slx"],[id*="sakalux"],[id*="qp"],[id*="mission"],[class*="slx"],[class*="sakalux"]')?.id||button.closest?.('[id*="slx"],[id*="sakalux"],[id*="qp"],[id*="mission"]')?.className||'');
+   if(!ROOT.test(String(scope))&&!ROOT.test(String(owner?.id||'')))return;
+   const label=String(button.textContent||button.title||button.getAttribute('aria-label')||'').trim();
+   if(!MATCH.test(label))return;
+   e.preventDefault();e.stopImmediatePropagation();
+   if(await isPro()){bypass.add(button);try{button.click()}finally{bypass.delete(button)}}else locked();
+ },true);
+})();
+/* SakaLuX Freemium Control — END */
 
 /* SakaLuX Unified Dialogs v1.0 — BEGIN */
 (() => {
@@ -665,7 +708,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.53';
+  let v = '1.3.54';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1000,7 +1043,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.53" }));
+  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.54" }));
   const API_GLOBAL = "SakaLuXEliminationAssistant";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1062,7 +1105,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  */
 (() => {
 'use strict';
-const VERSION = '1.3.53';
+const VERSION = '1.3.54';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
