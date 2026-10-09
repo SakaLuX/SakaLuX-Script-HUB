@@ -89,18 +89,18 @@
         }
       ],
       "release": {
-        "version": "5.3.55",
+        "version": "5.3.56",
         "date": "2026-10-09",
         "notes": [
-          "PRO access requires a server-confirmed license matching the Torn API key.",
-          "Access validity is bounded by the actual license expiry.",
-          "A fully tamper-resistant implementation requires server-hosted premium operations."
+          "Added a PRO Buyer Leaderboard button inside Bazaar Thanker settings.",
+          "The server verifies an active PRO license before computing a ranking of buyers from currently loaded Torn Events.",
+          "Results are a snapshot of loaded events, not a complete historical sales database."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.55",
-      "detailsRevision": 21,
+      "version": "5.3.56",
+      "detailsRevision": 22,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
