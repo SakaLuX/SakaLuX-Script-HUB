@@ -1,0 +1,15 @@
+{
+  "title": "SakaLuX License Manager v2",
+  "date": "2026-10-10",
+  "versions": {
+    "script-hub": "1.9.124",
+    "bazaar-smart-pricer": "1.1.25",
+    "mission-rewards": "1.0.57",
+    "market-intelligence": "1.17.71",
+    "elimination-assistant": "1.3.61",
+    "bounty-hunter": "0.5.15",
+    "stock-manager-advisor": "0.8.26",
+    "enhancer": "1.3.68",
+    "bazaar": "5.3.67"
+  }
+}

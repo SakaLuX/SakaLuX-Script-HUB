@@ -3,13 +3,17 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.25**
+**v0.8.26**
+
+### License Manager v2 (2026-10-10)
+- Shared entitlement broker; improved cache and outage handling.
+
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v0.8.25**
+- Canonical version: **v0.8.26**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -34,13 +38,13 @@
 
 ## Current release note
 
-**v0.8.25 — 2026-10-10**
+**v0.8.26 — 2026-10-10**
 - Advisor, Rebalance and PANIC inline controls become effectively OFF without PRO.
 - Saved control visibility choices are preserved and restored on license verification.
 
 ## Release history / Changelog
 
-### v0.8.25 — 2026-10-10
+### v0.8.26 — 2026-10-10
 - Advisor, Rebalance and PANIC inline controls become effectively OFF without PRO.
 - Saved control visibility choices are preserved and restored on license verification.
 
