@@ -1,5 +1,13 @@
 # Changelog
 
+## Freemium execution-path audit — 2026-10-10
+
+- Checked the six mixed-tier modules for UI-only access guards.
+- Added direct PRO guards to Stock Manager rebalance execution (v0.8.22), Bazaar Smart Pricer bulk Update All (v1.1.20), Market Intelligence Museum scan (v1.17.64), and Elimination FF loading/calibration (v1.3.55).
+- Stock PANIC execution already performed a PRO check; left that guard intact.
+- Remaining premium pathways, including other background scans, calculations and direct API entry points, have not yet been exhaustively secured. JavaScript guards are bypassable; stronger access control requires server-hosted premium computation.
+- Updated registry release notes and GreasyFork documentation for the modified modules.
+
 ## Freemium release — 2026-10-10
 
 - Split six previously FREE modules into FREE baseline and PRO advanced features: Bazaar Smart Pricer v1.1.19, Mission Rewards v1.0.53, Market Intelligence v1.17.63, Bounty Hunter v0.5.9, Elimination Assistant v1.3.54 and Stock Manager & Advisor v0.8.21.
