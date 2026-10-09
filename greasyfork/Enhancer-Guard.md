@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.62**
+**v1.3.63**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v1.3.62**
+- Canonical version: **v1.3.63**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -35,6 +35,12 @@
 - Installed copies subsequently use the GitHub source for automatic updates.
 
 ## Release history / Changelog
+
+### v1.3.63 — 2026-10-09
+- Added shared SakaLuX branded dialogs for informational, PRO and error notices.
+- Replaced existing blocking alert messages with styled notices.
+- Existing synchronous confirmations and prompts remain native for action safety.
+
 
 
 
