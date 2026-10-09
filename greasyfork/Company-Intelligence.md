@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.62**
+**v1.8.63**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v1.8.62**
+- Canonical version: **v1.8.63**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,19 +32,20 @@
 
 ## Current release note
 
-**v1.8.62 — 2026-10-09**
-- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
-- Synchronizes userscript metadata and runtime version.
-- Installed copies subsequently use the GitHub source for automatic updates.
+**v1.8.63 — 2026-10-09**
+- Fixes the Employee/Director mode selection crash: `$(...).forEach is not a function`.
+- Uses the multi-element `$$('[data-mode]', root)` selector when attaching mode-button events.
+- Aligns canonical installed-version markers and Hub release metadata; GreasyFork remains the configured download/update source.
 
 ## Release history / Changelog
 
-
+### v1.8.63 — 2026-10-09
+- Fixes the mode-switch event initialization exception caused by calling `forEach` on a single DOM element.
+- Updates release documentation and Hub catalog.
 
 ### v1.8.62 — 2026-10-09
-- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
-- Synchronizes userscript metadata and runtime version.
-- Installed copies subsequently use the GitHub source for automatic updates.
+- Synchronizes version metadata and the canonical installed-version marker.
+- GreasyFork is configured as the download/update provider.
 
 ### v1.8.61 — 2026-10-09
 - Synchronizes userscript and runtime version for reliable Hub installed/update detection.
