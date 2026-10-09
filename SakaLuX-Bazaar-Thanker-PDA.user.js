@@ -1988,7 +1988,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/pro-bazaar-ranking.php',headers:{'Content-Type':'application/json'},data:JSON.stringify({api_key:key,buyers}),timeout:15000,
               onload:r=>{try{const d=JSON.parse(r.responseText);if(r.status!==200)throw Error(d.status||'HTTP '+r.status);
                 target.replaceChildren();const note=document.createElement('p');note.textContent='TOP BUYERS · Loaded Torn events only';target.append(note);
-                for(const [i,b] of (d.buyers||[]).entries()){const line=document.createElement('div');line.textContent=(i+1)+'. '+b.name+' ['+b.id+'] — 
+                for (const [i,b] of (d.buyers || []).entries()) {
+                    const line = document.createElement('div');
+                    line.textContent = (i + 1) + '. ' + (b.name || ('Player ' + b.id)) + ' [' + b.id + '] — $' + Number(b.spent || 0).toLocaleString() + ' · ' + Number(b.items || 0) + ' items · ' + Number(b.purchases || 0) + ' purchases';
+                    target.append(line);
+                }
+              } catch (err) {
+                target.textContent = 'Could not load buyer ranking: ' + (err?.message || String(err));
+              }},
+              onerror:()=>{ target.textContent='Buyer ranking request failed.'; },
+              ontimeout:()=>{ target.textContent='Buyer ranking request timed out.'; }
+            });
+        };
+        return true;
     }
 
     function closeSettingsPanel() {
