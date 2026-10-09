@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.55**
+**v1.0.56**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.0.55**
+- Canonical version: **v1.0.56**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md
@@ -29,11 +29,16 @@
 
 ## Current release note
 
-**v1.0.55 — 2026-10-10**
-- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
-- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
+**v1.0.56 — 2026-10-10**
+- Temporarily displays weapon-mod learning OFF without PRO while retaining the saved preference.
+- Restores the saved learning switch after PRO verification; FREE mission information remains available.
 
 ## Release history / Changelog
+
+### v1.0.56 — 2026-10-10
+- Temporarily displays weapon-mod learning OFF without PRO while retaining the saved preference.
+- Restores the saved learning switch after PRO verification; FREE mission information remains available.
+
 
 
 ### v1.0.55 — 2026-10-10
