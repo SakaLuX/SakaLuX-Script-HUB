@@ -6,7 +6,7 @@
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
-// @grant        none
+// @grant        GM_xmlhttpRequest
 // @license      All Rights Reserved
 // @downloadURL  https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js
 // @updateURL    https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js
