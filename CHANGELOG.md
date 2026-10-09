@@ -1,5 +1,22 @@
 # Changelog
 
+## Unified SakaLuX Dialogs — 2026-10-09
+
+- Introduced a reusable branded dialog component in all 9 managed userscripts and Script Hub v1.9.120.
+- Existing native alert notifications have been replaced with styled dialogs for PRO, errors and notices; supports actionable buttons for future use.
+- Native synchronous confirm/prompt calls remain until the underlying workflows are migrated safely to asynchronous dialogs.
+- Refreshed registry, per-script release notes and GreasyFork documentation.
+
+- Enhancer Guard: v1.3.63
+- Bazaar Thanker: v5.3.61
+- Bazaar Smart Pricer: v1.1.18
+- Mission Rewards: v1.0.51
+- Market Intelligence: v1.17.62
+- Bounty Hunter: v0.5.8
+- Elimination Assistant: v1.3.52
+- Company Intelligence: v1.8.67
+- Stock Manager & Advisor: v0.8.20
+
 ## Company Intelligence v1.8.66 — 2026-10-09
 
 - Director selection verifies active PRO before unlocking its mode; persisted Director choice resets until validated.
