@@ -2059,7 +2059,7 @@ hideProtectedSaleRows();
             document.getElementById(HUB_PROMPT_ID)?.remove();
         }
         window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardStateChanged', { detail: { version: VERSION, enabled: state.enabled } }));
-        syncHubBridge('enhancer', state.enabled);
+        syncHubBridge('enhancer', state.enabled && slxProCurrent());
         return state.enabled;
     }
 
@@ -2392,7 +2392,7 @@ hideProtectedSaleRows();
         checkApiAccess: checkRequiredApiAccess,
         setEnabled,
         toggleEnabled,
-        isEnabled() { return state.enabled; },
+        isEnabled() { return state.enabled && slxProCurrent(); },
         health() {
             return {
                 ready: true,
@@ -2462,6 +2462,34 @@ function slxShowProNotice(){
  buttons.append(open,close);card.append(title,badge,desc,plan,trial,buttons);backdrop.append(card);document.body.append(backdrop);
  backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.remove()});
 }
+    /* PRO state is effective state; saved enabled preference is never overwritten by a license change. */
+    function slxApplyEntitlement(allowed){
+        slxProAllowed=Boolean(allowed);
+        const active=Boolean(state.enabled&&slxProCurrent());
+        if(active){
+            injectCss();configureAutoRefresh();installSaleProtectionFallback();installInventoryProtection();
+        }else{
+            if(state.autoRefreshTimer)clearInterval(state.autoRefreshTimer);
+            state.autoRefreshTimer=null;
+            if(saleObserver){saleObserver.disconnect();saleObserver=null;}
+            document.getElementById('sl-eg-overlay')?.remove();
+            document.getElementById('sl-eg-api-overlay')?.remove();
+        }
+        syncHubBridge('enhancer',active);
+        window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardStateChanged',{detail:{version:VERSION,enabled:active,preferredEnabled:state.enabled}}));
+    }
+    window.addEventListener('SakaLuX:PremiumStatus',e=>{
+        const d=e.detail||{},end=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');
+        const ok=d.premium_active===true&&d.entitlements?.includes('enhancer_guard')&&Number.isFinite(end)&&end>Date.now();
+        slxProExpiry=ok?end:0;slxApplyEntitlement(ok);
+    });
+    let slxLicenseChecking=false;
+    async function slxRefreshEntitlement(){
+        if(slxLicenseChecking)return;
+        slxLicenseChecking=true;
+        try{slxApplyEntitlement(await slxCheckProAccess());}
+        finally{slxLicenseChecking=false;}
+    }
     async function init() {
         slxProAllowed=await slxCheckProAccess();
         try { localStorage.setItem('SakaLuX_Installed_enhancer', VERSION); } catch {}
@@ -2476,7 +2504,7 @@ function slxShowProNotice(){
         state.autoRefreshMinutes = 0;
         setString(STORAGE.sort, 'name');
         setString(STORAGE.autoRefresh, '0');
-        if (state.enabled) {
+        if (state.enabled && slxProCurrent()) {
             injectCss();
             configureAutoRefresh();
             installSaleProtectionFallback();
@@ -2484,6 +2512,8 @@ function slxShowProNotice(){
             scheduleHubInstallPrompt();
             if (apiSetupPending() && !/preferences\.php/i.test(location.pathname + location.href)) setTimeout(openApiPanel, 900);
         }
+        syncHubBridge('enhancer', state.enabled && slxProCurrent());
+        setInterval(()=>{if(!document.hidden)void slxRefreshEntitlement()},5*60*1000);
         console.log('[SakaLuX Enhancer Guard v' + VERSION + '] Loaded.');
     }
 
