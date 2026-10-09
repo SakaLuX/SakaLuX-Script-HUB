@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.61**
+**v1.8.62**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-09**
-- Canonical version: **v1.8.61**
+- Canonical version: **v1.8.62**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,19 @@
 
 ## Current release note
 
-**v1.8.61 — 2026-10-09**
-- Synchronizes userscript and runtime version for reliable Hub installed/update detection.
-- Preserves existing Company Intelligence behavior and PRO verification.
+**v1.8.62 — 2026-10-09**
+- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
+- Synchronizes userscript metadata and runtime version.
+- Installed copies subsequently use the GitHub source for automatic updates.
 
 ## Release history / Changelog
 
+
+
+### v1.8.62 — 2026-10-09
+- Updates are distributed directly from the current GitHub source to avoid stale Greasy Fork installers.
+- Synchronizes userscript metadata and runtime version.
+- Installed copies subsequently use the GitHub source for automatic updates.
 
 ### v1.8.61 — 2026-10-09
 - Synchronizes userscript and runtime version for reliable Hub installed/update detection.
