@@ -10,6 +10,7 @@ on:
       - 'tools/sync_release_metadata.py'
       - 'tools/release_preflight.py'
       - 'tools/verify_premium_badge_release.py'
+      - 'tools/verify_premium_lifecycle.py'
       - '.github/scripts/verify_release_consistency.py'
       - '.github/scripts/verify_runtime_version_signals.py'
       - '.github/workflows/normalize-installed-versions.yml'
@@ -37,5 +38,7 @@ jobs:
         run: python3 .github/scripts/verify_runtime_version_signals.py
       - name: Verify PRO badge distribution and release metadata
         run: python3 tools/verify_premium_badge_release.py
+      - name: Verify PRO state lifecycle, syntax and releases
+        run: python3 tools/verify_premium_lifecycle.py
       - name: Verify complete release metadata
         run: python3 tools/release_preflight.py --all
