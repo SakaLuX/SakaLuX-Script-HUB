@@ -3230,6 +3230,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             Array.isArray(d.entitlements)&&d.entitlements.every(e=>typeof e==='string')&&
             (!d.premium_active||(Number.isFinite(expiryMs(d))&&expiryMs(d)>Date.now()));
         function clear(){currentKey='';cached=null;cachedAt=0;inFlight=null;}
+        function invalidate(){cached=null;cachedAt=0;}
+        function snapshot(){return usable(cached,cachedAt)?{state:cached.premium_active?'pro':'free',checkedAt:cachedAt,expiresAt:cached.expires_at||null}:{state:'unknown'};}
         async function check(key,{force=false}={}){
             if(!/^[A-Za-z0-9]{16}$/.test(key))return {status:'invalid_key',premium_active:false,entitlements:[]};
             if(currentKey!==key){currentKey=key;cached=null;cachedAt=0;inFlight=null;}
@@ -3259,7 +3261,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             inFlight=p;
             try{return await p}finally{if(inFlight===p)inFlight=null;}
         }
-        return Object.freeze({check,clear});
+        return Object.freeze({check,clear,invalidate,snapshot});
     })();
     globalThis.SakaLuXLicenseBroker=slxLicenseBroker;
 
