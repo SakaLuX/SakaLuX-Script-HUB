@@ -3230,17 +3230,16 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     let hubProRequestKey='';
     async function refreshHubProStatus(force=false){
         const button=document.getElementById('slh-premium');
-        if(!button)return;
         const key=getSharedApiKey();
         if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;}
-        if(!key){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';return;}
-        if(typeof GM_xmlhttpRequest!=='function'){button.title='Premium status unavailable';return;}
+        if(!key){if(button){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';}return;}
+        if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';return;}
         if(!force&&hubProCache&&Date.now()-hubProCheckedAt<5*60*1000){
             paintHubProStatus(button,hubProCache);return;
         }
         if(hubProPending)return hubProPending;
         hubProRequestKey=key;
-        button.title='Checking PRO license…';
+        if(button)button.title='Checking PRO license…';
         hubProPending=new Promise((resolve,reject)=>GM_xmlhttpRequest({
             method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
             headers:{'Content-Type':'application/json','Accept':'application/json'},
@@ -3252,6 +3251,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         catch(error){if(button.isConnected){const reason=String(error?.message||'connection error');button.title='PRO verification unavailable: '+reason+' — tap for details';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
         finally{hubProPending=null;}
     }
+    setInterval(()=>{if(!document.hidden)void refreshHubProStatus()},5*60*1000);
     function paintHubProStatus(button,data){
         if(!button||!data)return;
         const expiry=data.expires_at?Date.parse(String(data.expires_at).replace(' ','T')+'Z'):NaN;
