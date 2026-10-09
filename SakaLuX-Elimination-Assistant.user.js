@@ -78,6 +78,14 @@
    if(globalThis.SakaLuXDialog?.show)globalThis.SakaLuXDialog.show({title:'SakaLuX PRO',type:'pro',message:'This advanced feature requires active SakaLuX PRO. Basic features remain FREE. 1 Xanax = 7 days PRO.',actions:[{label:'CLOSE'},{label:'OPEN PREMIUM',primary:true,onClick:()=>location.assign('https://sakalux.ro/premium.html')}]});
    else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
  }
+
+ window.addEventListener('SakaLuX:PremiumStatus',event=>{
+   const data=event.detail||{};
+   const expiry=Date.parse(String(data.expires_at||'').replace(' ','T')+'Z');
+   const active=data.premium_active===true&&Array.isArray(data.entitlements)&&data.entitlements.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now();
+   verifiedKey=active?key():'';
+   verifiedUntil=active?Math.min(Date.now()+5*60*1000,expiry):0;
+ });
  globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
  globalThis.SakaLuXFreemium['elimination-assistant']={isPro,locked,isActive:()=>verifiedKey===key()&&verifiedUntil>Date.now()};void isPro();
  const bypass=new WeakSet();
