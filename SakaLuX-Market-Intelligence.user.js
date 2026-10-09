@@ -2457,7 +2457,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     async function renderBestTravelRun(){
         if(!ensureTravelSurfaceRuntime())return;
         const existing=document.getElementById('sl-mi-best-run');
-        if(!settings.bestRun||detectPage()!=='travel'||detectInFlight()||detectDestination()){existing?.remove();return;}
+        if(!settings.bestRun||!premiumSettingActive('bestRun')||detectPage()!=='travel'||detectInFlight()||detectDestination()){existing?.remove();return;}
         if(!existing){
             const loading=document.createElement('div');loading.id='sl-mi-best-run';loading.className='open';
             loading.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST ROUTE BASKET</span><strong>Loading routes…</strong><span>Travel only</span><button type="button">▾</button></div><div class="sl-mi-perf-note">Refreshing YATA stock and market prices…</div><div class="sl-mi-br-body"></div>';
@@ -2538,7 +2538,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if(!rows.length)return;
 
         let plan=null,plannedQty=new Map();
-        if(settings.arrivalBasket){
+        if(settings.arrivalBasket&&premiumSettingActive('arrivalBasket')){
             const projectedEntries=rows.map(r=>({id:r.itemId,name:r.name,buy:r.buyPrice,stock:r.projectedStock,row:null,destination}));
             plan=buildTravelBuyPlan(destination,projectedEntries,marketMap);
             plannedQty=new Map((plan?.rows||[]).map(r=>[String(r.id),Number(r.qty)||0]));
@@ -2559,13 +2559,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const top=rows.slice(0,10);state.arrivalRows=top.length;if(!top.length)return;
 
         const bar=document.createElement('div');bar.id='sl-mi-arrival';bar.className='open';
-        const title=settings.arrivalBasket?'✈ ARRIVAL BASKET':'✈ ARRIVAL STOCK';
-        const planSummary=settings.arrivalBasket&&plan?.rows?.length
+        const title=(settings.arrivalBasket&&premiumSettingActive('arrivalBasket'))?'✈ ARRIVAL BASKET':'✈ ARRIVAL STOCK';
+        const planSummary=settings.arrivalBasket&&premiumSettingActive('arrivalBasket')&&plan?.rows?.length
             ?('<strong>'+plan.used+'/'+slots+' slots · '+money(plan.totalProfit)+' profit · '+esc(plan.mode)+'</strong>')
             :('<strong>'+top.length+' opportunities</strong>');
         const budgetText=settings.travelBudget>0?(' · budget '+money(settings.travelBudget)):' · unlimited budget';
         bar.innerHTML='<div class="sl-mi-arrival-head"><div><span class="sl-mi-br-title">'+title+'</span><strong>'+esc(destination)+'</strong></div><div>Landing '+fmtDuration(landingMins)+' · '+esc(flight.source)+'</div><button type="button">▾</button></div>'+
-            '<div class="sl-mi-arrival-note">'+(settings.arrivalBasket?'Pre-builds the best basket for landing using predicted stock, travel slots and your budget. ':'Prediction uses current YATA stock plus locally learned restock timing. ')+planSummary+budgetText+' · projected stock is an estimate, not guaranteed.</div><div class="sl-mi-arrival-body"></div>';
+            '<div class="sl-mi-arrival-note">'+((settings.arrivalBasket&&premiumSettingActive('arrivalBasket'))?'Pre-builds the best basket for landing using predicted stock, travel slots and your budget. ':'Prediction uses current YATA stock plus locally learned restock timing. ')+planSummary+budgetText+' · projected stock is an estimate, not guaranteed.</div><div class="sl-mi-arrival-body"></div>';
         const body=bar.querySelector('.sl-mi-arrival-body');
         for(const r of top){
             const p=r.p,restockText=p.expectedRestocks>0?(p.eta.learned?('likely '+p.expectedRestocks+' restock'+(p.expectedRestocks===1?'':'s')):'possible restock'):'no learned restock';
@@ -3078,7 +3078,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function scanPoints(){if(!settings.points)return;const rate=scrapePointsRate();if(!rate)return;saveJson(STORAGE.pointsRate,{rate,at:Date.now()});document.getElementById('sl-mi-points-bar')?.remove();const bar=document.createElement('div');bar.id='sl-mi-points-bar';bar.innerHTML='<b>☠︎ Points Intelligence</b> · captured <strong>'+money(rate)+'/point</strong>';mountTop(bar);}
     async function scanMuseum(){
  if(!(await globalThis.SakaLuXFreemium['market-intelligence'].isPro()))return;
-        if(!settings.museum)return;
+        if(!settings.museum||!premiumSettingActive('museum'))return;
         document.getElementById('sl-mi-museum-bar')?.remove();
         state.museumSets=0;state.museumRecommendation='';state.museumMissingSets=0;
 
