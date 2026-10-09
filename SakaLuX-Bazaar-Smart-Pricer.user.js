@@ -57,16 +57,17 @@
  'use strict';
  const ENT='bazaar_smart_pricer_pro', MATCH=/quick fill|update all|bulk pricing|bulk fill/i, ROOT=/qp|pricer|sakalux/i;
  let verifiedUntil=0,verifiedKey='',pending=null;
+ let verificationState='checking';
  const key=()=>{try{return String(globalThis.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}};
  const accepts=(data,k)=>{
    const expiry=Date.parse(String(data?.expires_at||'').replace(' ','T')+'Z');
    return !!(data?.premium_active===true&&data?.entitlements?.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now()&&k===key());
  };
  async function isPro(){
-   const k=key();if(!/^[A-Za-z0-9]{16}$/.test(k))return false;
-   if(k===verifiedKey&&verifiedUntil>Date.now())return true;
+   const k=key();if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
+   if(k===verifiedKey&&verifiedUntil>Date.now()){verificationState='pro';return true;}
    const hub=globalThis.__SakaLuXPremiumVerified;
-   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));return true}
+   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));verificationState='pro';return true}
    // Prefer the Hub's shared broker: one in-flight request for all modules.
    // A server outage is unknown, never proof that the account is FREE.
    const broker=globalThis.SakaLuXLicenseBroker;
@@ -76,19 +77,24 @@
        const ok=d?.status==='ok'&&accepts(d,k);
        if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));}
        else {verifiedKey='';verifiedUntil=0;}
+       verificationState=ok?'pro':'free';
        return ok;
-     }catch{return false;}
+     }catch{verificationState='unavailable';return false;}
    }
    if(pending)return pending;
-   if(typeof GM_xmlhttpRequest!=='function')return false;
+   if(typeof GM_xmlhttpRequest!=='function'){verificationState='unavailable';return false;}
    pending=new Promise(resolve=>{
     GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:k}),timeout:12000,
-     onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ok=r.status===200&&accepts(d,k);if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}resolve(ok)}catch{resolve(false)}},
-     onerror:()=>resolve(false),ontimeout:()=>resolve(false)
+     onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ok=r.status===200&&d.status==='ok'&&accepts(d,k);verificationState=r.status===200&&d.status==='ok'?(ok?'pro':'free'):'unavailable';if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}resolve(ok)}catch{verificationState='unavailable';resolve(false)}},
+     onerror:()=>{verificationState='unavailable';resolve(false)},ontimeout:()=>{verificationState='unavailable';resolve(false)}
     })
    });try{return await pending}finally{pending=null}
  }
  function locked(){
+   if(verificationState==='unavailable'||verificationState==='checking'){
+     globalThis.SakaLuXDialog?.notice?.('PRO verification temporarily unavailable. Please retry shortly.','warning');
+     return;
+   }
    if(globalThis.SakaLuXDialog?.show)globalThis.SakaLuXDialog.show({title:'SakaLuX PRO',type:'pro',message:'This advanced feature requires active SakaLuX PRO. Basic features remain FREE. 1 Xanax = 7 days PRO.',actions:[{label:'CLOSE'},{label:'OPEN PREMIUM',primary:true,onClick:()=>location.assign('https://sakalux.ro/premium.html')}]});
    else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
  }
@@ -99,6 +105,7 @@
    const active=data.premium_active===true&&Array.isArray(data.entitlements)&&data.entitlements.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now();
    verifiedKey=active?key():'';
    verifiedUntil=active?Math.min(Date.now()+5*60*1000,expiry):0;
+   verificationState=active?'pro':(data.verification_state==='unavailable'?'unavailable':'free');
  });
  globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
  globalThis.SakaLuXFreemium['bazaar-smart-pricer']={isPro,locked,isActive:()=>verifiedKey===key()&&verifiedUntil>Date.now()};void isPro();
