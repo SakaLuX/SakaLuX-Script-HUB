@@ -3222,7 +3222,12 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const MAX_AGE=5*60*1000;
         let currentKey='',cached=null,cachedAt=0,inFlight=null;
         const expiryMs=d=>Date.parse(String(d?.expires_at||'').replace(' ','T')+'Z');
-        const usable=(d,at)=>!!d&&Date.now()-at<MAX_AGE&&
+        // Cache FREE briefly so newly granted subscriptions become visible promptly.
+        const usable=(d,at)=>!!d&&Date.now()-at<(d.premium_active?MAX_AGE:30*1000)&&
+            (!d.premium_active||(Number.isFinite(expiryMs(d))&&expiryMs(d)>Date.now()));
+        const validResponse=d=>d?.status==='ok'&&typeof d.premium_active==='boolean'&&
+            Number.isSafeInteger(Number(d.user?.id))&&Number(d.user.id)>0&&
+            Array.isArray(d.entitlements)&&d.entitlements.every(e=>typeof e==='string')&&
             (!d.premium_active||(Number.isFinite(expiryMs(d))&&expiryMs(d)>Date.now()));
         function clear(){currentKey='';cached=null;cachedAt=0;inFlight=null;}
         async function check(key,{force=false}={}){
@@ -3241,6 +3246,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                         try{
                             const d=JSON.parse(r.responseText||'{}');
                             if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);
+                            if(!validResponse(d))throw Error('invalid_license_response');
                             if(currentKey!==requestKey){reject(Error('identity_changed'));return;}
                             cached=d;cachedAt=Date.now();
                             resolve(d);
@@ -3267,7 +3273,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if(!key){if(button){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';}return;}
         if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';return;}
         const cachedExpiry=hubProCache?.expires_at?Date.parse(String(hubProCache.expires_at).replace(' ','T')+'Z'):NaN;
-        if(!force&&hubProCache&&Date.now()-hubProCheckedAt<5*60*1000&&
+        if(!force&&hubProCache&&Date.now()-hubProCheckedAt<(hubProCache.premium_active?5*60*1000:30*1000)&&
             (!hubProCache.premium_active||(Number.isFinite(cachedExpiry)&&cachedExpiry>Date.now())){
             paintHubProStatus(button,hubProCache);return;
         }
