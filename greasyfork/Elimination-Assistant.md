@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.55**
+**v1.3.56**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.3.55**
+- Canonical version: **v1.3.56**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -40,6 +40,11 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.3.56 — 2026-10-10
+- Corrected invalid async calibration declaration; PRO target learning is checked at data mutation.
+- Client-side gating is not tamper-resistant; genuinely protected premium calculations must execute on a licensed backend.
+
 
 ### v1.3.55 — 2026-10-10
 - Guards WIN/LOSS learning at its mutation entry point; basic team and availability functions remain free.
