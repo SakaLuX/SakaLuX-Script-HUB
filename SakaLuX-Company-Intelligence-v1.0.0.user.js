@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.66
+// @version      1.8.67
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -20,6 +20,41 @@
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
+
+/* SakaLuX Unified Dialogs v1.0 — BEGIN */
+(() => {
+  'use strict';
+  if (globalThis.SakaLuXDialog?.version === '1.0') return;
+  const STYLE='sakalux-unified-dialog-style';
+  const esc=v=>String(v??'');
+  function ensure(){
+    if(!document.getElementById(STYLE)){
+      const style=document.createElement('style');style.id=STYLE;
+      style.textContent=`.slx-dialog-shade{position:fixed!important;inset:0!important;z-index:2147483647!important;background:rgba(2,8,19,.78)!important;backdrop-filter:blur(5px)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;box-sizing:border-box!important}.slx-dialog-panel{box-sizing:border-box!important;width:min(100%,420px)!important;max-height:90dvh!important;overflow:auto!important;background:linear-gradient(155deg,#172638,#0b1421)!important;border:1px solid #405874!important;border-radius:20px!important;color:#edf4ff!important;box-shadow:0 24px 65px #000a!important;font:14px/1.55 system-ui,Arial,sans-serif!important}.slx-dialog-head{display:flex!important;align-items:center!important;gap:12px!important;padding:20px 20px 6px!important}.slx-dialog-icon{display:grid!important;place-items:center!important;flex:none!important;width:43px!important;height:43px!important;background:#26394e!important;color:#e8c577!important;border:1px solid #56617a!important;border-radius:13px!important;font-size:21px!important}.slx-dialog-title{font-size:20px!important;font-weight:800!important;line-height:1.2!important}.slx-dialog-tag{font-size:10px!important;font-weight:800!important;letter-spacing:.1em!important;color:#e9c779!important}.slx-dialog-x{margin-left:auto!important;border:0!important;border-radius:10px!important;background:#233348!important;color:#fff!important;padding:7px 12px!important;font-size:16px!important}.slx-dialog-message{white-space:pre-wrap!important;overflow-wrap:anywhere!important;color:#d8e5f7!important;padding:14px 20px 4px!important;font-size:15px!important}.slx-dialog-actions{display:flex!important;gap:10px!important;padding:18px 20px 20px!important}.slx-dialog-btn{min-height:43px!important;flex:1!important;border:1px solid #536a84!important;border-radius:12px!important;color:white!important;background:#26394e!important;font-weight:800!important}.slx-dialog-btn.primary{background:linear-gradient(#3d93e9,#2769b5)!important;border-color:#60a6ef!important}`;
+      (document.head||document.documentElement).appendChild(style);
+    }
+  }
+  function show({title='SakaLuX',message='',type='info',actions}={}){
+    ensure();const old=document.getElementById('sakalux-unified-dialog');old?.remove();
+    const shade=document.createElement('div');shade.id='sakalux-unified-dialog';shade.className='slx-dialog-shade';
+    const panel=document.createElement('section');panel.className='slx-dialog-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
+    const head=document.createElement('div');head.className='slx-dialog-head';
+    const icon=document.createElement('div');icon.className='slx-dialog-icon';icon.textContent=type==='error'?'!':type==='success'?'✓':type==='pro'?'✦':type==='update'?'↻':'i';
+    const group=document.createElement('div'),heading=document.createElement('div'),tag=document.createElement('div');
+    heading.className='slx-dialog-title';heading.textContent=title;tag.className='slx-dialog-tag';tag.textContent=type.toUpperCase();group.append(heading,tag);
+    const x=document.createElement('button');x.type='button';x.className='slx-dialog-x';x.textContent='×';x.setAttribute('aria-label','Close');x.onclick=()=>shade.remove();head.append(icon,group,x);
+    const body=document.createElement('div');body.className='slx-dialog-message';body.textContent=esc(message);
+    const foot=document.createElement('div');foot.className='slx-dialog-actions';
+    for(const action of actions||[{label:'CLOSE',primary:true}]){const b=document.createElement('button');b.type='button';b.className='slx-dialog-btn'+(action.primary?' primary':'');b.textContent=action.label||'OK';b.onclick=()=>{shade.remove();action.onClick?.()};foot.append(b)}
+    panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
+    shade.addEventListener('click',e=>{if(e.target===shade)shade.remove()});return shade;
+  }
+  function notice(message,type){const m=esc(message);return show({title:/error|failed|unavailable/i.test(m)?'Action failed':/pro|premium|license/i.test(m)?'SakaLuX PRO':'SakaLuX',message:m,type:type||(/error|failed|unavailable/i.test(m)?'error':/pro|premium|license/i.test(m)?'pro':'info')})}
+  function confirmAsync(message){return new Promise(resolve=>show({title:'Please confirm',message,type:'info',actions:[{label:'CANCEL',onClick:()=>resolve(false)},{label:'CONFIRM',primary:true,onClick:()=>resolve(true)}]}))}
+  globalThis.SakaLuXDialog={version:'1.0',show,notice,confirmAsync};
+})();
+/* SakaLuX Unified Dialogs v1.0 — END */
+
 
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
@@ -635,7 +670,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.66';
+  let v = '1.8.67';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -970,7 +1005,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"}, { version: "1.8.66" }));
+  const SELF = Object.freeze(Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"}, { version: "1.8.67" }));
   const API_GLOBAL = "SakaLuXCompanyIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1046,7 +1081,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.66',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.67',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1616,7 +1651,7 @@ function positions(){
 }
 async function openPositionRequirementsEditor(){
  await ensureOfficialCompanyCatalog();cleanupPositionCacheAgainstOfficial();const names=detectedPositionNames();
- if(!names.length){alert('Official position data is not available yet for this company type. Check the company type/API data and try again.');return}
+ if(!names.length){globalThis.SakaLuXDialog.notice('Official position data is not available yet for this company type. Check the company type/API data and try again.');return}
  const cache=positionReqCache().rows,official=new Map(officialCompanyPositions().map(x=>[positionNameKey(x.name),x])),back=document.createElement('div');back.className='ci-dialogback';back.id='ci-position-editor';
  const statOptions=value=>['','manual','intelligence','endurance'].map(v=>`<option value="${v}" ${v===value?'selected':''}>${v?statShort(v):'— Select —'}</option>`).join('');
  back.innerHTML=`<div class="ci-dialog ci-position-editor"><h3>Company Position Requirements</h3><p class="ci-note">Company: <b>${esc(meta().name)}</b> · Type: <b>${esc(meta().type)}</b>. Positions come from Torn's structured official company catalogue. Change a value only when you want a manual override for this company.</p>${companyCatalogDiagnosticsHtml()}<div class="ci-position-edit-list">${names.map(name=>{const base=official.get(positionNameKey(name))||{},row=cache[name]?.manual?cache[name]:{},primary=row.primary||base.primary,secondary=row.secondary||base.secondary;return `<div class="ci-position-edit-row" data-pos-row data-name="${esc(name)}"><b>${esc(name)}</b><small>${row.manual?'MANUAL OVERRIDE':'OFFICIAL'}</small><label>Primary<select data-primary-stat>${statOptions(primary?.stat||'')}</select><input data-primary-value type="number" min="0" value="${num(primary?.value)}"></label><label>Secondary<select data-secondary-stat>${statOptions(secondary?.stat||'')}</select><input data-secondary-value type="number" min="0" value="${num(secondary?.value)}"></label></div>`}).join('')}</div><div class="ci-actions"><button class="ci-btn primary" data-save>Save overrides</button><button class="ci-btn" data-reset>Reset to official</button><button class="ci-btn" data-cancel>Cancel</button></div></div>`;
@@ -1972,9 +2007,9 @@ function act(a){
  if(a==='settings'){S.tab='settings';set(KEY.tab,S.tab);render();return}
  if(a==='refresh'){refresh();return}
  if(a==='edit-positions'){openPositionRequirementsEditor();return}
- if(a==='save-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');alert('API key saved locally.');return}
+ if(a==='save-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');globalThis.SakaLuXDialog.notice('API key saved locally.');return}
  if(a==='test-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');S.tab='overview';set(KEY.tab,S.tab);refresh();return}
- if(a==='clear-key'){del(KEY.api);alert(hubApiKey()?'Local key cleared. The SakaLuX Hub key remains active.':'Local API key cleared.');render();return}
+ if(a==='clear-key'){del(KEY.api);globalThis.SakaLuXDialog.notice(hubApiKey()?'Local key cleared. The SakaLuX Hub key remains active.':'Local API key cleared.');render();return}
  if(a==='new-agreement')return dialog('Train Agreement',[{name:'company',label:'Company / employee',value:meta().name},{name:'perWeek',label:'Trains promised/week',type:'number',value:10},{name:'cost',label:'Cost/train (0 = free)',type:'number',value:0},{name:'startDate',label:'Starts / wait note',value:'Immediately'},{name:'note',label:'Notes',wide:true}],d=>{let x=arr(KEY.agreements);x.push({...d,perWeek:num(d.perWeek),cost:num(d.cost),ts:now(),active:true});set(KEY.agreements,x)});
  if(a==='log-train')return dialog('Log Train',[{name:'employee',label:'Employee / buyer',value:me()?.name||''},{name:'primary',label:'Primary stat',type:'select',options:['Intelligence','Endurance','Manual Labor','Unknown']},{name:'secondary',label:'Secondary stat',type:'select',options:['Endurance','Intelligence','Manual Labor','Unknown']},{name:'price',label:'Price received/paid',type:'number',value:0},{name:'note',label:'Note',wide:true}],d=>{let x=arr(KEY.trains);x.push({...d,price:num(d.price),ts:now()});set(KEY.trains,x)});
  if(a==='new-contract')return dialog('Train Sale Contract',[{name:'employee',label:'Employee / buyer'},{name:'totalTrains',label:'Total trains',type:'number',value:10},{name:'perWeek',label:'Promised per week',type:'number',value:10},{name:'pricePerTrain',label:'Price per train',type:'number',value:500000},{name:'startDate',label:'Start date',value:new Date().toISOString().slice(0,10)},{name:'note',label:'Notes',wide:true}],d=>{const x=arr(KEY.contracts);x.push({...d,id:String(now()),totalTrains:num(d.totalTrains),perWeek:num(d.perWeek),pricePerTrain:num(d.pricePerTrain),ts:now(),active:true,paid:false});set(KEY.contracts,x)});
@@ -1983,7 +2018,7 @@ function act(a){
  if(a==='export-report'){const events=[...knownSnapshots().map(x=>[new Date(x.ts).toISOString(),'Snapshot',x.company.name,`${x.company.stars} stars`,x.company.weeklyIncome]),...arr(KEY.trains).map(x=>[new Date(x.ts).toISOString(),'Train',x.employee||'',x.primary||'',x.price||0]),...arr(KEY.contracts).map(x=>[new Date(x.ts).toISOString(),'Contract',x.employee||'',x.totalTrains||0,num(x.totalTrains)*num(x.pricePerTrain)])].sort((a,b)=>String(b[0]).localeCompare(String(a[0])));return downloadCsv('SakaLuX-company-report.csv',[['Date','Type','Subject','Detail','Value'],...events])}
  if(a==='new-offer')return dialog('Add Company Offer',[{name:'company',label:'Company name'},{name:'type',label:'Company type'},{name:'stars',label:'Stars',type:'number',value:0},{name:'dailySalary',label:'Salary/day',type:'number',value:0},{name:'trainsPerWeek',label:'Trains/week',type:'number',value:0},{name:'trainCost',label:'Cost/train',type:'number',value:0},{name:'trainValue',label:'Your value/train',type:'number',value:500000}],d=>{let x=arr(KEY.offers);x.push({...d,stars:num(d.stars),dailySalary:num(d.dailySalary),trainsPerWeek:num(d.trainsPerWeek),trainCost:num(d.trainCost),trainValue:num(d.trainValue),ts:now()});set(KEY.offers,x)});
  if(a==='export'){const data={version:APP.version,agreements:arr(KEY.agreements),trains:arr(KEY.trains),contracts:arr(KEY.contracts),offers:arr(KEY.offers),benchmarks:arr(KEY.benchmarks),snapshots:arr(KEY.snapshots),metrics:arr(KEY.metrics)};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),ln=document.createElement('a');ln.href=u;ln.download=`SakaLuX-Company-Intelligence-${new Date().toISOString().slice(0,10)}.json`;ln.click();setTimeout(()=>URL.revokeObjectURL(u),1000);return}
- if(a==='import'){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async()=>{try{const d=JSON.parse(await i.files[0].text());for(const k of ['agreements','trains','contracts','offers','benchmarks','snapshots','metrics'])if(d[k])set(KEY[k],d[k]);alert('Import complete.');render()}catch(e){alert('Import failed: '+e.message)}};i.click();return}
+ if(a==='import'){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=async()=>{try{const d=JSON.parse(await i.files[0].text());for(const k of ['agreements','trains','contracts','offers','benchmarks','snapshots','metrics'])if(d[k])set(KEY[k],d[k]);globalThis.SakaLuXDialog.notice('Import complete.');render()}catch(e){globalThis.SakaLuXDialog.notice('Import failed: '+e.message)}};i.click();return}
  if(a==='clear'&&confirm('Clear local train, contract, benchmark, offer and snapshot history?')){[KEY.agreements,KEY.trains,KEY.contracts,KEY.benchmarks,KEY.offers,KEY.snapshots,KEY.metrics].forEach(del);render()}
 }
 function syncHubBridge(){const b=$('#sakalux-module-bridge-company-intelligence');if(b)b.dataset.enabled=String(S.enabled)}
