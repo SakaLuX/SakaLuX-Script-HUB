@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.107
+// @version      1.9.108
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2276,7 +2276,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 @media(max-width:699px){
 #${IDS.overlay}{align-items:flex-start!important;padding:0!important}
 #${IDS.panel}{height:100dvh!important;max-height:100dvh!important;border-radius:0 0 18px 18px!important;margin:0!important}
-.slh-card{display:grid!important;grid-template-columns:42px minmax(0,1fr) 142px!important;align-items:center!important;column-gap:9px!important;row-gap:4px!important;padding:9px!important;min-height:82px!important}
+.slh-card{display:grid!important;grid-template-columns:48px minmax(0,1fr) 142px!important;align-items:center!important;column-gap:9px!important;row-gap:4px!important;padding:9px!important;min-height:82px!important}
+.slh-card .slh-card-side{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:7px!important;width:48px!important;min-width:0!important}
+.slh-card .slh-card-side .slh-icon{width:42px!important;height:42px!important;flex:0 0 42px!important;grid-column:auto!important;grid-row:auto!important}
+.slh-card .slh-card-doc{display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:48px!important;min-height:26px!important;padding:4px 2px!important;border-radius:8px!important;border:1px solid #3c5678!important;background:linear-gradient(180deg,#1b344e,#142538)!important;color:#bbd9fa!important;font:bold 8px/1 Arial,sans-serif!important;letter-spacing:0!important;white-space:nowrap!important;cursor:pointer!important}
 .slh-card .slh-icon{grid-column:1!important;grid-row:1!important}
 .slh-card .slh-card-copy{grid-column:2!important;grid-row:1!important;min-width:0!important}
 .slh-card .slh-module-controls{grid-column:3!important;grid-row:1!important;display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-areas:'info toggle' 'new primary'!important;gap:6px!important;min-width:0!important;width:142px!important;margin:0!important;align-self:center!important}
@@ -3293,7 +3296,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             ? `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
             : `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
         return `<div class="slh-card ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''} ${!missing && !enabled ? 'off' : ''}">
-            <div class="slh-icon">${script.icon || '🧩'}</div>
+            <div class="slh-card-side"><button class="slh-card-doc" type="button" data-module-docs="${escapeHtml(script.id)}" title="Open module documentation">↗ DOCS</button><div class="slh-icon">${script.icon || '🧩'}</div></div>
             <div class="slh-card-copy">
                 <div class="slh-name-line"><div class="slh-name">${escapeHtml(script.name)}</div><span class="slh-category-chip">${escapeHtml(script.category || 'Other')}</span></div>
                 <div class="slh-chips">
@@ -3306,7 +3309,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     ${update.data?.checkedAt ? `<span class="slh-chip muted">${escapeHtml(formatAgo(update.data.checkedAt))}</span>` : ''}
                 </div>
             </div>
-            <div class="slh-module-controls">${controls}<button class="slh-card-tool" type="button" data-module-docs="${escapeHtml(script.id)}" title="Open module documentation on SakaLuX.ro">↗ DOCS</button></div>
+            <div class="slh-module-controls">${controls}</div>
         </div>`;
     }
 
