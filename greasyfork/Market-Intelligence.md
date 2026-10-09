@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.64**
+**v1.17.65**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.17.64**
+- Canonical version: **v1.17.65**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -39,6 +39,11 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.17.65 — 2026-10-10
+- Corrected duplicate async keyword after PRO entrypoint guard integration.
+- Verified JavaScript source parses and GreasyFork metadata is retained.
+
 
 ### v1.17.64 — 2026-10-10
 - Corrected invalid async declaration for the PRO Museum scanner; market indicators remain FREE.
