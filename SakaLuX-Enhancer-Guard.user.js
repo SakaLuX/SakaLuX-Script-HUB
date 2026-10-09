@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.57
+// @version      1.3.58
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
 // @match        https://www.torn.com/*
 // @grant        GM_xmlhttpRequest
 // @connect      api.torn.com
+// @connect      sakalux.ro
 // @license      All Rights Reserved
 // @downloadURL  https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js
 // @updateURL    https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js
@@ -1911,6 +1912,8 @@ hideProtectedSaleRows();
 
 
     function openPanel() {
+        if (!slxProAllowed) { slxShowProNotice(); return false; }
+
         if (!state.enabled) setEnabled(true);
         if (document.getElementById('sl-eg-overlay')) return true;
         const overlay = document.createElement('div');
@@ -1974,7 +1977,7 @@ hideProtectedSaleRows();
     function setEnabled(value) {
         state.enabled = Boolean(value);
         setBool(STORAGE.enabled, state.enabled);
-        if (state.enabled) {
+        if (state.enabled && slxProAllowed) {
             injectCss();
             configureAutoRefresh();
         } else {
@@ -2344,7 +2347,20 @@ hideProtectedSaleRows();
 
     window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardReady', { detail: { version: VERSION, enabled: state.enabled } }));
 
-    function init() {
+    let slxProAllowed=false;
+async function slxCheckProAccess(){
+ let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
+ if(!/^[a-zA-Z0-9]{16}$/.test(key)||typeof GM_xmlhttpRequest!=='function')return false;
+ return new Promise(resolve=>GM_xmlhttpRequest({
+  method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+  headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');resolve(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now())}catch{resolve(false)}},
+  onerror:()=>resolve(false),ontimeout:()=>resolve(false)
+ }));
+}
+function slxShowProNotice(){alert('This is a SakaLuX PRO module. Set your Torn API key in SakaLuX Hub and activate PRO at sakalux.ro/premium.html. FREE TRIAL: message SakaLuX [2380374].');}
+    async function init() {
+        slxProAllowed=await slxCheckProAccess();
         try { localStorage.setItem('SakaLuX_Installed_enhancer', VERSION); } catch {}
         state.enabled = getBool(STORAGE.enabled, true);
         installHubBridge('enhancer', openPanel);
