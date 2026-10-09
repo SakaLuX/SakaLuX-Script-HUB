@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.103
+// @version      1.9.104
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3299,7 +3299,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 <div class="slh-chips">
                     <span class="slh-chip ${healthChipClass}">${missing ? 'NOT INSTALLED' : 'v' + escapeHtml(installed || health.version || '?')}</span>
                     <span class="slh-chip ${statusChipClass}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(moduleStatus.label)}</span>
-                    ${script.id === "bazaar" ? `<span class="slh-chip info" title="PRO licensing will be enforced after secure account pairing is ready">PRO SOON</span>` : ""}
+                    ${`<span class="slh-chip ${script.accessTier === "pro" || script.id === "bazaar" ? "info" : "good"}" title="${script.accessTier === "pro" || script.id === "bazaar" ? "PRO tier — secure enforcement pending; existing features remain available" : "Free module"}">${script.accessTier === "pro" || script.id === "bazaar" ? "PRO" : "FREE"}</span>`}
                     ${getRemediationAction(script) ? `<button class="slh-chip ${statusChipClass} slh-remedy" type="button" data-remediate="${escapeHtml(script.id)}" title="${escapeHtml(moduleStatus.detail)}">${escapeHtml(getRemediationAction(script).label)}</button>` : ''}
                     <span class="slh-chip ${updateChipClass}">${escapeHtml(update.text)}</span>
                     ${!missing ? `<span class="slh-chip ${enabled ? 'good' : 'bad'}">${enabled ? 'ACTIVE' : 'DISABLED'}</span>` : ''}
