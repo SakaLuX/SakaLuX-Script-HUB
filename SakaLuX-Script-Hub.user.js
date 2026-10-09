@@ -3222,7 +3222,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     async function refreshHubProStatus(force=false){
         const button=document.getElementById('slh-premium');
         const key=getSharedApiKey();
-        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;}
+        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null}}));}
         if(!key){if(button){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';}return;}
         if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';return;}
         if(!force&&hubProCache&&Date.now()-hubProCheckedAt<5*60*1000){
@@ -3239,7 +3239,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             onerror:()=>reject(Error('Network unavailable')),ontimeout:()=>reject(Error('Timeout'))
         }));
         try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
-        catch(error){if(button.isConnected){const reason=String(error?.message||'connection error');button.title='PRO verification unavailable: '+reason+' — tap for details';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
+        catch(error){hubProCache=null;hubProCheckedAt=0;delete globalThis.__SakaLuXPremiumVerified;window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null}}));if(button?.isConnected){const reason=String(error?.message||'connection error');button.title='PRO verification unavailable: '+reason+' — tap for details';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
         finally{hubProPending=null;}
     }
     setInterval(()=>{if(!document.hidden)void refreshHubProStatus()},5*60*1000);
