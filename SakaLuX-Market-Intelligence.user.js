@@ -3265,7 +3265,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove();};
         overlay.querySelector('#sl-mi-close').onclick=()=>overlay.remove();
         overlay.querySelector('#sl-mi-api-access').onclick=()=>openApiAccess();
-        overlay.querySelectorAll('input[data-mi-toggle="1"]').forEach(input=>input.addEventListener('change',()=>applyLiveToggle(input.dataset.setting,input.checked)));
+        overlay.querySelectorAll('input[data-mi-toggle="1"]').forEach(input=>input.addEventListener('change',async()=>{
+            const premiumSettings=new Set(['bestRun','arrivalBasket','museum']);
+            if(premiumSettings.has(input.dataset.setting)&&input.checked){
+                input.checked=false;
+                const entitlement=globalThis.SakaLuXFreemium?.['market-intelligence'];
+                let authorized=false;
+                try{authorized=Boolean(await entitlement?.isPro?.());}catch(_){}
+                if(!input.isConnected)return;
+                if(!authorized){entitlement?.locked?.();return;}
+                input.checked=true;
+            }
+            applyLiveToggle(input.dataset.setting,input.checked);
+        }));
         overlay.querySelector('#sl-mi-save').onclick=()=>{settings.travelSlots=Math.max(1,Number(overlay.querySelector('#sl-mi-slots').value)||29);settings.travelBudget=Math.max(0,parseMoney(overlay.querySelector('#sl-mi-budget').value)||0);settings.flightMultiplier=Math.max(.1,Number(overlay.querySelector('#sl-mi-flight').value)||1);settings.marketFeePct=Number(overlay.querySelector('#sl-mi-fee').value)||0;settings.minProfit=parseMoney(overlay.querySelector('#sl-mi-min-profit').value)||0;settings.priceNetworkEndpoint=normalizeNetworkEndpoint(overlay.querySelector('#sl-mi-network-endpoint')?.value||'');saveJson(STORAGE.settings,settings);if(settings.priceNetwork)schedulePriceNetworkFlush(500);const b=overlay.querySelector('#sl-mi-save');if(b){const t=b.textContent;b.textContent='SAVED ✓';setTimeout(()=>{if(b.isConnected)b.textContent=t;},900);}scheduleScan(false);};
         overlay.querySelector('#sl-mi-clear-sessions').onclick=()=>{travelSessions={current:null,history:[]};saveTravelSessions();overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-refresh').onclick=()=>{overlay.remove();scheduleScan(true);};overlay.querySelector('#sl-mi-hard').onclick=()=>{marketCache={};saveJson(STORAGE.marketCache,marketCache);overlay.remove();scheduleScan(true);};
     }
