@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.65**
+**v5.3.66**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v5.3.65**
+- Canonical version: **v5.3.66**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -26,11 +26,16 @@
 
 ## Current release note
 
-**v5.3.65 — 2026-10-10**
-- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
-- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
+**v5.3.66 — 2026-10-10**
+- Paid buyer-thanking runtime suspends without PRO without modifying saved ON/OFF preference.
+- Automatically resumes previous enabled state after license verification.
 
 ## Release history / Changelog
+
+### v5.3.66 — 2026-10-10
+- Paid buyer-thanking runtime suspends without PRO without modifying saved ON/OFF preference.
+- Automatically resumes previous enabled state after license verification.
+
 
 
 ### v5.3.65 — 2026-10-10
