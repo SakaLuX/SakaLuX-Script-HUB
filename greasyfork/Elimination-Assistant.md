@@ -42,6 +42,11 @@
 ## Release history / Changelog
 
 ### v1.3.55 — 2026-10-10
+- Guards WIN/LOSS learning at its mutation entry point; basic team and availability functions remain free.
+- Client-side checks are usability controls; server-hosting premium calculations is required to prevent code bypass.
+
+
+### v1.3.55 — 2026-10-10
 - Added direct execution-entry checks for covered PRO functionality, including stock rebalance, Bazaar bulk updates, Museum scan and Elimination FF/calibration.
 - Retains basic FREE functions and GreasyFork distribution URLs.
 - Remaining execution paths and browser integration still need verification; JavaScript alone is not a secure server-side paywall.
