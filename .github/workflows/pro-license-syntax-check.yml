@@ -1,0 +1,47 @@
+name: PRO License JavaScript Syntax
+on:
+  pull_request:
+    paths:
+      - 'SakaLuX-*.user.js'
+      - '.github/workflows/pro-license-syntax-check.yml'
+  workflow_dispatch:
+jobs:
+  check-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check all SakaLuX userscript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(SakaLuX-*.user.js)
+          if (( ${#files[@]} == 0 )); then
+            echo "No userscripts found"; exit 1
+          fi
+          for file in "${files[@]}"; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+      - name: Check entitlement broker invariants
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const assert=require('node:assert/strict');
+          const hub=fs.readFileSync('SakaLuX-Script-Hub.user.js','utf8');
+          assert.match(hub,/const validResponse=d=>/,'Broker must validate server response');
+          assert.match(hub,/invalid_license_response/,'Malformed response must be rejected');
+          assert.match(hub,/identity_changed/,'Account switch must reject stale results');
+          assert.match(hub,/function invalidate\(\)/,'Broker must support immediate license invalidation');
+          assert.match(hub,/function snapshot\(\)/,'Broker should expose non-secret diagnostics');
+          assert.match(hub,/30\*1000/,'FREE cache must not delay newly paid accounts for 5 minutes');
+          for(const name of ['Bazaar-Smart-Pricer','Mission-Rewards','Market-Intelligence','Elimination-Assistant','Bounty-Hunter','Stock-Manager-Advisor','Enhancer-Guard','Bazaar-Thanker-PDA']){
+            const source=fs.readFileSync('SakaLuX-'+name+'.user.js','utf8');
+            assert.match(source,/SakaLuXLicenseBroker/,'Missing shared broker in '+name);
+          }
+          console.log('License wiring invariants passed.');
+          NODE

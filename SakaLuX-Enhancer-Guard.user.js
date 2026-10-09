@@ -2418,22 +2418,36 @@ hideProtectedSaleRows();
     window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardReady', { detail: { version: VERSION, enabled: state.enabled } }));
 
     let slxProAllowed=false,slxProExpiry=0;
+let slxProVerification='checking';
 async function slxCheckProAccess(){
  let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
- if(!/^[a-zA-Z0-9]{16}$/.test(key))return false;
+ if(!/^[a-zA-Z0-9]{16}$/.test(key)){slxProVerification='unavailable';return false;}
  const hub=globalThis.__SakaLuXPremiumVerified;
  if(hub?.key===key&&Date.now()-hub.at<5*60*1000&&hub.data?.premium_active===true){
   const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
   if(Number.isFinite(expiry)&&expiry>Date.now()&&hub.data.entitlements?.includes('enhancer_guard')){
-   slxProExpiry=expiry;return true;
+   slxProExpiry=expiry;slxProVerification='pro';return true;
   }
  }
- if(typeof GM_xmlhttpRequest!=='function')return false;
+ const broker=globalThis.SakaLuXLicenseBroker;
+ if(broker?.check){
+  try{
+   const d=await broker.check(key);
+   const expiry=Date.parse(String(d?.expires_at||'').replace(' ','T')+'Z');
+   const allowed=d?.status==='ok'&&d?.premium_active===true&&Array.isArray(d.entitlements)&&
+     d.entitlements.includes('enhancer_guard')&&
+     Number.isFinite(expiry)&&expiry>Date.now();
+   slxProExpiry=allowed?expiry:0;
+   slxProVerification=allowed?'pro':(d?.status==='ok'?'free':'unavailable');
+   return allowed;
+  }catch{slxProVerification='unavailable';return false;}
+ }
+ if(typeof GM_xmlhttpRequest!=='function'){slxProVerification='unavailable';return false;}
  return new Promise(resolve=>GM_xmlhttpRequest({
   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
   headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
-  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now());slxProExpiry=allowed?ends:0;resolve(allowed)}catch{resolve(false)}},
-  onerror:()=>resolve(false),ontimeout:()=>resolve(false)
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now());slxProExpiry=allowed?ends:0;slxProVerification=r.status===200&&d.status==='ok'?(allowed?'pro':'free'):'unavailable';resolve(allowed)}catch{slxProVerification='unavailable';resolve(false)}},
+  onerror:()=>{slxProVerification='unavailable';resolve(false)},ontimeout:()=>{slxProVerification='unavailable';resolve(false)}
  }));
 }
 function slxProCurrent(){
@@ -2446,6 +2460,10 @@ function slxProCurrent(){
  return slxProAllowed&&Date.now()<slxProExpiry;
 }
 function slxShowProNotice(){
+ if(slxProVerification!=='free'){
+  globalThis.SakaLuXDialog?.notice?.('PRO verification pending or temporarily unavailable. Retry shortly.','warning');
+  return;
+ }
  const existing=document.getElementById('slx-pro-access-modal');if(existing)return;
  const backdrop=document.createElement('div');backdrop.id='slx-pro-access-modal';
  backdrop.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;justify-content:center;align-items:center;padding:18px;background:rgba(3,7,14,.78);backdrop-filter:blur(5px)';
@@ -2484,7 +2502,9 @@ function slxShowProNotice(){
     window.addEventListener('SakaLuX:PremiumStatus',e=>{
         const d=e.detail||{},end=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');
         const ok=d.premium_active===true&&d.entitlements?.includes('enhancer_guard')&&Number.isFinite(end)&&end>Date.now();
-        slxProExpiry=ok?end:0;slxApplyEntitlement(ok);
+        slxProExpiry=ok?end:0;
+        slxProVerification=ok?'pro':(d.verification_state==='unavailable'?'unavailable':'free');
+        slxApplyEntitlement(ok);
     });
     let slxLicenseChecking=false;
     async function slxRefreshEntitlement(){
