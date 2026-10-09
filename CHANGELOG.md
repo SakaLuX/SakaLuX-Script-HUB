@@ -1,5 +1,33 @@
 # Changelog
 
+## PRO preference suspension and automatic restoration — 2026-10-10
+
+The premium license now controls the effective state of premium-only functions. User-selected ON/OFF preferences remain stored separately from the effective license state. On verified PRO loss, gated actions stop or display OFF without erasing the selected option; on successful revalidation, modules restore their previous choices.
+
+- Script Hub publishes the current entitlement status to all installed modules and refreshes the license on a five-minute cycle when Torn is visible.
+- Bazaar Thanker and Enhancer Guard suspend and resume their premium runtime while preserving the saved module-enabled preference.
+- Company Intelligence preserves the user's preferred Director mode and temporarily uses Employee mode while PRO is unavailable.
+- Market Intelligence preserves the saved Best Run, Arrival Basket and Museum choices; premium calculation/display paths check effective entitlement.
+- Mission Rewards and Stock Manager & Advisor show selected advanced switches as OFF during license inactivity without resetting underlying preferences.
+- Bounty Hunter uses FREE-safe sorting/scanning while preserving premium sort, full-board and enrichment preferences.
+- Bazaar Smart Pricer and Elimination Assistant continue enforcing premium execution checks and now respond to license-status changes without altering FREE settings.
+
+| Script | Version |
+|---|---|
+| Script Hub | 1.9.123 |
+| Enhancer Guard | 1.3.67 |
+| Bazaar Thanker | 5.3.66 |
+| Bazaar Smart Pricer | 1.1.24 |
+| Mission Rewards | 1.0.56 |
+| Market Intelligence | 1.17.70 |
+| Bounty Hunter | 0.5.14 |
+| Elimination Assistant | 1.3.60 |
+| Company Intelligence | 1.8.69 |
+| Stock Manager & Advisor | 0.8.25 |
+
+JavaScript parsing was checked on the updated userscripts; real TornPDA integration, server revocation latency and Greasy Fork propagation must also be confirmed.
+
+
 ## Market Intelligence v1.17.69 — 2026-10-10
 
 - Added ✦ PRO badges to premium travel and museum switches, including the previously unmarked Arrival Basket Planner.
