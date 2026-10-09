@@ -1,5 +1,16 @@
 # Changelog
 
+## Freemium release — 2026-10-10
+
+- Split six previously FREE modules into FREE baseline and PRO advanced features: Bazaar Smart Pricer v1.1.19, Mission Rewards v1.0.53, Market Intelligence v1.17.63, Bounty Hunter v0.5.9, Elimination Assistant v1.3.54 and Stock Manager & Advisor v0.8.21.
+- Added conditional client-side access checks on identified premium action controls, using the verified Hub entitlement for the same Torn API key or the premium verification endpoint.
+- Made the floating Stock Manager PANIC feature PRO and added an explicit entitlement check inside `panic()`, guarding non-button invocation paths.
+- Preserved baseline analysis and safety functionality for FREE users.
+- Expanded premium entitlements in `SakaLuX-Website/api/hub-premium-check.php`; deployed backend availability must be checked separately.
+- Updated `scripts.json` with mixed access tiers, feature lists and release notes and updated six GreasyFork documents.
+- **Limitations:** client-side access checks can be bypassed; not every alternate invocation path has been integration-tested. Do not represent this release as secure server-side enforcement. GreasyFork publication and TornPDA regression tests are separate.
+
+
 ## PRO synchronization and confirmation dialogs — 2026-10-09
 
 - Hub v1.9.121 publishes its successful server-confirmed PRO status to installed modules for the matching API key.
