@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.102
+// @version      1.9.103
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3082,17 +3082,19 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
     // Lightweight status display; the backend remains authoritative.
     let hubProCache=null,hubProCheckedAt=0,hubProPending=null,hubProTimer=null,hubProKey='';
+    let hubProRequestKey='';
     async function refreshHubProStatus(force=false){
         const button=document.getElementById('slh-premium');
         if(!button)return;
         const key=getSharedApiKey();
         if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;}
-        if(!key){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';return;}
+        if(!key){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';return;}
         if(typeof GM_xmlhttpRequest!=='function'){button.title='Premium status unavailable';return;}
         if(!force&&hubProCache&&Date.now()-hubProCheckedAt<15*60*1000){
             paintHubProStatus(button,hubProCache);return;
         }
         if(hubProPending)return hubProPending;
+        hubProRequestKey=key;
         button.title='Checking PRO license…';
         hubProPending=new Promise((resolve,reject)=>GM_xmlhttpRequest({
             method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
@@ -3101,8 +3103,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             onload:r=>{try{const d=JSON.parse(r.responseText||'{}');if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);resolve(d);}catch(e){reject(e);}},
             onerror:()=>reject(Error('Network unavailable')),ontimeout:()=>reject(Error('Timeout'))
         }));
-        try{const d=await hubProPending;hubProCache=d;hubProCheckedAt=Date.now();paintHubProStatus(document.getElementById('slh-premium'),d);}
-        catch{if(button.isConnected)button.title='Premium check unavailable — tap to retry';}
+        try{const d=await hubProPending;if(getSharedApiKey()!==hubProRequestKey)return;hubProCache=d;hubProCheckedAt=Date.now();paintHubProStatus(document.getElementById('slh-premium'),d);}
+        catch{if(button.isConnected){button.title='Premium check unavailable — tap to retry';button.textContent='PRO ?';button.style.borderColor='#8a7541';}}
         finally{hubProPending=null;}
     }
     function paintHubProStatus(button,data){
