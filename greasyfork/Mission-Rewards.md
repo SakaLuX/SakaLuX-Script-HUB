@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.51**
+**v1.0.52**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.0.51**
+- Canonical version: **v1.0.52**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md
@@ -36,6 +36,11 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.0.52 — 2026-10-09
+- Migrates reset confirmations from native browser dialogs to the shared branded SakaLuX confirmation popup.
+- Cancelling a confirmation preserves existing data.
+
 
 ### v1.0.51 — 2026-10-09
 - Added shared SakaLuX branded dialogs for informational, PRO and error notices.
