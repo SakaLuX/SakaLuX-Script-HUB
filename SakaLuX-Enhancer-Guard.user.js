@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.58
+// @version      1.3.59
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1912,7 +1912,7 @@ hideProtectedSaleRows();
 
 
     function openPanel() {
-        if (!slxProAllowed) { slxShowProNotice(); return false; }
+        if (!slxProCurrent()) { slxShowProNotice(); return false; }
 
         if (!state.enabled) setEnabled(true);
         if (document.getElementById('sl-eg-overlay')) return true;
@@ -1975,10 +1975,10 @@ hideProtectedSaleRows();
     }
 
     function setEnabled(value) {
-        if (value && !slxProAllowed) { slxShowProNotice(); return false; }
+        if (value && !slxProCurrent()) { slxShowProNotice(); return false; }
         state.enabled = Boolean(value);
         setBool(STORAGE.enabled, state.enabled);
-        if (state.enabled && slxProAllowed) {
+        if (state.enabled && slxProCurrent()) {
             injectCss();
             configureAutoRefresh();
         } else {
@@ -2348,17 +2348,18 @@ hideProtectedSaleRows();
 
     window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardReady', { detail: { version: VERSION, enabled: state.enabled } }));
 
-    let slxProAllowed=false;
+    let slxProAllowed=false,slxProExpiry=0;
 async function slxCheckProAccess(){
  let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
  if(!/^[a-zA-Z0-9]{16}$/.test(key)||typeof GM_xmlhttpRequest!=='function')return false;
  return new Promise(resolve=>GM_xmlhttpRequest({
   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
   headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
-  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');resolve(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now())}catch{resolve(false)}},
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now());slxProExpiry=allowed?Math.min(ends,Date.now()+5*60*1000):0;resolve(allowed)}catch{resolve(false)}},
   onerror:()=>resolve(false),ontimeout:()=>resolve(false)
  }));
 }
+function slxProCurrent(){return slxProAllowed&&Date.now()<slxProExpiry;}
 function slxShowProNotice(){alert('This is a SakaLuX PRO module. Set your Torn API key in SakaLuX Hub and activate PRO at sakalux.ro/premium.html. FREE TRIAL: message SakaLuX [2380374].');}
     async function init() {
         slxProAllowed=await slxCheckProAccess();
