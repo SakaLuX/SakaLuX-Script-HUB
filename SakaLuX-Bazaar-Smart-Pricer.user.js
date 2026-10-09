@@ -3,7 +3,7 @@
 // @namespace    sakalux.bazaar.smart.pricer
 // @version      1.1.17
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
-// @author       SakaLuX [2380374] · based on Zedtrooper [3028329]
+// @author       SakaLuX [2380374]
 // @license      MIT
 // @match        https://www.torn.com/*
 // @grant        GM_setValue
