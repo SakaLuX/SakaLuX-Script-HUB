@@ -2111,7 +2111,7 @@ async function slxCheckProAccess(){
  return new Promise(resolve=>GM_xmlhttpRequest({
   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
   headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
-  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('bazaar_thanker')&&Number.isFinite(ends)&&ends>Date.now());slxProExpiry=allowed?Math.min(ends,Date.now()+5*60*1000):0;resolve(allowed)}catch{resolve(false)}},
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('bazaar_thanker')&&Number.isFinite(ends)&&ends>Date.now());slxProExpiry=allowed?ends:0;resolve(allowed)}catch{resolve(false)}},
   onerror:()=>resolve(false),ontimeout:()=>resolve(false)
  }));
 }
