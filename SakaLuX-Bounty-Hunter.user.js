@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bounty Hunter
 // @namespace    sakalux.bounty.hunter
-// @version      0.5.11
+// @version      0.5.12
 // @description  Mobile-first Torn bounty intelligence with full-board API paging, live target enrichment, FF/BS hints, hospital countdowns, alerts, Safe/Profit modes, watchlist and blacklist.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -750,7 +750,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '0.5.11';
+  let v = '0.5.12';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1093,7 +1093,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — END */
 
 (()=>{'use strict';
-const VERSION='0.5.11',ID='bounty-hunter',API='SakaLuXBountyHunter';
+const VERSION='0.5.12',ID='bounty-hunter',API='SakaLuXBountyHunter';
 const GREASYFORK_ID='598988',GREASYFORK_URL='https://greasyfork.org/scripts/598988',HUB_SHARED_KEY_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks&company=profile,employees,stock&torn=items,elimination,eliminationteam,stocks,bounties&market=itemmarket';
 const CORE=globalThis.SakaLuXCore||null;
 try{CORE?.ui?.ensureSharedSkin?.();CORE?.settings?.register?.({id:ID,version:1,keys:['SLX_BOUNTY_SETTINGS_V3','SLX_BOUNTY_WATCH_V1','SLX_BOUNTY_BLACK_V1','SLX_BOUNTY_CACHE_V2','SLX_BOUNTY_USER_CACHE_V1','SLX_BOUNTY_FF_CACHE_V1','SLX_BOUNTY_SCAN_STATE_V1']});CORE?.api?.configure?.({maxConcurrent:4});}catch{}
@@ -1156,7 +1156,7 @@ async function enrichOne(x,key,force=false){const c=UCACHE[x.id];if(!force&&c&&D
  'https://api.torn.com/user/'+encodeURIComponent(x.id)+'?selections=basic&key='+encodeURIComponent(key),
  'https://api.torn.com/user/'+encodeURIComponent(x.id)+'?selections=profile&key='+encodeURIComponent(key)
 ];for(const url of tries){try{const j=await reqJson(url,12000);const z=normalizeUserBasic(j,x.id);if(!d||z.status!=='Unknown')d=z;if(z.status!=='Unknown')break}catch(e){last=e?.message||String(e)}}if(!d){return{...x,statusCheckError:last||'No status response'}}UCACHE[x.id]={at:Date.now(),data:d};saveUsers();return{...x,name:d.name||x.name,level:d.level??x.level,status:d.status!=='Unknown'?d.status:x.status,hospitalUntil:d.hospitalUntil||x.hospitalUntil,lastAction:d.lastAction||x.lastAction,travelText:d.travelText||x.travelText||'',statusVerified:d.status!=='Unknown',statusCheckError:d.status==='Unknown'?(last||'Status unavailable'):''}}
-async function enrichRows(rows,force=false){const key=getKey();if((!S.liveEnrich&&!S.onlyBeatable)||!key||!rows.length)return rows;const candidate=rows.filter(x=>!BLACK[x.id]&&x.reward>=num(S.minReward)&&(x.level==null||x.level<=num(S.maxLevel||100))&&(!S.onlyBeatable||x.ff==null||(x.ff>=num(S.minFF||1)&&x.ff<=num(S.maxFF||3)))&&(!S.maxBS||x.bs==null||x.bs<=num(S.maxBS))).sort((a,b)=>b.reward-a.reward),maxCheck=Math.max(24,Math.min(80,Math.max(num(S.enrichCount)||12,20)*3)),top=(candidate.length?candidate:rows).slice(0,maxCheck),map=new Map(rows.map(x=>[x.id,x]));let ready=0,checked=0;setProgress('status',0,top.length,'Checking status');for(let i=0;i<top.length;i+=4){const chunk=top.slice(i,i+4),got=await Promise.all(chunk.map(x=>enrichOne(x,key,force)));checked+=chunk.length;setProgress('status',checked,top.length,'Checking status');for(const x of got){map.set(x.id,x);const left=num(x.hospitalUntil)-Math.floor(Date.now()/1000),ok=x.status==='Okay'||(x.status==='Hospital'&&num(S.hospitalWindowMin)>=0&&num(x.hospitalUntil)>0&&left>0&&(num(S.hospitalWindowMin)===0||left<=num(S.hospitalWindowMin)*60));if(ok)ready++}if(ready>=20)break}return rows.map(x=>map.get(x.id)||x)}
+async function enrichRows(rows,force=false){if(!(await globalThis.SakaLuXFreemium['bounty-hunter'].isPro()))return rows;const key=getKey();if((!S.liveEnrich&&!S.onlyBeatable)||!key||!rows.length)return rows;const candidate=rows.filter(x=>!BLACK[x.id]&&x.reward>=num(S.minReward)&&(x.level==null||x.level<=num(S.maxLevel||100))&&(!S.onlyBeatable||x.ff==null||(x.ff>=num(S.minFF||1)&&x.ff<=num(S.maxFF||3)))&&(!S.maxBS||x.bs==null||x.bs<=num(S.maxBS))).sort((a,b)=>b.reward-a.reward),maxCheck=Math.max(24,Math.min(80,Math.max(num(S.enrichCount)||12,20)*3)),top=(candidate.length?candidate:rows).slice(0,maxCheck),map=new Map(rows.map(x=>[x.id,x]));let ready=0,checked=0;setProgress('status',0,top.length,'Checking status');for(let i=0;i<top.length;i+=4){const chunk=top.slice(i,i+4),got=await Promise.all(chunk.map(x=>enrichOne(x,key,force)));checked+=chunk.length;setProgress('status',checked,top.length,'Checking status');for(const x of got){map.set(x.id,x);const left=num(x.hospitalUntil)-Math.floor(Date.now()/1000),ok=x.status==='Okay'||(x.status==='Hospital'&&num(S.hospitalWindowMin)>=0&&num(x.hospitalUntil)>0&&left>0&&(num(S.hospitalWindowMin)===0||left<=num(S.hospitalWindowMin)*60));if(ok)ready++}if(ready>=20)break}return rows.map(x=>map.get(x.id)||x)}
 function hospLeft(x){const sec=num(x.hospitalUntil)-Math.floor(Date.now()/1000);return sec>0?sec:0}
 function hospText(x){const s=hospLeft(x);if(!s)return'';const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),z=s%60;return(h?h+'h ':'')+(m?m+'m ':'')+z+'s'}
 function textMatch(x){const q=N(S.query).toLowerCase();return!q||String(x.id).includes(q)||String(x.name||'').toLowerCase().includes(q)}
