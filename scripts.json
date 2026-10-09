@@ -485,19 +485,18 @@
         }
       ],
       "release": {
-        "version": "1.8.57",
-        "date": "2026-10-07",
+        "version": "1.8.58",
+        "date": "2026-10-09",
         "notes": [
-          "Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.",
-          "Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.",
-          "Updates the current release notes and documentation; INFO explains features and NEW lists changes.",
-          "Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower."
+          "Employee workspace remains FREE.",
+          "Director workspace now requires a verified active SakaLuX PRO license via the shared Torn API key.",
+          "Users without an active PRO license retain access to Employee tools."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.57",
-      "detailsRevision": 14,
+      "version": "1.8.58",
+      "detailsRevision": 15,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -509,8 +508,8 @@
       "proFeatures": [
         "director"
       ],
-      "accessEnforcement": "pending_server_side",
-      "premiumNote": "Employee: FREE. Director: PRO. License enforcement is pending."
+      "accessEnforcement": "client_side_check",
+      "premiumNote": "Employee: FREE; Director: PRO. Client-side check active; server-side feature enforcement is still required to prevent bypass."
     },
     {
       "active": true,
