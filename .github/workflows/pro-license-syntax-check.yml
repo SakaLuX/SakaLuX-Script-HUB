@@ -36,6 +36,8 @@ jobs:
           assert.match(hub,/const validResponse=d=>/,'Broker must validate server response');
           assert.match(hub,/invalid_license_response/,'Malformed response must be rejected');
           assert.match(hub,/identity_changed/,'Account switch must reject stale results');
+          assert.match(hub,/function invalidate\(\)/,'Broker must support immediate license invalidation');
+          assert.match(hub,/function snapshot\(\)/,'Broker should expose non-secret diagnostics');
           assert.match(hub,/30\*1000/,'FREE cache must not delay newly paid accounts for 5 minutes');
           for(const name of ['Bazaar-Smart-Pricer','Mission-Rewards','Market-Intelligence','Elimination-Assistant','Bounty-Hunter','Stock-Manager-Advisor','Enhancer-Guard','Bazaar-Thanker-PDA']){
             const source=fs.readFileSync('SakaLuX-'+name+'.user.js','utf8');
