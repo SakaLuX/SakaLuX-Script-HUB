@@ -62,7 +62,7 @@
       "greasyForkId": "592388",
       "icon": "💬",
       "id": "bazaar",
-      "info": "Purpose\nBazaar Thanker organizes purchases from your Bazaar and helps prepare personal thank-you messages for customers. It reads Events and assists on Messages; Hub can detect and open its settings from other Torn pages.\n\nBuyer grouping and purchase details\nDetects supported Bazaar purchase events and groups purchases by buyer. Buyer details let you review the purchase information before preparing a message. Copy tools help reuse purchase or message information. Configurable big-buyer thresholds highlight customers by item count or amount spent.\n\nMessage customization\nUses a custom Bazaar name when supplied and automatic name detection when no custom name is configured. Message text is configurable so you can include your preferred greeting and Bazaar information. The thank-you workflow prepares text for Torn's messaging flow; review the recipient and final message before sending.\n\nHistory and repeat-message control\nKeeps local buyer/message history, statistics and processed-event state. A configurable cooldown avoids repeatedly thanking the same buyer too soon; the default is four hours. History-management controls help inspect or clear the records stored on the device.\n\nAccess and persistence\nDoes not need a Torn API key. Settings and working records are stored locally in TornPDA or the userscript environment. Script Hub provides detection, settings access and ON/OFF integration; the shared standalone dock can open the module when Hub is absent. Core purchase and message processing remains limited to the relevant Events and Messages pages.\n\nVisible buyer export\nOn Torn Events, choose Export Bazaar buyers to download a JSON file of currently visible Bazaar purchase events. This does not yet sync to the SakaLuX website or MySQL; an authenticated import is planned after transaction deduplication is implemented.\n\nDirect website synchronization\nOpen Torn Events, tap Pair SakaLuX, then paste the one-time device pairing token from your authenticated sakalux.ro Dashboard. Sync Now sends only individual sales events with verifiable Torn event IDs; other events are safely skipped. Pairing token is saved locally in the browser; keep this device secure. Auto sync runs at most once every two minutes when the Events page is open. Export JSON remains available for backup.",
+      "info": "Purpose\nBazaar Thanker organizes purchases from your Bazaar and helps prepare personal thank-you messages for customers. It reads Events and assists on Messages; Hub can detect and open its settings from other Torn pages.\n\nBuyer grouping and purchase details\nDetects supported Bazaar purchase events and groups purchases by buyer. Buyer details let you review the purchase information before preparing a message. Copy tools help reuse purchase or message information. Configurable big-buyer thresholds highlight customers by item count or amount spent.\n\nMessage customization\nUses a custom Bazaar name when supplied and automatic name detection when no custom name is configured. Message text is configurable so you can include your preferred greeting and Bazaar information. The thank-you workflow prepares text for Torn's messaging flow; review the recipient and final message before sending.\n\nHistory and repeat-message control\nKeeps local buyer/message history, statistics and processed-event state. A configurable cooldown avoids repeatedly thanking the same buyer too soon; the default is four hours. History-management controls help inspect or clear the records stored on the device.\n\nAccess and persistence\nDoes not need a Torn API key. Settings and working records are stored locally in TornPDA or the userscript environment. Script Hub provides detection, settings access and ON/OFF integration; the shared standalone dock can open the module when Hub is absent. Core purchase and message processing remains limited to the relevant Events and Messages pages.",
       "metaUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "name": "Bazaar Thanker",
       "quickActions": [
@@ -87,18 +87,19 @@
         }
       ],
       "release": {
-        "version": "5.3.52",
+        "version": "5.3.53",
         "date": "2026-10-09",
         "notes": [
-          "Private beta: Export Bazaar buyers, Pair SakaLuX, and Sync Now only appear if the active Torn account is identifiable as player 2380374.",
-          "If the browser does not expose a reliable logged-in player identifier, the private controls remain hidden; regular Bazaar Thanker features are unchanged.",
-          "Server still requires an authorized pairing token and restricts access to the test account."
+          "Rolls Bazaar Thanker back to the v5.3.48 feature set, before all Dashboard and MySQL integration experiments.",
+          "Removes Pair SakaLuX, Sync Now, automatic website synchronization and Export Bazaar buyers buttons.",
+          "Retains original Bazaar buyer grouping, statistics, purchase details, thank-you messaging and existing settings.",
+          "Version increased to allow auto-updates from 5.3.52."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.52",
-      "detailsRevision": 18,
+      "version": "5.3.53",
+      "detailsRevision": 19,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
