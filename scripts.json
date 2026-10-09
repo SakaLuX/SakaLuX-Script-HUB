@@ -143,17 +143,15 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 39,
-      "version": "1.1.19",
+      "detailsRevision": 40,
+      "version": "1.1.20",
       "release": {
-        "version": "1.1.19",
+        "version": "1.1.20",
         "date": "2026-10-10",
         "notes": [
-          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
-          "Bulk Pricing designated PRO.",
-          "Update All designated PRO.",
-          "Quick Fill designated PRO.",
-          "Safety features and baseline functionality remain FREE."
+          "Added direct PRO entitlement checks at selected execution functions, not only UI buttons.",
+          "Blocked premium operations through covered alternative call paths.",
+          "Other paths still require validation; client-side checks are not server-side security."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -292,22 +290,18 @@
         }
       ],
       "release": {
-        "version": "1.17.63",
+        "version": "1.17.64",
         "date": "2026-10-10",
         "notes": [
-          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
-          "Bazaar Flip designated PRO.",
-          "Best Travel Run designated PRO.",
-          "Route Basket designated PRO.",
-          "Travel Planner designated PRO.",
-          "Museum designated PRO.",
-          "Safety features and baseline functionality remain FREE."
+          "Added direct PRO entitlement checks at selected execution functions, not only UI buttons.",
+          "Blocked premium operations through covered alternative call paths.",
+          "Other paths still require validation; client-side checks are not server-side security."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.63",
-      "detailsRevision": 27,
+      "version": "1.17.64",
+      "detailsRevision": 28,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -481,21 +475,18 @@
         }
       ],
       "release": {
-        "version": "1.3.54",
+        "version": "1.3.55",
         "date": "2026-10-10",
         "notes": [
-          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
-          "SAFE/RISKY/SKIP recommendations designated PRO.",
-          "FFScouter designated PRO.",
-          "Calibration designated PRO.",
-          "Target learning designated PRO.",
-          "Safety features and baseline functionality remain FREE."
+          "Added direct PRO entitlement checks at selected execution functions, not only UI buttons.",
+          "Blocked premium operations through covered alternative call paths.",
+          "Other paths still require validation; client-side checks are not server-side security."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.54",
-      "detailsRevision": 18,
+      "version": "1.3.55",
+      "detailsRevision": 19,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -615,23 +606,18 @@
         }
       ],
       "release": {
-        "version": "0.8.21",
+        "version": "0.8.22",
         "date": "2026-10-10",
         "notes": [
-          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
-          "Financial Advisor designated PRO.",
-          "Technical Assistant designated PRO.",
-          "Portfolio Simulator designated PRO.",
-          "Smart Rebalance designated PRO.",
-          "PANIC floating button and execution designated PRO.",
-          "Safety features and baseline functionality remain FREE.",
-          "The PANIC execution function explicitly checks PRO before any trading operation."
+          "Added direct PRO entitlement checks at selected execution functions, not only UI buttons.",
+          "Blocked premium operations through covered alternative call paths.",
+          "Other paths still require validation; client-side checks are not server-side security."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.21",
-      "detailsRevision": 20,
+      "version": "0.8.22",
+      "detailsRevision": 21,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
