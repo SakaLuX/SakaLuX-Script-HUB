@@ -5,6 +5,10 @@
 ## Current version
 **v1.3.61**
 
+### License Manager v2 (2026-10-10)
+- Faster shared license verification and safer unavailable states.
+
+
 ### License Manager v2 · 2026-10-10
 - Shared Hub license broker, short FREE cache, and bounded PRO cache.
 - Temporary network errors no longer count as confirmed FREE for upgrade prompts.
