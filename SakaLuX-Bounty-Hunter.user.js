@@ -71,7 +71,7 @@
        const ok=d?.status==='ok'&&accepts(d,k);
        if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));}
        else {verifiedKey='';verifiedUntil=0;}
-       verificationState=ok?'pro':'free';
+       verificationState=ok?'pro':(d?.status==='ok'?'free':'unavailable');
        return ok;
      }catch{verificationState='unavailable';return false;}
    }
