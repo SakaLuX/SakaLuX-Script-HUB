@@ -1,0 +1,46 @@
+name: Publish Premium Badge Releases v1
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-premium-badges-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-premium-badges-v1
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate badges and synchronized metadata
+        run: |
+          python3 tools/verify_premium_badge_release.py
+          python3 tools/release_preflight.py --all --build
+      - name: Verify and publish the ten changed releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ids=(bazaar-smart-pricer mission-rewards market-intelligence bounty-hunter elimination-assistant stock-manager-advisor company-intelligence enhancer bazaar script-hub)
+          for id in "${ids[@]}"; do
+            manifest=$(find dist/releases -path "*/${id}-v*/release-manifest.json" -print -quit)
+            test -n "$manifest" || { echo "Missing release manifest for $id"; exit 1; }
+            dir=$(dirname "$manifest")
+            tag=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["tag"])' "$manifest")
+            version=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$manifest")
+            name=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["name"])' "$manifest")
+            (cd "$dir" && sha256sum -c SHA256SUMS)
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "Existing release $tag: unchanged."
+              continue
+            fi
+            gh release create "$tag" "$dir"/* --target "$GITHUB_SHA" --title "$name v$version" --notes-file "$dir/RELEASE_INFO.md"
+            echo "Published $tag"
+          done
