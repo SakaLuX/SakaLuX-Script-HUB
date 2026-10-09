@@ -1814,6 +1814,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const groups = getBuyerGroups();
         ensureExportButton();
         ensureSyncControls();
+        const syncStatus=document.querySelector('#sakalux-bt-sync-controls span');
+        if(syncStatus)void syncVisibleEvents(syncStatus);
 
         document.querySelectorAll('.sakalux-bt-ui[data-buyer-id]').forEach(ui => {
             const xid = ui.dataset.buyerId;
