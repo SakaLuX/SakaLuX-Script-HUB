@@ -26,12 +26,18 @@
 
 ## Current release note
 
-**v5.3.59 — Current release**
-- Aligns published release documentation with the current userscript metadata.
-- See `scripts.json` and the version-specific changelog for detailed changes.
-
+**v5.3.59 — 2026-10-09**
+- Synchronizes userscript and runtime version for reliable Hub installed/update detection.
+- Preserves PRO verification and module functionality.
+- Repairs the malformed buyer-ranking handler and removes a duplicated corrupted code block that prevented Greasy Fork synchronization.
 
 ## Release history / Changelog
+
+
+### v5.3.59 — 2026-10-09
+- Synchronizes userscript and runtime version for reliable Hub installed/update detection.
+- Preserves PRO verification and module functionality.
+- Repairs the malformed buyer-ranking handler and removes a duplicated corrupted code block that prevented Greasy Fork synchronization.
 
 ### v5.3.48 — 2026-10-07
 - Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
