@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.67**
+**v1.8.68**
 
 
 ## Repository synchronization
 
-- Verified: **2026-10-09**
-- Canonical version: **v1.8.67**
+- Verified: **2026-10-10**
+- Canonical version: **v1.8.68**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,31 +32,16 @@
 
 ## Current release note
 
-**v1.8.66 — 2026-10-09**
-- Revalidates PRO before entering Director; remembered Director selections do not skip verification.
-- Distinguishes inactive PRO from connection failures, expired keys and rate limits.
-- Displays verification feedback inside the panel instead of a contradictory native alert.
-- Employee remains FREE; Director requires active PRO and Torn director status for private company data.
-
-
-**v1.8.65 — 2026-10-09**
-- Displays **EMPLOYEE · FREE** and **DIRECTOR · PRO** on the mode buttons.
-- Employee features remain free, while Director checks the active SakaLuX PRO entitlement.
-- Retains GreasyFork update/download metadata.
-
-
-**v1.8.64 — 2026-10-09**
-- Fixes the remaining `$(...).forEach is not a function` error in Employee/Director mode rendering.
-- Verified source uses `$('[data-mode]', root).forEach(...)` after the commit.
-- Download and update URLs remain on GreasyFork.
-
-
-**v1.8.63 — 2026-10-09**
-- Fixes the Employee/Director mode selection crash: `$(...).forEach is not a function`.
-- Uses the multi-element `$$('[data-mode]', root)` selector when attaching mode-button events.
-- Aligns canonical installed-version markers and Hub release metadata; GreasyFork remains the configured download/update source.
+**v1.8.68 — 2026-10-10**
+- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
+- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
 
 ## Release history / Changelog
+
+
+### v1.8.68 — 2026-10-10
+- Adds a visible ✦ PRO badge to matched premium commands while leaving FREE commands accessible.
+- Keeps existing SakaLuX PRO popup and entitlement checks unchanged.
 
 ### v1.8.67 — 2026-10-09
 - Added shared SakaLuX branded dialogs for informational, PRO and error notices.
