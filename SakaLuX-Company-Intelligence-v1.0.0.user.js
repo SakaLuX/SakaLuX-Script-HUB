@@ -2067,6 +2067,13 @@ function init(){
  S.employment=get(APP.key+':employment',null);
  if(!S.data.profile&&!(S.employment?.known&&!S.employment.id)){const cached=get(KEY.company,null),last=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>b.ts-a.ts)[0]?.company;if(cached||last)S.data.profile=cached||last}
  installHubBridge();syncHubBridge();
+ window.addEventListener('SakaLuX:PremiumStatus',event=>{
+   const d=event.detail||{},exp=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');
+   const allowed=d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('company_director')&&Number.isFinite(exp)&&exp>Date.now();
+   ciProVerified=allowed;ciProKey=allowed?ciHubApiKey():'';ciProExpires=allowed?Math.min(exp,Date.now()+5*60*1000):0;
+   const next=allowed&&get(KEY.mode,'employee')==='director'?'director':'employee';
+   if(S.mode!==next){S.mode=next;S.tab='overview';if(S.open)render();}
+ });
  async function reconcileDirectorPreference(){
    const desired=get(KEY.mode,'employee');
    let allowed=false;
