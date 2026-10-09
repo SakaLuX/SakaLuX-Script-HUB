@@ -3017,7 +3017,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function scrapePointsRate(){const vals=[];document.querySelectorAll('*').forEach(el=>{if(el.children.length)return;const m=(el.textContent||'').trim().match(/^\$\s*([\d,]+)$/);if(!m)return;const n=parseMoney(m[1]);if(n>=5000&&n<=200000)vals.push(n);});return vals.length?Math.min(...vals):null;}
     function scanPoints(){if(!settings.points)return;const rate=scrapePointsRate();if(!rate)return;saveJson(STORAGE.pointsRate,{rate,at:Date.now()});document.getElementById('sl-mi-points-bar')?.remove();const bar=document.createElement('div');bar.id='sl-mi-points-bar';bar.innerHTML='<b>☠︎ Points Intelligence</b> · captured <strong>'+money(rate)+'/point</strong>';mountTop(bar);}
     async function scanMuseum(){
- if(!(await globalThis.SakaLuXFreemium['market-intelligence'].isPro())){globalThis.SakaLuXFreemium['market-intelligence'].locked();return;}
+ if(!(await globalThis.SakaLuXFreemium['market-intelligence'].isPro()))return;
         if(!settings.museum)return;
         document.getElementById('sl-mi-museum-bar')?.remove();
         state.museumSets=0;state.museumRecommendation='';state.museumMissingSets=0;
