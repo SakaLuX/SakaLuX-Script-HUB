@@ -1,5 +1,25 @@
 # Changelog
 
+## Premium badges distribution — 2026-10-10
+
+Premium actions in nine scripts now have ✦ PRO visual labels. Script Hub uses ✦ PRO and FREE / ✦ PRO module badges. Existing license checks and PRO dialogs remain unchanged; FREE actions are not deliberately hidden.
+
+| Script | Version |
+|---|---|
+| Script Hub | 1.9.122 |
+| Bazaar Thanker | 5.3.65 |
+| Enhancer Guard | 1.3.66 |
+| Company Intelligence | 1.8.68 |
+| Bazaar Smart Pricer | 1.1.23 |
+| Mission Rewards | 1.0.55 |
+| Market Intelligence | 1.17.67 |
+| Bounty Hunter | 0.5.13 |
+| Elimination Assistant | 1.3.59 |
+| Stock Manager & Advisor | 0.8.24 |
+
+Release documents: `greasyfork/*.md`, `releases/*-v*.md`. Module release notes and versions: `scripts.json` and Script Hub offline fallback. All ten edited JavaScript sources passed a parser syntax check. Deployment via Greasy Fork and browser behavior remain to be confirmed separately.
+
+
 ## FREE/PRO execution-path hardening and security audit — 2026-10-10
 
 - Bazaar Smart Pricer v1.1.22: verified premium entry points for Quick Fill and Update All; added cached entitlement state helper.
