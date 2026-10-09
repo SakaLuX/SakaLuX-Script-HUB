@@ -3081,11 +3081,12 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     }
 
     // Lightweight status display; the backend remains authoritative.
-    let hubProCache=null,hubProCheckedAt=0,hubProPending=null,hubProTimer=null;
+    let hubProCache=null,hubProCheckedAt=0,hubProPending=null,hubProTimer=null,hubProKey='';
     async function refreshHubProStatus(force=false){
         const button=document.getElementById('slh-premium');
         if(!button)return;
         const key=getSharedApiKey();
+        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;}
         if(!key){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';return;}
         if(typeof GM_xmlhttpRequest!=='function'){button.title='Premium status unavailable';return;}
         if(!force&&hubProCache&&Date.now()-hubProCheckedAt<15*60*1000){
