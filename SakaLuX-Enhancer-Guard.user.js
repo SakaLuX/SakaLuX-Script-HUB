@@ -10,8 +10,8 @@
 // @connect      api.torn.com
 // @connect      sakalux.ro
 // @license      All Rights Reserved
-// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
-// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
+// @downloadURL  https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js
+// @updateURL    https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
