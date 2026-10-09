@@ -1,5 +1,11 @@
 # Changelog
 
+## Company Intelligence v1.8.65 — 2026-10-09
+
+- Labeled the Company interface's two modes **EMPLOYEE · FREE** and **DIRECTOR · PRO**.
+- Retained free Employee access and the existing server-confirmed PRO entitlement requirement for Director.
+- Updated `scripts.json` release notes, current version, and GreasyFork documentation.
+
 ## Company Intelligence v1.8.64 — 2026-10-09
 
 - Fixed the still-present single-element `$('[data-mode]', root).forEach(...)` crash by using `$('[data-mode]', root).forEach(...)`.
@@ -22,7 +28,7 @@ The following newer versions supersede the earlier release-documentation reconci
 | Script | Current source version |
 |---|---|
 | Bazaar Thanker | 5.3.60 |
-| Company Intelligence | 1.8.64 |
+| Company Intelligence | 1.8.65 |
 | Enhancer Guard | 1.3.62 |
 | Script Hub | 1.9.119 |
 | SakaLuX Suite | 0.9.984 |
