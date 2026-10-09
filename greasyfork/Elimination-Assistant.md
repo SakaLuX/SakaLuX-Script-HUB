@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.51**
+**v1.3.52**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.3.51**
+- Canonical version: **v1.3.52**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -40,6 +40,12 @@
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
 ## Release history / Changelog
+
+### v1.3.52 — 2026-10-09
+- Added shared SakaLuX branded dialogs for informational, PRO and error notices.
+- Replaced existing blocking alert messages with styled notices.
+- Existing synchronous confirmations and prompts remain native for action safety.
+
 
 ### v1.3.51 — 2026-10-07
 - Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
