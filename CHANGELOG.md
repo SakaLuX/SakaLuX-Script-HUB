@@ -1,5 +1,12 @@
 # Changelog
 
+## License Manager v2 distribution — 2026-10-10
+
+- Hub v1.9.124: shared in-flight license verification broker, safe account switching, strict verification response validation, and faster FREE-status rechecks.
+- Bazaar Smart Pricer v1.1.25, Bazaar Thanker v5.3.67, Enhancer Guard v1.3.68, Mission Rewards v1.0.57, Market Intelligence v1.17.71, Elimination Assistant v1.3.61, Bounty Hunter v0.5.15, Stock Manager & Advisor v0.8.26: shared broker integration and clearer pending/unavailable license treatment.
+- Added license checking regression workflow and documented testing cases.
+- Remaining: browser-side access controls are bypassable by modified user scripts; server-side authorization is required for sensitive operations. Signing server groundwork is managed separately in SakaLuX-Website and client signature verification is not yet deployed.
+
 ## PRO preference suspension and automatic restoration — 2026-10-10
 
 The premium license now controls the effective state of premium-only functions. User-selected ON/OFF preferences remain stored separately from the effective license state. On verified PRO loss, gated actions stop or display OFF without erasing the selected option; on successful revalidation, modules restore their previous choices.
