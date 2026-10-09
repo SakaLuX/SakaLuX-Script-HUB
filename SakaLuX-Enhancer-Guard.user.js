@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.63
+// @version      1.3.64
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -665,7 +665,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.63';
+  let v = '1.3.64';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1000,7 +1000,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"}, { version: "1.3.63" }));
+  const SELF = Object.freeze(Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"}, { version: "1.3.64" }));
   const API_GLOBAL = "SakaLuXEnhancerGuard";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1064,7 +1064,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.63';
+    const VERSION = '1.3.64';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -2386,7 +2386,15 @@ hideProtectedSaleRows();
     let slxProAllowed=false,slxProExpiry=0;
 async function slxCheckProAccess(){
  let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
- if(!/^[a-zA-Z0-9]{16}$/.test(key)||typeof GM_xmlhttpRequest!=='function')return false;
+ if(!/^[a-zA-Z0-9]{16}$/.test(key))return false;
+ const hub=globalThis.__SakaLuXPremiumVerified;
+ if(hub?.key===key&&Date.now()-hub.at<5*60*1000&&hub.data?.premium_active===true){
+  const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
+  if(Number.isFinite(expiry)&&expiry>Date.now()&&hub.data.entitlements?.includes('enhancer_guard')){
+   slxProExpiry=expiry;return true;
+  }
+ }
+ if(typeof GM_xmlhttpRequest!=='function')return false;
  return new Promise(resolve=>GM_xmlhttpRequest({
   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
   headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
