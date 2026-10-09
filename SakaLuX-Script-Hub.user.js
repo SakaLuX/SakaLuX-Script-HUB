@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.112
+// @version      1.9.113
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -653,7 +653,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.112';
+    const VERSION = '1.9.113';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -3273,9 +3273,15 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         rows = rows.filter(row => category === 'ALL' || row.script.category === category);
         rows.sort((a, b) => {
             // Disabled modules belong below enabled modules regardless of update state.
-            const aOff=a.health.state!=='missing'&&!isModuleEnabled(a.script);
-            const bOff=b.health.state!=='missing'&&!isModuleEnabled(b.script);
-            if(aOff!==bOff)return aOff?1:-1;
+            const orderState=row=>{
+                if(row.health.state==='missing')return 2;
+                // Bounty Hunter and other locally toggled modules must obey the OFF switch
+                // even if an older runtime bridge still reports enabled.
+                const explicitlyOff=modulePower[row.script.id]===false;
+                return explicitlyOff||!isModuleEnabled(row.script)?1:0;
+            };
+            const aState=orderState(a),bState=orderState(b);
+            if(aState!==bState)return aState-bState;
             if (a.health.state === 'missing' && b.health.state !== 'missing') return -1;
             if (b.health.state === 'missing' && a.health.state !== 'missing') return 1;
             if (a.update.state === 'available' && b.update.state !== 'available') return -1;
@@ -3293,7 +3299,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const update = row.update;
         const installed = getInstalledVersion(script);
         const missing = health.state === 'missing';
-        const enabled = !missing && isModuleEnabled(script);
+        const enabled = !missing && modulePower[script.id] !== false && isModuleEnabled(script);
         const moduleApi = script.api();
         const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id) || (script.id === 'bazaar-smart-pricer' && installed));
         const primary = getPrimaryAction(script);
