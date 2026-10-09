@@ -1,5 +1,12 @@
 # Changelog
 
+## Execution-entry PRO review — 2026-10-10
+
+- Bounty Hunter v0.5.12: added PRO check within live target enrichment; FREE users retain basic target records.
+- Stock Manager & Advisor v0.8.23: PANIC preview now requires PRO, matching PANIC execution.
+- Confirmed backend premium entitlement response includes dedicated rights for all six freemium modules. Other function-level paths still require systematic integration testing; client-side checks are not tamper-resistant.
+- Updated scripts.json and GreasyFork descriptions for the changed modules.
+
 ## Market and Elimination syntax hotfix — 2026-10-10
 
 - Market Intelligence v1.17.65: fixed duplicate `async` on Museum scan PRO guard.
