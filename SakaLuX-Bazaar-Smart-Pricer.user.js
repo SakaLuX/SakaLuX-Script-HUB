@@ -2639,7 +2639,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return null;
     }
 
-    async function updateAllManagePrices() {
+    async async function updateAllManagePrices() {
  if(!(await globalThis.SakaLuXFreemium['bazaar-smart-pricer'].isPro())){globalThis.SakaLuXFreemium['bazaar-smart-pricer'].locked();return;}
         const updateButton=chipFillBtn;
         if(updateButton){updateButton.disabled=true;updateButton.style.opacity='0.5';updateButton.textContent='Loading…';}
@@ -2894,6 +2894,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     async function fillAllItems() {
+        if(!(await globalThis.SakaLuXFreemium['bazaar-smart-pricer'].isPro())){globalThis.SakaLuXFreemium['bazaar-smart-pricer'].locked();return false;}
         const fillButton = chipFillBtn;
         if (fillButton) { fillButton.disabled = true; fillButton.style.opacity = '0.5'; fillButton.textContent = 'Loading…'; }
         // Same as Update All: only the rows Torn has already rendered are
