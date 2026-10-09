@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.54
+// @version      5.3.55
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1969,7 +1969,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const BAZAAR_VERSION='5.3.42';
 
     function openSettingsPanel() {
-        if (!slxProAllowed) { slxShowProNotice(); return false; }
+        if (!slxProCurrent()) { slxShowProNotice(); return false; }
 
         if (!moduleEnabled) setEnabled(true);
         createSettings();
@@ -1988,7 +1988,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function startRuntime() {
-        if (!moduleEnabled || !slxProAllowed) return;
+        if (!moduleEnabled || !slxProCurrent()) return;
         if (location.href.includes('sid=events')) {
             createSettings();
             processBuyerGroups();
@@ -2011,7 +2011,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function setEnabled(value) {
-        if (value && !slxProAllowed) { slxShowProNotice(); return false; }
+        if (value && !slxProCurrent()) { slxShowProNotice(); return false; }
         moduleEnabled = Boolean(value);
         localStorage.setItem(ENABLED_KEY, moduleEnabled ? '1' : '0');
         if (moduleEnabled) startRuntime();
@@ -2104,23 +2104,24 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         detail: { version: BAZAAR_VERSION, enabled: moduleEnabled }
     }));
 
-    let slxProAllowed=false;
+    let slxProAllowed=false,slxProExpiry=0;
 async function slxCheckProAccess(){
  let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
  if(!/^[a-zA-Z0-9]{16}$/.test(key)||typeof GM_xmlhttpRequest!=='function')return false;
  return new Promise(resolve=>GM_xmlhttpRequest({
   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
   headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
-  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');resolve(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('bazaar_thanker')&&Number.isFinite(ends)&&ends>Date.now())}catch{resolve(false)}},
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('bazaar_thanker')&&Number.isFinite(ends)&&ends>Date.now());slxProExpiry=allowed?Math.min(ends,Date.now()+5*60*1000):0;resolve(allowed)}catch{resolve(false)}},
   onerror:()=>resolve(false),ontimeout:()=>resolve(false)
  }));
 }
+function slxProCurrent(){return slxProAllowed&&Date.now()<slxProExpiry;}
 function slxShowProNotice(){alert('This is a SakaLuX PRO module. Set your Torn API key in SakaLuX Hub and activate PRO at sakalux.ro/premium.html. FREE TRIAL: message SakaLuX [2380374].');}
     async function init() {
         slxProAllowed=await slxCheckProAccess();
         try { localStorage.setItem('SakaLuX_Installed_bazaar', BAZAAR_VERSION); } catch {}
         installHubBridge('bazaar', openSettingsPanel);
-        if (moduleEnabled && slxProAllowed) {
+        if (moduleEnabled && slxProCurrent()) {
             startRuntime();
             scheduleHubInstallPrompt();
         }
