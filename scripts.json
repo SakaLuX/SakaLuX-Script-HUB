@@ -485,18 +485,18 @@
         }
       ],
       "release": {
-        "version": "1.8.58",
+        "version": "1.8.59",
         "date": "2026-10-09",
         "notes": [
-          "Employee workspace remains FREE.",
-          "Director workspace now requires a verified active SakaLuX PRO license via the shared Torn API key.",
-          "Users without an active PRO license retain access to Employee tools."
+          "Director mode now requires the server-issued company_director entitlement.",
+          "Employee workspace continues to be free.",
+          "PRO entitlement is checked against the verified Torn identity and license expiry."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.58",
-      "detailsRevision": 15,
+      "version": "1.8.59",
+      "detailsRevision": 16,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -509,7 +509,7 @@
         "director"
       ],
       "accessEnforcement": "client_side_check",
-      "premiumNote": "Employee: FREE; Director: PRO. Client-side check active; server-side feature enforcement is still required to prevent bypass."
+      "premiumNote": "Employee FREE; Director PRO. Server-calculated entitlement is checked by client; complete code-level protection requires server-hosted features."
     },
     {
       "active": true,
