@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.56
+// @version      1.3.57
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -708,7 +708,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.56';
+  let v = '1.3.57';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1043,7 +1043,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.56" }));
+  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.57" }));
   const API_GLOBAL = "SakaLuXEliminationAssistant";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1105,7 +1105,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  */
 (() => {
 'use strict';
-const VERSION = '1.3.56';
+const VERSION = '1.3.57';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';
@@ -1296,7 +1296,7 @@ async function testFFKey(keyOverride=''){
   try{const target=state.players[0]?.id||2380374;await ffReq([target],key);state.ffAccessStatus='ok';state.ffAccessMessage='FFScouter access OK';updateAccessPanel();return true}
   catch(e){state.ffAccessStatus='error';state.ffAccessMessage=String(e?.message||e||'FFScouter request failed');updateAccessPanel();return false}
 }
-async async function calibrate(force=false){
+async function calibrate(force=false){
  if(!(await globalThis.SakaLuXFreemium['elimination-assistant'].isPro())){globalThis.SakaLuXFreemium['elimination-assistant'].locked();return state.my.total||0;}if(state.my.source==='manual'&&!force)return state.my.total;if(!force&&state.my.total&&Date.now()-Number(state.my.at||0)<900000)return state.my.total;const raw=await torn('user/battlestats');const x=raw?.battlestats??raw?.data?.battlestats??raw?.data??raw??{};const statVal=k=>{const v=x?.[k]??x?.battle_stats?.[k]??0;if(v&&typeof v==='object')return Number(v.value??v.amount??v.total??v.base??0)||0;return Number(v)||0};const apiTotal=Number(x?.total??x?.total_battlestats??0)||0;const total=apiTotal||['strength','defense','speed','dexterity'].reduce((sum,k)=>sum+statVal(k),0);if(!total)throw new Error('Battle stats endpoint replied, but no stat values were found. Check Torn API key access.');state.my={total,at:Date.now(),source:'Torn API'};save(K.my,state.my);apply();setStatus('Battle stats calibrated: '+fmtBS(total));return total}
 function renderTeamOptions(){const e=$('#slx-team');if(!e)return;e.innerHTML='<option value="">Team…</option>'+state.teams.map(t=>`<option value="${t.id}" ${t.id===state.teamId?'selected':''}>${esc(t.name)}</option>`).join('')}
 async function loadTeams(){const fresh=normTeams(await torn('torn/elimination'));if(fresh.length){state.teams=fresh;save(K.teams,state.teams)}else if(!state.teams.length){state.teamId=0;localStorage.removeItem(K.team);renderTeamOptions();throw new Error('Torn returned no Elimination teams. The saved team was cleared so an old team cannot be loaded silently. Refresh and try again.')}if(!state.teams.some(t=>t.id===state.teamId))state.teamId=state.teams[0]?.id||0;if(state.teamId)localStorage.setItem(K.team,String(state.teamId));renderTeamOptions()}
