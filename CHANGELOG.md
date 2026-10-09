@@ -1,5 +1,22 @@
 # Changelog
 
+## Release validation follow-up — 2026-10-09
+
+All 13 userscript sources were parsed successfully with JavaScript syntax validation, including the full 0.9.984 Suite source. This is a syntax check, not an execution or browser integration test.
+
+The following newer versions supersede the earlier release-documentation reconciliation, which remains historical:
+
+| Script | Current source version |
+|---|---|
+| Bazaar Thanker | 5.3.60 |
+| Company Intelligence | 1.8.62 |
+| Enhancer Guard | 1.3.62 |
+| Script Hub | 1.9.119 |
+| SakaLuX Suite | 0.9.984 |
+
+The four matching Greasy Fork Markdown release documents now contain current-version headers and changelog entries. GitHub Actions release-preflight completion and Greasy Fork remote synchronization were not independently verified.
+
+
 ## Release documentation reconciliation — 2026-10-09
 
 Current version sources are the userscript `@version` fields. Earlier entries below are retained as historical records, not overwritten.
