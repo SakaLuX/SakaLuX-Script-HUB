@@ -50,7 +50,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
-      "license": "All Rights Reserved"
+      "license": "All Rights Reserved",
+      "accessTier": "free"
     },
     {
       "active": true,
@@ -105,8 +106,8 @@
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
       "license": "All Rights Reserved",
       "accessTier": "pro",
-      "accessEnforcement": "pending_secure_pairing",
-      "premiumNote": "Bazaar Thanker will require a verified SakaLuX PRO license when the secure TornPDA pairing flow is released; the currently published userscript is not yet gated."
+      "accessEnforcement": "pending_server_side",
+      "premiumNote": "Bazaar Thanker is designated PRO; the current standalone userscript remains available until secure server-side premium features are launched."
     },
     {
       "active": true,
@@ -161,7 +162,8 @@
       "greasyForkId": "596672",
       "greasyForkUrl": "https://greasyfork.org/scripts/596672",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md",
-      "license": "MIT"
+      "license": "MIT",
+      "accessTier": "free"
     },
     {
       "active": true,
@@ -216,7 +218,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
-      "license": "All Rights Reserved"
+      "license": "All Rights Reserved",
+      "accessTier": "free"
     },
     {
       "active": true,
@@ -283,7 +286,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
-      "license": "All Rights Reserved"
+      "license": "All Rights Reserved",
+      "accessTier": "free"
     },
     {
       "active": true,
@@ -352,7 +356,8 @@
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
-      "greasyForkUrl": "https://greasyfork.org/scripts/598988"
+      "greasyForkUrl": "https://greasyfork.org/scripts/598988",
+      "accessTier": "free"
     },
     {
       "active": true,
@@ -441,7 +446,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
-      "license": "All Rights Reserved"
+      "license": "All Rights Reserved",
+      "accessTier": "free"
     },
     {
       "active": true,
@@ -493,7 +499,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
-      "license": "All Rights Reserved"
+      "license": "All Rights Reserved",
+      "accessTier": "free"
     },
     {
       "active": true,
@@ -552,7 +559,8 @@
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md",
-      "license": "All Rights Reserved"
+      "license": "All Rights Reserved",
+      "accessTier": "free"
     }
   ],
   "lastVerified": "2026-10-07",
