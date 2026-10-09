@@ -3,13 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.97**
+**v1.9.98**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v1.9.97**
+- Canonical version: **v1.9.98**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -41,17 +41,23 @@
 
 ## Release history / Changelog
 
-### v1.9.97 — 2026-10-09
+### v1.9.98 — 2026-10-09
+- Adds one-time Premium device pairing with SakaLuX.ro using GM storage.
+- Checks license status using a revocable device credential and server validation.
+- Keeps all installed scripts functioning in beta until the server-backed services are tested.
+
+
+### v1.9.98 — 2026-10-09
 - Shows Bazaar Thanker as PRO SOON in the Hub; current installs remain functional pending secure pairing.
 - Defines the future PRO catalog on SakaLuX.ro, without enabling payments.
 
 
-### v1.9.97 — 2026-10-09
+### v1.9.98 — 2026-10-09
 - Adds PREMIUM navigation to the account license status page on SakaLuX.ro.
 - Monthly billing is not active; existing modules remain free.
 
 
-### v1.9.97 — 2026-10-08
+### v1.9.98 — 2026-10-08
 - Adds WEBSITE navigation in the Hub toolbar.
 - Adds module-specific DOCS links to SakaLuX.ro, preserving local INFO/NEW controls.
 
