@@ -143,15 +143,17 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 38,
-      "version": "1.1.18",
+      "detailsRevision": 39,
+      "version": "1.1.19",
       "release": {
-        "version": "1.1.18",
-        "date": "2026-10-09",
+        "version": "1.1.19",
+        "date": "2026-10-10",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
+          "Bulk Pricing designated PRO.",
+          "Update All designated PRO.",
+          "Quick Fill designated PRO.",
+          "Safety features and baseline functionality remain FREE."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -160,7 +162,19 @@
       "greasyForkUrl": "https://greasyfork.org/scripts/596672",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md",
       "license": "MIT",
-      "accessTier": "free"
+      "accessTier": "mixed",
+      "freeFeatures": [
+        "Per-item Quick Add and Undo",
+        "Individual pricing",
+        "RW/bonus item safety controls"
+      ],
+      "proFeatures": [
+        "Bulk Pricing",
+        "Update All",
+        "Quick Fill"
+      ],
+      "accessEnforcement": "client_side_check",
+      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
     },
     {
       "active": true,
@@ -199,22 +213,35 @@
         }
       ],
       "release": {
-        "version": "1.0.52",
-        "date": "2026-10-09",
+        "version": "1.0.53",
+        "date": "2026-10-10",
         "notes": [
-          "Migrates the module's destructive-data reset confirmation to the shared SakaLuX popup.",
-          "Cancel keeps existing data unchanged."
+          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
+          "Advanced reward offer analysis designated PRO.",
+          "Weapon mod price history designated PRO.",
+          "Safety features and baseline functionality remain FREE."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.52",
-      "detailsRevision": 16,
+      "version": "1.0.53",
+      "detailsRevision": 17,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
       "license": "All Rights Reserved",
-      "accessTier": "free"
+      "accessTier": "mixed",
+      "freeFeatures": [
+        "Reward values",
+        "Value per credit",
+        "Owned ammunition"
+      ],
+      "proFeatures": [
+        "Advanced reward offer analysis",
+        "Weapon mod price history"
+      ],
+      "accessEnforcement": "client_side_check",
+      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
     },
     {
       "active": true,
@@ -265,23 +292,41 @@
         }
       ],
       "release": {
-        "version": "1.17.62",
-        "date": "2026-10-09",
+        "version": "1.17.63",
+        "date": "2026-10-10",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
+          "Bazaar Flip designated PRO.",
+          "Best Travel Run designated PRO.",
+          "Route Basket designated PRO.",
+          "Travel Planner designated PRO.",
+          "Museum designated PRO.",
+          "Safety features and baseline functionality remain FREE."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.62",
-      "detailsRevision": 26,
+      "version": "1.17.63",
+      "detailsRevision": 27,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
       "license": "All Rights Reserved",
-      "accessTier": "free"
+      "accessTier": "mixed",
+      "freeFeatures": [
+        "Market price context",
+        "BUY/WAIT indicators",
+        "Basic watchlist"
+      ],
+      "proFeatures": [
+        "Bazaar Flip",
+        "Best Travel Run",
+        "Route Basket",
+        "Travel Planner",
+        "Museum"
+      ],
+      "accessEnforcement": "client_side_check",
+      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
     },
     {
       "active": true,
@@ -331,12 +376,14 @@
         }
       ],
       "release": {
-        "version": "0.5.8",
-        "date": "2026-10-09",
+        "version": "0.5.9",
+        "date": "2026-10-10",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
+          "Full-board Scanner designated PRO.",
+          "FF/BS filtering designated PRO.",
+          "Smart Sort designated PRO.",
+          "Safety features and baseline functionality remain FREE."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -344,13 +391,24 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.8",
-      "detailsRevision": 17,
+      "version": "0.5.9",
+      "detailsRevision": 18,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
       "greasyForkUrl": "https://greasyfork.org/scripts/598988",
-      "accessTier": "free"
+      "accessTier": "mixed",
+      "freeFeatures": [
+        "Basic target list",
+        "Basic search and filtering"
+      ],
+      "proFeatures": [
+        "Full-board Scanner",
+        "FF/BS filtering",
+        "Smart Sort"
+      ],
+      "accessEnforcement": "client_side_check",
+      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
     },
     {
       "active": true,
@@ -423,22 +481,39 @@
         }
       ],
       "release": {
-        "version": "1.3.53",
-        "date": "2026-10-09",
+        "version": "1.3.54",
+        "date": "2026-10-10",
         "notes": [
-          "Migrates the module's destructive-data reset confirmation to the shared SakaLuX popup.",
-          "Cancel keeps existing data unchanged."
+          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
+          "SAFE/RISKY/SKIP recommendations designated PRO.",
+          "FFScouter designated PRO.",
+          "Calibration designated PRO.",
+          "Target learning designated PRO.",
+          "Safety features and baseline functionality remain FREE."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.53",
-      "detailsRevision": 17,
+      "version": "1.3.54",
+      "detailsRevision": 18,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
       "license": "All Rights Reserved",
-      "accessTier": "free"
+      "accessTier": "mixed",
+      "freeFeatures": [
+        "Elimination teams",
+        "Player search",
+        "Availability status"
+      ],
+      "proFeatures": [
+        "SAFE/RISKY/SKIP recommendations",
+        "FFScouter",
+        "Calibration",
+        "Target learning"
+      ],
+      "accessEnforcement": "client_side_check",
+      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
     },
     {
       "active": true,
@@ -540,26 +615,47 @@
         }
       ],
       "release": {
-        "version": "0.8.20",
-        "date": "2026-10-09",
+        "version": "0.8.21",
+        "date": "2026-10-10",
         "notes": [
-          "Added shared premium-style SakaLuX dialog component for notices and action failures.",
-          "Existing alert messages now open branded dialogs with accessible close control.",
-          "Legacy synchronous confirmation and prompt dialogs are retained until migrated to asynchronous action flows."
+          "Introduced mixed FREE/PRO access for the agreed advanced feature groups.",
+          "Financial Advisor designated PRO.",
+          "Technical Assistant designated PRO.",
+          "Portfolio Simulator designated PRO.",
+          "Smart Rebalance designated PRO.",
+          "PANIC floating button and execution designated PRO.",
+          "Safety features and baseline functionality remain FREE.",
+          "The PANIC execution function explicitly checks PRO before any trading operation."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.20",
-      "detailsRevision": 19,
+      "version": "0.8.21",
+      "detailsRevision": 20,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md",
       "license": "All Rights Reserved",
-      "accessTier": "free"
+      "accessTier": "mixed",
+      "freeFeatures": [
+        "Portfolio",
+        "Prices",
+        "Profit/loss",
+        "Stock benefits",
+        "Safety confirmations"
+      ],
+      "proFeatures": [
+        "Financial Advisor",
+        "Technical Assistant",
+        "Portfolio Simulator",
+        "Smart Rebalance",
+        "PANIC floating button and execution"
+      ],
+      "accessEnforcement": "client_side_check",
+      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
     }
   ],
-  "lastVerified": "2026-10-09",
+  "lastVerified": "2026-10-10",
   "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
 }
