@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.50
+// @version      5.3.51
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -628,7 +628,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '5.3.50';
+  let v = '5.3.51';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -963,7 +963,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.50" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.51" }));
   const API_GLOBAL = "SakaLuXBazaarThanker";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1488,6 +1488,67 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.body.appendChild(button);
     }
 
+    // Bazaar Sync: user-authorized device pairing; no Torn API key is transferred.
+    const SYNC_PAIR_KEY = 'sakalux_bazaar_sync_pair_v1';
+    let syncBusy = false;
+    let syncLastAttempt = 0;
+    function findVerifiedEventId(p) {
+        const container = p.closest('[data-event-id],[data-eventid],[data-id]') || p;
+        const possible = [container.getAttribute('data-event-id'),container.getAttribute('data-eventid')];
+        // Torn event IDs must be sourced from individual event metadata, never text or position.
+        for (const value of possible) if (/^\\d{4,30}$/.test(String(value||''))) return 'torn:'+value;
+        const anchor = container.querySelector('a[href*="eventID="],a[href*="eventId="],a[href*="event_id="]');
+        const match = anchor?.href?.match(/[?&#]event(?:ID|Id|_id)=(\\d{4,30})/);
+        return match ? 'torn:'+match[1] : null;
+    }
+    function ensureSyncControls() {
+        if (!moduleEnabled || !location.href.includes('sid=events') || document.getElementById('sakalux-bt-sync-controls')) return;
+        const root=document.createElement('div');
+        root.id='sakalux-bt-sync-controls';
+        root.style.cssText='position:fixed;right:14px;bottom:125px;z-index:999998;display:flex;gap:6px;flex-wrap:wrap;max-width:330px';
+        const pair=document.createElement('button'),sync=document.createElement('button'),status=document.createElement('span');
+        for (const btn of [pair,sync]) btn.style.cssText='background:#172235;color:#e9c778;border:1px solid #bb984a;border-radius:9px;padding:9px;cursor:pointer';
+        pair.textContent='Pair SakaLuX';sync.textContent='Sync Now';
+        status.style.cssText='width:100%;font:11px Arial;color:#e9c778;background:#111a26;padding:4px';
+        pair.addEventListener('click',()=>{
+            const token=window.prompt('Paste the pairing token from sakalux.ro Dashboard. Never paste a Torn API key here.');
+            if(token===null)return;
+            if(!/^[a-f0-9]{64}$/.test(token.trim())){status.textContent='Invalid pairing token.';return;}
+            localStorage.setItem(SYNC_PAIR_KEY,token.trim());
+            status.textContent='Paired locally. Tap Sync Now to send eligible unique events.';
+        });
+        sync.addEventListener('click',()=>{void syncVisibleEvents(status,true);});
+        root.append(pair,sync,status);document.body.appendChild(root);
+    }
+    async function syncVisibleEvents(status,manual=false) {
+        if(syncBusy || !moduleEnabled || !location.href.includes('sid=events'))return;
+        const token=localStorage.getItem(SYNC_PAIR_KEY);
+        if(!token){if(manual)status.textContent='Pair SakaLuX first.';return;}
+        if(!manual&&Date.now()-syncLastAttempt<120000)return;
+        syncLastAttempt=Date.now();
+        const events=new Map();
+        for(const p of getBazaarParagraphs()) {
+            const buyer=getBuyerFromEvent(p),purchase=parsePurchase(getCleanEventText(p));
+            const eventId=findVerifiedEventId(p);
+            if(!buyer||!purchase||!eventId)continue;
+            const buyerId=Number(buyer.id);
+            if(!Number.isSafeInteger(buyerId)||buyerId<1||!Number.isSafeInteger(purchase.qty)||purchase.qty<1||!Number.isSafeInteger(purchase.price)||purchase.price<0)continue;
+            events.set(eventId,{event_id:eventId,buyer_torn_id:buyerId,buyer_name:buyer.name.slice(0,100),items:purchase.qty,spent:purchase.price});
+        }
+        if(!events.size){status.textContent='No events with verified unique Torn event IDs found. Nothing uploaded.';return;}
+        syncBusy=true;let added=0,duplicates=0;
+        try{
+          const values=[...events.values()];
+          for(let i=0;i<values.length;i+=50){
+            const response=await fetch('https://sakalux.ro/api/bazaar-sync.php',{method:'POST',mode:'cors',credentials:'omit',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({events:values.slice(i,i+50)})});
+            const result=await response.json();
+            if(!response.ok||result.status!=='ok')throw new Error(String(result.status||response.status));
+            added+=Number(result.added||0);duplicates+=Number(result.duplicates||0);
+          }
+          status.textContent='Synced '+added+' new events; '+duplicates+' already recorded.';
+        }catch(e){status.textContent='Sync failed: '+String(e.message||e).slice(0,100);}
+        finally{syncBusy=false;}
+    }
     function isBigBuyer(group) {
         const settings = loadSettings();
         return group.totalItems >= Number(settings.bigBuyerItems || 0) ||
@@ -1752,6 +1813,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (!moduleEnabled || !location.href.includes('sid=events')) return;
         const groups = getBuyerGroups();
         ensureExportButton();
+        ensureSyncControls();
 
         document.querySelectorAll('.sakalux-bt-ui[data-buyer-id]').forEach(ui => {
             const xid = ui.dataset.buyerId;
