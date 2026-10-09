@@ -1,5 +1,12 @@
 # Changelog
 
+## Company Intelligence v1.8.66 — 2026-10-09
+
+- Director selection verifies active PRO before unlocking its mode; persisted Director choice resets until validated.
+- Network, timeout, HTTP and rate-limit failures no longer appear as a definitive statement that the subscription is inactive.
+- Replaced contradictory native alert with inline feedback; Employee stays free and private Torn company data still requires actual director permissions.
+- Synchronized the script version, `scripts.json` release notes and GreasyFork documentation.
+
 ## Company Intelligence v1.8.65 — 2026-10-09
 
 - Labeled the Company interface's two modes **EMPLOYEE · FREE** and **DIRECTOR · PRO**.
@@ -28,7 +35,7 @@ The following newer versions supersede the earlier release-documentation reconci
 | Script | Current source version |
 |---|---|
 | Bazaar Thanker | 5.3.60 |
-| Company Intelligence | 1.8.65 |
+| Company Intelligence | 1.8.66 |
 | Enhancer Guard | 1.3.62 |
 | Script Hub | 1.9.119 |
 | SakaLuX Suite | 0.9.984 |
