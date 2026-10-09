@@ -3203,6 +3203,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       }
       if(authorized&&settings.enabled)scheduleScan(false);
     }
+    window.addEventListener('SakaLuX:PremiumStatus',()=>{const panel=document.getElementById('sl-mi-overlay');if(panel)void restorePremiumSettingsUI(panel);});
     function removeNodes(selector){document.querySelectorAll(selector).forEach(n=>n.remove());}
     function cleanupLiveFeature(key){
         const map={
