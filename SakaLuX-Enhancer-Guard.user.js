@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.64
+// @version      1.3.65
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -665,7 +665,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.64';
+  let v = '1.3.65';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1000,7 +1000,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"}, { version: "1.3.64" }));
+  const SELF = Object.freeze(Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"}, { version: "1.3.65" }));
   const API_GLOBAL = "SakaLuXEnhancerGuard";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1064,7 +1064,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.64';
+    const VERSION = '1.3.65';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -2402,7 +2402,15 @@ async function slxCheckProAccess(){
   onerror:()=>resolve(false),ontimeout:()=>resolve(false)
  }));
 }
-function slxProCurrent(){return slxProAllowed&&Date.now()<slxProExpiry;}
+function slxProCurrent(){
+ const hub=globalThis.__SakaLuXPremiumVerified;
+ let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
+ if(hub?.key===key&&hub.data?.premium_active===true&&hub.data.entitlements?.includes('enhancer_guard')&&Date.now()-hub.at<5*60*1000){
+  const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
+  if(Number.isFinite(expiry)&&expiry>Date.now()){slxProAllowed=true;slxProExpiry=expiry}
+ }
+ return slxProAllowed&&Date.now()<slxProExpiry;
+}
 function slxShowProNotice(){
  const existing=document.getElementById('slx-pro-access-modal');if(existing)return;
  const backdrop=document.createElement('div');backdrop.id='slx-pro-access-modal';
