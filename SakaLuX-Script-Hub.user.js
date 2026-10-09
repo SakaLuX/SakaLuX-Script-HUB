@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.113
+// @version      1.9.114
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -653,7 +653,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.113';
+    const VERSION = '1.9.114';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2218,6 +2218,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             || { id: 'open', label: 'OPEN', icon: '↗', method: 'open' };
     }
 
+    function isBountyDisabledInStorage() {
+        try {
+            const raw=localStorage.getItem('SLX_BOUNTY_SETTINGS_V3');
+            if(!raw)return false;
+            const cfg=JSON.parse(raw);
+            return cfg&&cfg.enabled===false;
+        } catch { return false; }
+    }
+
+    function moduleIsOff(script) {
+        if(modulePower[script.id]===false)return true;
+        if(script.id==='bounty-hunter'&&isBountyDisabledInStorage())return true;
+        return !isModuleEnabled(script);
+    }
+
     function isModuleEnabled(script) {
         const api = script.api();
         try {
@@ -3278,7 +3293,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 // Bounty Hunter and other locally toggled modules must obey the OFF switch
                 // even if an older runtime bridge still reports enabled.
                 const explicitlyOff=modulePower[row.script.id]===false;
-                return explicitlyOff||!isModuleEnabled(row.script)?1:0;
+                return explicitlyOff||moduleIsOff(row.script)?1:0;
             };
             const aState=orderState(a),bState=orderState(b);
             if(aState!==bState)return aState-bState;
@@ -3299,7 +3314,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const update = row.update;
         const installed = getInstalledVersion(script);
         const missing = health.state === 'missing';
-        const enabled = !missing && modulePower[script.id] !== false && isModuleEnabled(script);
+        const enabled = !missing && !moduleIsOff(script);
         const moduleApi = script.api();
         const powerReady = Boolean((moduleApi && typeof moduleApi.setEnabled === 'function' && typeof moduleApi.isEnabled === 'function') || document.getElementById('sakalux-module-bridge-' + script.id) || (script.id === 'bazaar-smart-pricer' && installed));
         const primary = getPrimaryAction(script);
