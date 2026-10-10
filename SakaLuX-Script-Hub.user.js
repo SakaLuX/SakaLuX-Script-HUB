@@ -687,7 +687,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.127';
+    const VERSION = '1.9.128';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -1213,7 +1213,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.70",
+                    "version": "1.3.71",
                     "date": "2026-10-10",
                     "notes": [
                         "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
@@ -1222,7 +1222,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.70",
+                "version": "1.3.71",
                 "detailsRevision": 28,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
@@ -1267,7 +1267,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.69",
+                    "version": "5.3.70",
                     "date": "2026-10-10",
                     "notes": [
                         "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
@@ -1276,7 +1276,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.69",
+                "version": "5.3.70",
                 "detailsRevision": 32,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
@@ -1323,9 +1323,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
                 "detailsRevision": 47,
-                "version": "1.1.27",
+                "version": "1.1.28",
                 "release": {
-                    "version": "1.1.27",
+                    "version": "1.1.28",
                     "date": "2026-10-10",
                     "notes": [
                         "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
@@ -1389,7 +1389,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.60",
+                    "version": "1.0.61",
                     "date": "2026-10-10",
                     "notes": [
                         "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
@@ -1398,7 +1398,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.60",
+                "version": "1.0.61",
                 "detailsRevision": 23,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
@@ -1466,7 +1466,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.73",
+                    "version": "1.17.74",
                     "date": "2026-10-10",
                     "notes": [
                         "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
@@ -1475,7 +1475,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.73",
+                "version": "1.17.74",
                 "detailsRevision": 37,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
@@ -1545,7 +1545,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.5.18",
+                    "version": "0.5.19",
                     "date": "2026-10-10",
                     "notes": [
                         "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
@@ -1557,7 +1557,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
-                "version": "0.5.18",
+                "version": "0.5.19",
                 "detailsRevision": 26,
                 "license": "All Rights Reserved",
                 "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
@@ -1647,7 +1647,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.63",
+                    "version": "1.3.64",
                     "date": "2026-10-10",
                     "notes": [
                         "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
@@ -1656,7 +1656,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.63",
+                "version": "1.3.64",
                 "detailsRevision": 27,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
@@ -1711,7 +1711,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.72",
+                    "version": "1.8.73",
                     "date": "2026-10-10",
                     "notes": [
                         "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
@@ -1720,7 +1720,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.72",
+                "version": "1.8.73",
                 "detailsRevision": 27,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
