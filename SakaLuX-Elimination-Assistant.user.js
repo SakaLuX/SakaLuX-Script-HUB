@@ -18,7 +18,7 @@
 /* SakaLuX Premium Badges v2 — BEGIN */
 (()=>{
  'use strict';
- const MATCH=new RegExp("smart target|smart score|calibrat|ffscouter|target learning|record win|record loss|advanced target",'i');
+ const MATCH=new RegExp("smart target|smart score|calibrat|ffscouter|target learning|record win|record loss|advanced target|load ff|tactical",'i');
  const ROOT=new RegExp("slx-elim|slx-ea|elimination",'i');
  const STYLE_ID='slx-premium-badge-style';
  function decorate(){
@@ -49,7 +49,7 @@
    }
    if(el.querySelector(':scope > .slx-premium-badge'))continue;
    const label=String(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
-   if(!MATCH.test(label)||/^(?:OPEN PREMIUM|PRO|✦ PRO)$/i.test(label))continue;
+   if(!MATCH.test(label)||/^(?:OPEN PREMIUM|PRO|✦ PRO)$/i.test(label)||/(?:\bPRO\b|✦\s*PRO)/i.test(label))continue;
    const tag=document.createElement('span');tag.className='slx-premium-badge';tag.textContent='✦ PRO';tag.setAttribute('aria-hidden','true');
    if(el.tagName==='LABEL'&&el.querySelector('button'))continue;
    el.append(tag);
