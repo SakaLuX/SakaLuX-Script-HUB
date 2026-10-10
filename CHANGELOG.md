@@ -1,5 +1,10 @@
 # Changelog
 
+## Stock Manager v0.8.34 — TornPDA installed version detection (2026-10-10)
+
+- Fixed the canonical installed version fallback which still advertised v0.8.30 without GM_info.
+- Bumped Stock Manager to v0.8.34 and aligned the Hub offline registry and scripts.json.
+
 ## Script Hub v1.9.129 — GreasyFork parser fix (2026-10-10)
 
 - Fixes GreasyFork synchronization failure: `Uncaught SyntaxError: Private field '#sakalux' must be declared in an enclosing class` caused by raw CSS injected into JavaScript.
