@@ -11,10 +11,10 @@
 // @updateURL    https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // ==/UserScript==
-/* SakaLuX Premium Badges v1 — BEGIN */
+/* SakaLuX Premium Badges v2 — BEGIN */
 (()=>{
  'use strict';
- const MATCH=new RegExp("full.board|scan full|smart sort|lowest ff|lowest bs|ffscouter",'i');
+ const MATCH=new RegExp("full board|smart sort|lowest ff|lowest bs|live status|beatable only|safe ff|ffscouter",'i');
  const ROOT=new RegExp("slx-bh|bounty",'i');
  const STYLE_ID='slx-premium-badge-style';
  function decorate(){
@@ -24,16 +24,30 @@
    style.textContent='.slx-premium-badge{display:inline-flex!important;align-items:center!important;margin-inline-start:5px!important;padding:1px 5px!important;border:1px solid #bd9a4c!important;border-radius:5px!important;background:#372b14!important;color:#f9dc8d!important;font:800 10px/1.5 system-ui,sans-serif!important;letter-spacing:.035em!important;white-space:nowrap!important;vertical-align:middle!important;pointer-events:none!important}';
    (document.head||document.documentElement).appendChild(style);
   }
-  for(const el of document.querySelectorAll('button,[role="button"],[role="tab"],label')){
-   if(el.dataset.slxProBadgeChecked==='1')continue;
+  const selector='button,[role="button"],[role="tab"],label,select';
+  for(const el of document.querySelectorAll(selector)){
    if(el.closest('#sakalux-unified-dialog,#sakalux-hub,#sakalux-script-hub,.slx-dialog-shade'))continue;
-   const identity=(String(el.id||'')+' '+String(el.className||'')+' '+String(el.parentElement?.id||'')+' '+String(el.parentElement?.className||'')).toLowerCase();
-   if(!ROOT.test(identity))continue;
+   let node=el, inModule=false;
+   for(let i=0;node&&i<6;i++,node=node.parentElement){
+    const identity=String(node.id||'')+' '+String(typeof node.className==='string'?node.className:'');
+    if(ROOT.test(identity)){inModule=true;break}
+   }
+   if(!inModule)continue;
+   if(el.tagName==='SELECT'){
+     for(const option of el.options){
+      if(option.dataset.slxProOption==='1')continue;
+      const title=String(option.textContent||'').trim();
+      if(MATCH.test(title)&&!(/(?:✦\\s*)?PRO\\s*$/i).test(title)){
+       option.textContent=title+' · ✦ PRO';option.dataset.slxProOption='1';
+      }
+     }
+     continue;
+   }
+   if(el.querySelector(':scope > .slx-premium-badge'))continue;
    const label=String(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
-   if(!MATCH.test(label))continue;
-   el.dataset.slxProBadgeChecked='1';
-   if(el.querySelector('.slx-premium-badge'))continue;
+   if(!MATCH.test(label)||/^(?:OPEN PREMIUM|PRO|✦ PRO)$/i.test(label))continue;
    const tag=document.createElement('span');tag.className='slx-premium-badge';tag.textContent='✦ PRO';tag.setAttribute('aria-hidden','true');
+   if(el.tagName==='LABEL'&&el.querySelector('button'))continue;
    el.append(tag);
    if(!el.title)el.title='SakaLuX PRO feature';
   }
@@ -43,7 +57,7 @@
  const start=()=>{decorate();new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true})};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
-/* SakaLuX Premium Badges v1 — END */
+/* SakaLuX Premium Badges v2 — END */
 
 
 /* SakaLuX Freemium Control — BEGIN */
