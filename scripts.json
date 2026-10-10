@@ -34,18 +34,17 @@
         }
       ],
       "release": {
-        "version": "1.3.68",
+        "version": "1.3.69",
         "date": "2026-10-10",
         "notes": [
-          "License Manager v2: shared status broker reduces duplicate checks across modules.",
-          "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
-          "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.68",
-      "detailsRevision": 27,
+      "version": "1.3.69",
+      "detailsRevision": 28,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -89,18 +88,17 @@
         }
       ],
       "release": {
-        "version": "5.3.67",
+        "version": "5.3.68",
         "date": "2026-10-10",
         "notes": [
-          "License Manager v2: shared status broker reduces duplicate checks across modules.",
-          "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
-          "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.67",
-      "detailsRevision": 31,
+      "version": "5.3.68",
+      "detailsRevision": 32,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -145,15 +143,14 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 46,
-      "version": "1.1.25",
+      "detailsRevision": 47,
+      "version": "1.1.26",
       "release": {
-        "version": "1.1.25",
+        "version": "1.1.26",
         "date": "2026-10-10",
         "notes": [
-          "License Manager v2: shared status broker reduces duplicate checks across modules.",
-          "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
-          "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -213,17 +210,17 @@
         }
       ],
       "release": {
-        "version": "1.0.58",
+        "version": "1.0.59",
         "date": "2026-10-10",
         "notes": [
-          "Adds a visible ✦ PRO label to Weapon Mod Price Learning.",
-          "Existing FREE options and PRO entitlement checks are preserved."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.58",
-      "detailsRevision": 22,
+      "version": "1.0.59",
+      "detailsRevision": 23,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -290,18 +287,17 @@
         }
       ],
       "release": {
-        "version": "1.17.71",
+        "version": "1.17.72",
         "date": "2026-10-10",
         "notes": [
-          "License Manager v2: shared status broker reduces duplicate checks across modules.",
-          "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
-          "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.71",
-      "detailsRevision": 36,
+      "version": "1.17.72",
+      "detailsRevision": 37,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -370,11 +366,11 @@
         }
       ],
       "release": {
-        "version": "0.5.16",
+        "version": "0.5.17",
         "date": "2026-10-10",
         "notes": [
-          "Adds explicit ✦ PRO labels to premium sorting and Full Board / Beatable Only / Live Status controls.",
-          "Existing FREE options and PRO entitlement checks are preserved."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -382,8 +378,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.16",
-      "detailsRevision": 25,
+      "version": "0.5.17",
+      "detailsRevision": 26,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -472,18 +468,17 @@
         }
       ],
       "release": {
-        "version": "1.3.61",
+        "version": "1.3.62",
         "date": "2026-10-10",
         "notes": [
-          "License Manager v2: shared status broker reduces duplicate checks across modules.",
-          "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
-          "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.61",
-      "detailsRevision": 26,
+      "version": "1.3.62",
+      "detailsRevision": 27,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -537,17 +532,17 @@
         }
       ],
       "release": {
-        "version": "1.8.70",
+        "version": "1.8.71",
         "date": "2026-10-10",
         "notes": [
-          "Marks the Director mode selector with a clear ✦ PRO label.",
-          "Existing FREE options and PRO entitlement checks are preserved."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.70",
-      "detailsRevision": 26,
+      "version": "1.8.71",
+      "detailsRevision": 27,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -602,17 +597,17 @@
         }
       ],
       "release": {
-        "version": "0.8.27",
+        "version": "0.8.28",
         "date": "2026-10-10",
         "notes": [
-          "Marks Advisor, Rebalance and PANIC visibility controls with ✦ PRO.",
-          "Existing FREE options and PRO entitlement checks are preserved."
+          "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
+          "FREE controls stay visible and existing license checks and saved settings are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.27",
-      "detailsRevision": 26,
+      "version": "0.8.28",
+      "detailsRevision": 27,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
