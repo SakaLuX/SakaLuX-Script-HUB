@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.30**
+**v0.8.33**
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
