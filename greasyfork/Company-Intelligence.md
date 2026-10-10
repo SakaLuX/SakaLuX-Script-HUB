@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.70**
+**v1.8.71**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.8.70**
+- Canonical version: **v1.8.71**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,11 +32,16 @@
 
 ## Current release note
 
-**v1.8.70 — 2026-10-10**
-- Marks the Director mode selector with a clear ✦ PRO label.
-- Existing FREE options and PRO entitlement checks are preserved.
+**v1.8.71 — 2026-10-10**
+- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
+- FREE controls stay visible and existing license checks and saved settings are preserved.
 
 ## Release history / Changelog
+
+### v1.8.71 — 2026-10-10
+- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
+- FREE controls stay visible and existing license checks and saved settings are preserved.
+
 
 ### v1.8.70 — 2026-10-10
 - Marks the Director mode selector with a clear ✦ PRO label.
