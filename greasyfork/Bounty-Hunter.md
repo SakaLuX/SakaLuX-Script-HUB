@@ -1,7 +1,7 @@
 # SakaLuX Bounty Hunter
 
 ## Current version
-**v0.5.17**
+**v0.5.18**
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
@@ -51,6 +51,10 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 - FREE controls stay visible and existing license checks and saved settings are preserved.
 
 ## Release history / Changelog
+
+### v0.5.18 — 2026-10-10
+- Improved premium badge coverage while preserving FREE controls.
+
 
 ### v0.5.17 — 2026-10-10
 - PRO badge coverage extended to premium switches, buttons, labels and selection choices.
