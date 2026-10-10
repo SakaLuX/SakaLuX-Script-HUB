@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.62**
+**v1.3.63**
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -20,7 +20,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.3.62**
+- Canonical version: **v1.3.63**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -49,6 +49,10 @@
 - FREE controls stay visible and existing license checks and saved settings are preserved.
 
 ## Release history / Changelog
+
+### v1.3.63 — 2026-10-10
+- Improved premium badge coverage while preserving FREE controls.
+
 
 ### v1.3.62 — 2026-10-10
 - PRO badge coverage extended to premium switches, buttons, labels and selection choices.
