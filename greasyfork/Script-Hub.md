@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.126**
+**v1.9.128**
 
 ### Certificate verification diagnostics — 2026-10-10
 - Hub Settings now displays whether an Ed25519 certificate was received, whether its signature verified, and the signed certificate expiry.
