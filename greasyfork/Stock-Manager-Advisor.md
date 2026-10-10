@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.29**
+**v0.8.30**
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
@@ -13,7 +13,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v0.8.29**
+- Canonical version: **v0.8.30**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -43,6 +43,11 @@
 - FREE controls stay visible and existing license checks and saved settings are preserved.
 
 ## Release history / Changelog
+
+### v0.8.30 — 2026-10-10
+- Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.
+- The purchase information applies to users with or without active PRO. License enforcement rules are unchanged.
+
 
 ### v0.8.29 — 2026-10-10
 - Improved premium badge coverage while preserving FREE controls.
