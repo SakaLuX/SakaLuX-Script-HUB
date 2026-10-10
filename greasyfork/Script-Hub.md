@@ -3,7 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.124**
+**v1.9.125**
+
+### Certificate verification diagnostics — 2026-10-10
+- Hub Settings now displays whether an Ed25519 certificate was received, whether its signature verified, and the signed certificate expiry.
+- **VERIFY CERTIFICATE NOW** forces a fresh server license check. No API key or signed payload is displayed.
+- Unsigned PRO responses remain temporarily accepted pending live TornPDA verification; strict certificate enforcement is not yet enabled.
+
 
 ### License Manager v2 (2026-10-10)
 - Shared verification broker with time-limited licensing cache and network error handling.
@@ -14,7 +20,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.9.124**
+- Canonical version: **v1.9.125**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -39,14 +45,14 @@
 
 ## Current release note
 
-**v1.9.124 — 2026-10-10**
+**v1.9.125 — 2026-10-10**
 - Broadcasts verified premium entitlement status to installed SakaLuX modules.
 - Refreshes PRO status every five minutes while Torn is visible, including with Hub panel closed.
 - Updates the embedded module registry and release NEWS for license-sensitive preference restoration.
 
 ## Release history / Changelog
 
-### v1.9.124 — 2026-10-10
+### v1.9.125 — 2026-10-10
 - Broadcasts verified premium entitlement status to installed SakaLuX modules.
 - Refreshes PRO status every five minutes while Torn is visible, including with Hub panel closed.
 - Updates the embedded module registry and release NEWS for license-sensitive preference restoration.
