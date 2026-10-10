@@ -1,5 +1,22 @@
 # Changelog
 
+## Premium Xanax offer text — 2026-10-10
+
+- Updated all 9 userscripts' shared PRO dialogs to display **Send 1 Xanax for 7 days PRO** and a direct link to the recipient's Torn profile.
+- Updated the Script Hub Premium popup offer text for both active and inactive PRO states (Hub v1.9.127).
+- License validity checks, grants, and free/premium gates are unchanged.
+- Synchronized per-script release notes, scripts.json and GreasyFork documentation.
+
+- Enhancer Guard v1.3.71
+- Bazaar Thanker v5.3.70
+- Bazaar Smart Pricer v1.1.28
+- Mission Rewards v1.0.61
+- Market Intelligence v1.17.74
+- Bounty Hunter v0.5.19
+- Elimination Assistant v1.3.64
+- Company Intelligence v1.8.73
+- Stock Manager & Advisor v0.8.30
+
 ## Premium badge coverage v2 — 2026-10-10
 
 Expanded ✦ PRO indicators to premium buttons, setting labels, toggles, and select-menu options across all nine paid/mixed modules. Only premium-matched entries are tagged; FREE entries remain unmarked. Existing access checks and saved ON/OFF preferences are unchanged.
