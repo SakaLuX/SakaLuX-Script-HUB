@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.67**
+**v5.3.68**
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -20,7 +20,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v5.3.67**
+- Canonical version: **v5.3.68**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -37,11 +37,16 @@
 
 ## Current release note
 
-**v5.3.67 — 2026-10-10**
-- Paid buyer-thanking runtime suspends without PRO without modifying saved ON/OFF preference.
-- Automatically resumes previous enabled state after license verification.
+**v5.3.68 — 2026-10-10**
+- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
+- FREE controls stay visible and existing license checks and saved settings are preserved.
 
 ## Release history / Changelog
+
+### v5.3.68 — 2026-10-10
+- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
+- FREE controls stay visible and existing license checks and saved settings are preserved.
+
 
 ### v5.3.67 — 2026-10-10
 - Paid buyer-thanking runtime suspends without PRO without modifying saved ON/OFF preference.
