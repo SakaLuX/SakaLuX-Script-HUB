@@ -1,5 +1,22 @@
 # Changelog
 
+## Premium badge coverage v2 — 2026-10-10
+
+Expanded ✦ PRO indicators to premium buttons, setting labels, toggles, and select-menu options across all nine paid/mixed modules. Only premium-matched entries are tagged; FREE entries remain unmarked. Existing access checks and saved ON/OFF preferences are unchanged.
+
+- enhancer: v1.3.69
+- bazaar: v5.3.68
+- bazaar-smart-pricer: v1.1.26
+- mission-rewards: v1.0.59
+- market-intelligence: v1.17.72
+- bounty-hunter: v0.5.17
+- elimination-assistant: v1.3.62
+- company-intelligence: v1.8.71
+- stock-manager-advisor: v0.8.28
+
+JavaScript parser validation completed for changed source files. UI completeness and Greasy Fork publishing require runtime confirmation.
+
+
 ## Explicit PRO option badges — 2026-10-10
 
 - Mission Rewards v1.0.58: Weapon Mod Price Learning displays ✦ PRO.
