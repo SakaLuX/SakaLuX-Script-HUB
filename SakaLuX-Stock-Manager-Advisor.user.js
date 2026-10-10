@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.30
+// @version      0.8.31
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3265,6 +3265,38 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
       refreshInlinePanel();
     };
   }
+
+  // Handle Withdraw from a stable ancestor: TornPDA/SPA can replace button nodes.
+  // Capture once to prevent stale inline onclick handlers from swallowing user feedback.
+  document.addEventListener('click',event=>{
+    const button=event.target?.closest?.('#slx-withdraw, #slx-inline-withdraw');
+    if(!button || !document.contains(button)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const inline=button.id==='slx-inline-withdraw';
+    const input=inline ? $('#slx-inline-withdraw-value') : $('#slx-stock-withdraw');
+    const amount=parseAmount(input?.value);
+    const report=(message,kind='info')=>{
+      status(message,kind);
+      if(inline) inlineStatus(message,kind);
+    };
+    if(!Number.isFinite(amount)||amount<=0){
+      report('Withdraw: enter an amount greater than zero (e.g. 2m).','bad');
+      return;
+    }
+    if(S.tradeBusy){
+      report('Withdraw: another stock transaction is already running.','warn');
+      return;
+    }
+    report('Withdraw: checking holdings and preparing sale…','warn');
+    Promise.resolve().then(()=>withdrawCash(amount)).then(result=>{
+      report('Withdraw: sale submitted. Refreshing stock balance…','ok');
+      return syncAllApi().catch(error=>{
+        report('Withdraw submitted; portfolio refresh unavailable: '+String(error?.message||error),'warn');
+        refreshInlinePanel();
+      });
+    }).catch(error=>report('Withdraw failed: '+String(error?.message||error),'bad'));
+  },true);
 
   function openPanel() { style(); premiumStyle(); const p=panel(); normalizeStockPanelChrome(); const legacyApi=p.querySelector('#slx-stock-api')?.closest('.section'); if(legacyApi) legacyApi.style.setProperty('display','none','important'); p.dataset.open='1'; safeRender('Targets',refreshTargetSelect); safeRender('Portfolio',renderPortfolio); safeRender('Benefit Values',renderBenefitValues); safeRender('ROI Advisor',renderAdvisor); safeRender('Portfolio Optimizer',renderOptimizer); safeRender('Rebalance Preview',renderRebalancePreview); safeRender('Trade Assistant',renderTradeAssistant); safeRender('Transaction History',renderTransactionHistory); safeRender('Action Log',renderActionLog); safeRender('Advisor Suite',renderAdvisorSuiteV080); }
 
