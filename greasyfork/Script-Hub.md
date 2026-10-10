@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.125**
+**v1.9.126**
 
 ### Certificate verification diagnostics — 2026-10-10
 - Hub Settings now displays whether an Ed25519 certificate was received, whether its signature verified, and the signed certificate expiry.
@@ -20,7 +20,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.9.125**
+- Canonical version: **v1.9.126**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -51,6 +51,10 @@
 - Updates the embedded module registry and release NEWS for license-sensitive preference restoration.
 
 ## Release history / Changelog
+
+### v1.9.126 — 2026-10-10
+- Improved premium badge coverage while preserving FREE controls.
+
 
 ### v1.9.125 — 2026-10-10
 - Broadcasts verified premium entitlement status to installed SakaLuX modules.
