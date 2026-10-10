@@ -1,5 +1,23 @@
 # Changelog
 
+## Version registry and release audit — 2026-10-10
+
+- Script Hub **1.9.128**: synchronized internal version and offline registry; UPDATE remains a FREE maintenance action. Removed badge decorations inside the UPDATE control where identified.
+- Bounty Hunter: fixed stale runtime version **0.5.3** to **0.5.19** (metadata-only; not a behavioral change).
+- Stock Manager & Advisor: aligned remaining runtime/registry/documentation versions to **0.8.33**. Versions 0.8.31–0.8.33 address TornPDA Withdraw click reporting and the inline control `forEach` TypeError.
+- Updated the GreasyFork Markdown documentation current-version labels where stale. Added an audit release note for each managed add-on and the Hub. These repository notes do not automatically create GitHub Releases or publish to GreasyFork.
+- Public GreasyFork sync and installed TornPDA versions must be verified independently.
+
+- Enhancer Guard: **1.3.71** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+- Bazaar Thanker: **5.3.70** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+- Bazaar Smart Pricer: **1.1.28** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+- Mission Rewards: **1.0.61** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+- Market Intelligence: **1.17.74** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+- Bounty Hunter: **0.5.19** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+- Elimination Assistant: **1.3.64** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+- Company Intelligence: **1.8.73** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+- Stock Manager & Advisor: **0.8.33** (source, internal runtime, registry, Hub offline registry, release metadata and documentation checked)
+
 ## Premium Xanax offer text — 2026-10-10
 
 - Updated all 9 userscripts' shared PRO dialogs to display **Send 1 Xanax for 7 days PRO** and a direct link to the recipient's Torn profile.
