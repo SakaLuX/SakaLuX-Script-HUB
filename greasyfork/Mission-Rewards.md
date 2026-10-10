@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.58**
+**v1.0.59**
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
@@ -20,7 +20,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.0.58**
+- Canonical version: **v1.0.59**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md
@@ -40,11 +40,16 @@
 
 ## Current release note
 
-**v1.0.58 — 2026-10-10**
-- Adds a visible ✦ PRO label to Weapon Mod Price Learning.
-- Existing FREE options and PRO entitlement checks are preserved.
+**v1.0.59 — 2026-10-10**
+- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
+- FREE controls stay visible and existing license checks and saved settings are preserved.
 
 ## Release history / Changelog
+
+### v1.0.59 — 2026-10-10
+- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
+- FREE controls stay visible and existing license checks and saved settings are preserved.
+
 
 ### v1.0.58 — 2026-10-10
 - Adds a visible ✦ PRO label to Weapon Mod Price Learning.
