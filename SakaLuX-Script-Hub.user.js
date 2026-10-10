@@ -3237,6 +3237,26 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             Number.isSafeInteger(Number(d.user?.id))&&Number(d.user.id)>0&&
             Array.isArray(d.entitlements)&&d.entitlements.every(e=>typeof e==='string')&&
             (!d.premium_active||(Number.isFinite(expiryMs(d))&&expiryMs(d)>Date.now()));
+        const LICENSE_PUBLIC_KEY_B64='Hw+1h/0NZwOLEmJ+sbwgcKBIpJrgE/5kmjGnA7hnrhM='; // Pin trusted server public key before enabling certificate checks.
+        async function slxVerifySignedGrant(data){
+            const cert=data.signed_certificate;
+            if(!cert)return false;
+            if(!LICENSE_PUBLIC_KEY_B64)throw Error('license_public_key_not_pinned');
+            const decode=x=>Uint8Array.from(atob(x.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-x.length%4)%4)),c=>c.charCodeAt(0));
+            const publicKey=decode(LICENSE_PUBLIC_KEY_B64);
+            const signature=decode(cert.signature);
+            const payloadBytes=decode(cert.payload);
+            if(cert.format!=='slx-ed25519-v1'||publicKey.length!==32||signature.length!==64)throw Error('invalid_certificate_format');
+            const key=await crypto.subtle.importKey('raw',publicKey,{name:'Ed25519'},false,['verify']);
+            if(!await crypto.subtle.verify('Ed25519',key,signature,payloadBytes))throw Error('invalid_certificate_signature');
+            const claim=JSON.parse(new TextDecoder().decode(payloadBytes));
+            const now=Math.floor(Date.now()/1000);
+            if(claim.issuer!=='sakalux.ro'||claim.v!==1||claim.subject!==Number(data.user?.id)||
+                !Number.isInteger(claim.iat)||!Number.isInteger(claim.exp)||
+                claim.exp<=now||claim.iat>now+30||claim.exp>claim.iat+300||
+                JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))throw Error('invalid_certificate_claims');
+            return true;
+        }
         function clear(){currentKey='';cached=null;cachedAt=0;inFlight=null;}
         function invalidate(){cached=null;cachedAt=0;}
         function snapshot(){return usable(cached,cachedAt)?{state:cached.premium_active?'pro':'free',checkedAt:cachedAt,expiresAt:cached.expires_at||null}:{state:'unknown'};}
@@ -3252,11 +3272,12 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
                     headers:{'Content-Type':'application/json','Accept':'application/json'},
                     data:JSON.stringify({api_key:requestKey}),timeout:15000,
-                    onload:r=>{
+                    onload:async r=>{
                         try{
                             const d=JSON.parse(r.responseText||'{}');
                             if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);
                             if(!validResponse(d))throw Error('invalid_license_response');
+                            if(d.premium_active&&d.signed_certificate)await slxVerifySignedGrant(d);
                             if(currentKey!==requestKey){reject(Error('identity_changed'));return;}
                             cached=d;cachedAt=Date.now();
                             resolve(d);
