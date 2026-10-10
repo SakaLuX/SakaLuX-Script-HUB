@@ -1,7 +1,7 @@
 # SakaLuX Bounty Hunter
 
 ## Current version
-**v0.5.15**
+**v0.5.16**
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
@@ -46,11 +46,16 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.15 — 2026-10-10**
-- Premium full-board, enrichment, smart/FF/BS sorting and advanced filters are inactive without PRO.
-- Original premium choices are preserved and used again once entitlement is verified.
+**v0.5.16 — 2026-10-10**
+- Adds explicit ✦ PRO labels to premium sorting and Full Board / Beatable Only / Live Status controls.
+- Existing FREE options and PRO entitlement checks are preserved.
 
 ## Release history / Changelog
+
+### v0.5.16 — 2026-10-10
+- Adds explicit ✦ PRO labels to premium sorting and Full Board / Beatable Only / Live Status controls.
+- Existing FREE options and PRO entitlement checks are preserved.
+
 
 ### v0.5.15 — 2026-10-10
 - Premium full-board, enrichment, smart/FF/BS sorting and advanced filters are inactive without PRO.
