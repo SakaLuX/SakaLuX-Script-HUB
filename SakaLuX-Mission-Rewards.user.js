@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Mission Rewards
 // @namespace    sakalux.mission.rewards
-// @version      1.0.60
+// @version      1.0.61
 // @description  Advanced Mission Shop reward information, value per credit, ammo ownership and weapon mod tracking for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -107,7 +107,7 @@
      globalThis.SakaLuXDialog?.notice?.('PRO verification temporarily unavailable. Please retry shortly.','warning');
      return;
    }
-   if(globalThis.SakaLuXDialog?.show)globalThis.SakaLuXDialog.show({title:'SakaLuX PRO',type:'pro',message:'This advanced feature requires active SakaLuX PRO. Basic features remain FREE. 1 Xanax = 7 days PRO.',actions:[{label:'CLOSE'},{label:'OPEN PREMIUM',primary:true,onClick:()=>location.assign('https://sakalux.ro/premium.html')}]});
+   if(globalThis.SakaLuXDialog?.show)globalThis.SakaLuXDialog.show({title:'SakaLuX PRO',type:'pro',message:'This advanced feature requires active SakaLuX PRO. Basic features remain FREE. Send 1 Xanax for 7 days PRO.',actions:[{label:'CLOSE'},{label:'OPEN PREMIUM',primary:true,onClick:()=>location.assign('https://sakalux.ro/premium.html')}]});
    else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
  }
 
@@ -159,7 +159,7 @@
     const body=document.createElement('div');body.className='slx-dialog-message';body.textContent=esc(message);
     const foot=document.createElement('div');foot.className='slx-dialog-actions';
     for(const action of actions||[{label:'CLOSE',primary:true}]){const b=document.createElement('button');b.type='button';b.className='slx-dialog-btn'+(action.primary?' primary':'');b.textContent=action.label||'OK';b.onclick=()=>{shade.remove();action.onClick?.()};foot.append(b)}
-    panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
+    if(type==='pro'){const link=document.createElement('a');link.href='https://www.torn.com/profiles.php?XID=2380374';link.target='_blank';link.rel='noopener noreferrer';link.textContent='Send 1 Xanax for 7 days PRO → SakaLuX [2380374] ↗';link.style.cssText='display:block;margin:10px 20px;color:#e9c779;font-weight:700;text-decoration:underline';panel.append(head,body,link,foot)}else panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
     shade.addEventListener('click',e=>{if(e.target===shade)shade.remove()});return shade;
   }
   function notice(message,type){const m=esc(message);return show({title:/error|failed|unavailable/i.test(m)?'Action failed':/pro|premium|license/i.test(m)?'SakaLuX PRO':'SakaLuX',message:m,type:type||(/error|failed|unavailable/i.test(m)?'error':/pro|premium|license/i.test(m)?'pro':'info')})}
@@ -783,7 +783,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.0.60';
+  let v = '1.0.61';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1118,7 +1118,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"}, { version: "1.0.60" }));
+  const SELF = Object.freeze(Object.assign({"id":"mission-rewards","name":"Missions","icon":"🎯","selector":"","fallback":"https://www.torn.com/page.php?sid=missions"}, { version: "1.0.61" }));
   const API_GLOBAL = "SakaLuXMissionRewards";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1182,7 +1182,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.0.60';
+    const VERSION = '1.0.61';
     const PDA_KEY = '###PDA-APIKEY###';
     const MISSIONS_URL = 'https://www.torn.com/page.php?sid=missions';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
