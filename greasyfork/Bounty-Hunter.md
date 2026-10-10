@@ -1,7 +1,7 @@
 # SakaLuX Bounty Hunter
 
 ## Current version
-**v0.5.18**
+**v0.5.19**
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
@@ -51,6 +51,11 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 - FREE controls stay visible and existing license checks and saved settings are preserved.
 
 ## Release history / Changelog
+
+### v0.5.19 — 2026-10-10
+- Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.
+- The purchase information applies to users with or without active PRO. License enforcement rules are unchanged.
+
 
 ### v0.5.18 — 2026-10-10
 - Improved premium badge coverage while preserving FREE controls.
