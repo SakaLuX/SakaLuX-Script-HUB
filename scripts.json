@@ -213,18 +213,17 @@
         }
       ],
       "release": {
-        "version": "1.0.57",
+        "version": "1.0.58",
         "date": "2026-10-10",
         "notes": [
-          "License Manager v2: shared status broker reduces duplicate checks across modules.",
-          "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
-          "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
+          "Adds a visible ✦ PRO label to Weapon Mod Price Learning.",
+          "Existing FREE options and PRO entitlement checks are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.57",
-      "detailsRevision": 21,
+      "version": "1.0.58",
+      "detailsRevision": 22,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -371,12 +370,11 @@
         }
       ],
       "release": {
-        "version": "0.5.15",
+        "version": "0.5.16",
         "date": "2026-10-10",
         "notes": [
-          "License Manager v2: shared status broker reduces duplicate checks across modules.",
-          "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
-          "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
+          "Adds explicit ✦ PRO labels to premium sorting and Full Board / Beatable Only / Live Status controls.",
+          "Existing FREE options and PRO entitlement checks are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -384,8 +382,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.15",
-      "detailsRevision": 24,
+      "version": "0.5.16",
+      "detailsRevision": 25,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -539,17 +537,17 @@
         }
       ],
       "release": {
-        "version": "1.8.69",
+        "version": "1.8.70",
         "date": "2026-10-10",
         "notes": [
-          "Director mode falls back to Employee when PRO is inactive without deleting the saved Director preference.",
-          "Revalidates and restores the preferred Director mode automatically when entitlement becomes active."
+          "Marks the Director mode selector with a clear ✦ PRO label.",
+          "Existing FREE options and PRO entitlement checks are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.69",
-      "detailsRevision": 25,
+      "version": "1.8.70",
+      "detailsRevision": 26,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -604,18 +602,17 @@
         }
       ],
       "release": {
-        "version": "0.8.26",
+        "version": "0.8.27",
         "date": "2026-10-10",
         "notes": [
-          "License Manager v2: shared status broker reduces duplicate checks across modules.",
-          "Improved pending/unavailable handling to avoid false PRO purchase prompts; account-switch isolation and entitlement expiry safeguards.",
-          "Security note: client-side checks are not tamper-proof; server-side enforcement remains required."
+          "Marks Advisor, Rebalance and PANIC visibility controls with ✦ PRO.",
+          "Existing FREE options and PRO entitlement checks are preserved."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.26",
-      "detailsRevision": 25,
+      "version": "0.8.27",
+      "detailsRevision": 26,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
