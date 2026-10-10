@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.70
+// @version      1.3.71
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -89,7 +89,7 @@
     const body=document.createElement('div');body.className='slx-dialog-message';body.textContent=esc(message);
     const foot=document.createElement('div');foot.className='slx-dialog-actions';
     for(const action of actions||[{label:'CLOSE',primary:true}]){const b=document.createElement('button');b.type='button';b.className='slx-dialog-btn'+(action.primary?' primary':'');b.textContent=action.label||'OK';b.onclick=()=>{shade.remove();action.onClick?.()};foot.append(b)}
-    panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
+    if(type==='pro'){const link=document.createElement('a');link.href='https://www.torn.com/profiles.php?XID=2380374';link.target='_blank';link.rel='noopener noreferrer';link.textContent='Send 1 Xanax for 7 days PRO → SakaLuX [2380374] ↗';link.style.cssText='display:block;margin:10px 20px;color:#e9c779;font-weight:700;text-decoration:underline';panel.append(head,body,link,foot)}else panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
     shade.addEventListener('click',e=>{if(e.target===shade)shade.remove()});return shade;
   }
   function notice(message,type){const m=esc(message);return show({title:/error|failed|unavailable/i.test(m)?'Action failed':/pro|premium|license/i.test(m)?'SakaLuX PRO':'SakaLuX',message:m,type:type||(/error|failed|unavailable/i.test(m)?'error':/pro|premium|license/i.test(m)?'pro':'info')})}
@@ -713,7 +713,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.70';
+  let v = '1.3.71';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1048,7 +1048,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"}, { version: "1.3.70" }));
+  const SELF = Object.freeze(Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"}, { version: "1.3.71" }));
   const API_GLOBAL = "SakaLuXEnhancerGuard";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1112,7 +1112,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.70';
+    const VERSION = '1.3.71';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -2486,7 +2486,7 @@ function slxShowProNotice(){
  const title=document.createElement('h2');title.textContent='✦ SakaLuX PRO';title.style.cssText='font-size:21px;font-weight:900;color:#f1d28b;margin:0 0 8px';
  const badge=document.createElement('div');badge.textContent='PRO ACCESS REQUIRED';badge.style.cssText='display:inline-block;border:1px solid #836a3d;border-radius:20px;background:#352c1d;color:#f1d28b;padding:6px 10px;font-size:11px;font-weight:800';
  const desc=document.createElement('p');desc.textContent='This module requires an active PRO subscription. Add your Torn API key in SakaLuX Hub Settings to verify your account.';desc.style.cssText='font-size:13px;line-height:1.6;color:#c8d7e9';
- const plan=document.createElement('div');plan.textContent='1 Xanax = 7 days PRO';plan.style.cssText='border:1px solid #43536a;border-radius:12px;padding:13px;background:#152236;font-weight:800;text-align:center;margin:15px 0;color:#f4dc9c';
+ const plan=document.createElement('div');plan.textContent='Send 1 Xanax for 7 days PRO';plan.style.cssText='border:1px solid #43536a;border-radius:12px;padding:13px;background:#152236;font-weight:800;text-align:center;margin:15px 0;color:#f4dc9c';
  const trial=document.createElement('a');trial.href='https://www.torn.com/profiles.php?XID=2380374';trial.target='_blank';trial.rel='noopener noreferrer';trial.textContent='Want a FREE TRIAL? Message SakaLuX [2380374] ↗';trial.style.cssText='display:block;color:#f2d38a;font-size:13px;line-height:1.5;margin:12px 0 18px;text-decoration:underline';
  const buttons=document.createElement('div');buttons.style.cssText='display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap';
  const open=document.createElement('button');open.type='button';open.textContent='OPEN PREMIUM';open.style.cssText='border:1px solid #4b80bb;border-radius:10px;background:#285385;color:white;padding:11px 13px;font-weight:800';open.onclick=()=>window.open('https://sakalux.ro/premium.html','_blank','noopener,noreferrer');
