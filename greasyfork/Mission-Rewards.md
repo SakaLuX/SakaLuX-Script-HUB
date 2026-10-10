@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.60**
+**v1.0.61**
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
@@ -20,7 +20,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.0.60**
+- Canonical version: **v1.0.61**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md
@@ -45,6 +45,11 @@
 - Avoids duplicate PRO badges without changing FREE options or license checks.
 
 ## Release history / Changelog
+
+### v1.0.61 — 2026-10-10
+- Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.
+- The purchase information applies to users with or without active PRO. License enforcement rules are unchanged.
+
 
 ### v1.0.60 — 2026-10-10
 - Expands visible ✦ PRO badge matching to cover premium controls and available selection choices.
