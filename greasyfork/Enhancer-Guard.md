@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.69**
+**v1.3.70**
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -20,7 +20,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.3.69**
+- Canonical version: **v1.3.70**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -40,11 +40,16 @@
 
 ## Current release note
 
-**v1.3.69 — 2026-10-10**
-- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
-- FREE controls stay visible and existing license checks and saved settings are preserved.
+**v1.3.70 — 2026-10-10**
+- Expands visible ✦ PRO badge matching to cover premium controls and available selection choices.
+- Avoids duplicate PRO badges without changing FREE options or license checks.
 
 ## Release history / Changelog
+
+### v1.3.70 — 2026-10-10
+- Expands visible ✦ PRO badge matching to cover premium controls and available selection choices.
+- Avoids duplicate PRO badges without changing FREE options or license checks.
+
 
 ### v1.3.69 — 2026-10-10
 - PRO badge coverage extended to premium switches, buttons, labels and selection choices.
