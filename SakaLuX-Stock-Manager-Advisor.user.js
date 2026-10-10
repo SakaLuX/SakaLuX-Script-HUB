@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.32
+// @version      0.8.33
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2723,7 +2723,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const premium=new Set(['advisor','rebalance','panic']);
     const active=globalThis.SakaLuXFreemium?.['stock-manager-advisor']?.isActive?.()===true;
     Object.entries(map).forEach(([k,sel])=>{const el=$(sel,card);if(!el)return;el.hidden=!pref[k];if(premium.has(k)){el.dataset.slxProLocked=String(!active);if(!active)el.title='SakaLuX PRO required — preference saved';else el.removeAttribute('title');}});
-    $('[data-inline-button]',card).forEach(cb=>{if(premium.has(cb.dataset.inlineButton))cb.checked=active&&Boolean(pref[cb.dataset.inlineButton]);});
+    $$('[data-inline-button]',card).forEach(cb=>{if(premium.has(cb.dataset.inlineButton))cb.checked=active&&Boolean(pref[cb.dataset.inlineButton]);});
   }
 
   function openPanelAt(selector) {
@@ -2797,7 +2797,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const ho=$('#slx-history-open',card); if(ho) ho.onclick=()=>{openPanel();setTimeout(()=>$('#slx-stock-tx-history')?.scrollIntoView({behavior:'smooth',block:'center'}),50);};
     const compactBtn=$('#slx-inline-compact',card); if(compactBtn){const syncCompact=()=>{const on=bool(K.compactMode,false);card.dataset.compact=on?'1':'0';compactBtn.dataset.active=on?'1':'0';compactBtn.textContent=on?'Compact ✓':'Compact';};syncCompact();compactBtn.onclick=()=>{set(K.compactMode,bool(K.compactMode,false)?'0':'1');syncCompact();renderInlineWorkspace(get(K.inlineTab,''));};}
     $('#slx-inline-save-presets',card).onclick=()=>{const raw=$('#slx-inline-preset-input',card).value;set(K.inlinePresets,raw);renderInlinePresetButtons(card);inlineStatus('Withdrawal presets saved.','ok');};
-    $('[data-inline-button]',card).forEach(cb=>{
+    $$('[data-inline-button]',card).forEach(cb=>{
       const key=cb.dataset.inlineButton,premium=new Set(['advisor','rebalance','panic']);
       const guard=globalThis.SakaLuXFreemium?.['stock-manager-advisor'];
       cb.checked=!!inlineButtonPrefs()[key]&&(!premium.has(key)||guard?.isActive?.());
