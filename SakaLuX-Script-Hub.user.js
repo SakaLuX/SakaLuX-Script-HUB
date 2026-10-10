@@ -3229,6 +3229,9 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     const slxLicenseBroker=(()=>{
         const MAX_AGE=5*60*1000;
         let currentKey='',cached=null,cachedAt=0,inFlight=null;
+        let diagnostic={state:'not_checked',received:false,verified:false,expiresAt:null,checkedAt:null};
+        const diag=()=>({...diagnostic});
+        const updateDiag=(patch)=>{diagnostic={...diagnostic,...patch,checkedAt:Date.now()};};
         const expiryMs=d=>Date.parse(String(d?.expires_at||'').replace(' ','T')+'Z');
         // Cache FREE briefly so newly granted subscriptions become visible promptly.
         const usable=(d,at)=>!!d&&Date.now()-at<(d.premium_active?MAX_AGE:30*1000)&&
@@ -3257,12 +3260,12 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))throw Error('invalid_certificate_claims');
             return true;
         }
-        function clear(){currentKey='';cached=null;cachedAt=0;inFlight=null;}
+        function clear(){currentKey='';cached=null;cachedAt=0;inFlight=null;diagnostic={state:'not_checked',received:false,verified:false,expiresAt:null,checkedAt:null};}
         function invalidate(){cached=null;cachedAt=0;}
         function snapshot(){return usable(cached,cachedAt)?{state:cached.premium_active?'pro':'free',checkedAt:cachedAt,expiresAt:cached.expires_at||null}:{state:'unknown'};}
         async function check(key,{force=false}={}){
-            if(!/^[A-Za-z0-9]{16}$/.test(key))return {status:'invalid_key',premium_active:false,entitlements:[]};
-            if(currentKey!==key){currentKey=key;cached=null;cachedAt=0;inFlight=null;}
+            if(!/^[A-Za-z0-9]{16}$/.test(key)){updateDiag({state:'invalid_key',received:false,verified:false,expiresAt:null});return {status:'invalid_key',premium_active:false,entitlements:[]};}
+            if(currentKey!==key){currentKey=key;cached=null;cachedAt=0;inFlight=null;updateDiag({state:'checking',received:false,verified:false,expiresAt:null});}
             if(!force&&usable(cached,cachedAt))return cached;
             if(inFlight)return inFlight;
             if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
@@ -3277,11 +3280,13 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                             const d=JSON.parse(r.responseText||'{}');
                             if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);
                             if(!validResponse(d))throw Error('invalid_license_response');
-                            if(d.premium_active&&d.signed_certificate)await slxVerifySignedGrant(d);
+                            let verified=false;
+                            if(d.premium_active&&d.signed_certificate)verified=await slxVerifySignedGrant(d);
                             if(currentKey!==requestKey){reject(Error('identity_changed'));return;}
                             cached=d;cachedAt=Date.now();
+                            updateDiag({state:d.premium_active?(verified?'verified':'unsigned'):'free',received:!!d.signed_certificate,verified,expiresAt:verified?new Date(JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(d.signed_certificate.payload.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-d.signed_certificate.payload.length%4)%4)),c=>c.charCodeAt(0)))).exp*1000).toISOString():null});
                             resolve(d);
-                        }catch(e){reject(e);}
+                        }catch(e){if(currentKey===requestKey)updateDiag({state:'verification_error',received:false,verified:false,expiresAt:null});reject(e);}
                     },
                     onerror:()=>reject(Error('network_unavailable')),
                     ontimeout:()=>reject(Error('timeout'))
@@ -3290,7 +3295,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             inFlight=p;
             try{return await p}finally{if(inFlight===p)inFlight=null;}
         }
-        return Object.freeze({check,clear,invalidate,snapshot});
+        return Object.freeze({check,clear,invalidate,snapshot,diagnostics:diag});
     })();
     globalThis.SakaLuXLicenseBroker=slxLicenseBroker;
 
@@ -3774,8 +3779,21 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             <div class="slh-settings-pair"><div class="slh-setting">Fallback button position<select id="slhs-position"><option value="top-right">Top right</option><option value="middle-right">Middle right</option><option value="bottom-right">Bottom right</option><option value="top-left">Top left</option></select></div><div class="slh-setting">Language<select id="slhs-language">${Object.entries(LOCALES).map(([code,locale])=>`<option value="${escapeHtml(code)}">${escapeHtml(locale.label)}</option>`).join('')}</select></div></div>
             <div class="slh-setting">Fallback button size: <b id="slhs-size-label">${settings.buttonSize}px</b><input id="slhs-size" type="range" min="38" max="64" step="2" value="${settings.buttonSize}"></div>
             <div class="slh-setting"><b>🔑 SHARED SAKALUX TORN API KEY</b><div style="margin-top:4px;color:#8fa0b3">One key for Enhancer Guard, Mission Rewards, Market Intelligence and Elimination Assistant. Bazaar Thanker does not require a Torn API key.</div><div id="slhs-api-status" style="margin-top:6px;color:${getSharedApiKey() ? '#72d6a2' : '#e7c675'}">${getSharedApiKey() ? '✅ Shared key saved' : '⚠️ No shared key saved'}</div><input id="slhs-api-key" type="password" autocomplete="off" placeholder="Paste the newly created Torn API key"><button class="slh-big-btn update" id="slhs-api-create">🔑 CREATE GENERAL API KEY</button><div class="slh-api-actions"><button class="slh-big-btn" id="slhs-api-save">SAVE & TEST</button><button class="slh-big-btn red" id="slhs-api-clear">CLEAR KEY</button></div></div>
-            <button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
+            <div class="slh-setting"><strong>PRO Certificate Security</strong><div id="slhs-license-diagnostics" style="font-size:12px;line-height:1.8;white-space:pre-line;margin:10px 0">Not checked</div><button class="slh-big-btn gray" id="slhs-certificate-check">VERIFY CERTIFICATE NOW</button></div><button class="slh-big-btn" id="slhs-save">💾 SAVE SETTINGS</button><button class="slh-big-btn gray" id="slhs-backup">📤 BACKUP</button><button class="slh-big-btn gray" id="slhs-restore">📥 RESTORE</button><button class="slh-big-btn red" id="slhs-reset">🧹 RESET HUB</button><button class="slh-big-btn gray" id="slhs-back">← BACK</button>
         </div>`);
+        const diagEl=document.getElementById('slhs-license-diagnostics');
+        const paintCertDiag=()=>{
+            const d=slxLicenseBroker.diagnostics();
+            diagEl.textContent='Certificate received: '+(d.received?'YES':'NO')+'\nSignature verified: '+(d.verified?'YES':'NO')+'\nCertificate expiry: '+(d.expiresAt||'N/A')+'\nStatus: '+d.state;
+        };
+        paintCertDiag();
+        document.getElementById('slhs-certificate-check').onclick=async()=>{
+            diagEl.textContent='Checking certificate…';
+            slxLicenseBroker.invalidate();
+            try{await slxLicenseBroker.check(getSharedApiKey(),{force:true});}
+            catch(error){diagEl.textContent='Verification unavailable: '+String(error?.message||'error');return;}
+            paintCertDiag();
+        };
         const position = document.getElementById('slhs-position');
         const languageSelect = document.getElementById('slhs-language');
         const size = document.getElementById('slhs-size');
