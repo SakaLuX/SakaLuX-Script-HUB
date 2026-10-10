@@ -1,5 +1,15 @@
 # Changelog
 
+## Explicit PRO option badges — 2026-10-10
+
+- Mission Rewards v1.0.58: Weapon Mod Price Learning displays ✦ PRO.
+- Bounty Hunter v0.5.16: Smart/FF/BS sorting, Full Board, Beatable Only and Live Status display ✦ PRO.
+- Stock Manager & Advisor v0.8.27: Advisor, Rebalance and PANIC settings display ✦ PRO.
+- Company Intelligence v1.8.70: Director mode displays ✦ PRO.
+- Nine premium-bearing modules retain their previously installed generic badge behavior; the four updates above add explicit labels where the generic matcher was insufficient.
+- UI rendering on TornPDA and Greasy Fork publication not yet confirmed.
+
+
 ## Script Hub v1.9.125 — Signed certificate diagnostics (2026-10-10)
 
 - Added certificate-received, signature-verified and signed-expiry diagnostics under Hub Settings.
