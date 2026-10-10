@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.31
+// @version      0.8.32
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3290,7 +3290,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     }
     report('Withdraw: checking holdings and preparing sale…','warn');
     Promise.resolve().then(()=>withdrawCash(amount)).then(result=>{
-      report('Withdraw: sale submitted. Refreshing stock balance…','ok');
+      report('Withdraw: sale accepted by Torn. Refreshing stock balance…','ok');
       return syncAllApi().catch(error=>{
         report('Withdraw submitted; portfolio refresh unavailable: '+String(error?.message||error),'warn');
         refreshInlinePanel();
