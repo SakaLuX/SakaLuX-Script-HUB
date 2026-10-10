@@ -3284,7 +3284,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                             cached=d;cachedAt=Date.now();
                             updateDiag({state:d.premium_active?(verified?'verified':'unsigned'):'free',received:!!d.signed_certificate,verified,expiresAt:verified?new Date(JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(d.signed_certificate.payload.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-d.signed_certificate.payload.length%4)%4)),c=>c.charCodeAt(0)))).exp*1000).toISOString():null});
                             resolve(d);
-                        }catch(e){if(currentKey===requestKey)updateDiag({state:'verification_error',received:false,verified:false,expiresAt:null});reject(e);}
+                        }catch(e){if(currentKey===requestKey)updateDiag({state:String(e?.message||'verification_error'),received:false,verified:false,expiresAt:null});reject(e);}
                     },
                     onerror:()=>reject(Error('network_unavailable')),
                     ontimeout:()=>reject(Error('timeout'))
