@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.127
+// @version      1.9.128
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -707,7 +707,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
-        {"version":"1.9.127","date":"2026-10-10","changes":["Adds explicit ✦ PRO and FREE / ✦ PRO labels in module cards.","Updates the offline registry and release information for all nine badge-enabled add-ons.","Preserves INFO details and displays release-specific NEW notes."]},
+        {"version":"1.9.128","date":"2026-10-10","changes":["Adds explicit ✦ PRO and FREE / ✦ PRO labels in module cards.","Updates the offline registry and release information for all nine badge-enabled add-ons.","Preserves INFO details and displays release-specific NEW notes."]},
         {version:'1.9.98',date:'2026-10-09',changes:['Adds secure one-time pairing from Premium web account to Hub on TornPDA/Tampermonkey.','Checks server-issued PRO license with revocable device token; existing Bazaar Thanker stays available during beta.']},
         {version:'1.9.97',date:'2026-10-09',changes:['Marks Bazaar Thanker as a planned PRO module in Hub without disabling existing installations.','Adds canonical account license plans on SakaLuX.ro; billing is not yet active.']},
         {version:'1.9.96',date:'2026-10-09',changes:['Adds PREMIUM navigation to SakaLuX.ro account license status.','Keeps existing modules free; billing is disabled during test rollout.']},
@@ -1776,11 +1776,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.29",
+                    "version": "0.8.33",
                     "date": "2026-10-10",
                     "notes": [
-                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
-                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
+                        "TornPDA Withdraw action feedback and stable click handling.",
+                        "Fixes inline button iteration TypeError.",
+                        "Synchronizes userscript and runtime reported versions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
@@ -3364,7 +3365,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 <div class="slh-stats" id="slh-stats"></div>
                 <div class="slh-tools">
                     <button class="slh-tool" id="slh-update-check" title="Refresh registry and check updates"><span>↻</span>CHECK</button>
-                    <button class="slh-tool" id="slh-update-all" title="Refresh registry and update all"><span>⇧</span>UPDATE</button>
+                    <button class="slh-tool" id="slh-update-all" data-slx-free-action="1" title="Refresh registry and update all"><span>⇧</span>UPDATE</button>
                     <button class="slh-tool" id="slh-health" title="System check"><span>◉</span>HEALTH</button>
                     <button class="slh-tool whatsnew" id="slh-whats-new" title="What's new"><span>✦</span>NEW</button>
                     <button class="slh-tool settings" id="slh-settings" title="Settings"><span>⚙</span>SETTINGS</button>
@@ -4017,6 +4018,14 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 @media(max-width:520px){#sakalux-hub-panel#sakalux-hub-panel .slh-tool{font-size:7px!important}}
 `;(document.head||document.documentElement).appendChild(s)})();
 
+
+
+/* Update is a FREE maintenance action, never a PRO feature. */
+#sakalux-hub-panel #slh-update-all [class*="pro"],
+#sakalux-hub-panel #slh-update-all [class*="premium"],
+#sakalux-hub-panel #slh-update-all [data-slx-pro],
+#sakalux-hub-panel #slh-update-all [data-pro],
+#sakalux-hub-panel #slh-update-all .slx-pro-badge{display:none!important}
 
 /* SAKALUX_ACTIVE_FIRST_ALPHA_SORT */
 (() => {
