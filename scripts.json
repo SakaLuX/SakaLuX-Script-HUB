@@ -605,17 +605,17 @@
         }
       ],
       "release": {
-        "version": "0.8.30",
+        "version": "0.8.33",
         "date": "2026-10-10",
         "notes": [
-          "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
-          "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
-          "No change to free/premium entitlements or server-side license rules."
+          "TornPDA Withdraw action feedback and stable click handling.",
+          "Fixes inline button iteration TypeError.",
+          "Synchronizes userscript and runtime reported versions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.30",
+      "version": "0.8.33",
       "detailsRevision": 28,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
