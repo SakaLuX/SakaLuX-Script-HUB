@@ -11,7 +11,7 @@ const id=2380374, expiry=new Date(Date.now()+180000).toISOString().replace('T','
 const future=Math.floor(Date.now()/1000)+160;
 const key='A'.repeat(16);
 const base64url=x=>Buffer.from(x).toString('base64url');
-const claims={v:1,issuer:'sakalux.ro',subject:id,entitlements:['enhancer_guard'],iat:future-120,exp:future};
+const claims={v:1,issuer:'sakalux.ro',subject:id,entitlements:['enhancer_guard'],iat:future-150,exp:future};
 const cert={format:'slx-ed25519-v1',payload:base64url(JSON.stringify(claims)),signature:base64url(Buffer.alloc(64,3))};
 const base={status:'ok',user:{id},premium_active:true,entitlements:['enhancer_guard'],expires_at:expiry};
 async function scenario(label,response,verifyResult,shouldPass){
