@@ -3228,7 +3228,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const expiryMs=d=>Date.parse(String(d?.expires_at||'').replace(' ','T')+'Z');
         // Cache FREE briefly so newly granted subscriptions become visible promptly.
         const usable=(d,at)=>!!d&&Date.now()-at<(d.premium_active?MAX_AGE:30*1000)&&
-            (!d.premium_active||(Number.isFinite(expiryMs(d))&&expiryMs(d)>Date.now()));
+            (!d.premium_active||(Number.isFinite(expiryMs(d))&&expiryMs(d)>Date.now()&&
+            diagnostic.verified&&(!diagnostic.expiresAt||Date.parse(diagnostic.expiresAt)>Date.now())));
         const validResponse=d=>d?.status==='ok'&&typeof d.premium_active==='boolean'&&
             Number.isSafeInteger(Number(d.user?.id))&&Number(d.user.id)>0&&
             Array.isArray(d.entitlements)&&d.entitlements.every(e=>typeof e==='string')&&
@@ -3274,12 +3275,16 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                             if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);
                             if(!validResponse(d))throw Error('invalid_license_response');
                             let verified=false;
-                            if(d.premium_active&&d.signed_certificate)verified=await slxVerifySignedGrant(d);
+                            if(d.premium_active){
+                                if(!d.signed_certificate)throw Error('signed_certificate_required');
+                                verified=await slxVerifySignedGrant(d);
+                                if(!verified)throw Error('signed_certificate_required');
+                            }
                             if(currentKey!==requestKey){reject(Error('identity_changed'));return;}
                             cached=d;cachedAt=Date.now();
                             updateDiag({state:d.premium_active?(verified?'verified':'unsigned'):'free',received:!!d.signed_certificate,verified,expiresAt:verified?new Date(JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(d.signed_certificate.payload.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-d.signed_certificate.payload.length%4)%4)),c=>c.charCodeAt(0)))).exp*1000).toISOString():null});
                             resolve(d);
-                        }catch(e){if(currentKey===requestKey)updateDiag({state:'verification_error',received:false,verified:false,expiresAt:null});reject(e);}
+                        }catch(e){if(currentKey===requestKey)updateDiag({state:String(e?.message||'verification_error'),received:false,verified:false,expiresAt:null});reject(e);}
                     },
                     onerror:()=>reject(Error('network_unavailable')),
                     ontimeout:()=>reject(Error('timeout'))
