@@ -1,5 +1,12 @@
 # Changelog
 
+## Script Hub v1.9.129 — GreasyFork parser fix (2026-10-10)
+
+- Fixes GreasyFork synchronization failure: `Uncaught SyntaxError: Private field '#sakalux' must be declared in an enclosing class` caused by raw CSS injected into JavaScript.
+- Wraps UPDATE control badge styles in a valid JavaScript style element.
+- Confirms parsing of the full Hub userscript with the JavaScript parser.
+- Does not change license rules, paid capabilities or trading behavior.
+
 ## Version registry and release audit — 2026-10-10
 
 - Script Hub **1.9.128**: synchronized internal version and offline registry; UPDATE remains a FREE maintenance action. Removed badge decorations inside the UPDATE control where identified.
