@@ -1,5 +1,11 @@
 # Changelog
 
+## Script Hub v1.9.125 — Signed certificate diagnostics (2026-10-10)
+
+- Added certificate-received, signature-verified and signed-expiry diagnostics under Hub Settings.
+- Added a manual fresh verification action without exposing the Torn key or raw certificate.
+- Signature enforcement remains staged until a successful TornPDA test of a signed PRO response.
+
 ## License Manager v2 distribution — 2026-10-10
 
 - Hub v1.9.124: shared in-flight license verification broker, safe account switching, strict verification response validation, and faster FREE-status rechecks.
