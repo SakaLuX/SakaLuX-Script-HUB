@@ -22,7 +22,7 @@ async function scenario(label,response,verifyResult,shouldPass){
  ctx.globalThis=ctx;
  vm.runInNewContext(brokerSource,ctx);
  let passed=false;
- try{await ctx.testBroker.check(key);passed=true}catch{}
+ try{await ctx.testBroker.check(key);passed=true}catch(error){if(shouldPass)console.error(label, 'broker rejected:', error?.message || String(error));}
  assert.equal(passed,shouldPass,label);
  assert.equal(calls,1,label+': expected one network call');
 }
