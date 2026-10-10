@@ -3,7 +3,11 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.33**
+**v0.8.34**
+
+### v0.8.34 — Installed-version fallback fix
+- Corrected the canonical TornPDA installed-version fallback from v0.8.30 to v0.8.34, preventing false update indications after installation.
+
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
