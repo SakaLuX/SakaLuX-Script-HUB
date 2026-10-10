@@ -43,7 +43,7 @@
      for(const option of el.options){
       if(option.dataset.slxProOption==='1')continue;
       const title=String(option.textContent||'').trim();
-      if(MATCH.test(title)&&!(/(?:✦\\s*)?PRO\\s*$/i).test(title)){
+      if(MATCH.test(title)&&!(/(?:✦\s*)?PRO\s*$/i).test(title)){
        option.textContent=title+' · ✦ PRO';option.dataset.slxProOption='1';
       }
      }
