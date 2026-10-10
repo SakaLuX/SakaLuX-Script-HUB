@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.125
+// @version      1.9.126
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -687,7 +687,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.125';
+    const VERSION = '1.9.126';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -707,7 +707,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
-        {"version":"1.9.125","date":"2026-10-10","changes":["Adds explicit ✦ PRO and FREE / ✦ PRO labels in module cards.","Updates the offline registry and release information for all nine badge-enabled add-ons.","Preserves INFO details and displays release-specific NEW notes."]},
+        {"version":"1.9.126","date":"2026-10-10","changes":["Adds explicit ✦ PRO and FREE / ✦ PRO labels in module cards.","Updates the offline registry and release information for all nine badge-enabled add-ons.","Preserves INFO details and displays release-specific NEW notes."]},
         {version:'1.9.98',date:'2026-10-09',changes:['Adds secure one-time pairing from Premium web account to Hub on TornPDA/Tampermonkey.','Checks server-issued PRO license with revocable device token; existing Bazaar Thanker stays available during beta.']},
         {version:'1.9.97',date:'2026-10-09',changes:['Marks Bazaar Thanker as a planned PRO module in Hub without disabling existing installations.','Adds canonical account license plans on SakaLuX.ro; billing is not yet active.']},
         {version:'1.9.96',date:'2026-10-09',changes:['Adds PREMIUM navigation to SakaLuX.ro account license status.','Keeps existing modules free; billing is disabled during test rollout.']},
@@ -1213,16 +1213,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.69",
+                    "version": "1.3.70",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.69",
+                "version": "1.3.70",
                 "detailsRevision": 28,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
@@ -1267,16 +1267,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.68",
+                    "version": "5.3.69",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.68",
+                "version": "5.3.69",
                 "detailsRevision": 32,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
@@ -1323,13 +1323,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
                 "detailsRevision": 47,
-                "version": "1.1.26",
+                "version": "1.1.27",
                 "release": {
-                    "version": "1.1.26",
+                    "version": "1.1.27",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1389,16 +1389,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.59",
+                    "version": "1.0.60",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.59",
+                "version": "1.0.60",
                 "detailsRevision": 23,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
@@ -1466,16 +1466,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.72",
+                    "version": "1.17.73",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.72",
+                "version": "1.17.73",
                 "detailsRevision": 37,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
@@ -1545,11 +1545,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.5.17",
+                    "version": "0.5.18",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -1557,7 +1557,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
-                "version": "0.5.17",
+                "version": "0.5.18",
                 "detailsRevision": 26,
                 "license": "All Rights Reserved",
                 "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
@@ -1647,16 +1647,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.62",
+                    "version": "1.3.63",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.62",
+                "version": "1.3.63",
                 "detailsRevision": 27,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
@@ -1711,16 +1711,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.71",
+                    "version": "1.8.72",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.71",
+                "version": "1.8.72",
                 "detailsRevision": 27,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
@@ -1776,16 +1776,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.28",
+                    "version": "0.8.29",
                     "date": "2026-10-10",
                     "notes": [
-                        "PRO badge coverage extended to premium switches, buttons, labels and selection choices.",
-                        "FREE controls stay visible and existing license checks and saved settings are preserved."
+                        "Improves ✦ PRO badge coverage across premium buttons, switches, labels and selection options.",
+                        "Avoids duplicate badges; FREE features and existing license enforcement stay unchanged."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.28",
+                "version": "0.8.29",
                 "detailsRevision": 27,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
