@@ -3237,7 +3237,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             Number.isSafeInteger(Number(d.user?.id))&&Number(d.user.id)>0&&
             Array.isArray(d.entitlements)&&d.entitlements.every(e=>typeof e==='string')&&
             (!d.premium_active||(Number.isFinite(expiryMs(d))&&expiryMs(d)>Date.now()));
-        const LICENSE_PUBLIC_KEY_B64=''; // Pin trusted server public key before enabling certificate checks.
+        const LICENSE_PUBLIC_KEY_B64='Hw+1h/0NZwOLEmJ+sbwgcKBIpJrgE/5kmjGnA7hnrhM='; // Pin trusted server public key before enabling certificate checks.
         async function slxVerifySignedGrant(data){
             const cert=data.signed_certificate;
             if(!cert)return false;
