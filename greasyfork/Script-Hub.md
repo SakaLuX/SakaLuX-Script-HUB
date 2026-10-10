@@ -3,7 +3,12 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.128**
+**v1.9.129**
+
+### GreasyFork syntax fix — 2026-10-10
+- Fixes the parser error caused by raw CSS after the Hub toolbar styling.
+- Restores script synchronization compatibility by injecting UPDATE badge styling through JavaScript.
+
 
 ### Certificate verification diagnostics — 2026-10-10
 - Hub Settings now displays whether an Ed25519 certificate was received, whether its signature verified, and the signed certificate expiry.
