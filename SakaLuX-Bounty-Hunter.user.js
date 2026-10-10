@@ -1160,7 +1160,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.freeze({id:'bounty-hunter',name:'Bounty Hunter',icon:'🎯',version:'0.5.3',fallback:'https://www.torn.com/bounties.php'});
+  const SELF=Object.freeze({id:'bounty-hunter',name:'Bounty Hunter',icon:'🎯',version:'0.5.19',fallback:'https://www.torn.com/bounties.php'});
   function openSelf(){try{const api=window.SakaLuXBountyHunter;if(api&&typeof api.open==='function'){api.open();return}}catch{}const bridge=document.getElementById('sakalux-module-bridge-'+SELF.id);if(bridge){bridge.dataset.action = 'open';bridge.click();return}if(SELF.fallback)location.href=SELF.fallback}
   function register(){const dock=globalThis.SakaLuXDockRuntime;if(!dock||typeof dock.register!=='function')throw new Error('SakaLuX Shared Dock Runtime is unavailable');dock.register({...SELF,open:openSelf})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',register,{once:true});else register();
