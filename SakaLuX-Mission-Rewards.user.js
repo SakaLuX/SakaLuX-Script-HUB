@@ -1723,7 +1723,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 <div class="sl-mr-settings-head"><div><div class="sl-mr-settings-title">🎯 SakaLuX Mission Rewards</div><div class="sl-mr-settings-sub">v${VERSION} • ${escapeHtml(state.apiMode || 'API not loaded')}</div></div><div class="sl-mr-head-actions"><button type="button" id="sl-mr-api-open" title="API Access">🔑</button><button id="sl-mr-settings-close">×</button></div></div>
                 <label class="sl-mr-setting"><input id="sl-mr-show-items" type="checkbox" ${settings.showItemValue ? 'checked' : ''}> Show item market value / credit</label>
                 <label class="sl-mr-setting"><input id="sl-mr-show-ammo" type="checkbox" ${settings.showAmmoOwned ? 'checked' : ''}> Show owned special ammo</label>
-                <label class="sl-mr-setting"><input id="sl-mr-learn-mods" type="checkbox" ${settings.learnModPrices && globalThis.SakaLuXFreemium?.['mission-rewards']?.isActive?.() ? 'checked' : ''}> Learn weapon mod price ranges locally</label>
+                <label class="sl-mr-setting"><input id="sl-mr-learn-mods" type="checkbox" ${settings.learnModPrices && globalThis.SakaLuXFreemium?.['mission-rewards']?.isActive?.() ? 'checked' : ''}> Learn weapon mod price ranges locally <span class="slx-premium-badge">✦ PRO</span></label>
                 <label class="sl-mr-setting"><input id="sl-mr-show-badges" type="checkbox" ${settings.showCardBadges ? 'checked' : ''}> Show information directly on reward cards</label>
                 <button class="sl-mr-settings-btn" id="sl-mr-save">💾 SAVE</button>
                 <button class="sl-mr-settings-btn gray" id="sl-mr-refresh">🔄 REFRESH DATA</button>
