@@ -2117,10 +2117,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function setEnabled(value) {
-        if (value && !slxProCurrent()) { slxShowProNotice(); return false; }
+        if (value && !slxProCurrent()) slxShowProNotice(); // keep preferred ON, but do not start protected runtime
         moduleEnabled = Boolean(value);
         localStorage.setItem(ENABLED_KEY, moduleEnabled ? '1' : '0');
-        if (moduleEnabled) startRuntime();
+        if (moduleEnabled && slxProCurrent()) startRuntime();
         else stopRuntime();
         window.dispatchEvent(new CustomEvent('SakaLuX:BazaarThankerStateChanged', { detail: { version: BAZAAR_VERSION, enabled: moduleEnabled } }));
         syncHubBridge('bazaar', moduleEnabled && slxProCurrent());
