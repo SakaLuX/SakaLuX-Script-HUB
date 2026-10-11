@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.84 — automatic PRO panel recovery (2026-10-11)
+
+- Reopens Best Buys and Best Route Basket as soon as the shared Hub license state becomes verified.
+- Works on landed-country and Torn Travel Agency pages without opening the Hub UI.
+- Recovery polling reads only local entitlement state and adds no network license requests.
+
 ## Market Intelligence v1.17.83 — PRO bootstrap and rate limit handling (2026-10-11)
 
 - Restores a recent positively verified PRO entitlement before Travel and Bazaar Flip initialization.
