@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Thanker - PDA
 // @namespace    sakalux.bazaar.thanker
-// @version      5.3.70
+// @version      5.3.71
 // @description  Optimized Bazaar Thanker with custom/auto Bazaar name, buyer grouping, details, copy, big buyer detection, statistics and history management.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -711,7 +711,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '5.3.70';
+  let v = '5.3.71';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1046,7 +1046,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.70" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar","name":"Bazaar","icon":"💬","selector":"","fallback":"https://www.torn.com/page.php?sid=events"}, { version: "5.3.71" }));
   const API_GLOBAL = "SakaLuXBazaarThanker";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -2050,7 +2050,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         setTimeout(fillMessageEditor, 2000);
     }
 
-    const BAZAAR_VERSION='5.3.70';
+    const BAZAAR_VERSION='5.3.71';
 
     function openSettingsPanel() {
         if (!slxProCurrent()) { slxShowProNotice(); return false; }
@@ -2211,15 +2211,35 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }));
 
     let slxProAllowed=false,slxProExpiry=0;
+const slxLicenseCacheKey='SakaLuX_PRO_CACHE_bazaar_thanker_v1';
+const slxLicenseCacheTTL=10*60*1000;
+function slxLicenseKey(){try{return String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}}
+function slxLicenseFingerprint(key){let h=2166136261;for(let i=0;i<key.length;i++){h=Math.imul(h^key.charCodeAt(i),16777619)}return (h>>>0).toString(16)}
+function slxRememberPro(expiry){
+ const key=slxLicenseKey();
+ if(!/^[a-zA-Z0-9]{16}$/.test(key)||!Number.isFinite(expiry)||expiry<=Date.now())return;
+ try{localStorage.setItem(slxLicenseCacheKey,JSON.stringify({fingerprint:slxLicenseFingerprint(key),verifiedAt:Date.now(),expiry}))}catch{}
+}
+function slxRestorePro(){
+ const key=slxLicenseKey();if(!/^[a-zA-Z0-9]{16}$/.test(key))return false;
+ try{
+  const d=JSON.parse(localStorage.getItem(slxLicenseCacheKey)||'null');
+  if(d?.fingerprint!==slxLicenseFingerprint(key)||!(Date.now()-d.verifiedAt>=0&&Date.now()-d.verifiedAt<slxLicenseCacheTTL)||!(d.expiry>Date.now()))return false;
+  slxProAllowed=true;slxProExpiry=d.expiry;slxProVerification='pro';
+  return true;
+ }catch{return false}
+}
+function slxConfirmedPro(expiry){slxProAllowed=true;slxProExpiry=expiry;slxProVerification='pro';slxRememberPro(expiry);return true}
+
 let slxProVerification='checking';
 async function slxCheckProAccess(){
  let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
- if(!/^[a-zA-Z0-9]{16}$/.test(key)){slxProVerification='unavailable';return false;}
+ if(!/^[a-zA-Z0-9]{16}$/.test(key)){slxProVerification='unavailable';return slxRestorePro();}
  const hub=globalThis.__SakaLuXPremiumVerified;
  if(hub?.key===key&&Date.now()-hub.at<5*60*1000&&hub.data?.premium_active===true){
   const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
   if(Number.isFinite(expiry)&&expiry>Date.now()&&hub.data.entitlements?.includes('bazaar_thanker')){
-   slxProExpiry=expiry;slxProVerification='pro';return true;
+   return slxConfirmedPro(expiry);
   }
  }
  const broker=globalThis.SakaLuXLicenseBroker;
@@ -2230,9 +2250,10 @@ async function slxCheckProAccess(){
    const allowed=d?.status==='ok'&&d?.premium_active===true&&Array.isArray(d.entitlements)&&
      d.entitlements.includes('bazaar_thanker')&&
      Number.isFinite(expiry)&&expiry>Date.now();
-   slxProExpiry=allowed?expiry:0;
-   slxProVerification=allowed?'pro':(d?.status==='ok'?'free':'unavailable');
-   return allowed;
+   if(allowed)return slxConfirmedPro(expiry);
+   slxProVerification=d?.status==='ok'?'free':'unavailable';
+   if(d?.status==='ok'){slxProAllowed=false;slxProExpiry=0;try{localStorage.removeItem(slxLicenseCacheKey)}catch{};return false}
+   return slxRestorePro();
   }catch{slxProVerification='unavailable';return false;}
  }
  if(typeof GM_xmlhttpRequest!=='function'){slxProVerification='unavailable';return false;}
@@ -2298,7 +2319,7 @@ function slxShowProNotice(){
     async function init() {
         try { localStorage.setItem('SakaLuX_Installed_bazaar', BAZAAR_VERSION); } catch {}
         installHubBridge('bazaar', openSettingsPanel);
-        await slxRefreshEntitlement();
+        slxRestorePro();slxApplyEntitlement(slxProCurrent());void slxRefreshEntitlement();
         if (moduleEnabled && slxProCurrent()) scheduleHubInstallPrompt();
         setInterval(()=>{if(!document.hidden)void slxRefreshEntitlement()},5*60*1000);
     }
