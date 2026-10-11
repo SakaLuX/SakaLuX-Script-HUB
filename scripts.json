@@ -291,17 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.79",
+        "version": "1.17.80",
         "date": "2026-10-11",
         "notes": [
-          "Re-renders Best Route Basket after asynchronous PRO entitlement confirmation.",
-          "Retries license verification briefly when Travel Agency is loaded, without opening Hub.",
-          "Stops retry timer and event listener when Market Intelligence runtime is disabled."
+          "Keeps Travel Agency Best Route startup retries active while the page and license are being loaded.",
+          "Retries after PRO confirmation and when an earlier scan was occupied.",
+          "Cleans up retry timer/listener when Market Intelligence is disabled."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.79",
+      "version": "1.17.80",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
