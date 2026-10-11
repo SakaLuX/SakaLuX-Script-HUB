@@ -291,17 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.75",
+        "version": "1.17.76",
         "date": "2026-10-11",
         "notes": [
-          "Fixes null budget override interpreted as zero (unlimited), enforcing configured Travel Budget.",
-          "Rejects route baskets that exceed a positive configured budget.",
-          "Displays previous YATA stock snapshot and cached-price recommendations while live data refreshes."
+          "Travel Agency Best Route Basket displays Top 3 Optimized routes respecting configured Travel Budget.",
+          "Displays a separate Top 3 Greedy routes with no spending cap.",
+          "Both rankings use profitability per hour and refreshed market prices when available."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.75",
+      "version": "1.17.76",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
