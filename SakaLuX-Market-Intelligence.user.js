@@ -152,7 +152,7 @@
    if(active){acceptGrant(data,key());rememberGrant(data,key());}
    else if(data.verification_state==='checking'||data.verification_state==='unavailable'){
      verificationState='unavailable';restoreRecentGrant(key());
-   }else if(data.verification_state==='free'||data.verification_state==='denied'){
+   }else if(data.verification_state==='free'||data.verification_state==='denied'||data.premium_active===false){
      forgetGrant();verificationState='free';
    }
    if(active)window.dispatchEvent(new CustomEvent('SakaLuX:MarketProReady'));
