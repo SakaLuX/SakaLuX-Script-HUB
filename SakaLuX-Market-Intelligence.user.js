@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.82
+// @version      1.17.83
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -107,9 +107,12 @@
    if(k===verifiedKey&&verifiedUntil>Date.now())return true;
    const hub=globalThis.__SakaLuXPremiumVerified;
    if(hub?.key===k&&Date.now()-hub.at<10*60*1000&&acceptGrant(hub.data,k))return true;
-   if(restoreRecentGrant(k))return true;
+   if(restoreRecentGrant(k)){
+     // Revalidate asynchronously through the Hub broker when available, not per UI click.
+     return true;
+   }
    if(pending)return pending;
-   if(Date.now()<licenseNextRetry){verificationState='unavailable';return false;}
+   if(Date.now()<licenseNextRetry){verificationState='unavailable';return restoreRecentGrant(k);}
    pending=(async()=>{
      try{
        const broker=globalThis.SakaLuXLicenseBroker;
@@ -145,6 +148,9 @@
    else globalThis.SakaLuXDialog?.notice?.('This feature requires SakaLuX PRO.','pro');
  }
 
+ // Hydrate a short-lived, server-confirmed grant before UI startup.
+ // Network revalidation remains authoritative and may revoke it immediately.
+ try{restoreRecentGrant(key());}catch{}
  window.addEventListener('SakaLuX:PremiumStatus',event=>{
    const data=event.detail||{};
    const expiry=Date.parse(String(data.expires_at||'').replace(' ','T')+'Z');
@@ -152,13 +158,17 @@
    if(active){acceptGrant(data,key());rememberGrant(data,key());}
    else if(data.verification_state==='checking'||data.verification_state==='unavailable'){
      verificationState='unavailable';restoreRecentGrant(key());
-   }else if(data.verification_state==='free'||data.verification_state==='denied'||data.premium_active===false){
+   }else if(data.verification_state==='free'||data.verification_state==='denied'||(data.verification_state!=='unavailable'&&data.verification_state!=='checking'&&data.premium_active===false)){
      forgetGrant();verificationState='free';
    }
    if(active)window.dispatchEvent(new CustomEvent('SakaLuX:MarketProReady'));
  });
  globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
- globalThis.SakaLuXFreemium['market-intelligence']={isPro,locked,isActive:()=>verifiedKey===key()&&verifiedUntil>Date.now()};void isPro().then(ok=>{if(ok)window.dispatchEvent(new CustomEvent('SakaLuX:MarketProReady'));});
+ globalThis.SakaLuXFreemium['market-intelligence']={isPro,locked,isActive:()=>verifiedKey===key()&&verifiedUntil>Date.now()};
+ // Reuse cached entitlement synchronously; avoid racing Hub for a duplicate license request.
+ if(verifiedKey===key()&&verifiedUntil>Date.now())
+   window.dispatchEvent(new CustomEvent('SakaLuX:MarketProReady'));
+ else setTimeout(()=>{void isPro().then(ok=>{if(ok)window.dispatchEvent(new CustomEvent('SakaLuX:MarketProReady'));});},1200);
  const bypass=new WeakSet();
  document.addEventListener('click',async e=>{
    const button=e.target?.closest?.('button,[role="button"],a');if(!button||bypass.has(button))return;
@@ -821,7 +831,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.82';
+  let v = '1.17.83';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1156,7 +1166,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.82" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.83" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
