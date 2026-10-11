@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.81
+// @version      1.17.82
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -77,32 +77,64 @@
    const expiry=Date.parse(String(data?.expires_at||'').replace(' ','T')+'Z');
    return !!(data?.premium_active===true&&data?.entitlements?.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now()&&k===key());
  };
+ let licenseNextRetry=0;
+ const CACHE_KEY='SakaLuX_HUB_PRO_VERIFIED_V1';
+ const fingerprint=k=>{let h=2166136261;for(let i=0;i<k.length;i++)h=Math.imul(h^k.charCodeAt(i),16777619);return (h>>>0).toString(16)};
+ const acceptGrant=(d,k)=>{
+   if(!accepts(d,k))return false;
+   verifiedKey=k;
+   verifiedUntil=Math.min(Date.now()+5*60*1000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));
+   verificationState='pro';return true;
+ };
+ function restoreRecentGrant(k){
+   try{
+     const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+     if(cached?.fingerprint!==fingerprint(k)||!Number.isFinite(cached.at)||
+        Date.now()-cached.at<0||Date.now()-cached.at>=10*60*1000)return false;
+     return acceptGrant(cached.data,k);
+   }catch{return false}
+ }
+ function rememberGrant(d,k){
+   if(!accepts(d,k))return;
+   try{localStorage.setItem(CACHE_KEY,JSON.stringify({fingerprint:fingerprint(k),at:Date.now(),data:{
+     status:'ok',premium_active:true,entitlements:d.entitlements,expires_at:d.expires_at
+   }}))}catch{}
+ }
+ function forgetGrant(){verifiedKey='';verifiedUntil=0;try{localStorage.removeItem(CACHE_KEY)}catch{}}
  async function isPro(){
-   const k=key();if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
-   if(k===verifiedKey&&verifiedUntil>Date.now()){verificationState='pro';return true;}
+   const k=key();
+   if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false}
+   if(k===verifiedKey&&verifiedUntil>Date.now())return true;
    const hub=globalThis.__SakaLuXPremiumVerified;
-   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));verificationState='pro';return true}
-   // Prefer the Hub's shared broker: one in-flight request for all modules.
-   // A server outage is unknown, never proof that the account is FREE.
-   const broker=globalThis.SakaLuXLicenseBroker;
-   if(broker?.check){
-     try{
-       const d=await broker.check(k);
-       const ok=d?.status==='ok'&&accepts(d,k);
-       if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));}
-       else {verifiedKey='';verifiedUntil=0;}
-       verificationState=ok?'pro':(d?.status==='ok'?'free':'unavailable');
-       return ok;
-     }catch{verificationState='unavailable';return false;}
-   }
+   if(hub?.key===k&&Date.now()-hub.at<10*60*1000&&acceptGrant(hub.data,k))return true;
+   if(restoreRecentGrant(k))return true;
    if(pending)return pending;
-   if(typeof GM_xmlhttpRequest!=='function'){verificationState='unavailable';return false;}
-   pending=new Promise(resolve=>{
-    GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:k}),timeout:12000,
-     onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ok=r.status===200&&d.status==='ok'&&accepts(d,k);verificationState=r.status===200&&d.status==='ok'?(ok?'pro':'free'):'unavailable';if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}resolve(ok)}catch{verificationState='unavailable';resolve(false)}},
-     onerror:()=>{verificationState='unavailable';resolve(false)},ontimeout:()=>{verificationState='unavailable';resolve(false)}
-    })
-   });try{return await pending}finally{pending=null}
+   if(Date.now()<licenseNextRetry){verificationState='unavailable';return false;}
+   pending=(async()=>{
+     try{
+       const broker=globalThis.SakaLuXLicenseBroker;
+       let d;
+       if(broker?.check)d=await broker.check(k);
+       else{
+         if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
+         d=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
+           method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+           headers:{'Content-Type':'application/json','Accept':'application/json'},
+           data:JSON.stringify({api_key:k}),timeout:12000,
+           onload:r=>{try{const data=JSON.parse(r.responseText||'{}');if(r.status===429||data.status==='rate_limited')throw Error('rate_limited');if(r.status!==200)throw Error('HTTP '+r.status);resolve(data)}catch(e){reject(e)}},
+           onerror:()=>reject(Error('network_unavailable')),ontimeout:()=>reject(Error('timeout'))
+         }));
+       }
+       if(d?.status!=='ok')throw Error(d?.status||'license_unavailable');
+       if(acceptGrant(d,k)){rememberGrant(d,k);return true;}
+       forgetGrant();verificationState='free';return false;
+     }catch(e){
+       licenseNextRetry=Date.now()+(/rate_limited/i.test(String(e?.message))?90000:20000);
+       verificationState='unavailable';
+       return restoreRecentGrant(k);
+     }
+   })();
+   try{return await pending}finally{pending=null}
  }
  function locked(){
    if(verificationState==='unavailable'||verificationState==='checking'){
@@ -117,9 +149,12 @@
    const data=event.detail||{};
    const expiry=Date.parse(String(data.expires_at||'').replace(' ','T')+'Z');
    const active=data.premium_active===true&&Array.isArray(data.entitlements)&&data.entitlements.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now();
-   verifiedKey=active?key():'';
-   verifiedUntil=active?Math.min(Date.now()+5*60*1000,expiry):0;
-   verificationState=active?'pro':(data.verification_state==='unavailable'?'unavailable':'free');
+   if(active){acceptGrant(data,key());rememberGrant(data,key());}
+   else if(data.verification_state==='checking'||data.verification_state==='unavailable'){
+     verificationState='unavailable';restoreRecentGrant(key());
+   }else if(data.verification_state==='free'||data.verification_state==='denied'){
+     forgetGrant();verificationState='free';
+   }
    if(active)window.dispatchEvent(new CustomEvent('SakaLuX:MarketProReady'));
  });
  globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
@@ -786,7 +821,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.81';
+  let v = '1.17.82';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1121,7 +1156,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.81" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.82" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
