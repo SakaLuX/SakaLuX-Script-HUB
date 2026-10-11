@@ -2214,6 +2214,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     let slxProAllowed=false,slxProExpiry=0;
 const slxLicenseCacheKey='SakaLuX_PRO_CACHE_bazaar_thanker_v1';
 const slxLicenseCacheTTL=10*60*1000;
+let slxLastVerifiedAt=0,slxVerifiedFingerprint='';
 function slxLicenseKey(){try{return String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}}
 function slxLicenseFingerprint(key){let h=2166136261;for(let i=0;i<key.length;i++){h=Math.imul(h^key.charCodeAt(i),16777619)}return (h>>>0).toString(16)}
 function slxRememberPro(expiry){
@@ -2226,11 +2227,11 @@ function slxRestorePro(){
  try{
   const d=JSON.parse(localStorage.getItem(slxLicenseCacheKey)||'null');
   if(d?.fingerprint!==slxLicenseFingerprint(key)||!(Date.now()-d.verifiedAt>=0&&Date.now()-d.verifiedAt<slxLicenseCacheTTL)||!(d.expiry>Date.now()))return false;
-  slxProAllowed=true;slxProExpiry=d.expiry;slxProVerification='pro';
+  slxProAllowed=true;slxProExpiry=d.expiry;slxProVerification='pro';slxLastVerifiedAt=d.verifiedAt;slxVerifiedFingerprint=d.fingerprint;
   return true;
  }catch{return false}
 }
-function slxConfirmedPro(expiry){slxProAllowed=true;slxProExpiry=expiry;slxProVerification='pro';slxRememberPro(expiry);return true}
+function slxConfirmedPro(expiry){slxProAllowed=true;slxProExpiry=expiry;slxProVerification='pro';slxLastVerifiedAt=Date.now();slxVerifiedFingerprint=slxLicenseFingerprint(slxLicenseKey());slxRememberPro(expiry);return true}
 
 let slxProVerification='checking';
 async function slxCheckProAccess(){
@@ -2270,9 +2271,9 @@ function slxProCurrent(){
  let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
  if(hub?.key===key&&hub.data?.premium_active===true&&hub.data.entitlements?.includes('bazaar_thanker')&&Date.now()-hub.at<5*60*1000){
   const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
-  if(Number.isFinite(expiry)&&expiry>Date.now()){slxProAllowed=true;slxProExpiry=expiry}
+  if(Number.isFinite(expiry)&&expiry>Date.now())slxConfirmedPro(expiry)
  }
- return slxProAllowed&&Date.now()<slxProExpiry;
+ return slxProAllowed&&Date.now()<slxProExpiry&&Date.now()-slxLastVerifiedAt>=0&&Date.now()-slxLastVerifiedAt<slxLicenseCacheTTL&&slxVerifiedFingerprint===slxLicenseFingerprint(key);
 }
 function slxShowProNotice(){
  if(slxProVerification!=='free'){
