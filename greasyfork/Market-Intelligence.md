@@ -3,7 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.75**
+**v1.17.76**
+
+### Top 3 Optimized and Top 3 Greedy — 2026-10-11
+- Two separate Travel Agency route rankings: the three highest hourly profit Optimized baskets within the configured budget and the three highest hourly profit Greedy baskets without a spending limit.
+- Price refresh considers expensive items needed by the unlimited Greedy ranking.
+
 
 ### Travel budget and fast route basket — 2026-10-11
 - Best Route Basket uses the configured Travel Budget as an enforced spending ceiling.
