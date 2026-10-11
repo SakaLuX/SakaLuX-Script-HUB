@@ -1,5 +1,12 @@
 # Changelog
 
+## PRO license persistence and ON/OFF preference — 2026-10-11
+
+- Enhancer Guard v1.3.72 and Bazaar Thanker v5.3.71: retain last positively verified entitlement for up to 10 minutes, bounded by the server license expiry and tied to the configured API key.
+- Treat an unavailable/pending license check as temporary rather than overwriting user-selected ON/OFF preferences.
+- Restore active premium runtime when a valid entitlement is confirmed while keeping any user-disabled modules OFF.
+- Hub reports the preferred power state independently of active premium authorization.
+
 ## Stock Manager v0.8.34 — TornPDA installed version detection (2026-10-10)
 
 - Fixed the canonical installed version fallback which still advertised v0.8.30 without GM_info.
