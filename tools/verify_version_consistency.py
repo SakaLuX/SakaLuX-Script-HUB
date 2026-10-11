@@ -48,15 +48,15 @@ for module in registry["scripts"]:
     document = (ROOT / "greasyfork" / (docs[ident] + ".md")).read_text(encoding="utf-8")
     current_doc = version_match(document, r"## Current version\s*\n\*\*v([^*]+)\*\*", ident + " documentation")
     release = module.get("release", {}).get("version")
-    notes = ROOT / "releases" / f"{ident}-v{expected}-version-audit-2026-10-10.md"
+    notes = list((ROOT / "releases").glob(f"{ident}-v{expected}-version-audit-*.md"))
     versions = {"header": header, "runtime": internal, "manifest release": release, "docs": current_doc}
     for label, value in versions.items():
         if value != expected:
             errors.append(f"{ident} {label}={value!r}, expected {expected}")
     if not embedded or any(v != expected for v in embedded):
         errors.append(f"{ident} Hub versions={embedded!r}, expected {expected}")
-    if not notes.exists():
-        errors.append(f"{ident}: missing audit release note {notes.relative_to(ROOT)}")
+    if not notes:
+        errors.append(f"{ident}: missing version audit release note for v{expected}")
 
 hub_docs = (ROOT / "greasyfork" / "Script-Hub.md").read_text(encoding="utf-8")
 if version_match(hub_docs, r"## Current version\s*\n\*\*v([^*]+)\*\*", "Hub docs") != hub_header:
