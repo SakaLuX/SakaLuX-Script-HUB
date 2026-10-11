@@ -3,7 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.78**
+**v1.17.79**
+
+### Travel Agency license startup — 2026-10-11
+- Best Route Basket reappears after asynchronous PRO verification without opening Hub.
+- Brief retry window handles entitlement arrival after initial scan.
+
 
 ### TornPDA automatic Best Buys initialization — 2026-10-11
 - Best Buys starts without having to open Script Hub first.
