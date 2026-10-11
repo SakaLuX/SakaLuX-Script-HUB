@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.71
+// @version      1.3.72
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -713,7 +713,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.71';
+  let v = '1.3.72';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1048,7 +1048,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"}, { version: "1.3.71" }));
+  const SELF = Object.freeze(Object.assign({"id":"enhancer","name":"Enhancer","icon":"🛡️","selector":"","fallback":"https://www.torn.com/item.php"}, { version: "1.3.72" }));
   const API_GLOBAL = "SakaLuXEnhancerGuard";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1112,7 +1112,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.71';
+    const VERSION = '1.3.72';
     const PDA_KEY = '###PDA-APIKEY###';
 
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -2432,15 +2432,35 @@ hideProtectedSaleRows();
     window.dispatchEvent(new CustomEvent('SakaLuX:EnhancerGuardReady', { detail: { version: VERSION, enabled: state.enabled } }));
 
     let slxProAllowed=false,slxProExpiry=0;
+const slxLicenseCacheKey='SakaLuX_PRO_CACHE_enhancer_guard_v1';
+const slxLicenseCacheTTL=10*60*1000;
+function slxLicenseKey(){try{return String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}}
+function slxLicenseFingerprint(key){let h=2166136261;for(let i=0;i<key.length;i++){h=Math.imul(h^key.charCodeAt(i),16777619)}return (h>>>0).toString(16)}
+function slxRememberPro(expiry){
+ const key=slxLicenseKey();
+ if(!/^[a-zA-Z0-9]{16}$/.test(key)||!Number.isFinite(expiry)||expiry<=Date.now())return;
+ try{localStorage.setItem(slxLicenseCacheKey,JSON.stringify({fingerprint:slxLicenseFingerprint(key),verifiedAt:Date.now(),expiry}))}catch{}
+}
+function slxRestorePro(){
+ const key=slxLicenseKey();if(!/^[a-zA-Z0-9]{16}$/.test(key))return false;
+ try{
+  const d=JSON.parse(localStorage.getItem(slxLicenseCacheKey)||'null');
+  if(d?.fingerprint!==slxLicenseFingerprint(key)||!(Date.now()-d.verifiedAt>=0&&Date.now()-d.verifiedAt<slxLicenseCacheTTL)||!(d.expiry>Date.now()))return false;
+  slxProAllowed=true;slxProExpiry=d.expiry;slxProVerification='pro';
+  return true;
+ }catch{return false}
+}
+function slxConfirmedPro(expiry){slxProAllowed=true;slxProExpiry=expiry;slxProVerification='pro';slxRememberPro(expiry);return true}
+
 let slxProVerification='checking';
 async function slxCheckProAccess(){
  let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
- if(!/^[a-zA-Z0-9]{16}$/.test(key)){slxProVerification='unavailable';return false;}
+ if(!/^[a-zA-Z0-9]{16}$/.test(key)){slxProVerification='unavailable';return slxRestorePro();}
  const hub=globalThis.__SakaLuXPremiumVerified;
  if(hub?.key===key&&Date.now()-hub.at<5*60*1000&&hub.data?.premium_active===true){
   const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
   if(Number.isFinite(expiry)&&expiry>Date.now()&&hub.data.entitlements?.includes('enhancer_guard')){
-   slxProExpiry=expiry;slxProVerification='pro';return true;
+   return slxConfirmedPro(expiry);
   }
  }
  const broker=globalThis.SakaLuXLicenseBroker;
@@ -2451,9 +2471,10 @@ async function slxCheckProAccess(){
    const allowed=d?.status==='ok'&&d?.premium_active===true&&Array.isArray(d.entitlements)&&
      d.entitlements.includes('enhancer_guard')&&
      Number.isFinite(expiry)&&expiry>Date.now();
-   slxProExpiry=allowed?expiry:0;
-   slxProVerification=allowed?'pro':(d?.status==='ok'?'free':'unavailable');
-   return allowed;
+   if(allowed)return slxConfirmedPro(expiry);
+   slxProVerification=d?.status==='ok'?'free':'unavailable';
+   if(d?.status==='ok'){slxProAllowed=false;slxProExpiry=0;try{localStorage.removeItem(slxLicenseCacheKey)}catch{};return false}
+   return slxRestorePro();
   }catch{slxProVerification='unavailable';return false;}
  }
  if(typeof GM_xmlhttpRequest!=='function'){slxProVerification='unavailable';return false;}
@@ -2528,7 +2549,7 @@ function slxShowProNotice(){
         finally{slxLicenseChecking=false;}
     }
     async function init() {
-        slxProAllowed=await slxCheckProAccess();
+        slxRestorePro();slxProAllowed=await slxCheckProAccess();
         try { localStorage.setItem('SakaLuX_Installed_enhancer', VERSION); } catch {}
         state.enabled = getBool(STORAGE.enabled, true);
         installHubBridge('enhancer', openPanel);
