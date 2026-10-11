@@ -2538,9 +2538,12 @@ function slxShowProNotice(){
     window.addEventListener('SakaLuX:PremiumStatus',e=>{
         const d=e.detail||{},end=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');
         const ok=d.premium_active===true&&d.entitlements?.includes('enhancer_guard')&&Number.isFinite(end)&&end>Date.now();
-        slxProExpiry=ok?end:0;
-        slxProVerification=ok?'pro':(d.verification_state==='unavailable'?'unavailable':'free');
-        slxApplyEntitlement(ok);
+        if(ok){slxConfirmedPro(end);slxApplyEntitlement(true);return;}
+        const pending=d.verification_state==='checking'||d.verification_state==='unavailable';
+        if(pending){slxProVerification=d.verification_state;slxApplyEntitlement(slxRestorePro());return;}
+        slxProExpiry=0;slxProAllowed=false;slxProVerification='free';
+        try{localStorage.removeItem(slxLicenseCacheKey)}catch{}
+        slxApplyEntitlement(false);
     });
     let slxLicenseChecking=false;
     async function slxRefreshEntitlement(){
