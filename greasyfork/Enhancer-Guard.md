@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.71**
+**v1.3.72**
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
