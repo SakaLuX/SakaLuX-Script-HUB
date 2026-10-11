@@ -291,17 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.82",
+        "version": "1.17.83",
         "date": "2026-10-11",
         "notes": [
-          "Shared confirmed PRO status and valid cache are checked before any network call, including for Bazaar Flip and Travel Basket.",
-          "Duplicate concurrent license checks are coalesced; rate-limited responses pause retries for 90 seconds.",
-          "Explicit server denial clears cached PRO, temporary outages preserve only fresh unexpired verification."
+          "Preloads a recent server-confirmed Market PRO grant before initializing Travel Agency and Bazaar Flip.",
+          "Avoids an immediate duplicate license check when a valid cached grant exists.",
+          "Treats unavailable and rate-limited checks as unknown, not an explicit FREE denial."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.82",
+      "version": "1.17.83",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
