@@ -291,16 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.81",
+        "version": "1.17.82",
         "date": "2026-10-11",
         "notes": [
-          "Restore Best Route Basket automatically when asynchronous PRO verification completes after initial Travel Agency scan.",
-          "No manual opening of Hub is required to trigger basket rendering."
+          "Shared confirmed PRO status and valid cache are checked before any network call, including for Bazaar Flip and Travel Basket.",
+          "Duplicate concurrent license checks are coalesced; rate-limited responses pause retries for 90 seconds.",
+          "Explicit server denial clears cached PRO, temporary outages preserve only fresh unexpired verification."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.81",
+      "version": "1.17.82",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
