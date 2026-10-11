@@ -3,7 +3,12 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.130**
+**v1.9.131**
+
+### Early PRO verification — 2026-10-11
+- Starts shared entitlement verification as soon as Hub loads, without opening the UI.
+- Reuses the shared broker and previously verified PRO cache rather than triggering another independent request.
+
 
 ### Persistent verified PRO status — 2026-10-11
 - Reuses the most recent server-confirmed PRO status for up to 10 minutes, bounded by license expiry and associated with the configured Torn API key.
