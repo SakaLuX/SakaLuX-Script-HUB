@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.129
+// @version      1.9.130
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -687,7 +687,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.129';
+    const VERSION = '1.9.130';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -3295,10 +3295,37 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     // Lightweight status display; the backend remains authoritative.
     let hubProCache=null,hubProCheckedAt=0,hubProPending=null,hubProTimer=null,hubProKey='';
     let hubProRequestKey='';
+    const HUB_PRO_CACHE_KEY='SakaLuX_HUB_PRO_VERIFIED_V1';
+    const HUB_PRO_CACHE_TTL=10*60*1000;
+    function hubProFingerprint(key){
+        let h=2166136261;for(let i=0;i<key.length;i++)h=Math.imul(h^key.charCodeAt(i),16777619);
+        return (h>>>0).toString(16);
+    }
+    function restoreVerifiedHubPro(key){
+        if(!/^[a-zA-Z0-9]{16}$/.test(key))return null;
+        try{
+            const saved=JSON.parse(localStorage.getItem(HUB_PRO_CACHE_KEY)||'null');
+            const t=Date.now();
+            if(saved?.fingerprint!==hubProFingerprint(key)||!Number.isFinite(saved.at)||
+                t<saved.at||t-saved.at>=HUB_PRO_CACHE_TTL)return null;
+            const d=saved.data,expiry=Date.parse(String(d?.expires_at||'').replace(' ','T')+'Z');
+            if(d?.premium_active!==true||!Array.isArray(d.entitlements)||!Number.isFinite(expiry)||expiry<=t)return null;
+            return {data:d,at:saved.at};
+        }catch{return null}
+    }
+    function rememberVerifiedHubPro(key,d){
+        const expiry=Date.parse(String(d?.expires_at||'').replace(' ','T')+'Z');
+        if(d?.premium_active!==true||!Array.isArray(d.entitlements)||!Number.isFinite(expiry)||expiry<=Date.now())return;
+        try{localStorage.setItem(HUB_PRO_CACHE_KEY,JSON.stringify({
+            fingerprint:hubProFingerprint(key),at:Date.now(),
+            data:{premium_active:true,entitlements:d.entitlements,expires_at:d.expires_at,status:'ok'}
+        }))}catch{}
+    }
+    function discardVerifiedHubPro(){try{localStorage.removeItem(HUB_PRO_CACHE_KEY)}catch{}}
     async function refreshHubProStatus(force=false){
         const button=document.getElementById('slh-premium');
         const key=getSharedApiKey();
-        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;hubProPending=null;slxLicenseBroker.clear();delete globalThis.__SakaLuXPremiumVerified;window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null,verification_state:'checking'}}));}
+        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;hubProPending=null;slxLicenseBroker.clear();delete globalThis.__SakaLuXPremiumVerified;const last=restoreVerifiedHubPro(key);if(last){hubProCache=last.data;hubProCheckedAt=last.at;globalThis.__SakaLuXPremiumVerified={key,data:last.data,at:last.at};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{...last.data,verification_state:'cached'}}));paintHubProStatus(button,last.data);}else window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null,verification_state:'checking'}}));}
         if(!key){if(button){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';}return;}
         if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';return;}
         const cachedExpiry=hubProCache?.expires_at?Date.parse(String(hubProCache.expires_at).replace(' ','T')+'Z'):NaN;
@@ -3311,7 +3338,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if(button)button.title='Checking PRO license…';
         const request=slxLicenseBroker.check(key,{force});
         hubProPending=request;
-        try{const d=await request;if(getSharedApiKey()!==key)return;hubProCache=d;hubProCheckedAt=Date.now();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
+        try{const d=await request;if(getSharedApiKey()!==key)return;hubProCache=d;hubProCheckedAt=Date.now();if(d?.status==='ok'&&d?.premium_active===true)rememberVerifiedHubPro(key,d);else if(d?.status==='ok')discardVerifiedHubPro();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
         catch(error){
             if(getSharedApiKey()!==key)return; // stale in-flight response after account switch
             // A transport/rate-limit failure is UNKNOWN, not FREE. Preserve an unexpired,
