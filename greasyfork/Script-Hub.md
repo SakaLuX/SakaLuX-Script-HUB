@@ -3,7 +3,13 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.129**
+**v1.9.130**
+
+### Persistent verified PRO status — 2026-10-11
+- Reuses the most recent server-confirmed PRO status for up to 10 minutes, bounded by license expiry and associated with the configured Torn API key.
+- Background revalidation does not reset manually saved ON/OFF preferences.
+- Explicit license revocation/expiration disables protected features without erasing preferences.
+
 
 ### GreasyFork syntax fix — 2026-10-10
 - Fixes the parser error caused by raw CSS after the Hub toolbar styling.
