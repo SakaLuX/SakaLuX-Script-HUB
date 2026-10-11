@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.86 — autonomous Travel panel startup (2026-10-11)
+
+- Starts missing Travel Agency and landed-country panels independently of opening Script Hub.
+- Records a local diagnostic separating page detection from PRO verification failure.
+- Respects existing license request deduplication and backoff.
+
 ## Market Intelligence v1.17.85 — standalone licensing permission (2026-10-11)
 
 - Declares sakalux.ro as an allowed cross-origin license endpoint in userscript metadata.
