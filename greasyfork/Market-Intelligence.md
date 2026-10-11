@@ -3,7 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.77**
+**v1.17.78**
+
+### TornPDA automatic Best Buys initialization — 2026-10-11
+- Best Buys starts without having to open Script Hub first.
+- Short-lived bootstrap retries while the foreign shop loads, stopping when the panel appears.
+
 
 ### Faster landed-country Best Buys — 2026-10-11
 - Immediately renders existing cached item quotes when available, instead of blocking the panel on network calls.
