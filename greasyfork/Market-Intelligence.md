@@ -3,7 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.74**
+**v1.17.75**
+
+### Travel budget and fast route basket — 2026-10-11
+- Best Route Basket uses the configured Travel Budget as an enforced spending ceiling.
+- Reuses a recent YATA stock snapshot for a fast initial preview, updating it with live prices afterward.
+
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
