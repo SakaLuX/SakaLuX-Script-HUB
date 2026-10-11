@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.75
+// @version      1.17.76
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -785,7 +785,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.75';
+  let v = '1.17.76';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1120,7 +1120,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.75" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.76" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -2417,58 +2417,92 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
     function buildBestRunRows(candidates,marketMap,actualTimes){
         if(!globalThis.SakaLuXFreemium['market-intelligence'].isActive())return [];
-        const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),grouped=new Map(),ranked=[];
-        for(const r of candidates){if(!grouped.has(r.destination))grouped.set(r.destination,[]);grouped.get(r.destination).push(r);}
-        let blocked=0,totalBasketItems=0;
-        for(const [destination,rows] of grouped){
-            const flight=flightInfo(destination,actualTimes);if(!flight)continue;
-            const entries=routeBasketEntries(rows);
-            const plan=buildTravelBuyPlan(destination,entries,marketMap);
-            if(!plan?.rows?.length||!(plan.totalProfit>0)||(budget>0&&plan.totalCost>budget+0.001)){blocked++;continue;}
-            const roundTrip=flight.mins*2,profitHour=plan.totalProfit/(roundTrip/60);
-            const summary=plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':'');
-            totalBasketItems+=plan.rows.length;
-            ranked.push({
-                destination,
-                basket:plan.rows,
-                basketSummary:summary,
-                qty:plan.used,
-                slots,
-                costRun:plan.totalCost,
-                profitRun:plan.totalProfit,
-                profitHour,
-                flightMins:flight.mins,
-                flightSource:flight.source,
-                budgetLimited:budget>0&&plan.unusedBudget!==null,
-                mode:plan.mode,
+        const slots=Math.max(1,Number(settings.travelSlots)||29);
+        const budget=Math.max(0,Number(settings.travelBudget)||0);
+        const grouped=new Map(),optimized=[],greedy=[];
+        for(const r of candidates){
+            if(!grouped.has(r.destination))grouped.set(r.destination,[]);
+            grouped.get(r.destination).push(r);
+        }
+        let blocked=0;
+        const push=(list,destination,flight,plan,kind)=>{
+            if(!plan?.rows?.length||!(plan.totalProfit>0)||!(plan.totalCost>0))return;
+            if(kind==='OPTIMIZED'&&budget>0&&plan.totalCost>budget+0.001)return;
+            const profitHour=plan.totalProfit/(flight.mins*2/60);
+            list.push({
+                destination,kind,basket:plan.rows,
+                basketSummary:plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':''),
+                qty:plan.used,slots,costRun:plan.totalCost,profitRun:plan.totalProfit,profitHour,
+                flightMins:flight.mins,flightSource:flight.source,
+                budgetLimited:kind==='OPTIMIZED'&&budget>0,mode:kind,
                 optimizationGain:plan.optimizationGain||0
             });
+        };
+        for(const [destination,rows] of grouped){
+            const flight=flightInfo(destination,actualTimes);
+            if(!flight)continue;
+            const entries=routeBasketEntries(rows);
+            const affordablePlan=buildTravelBuyPlan(destination,entries,marketMap,budget);
+            const eligible=travelPlannerCandidates(entries,marketMap,slots);
+            const unlimitedPlan=buildGreedyTravelPlan(destination,eligible,slots,0);
+            push(optimized,destination,flight,affordablePlan,'OPTIMIZED');
+            push(greedy,destination,flight,unlimitedPlan,'GREEDY');
+            if(!affordablePlan?.rows?.length)blocked++;
         }
+        const sortByHourly=(a,b)=>b.profitHour-a.profitHour||b.profitRun-a.profitRun;
+        const topOptimized=optimized.sort(sortByHourly).slice(0,3);
+        const topGreedy=greedy.sort(sortByHourly).slice(0,3);
+        const top=[...topOptimized,...topGreedy];
         state.bestRunBudgetAware=budget>0;
-        state.bestRunAffordableRoutes=ranked.length;
+        state.bestRunAffordableRoutes=optimized.length;
         state.bestRunBlockedRoutes=blocked;
-        state.bestRunBasketRoutes=ranked.length;
-        state.bestRunBasketItems=totalBasketItems;
-        const sorted=ranked.sort((a,b)=>b.profitHour-a.profitHour || b.profitRun-a.profitRun).slice(0,11);
-        state.bestRunBasketProfit=sorted[0]?.profitRun||0;
-        return sorted;
+        state.bestRunBasketRoutes=top.length;
+        state.bestRunBasketItems=top.reduce((sum,r)=>sum+r.basket.length,0);
+        state.bestRunBasketProfit=topOptimized[0]?.profitRun||0;
+        return top;
     }
 
     function paintBestTravelRun(top,phase){
         if(detectPage()!=='travel'){document.getElementById('sl-mi-best-run')?.remove();return;}
-        state.bestRunRows=top.length;if(!top.length)return;
+        state.bestRunRows=top.length;
         const existing=document.getElementById('sl-mi-best-run');
-        const wasOpen=existing?existing.classList.contains('open'):false;
-        const bar=existing||document.createElement('div');bar.id='sl-mi-best-run';bar.classList.toggle('open',wasOpen);const best=top[0];
-        bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST ROUTE BASKET</span><strong>'+esc(best.destination)+' · '+best.basket.length+' item types</strong><span>'+money(best.profitHour)+'/hr</span><button type="button">▾</button></div><div class="sl-mi-perf-note">'+esc(phase||'cached')+'</div><div class="sl-mi-br-body"></div>';
+        const wasOpen=existing?existing.classList.contains('open'):true;
+        const bar=existing||document.createElement('div');
+        bar.id='sl-mi-best-run';
+        bar.classList.toggle('open',wasOpen);
+        const optimized=top.filter(r=>r.kind==='OPTIMIZED');
+        const greedy=top.filter(r=>r.kind==='GREEDY');
+        const best=optimized[0]||greedy[0];
+        const headline=best?esc(best.destination)+' · '+money(best.profitHour)+'/hr':'No affordable route';
+        bar.innerHTML='<div class="sl-mi-br-head"><span class="sl-mi-br-title">☠︎ BEST ROUTE BASKET</span><strong>'+headline+'</strong><button type="button">▾</button></div><div class="sl-mi-perf-note">'+esc(phase||'cached')+'</div><div class="sl-mi-br-body"></div>';
         const body=bar.querySelector('.sl-mi-br-body');
-        for(const r of top){
-            const row=document.createElement('div');row.className='sl-mi-br-row sl-mi-route';row.dataset.destination=r.destination;row.setAttribute('role','button');row.tabIndex=0;row.title='Select '+r.destination+' in Torn Travel';
-            const routeInfo=r.basket.length+' item types · '+r.qty+'/'+r.slots+' slots · flight '+fmtFlightMinutes(r.flightMins)+' '+(r.flightSource==='torn-page'?'actual':'fallback');
-            const costLine='cost '+money(r.costRun)+(settings.travelBudget>0?' · budget '+money(settings.travelBudget):'');
-            row.innerHTML='<span class="name">'+esc(r.destination)+'</span><span>'+esc(r.basketSummary)+'</span><span>'+routeInfo+'</span><span class="eta">'+costLine+' · '+esc(r.mode)+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
-            const activate=()=>selectTravelDestination(r.destination);row.addEventListener('click',activate);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});body.appendChild(row);
-        }
+        const addGroup=(label,rows,budgetLabel)=>{
+            const heading=document.createElement('div');
+            heading.className='sl-mi-br-group-heading';
+            heading.style.cssText='margin:10px 0 5px;padding:5px 7px;border-radius:6px;background:#233047;color:#e5edf7;font-weight:800';
+            heading.textContent=label+' · '+budgetLabel;
+            body.appendChild(heading);
+            if(!rows.length){
+                const empty=document.createElement('div');empty.className='sl-mi-br-row';
+                empty.textContent='No profitable basket available with current prices and stock.';
+                body.appendChild(empty);return;
+            }
+            for(const [index,r] of rows.entries()){
+                const row=document.createElement('div');
+                row.className='sl-mi-br-row sl-mi-route';row.dataset.destination=r.destination;
+                row.setAttribute('role','button');row.tabIndex=0;
+                row.title='Select '+r.destination+' in Torn Travel';
+                const routeInfo=r.basket.length+' item types · '+r.qty+'/'+r.slots+' slots · flight '+fmtFlightMinutes(r.flightMins)+' '+(r.flightSource==='torn-page'?'actual':'fallback');
+                const costLine='cost '+money(r.costRun)+(r.kind==='OPTIMIZED'&&settings.travelBudget>0?' · max '+money(settings.travelBudget):' · unlimited budget');
+                row.innerHTML='<span class="name">#'+(index+1)+' '+esc(r.destination)+'</span><span>'+esc(r.basketSummary)+'</span><span>'+routeInfo+'</span><span class="eta">'+costLine+' · '+esc(r.kind)+'</span><span>'+money(r.profitRun)+'/run</span><strong>'+money(r.profitHour)+'/hr</strong>';
+                const activate=()=>selectTravelDestination(r.destination);
+                row.addEventListener('click',activate);
+                row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});
+                body.appendChild(row);
+            }
+        };
+        addGroup('TOP 3 OPTIMIZED',optimized,'budget '+money(Math.max(0,Number(settings.travelBudget)||0)));
+        addGroup('TOP 3 GREEDY',greedy,'no spending limit');
         bar.querySelector('.sl-mi-br-head').onclick=()=>bar.classList.toggle('open');
         if(!existing)mountTop(bar);
     }
