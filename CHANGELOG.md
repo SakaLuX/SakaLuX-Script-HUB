@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.76 — two Best Route rankings (2026-10-11)
+
+- Displays three optimized route baskets respecting the saved Travel Budget.
+- Displays three greedy route baskets without a spending limit.
+- Both groups rank by estimated profit per hour and are recomputed after online price refresh, with cached recommendations labeled when displayed.
+
 ## Market Intelligence v1.17.75 — budget-capped fast travel baskets (2026-10-11)
 
 - Fixed a null budget override erroneously disabling the configured budget limit.
