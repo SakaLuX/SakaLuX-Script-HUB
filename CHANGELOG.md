@@ -1,5 +1,10 @@
 # Changelog
 
+## Market Intelligence v1.17.85 — standalone licensing permission (2026-10-11)
+
+- Declares sakalux.ro as an allowed cross-origin license endpoint in userscript metadata.
+- Enables Market Intelligence to verify PRO directly without waiting for Hub to open.
+
 ## Script Hub v1.9.132 — automatic license boot (2026-10-11)
 
 - Starts a shared PRO entitlement verification explicitly during Hub initialization without opening the panel.
