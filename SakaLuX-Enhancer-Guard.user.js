@@ -2476,14 +2476,14 @@ async function slxCheckProAccess(){
    slxProVerification=d?.status==='ok'?'free':'unavailable';
    if(d?.status==='ok'){slxProAllowed=false;slxProExpiry=0;try{localStorage.removeItem(slxLicenseCacheKey)}catch{};return false}
    return slxRestorePro();
-  }catch{slxProVerification='unavailable';return false;}
+  }catch{slxProVerification='unavailable';return slxRestorePro();}
  }
- if(typeof GM_xmlhttpRequest!=='function'){slxProVerification='unavailable';return false;}
+ if(typeof GM_xmlhttpRequest!=='function'){slxProVerification='unavailable';return slxRestorePro();}
  return new Promise(resolve=>GM_xmlhttpRequest({
   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
   headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
-  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now());slxProExpiry=allowed?ends:0;slxProVerification=r.status===200&&d.status==='ok'?(allowed?'pro':'free'):'unavailable';resolve(allowed)}catch{slxProVerification='unavailable';resolve(false)}},
-  onerror:()=>{slxProVerification='unavailable';resolve(false)},ontimeout:()=>{slxProVerification='unavailable';resolve(false)}
+  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now());if(allowed){resolve(slxConfirmedPro(ends));return;}if(r.status===200&&d.status==='ok'){slxProAllowed=false;slxProExpiry=0;slxProVerification='free';try{localStorage.removeItem(slxLicenseCacheKey)}catch{};resolve(false);return;}slxProVerification='unavailable';resolve(slxRestorePro())}catch{slxProVerification='unavailable';resolve(slxRestorePro())}},
+  onerror:()=>{slxProVerification='unavailable';resolve(slxRestorePro())},ontimeout:()=>{slxProVerification='unavailable';resolve(slxRestorePro())}
  }));
 }
 function slxProCurrent(){
