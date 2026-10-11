@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.78 — TornPDA landed Best Buys startup (2026-10-11)
+
+- Best Buys initializes automatically upon loading a foreign-country shop, without opening Script Hub.
+- A bounded bootstrap retry handles shop content rendered after DOMContentLoaded.
+- Existing cached-first pricing and background refresh are retained.
+
 ## Market Intelligence v1.17.77 — fast landed-country Best Buys (2026-10-11)
 
 - Renders the Mexico and other landed-country Best Buys panel from cached quotes before asynchronous price refresh completes.
