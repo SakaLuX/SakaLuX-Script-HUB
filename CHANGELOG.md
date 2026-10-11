@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.79 — Travel Agency basket startup (2026-10-11)
+
+- Retries premium validation while Travel Agency initializes, then renders Best Route Basket automatically.
+- Responds to PRO status events without needing to open Script Hub.
+- Cancels bootstrap timers and listener when the module is stopped.
+
 ## Market Intelligence v1.17.78 — TornPDA landed Best Buys startup (2026-10-11)
 
 - Best Buys initializes automatically upon loading a foreign-country shop, without opening Script Hub.
