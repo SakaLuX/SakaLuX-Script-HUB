@@ -34,17 +34,17 @@
         }
       ],
       "release": {
-        "version": "1.3.71",
-        "date": "2026-10-10",
+        "version": "1.3.72",
+        "date": "2026-10-11",
         "notes": [
-          "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
-          "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
-          "No change to free/premium entitlements or server-side license rules."
+          "Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.",
+          "Preserve preferred ON/OFF independent of transient license check.",
+          "Restore premium runtime after confirmed authorization."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.71",
+      "version": "1.3.72",
       "detailsRevision": 29,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
@@ -89,17 +89,17 @@
         }
       ],
       "release": {
-        "version": "5.3.70",
-        "date": "2026-10-10",
+        "version": "5.3.71",
+        "date": "2026-10-11",
         "notes": [
-          "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
-          "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
-          "No change to free/premium entitlements or server-side license rules."
+          "Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.",
+          "Preserve preferred ON/OFF independent of transient license check.",
+          "Restore premium runtime after confirmed authorization."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.70",
+      "version": "5.3.71",
       "detailsRevision": 33,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
