@@ -2510,7 +2510,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             if(!yataCacheRows?.length){
                 const snapshot=loadJson('slx_mi_best_route_yata_snapshot_v1',null);
                 if(Array.isArray(snapshot?.rows)&&Date.now()-snapshot.at<15*60*1000)
-                    yataCacheRows=snapshot.rows,yataCacheAt=snapshot.at;
+                    yataCacheRows=snapshot.rows,yataCacheAt=0; // Preview immediately; force live revalidation.
             }
             if(yataCacheRows?.length){
                 const cachedTimes=scrapeTravelTimes();
