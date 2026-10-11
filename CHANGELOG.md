@@ -1,5 +1,11 @@
 # Changelog
 
+## Script Hub v1.9.131 — early shared license verification (2026-10-11)
+
+- Triggers shared PRO license verification on script startup rather than waiting for Hub UI to be opened.
+- Retains the existing bounded verified entitlement cache and deduplicated request broker.
+- Market Intelligence v1.17.82 already includes short-term validated PRO restoration and rate-limit backoff for Best Route Basket and Bazaar Flip.
+
 ## Market Intelligence v1.17.82 — PRO verification and rate-limit resilience (2026-10-11)
 
 - Reuses the Hub's verified premium grant on Market Intelligence startup, including Bazaar Flip and Best Route Basket.
