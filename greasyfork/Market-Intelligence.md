@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.79**
+**v1.17.80**
 
 ### Travel Agency license startup — 2026-10-11
 - Best Route Basket reappears after asynchronous PRO verification without opening Hub.
