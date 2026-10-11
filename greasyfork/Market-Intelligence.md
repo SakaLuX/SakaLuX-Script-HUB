@@ -3,7 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.76**
+**v1.17.77**
+
+### Faster landed-country Best Buys — 2026-10-11
+- Immediately renders existing cached item quotes when available, instead of blocking the panel on network calls.
+- Uses visible or previously cached cash first, with background revalidation.
+- Repaints with refreshed market quotes once available.
+
 
 ### Top 3 Optimized and Top 3 Greedy — 2026-10-11
 - Two separate Travel Agency route rankings: the three highest hourly profit Optimized baskets within the configured budget and the three highest hourly profit Greedy baskets without a spending limit.
