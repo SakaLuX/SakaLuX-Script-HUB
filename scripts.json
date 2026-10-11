@@ -291,17 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.77",
+        "version": "1.17.78",
         "date": "2026-10-11",
         "notes": [
-          "Best Buys appears immediately upon landing when saved price quotes are available.",
-          "Reads page or cached cash without waiting for a network response; asynchronously updates from API.",
-          "Refreshes item market values in background and updates Best Buys without fabricating prices."
+          "Bootstrap Best Buys directly upon landing in TornPDA without needing to open Script Hub.",
+          "Retry initialization briefly while foreign shop content loads, stop when panel appears.",
+          "Preserve cached-first prices and background market refresh."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.77",
+      "version": "1.17.78",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
