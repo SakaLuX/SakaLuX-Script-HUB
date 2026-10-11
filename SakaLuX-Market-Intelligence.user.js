@@ -2510,8 +2510,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function travelRefreshIds(candidates,limit,actualTimes){
         const slots=Math.max(1,Number(settings.travelSlots)||29),budget=Math.max(0,Number(settings.travelBudget)||0),byDestination=new Map();
         for(const r of candidates){
-            const affordableQty=bestRunAffordableQty(r,slots);
-            if(affordableQty<=0) continue;
+            // Greedy recommendations ignore the configured budget; still refresh their market prices.
+            const affordableQty=r.stock==null?slots:Math.min(slots,Math.max(0,Number(r.stock)||0));
+            if(affordableQty<=0)continue;
             const c=cachePeek(r.itemId),flight=flightInfo(r.destination,actualTimes)?.mins||9999;
             let score=0;
             if(c){const m=metrics(r.buyPrice,c.price);score=Math.max(0,m.profit)*affordableQty/(flight||1);}
