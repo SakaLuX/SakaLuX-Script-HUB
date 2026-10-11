@@ -3,7 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.80**
+**v1.17.82**
+
+### Faster PRO verification for Bazaar Flip and Travel — 2026-10-11
+- Uses cached verified entitlement first, then checks live in the background when needed.
+- Prevents repeated network calls while verification is pending and backs off on rate limits.
+- Clears cache upon authoritative denial or expiry.
+
 
 ### Travel Agency license startup — 2026-10-11
 - Best Route Basket reappears after asynchronous PRO verification without opening Hub.
