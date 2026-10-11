@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.74
+// @version      1.17.75
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -785,7 +785,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.74';
+  let v = '1.17.75';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1120,7 +1120,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.74" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.75" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -2424,7 +2424,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             const flight=flightInfo(destination,actualTimes);if(!flight)continue;
             const entries=routeBasketEntries(rows);
             const plan=buildTravelBuyPlan(destination,entries,marketMap);
-            if(!plan?.rows?.length||!(plan.totalProfit>0)){blocked++;continue;}
+            if(!plan?.rows?.length||!(plan.totalProfit>0)||(budget>0&&plan.totalCost>budget+0.001)){blocked++;continue;}
             const roundTrip=flight.mins*2,profitHour=plan.totalProfit/(roundTrip/60);
             const summary=plan.rows.slice(0,3).map(x=>x.name+' ×'+x.qty).join(' · ')+(plan.rows.length>3?' · +'+(plan.rows.length-3)+' more':'');
             totalBasketItems+=plan.rows.length;
@@ -2505,12 +2505,28 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             loading.querySelector('.sl-mi-br-head').onclick=()=>loading.classList.toggle('open');
             mountTop(loading);
         }
+        // Show a previously verified YATA snapshot immediately, then revalidate online.
+        try{
+            if(!yataCacheRows?.length){
+                const snapshot=loadJson('slx_mi_best_route_yata_snapshot_v1',null);
+                if(Array.isArray(snapshot?.rows)&&Date.now()-snapshot.at<15*60*1000)
+                    yataCacheRows=snapshot.rows,yataCacheAt=snapshot.at;
+            }
+            if(yataCacheRows?.length){
+                const cachedTimes=scrapeTravelTimes();
+                const cachedMarket=new Map();
+                for(const r of yataCacheRows){const c=cachePeek(r.itemId);if(c)cachedMarket.set(r.itemId,c);}
+                const quick=buildBestRunRows(yataCacheRows.filter(r=>r.stock!==0),cachedMarket,cachedTimes);
+                if(quick.length)paintBestTravelRun(quick,'cached recommendation · validating live prices and stock…');
+            }
+        }catch(error){console.warn('[SakaLuX Market] route snapshot unavailable',error);}
         const yata=await fetchYataAll();
         if(!yata.length){
             const bar=document.getElementById('sl-mi-best-run');
             if(bar){const note=bar.querySelector('.sl-mi-perf-note');if(note)note.textContent='No travel stock data available yet · retrying on next scan';}
             return;
         }
+        try{saveJson('slx_mi_best_route_yata_snapshot_v1',{at:Date.now(),rows:yata});}catch{}
         const candidates=[];
         for(const r of yata){if(r.stock!=null)recordStock(r.destination,r.itemId,r.stock);if(r.stock===0)continue;candidates.push(r);}flushStockHistory();
 
@@ -2733,7 +2749,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
     function buildTravelBuyPlan(destination, entries, marketMap, budgetOverride=null) {
         const slots=Math.max(1,Number(settings.travelSlots)||29);
-        const configuredBudget=Number.isFinite(Number(budgetOverride))&&Number(budgetOverride)>=0?Math.max(0,Number(budgetOverride)):Math.max(0,Number(settings.travelBudget)||0);
+        const configuredBudget=budgetOverride!==null&&budgetOverride!==undefined&&Number.isFinite(Number(budgetOverride))&&Number(budgetOverride)>=0?Math.max(0,Number(budgetOverride)):Math.max(0,Number(settings.travelBudget)||0);
         const candidates=travelPlannerCandidates(entries,marketMap,slots);
         const greedy=buildGreedyTravelPlan(destination,candidates,slots,configuredBudget);
         const optimized=buildOptimizedTravelPlan(destination,candidates,slots,configuredBudget);
