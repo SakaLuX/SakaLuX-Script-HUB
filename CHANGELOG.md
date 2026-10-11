@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.80 — Travel Agency basket startup (2026-10-11)
+
+- Prevents Best Route Basket initialization retries from expiring while the Travel Agency is open.
+- Retries after entitlement verification and after busy scans, independently of opening Script Hub.
+- Stops startup polling when the module is disabled.
+
 ## Market Intelligence v1.17.79 — Travel Agency basket startup (2026-10-11)
 
 - Retries premium validation while Travel Agency initializes, then renders Best Route Basket automatically.
