@@ -291,17 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.76",
+        "version": "1.17.77",
         "date": "2026-10-11",
         "notes": [
-          "Travel Agency Best Route Basket displays Top 3 Optimized routes respecting configured Travel Budget.",
-          "Displays a separate Top 3 Greedy routes with no spending cap.",
-          "Both rankings use profitability per hour and refreshed market prices when available."
+          "Best Buys appears immediately upon landing when saved price quotes are available.",
+          "Reads page or cached cash without waiting for a network response; asynchronously updates from API.",
+          "Refreshes item market values in background and updates Best Buys without fabricating prices."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.76",
+      "version": "1.17.77",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
