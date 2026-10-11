@@ -291,17 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.74",
-        "date": "2026-10-10",
+        "version": "1.17.75",
+        "date": "2026-10-11",
         "notes": [
-          "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
-          "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
-          "No change to free/premium entitlements or server-side license rules."
+          "Fixes null budget override interpreted as zero (unlimited), enforcing configured Travel Budget.",
+          "Rejects route baskets that exceed a positive configured budget.",
+          "Displays previous YATA stock snapshot and cached-price recommendations while live data refreshes."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.74",
+      "version": "1.17.75",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
