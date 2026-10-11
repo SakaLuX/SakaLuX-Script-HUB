@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.77 — fast landed-country Best Buys (2026-10-11)
+
+- Renders the Mexico and other landed-country Best Buys panel from cached quotes before asynchronous price refresh completes.
+- Avoids waiting for a separate remote cash request before drawing cached recommendations.
+- Uses no invented price data; fresher market quotes update the displayed plan after retrieval.
+
 ## Market Intelligence v1.17.76 — two Best Route rankings (2026-10-11)
 
 - Displays three optimized route baskets respecting the saved Travel Budget.
