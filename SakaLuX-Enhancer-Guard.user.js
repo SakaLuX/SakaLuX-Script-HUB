@@ -2406,7 +2406,8 @@ hideProtectedSaleRows();
         checkApiAccess: checkRequiredApiAccess,
         setEnabled,
         toggleEnabled,
-        isEnabled() { return state.enabled && slxProCurrent(); },
+        isEnabled() { return state.enabled; },
+        isRuntimeActive() { return state.enabled && slxProCurrent(); },
         health() {
             return {
                 ready: true,
