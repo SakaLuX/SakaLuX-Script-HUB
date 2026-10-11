@@ -707,6 +707,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {version:'1.9.130',date:'2026-10-11',changes:['Restores recent server-verified PRO entitlement from a bounded local cache while the next check runs.','Keeps preferred module ON/OFF independent from transient license availability.','Rechecks in the background and clears saved proof when the server explicitly denies access.']},
         {"version":"1.9.129","date":"2026-10-10","changes":["Adds explicit ✦ PRO and FREE / ✦ PRO labels in module cards.","Updates the offline registry and release information for all nine badge-enabled add-ons.","Preserves INFO details and displays release-specific NEW notes."]},
         {version:'1.9.98',date:'2026-10-09',changes:['Adds secure one-time pairing from Premium web account to Hub on TornPDA/Tampermonkey.','Checks server-issued PRO license with revocable device token; existing Bazaar Thanker stays available during beta.']},
         {version:'1.9.97',date:'2026-10-09',changes:['Marks Bazaar Thanker as a planned PRO module in Hub without disabling existing installations.','Adds canonical account license plans on SakaLuX.ro; billing is not yet active.']},
