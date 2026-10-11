@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.83
+// @version      1.17.84
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -831,7 +831,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.83';
+  let v = '1.17.84';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1166,7 +1166,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.83" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.84" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -3523,6 +3523,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         state.observer?.disconnect();state.observer=null;
         if(state.routeHandler)window.removeEventListener('hashchange',state.routeHandler);state.routeHandler=null;
         if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=null;
+        if(state.premiumPanelRecoveryTimer){clearInterval(state.premiumPanelRecoveryTimer);state.premiumPanelRecoveryTimer=null;}
         if(state.bestRouteBootstrapTimer){clearInterval(state.bestRouteBootstrapTimer);state.bestRouteBootstrapTimer=null;}
         if(state.bestRouteEntitlementListener){window.removeEventListener('SakaLuX:PremiumStatus',state.bestRouteEntitlementListener);state.bestRouteEntitlementListener=null;}
         if(state.landedBootstrapTimer){clearInterval(state.landedBootstrapTimer);state.landedBootstrapTimer=null;}
@@ -3561,9 +3562,32 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         },2500);
         void attempt();
     }
+    // Restore premium panels as soon as the shared Hub entitlement becomes valid.
+    // No new network calls here: the broker remains the only authority.
+    function installPremiumPanelRecovery(){
+        if(state.premiumPanelRecoveryInstalled)return;
+        state.premiumPanelRecoveryInstalled=true;
+        let scheduled=false;
+        const recover=()=>{
+            if(!settings.enabled||detectPage()!=='travel')return;
+            const pro=globalThis.SakaLuXFreemium?.['market-intelligence'];
+            if(!pro?.isActive?.()||scheduled)return;
+            const travel=detectTravelStateRuntime();
+            const missing=travel.state===TRAVEL_STATES.LANDED_ABROAD
+                ?(settings.countryBestBuys&&!document.getElementById('sl-mi-country-best'))
+                :(travel.state===TRAVEL_STATES.TORN_TRAVEL_AGENCY&&settings.bestRun&&!document.getElementById('sl-mi-best-run'));
+            if(!missing)return;
+            scheduled=true;
+            setTimeout(()=>{scheduled=false;if(settings.enabled&&!state.busy)void scan(false);},150);
+        };
+        window.addEventListener('SakaLuX:PremiumStatus',recover);
+        window.addEventListener('SakaLuX:MarketProReady',recover);
+        state.premiumPanelRecoveryTimer=setInterval(recover,2500);
+        recover();
+    }
     function startRuntime(){
         if(!settings.enabled)return;
-        injectCss();startObserver();ensureBestRouteStartup();
+        injectCss();startObserver();ensureBestRouteStartup();installPremiumPanelRecovery();
         if(settings.priceNetwork&&networkQueue.length)schedulePriceNetworkFlush(2500);
         if(getApiKey())checkRequiredApiAccess(false);
         scheduleScan(true);
