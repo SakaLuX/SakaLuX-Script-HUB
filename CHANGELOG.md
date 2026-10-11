@@ -1,5 +1,10 @@
 # Changelog
 
+## Script Hub v1.9.132 — automatic license boot (2026-10-11)
+
+- Starts a shared PRO entitlement verification explicitly during Hub initialization without opening the panel.
+- Retains the in-flight broker deduplication and last verified grant behavior.
+
 ## Market Intelligence v1.17.84 — automatic PRO panel recovery (2026-10-11)
 
 - Reopens Best Buys and Best Route Basket as soon as the shared Hub license state becomes verified.
