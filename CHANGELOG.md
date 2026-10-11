@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.75 — budget-capped fast travel baskets (2026-10-11)
+
+- Fixed a null budget override erroneously disabling the configured budget limit.
+- Excludes baskets costing more than the configured Travel Budget.
+- Paints cached travel recommendations before online YATA/market refreshes, with a visible cache label.
+
 ## PRO license persistence and ON/OFF preference — 2026-10-11
 
 - Enhancer Guard v1.3.72 and Bazaar Thanker v5.3.71: retain last positively verified entitlement for up to 10 minutes, bounded by the server license expiry and tied to the configured API key.
