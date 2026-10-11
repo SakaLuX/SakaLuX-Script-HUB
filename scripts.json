@@ -291,16 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.85",
+        "version": "1.17.86",
         "date": "2026-10-11",
         "notes": [
-          "Adds missing @connect sakalux.ro permission needed for independent Market Intelligence license verification in TornPDA.",
-          "Works with Hub v1.9.132 background PRO verification, without opening Hub."
+          "Start Travel Agency and foreign-country Best Buys autonomously without Hub UI mutation.",
+          "Record a local diagnostic showing page detection and whether PRO was verified.",
+          "Respect shared license deduplication and retry backoff."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.85",
+      "version": "1.17.86",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
