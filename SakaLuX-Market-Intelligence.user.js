@@ -3524,6 +3524,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if(state.routeHandler)window.removeEventListener('hashchange',state.routeHandler);state.routeHandler=null;
         if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=null;
         if(state.premiumPanelRecoveryTimer){clearInterval(state.premiumPanelRecoveryTimer);state.premiumPanelRecoveryTimer=null;}
+        state.premiumPanelRecoveryInstalled=false;
         if(state.bestRouteBootstrapTimer){clearInterval(state.bestRouteBootstrapTimer);state.bestRouteBootstrapTimer=null;}
         if(state.bestRouteEntitlementListener){window.removeEventListener('SakaLuX:PremiumStatus',state.bestRouteEntitlementListener);state.bestRouteEntitlementListener=null;}
         if(state.landedBootstrapTimer){clearInterval(state.landedBootstrapTimer);state.landedBootstrapTimer=null;}
@@ -3582,7 +3583,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         };
         window.addEventListener('SakaLuX:PremiumStatus',recover);
         window.addEventListener('SakaLuX:MarketProReady',recover);
-        state.premiumPanelRecoveryTimer=setInterval(recover,2500);
+        state.premiumPanelRecoveryTimer=setInterval(()=>{
+            recover();
+            const pro=globalThis.SakaLuXFreemium?.['market-intelligence'];
+            if(settings.enabled&&detectPage()==='travel'&&!pro?.isActive?.()){
+                // isPro has its own in-flight dedupe and rate-limit backoff.
+                // Check infrequently; never send a fresh request every repaint.
+                const now=Date.now();
+                if(now-Number(state.lastPremiumRetryAt||0)>=90000){
+                    state.lastPremiumRetryAt=now;
+                    Promise.resolve(pro?.isPro?.()).then(ok=>{if(ok)recover();}).catch(()=>{});
+                }
+            }
+        },2500);
         recover();
     }
     function startRuntime(){
