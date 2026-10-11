@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.76
+// @version      1.17.77
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -785,7 +785,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.76';
+  let v = '1.17.77';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1120,7 +1120,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.76" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.77" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -2924,13 +2924,27 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.getElementById('sl-mi-best-run')?.remove();
         ensureTravelInlineInfoToggle();
         if(settings.travelInlineInfo===false)removeTravelInlineInfo();
-        const availableCash=await fetchAvailableCash(true);
+        // Use page cash or a recent cached balance immediately; refresh remotely later.
+        const pageCash=readAvailableCashFromPage();
+        const availableCash=Number.isFinite(pageCash)?pageCash:
+            (Number.isFinite(state.availableCash)?state.availableCash:null);
         if(!ensureTravelSurfaceRuntime())return;
         const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')],entries=[],seen=new Set();
         for(const img of imgs){const id=itemIdFromImg(img),compact=travelRowContainer(img),row=compact?.closest?.('tr')||compact;if(!id||!row||seen.has(row))continue;const buy=extractFirstPrice(row);if(!(buy>0))continue;seen.add(row);entries.push({id,row,img,buy,name:img.alt||('Item #'+id),stock:extractTravelStock(row),displayValue:extractAdjacentTornDisplayedValue(row)});}
         const unique=[...new Map(entries.map(e=>[e.id,e])).values()].slice(0,MAX_LIVE_FETCHES);
         const marketMap=new Map();
         for(const e of unique){const c=cachePeek(e.id);if(c)marketMap.set(e.id,c);}
+        // Paint the first usable Best Buys immediately from cached prices.
+        // A missing market quote is not fabricated; refresh will fill the remaining rows.
+        if(settings.countryBestBuys){
+            paintCountryBestBuys(destination,unique,marketMap,availableCash);
+        }else if(marketMap.size){
+            paintTravelBuyPlan(buildTravelBuyPlan(destination,unique,marketMap));
+        }
+        if(!Number.isFinite(pageCash))void fetchAvailableCash(false).then(cash=>{
+            if(!ensureTravelSurfaceRuntime()||detectPage()!=='travel'||detectDestination()!==destination)return;
+            if(settings.countryBestBuys)paintCountryBestBuys(destination,unique,marketMap,cash);
+        }).catch(()=>{});
         await mapWithLimit(unique,async e=>{if(e.stock!=null)recordStock(destination,e.id,e.stock);const fetched=await fetchMarket(e.id);if(!fetched)return;const market=e.displayValue>0?{...fetched,price:e.displayValue,tornDisplayedValue:e.displayValue}:fetched;marketMap.set(e.id,market);const m=metrics(e.buy,market.price);if(settings.travelInlineInfo!==false){const box=ensureTravelBadge(e.row,'sl-mi-travel');box.classList.toggle('loss',m.profit<Number(settings.minProfit||0));box.innerHTML='<b>☠︎ MI</b> Market '+money(market.price)+' · Net '+money(m.net)+' · <strong>'+money(m.profit)+' ('+pct(m.roi)+')</strong>'+(e.stock!=null?' · Stock '+e.stock.toLocaleString('en-US')+stockEtaText(destination,e.id,e.stock):'');state.decorated++;}});
         flushStockHistory();
         if(settings.countryBestBuys) paintCountryBestBuys(destination,unique,marketMap,availableCash);
