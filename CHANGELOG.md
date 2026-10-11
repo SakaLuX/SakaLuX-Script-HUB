@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.83 — PRO bootstrap and rate limit handling (2026-10-11)
+
+- Restores a recent positively verified PRO entitlement before Travel and Bazaar Flip initialization.
+- Avoids immediately duplicating the Hub license request when a valid grant is cached.
+- Treats unavailable and rate-limited checks as inconclusive instead of denying PRO.
+
 ## Script Hub v1.9.131 — early shared license verification (2026-10-11)
 
 - Triggers shared PRO license verification on script startup rather than waiting for Hub UI to be opened.
