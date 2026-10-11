@@ -291,17 +291,16 @@
         }
       ],
       "release": {
-        "version": "1.17.84",
+        "version": "1.17.85",
         "date": "2026-10-11",
         "notes": [
-          "Automatically redraw Best Buys and Best Route Basket when shared Hub PRO validation completes.",
-          "Recover missing panels without requiring the user to open the Hub interface.",
-          "Reuse the shared license status without adding duplicate network requests."
+          "Adds missing @connect sakalux.ro permission needed for independent Market Intelligence license verification in TornPDA.",
+          "Works with Hub v1.9.132 background PRO verification, without opening Hub."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.84",
+      "version": "1.17.85",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
