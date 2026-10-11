@@ -2161,7 +2161,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         },
         setEnabled,
         toggleEnabled,
-        isEnabled() { return moduleEnabled && slxProCurrent(); },
+        isEnabled() { return moduleEnabled; },
+        isRuntimeActive() { return moduleEnabled && slxProCurrent(); },
 
         stats() {
             if (!location.href.includes('sid=events')) {
