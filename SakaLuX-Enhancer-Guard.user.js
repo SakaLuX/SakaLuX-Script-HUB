@@ -2058,7 +2058,7 @@ hideProtectedSaleRows();
     }
 
     function setEnabled(value) {
-        if (value && !slxProCurrent()) { slxShowProNotice(); return false; }
+        if (value && !slxProCurrent()) slxShowProNotice(); // keep preferred ON, but do not start protected runtime
         state.enabled = Boolean(value);
         setBool(STORAGE.enabled, state.enabled);
         if (state.enabled && slxProCurrent()) {
