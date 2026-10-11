@@ -291,17 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.83",
+        "version": "1.17.84",
         "date": "2026-10-11",
         "notes": [
-          "Preloads a recent server-confirmed Market PRO grant before initializing Travel Agency and Bazaar Flip.",
-          "Avoids an immediate duplicate license check when a valid cached grant exists.",
-          "Treats unavailable and rate-limited checks as unknown, not an explicit FREE denial."
+          "Automatically redraw Best Buys and Best Route Basket when shared Hub PRO validation completes.",
+          "Recover missing panels without requiring the user to open the Hub interface.",
+          "Reuse the shared license status without adding duplicate network requests."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.83",
+      "version": "1.17.84",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
