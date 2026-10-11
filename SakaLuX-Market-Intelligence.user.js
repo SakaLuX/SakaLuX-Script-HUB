@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.77
+// @version      1.17.78
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -785,7 +785,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.77';
+  let v = '1.17.78';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1120,7 +1120,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.77" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.78" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -3460,12 +3460,37 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         state.observer?.disconnect();state.observer=null;
         if(state.routeHandler)window.removeEventListener('hashchange',state.routeHandler);state.routeHandler=null;
         if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=null;
+        if(state.landedBootstrapTimer){clearInterval(state.landedBootstrapTimer);state.landedBootstrapTimer=null;}
         if(state.landedRefreshTimer)clearTimeout(state.landedRefreshTimer);state.landedRefreshTimer=null;
         if(networkFlushTimer)clearTimeout(networkFlushTimer);networkFlushTimer=null;
         cleanupLiveFeature('enabled');
         removeNodes('#sl-mi-overlay,#sl-mi-hub-prompt');
     }
-    function startRuntime(){if(!settings.enabled)return;injectCss();startObserver();if(settings.priceNetwork&&networkQueue.length)schedulePriceNetworkFlush(2500);if(getApiKey())checkRequiredApiAccess(false);scheduleScan(true);}
+    function startRuntime(){
+        if(!settings.enabled)return;
+        injectCss();startObserver();
+        if(settings.priceNetwork&&networkQueue.length)schedulePriceNetworkFlush(2500);
+        if(getApiKey())checkRequiredApiAccess(false);
+        scheduleScan(true);
+        // TornPDA may render foreign shops after DOMContentLoaded without a
+        // mutation that qualifies for the normal throttled observer.
+        // Bootstrap while the landed Best Buys surface is missing; Hub is not required.
+        if(!state.landedBootstrapTimer){
+            let checks=0;
+            state.landedBootstrapTimer=setInterval(()=>{
+                if(!settings.enabled||++checks>24){
+                    clearInterval(state.landedBootstrapTimer);state.landedBootstrapTimer=null;return;
+                }
+                if(detectPage()!=='travel'||detectInFlight())return;
+                const destination=detectDestination()||detectTravelStateRuntime().destination;
+                if(!destination||!settings.countryBestBuys)return;
+                if(document.getElementById('sl-mi-country-best')){
+                    clearInterval(state.landedBootstrapTimer);state.landedBootstrapTimer=null;return;
+                }
+                if(!state.busy)void scan(false);
+            },1000);
+        }
+    }
     function setEnabled(value){settings.enabled=!!value;saveJson(STORAGE.settings,settings);if(settings.enabled)startRuntime();else stopRuntime();window.dispatchEvent(new CustomEvent('SakaLuX:MarketIntelligenceStateChanged',{detail:{version:VERSION,enabled:settings.enabled}}));syncHubBridge('market-intelligence',settings.enabled);return settings.enabled;}
     function toggleEnabled(){return setEnabled(!settings.enabled);}
     function syncHubBridge(id,value){const bridge=document.getElementById('sakalux-module-bridge-'+id);if(bridge)bridge.dataset.enabled=String(Boolean(value));}
