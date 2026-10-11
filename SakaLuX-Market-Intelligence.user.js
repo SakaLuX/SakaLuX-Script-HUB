@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.79
+// @version      1.17.80
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -785,7 +785,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.17.79';
+  let v = '1.17.80';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1120,7 +1120,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.79" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.17.80" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -3477,6 +3477,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         state.observer?.disconnect();state.observer=null;
         if(state.routeHandler)window.removeEventListener('hashchange',state.routeHandler);state.routeHandler=null;
         if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=null;
+        if(state.bestRouteBootstrapTimer){clearInterval(state.bestRouteBootstrapTimer);state.bestRouteBootstrapTimer=null;}
+        if(state.bestRouteEntitlementListener){window.removeEventListener('SakaLuX:PremiumStatus',state.bestRouteEntitlementListener);state.bestRouteEntitlementListener=null;}
         if(state.landedBootstrapTimer){clearInterval(state.landedBootstrapTimer);state.landedBootstrapTimer=null;}
         if(state.landedRefreshTimer)clearTimeout(state.landedRefreshTimer);state.landedRefreshTimer=null;
         if(networkFlushTimer)clearTimeout(networkFlushTimer);networkFlushTimer=null;
@@ -3487,32 +3489,31 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     // Rerun the premium route render on entitlement arrival without requiring Hub UI.
     function ensureBestRouteStartup(){
         if(state.bestRouteEntitlementListener)return;
-        state.bestRouteEntitlementListener=event=>{
-            const d=event.detail||{};
-            if(!settings.enabled||!settings.bestRun||detectPage()!=='travel'||
-                detectTravelStateRuntime().state!==TRAVEL_STATES.TORN_TRAVEL_AGENCY)return;
-            const allowed=d.premium_active===true&&Array.isArray(d.entitlements)&&
-                d.entitlements.includes('market_intelligence_pro');
-            if(allowed){
-                Promise.resolve(globalThis.SakaLuXFreemium?.['market-intelligence']?.isPro?.())
-                    .then(ok=>{if(ok&&!state.busy)scheduleScan(true);}).catch(()=>{});
-            }
+        // One timer for TornPDA's asynchronous Travel Agency page and license bootstrap.
+        // Do not silently stop checking while a user remains on the Travel Agency.
+        const eligible=()=>settings.enabled&&settings.bestRun&&detectPage()==='travel'&&
+            detectTravelStateRuntime().state===TRAVEL_STATES.TORN_TRAVEL_AGENCY;
+        let pending=false;
+        const attempt=async()=>{
+            if(!eligible()||document.getElementById('sl-mi-best-run')||pending)return;
+            pending=true;
+            try{
+                const pro=globalThis.SakaLuXFreemium?.['market-intelligence'];
+                if(!await pro?.isPro?.())return;
+                if(!eligible()||document.getElementById('sl-mi-best-run'))return;
+                // A busy scan must not swallow the one-time entitlement event.
+                if(state.busy)return;
+                await scan(false);
+            }catch(e){console.warn('[SakaLuX Market] Best Route startup retry',e);}
+            finally{pending=false;}
         };
+        state.bestRouteEntitlementListener=()=>{void attempt();};
         window.addEventListener('SakaLuX:PremiumStatus',state.bestRouteEntitlementListener);
-        let count=0;
         state.bestRouteBootstrapTimer=setInterval(()=>{
-            if(!settings.enabled||++count>15){
-                clearInterval(state.bestRouteBootstrapTimer);state.bestRouteBootstrapTimer=null;return;
-            }
-            if(detectTravelStateRuntime().state!==TRAVEL_STATES.TORN_TRAVEL_AGENCY||
-                !settings.bestRun||document.getElementById('sl-mi-best-run'))return;
-            const pro=globalThis.SakaLuXFreemium?.['market-intelligence'];
-            Promise.resolve(pro?.isPro?.()).then(ok=>{
-                if(ok&&settings.enabled&&!state.busy&&
-                    detectTravelStateRuntime().state===TRAVEL_STATES.TORN_TRAVEL_AGENCY)
-                    scheduleScan(true);
-            }).catch(()=>{});
-        },2000);
+            if(!settings.enabled){clearInterval(state.bestRouteBootstrapTimer);state.bestRouteBootstrapTimer=null;return;}
+            void attempt();
+        },2500);
+        void attempt();
     }
     function startRuntime(){
         if(!settings.enabled)return;
