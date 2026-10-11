@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.82 — PRO verification and rate-limit resilience (2026-10-11)
+
+- Reuses the Hub's verified premium grant on Market Intelligence startup, including Bazaar Flip and Best Route Basket.
+- Coalesces simultaneous requests and backs off on `rate_limited` errors for 90 seconds.
+- Keeps only recent, unexpired entitlement while a new check is unavailable; explicit denial invalidates cache.
+
 ## Market Intelligence v1.17.80 — Travel Agency basket startup (2026-10-11)
 
 - Prevents Best Route Basket initialization retries from expiring while the Travel Agency is open.
