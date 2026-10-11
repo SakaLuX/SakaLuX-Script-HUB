@@ -3287,6 +3287,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         state.scanTimer=setTimeout(()=>{state.scanTimer=null;scan(force);},force?80:500);
     }
 
+    // Entitlement resolves asynchronously: a first scan may run before Hub's PRO grant arrives.
+    // Re-scan premium Travel panels once the grant becomes valid, without opening Hub.
+    let travelProWasActive=false;
+    function retryTravelPanelsOnProGrant(){
+        const valid=Boolean(globalThis.SakaLuXFreemium?.['market-intelligence']?.isActive?.());
+        if(!valid){travelProWasActive=false;return;}
+        if(!travelProWasActive && settings.enabled && detectPage()==='travel'){
+            travelProWasActive=true;
+            if(!state.busy)scheduleScan(true);
+            else setTimeout(()=>{if(settings.enabled&&detectPage()==='travel')scheduleScan(true);},1200);
+        }
+    }
+    window.addEventListener('SakaLuX:PremiumStatus',()=>setTimeout(retryTravelPanelsOnProGrant,0));
+    Promise.resolve(globalThis.SakaLuXFreemium?.['market-intelligence']?.isPro?.())
+        .then(()=>retryTravelPanelsOnProGrant()).catch(()=>{});
     const PREMIUM_SETTING_KEYS=new Set(['bestRun','arrivalBasket','museum']);
     function premiumSettingActive(key){return !PREMIUM_SETTING_KEYS.has(key)||Boolean(globalThis.SakaLuXFreemium?.['market-intelligence']?.isActive?.());}
     function toggle(key,label){const isPremium=PREMIUM_SETTING_KEYS.has(key);const badge=isPremium?'<span class="slx-premium-badge" aria-label="PRO feature">✦ PRO</span>':'';const active=Boolean(settings[key])&&premiumSettingActive(key);return '<label class="sl-mi-toggle"><span class="sl-mi-toggle-label">'+esc(label)+'</span>'+badge+'<span class="sl-mi-switch"><input data-mi-toggle="1" data-setting="'+esc(key)+'" id="sl-mi-'+key+'" type="checkbox" '+(active?'checked':'')+'><span class="sl-mi-switch-ui"></span></span></label>';}
@@ -3505,6 +3520,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if(settings.priceNetwork&&networkQueue.length)schedulePriceNetworkFlush(2500);
         if(getApiKey())checkRequiredApiAccess(false);
         scheduleScan(true);
+        void globalThis.SakaLuXFreemium?.['market-intelligence']?.isPro?.().then(retryTravelPanelsOnProGrant).catch(()=>{});
         // TornPDA may render foreign shops after DOMContentLoaded without a
         // mutation that qualifies for the normal throttled observer.
         // Bootstrap while the landed Best Buys surface is missing; Hub is not required.
