@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.130
+// @version      1.9.131
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -687,7 +687,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.130';
+    const VERSION = '1.9.131';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -707,6 +707,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {version:'1.9.131',date:'2026-10-11',changes:['Starts shared PRO license verification at startup, without opening Hub.','Reuses the existing verified entitlement cache and shared request broker.']},
         {version:'1.9.130',date:'2026-10-11',changes:['Restores recent server-verified PRO entitlement from a bounded local cache while the next check runs.','Keeps preferred module ON/OFF independent from transient license availability.','Rechecks in the background and clears saved proof when the server explicitly denies access.']},
         {"version":"1.9.129","date":"2026-10-10","changes":["Adds explicit ✦ PRO and FREE / ✦ PRO labels in module cards.","Updates the offline registry and release information for all nine badge-enabled add-ons.","Preserves INFO details and displays release-specific NEW notes."]},
         {version:'1.9.98',date:'2026-10-09',changes:['Adds secure one-time pairing from Premium web account to Hub on TornPDA/Tampermonkey.','Checks server-issued PRO license with revocable device token; existing Bazaar Thanker stays available during beta.']},
@@ -3364,6 +3365,9 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         }
         finally{if(hubProPending===request)hubProPending=null;}
     }
+    // Verify entitlement on script startup, independent of opening the Hub UI.
+    // The shared broker deduplicates simultaneous requests from other modules.
+    void refreshHubProStatus().catch(e=>console.warn('[SakaLuX Hub] initial license check',e));
     setInterval(()=>{if(!document.hidden)void refreshHubProStatus()},5*60*1000);
     function paintHubProStatus(button,data){
         if(!button||!data)return;
