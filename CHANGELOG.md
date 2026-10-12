@@ -1,5 +1,11 @@
 # Changelog
 
+## Market Intelligence v1.17.87 — strict page isolation (2026-10-13)
+
+- Fixed travel panels appearing on Bazaar, Bargain Vault and profile views because travel text in the global page was detected before the actual route.
+- Explicit Bazaar/profile/items/market routes now override all travel detection.
+- Best Route Basket rejects late asynchronous updates outside the Travel Agency and mounts only on travel surfaces.
+
 ## Market Intelligence v1.17.86 — autonomous Travel panel startup (2026-10-11)
 
 - Starts missing Travel Agency and landed-country panels independently of opening Script Hub.
