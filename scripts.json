@@ -291,17 +291,17 @@
         }
       ],
       "release": {
-        "version": "1.17.86",
-        "date": "2026-10-11",
+        "version": "1.17.87",
+        "date": "2026-10-13",
         "notes": [
-          "Start Travel Agency and foreign-country Best Buys autonomously without Hub UI mutation.",
-          "Record a local diagnostic showing page detection and whether PRO was verified.",
-          "Respect shared license deduplication and retry backoff."
+          "Travel panels are restricted to true Travel Agency/in-flight/abroad page contexts, never Bazaar or profiles.",
+          "Route detection prioritizes explicit Bazaar, profile, inventory and market pages before SPA travel headings.",
+          "Late YATA and market-price responses cannot paint Best Route Basket after navigation away."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.86",
+      "version": "1.17.87",
       "detailsRevision": 38,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
