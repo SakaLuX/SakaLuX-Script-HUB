@@ -1,5 +1,11 @@
 # Changelog
 
+## Script Hub v1.9.133 — Background PRO license recovery (2026-10-14)
+
+- Retries shared license verification after initial transport/server failures without opening Hub.
+- Uses escalating 30-second to five-minute delays; honors rate limits with a longer minimum cooldown.
+- Cancels pending retries after a successful response and retries after returning to the foreground when appropriate.
+
 ## Market Intelligence v1.17.87 — strict page isolation (2026-10-13)
 
 - Fixed travel panels appearing on Bazaar, Bargain Vault and profile views because travel text in the global page was detected before the actual route.
