@@ -1156,7 +1156,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.8.30',
+    version: '0.8.34',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'
