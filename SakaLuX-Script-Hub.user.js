@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.132
+// @version      1.9.133
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -687,7 +687,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.132';
+    const VERSION = '1.9.133';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -3329,7 +3329,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const key=getSharedApiKey();
         if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;hubProPending=null;slxLicenseBroker.clear();delete globalThis.__SakaLuXPremiumVerified;const last=restoreVerifiedHubPro(key);if(last){hubProCache=last.data;hubProCheckedAt=last.at;globalThis.__SakaLuXPremiumVerified={key,data:last.data,at:last.at};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{...last.data,verification_state:'cached'}}));paintHubProStatus(button,last.data);}else window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null,verification_state:'checking'}}));}
         if(!key){if(button){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';}return;}
-        if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';return;}
+        if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';queueHubProRecovery('transport_unavailable');return;}
         const cachedExpiry=hubProCache?.expires_at?Date.parse(String(hubProCache.expires_at).replace(' ','T')+'Z'):NaN;
         if(!force&&hubProCache&&Date.now()-hubProCheckedAt<(hubProCache.premium_active?5*60*1000:30*1000)&&
             (!hubProCache.premium_active||(Number.isFinite(cachedExpiry)&&cachedExpiry>Date.now()))){
@@ -3340,7 +3340,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if(button)button.title='Checking PRO license…';
         const request=slxLicenseBroker.check(key,{force});
         hubProPending=request;
-        try{const d=await request;if(getSharedApiKey()!==key)return;hubProCache=d;hubProCheckedAt=Date.now();if(d?.status==='ok'&&d?.premium_active===true)rememberVerifiedHubPro(key,d);else if(d?.status==='ok')discardVerifiedHubPro();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
+        try{const d=await request;if(getSharedApiKey()!==key)return;hubProCache=d;hubProCheckedAt=Date.now();clearHubProRecovery();if(d?.status==='ok'&&d?.premium_active===true)rememberVerifiedHubPro(key,d);else if(d?.status==='ok')discardVerifiedHubPro();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
         catch(error){
             if(getSharedApiKey()!==key)return; // stale in-flight response after account switch
             // A transport/rate-limit failure is UNKNOWN, not FREE. Preserve an unexpired,
@@ -3356,6 +3356,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     detail:{premium_active:false,entitlements:[],expires_at:null,verification_state:'unavailable'}
                 }));
             }
+            queueHubProRecovery(error);
             if(button?.isConnected){
                 const reason=String(error?.message||'connection error');
                 button.title='PRO verification temporarily unavailable: '+reason;
@@ -3365,6 +3366,28 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         }
         finally{if(hubProPending===request)hubProPending=null;}
     }
+    // Shared license recovery: recheck after transient startup failures, even when
+    // the Hub panel was never opened. Back off on rate limits.
+    let hubProRecoveryTimer=null,hubProRecoveryDelay=30000;
+    function queueHubProRecovery(error){
+        if(hubProRecoveryTimer||!getSharedApiKey())return;
+        const rateLimited=/rate.limit|429/i.test(String(error?.message||error||''));
+        const pause=rateLimited?Math.max(90000,hubProRecoveryDelay):hubProRecoveryDelay;
+        hubProRecoveryDelay=Math.min(5*60*1000,Math.ceil(pause*1.6));
+        hubProRecoveryTimer=setTimeout(()=>{
+            hubProRecoveryTimer=null;
+            if(document.hidden){queueHubProRecovery('background');return;}
+            void refreshHubProStatus().catch(e=>console.warn('[SakaLuX Hub] license recovery',e));
+        },pause);
+    }
+    function clearHubProRecovery(){
+        if(hubProRecoveryTimer)clearTimeout(hubProRecoveryTimer);
+        hubProRecoveryTimer=null;hubProRecoveryDelay=30000;
+    }
+    document.addEventListener('visibilitychange',()=>{
+        if(!document.hidden&&getSharedApiKey()&&!hubProCache&&!hubProPending&&!hubProRecoveryTimer)
+            void refreshHubProStatus();
+    });
     // Verify entitlement on script startup, independent of opening the Hub UI.
     // The shared broker deduplicates simultaneous requests from other modules.
     void refreshHubProStatus().catch(e=>console.warn('[SakaLuX Hub] initial license check',e));
