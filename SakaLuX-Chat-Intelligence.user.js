@@ -22,7 +22,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.3';
+  const CORE_VERSION = '1.2.4';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -627,7 +627,7 @@
     applyWorkspaceLayout(overlay, panel, options = {}) {
       if (!overlay || !panel || typeof window === 'undefined') return null;
       const top = Math.max(0, Number(options.top ?? 0));
-      const bottom = Math.max(0, Number(options.bottom ?? 36));
+      const bottom = Math.max(0, Number(options.bottom ?? 0));
       const side = Math.max(0, Number(options.side ?? 4));
       const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
       if (typeof document !== 'undefined' && !document.getElementById('sakalux-shared-workspace-layout-style')) {
