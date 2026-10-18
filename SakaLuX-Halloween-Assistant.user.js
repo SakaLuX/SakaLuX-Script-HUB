@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.1.1
+// @version      0.1.2
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -19,7 +19,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '0.1.1';
+  const VERSION = '0.1.2';
+  const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
   const FF_TTL = 12 * 60 * 60 * 1000;
   const STATUS_TTL = 30000;
@@ -44,12 +45,13 @@
 
   let settings = { ...DEFAULTS, ...read(KEYS.settings, {}) };
   let boardCache = read(KEYS.board, { at: 0, rows: [] });
-  let ffCache = read(KEYS.ffCache, {});
+  let ffCache = { ...read('SLX_BOUNTY_FF_CACHE_V1', {}), ...read(KEYS.ffCache, {}) };
   let statusCache = read(KEYS.statusCache, {});
   let targets = [];
   let scanning = false;
   let timer = 0;
   let lastError = '';
+  let lastWarning = '';
   let lastScanMs = 0;
   let rateLimited = false;
 
@@ -62,8 +64,14 @@
       return String(localStorage.getItem('SakaLuX_HUB_TORN_API_KEY') || '').trim();
     } catch { return ''; }
   }
-  function getTornKey() { return getHubKey() || String(localStorage.getItem(KEYS.torn) || '').trim(); }
-  function getFFKey() { return String(localStorage.getItem(KEYS.ff) || '').trim() || getTornKey(); }
+  function getPDAKey() { return PDA_KEY && PDA_KEY !== '###PDA-APIKEY###' ? String(PDA_KEY).trim() : ''; }
+  function getTornKey() { return getHubKey() || getPDAKey() || String(localStorage.getItem(KEYS.torn) || '').trim(); }
+  function getFFKey() {
+    try {
+      return String(localStorage.getItem(KEYS.ff) || localStorage.getItem('SakaLuX_BOUNTY_FFSCOUTER_KEY') || localStorage.getItem('bh_ffscouterKey') || getTornKey() || '').trim();
+    } catch { return getTornKey(); }
+  }
+  function keySource() { return getHubKey() ? 'Hub' : getPDAKey() ? 'Torn PDA' : validKey(String(localStorage.getItem(KEYS.torn) || '').trim()) ? 'Local' : 'None'; }
   function validKey(key) { return /^[A-Za-z0-9]{16}$/.test(String(key || '').trim()); }
   function pruneCaches() {
     const now = Date.now();
@@ -93,26 +101,48 @@
     if (globalThis.SakaLuXCore?.api?.requestText) {
       return globalThis.SakaLuXCore.api.requestText({ url, ttl: 0, retries: 1, timeout: 15000 });
     }
+    const parsePDA = response => response?.responseText ?? response?.body ?? response?.data ?? response;
+    if (/^https:\/\/api\.torn\.com\//i.test(url) && typeof globalThis.PDA_httpGet === 'function') {
+      return globalThis.PDA_httpGet(url, { Accept: 'application/json' }).then(parsePDA);
+    }
+    if (/^https:\/\/api\.torn\.com\//i.test(url) && globalThis.flutter_inappwebview?.callHandler) {
+      return globalThis.flutter_inappwebview.callHandler('PDA_httpGet', url, { Accept: 'application/json' }).then(parsePDA);
+    }
     if (typeof GM_xmlhttpRequest === 'function') {
       return new Promise((resolve, reject) => GM_xmlhttpRequest({
         method: 'GET', url, timeout: 15000,
-        onload: response => response.status >= 200 && response.status < 300 ? resolve(String(response.responseText || '')) : reject(new Error('HTTP ' + response.status)),
+        onload: response => {
+          if (response.status >= 200 && response.status < 300) return resolve(String(response.responseText || ''));
+          let detail = '';
+          try { const body = JSON.parse(String(response.responseText || '{}')); detail = body?.error?.error || body?.error || body?.message || ''; } catch {}
+          reject(new Error('HTTP ' + response.status + (detail ? ' · ' + detail : '')));
+        },
         onerror: () => reject(new Error('Network error')),
         ontimeout: () => reject(new Error('Request timeout'))
       }));
     }
     return fetch(url, { credentials: 'omit', headers: { Accept: 'application/json' } }).then(async response => {
-      if (!response.ok) throw new Error('HTTP ' + response.status);
+      if (!response.ok) {
+        let detail = '';
+        try { const body = await response.clone().json(); detail = body?.error?.error || body?.error || body?.message || ''; } catch {}
+        throw new Error('HTTP ' + response.status + (detail ? ' · ' + detail : ''));
+      }
       return response.text();
     });
   }
   async function requestJSON(url) {
     const raw = await requestText(url);
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    if (data?.error) throw new Error(data.error.error || data.error.message || 'API error');
+    if (data?.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.error || data.error.message || 'API error');
     return data;
   }
   function isRateLimitError(error) { return /(?:http\s*429|rate.?limit|too many requests)/i.test(String(error?.message || error || '')); }
+  function friendlyError(error, service = 'API') {
+    const message = String(error?.message || error || 'Unknown error');
+    if (service === 'FFScouter' && /(?:http\s*401|invalid api key|sign up)/i.test(message)) return 'FFScouter key not registered · using level/cache ranking';
+    if (service === 'Torn' && /http\s*401/i.test(message)) return 'Torn key rejected · open Settings and save a valid key';
+    return service + ': ' + message;
+  }
 
   function formatBS(value) {
     const n = num(value);
@@ -273,13 +303,15 @@
     return aLevel - bLevel || b.reward - a.reward;
   }
   function speedLabel(row) {
+    if (row.ff == null && row.bs == null) return 'LEVEL PICK';
     if (row.ff <= 1.15 && (row.bs == null || row.bs <= 1e6)) return '⚡ VERY FAST';
     if (row.ff <= 1.3) return '⚡ FAST';
     return '✓ EASY';
   }
   function candidateRows(rows) {
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
-    return rows.filter(row => row.ff != null && row.ff >= 1 && row.ff <= maxFF).sort(quickCompare);
+    const known = rows.filter(row => row.ff != null && row.ff >= 1 && row.ff <= maxFF);
+    return (known.length ? known : rows).sort(quickCompare);
   }
   function applyCachedIntelligence(rows) {
     const now = Date.now();
@@ -306,12 +338,14 @@
     rateLimited = false;
     lastScanMs = 0;
     lastError = '';
+    lastWarning = '';
     updateControls();
     try {
       if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(boardCache.rows);
       let rows = await loadBoard(false);
       paintInstantCache(rows);
-      rows = await enrichFF(rows);
+      try { rows = await enrichFF(rows); }
+      catch (error) { lastWarning = friendlyError(error, 'FFScouter'); }
       const candidates = candidateRows(rows);
       const limit = Math.max(10, Math.min(160, Math.floor(num(settings.statusChecks) || DEFAULTS.statusChecks)));
       const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
@@ -328,10 +362,10 @@
       if (verified.length || !rateLimited) targets = verified.sort(quickCompare).slice(0, wanted);
       renderTargets();
       lastScanMs = Math.round(performance.now() - started);
-      setProgress((rateLimited ? 'API limit reached · cached live list kept · ' : 'Ready in ') + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
+      setProgress((lastWarning ? lastWarning + ' · ' : rateLimited ? 'API limit reached · cached live list kept · ' : 'Ready · ') + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
       return true;
     } catch (error) {
-      lastError = String(error?.message || error || 'Scan failed');
+      lastError = friendlyError(error, 'Torn');
       renderTargets();
       setProgress('Error: ' + lastError, 0, 0);
       return false;
@@ -346,6 +380,7 @@
     if ($(('#' + IDS.style))) return;
     const style = document.createElement('style'); style.id = IDS.style;
     style.textContent = `#${IDS.launcher}{position:fixed;right:12px;bottom:88px;z-index:2147483000;width:48px;height:48px;border:1px solid #f59e0b;border-radius:15px;background:linear-gradient(160deg,#542109,#1a1212);color:#fff;font-size:24px;box-shadow:0 10px 28px #000a}#${IDS.overlay}{position:fixed;inset:0;z-index:2147483600;display:flex;align-items:flex-end;justify-content:center;background:#02050ab8;color:#f8fafc;font:14px/1.4 system-ui,sans-serif}#${IDS.overlay}[hidden]{display:none!important}#${IDS.overlay} .ha-panel{width:min(760px,100%);height:min(92dvh,920px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #6b3b1c;border-radius:18px 18px 0 0;background:linear-gradient(155deg,#1d1620,#0d141d 55%);box-shadow:0 -18px 60px #000c}#${IDS.overlay} header{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #483020;background:#201822}#${IDS.overlay} header b{flex:1;color:#ffd894}#${IDS.overlay} button,#${IDS.overlay} input{border:1px solid #594a43;border-radius:9px;background:#17202a;color:#fff;min-height:38px;padding:7px 10px}#${IDS.overlay} .ha-head-btn{width:40px;padding:0}#${IDS.overlay} .ha-progress{padding:10px 12px;color:#cbd5e1;border-bottom:1px solid #2f3037}#${IDS.overlay} .ha-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid #2f3037}#${IDS.overlay} label{display:grid;gap:4px;color:#cbd5e1;font-size:11px}#${IDS.overlay} .ha-wide{grid-column:1/-1}#${IDS.overlay} .ha-actions{display:flex;gap:8px;grid-column:1/-1}#${IDS.overlay} .ha-actions button{flex:1;font-weight:800}#${IDS.overlay} [data-scan]{background:linear-gradient(#e57b18,#a8450b);border-color:#ffad45}#${IDS.overlay} .ha-list{flex:1;min-height:0;overflow:auto;display:grid;align-content:start;gap:8px;padding:10px}#${IDS.overlay} .ha-target{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:11px;border:1px solid #3c4655;border-radius:12px;background:#131c27}#${IDS.overlay} .ha-name{font-weight:900;color:#fff}#${IDS.overlay} .ha-meta{margin-top:4px;color:#aebdce;font-size:11px}#${IDS.overlay} .ha-speed{color:#ffcc70;font-weight:900}#${IDS.overlay} .ha-links{display:flex;gap:6px;align-items:center}#${IDS.overlay} .ha-links a{display:grid;place-items:center;width:42px;height:38px;border:1px solid #87531f;border-radius:9px;background:#42230c;color:#fff;text-decoration:none;font-weight:900}#${IDS.overlay} .ha-empty{padding:30px;text-align:center;color:#aebdce}#${IDS.overlay} footer{padding:8px 12px;border-top:1px solid #2f3037;color:#8998aa;font-size:10px}@media(max-width:540px){#${IDS.overlay} .ha-panel{height:94dvh}#${IDS.overlay} .ha-settings{grid-template-columns:1fr 1fr}#${IDS.overlay} .ha-target{grid-template-columns:1fr}#${IDS.overlay} .ha-links{justify-content:flex-end}}`;
+    style.textContent += `#${IDS.overlay} .ha-panel{height:min(86dvh,780px);background:linear-gradient(180deg,#17131d,#0b1119 42%)}#${IDS.overlay} header{min-height:48px;padding:7px 10px}#${IDS.overlay} header b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#${IDS.overlay} .ha-head-btn{width:36px;min-height:36px}#${IDS.overlay} .ha-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;padding:8px 10px;border-bottom:1px solid #302c35;background:#111722}#${IDS.overlay} .ha-key{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8fd6ad;font-size:11px;font-weight:800}#${IDS.overlay} .ha-toolbar button{min-height:34px;padding:5px 11px;font-size:12px;font-weight:900}#${IDS.overlay} .ha-progress{padding:7px 10px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#${IDS.overlay} .ha-settings[hidden]{display:none!important}#${IDS.overlay} .ha-settings{max-height:50dvh;overflow:auto;background:#111722}#${IDS.overlay} .ha-hint{padding:6px 10px;color:#8e9cad;font-size:10px;border-bottom:1px solid #29313a}#${IDS.overlay} .ha-setup{display:grid;place-items:center;flex:1;min-height:38px;border:1px solid #594a43;border-radius:9px;background:#17202a;color:#ffd894;text-decoration:none;font-weight:800}#${IDS.overlay} footer{padding:5px 10px;text-align:center} @media(max-width:540px){#${IDS.overlay}{font-size:13px}#${IDS.overlay} .ha-panel{height:84dvh;border-radius:16px 16px 0 0}#${IDS.overlay} .ha-settings{grid-template-columns:1fr 1fr;gap:7px;padding:8px}#${IDS.overlay} label{font-size:10px}#${IDS.overlay} input{min-height:36px;padding:5px 8px}#${IDS.overlay} .ha-list{padding:7px;gap:7px}#${IDS.overlay} .ha-target{grid-template-columns:minmax(0,1fr) auto;padding:9px}#${IDS.overlay} .ha-links{justify-content:initial}#${IDS.overlay} .ha-links a{width:40px;height:35px}#${IDS.overlay} .ha-hint{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}`;
     (document.head || document.documentElement).appendChild(style);
   }
   function setProgress(text, current = 0, total = 0) {
@@ -368,7 +403,8 @@
     }
     for (const row of targets) {
       const card = document.createElement('article'); card.className = 'ha-target';
-      card.innerHTML = `<div><div class="ha-name">${esc(row.name)} <small>[${row.id}]</small></div><div class="ha-meta"><span class="ha-speed">${esc(speedLabel(row))}</span> · LIVE OKAY ✓ · FF ${num(row.ff).toFixed(2)} · BS ${esc(formatBS(row.bs))}${row.level != null ? ' · L' + esc(row.level) : ''} · ${row.count} bount${row.count === 1 ? 'y' : 'ies'} ${money(row.reward)}</div></div><div class="ha-links"><a href="https://www.torn.com/page.php?sid=attack&user2ID=${row.id}" title="Open attack">ATK</a><a href="https://www.torn.com/profiles.php?XID=${row.id}" target="_blank" rel="noopener noreferrer" title="Open profile">👤</a></div>`;
+      const intel = `${row.ff != null ? ' · FF ' + num(row.ff).toFixed(2) : ''}${row.bs != null ? ' · BS ' + esc(formatBS(row.bs)) : ''}`;
+      card.innerHTML = `<div><div class="ha-name">${esc(row.name)} <small>[${row.id}]</small></div><div class="ha-meta"><span class="ha-speed">${esc(speedLabel(row))}</span> · LIVE OKAY ✓${intel}${row.level != null ? ' · L' + esc(row.level) : ''} · ${row.count} bount${row.count === 1 ? 'y' : 'ies'} ${money(row.reward)}</div></div><div class="ha-links"><a href="https://www.torn.com/page.php?sid=attack&user2ID=${row.id}" title="Attack">ATK</a><a href="https://www.torn.com/profiles.php?XID=${row.id}" target="_blank" rel="noopener noreferrer" title="Profile">👤</a></div>`;
       list.appendChild(card);
     }
   }
@@ -397,11 +433,12 @@
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
-      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 SakaLuX Halloween Assistant v${VERSION}</b><button class="ha-head-btn" data-close>×</button></header><div class="ha-progress" data-progress>Ready to scan</div><div class="ha-settings"><label>Torn API key<input data-torn type="password" maxlength="16" placeholder="Hub key used automatically"></label><label>FFScouter key<input data-ff type="password" maxlength="16" placeholder="Falls back to Torn key"></label><label>Board pages<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>Maximum FF<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Results<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Live checks<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SAVE</button><button data-scan>SCAN NOW</button></div><div class="ha-wide">Only live-verified <b>Okay</b> targets are shown. Hospital, Jail, Abroad, Federal and Unknown are always hidden. Speed is an estimate from FFScouter BS/FF and level; no win is guaranteed.</div></div><div class="ha-list"></div><footer>Manual attacks only · no automatic attack or weapon action · © 2026 SakaLuX [2380374]</footer></section>`;
+      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Cheie Torn<input data-torn type="password" maxlength="16" placeholder="Hub/PDA automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" placeholder="Opțională"></label><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ</button><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div></div><div class="ha-hint">Doar ținte verificate LIVE OKAY · cele mai ușoare apar primele</div><div class="ha-list"></div><footer>Atac manual · SakaLuX [2380374]</footer></section>`;
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
       $('[data-scan]', overlay).onclick = () => { saveSettingsFromUI(); void scan(true); };
+      $('[data-settings]', overlay).onclick = () => { const panel = $('.ha-settings', overlay); panel.hidden = !panel.hidden; };
       document.body.appendChild(overlay);
     }
     return overlay;
