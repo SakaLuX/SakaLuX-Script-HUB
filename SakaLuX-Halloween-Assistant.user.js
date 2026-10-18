@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.2.0
+// @version      0.2.1
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -25,7 +25,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.1';
+  const CORE_VERSION = '1.2.2';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -594,6 +594,39 @@
   })();
 
   const ui = {
+    ensureDonationFooter(rootOrSelector, options = {}) {
+      if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
+      const root = typeof rootOrSelector === 'string' ? document.querySelector(rootOrSelector) : rootOrSelector;
+      if (!root) return null;
+      const moduleId = String(options.id || 'module').replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+      const id = 'sakalux-inline-footer-' + moduleId;
+      const existing = root.querySelector?.('#' + id) || document.getElementById(id);
+      if (existing) { if (existing.parentElement !== root) root.appendChild(existing); return existing; }
+      const profile = String(options.profile || 'https://www.torn.com/profiles.php?XID=2380374');
+      const author = String(options.author || 'SakaLuX [2380374]');
+      if (!document.getElementById('sakalux-shared-donation-footer-style')) {
+        const style = document.createElement('style');
+        style.id = 'sakalux-shared-donation-footer-style';
+        style.textContent = `.slx-shared-donation{display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#080d13!important;font-family:Inter,Arial,sans-serif!important}.slx-shared-donation *{box-sizing:border-box!important}.slx-shared-donation-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;height:28px!important;padding:4px 10px!important}.slx-shared-donation button{display:block!important;width:100%!important;height:20px!important;min-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:8px!important;background:#151f2a!important;color:#c5d2df!important;font:900 8px/1.2 Inter,Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important}.slx-shared-donation-made{height:22px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;padding:0 6px!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important;font:500 9px/20px Inter,Arial,sans-serif!important;white-space:nowrap!important}.slx-shared-donation-made a{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}`;
+        (document.head || document.documentElement).appendChild(style);
+      }
+      const footer = document.createElement('div');
+      footer.id = id;
+      footer.className = 'slx-shared-donation';
+      footer.innerHTML = `<div class="slx-shared-donation-actions"><button type="button" data-slx-donate="money">💸 SEND MONEY</button><button type="button" data-slx-donate="items">🎁 SEND ITEMS</button></div><div class="slx-shared-donation-made">Made with ❤️ by <a href="${profile}">${author}</a></div>`;
+      footer.addEventListener('click', event => {
+        const action = event.target?.closest?.('[data-slx-donate]');
+        const link = event.target?.closest?.('a');
+        if (!action && !link) return;
+        event.preventDefault();
+        if (action && typeof options.onDonate === 'function') {
+          try { options.onDonate(action.dataset.slxDonate, profile); return; } catch {}
+        }
+        if (typeof location !== 'undefined') location.href = profile;
+      });
+      root.appendChild(footer);
+      return footer;
+    },
     applyWorkspaceLayout(overlay, panel, options = {}) {
       if (!overlay || !panel || typeof window === 'undefined') return null;
       const top = Math.max(0, Number(options.top ?? 0));
@@ -676,7 +709,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.2.0';
+  const VERSION = '0.2.1';
+  const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
   const FF_TTL = 12 * 60 * 60 * 1000;
@@ -722,9 +756,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   let rateLimited = false;
 
   try {
-    globalThis.SakaLuXCore?.settings?.register?.({ id: 'halloween-assistant', version: 1, keys: Object.values(KEYS) });
-    globalThis.SakaLuXCore?.api?.configure?.({ maxConcurrent: 8 });
-    globalThis.SakaLuXCore?.ui?.ensureSharedSkin?.();
+    SHARED_CORE?.settings?.register?.({ id: 'halloween-assistant', version: 1, keys: Object.values(KEYS) });
+    SHARED_CORE?.api?.configure?.({ maxConcurrent: 8 });
+    SHARED_CORE?.ui?.ensureSharedSkin?.();
   } catch {}
 
   function getHubKey() {
@@ -1164,20 +1198,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
-      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(globalThis.SakaLuXCore?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Cheie Torn<input data-torn type="password" maxlength="16" placeholder="Hub/PDA automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" placeholder="Opțională"></label><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ</button><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div></div><div class="ha-hint">LIVE OKAY · întâi cu bounty, apoi fără bounty · cele mai ușoare primele</div><div class="ha-list"></div><footer>Atac manual · SakaLuX [2380374]</footer></section>`;
+      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Cheie Torn<input data-torn type="password" maxlength="16" placeholder="Hub/PDA automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" placeholder="Opțională"></label><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ</button><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div></div><div class="ha-hint">LIVE OKAY · întâi cu bounty, apoi fără bounty · cele mai ușoare primele</div><div class="ha-list"></div></section>`;
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
       $('[data-scan]', overlay).onclick = () => { saveSettingsFromUI(); void scan(true); };
       $('[data-settings]', overlay).onclick = () => { const panel = $('.ha-settings', overlay); panel.hidden = !panel.hidden; };
       document.body.appendChild(overlay);
+      SHARED_CORE?.ui?.ensureDonationFooter?.($('.ha-panel', overlay), { id: 'halloween-assistant' });
     }
     return overlay;
   }
   function open() { const overlay = ensureUI(); overlay.hidden = false; renderTargets(); if (!targets.length && !scanning) void scan(false); return true; }
   function close() { const overlay = $('#' + IDS.overlay); if (overlay) overlay.hidden = true; }
   function schedule() { clearInterval(timer); if (settings.autoRefresh) timer = setInterval(() => { if (!document.hidden && !scanning) void scan(false); }, Math.max(30, num(settings.refreshSeconds) || 90) * 1000); }
-  function health() { return { version: VERSION, core: globalThis.SakaLuXCore?.version || null, ready: true, scanning, targets: targets.length, bountyTargets: targets.filter(row => row.hasBounty).length, supplementalTargets: targets.filter(row => !row.hasBounty).length, lastScanMs, boardCacheAge: Date.now() - num(boardCache.at), targetPoolAge: Date.now() - num(targetPool.at), ffCache: Object.keys(ffCache).length, statusCache: Object.keys(statusCache).length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError, lastWarning }; }
+  function health() { return { version: VERSION, core: SHARED_CORE?.version || null, ready: true, scanning, targets: targets.length, bountyTargets: targets.filter(row => row.hasBounty).length, supplementalTargets: targets.filter(row => !row.hasBounty).length, lastScanMs, boardCacheAge: Date.now() - num(boardCache.at), targetPoolAge: Date.now() - num(targetPool.at), ffCache: Object.keys(ffCache).length, statusCache: Object.keys(statusCache).length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError, lastWarning }; }
 
   globalThis.SakaLuXHalloweenAssistant = Object.freeze({ version: VERSION, open, close, scan: () => scan(true), health });
   function start() { pruneCaches(); ensureUI(); schedule(); window.dispatchEvent(new CustomEvent('SakaLuXHalloweenAssistantReady', { detail: { version: VERSION } })); }
