@@ -20,89 +20,6 @@
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
-/* SakaLuX Premium Badges v2 — BEGIN */
-(()=>{
- 'use strict';
- const MATCH=new RegExp("director",'i');
- const ROOT=new RegExp("ci-root|ci-shell|company",'i');
- const STYLE_ID='slx-premium-badge-style';
- function decorate(){
-  if(!document.body)return;
-  if(!document.getElementById(STYLE_ID)){
-   const style=document.createElement('style');style.id=STYLE_ID;
-   style.textContent='.slx-premium-badge{display:inline-flex!important;align-items:center!important;margin-inline-start:5px!important;padding:1px 5px!important;border:1px solid #bd9a4c!important;border-radius:5px!important;background:#372b14!important;color:#f9dc8d!important;font:800 10px/1.5 system-ui,sans-serif!important;letter-spacing:.035em!important;white-space:nowrap!important;vertical-align:middle!important;pointer-events:none!important}';
-   (document.head||document.documentElement).appendChild(style);
-  }
-  const selector='button,[role="button"],[role="tab"],label,select';
-  for(const el of document.querySelectorAll(selector)){
-   if(el.closest('#sakalux-unified-dialog,#sakalux-hub,#sakalux-script-hub,.slx-dialog-shade'))continue;
-   let node=el, inModule=false;
-   for(let i=0;node&&i<6;i++,node=node.parentElement){
-    const identity=String(node.id||'')+' '+String(typeof node.className==='string'?node.className:'');
-    if(ROOT.test(identity)){inModule=true;break}
-   }
-   if(!inModule)continue;
-   if(el.tagName==='SELECT'){
-     for(const option of el.options){
-      if(option.dataset.slxProOption==='1')continue;
-      const title=String(option.textContent||'').trim();
-      if(MATCH.test(title)&&!(/(?:✦\s*)?PRO\s*$/i).test(title)){
-       option.textContent=title+' · ✦ PRO';option.dataset.slxProOption='1';
-      }
-     }
-     continue;
-   }
-   if(el.querySelector(':scope > .slx-premium-badge'))continue;
-   const label=String(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
-   if(!MATCH.test(label)||/^(?:OPEN PREMIUM|PRO|✦ PRO)$/i.test(label)||/(?:\bPRO\b|✦\s*PRO)/i.test(label))continue;
-   const tag=document.createElement('span');tag.className='slx-premium-badge';tag.textContent='✦ PRO';tag.setAttribute('aria-hidden','true');
-   if(el.tagName==='LABEL'&&el.querySelector('button'))continue;
-   el.append(tag);
-   if(!el.title)el.title='SakaLuX PRO feature';
-  }
- }
- let timer=0;
- const schedule=()=>{if(timer)return;timer=setTimeout(()=>{timer=0;decorate()},180)};
- const start=()=>{decorate();new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true})};
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
-/* SakaLuX Premium Badges v2 — END */
-
-
-/* SakaLuX Unified Dialogs v1.0 — BEGIN */
-(() => {
-  'use strict';
-  if (globalThis.SakaLuXDialog?.version === '1.0') return;
-  const STYLE='sakalux-unified-dialog-style';
-  const esc=v=>String(v??'');
-  function ensure(){
-    if(!document.getElementById(STYLE)){
-      const style=document.createElement('style');style.id=STYLE;
-      style.textContent=`.slx-dialog-shade{position:fixed!important;inset:0!important;z-index:2147483647!important;background:rgba(2,8,19,.78)!important;backdrop-filter:blur(5px)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;box-sizing:border-box!important}.slx-dialog-panel{box-sizing:border-box!important;width:min(100%,420px)!important;max-height:90dvh!important;overflow:auto!important;background:linear-gradient(155deg,#172638,#0b1421)!important;border:1px solid #405874!important;border-radius:20px!important;color:#edf4ff!important;box-shadow:0 24px 65px #000a!important;font:14px/1.55 system-ui,Arial,sans-serif!important}.slx-dialog-head{display:flex!important;align-items:center!important;gap:12px!important;padding:20px 20px 6px!important}.slx-dialog-icon{display:grid!important;place-items:center!important;flex:none!important;width:43px!important;height:43px!important;background:#26394e!important;color:#e8c577!important;border:1px solid #56617a!important;border-radius:13px!important;font-size:21px!important}.slx-dialog-title{font-size:20px!important;font-weight:800!important;line-height:1.2!important}.slx-dialog-tag{font-size:10px!important;font-weight:800!important;letter-spacing:.1em!important;color:#e9c779!important}.slx-dialog-x{margin-left:auto!important;border:0!important;border-radius:10px!important;background:#233348!important;color:#fff!important;padding:7px 12px!important;font-size:16px!important}.slx-dialog-message{white-space:pre-wrap!important;overflow-wrap:anywhere!important;color:#d8e5f7!important;padding:14px 20px 4px!important;font-size:15px!important}.slx-dialog-actions{display:flex!important;gap:10px!important;padding:18px 20px 20px!important}.slx-dialog-btn{min-height:43px!important;flex:1!important;border:1px solid #536a84!important;border-radius:12px!important;color:white!important;background:#26394e!important;font-weight:800!important}.slx-dialog-btn.primary{background:linear-gradient(#3d93e9,#2769b5)!important;border-color:#60a6ef!important}`;
-      (document.head||document.documentElement).appendChild(style);
-    }
-  }
-  function show({title='SakaLuX',message='',type='info',actions}={}){
-    ensure();const old=document.getElementById('sakalux-unified-dialog');old?.remove();
-    const shade=document.createElement('div');shade.id='sakalux-unified-dialog';shade.className='slx-dialog-shade';
-    const panel=document.createElement('section');panel.className='slx-dialog-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
-    const head=document.createElement('div');head.className='slx-dialog-head';
-    const icon=document.createElement('div');icon.className='slx-dialog-icon';icon.textContent=type==='error'?'!':type==='success'?'✓':type==='pro'?'✦':type==='update'?'↻':'i';
-    const group=document.createElement('div'),heading=document.createElement('div'),tag=document.createElement('div');
-    heading.className='slx-dialog-title';heading.textContent=title;tag.className='slx-dialog-tag';tag.textContent=type.toUpperCase();group.append(heading,tag);
-    const x=document.createElement('button');x.type='button';x.className='slx-dialog-x';x.textContent='×';x.setAttribute('aria-label','Close');x.onclick=()=>shade.remove();head.append(icon,group,x);
-    const body=document.createElement('div');body.className='slx-dialog-message';body.textContent=esc(message);
-    const foot=document.createElement('div');foot.className='slx-dialog-actions';
-    for(const action of actions||[{label:'CLOSE',primary:true}]){const b=document.createElement('button');b.type='button';b.className='slx-dialog-btn'+(action.primary?' primary':'');b.textContent=action.label||'OK';b.onclick=()=>{shade.remove();action.onClick?.()};foot.append(b)}
-    if(type==='pro'){const link=document.createElement('a');link.href='https://www.torn.com/profiles.php?XID=2380374';link.target='_blank';link.rel='noopener noreferrer';link.textContent='Send 1 Xanax for 7 days PRO → SakaLuX [2380374] ↗';link.style.cssText='display:block;margin:10px 20px;color:#e9c779;font-weight:700;text-decoration:underline';panel.append(head,body,link,foot)}else panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
-    shade.addEventListener('click',e=>{if(e.target===shade)shade.remove()});return shade;
-  }
-  function notice(message,type){const m=esc(message);return show({title:/error|failed|unavailable/i.test(m)?'Action failed':/pro|premium|license/i.test(m)?'SakaLuX PRO':'SakaLuX',message:m,type:type||(/error|failed|unavailable/i.test(m)?'error':/pro|premium|license/i.test(m)?'pro':'info')})}
-  function confirmAsync(message){return new Promise(resolve=>show({title:'Please confirm',message,type:'info',actions:[{label:'CANCEL',onClick:()=>resolve(false)},{label:'CONFIRM',primary:true,onClick:()=>resolve(true)}]}))}
-  globalThis.SakaLuXDialog={version:'1.0',show,notice,confirmAsync};
-})();
-/* SakaLuX Unified Dialogs v1.0 — END */
-
 
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
@@ -113,13 +30,14 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.1.0';
+  const CORE_VERSION = '1.2.2';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
     { match: /Account Auditor/i, id: 'account-auditor', version: 1, keys: ['SakaLuX_AUDITOR_SETTINGS_V3'] },
     { match: /Bazaar Smart Pricer/i, id: 'bazaar-smart-pricer', version: 1, keys: ['SakaLuX_BAZAAR_SMART_PRICER_SETTINGS'] },
     { match: /Bazaar Thanker/i, id: 'bazaar', version: 1, keys: ['sakalux_bazaar_thanker_v5'] },
+    { match: /Bounty Hunter/i, id: 'bounty-hunter', version: 1, keys: ['SLX_BOUNTY_SETTINGS_V3','SLX_BOUNTY_WATCH_V1','SLX_BOUNTY_BLACK_V1','SLX_BOUNTY_CACHE_V2','SLX_BOUNTY_USER_CACHE_V1','SLX_BOUNTY_FF_CACHE_V1','SLX_BOUNTY_SCAN_STATE_V1'] },
     { match: /Chat Intelligence/i, id: 'chat-intelligence', version: 1, keys: ['SLX_CHAT_CFG4'] },
     { match: /Company Intelligence/i, id: 'company-intelligence', version: 1, keys: ['sak_ci:mode', 'sak_ci:tab', 'sak_ci:compact', 'sak_ci:enabled'] },
     { match: /Elimination Assistant/i, id: 'elimination-assistant', version: 1, keys: ['slx_elim_ui_v1'] },
@@ -381,7 +299,7 @@
 
   const dock = {
     ORDER: Object.freeze([
-      'enhancer','bazaar','bazaar-smart-pricer','mission-rewards','market-intelligence',
+      'enhancer','bazaar','bazaar-smart-pricer','bounty-hunter','mission-rewards','market-intelligence',
       'elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'
     ]),
     dedupe(registrations = []) {
@@ -681,6 +599,84 @@
   })();
 
   const ui = {
+    ensureDonationFooter(rootOrSelector, options = {}) {
+      if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
+      const root = typeof rootOrSelector === 'string' ? document.querySelector(rootOrSelector) : rootOrSelector;
+      if (!root) return null;
+      const moduleId = String(options.id || 'module').replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+      const id = 'sakalux-inline-footer-' + moduleId;
+      const existing = root.querySelector?.('#' + id) || document.getElementById(id);
+      if (existing) { if (existing.parentElement !== root) root.appendChild(existing); return existing; }
+      const profile = String(options.profile || 'https://www.torn.com/profiles.php?XID=2380374');
+      const author = String(options.author || 'SakaLuX [2380374]');
+      if (!document.getElementById('sakalux-shared-donation-footer-style')) {
+        const style = document.createElement('style');
+        style.id = 'sakalux-shared-donation-footer-style';
+        style.textContent = `.slx-shared-donation{display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#080d13!important;font-family:Inter,Arial,sans-serif!important}.slx-shared-donation *{box-sizing:border-box!important}.slx-shared-donation-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;height:28px!important;padding:4px 10px!important}.slx-shared-donation button{display:block!important;width:100%!important;height:20px!important;min-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:8px!important;background:#151f2a!important;color:#c5d2df!important;font:900 8px/1.2 Inter,Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important}.slx-shared-donation-made{height:22px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;padding:0 6px!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important;font:500 9px/20px Inter,Arial,sans-serif!important;white-space:nowrap!important}.slx-shared-donation-made a{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}`;
+        (document.head || document.documentElement).appendChild(style);
+      }
+      const footer = document.createElement('div');
+      footer.id = id;
+      footer.className = 'slx-shared-donation';
+      footer.innerHTML = `<div class="slx-shared-donation-actions"><button type="button" data-slx-donate="money">💸 SEND MONEY</button><button type="button" data-slx-donate="items">🎁 SEND ITEMS</button></div><div class="slx-shared-donation-made">Made with ❤️ by <a href="${profile}">${author}</a></div>`;
+      footer.addEventListener('click', event => {
+        const action = event.target?.closest?.('[data-slx-donate]');
+        const link = event.target?.closest?.('a');
+        if (!action && !link) return;
+        event.preventDefault();
+        if (action && typeof options.onDonate === 'function') {
+          try { options.onDonate(action.dataset.slxDonate, profile); return; } catch {}
+        }
+        if (typeof location !== 'undefined') location.href = profile;
+      });
+      root.appendChild(footer);
+      return footer;
+    },
+    applyWorkspaceLayout(overlay, panel, options = {}) {
+      if (!overlay || !panel || typeof window === 'undefined') return null;
+      const top = Math.max(0, Number(options.top ?? 0));
+      const bottom = Math.max(0, Number(options.bottom ?? 36));
+      const side = Math.max(0, Number(options.side ?? 4));
+      const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
+      const apply = () => {
+        const vv = window.visualViewport;
+        const width = Math.max(0, Number(vv?.width || window.innerWidth || 0));
+        const height = Math.max(0, Number(vv?.height || window.innerHeight || 0));
+        const offsetTop = Math.max(0, Number(vv?.offsetTop || 0));
+        const offsetLeft = Math.max(0, Number(vv?.offsetLeft || 0));
+        Object.assign(overlay.style, {
+          position: 'fixed',
+          inset: '0px',
+          width: 'auto',
+          height: 'auto',
+          maxHeight: 'none',
+          display: 'block'
+        });
+        const usable = Math.max(240, height - top - bottom);
+        const panelWidth = Math.min(maxWidth, Math.max(240, width - side * 2));
+        Object.assign(panel.style, {
+          position: 'fixed',
+          top: (offsetTop + top) + 'px',
+          bottom: 'auto',
+          left: (offsetLeft + Math.max(side, (width - panelWidth) / 2)) + 'px',
+          width: panelWidth + 'px',
+          height: usable + 'px',
+          maxHeight: usable + 'px',
+          margin: '0',
+          boxSizing: 'border-box'
+        });
+      };
+      apply();
+      const vv = window.visualViewport;
+      vv?.addEventListener?.('resize', apply);
+      vv?.addEventListener?.('scroll', apply);
+      window.addEventListener?.('resize', apply);
+      return () => {
+        vv?.removeEventListener?.('resize', apply);
+        vv?.removeEventListener?.('scroll', apply);
+        window.removeEventListener?.('resize', apply);
+      };
+    },
     ensureSharedSkin() {
       if (typeof document === 'undefined' || typeof document.createElement !== 'function' || document.getElementById('sakalux-shared-hub-skin')) return;
       const st = document.createElement('style');
@@ -714,6 +710,89 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   ui.ensureSharedSkin();
 })();
 /* SakaLuX Shared Core — END */
+/* SakaLuX Premium Badges v2 — BEGIN */
+(()=>{
+ 'use strict';
+ const MATCH=new RegExp("director",'i');
+ const ROOT=new RegExp("ci-root|ci-shell|company",'i');
+ const STYLE_ID='slx-premium-badge-style';
+ function decorate(){
+  if(!document.body)return;
+  if(!document.getElementById(STYLE_ID)){
+   const style=document.createElement('style');style.id=STYLE_ID;
+   style.textContent='.slx-premium-badge{display:inline-flex!important;align-items:center!important;margin-inline-start:5px!important;padding:1px 5px!important;border:1px solid #bd9a4c!important;border-radius:5px!important;background:#372b14!important;color:#f9dc8d!important;font:800 10px/1.5 system-ui,sans-serif!important;letter-spacing:.035em!important;white-space:nowrap!important;vertical-align:middle!important;pointer-events:none!important}';
+   (document.head||document.documentElement).appendChild(style);
+  }
+  const selector='button,[role="button"],[role="tab"],label,select';
+  for(const el of document.querySelectorAll(selector)){
+   if(el.closest('#sakalux-unified-dialog,#sakalux-hub,#sakalux-script-hub,.slx-dialog-shade'))continue;
+   let node=el, inModule=false;
+   for(let i=0;node&&i<6;i++,node=node.parentElement){
+    const identity=String(node.id||'')+' '+String(typeof node.className==='string'?node.className:'');
+    if(ROOT.test(identity)){inModule=true;break}
+   }
+   if(!inModule)continue;
+   if(el.tagName==='SELECT'){
+     for(const option of el.options){
+      if(option.dataset.slxProOption==='1')continue;
+      const title=String(option.textContent||'').trim();
+      if(MATCH.test(title)&&!(/(?:✦\s*)?PRO\s*$/i).test(title)){
+       option.textContent=title+' · ✦ PRO';option.dataset.slxProOption='1';
+      }
+     }
+     continue;
+   }
+   if(el.querySelector(':scope > .slx-premium-badge'))continue;
+   const label=String(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
+   if(!MATCH.test(label)||/^(?:OPEN PREMIUM|PRO|✦ PRO)$/i.test(label)||/(?:\bPRO\b|✦\s*PRO)/i.test(label))continue;
+   const tag=document.createElement('span');tag.className='slx-premium-badge';tag.textContent='✦ PRO';tag.setAttribute('aria-hidden','true');
+   if(el.tagName==='LABEL'&&el.querySelector('button'))continue;
+   el.append(tag);
+   if(!el.title)el.title='SakaLuX PRO feature';
+  }
+ }
+ let timer=0;
+ const schedule=()=>{if(timer)return;timer=setTimeout(()=>{timer=0;decorate()},180)};
+ const start=()=>{decorate();new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true})};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+/* SakaLuX Premium Badges v2 — END */
+
+
+/* SakaLuX Unified Dialogs v1.0 — BEGIN */
+(() => {
+  'use strict';
+  if (globalThis.SakaLuXDialog?.version === '1.0') return;
+  const STYLE='sakalux-unified-dialog-style';
+  const esc=v=>String(v??'');
+  function ensure(){
+    if(!document.getElementById(STYLE)){
+      const style=document.createElement('style');style.id=STYLE;
+      style.textContent=`.slx-dialog-shade{position:fixed!important;inset:0!important;z-index:2147483647!important;background:rgba(2,8,19,.78)!important;backdrop-filter:blur(5px)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:18px!important;box-sizing:border-box!important}.slx-dialog-panel{box-sizing:border-box!important;width:min(100%,420px)!important;max-height:90dvh!important;overflow:auto!important;background:linear-gradient(155deg,#172638,#0b1421)!important;border:1px solid #405874!important;border-radius:20px!important;color:#edf4ff!important;box-shadow:0 24px 65px #000a!important;font:14px/1.55 system-ui,Arial,sans-serif!important}.slx-dialog-head{display:flex!important;align-items:center!important;gap:12px!important;padding:20px 20px 6px!important}.slx-dialog-icon{display:grid!important;place-items:center!important;flex:none!important;width:43px!important;height:43px!important;background:#26394e!important;color:#e8c577!important;border:1px solid #56617a!important;border-radius:13px!important;font-size:21px!important}.slx-dialog-title{font-size:20px!important;font-weight:800!important;line-height:1.2!important}.slx-dialog-tag{font-size:10px!important;font-weight:800!important;letter-spacing:.1em!important;color:#e9c779!important}.slx-dialog-x{margin-left:auto!important;border:0!important;border-radius:10px!important;background:#233348!important;color:#fff!important;padding:7px 12px!important;font-size:16px!important}.slx-dialog-message{white-space:pre-wrap!important;overflow-wrap:anywhere!important;color:#d8e5f7!important;padding:14px 20px 4px!important;font-size:15px!important}.slx-dialog-actions{display:flex!important;gap:10px!important;padding:18px 20px 20px!important}.slx-dialog-btn{min-height:43px!important;flex:1!important;border:1px solid #536a84!important;border-radius:12px!important;color:white!important;background:#26394e!important;font-weight:800!important}.slx-dialog-btn.primary{background:linear-gradient(#3d93e9,#2769b5)!important;border-color:#60a6ef!important}`;
+      (document.head||document.documentElement).appendChild(style);
+    }
+  }
+  function show({title='SakaLuX',message='',type='info',actions}={}){
+    ensure();const old=document.getElementById('sakalux-unified-dialog');old?.remove();
+    const shade=document.createElement('div');shade.id='sakalux-unified-dialog';shade.className='slx-dialog-shade';
+    const panel=document.createElement('section');panel.className='slx-dialog-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
+    const head=document.createElement('div');head.className='slx-dialog-head';
+    const icon=document.createElement('div');icon.className='slx-dialog-icon';icon.textContent=type==='error'?'!':type==='success'?'✓':type==='pro'?'✦':type==='update'?'↻':'i';
+    const group=document.createElement('div'),heading=document.createElement('div'),tag=document.createElement('div');
+    heading.className='slx-dialog-title';heading.textContent=title;tag.className='slx-dialog-tag';tag.textContent=type.toUpperCase();group.append(heading,tag);
+    const x=document.createElement('button');x.type='button';x.className='slx-dialog-x';x.textContent='×';x.setAttribute('aria-label','Close');x.onclick=()=>shade.remove();head.append(icon,group,x);
+    const body=document.createElement('div');body.className='slx-dialog-message';body.textContent=esc(message);
+    const foot=document.createElement('div');foot.className='slx-dialog-actions';
+    for(const action of actions||[{label:'CLOSE',primary:true}]){const b=document.createElement('button');b.type='button';b.className='slx-dialog-btn'+(action.primary?' primary':'');b.textContent=action.label||'OK';b.onclick=()=>{shade.remove();action.onClick?.()};foot.append(b)}
+    if(type==='pro'){const link=document.createElement('a');link.href='https://www.torn.com/profiles.php?XID=2380374';link.target='_blank';link.rel='noopener noreferrer';link.textContent='Send 1 Xanax for 7 days PRO → SakaLuX [2380374] ↗';link.style.cssText='display:block;margin:10px 20px;color:#e9c779;font-weight:700;text-decoration:underline';panel.append(head,body,link,foot)}else panel.append(head,body,foot);shade.append(panel);(document.body||document.documentElement).append(shade);
+    shade.addEventListener('click',e=>{if(e.target===shade)shade.remove()});return shade;
+  }
+  function notice(message,type){const m=esc(message);return show({title:/error|failed|unavailable/i.test(m)?'Action failed':/pro|premium|license/i.test(m)?'SakaLuX PRO':'SakaLuX',message:m,type:type||(/error|failed|unavailable/i.test(m)?'error':/pro|premium|license/i.test(m)?'pro':'info')})}
+  function confirmAsync(message){return new Promise(resolve=>show({title:'Please confirm',message,type:'info',actions:[{label:'CANCEL',onClick:()=>resolve(false)},{label:'CONFIRM',primary:true,onClick:()=>resolve(true)}]}))}
+  globalThis.SakaLuXDialog={version:'1.0',show,notice,confirmAsync};
+})();
+/* SakaLuX Unified Dialogs v1.0 — END */
+
 
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
