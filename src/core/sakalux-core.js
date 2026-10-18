@@ -6,7 +6,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.4';
+  const CORE_VERSION = '1.2.5';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -611,9 +611,10 @@
     applyWorkspaceLayout(overlay, panel, options = {}) {
       if (!overlay || !panel || typeof window === 'undefined') return null;
       const top = Math.max(0, Number(options.top ?? 0));
-      const bottom = Math.max(0, Number(options.bottom ?? 0));
+      const bottom = Math.max(0, Number(options.bottom ?? 64));
       const side = Math.max(0, Number(options.side ?? 4));
       const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
+      const radius = Math.max(0, Number(options.radius ?? 16));
       if (typeof document !== 'undefined' && !document.getElementById('sakalux-shared-workspace-layout-style')) {
         const style = document.createElement('style');
         style.id = 'sakalux-shared-workspace-layout-style';
@@ -652,6 +653,8 @@
           maxHeight: usable + 'px',
           margin: '0',
           boxSizing: 'border-box',
+          borderRadius: radius + 'px',
+          overflow: 'hidden',
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none'
         });
