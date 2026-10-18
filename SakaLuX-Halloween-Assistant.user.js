@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.1.0
+// @version      0.1.1
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -19,7 +19,13 @@
 (() => {
   'use strict';
 
-  const VERSION = '0.1.0';
+  const VERSION = '0.1.1';
+  const BOARD_TTL = 120000;
+  const FF_TTL = 12 * 60 * 60 * 1000;
+  const STATUS_TTL = 30000;
+  const BOARD_CONCURRENCY = 3;
+  const FF_CONCURRENCY = 2;
+  const STATUS_CONCURRENCY = 8;
   const IDS = Object.freeze({ launcher: 'slx-halloween-launcher', overlay: 'slx-halloween-overlay', style: 'slx-halloween-style' });
   const KEYS = Object.freeze({
     settings: 'SLX_HALLOWEEN_SETTINGS_V1',
@@ -33,7 +39,6 @@
   const $ = (query, root = document) => root.querySelector(query);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
-  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   const read = (key, fallback) => { try { const value = JSON.parse(localStorage.getItem(key) || 'null'); return value ?? fallback; } catch { return fallback; } };
   const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } };
 
@@ -45,6 +50,8 @@
   let scanning = false;
   let timer = 0;
   let lastError = '';
+  let lastScanMs = 0;
+  let rateLimited = false;
 
   function getHubKey() {
     try {
@@ -58,6 +65,29 @@
   function getTornKey() { return getHubKey() || String(localStorage.getItem(KEYS.torn) || '').trim(); }
   function getFFKey() { return String(localStorage.getItem(KEYS.ff) || '').trim() || getTornKey(); }
   function validKey(key) { return /^[A-Za-z0-9]{16}$/.test(String(key || '').trim()); }
+  function pruneCaches() {
+    const now = Date.now();
+    let ffChanged = false, statusChanged = false;
+    for (const [id, cached] of Object.entries(ffCache)) if (!cached || now - num(cached.at) > 24 * 60 * 60 * 1000) { delete ffCache[id]; ffChanged = true; }
+    for (const [id, cached] of Object.entries(statusCache)) if (!cached || now - num(cached.at) > 5 * 60 * 1000) { delete statusCache[id]; statusChanged = true; }
+    const ffIds = Object.keys(ffCache), statusIds = Object.keys(statusCache);
+    if (ffIds.length > 5000) { ffIds.sort((a, b) => num(ffCache[b]?.at) - num(ffCache[a]?.at)).slice(5000).forEach(id => delete ffCache[id]); ffChanged = true; }
+    if (statusIds.length > 1000) { statusIds.sort((a, b) => num(statusCache[b]?.at) - num(statusCache[a]?.at)).slice(1000).forEach(id => delete statusCache[id]); statusChanged = true; }
+    if (ffChanged) write(KEYS.ffCache, ffCache);
+    if (statusChanged) write(KEYS.statusCache, statusCache);
+  }
+  async function mapLimit(items, limit, worker) {
+    const results = new Array(items.length);
+    let next = 0;
+    async function run() {
+      while (next < items.length) {
+        const index = next++;
+        results[index] = await worker(items[index], index);
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(Math.max(1, limit), items.length) }, run));
+    return results;
+  }
 
   function requestText(url) {
     if (globalThis.SakaLuXCore?.api?.requestText) {
@@ -82,6 +112,7 @@
     if (data?.error) throw new Error(data.error.error || data.error.message || 'API error');
     return data;
   }
+  function isRateLimitError(error) { return /(?:http\s*429|rate.?limit|too many requests)/i.test(String(error?.message || error || '')); }
 
   function formatBS(value) {
     const n = num(value);
@@ -120,17 +151,28 @@
   }
 
   async function loadBoard(force = false) {
-    if (!force && Array.isArray(boardCache.rows) && boardCache.rows.length && Date.now() - num(boardCache.at) < 120000) return boardCache.rows.map(row => ({ ...row }));
+    if (!force && Array.isArray(boardCache.rows) && boardCache.rows.length && Date.now() - num(boardCache.at) < BOARD_TTL) return boardCache.rows.map(row => ({ ...row }));
     const key = getTornKey();
     if (!validKey(key)) throw new Error('Add a valid Torn API key in Settings or SakaLuX Hub.');
     const grouped = new Map();
     const pages = Math.max(1, Math.min(60, Math.floor(num(settings.maxPages) || DEFAULTS.maxPages)));
-    let offset = 0;
-    for (let page = 0; page < pages; page++) {
-      setProgress('Scanning bounty board', page, pages);
+    let completed = 0;
+    const offsets = Array.from({ length: pages }, (_, page) => page * 100);
+    const pageLists = await mapLimit(offsets, BOARD_CONCURRENCY, async (offset, page) => {
       const url = 'https://api.torn.com/v2/torn/bounties?limit=100&offset=' + offset + '&key=' + encodeURIComponent(key);
-      const data = await requestJSON(url);
-      const list = apiList(data);
+      try {
+        const list = apiList(await requestJSON(url));
+        completed++;
+        setProgress('Scanning bounty board', completed, pages);
+        return list;
+      } catch (error) {
+        completed++;
+        setProgress('Scanning bounty board', completed, pages);
+        if (page === 0) throw error;
+        return [];
+      }
+    });
+    for (const list of pageLists) {
       for (const item of list) {
         const row = normalizeBounty(item);
         if (!row) continue;
@@ -138,9 +180,6 @@
         if (previous) { previous.reward += row.reward; previous.count++; }
         else grouped.set(row.id, row);
       }
-      if (list.length < 100) break;
-      offset += list.length;
-      await wait(850);
     }
     const rows = [...grouped.values()];
     boardCache = { at: Date.now(), rows };
@@ -163,16 +202,20 @@
     const needed = [];
     for (const row of rows) {
       const cached = ffCache[String(row.id)];
-      if (cached && now - num(cached.at) < 12 * 60 * 60 * 1000) { row.ff = cached.ff; row.bs = cached.bs; }
+      if (cached && now - num(cached.at) < FF_TTL) { row.ff = cached.ff; row.bs = cached.bs; }
       else needed.push(row.id);
     }
-    for (let index = 0; index < needed.length; index += 205) {
-      const batch = needed.slice(index, index + 205);
-      setProgress('Loading FF / battle stats', Math.min(index, needed.length), needed.length);
+    const batches = [];
+    for (let index = 0; index < needed.length; index += 205) batches.push(needed.slice(index, index + 205));
+    let completed = 0;
+    const results = await mapLimit(batches, FF_CONCURRENCY, async batch => {
       const url = 'https://ffscouter.com/api/v1/get-stats?key=' + encodeURIComponent(key) + '&targets=' + batch.join(',');
-      for (const item of normalizeFF(await requestJSON(url))) ffCache[String(item.id)] = { at: Date.now(), ff: item.ff, bs: item.bs };
-      if (index + 205 < needed.length) await wait(200);
-    }
+      const result = normalizeFF(await requestJSON(url));
+      completed += batch.length;
+      setProgress('Loading FF / battle stats', Math.min(completed, needed.length), needed.length);
+      return result;
+    });
+    for (const result of results) for (const item of result) ffCache[String(item.id)] = { at: Date.now(), ff: item.ff, bs: item.bs };
     write(KEYS.ffCache, ffCache);
     for (const row of rows) {
       const cached = ffCache[String(row.id)];
@@ -199,7 +242,7 @@
   }
   async function checkStatus(row, force = false) {
     const cached = statusCache[String(row.id)];
-    if (!force && cached && Date.now() - num(cached.at) < 30000) return { ...row, ...cached.data, statusVerified: cached.data.status !== 'Unknown', ff: row.ff, bs: row.bs };
+    if (!force && cached && Date.now() - num(cached.at) < STATUS_TTL) return { ...row, ...cached.data, statusVerified: cached.data.status !== 'Unknown', ff: row.ff, bs: row.bs };
     const key = getTornKey();
     const routes = [
       'https://api.torn.com/v2/user/' + row.id + '/basic?striptags=true&key=' + encodeURIComponent(key),
@@ -208,11 +251,16 @@
     ];
     let result = null;
     for (const url of routes) {
-      try { result = statusFrom(await requestJSON(url)); if (result.status !== 'Unknown') break; } catch {}
+      if (rateLimited) break;
+      try {
+        result = statusFrom(await requestJSON(url));
+        if (result.status !== 'Unknown') break;
+      } catch (error) {
+        if (isRateLimitError(error)) { rateLimited = true; break; }
+      }
     }
     if (!result) return row;
     statusCache[String(row.id)] = { at: Date.now(), data: result };
-    write(KEYS.statusCache, statusCache);
     return { ...row, ...result, name: result.name || row.name, level: result.level ?? row.level, statusVerified: result.status !== 'Unknown', ff: row.ff, bs: row.bs };
   }
 
@@ -233,29 +281,54 @@
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
     return rows.filter(row => row.ff != null && row.ff >= 1 && row.ff <= maxFF).sort(quickCompare);
   }
+  function applyCachedIntelligence(rows) {
+    const now = Date.now();
+    return rows.map(row => {
+      const ff = ffCache[String(row.id)];
+      const status = statusCache[String(row.id)];
+      const next = { ...row };
+      if (ff && now - num(ff.at) < FF_TTL) { next.ff = ff.ff; next.bs = ff.bs; }
+      if (status && now - num(status.at) < STATUS_TTL) Object.assign(next, status.data, { statusVerified: status.data.status !== 'Unknown' });
+      return next;
+    });
+  }
+  function paintInstantCache(rows) {
+    const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
+    const instant = candidateRows(applyCachedIntelligence(rows)).filter(row => row.statusVerified === true && row.status === 'Okay').slice(0, wanted);
+    if (instant.length) { targets = instant; renderTargets(); setProgress('Instant cache · refreshing live', instant.length, instant.length); }
+    return instant.length;
+  }
 
   async function scan(force = false) {
     if (scanning) return false;
+    const started = performance.now();
     scanning = true;
+    rateLimited = false;
+    lastScanMs = 0;
     lastError = '';
     updateControls();
     try {
-      let rows = await loadBoard(force);
+      if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(boardCache.rows);
+      let rows = await loadBoard(false);
+      paintInstantCache(rows);
       rows = await enrichFF(rows);
       const candidates = candidateRows(rows);
       const limit = Math.max(10, Math.min(160, Math.floor(num(settings.statusChecks) || DEFAULTS.statusChecks)));
       const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
       const verified = [];
-      for (let index = 0; index < Math.min(limit, candidates.length); index += 4) {
-        const batch = candidates.slice(index, index + 4);
+      const checkCount = Math.min(limit, candidates.length);
+      for (let index = 0; index < checkCount; index += STATUS_CONCURRENCY) {
+        const batch = candidates.slice(index, index + STATUS_CONCURRENCY);
         setProgress('Verifying attack-ready status', Math.min(index, limit), Math.min(limit, candidates.length));
-        const checked = await Promise.all(batch.map(row => checkStatus(row, force)));
+        const checked = await mapLimit(batch, STATUS_CONCURRENCY, row => rateLimited ? row : checkStatus(row, force));
         verified.push(...checked.filter(row => row.statusVerified === true && row.status === 'Okay'));
-        if (verified.length >= wanted) break;
+        if (verified.length >= wanted || rateLimited) break;
       }
-      targets = verified.sort(quickCompare).slice(0, wanted);
+      write(KEYS.statusCache, statusCache);
+      if (verified.length || !rateLimited) targets = verified.sort(quickCompare).slice(0, wanted);
       renderTargets();
-      setProgress('Ready', targets.length, targets.length);
+      lastScanMs = Math.round(performance.now() - started);
+      setProgress((rateLimited ? 'API limit reached · cached live list kept · ' : 'Ready in ') + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
       return true;
     } catch (error) {
       lastError = String(error?.message || error || 'Scan failed');
@@ -263,6 +336,7 @@
       setProgress('Error: ' + lastError, 0, 0);
       return false;
     } finally {
+      if (!lastScanMs) lastScanMs = Math.round(performance.now() - started);
       scanning = false;
       updateControls();
     }
@@ -335,9 +409,9 @@
   function open() { const overlay = ensureUI(); overlay.hidden = false; renderTargets(); if (!targets.length && !scanning) void scan(false); return true; }
   function close() { const overlay = $('#' + IDS.overlay); if (overlay) overlay.hidden = true; }
   function schedule() { clearInterval(timer); if (settings.autoRefresh) timer = setInterval(() => { if (!document.hidden && !scanning) void scan(false); }, Math.max(30, num(settings.refreshSeconds) || 90) * 1000); }
-  function health() { return { version: VERSION, ready: true, scanning, targets: targets.length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError }; }
+  function health() { return { version: VERSION, ready: true, scanning, targets: targets.length, lastScanMs, boardCacheAge: Date.now() - num(boardCache.at), ffCache: Object.keys(ffCache).length, statusCache: Object.keys(statusCache).length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError }; }
 
   globalThis.SakaLuXHalloweenAssistant = Object.freeze({ version: VERSION, open, close, scan: () => scan(true), health });
-  function start() { ensureUI(); schedule(); window.dispatchEvent(new CustomEvent('SakaLuXHalloweenAssistantReady', { detail: { version: VERSION } })); }
+  function start() { pruneCaches(); ensureUI(); schedule(); window.dispatchEvent(new CustomEvent('SakaLuXHalloweenAssistantReady', { detail: { version: VERSION } })); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start();
 })();
