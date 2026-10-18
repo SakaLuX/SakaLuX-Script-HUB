@@ -3,7 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.72**
+**v1.3.73**
+
+### v1.3.73 — Faction Deposit visibility fix (2026-10-18)
+- Excludes Faction Armory and Deposit from protected-sale row hiding.
+- Prevents generic item-row detection from hiding Torn's native faction deposit controls.
+- Keeps Bazaar, Trade, Display Case and Add Listing sale protection unchanged.
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -19,8 +24,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-10**
-- Canonical version: **v1.3.71**
+- Verified: **2026-10-18**
+- Canonical version: **v1.3.73**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
