@@ -6,7 +6,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.5';
+  const CORE_VERSION = '1.2.6';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -575,6 +575,86 @@
   })();
 
   const ui = {
+    makeDraggable(element, options = {}) {
+      if (!element || typeof window === 'undefined' || typeof element.addEventListener !== 'function') return null;
+      if (element.dataset.slxDraggable === '1') return element._slxDragCleanup || null;
+      const storageKey = String(options.storageKey || ('SLX_DRAG_POSITION_' + (element.id || 'BUTTON')));
+      const padding = Math.max(0, Number(options.padding ?? 6));
+      let drag = null;
+      let suppressClick = false;
+      let releaseClickTimer = 0;
+      const viewport = () => ({
+        width: Math.max(0, Number(window.visualViewport?.width || window.innerWidth || 0)),
+        height: Math.max(0, Number(window.visualViewport?.height || window.innerHeight || 0))
+      });
+      const place = (x, y) => {
+        const view = viewport();
+        const width = Math.max(1, element.offsetWidth || 48);
+        const height = Math.max(1, element.offsetHeight || 48);
+        const left = Math.min(Math.max(padding, Number(x) || padding), Math.max(padding, view.width - width - padding));
+        const top = Math.min(Math.max(padding, Number(y) || padding), Math.max(padding, view.height - height - padding));
+        Object.assign(element.style, { left: left + 'px', top: top + 'px', right: 'auto', bottom: 'auto', touchAction: 'none', userSelect: 'none' });
+        return { x: left, y: top };
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) place(saved.x, saved.y);
+      } catch {}
+      const onPointerDown = event => {
+        if (event.button != null && event.button !== 0) return;
+        const rect = element.getBoundingClientRect();
+        drag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, moved: false };
+        element.setPointerCapture?.(event.pointerId);
+      };
+      const onPointerMove = event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 5) return;
+        drag.moved = true;
+        event.preventDefault();
+        place(event.clientX - drag.offsetX, event.clientY - drag.offsetY);
+      };
+      const onPointerUp = event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        element.releasePointerCapture?.(event.pointerId);
+        if (drag.moved) {
+          const rect = element.getBoundingClientRect();
+          const position = place(rect.left, rect.top);
+          try { localStorage.setItem(storageKey, JSON.stringify(position)); } catch {}
+          suppressClick = true;
+          clearTimeout(releaseClickTimer);
+          releaseClickTimer = setTimeout(() => { suppressClick = false; }, 0);
+        }
+        drag = null;
+      };
+      const onClick = event => {
+        if (!suppressClick) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      };
+      const onResize = () => {
+        if (element.style.left && element.style.top) place(parseFloat(element.style.left), parseFloat(element.style.top));
+      };
+      element.dataset.slxDraggable = '1';
+      element.addEventListener('pointerdown', onPointerDown);
+      element.addEventListener('pointermove', onPointerMove);
+      element.addEventListener('pointerup', onPointerUp);
+      element.addEventListener('pointercancel', onPointerUp);
+      element.addEventListener('click', onClick, true);
+      window.addEventListener('resize', onResize);
+      const cleanup = () => {
+        clearTimeout(releaseClickTimer);
+        element.removeEventListener('pointerdown', onPointerDown);
+        element.removeEventListener('pointermove', onPointerMove);
+        element.removeEventListener('pointerup', onPointerUp);
+        element.removeEventListener('pointercancel', onPointerUp);
+        element.removeEventListener('click', onClick, true);
+        window.removeEventListener('resize', onResize);
+        delete element.dataset.slxDraggable;
+        delete element._slxDragCleanup;
+      };
+      element._slxDragCleanup = cleanup;
+      return cleanup;
+    },
     ensureDonationFooter(rootOrSelector, options = {}) {
       if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
       const root = typeof rootOrSelector === 'string' ? document.querySelector(rootOrSelector) : rootOrSelector;
@@ -611,14 +691,14 @@
     applyWorkspaceLayout(overlay, panel, options = {}) {
       if (!overlay || !panel || typeof window === 'undefined') return null;
       const top = Math.max(0, Number(options.top ?? 0));
-      const bottom = Math.max(0, Number(options.bottom ?? 64));
+      const bottom = Math.max(0, Number(options.bottom ?? 8));
       const side = Math.max(0, Number(options.side ?? 4));
       const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
       const radius = Math.max(0, Number(options.radius ?? 16));
       if (typeof document !== 'undefined' && !document.getElementById('sakalux-shared-workspace-layout-style')) {
         const style = document.createElement('style');
         style.id = 'sakalux-shared-workspace-layout-style';
-        style.textContent = `[data-slx-workspace-layout="1"],[data-slx-workspace-layout="1"] *,[data-slx-workspace-panel="1"],[data-slx-workspace-panel="1"] *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}[data-slx-workspace-layout="1"]{background:transparent!important;box-shadow:none!important}`;
+        style.textContent = `[data-slx-workspace-layout="1"],[data-slx-workspace-layout="1"] *,[data-slx-workspace-panel="1"],[data-slx-workspace-panel="1"] *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important}[data-slx-workspace-layout="1"]{background:transparent!important;background-image:none!important;box-shadow:none!important}`;
         (document.head || document.documentElement).appendChild(style);
       }
       overlay.dataset.slxWorkspaceLayout = '1';
@@ -655,6 +735,7 @@
           boxSizing: 'border-box',
           borderRadius: radius + 'px',
           overflow: 'hidden',
+          boxShadow: 'none',
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none'
         });
