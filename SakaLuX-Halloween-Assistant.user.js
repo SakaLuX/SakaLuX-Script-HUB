@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.2.4
+// @version      0.2.5
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -25,7 +25,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.5';
+  const CORE_VERSION = '1.2.6';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -594,6 +594,86 @@
   })();
 
   const ui = {
+    makeDraggable(element, options = {}) {
+      if (!element || typeof window === 'undefined' || typeof element.addEventListener !== 'function') return null;
+      if (element.dataset.slxDraggable === '1') return element._slxDragCleanup || null;
+      const storageKey = String(options.storageKey || ('SLX_DRAG_POSITION_' + (element.id || 'BUTTON')));
+      const padding = Math.max(0, Number(options.padding ?? 6));
+      let drag = null;
+      let suppressClick = false;
+      let releaseClickTimer = 0;
+      const viewport = () => ({
+        width: Math.max(0, Number(window.visualViewport?.width || window.innerWidth || 0)),
+        height: Math.max(0, Number(window.visualViewport?.height || window.innerHeight || 0))
+      });
+      const place = (x, y) => {
+        const view = viewport();
+        const width = Math.max(1, element.offsetWidth || 48);
+        const height = Math.max(1, element.offsetHeight || 48);
+        const left = Math.min(Math.max(padding, Number(x) || padding), Math.max(padding, view.width - width - padding));
+        const top = Math.min(Math.max(padding, Number(y) || padding), Math.max(padding, view.height - height - padding));
+        Object.assign(element.style, { left: left + 'px', top: top + 'px', right: 'auto', bottom: 'auto', touchAction: 'none', userSelect: 'none' });
+        return { x: left, y: top };
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) place(saved.x, saved.y);
+      } catch {}
+      const onPointerDown = event => {
+        if (event.button != null && event.button !== 0) return;
+        const rect = element.getBoundingClientRect();
+        drag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, moved: false };
+        element.setPointerCapture?.(event.pointerId);
+      };
+      const onPointerMove = event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 5) return;
+        drag.moved = true;
+        event.preventDefault();
+        place(event.clientX - drag.offsetX, event.clientY - drag.offsetY);
+      };
+      const onPointerUp = event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        element.releasePointerCapture?.(event.pointerId);
+        if (drag.moved) {
+          const rect = element.getBoundingClientRect();
+          const position = place(rect.left, rect.top);
+          try { localStorage.setItem(storageKey, JSON.stringify(position)); } catch {}
+          suppressClick = true;
+          clearTimeout(releaseClickTimer);
+          releaseClickTimer = setTimeout(() => { suppressClick = false; }, 0);
+        }
+        drag = null;
+      };
+      const onClick = event => {
+        if (!suppressClick) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      };
+      const onResize = () => {
+        if (element.style.left && element.style.top) place(parseFloat(element.style.left), parseFloat(element.style.top));
+      };
+      element.dataset.slxDraggable = '1';
+      element.addEventListener('pointerdown', onPointerDown);
+      element.addEventListener('pointermove', onPointerMove);
+      element.addEventListener('pointerup', onPointerUp);
+      element.addEventListener('pointercancel', onPointerUp);
+      element.addEventListener('click', onClick, true);
+      window.addEventListener('resize', onResize);
+      const cleanup = () => {
+        clearTimeout(releaseClickTimer);
+        element.removeEventListener('pointerdown', onPointerDown);
+        element.removeEventListener('pointermove', onPointerMove);
+        element.removeEventListener('pointerup', onPointerUp);
+        element.removeEventListener('pointercancel', onPointerUp);
+        element.removeEventListener('click', onClick, true);
+        window.removeEventListener('resize', onResize);
+        delete element.dataset.slxDraggable;
+        delete element._slxDragCleanup;
+      };
+      element._slxDragCleanup = cleanup;
+      return cleanup;
+    },
     ensureDonationFooter(rootOrSelector, options = {}) {
       if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
       const root = typeof rootOrSelector === 'string' ? document.querySelector(rootOrSelector) : rootOrSelector;
@@ -630,14 +710,14 @@
     applyWorkspaceLayout(overlay, panel, options = {}) {
       if (!overlay || !panel || typeof window === 'undefined') return null;
       const top = Math.max(0, Number(options.top ?? 0));
-      const bottom = Math.max(0, Number(options.bottom ?? 64));
+      const bottom = Math.max(0, Number(options.bottom ?? 8));
       const side = Math.max(0, Number(options.side ?? 4));
       const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
       const radius = Math.max(0, Number(options.radius ?? 16));
       if (typeof document !== 'undefined' && !document.getElementById('sakalux-shared-workspace-layout-style')) {
         const style = document.createElement('style');
         style.id = 'sakalux-shared-workspace-layout-style';
-        style.textContent = `[data-slx-workspace-layout="1"],[data-slx-workspace-layout="1"] *,[data-slx-workspace-panel="1"],[data-slx-workspace-panel="1"] *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}[data-slx-workspace-layout="1"]{background:transparent!important;box-shadow:none!important}`;
+        style.textContent = `[data-slx-workspace-layout="1"],[data-slx-workspace-layout="1"] *,[data-slx-workspace-panel="1"],[data-slx-workspace-panel="1"] *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important}[data-slx-workspace-layout="1"]{background:transparent!important;background-image:none!important;box-shadow:none!important}`;
         (document.head || document.documentElement).appendChild(style);
       }
       overlay.dataset.slxWorkspaceLayout = '1';
@@ -674,6 +754,7 @@
           boxSizing: 'border-box',
           borderRadius: radius + 'px',
           overflow: 'hidden',
+          boxShadow: 'none',
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none'
         });
@@ -728,7 +809,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.2.4';
+  const VERSION = '0.2.5';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1162,7 +1243,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function ensureStyle() {
     if ($(('#' + IDS.style))) return;
     const style = document.createElement('style'); style.id = IDS.style;
-    style.textContent = `#${IDS.launcher}{position:fixed;right:12px;bottom:88px;z-index:2147483000;width:48px;height:48px;border:1px solid #f59e0b;border-radius:15px;background:linear-gradient(160deg,#542109,#1a1212);color:#fff;font-size:24px;box-shadow:0 10px 28px #000a}#${IDS.overlay}{position:fixed;inset:0;z-index:2147483600;display:flex;align-items:flex-end;justify-content:center;background:#02050ab8;color:#f8fafc;font:14px/1.4 system-ui,sans-serif}#${IDS.overlay}[hidden]{display:none!important}#${IDS.overlay} .ha-panel{width:min(760px,100%);height:min(92dvh,920px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #6b3b1c;border-radius:18px 18px 0 0;background:linear-gradient(155deg,#1d1620,#0d141d 55%);box-shadow:0 -18px 60px #000c}#${IDS.overlay} header{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #483020;background:#201822}#${IDS.overlay} header b{flex:1;color:#ffd894}#${IDS.overlay} button,#${IDS.overlay} input{border:1px solid #594a43;border-radius:9px;background:#17202a;color:#fff;min-height:38px;padding:7px 10px}#${IDS.overlay} .ha-head-btn{width:40px;padding:0}#${IDS.overlay} .ha-progress{padding:10px 12px;color:#cbd5e1;border-bottom:1px solid #2f3037}#${IDS.overlay} .ha-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid #2f3037}#${IDS.overlay} label{display:grid;gap:4px;color:#cbd5e1;font-size:11px}#${IDS.overlay} .ha-wide{grid-column:1/-1}#${IDS.overlay} .ha-actions{display:flex;gap:8px;grid-column:1/-1}#${IDS.overlay} .ha-actions button{flex:1;font-weight:800}#${IDS.overlay} [data-scan]{background:linear-gradient(#e57b18,#a8450b);border-color:#ffad45}#${IDS.overlay} .ha-list{flex:1;min-height:0;overflow:auto;display:grid;align-content:start;gap:8px;padding:10px}#${IDS.overlay} .ha-target{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:11px;border:1px solid #3c4655;border-radius:12px;background:#131c27}#${IDS.overlay} .ha-name{font-weight:900;color:#fff}#${IDS.overlay} .ha-meta{margin-top:4px;color:#aebdce;font-size:11px}#${IDS.overlay} .ha-speed{color:#ffcc70;font-weight:900}#${IDS.overlay} .ha-links{display:flex;gap:6px;align-items:center}#${IDS.overlay} .ha-links a{display:grid;place-items:center;width:42px;height:38px;border:1px solid #87531f;border-radius:9px;background:#42230c;color:#fff;text-decoration:none;font-weight:900}#${IDS.overlay} .ha-empty{padding:30px;text-align:center;color:#aebdce}#${IDS.overlay} footer{padding:8px 12px;border-top:1px solid #2f3037;color:#8998aa;font-size:10px}@media(max-width:540px){#${IDS.overlay} .ha-panel{height:94dvh}#${IDS.overlay} .ha-settings{grid-template-columns:1fr 1fr}#${IDS.overlay} .ha-target{grid-template-columns:1fr}#${IDS.overlay} .ha-links{justify-content:flex-end}}`;
+    style.textContent = `#${IDS.launcher}{position:fixed;right:12px;bottom:88px;z-index:2147483000;width:48px;height:48px;border:1px solid #f59e0b;border-radius:15px;background:linear-gradient(160deg,#542109,#1a1212);color:#fff;font-size:24px;box-shadow:0 10px 28px #000a;touch-action:none;user-select:none}#${IDS.overlay}{position:fixed;inset:0;z-index:2147483600;display:flex;align-items:flex-end;justify-content:center;background:transparent;background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;color:#f8fafc;font:14px/1.4 system-ui,sans-serif}#${IDS.overlay}[hidden]{display:none!important}#${IDS.overlay} .ha-panel{width:min(760px,100%);height:min(92dvh,920px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #6b3b1c;border-radius:18px;background:linear-gradient(155deg,#1d1620,#0d141d 55%);box-shadow:none}#${IDS.overlay} header{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #483020;background:#201822}#${IDS.overlay} header b{flex:1;color:#ffd894}#${IDS.overlay} button,#${IDS.overlay} input{border:1px solid #594a43;border-radius:9px;background:#17202a;color:#fff;min-height:38px;padding:7px 10px}#${IDS.overlay} .ha-head-btn{width:40px;padding:0}#${IDS.overlay} .ha-progress{padding:10px 12px;color:#cbd5e1;border-bottom:1px solid #2f3037}#${IDS.overlay} .ha-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid #2f3037}#${IDS.overlay} label{display:grid;gap:4px;color:#cbd5e1;font-size:11px}#${IDS.overlay} .ha-wide{grid-column:1/-1}#${IDS.overlay} .ha-actions{display:flex;gap:8px;grid-column:1/-1}#${IDS.overlay} .ha-actions button{flex:1;font-weight:800}#${IDS.overlay} [data-scan]{background:linear-gradient(#e57b18,#a8450b);border-color:#ffad45}#${IDS.overlay} .ha-list{flex:1;min-height:0;overflow:auto;display:grid;align-content:start;gap:8px;padding:10px}#${IDS.overlay} .ha-target{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:11px;border:1px solid #3c4655;border-radius:12px;background:#131c27}#${IDS.overlay} .ha-name{font-weight:900;color:#fff}#${IDS.overlay} .ha-meta{margin-top:4px;color:#aebdce;font-size:11px}#${IDS.overlay} .ha-speed{color:#ffcc70;font-weight:900}#${IDS.overlay} .ha-links{display:flex;gap:6px;align-items:center}#${IDS.overlay} .ha-links a{display:grid;place-items:center;width:42px;height:38px;border:1px solid #87531f;border-radius:9px;background:#42230c;color:#fff;text-decoration:none;font-weight:900}#${IDS.overlay} .ha-empty{padding:30px;text-align:center;color:#aebdce}#${IDS.overlay} footer{padding:8px 12px;border-top:1px solid #2f3037;color:#8998aa;font-size:10px}@media(max-width:540px){#${IDS.overlay} .ha-panel{height:94dvh}#${IDS.overlay} .ha-settings{grid-template-columns:1fr 1fr}#${IDS.overlay} .ha-target{grid-template-columns:1fr}#${IDS.overlay} .ha-links{justify-content:flex-end}}`;
     style.textContent += `#${IDS.overlay} .ha-panel{height:min(86dvh,780px);border-radius:16px;background:linear-gradient(180deg,#17131d,#0b1119 42%)}#${IDS.overlay} header{min-height:48px;padding:7px 10px}#${IDS.overlay} header b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#${IDS.overlay} .ha-head-btn{width:36px;min-height:36px}#${IDS.overlay} .ha-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;padding:8px 10px;border-bottom:1px solid #302c35;background:#111722}#${IDS.overlay} .ha-key{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8fd6ad;font-size:11px;font-weight:800}#${IDS.overlay} .ha-toolbar button{min-height:34px;padding:5px 11px;font-size:12px;font-weight:900}#${IDS.overlay} .ha-progress{padding:7px 10px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#${IDS.overlay} .ha-settings[hidden],#${IDS.overlay} .ha-api-panel[hidden]{display:none!important}#${IDS.overlay} .ha-settings,#${IDS.overlay} .ha-api-panel{max-height:50dvh;overflow:auto;background:#111722}#${IDS.overlay} .ha-api-panel{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid #2f3037}#${IDS.overlay} .ha-api-head,#${IDS.overlay} .ha-api-status,#${IDS.overlay} .ha-api-actions,#${IDS.overlay} .ha-api-panel .ha-setup{grid-column:1/-1}#${IDS.overlay} .ha-api-head{display:flex;align-items:center;gap:8px;color:#ffd894}#${IDS.overlay} .ha-api-head b{flex:1}#${IDS.overlay} .ha-api-close{width:36px;min-height:34px;padding:0}#${IDS.overlay} .ha-api-status{color:#8fd6ad;font-size:11px}#${IDS.overlay} .ha-api-actions{display:flex;gap:8px}#${IDS.overlay} .ha-api-actions button{flex:1;font-weight:800}#${IDS.overlay} [data-api-save]{background:linear-gradient(#e57b18,#a8450b);border-color:#ffad45}#${IDS.overlay} .ha-hint{padding:6px 10px;color:#8e9cad;font-size:10px;border-bottom:1px solid #29313a}#${IDS.overlay} .ha-setup{display:grid;place-items:center;flex:1;min-height:38px;border:1px solid #594a43;border-radius:9px;background:#17202a;color:#ffd894;text-decoration:none;font-weight:800}#${IDS.overlay} footer{padding:5px 10px;text-align:center}@media(max-width:540px){#${IDS.overlay}{font-size:13px}#${IDS.overlay} .ha-panel{height:84dvh;border-radius:16px}#${IDS.overlay} .ha-settings,#${IDS.overlay} .ha-api-panel{grid-template-columns:1fr 1fr;gap:7px;padding:8px}#${IDS.overlay} label{font-size:10px}#${IDS.overlay} input{min-height:36px;padding:5px 8px}#${IDS.overlay} .ha-list{padding:7px;gap:7px}#${IDS.overlay} .ha-target{grid-template-columns:minmax(0,1fr) auto;padding:9px}#${IDS.overlay} .ha-links{justify-content:initial}#${IDS.overlay} .ha-links a{width:40px;height:35px}#${IDS.overlay} .ha-hint{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}`;
     (document.head || document.documentElement).appendChild(style);
   }
@@ -1243,6 +1324,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       launcher = document.createElement('button'); launcher.id = IDS.launcher; launcher.type = 'button'; launcher.textContent = '🎃'; launcher.title = 'SakaLuX Halloween Assistant';
       launcher.onclick = open; document.body.appendChild(launcher);
     }
+    SHARED_CORE?.ui?.makeDraggable?.(launcher, { storageKey: 'SLX_HALLOWEEN_LAUNCHER_POSITION_V1', padding: 6 });
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
@@ -1259,7 +1341,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       document.body.appendChild(overlay);
       const panel = $('.ha-panel', overlay);
       SHARED_CORE?.ui?.ensureDonationFooter?.(panel, { id: 'halloween-assistant' });
-      overlay._slxWorkspaceCleanup = SHARED_CORE?.ui?.applyWorkspaceLayout?.(overlay, panel, { top: 0, bottom: 64, side: 4, maxWidth: 760, radius: 16 }) || null;
+      overlay._slxWorkspaceCleanup = SHARED_CORE?.ui?.applyWorkspaceLayout?.(overlay, panel, { top: 0, bottom: 8, side: 4, maxWidth: 760, radius: 16 }) || null;
       refreshApiPanel(overlay);
     }
     return overlay;
