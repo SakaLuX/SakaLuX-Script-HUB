@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.2.1
+// @version      0.2.2
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -25,7 +25,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.2';
+  const CORE_VERSION = '1.2.3';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -633,6 +633,14 @@
       const bottom = Math.max(0, Number(options.bottom ?? 36));
       const side = Math.max(0, Number(options.side ?? 4));
       const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
+      if (typeof document !== 'undefined' && !document.getElementById('sakalux-shared-workspace-layout-style')) {
+        const style = document.createElement('style');
+        style.id = 'sakalux-shared-workspace-layout-style';
+        style.textContent = `[data-slx-workspace-layout="1"],[data-slx-workspace-layout="1"] *,[data-slx-workspace-panel="1"],[data-slx-workspace-panel="1"] *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}[data-slx-workspace-layout="1"]{background:transparent!important;box-shadow:none!important}`;
+        (document.head || document.documentElement).appendChild(style);
+      }
+      overlay.dataset.slxWorkspaceLayout = '1';
+      panel.dataset.slxWorkspacePanel = '1';
       const apply = () => {
         const vv = window.visualViewport;
         const width = Math.max(0, Number(vv?.width || window.innerWidth || 0));
@@ -641,11 +649,15 @@
         const offsetLeft = Math.max(0, Number(vv?.offsetLeft || 0));
         Object.assign(overlay.style, {
           position: 'fixed',
-          inset: '0px',
+          inset: `0px 0px ${bottom}px 0px`,
           width: 'auto',
           height: 'auto',
           maxHeight: 'none',
-          display: 'block'
+          display: 'block',
+          background: 'transparent',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+          boxShadow: 'none'
         });
         const usable = Math.max(240, height - top - bottom);
         const panelWidth = Math.min(maxWidth, Math.max(240, width - side * 2));
@@ -658,7 +670,9 @@
           height: usable + 'px',
           maxHeight: usable + 'px',
           margin: '0',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none'
         });
       };
       apply();
@@ -670,6 +684,8 @@
         vv?.removeEventListener?.('resize', apply);
         vv?.removeEventListener?.('scroll', apply);
         window.removeEventListener?.('resize', apply);
+        delete overlay.dataset.slxWorkspaceLayout;
+        delete panel.dataset.slxWorkspacePanel;
       };
     },
     ensureSharedSkin() {
@@ -709,7 +725,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.2.1';
+  const VERSION = '0.2.2';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1205,7 +1221,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       $('[data-scan]', overlay).onclick = () => { saveSettingsFromUI(); void scan(true); };
       $('[data-settings]', overlay).onclick = () => { const panel = $('.ha-settings', overlay); panel.hidden = !panel.hidden; };
       document.body.appendChild(overlay);
-      SHARED_CORE?.ui?.ensureDonationFooter?.($('.ha-panel', overlay), { id: 'halloween-assistant' });
+      const panel = $('.ha-panel', overlay);
+      SHARED_CORE?.ui?.ensureDonationFooter?.(panel, { id: 'halloween-assistant' });
+      overlay._slxWorkspaceCleanup = SHARED_CORE?.ui?.applyWorkspaceLayout?.(overlay, panel, { top: 0, bottom: 36, side: 4, maxWidth: 760 }) || null;
     }
     return overlay;
   }
