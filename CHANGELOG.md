@@ -1,5 +1,11 @@
 # Changelog
 
+## Enhancer Guard v1.3.73 — Faction Deposit visibility fix (2026-10-18)
+
+- Excluded all Faction Armory/Deposit views from protected-sale row filtering.
+- Prevented protected item locks from hiding native faction deposit panels and controls.
+- Retained protection on actual Bazaar, Trade, Display Case and Add Listing sale screens.
+
 ## Script Hub v1.9.133 — Background PRO license recovery (2026-10-14)
 
 - Retries shared license verification after initial transport/server failures without opening Hub.
