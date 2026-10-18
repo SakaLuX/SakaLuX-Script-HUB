@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.1.2
+// @version      0.2.0
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -16,10 +16,667 @@
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
+/* SakaLuX Shared Core — BEGIN */
+/* SakaLuX Shared Core v1 - test foundation
+ * Source-only module. Not installed directly by users.
+ * Intended to be embedded into standalone userscripts at build/release time.
+ */
 (() => {
   'use strict';
 
-  const VERSION = '0.1.2';
+  const g = globalThis;
+  const CORE_VERSION = '1.2.1';
+  const NS = 'SakaLuXCore';
+
+  const SETTINGS_CATALOG = Object.freeze([
+    { match: /Account Auditor/i, id: 'account-auditor', version: 1, keys: ['SakaLuX_AUDITOR_SETTINGS_V3'] },
+    { match: /Bazaar Smart Pricer/i, id: 'bazaar-smart-pricer', version: 1, keys: ['SakaLuX_BAZAAR_SMART_PRICER_SETTINGS'] },
+    { match: /Bazaar Thanker/i, id: 'bazaar', version: 1, keys: ['sakalux_bazaar_thanker_v5'] },
+    { match: /Bounty Hunter/i, id: 'bounty-hunter', version: 1, keys: ['SLX_BOUNTY_SETTINGS_V3','SLX_BOUNTY_WATCH_V1','SLX_BOUNTY_BLACK_V1','SLX_BOUNTY_CACHE_V2','SLX_BOUNTY_USER_CACHE_V1','SLX_BOUNTY_FF_CACHE_V1','SLX_BOUNTY_SCAN_STATE_V1'] },
+    { match: /Chat Intelligence/i, id: 'chat-intelligence', version: 1, keys: ['SLX_CHAT_CFG4'] },
+    { match: /Company Intelligence/i, id: 'company-intelligence', version: 1, keys: ['sak_ci:mode', 'sak_ci:tab', 'sak_ci:compact', 'sak_ci:enabled'] },
+    { match: /Elimination Assistant/i, id: 'elimination-assistant', version: 1, keys: ['slx_elim_ui_v1'] },
+    { match: /Enhancer Guard/i, id: 'enhancer', version: 1, keys: ['SakaLuX_EG_FAVORITES'] },
+    { match: /Market Intelligence/i, id: 'market-intelligence', version: 1, keys: ['SakaLuX_MI_SETTINGS_V2'] },
+    { match: /Mission Rewards/i, id: 'mission-rewards', version: 1, keys: ['SakaLuX_MR_SETTINGS_V1'] },
+    { match: /Script Hub/i, id: 'script-hub', version: 1, keys: ['SakaLuX_HUB_SETTINGS_V16'] },
+    { match: /Stock Manager/i, id: 'stock-manager-advisor', version: 1, keys: ['SLX_STOCK_PRESETS', 'SLX_STOCK_BENEFIT_VALUES'] },
+    { match: /SakaLuX Suite/i, id: 'suite', version: 1, keys: ['sakalux_master_suite_settings_v1'] }
+  ]);
+
+  function currentScriptSettingsDefinition() {
+    let name = '';
+    try { name = String(g.GM_info?.script?.name || ''); } catch {}
+    return SETTINGS_CATALOG.find(entry => entry.match.test(name)) || null;
+  }
+
+  function currentTransportEnvironment() {
+    let gm = null;
+    try { if (typeof GM_xmlhttpRequest === 'function') gm = GM_xmlhttpRequest; } catch {}
+    return {
+      pda: typeof g.PDA_httpGet === 'function' ? g.PDA_httpGet.bind(g) : null,
+      gm,
+      fetch: typeof g.fetch === 'function' ? g.fetch.bind(g) : null
+    };
+  }
+
+  if (g[NS]?.version === CORE_VERSION) {
+    g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
+    g[NS].settings?.autoGuardCurrentScript?.();
+    if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
+    return;
+  }
+
+  const timers = new Map();
+  const listeners = new Set();
+  let routeKey = '';
+  let routeEpoch = 0;
+  let routerBound = false;
+  let routeAbortHook = null;
+
+  const perf = {
+    debounce(key, fn, wait = 220) {
+      const old = timers.get(key);
+      if (old) clearTimeout(old);
+      const id = setTimeout(() => {
+        timers.delete(key);
+        fn();
+      }, Math.max(120, Number(wait) || 220));
+      timers.set(key, id);
+      return id;
+    },
+    idle(fn, timeout = 700) {
+      if (typeof requestIdleCallback === 'function') return requestIdleCallback(fn, { timeout });
+      return setTimeout(fn, 32);
+    },
+    unrelated(records) {
+      return Array.isArray(records) && records.length > 0 && records.every(record => {
+        const node = record?.target;
+        const target = node?.nodeType === 1 ? node : node?.parentElement;
+        return !!target?.closest?.('#chat-box,[id^="chat-box"],[class*="chat-box"],[class*="chatBox"],#sakalux-standalone-dock,[id^="sakalux-inline-footer-"]');
+      });
+    }
+  };
+
+  const hub = {
+    installed() {
+      if (typeof document === 'undefined') return false;
+      const html = document.documentElement;
+      const body = document.body;
+      return !!(
+        g.SakaLuXScriptHub ||
+        document.getElementById('sakalux-hub-button') ||
+        document.getElementById('sakalux-hub-top-skull') ||
+        document.getElementById('sakalux-hub-nav-skull') ||
+        document.getElementById('sakalux-hub-panel') ||
+        document.getElementById('sakalux-hub-style') ||
+        html?.getAttribute('data-sakalux-hub-installed') === '1' ||
+        body?.getAttribute('data-sakalux-hub-installed') === '1' ||
+        html?.getAttribute('data-sakalux-hub-active') === '1' ||
+        body?.getAttribute('data-sakalux-hub-active') === '1'
+      );
+    }
+  };
+
+  const storage = {
+    get(key, fallback = null) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw == null ? fallback : JSON.parse(raw);
+      } catch { return fallback; }
+    },
+    set(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch { return false; }
+    },
+    remove(key) {
+      try {
+        localStorage.removeItem(key);
+        return true;
+      } catch { return false; }
+    }
+  };
+
+  const settings = (() => {
+    const statuses = new Map();
+    const prefix = 'SakaLuX_SettingsSchema::';
+    const backupPrefix = 'SakaLuX_SettingsBackup::';
+
+    function normalizeDefinition(definition = {}) {
+      const id = String(definition.id || '').trim();
+      const version = Math.max(1, Math.floor(Number(definition.version) || 1));
+      const keys = [...new Set((definition.keys || []).map(String).filter(Boolean))];
+      if (!id) throw new Error('Settings schema id is required');
+      if (!keys.length) throw new Error(`Settings schema ${id} has no storage keys`);
+      return { ...definition, id, version, keys };
+    }
+
+    function readJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw == null ? fallback : JSON.parse(raw);
+      } catch { return fallback; }
+    }
+
+    function writeJson(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+      catch { return false; }
+    }
+
+    function snapshot(keys) {
+      const values = {};
+      for (const key of keys) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw != null) values[key] = raw;
+        } catch {}
+      }
+      return values;
+    }
+
+    function validateAndRecover(def, backup) {
+      const recovered = [];
+      const reset = [];
+      const valid = [];
+      for (const key of def.keys) {
+        let raw = null;
+        try { raw = localStorage.getItem(key); } catch {}
+        if (raw == null) continue;
+        try { JSON.parse(raw); valid.push(key); continue; } catch {}
+        const previous = backup?.values?.[key];
+        if (typeof previous === 'string') {
+          try { JSON.parse(previous); localStorage.setItem(key, previous); recovered.push(key); continue; } catch {}
+        }
+        try { localStorage.removeItem(key); } catch {}
+        reset.push(key);
+      }
+      return { recovered, reset, valid };
+    }
+
+    function register(definition = {}) {
+      const def = normalizeDefinition(definition);
+      const metaKey = prefix + def.id;
+      const backupKey = backupPrefix + def.id;
+      const previousMeta = readJson(metaKey, {}) || {};
+      const previousVersion = Math.max(0, Math.floor(Number(previousMeta.version) || 0));
+      const existingBackup = readJson(backupKey, null);
+      const before = snapshot(def.keys);
+      if (Object.keys(before).length) writeJson(backupKey, { version: previousVersion, at: Date.now(), values: before });
+      const recovery = validateAndRecover(def, existingBackup);
+      let migrated = false;
+      let fallback = recovery.reset.length > 0;
+      let error = '';
+
+      if (previousVersion < def.version) {
+        try {
+          for (let target = previousVersion + 1; target <= def.version; target++) {
+            const migrate = def.migrations?.[target];
+            if (typeof migrate !== 'function') continue;
+            for (const key of def.keys) {
+              let raw = null;
+              try { raw = localStorage.getItem(key); } catch {}
+              if (raw == null) continue;
+              const current = JSON.parse(raw);
+              const next = migrate(current, { id: def.id, key, from: target - 1, to: target });
+              if (next !== undefined) localStorage.setItem(key, JSON.stringify(next));
+            }
+          }
+          migrated = previousVersion > 0 || Object.keys(before).length > 0;
+        } catch (err) {
+          error = String(err?.message || err);
+          fallback = true;
+          for (const key of def.keys) {
+            const raw = before[key];
+            try { if (raw == null) localStorage.removeItem(key); else localStorage.setItem(key, raw); } catch {}
+          }
+        }
+      }
+
+      const nextMeta = {
+        schema: 'sakalux-settings-schema-v1', id: def.id, version: error ? previousVersion : Math.max(previousVersion, def.version),
+        updatedAt: Date.now(), migrated, fallback, recovered: recovery.recovered, reset: recovery.reset,
+        error: error || null
+      };
+      writeJson(metaKey, nextMeta);
+      statuses.set(def.id, Object.freeze({ ...nextMeta }));
+      return statuses.get(def.id);
+    }
+
+    function status(id) { return statuses.get(String(id)) || readJson(prefix + String(id), null); }
+    function diagnostics() { return Object.freeze(Object.fromEntries([...statuses.entries()])); }
+    function autoGuardCurrentScript() {
+      const def = currentScriptSettingsDefinition();
+      if (!def) return null;
+      try { return register(def); }
+      catch (err) {
+        const failed = Object.freeze({ schema: 'sakalux-settings-schema-v1', id: def.id, version: 0, fallback: true, error: String(err?.message || err) });
+        statuses.set(def.id, failed);
+        return failed;
+      }
+    }
+
+    return Object.freeze({ register, status, diagnostics, autoGuardCurrentScript, catalog: SETTINGS_CATALOG });
+  })();
+
+  const router = {
+    key(loc = g.location) {
+      if (!loc) return '';
+      return `${loc.pathname || ''}${loc.search || ''}${loc.hash || ''}`;
+    },
+    epoch() { return routeEpoch; },
+    onChange(fn) {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    check(loc = g.location) {
+      const next = this.key(loc);
+      if (next === routeKey) return false;
+      const prev = routeKey;
+      routeKey = next;
+      routeEpoch++;
+      try { routeAbortHook?.({ previous: prev, current: next, epoch: routeEpoch }); } catch (err) { console.error('[SakaLuXCore router abort]', err); }
+      for (const fn of [...listeners]) {
+        try { fn({ previous: prev, current: next, epoch: routeEpoch }); } catch (err) { console.error('[SakaLuXCore router]', err); }
+      }
+      return true;
+    },
+    bind() {
+      if (routerBound || typeof g.addEventListener !== 'function') return false;
+      const signal = () => this.check();
+      g.addEventListener('hashchange', signal, { passive: true });
+      g.addEventListener('popstate', signal, { passive: true });
+      routerBound = true;
+      return true;
+    }
+  };
+
+  const dock = {
+    ORDER: Object.freeze([
+      'enhancer','bazaar','bazaar-smart-pricer','bounty-hunter','mission-rewards','market-intelligence',
+      'elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'
+    ]),
+    dedupe(registrations = []) {
+      return [...new Map(registrations.filter(Boolean).map(r => [r.id, r])).values()];
+    },
+    sort(registrations = []) {
+      const order = this.ORDER;
+      return this.dedupe(registrations).sort((a, b) => {
+        const ai = order.indexOf(a.id), bi = order.indexOf(b.id);
+        const ar = ai < 0 ? Number.MAX_SAFE_INTEGER : ai;
+        const br = bi < 0 ? Number.MAX_SAFE_INTEGER : bi;
+        return ar - br || String(a.name || a.id).localeCompare(String(b.name || b.id));
+      });
+    }
+  };
+
+  const api = (() => {
+    const inflight = new Map();
+    const responseCache = new Map();
+    const queue = [];
+    const routeControllers = new Set();
+    const env = { pda: null, gm: null, fetch: null };
+    const stats = {
+      requests: 0,
+      networkRequests: 0,
+      cacheHits: 0,
+      deduped: 0,
+      retries: 0,
+      failures: 0,
+      aborted: 0,
+      timeouts: 0,
+      rateLimited: 0
+    };
+    let active = 0;
+    let maxConcurrent = 4;
+    let sequence = 0;
+
+    function registerEnvironment(next = {}) {
+      if (typeof next.pda === 'function') env.pda = next.pda;
+      if (typeof next.gm === 'function') env.gm = next.gm;
+      if (typeof next.fetch === 'function') env.fetch = next.fetch;
+      if (typeof g.PDA_httpGet === 'function') env.pda = g.PDA_httpGet.bind(g);
+      if (!env.fetch && typeof g.fetch === 'function') env.fetch = g.fetch.bind(g);
+      return { pda: !!env.pda, gm: !!env.gm, fetch: !!env.fetch };
+    }
+
+    function makeError(message, code, extra = {}) {
+      const err = new Error(message);
+      err.code = code;
+      Object.assign(err, extra);
+      return err;
+    }
+
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, Math.max(0, ms))); }
+
+    function canonicalUrl(value) {
+      const raw = String(value || '');
+      try {
+        const u = new URL(raw, g.location?.origin || 'https://www.torn.com');
+        for (const key of ['ts', '_', 'cacheBust', 'cache_bust']) u.searchParams.delete(key);
+        u.searchParams.sort();
+        return u.toString();
+      } catch { return raw; }
+    }
+
+    function requestKey(opts) {
+      if (opts.key) return String(opts.key);
+      return `${opts.method}|${canonicalUrl(opts.url)}|${opts.parse || 'text'}|${opts.credentials || ''}`;
+    }
+
+    function cacheRead(key) {
+      const row = responseCache.get(key);
+      if (!row) return null;
+      if (row.expiresAt <= Date.now()) { responseCache.delete(key); return null; }
+      return row.value;
+    }
+
+    function cacheWrite(key, value, ttl) {
+      const ms = Math.max(0, Number(ttl) || 0);
+      if (ms > 0) responseCache.set(key, { value, expiresAt: Date.now() + ms });
+    }
+
+    function enqueue(run, priority = 0) {
+      return new Promise((resolve, reject) => {
+        queue.push({ run, priority: Number(priority) || 0, sequence: sequence++, resolve, reject });
+        queue.sort((a, b) => b.priority - a.priority || a.sequence - b.sequence);
+        pump();
+      });
+    }
+
+    function pump() {
+      while (active < maxConcurrent && queue.length) {
+        const job = queue.shift();
+        active++;
+        Promise.resolve().then(job.run).then(job.resolve, job.reject).finally(() => { active--; pump(); });
+      }
+    }
+
+    function normalizePdaResponse(raw) {
+      if (typeof raw === 'string') return { status: 200, text: raw };
+      const status = Number(raw?.status || raw?.statusCode || 200) || 200;
+      const value = raw?.responseText ?? raw?.body ?? raw?.data ?? raw;
+      return { status, text: typeof value === 'string' ? value : JSON.stringify(value ?? null) };
+    }
+
+    function requestViaPda(opts) {
+      return Promise.resolve(env.pda(opts.url, opts.headers || {})).then(normalizePdaResponse);
+    }
+
+    function requestViaGm(opts, controller) {
+      return new Promise((resolve, reject) => {
+        let settled = false;
+        let handle = null;
+        const finish = fn => value => { if (settled) return; settled = true; fn(value); };
+        const onResolve = finish(resolve);
+        const onReject = finish(reject);
+        try {
+          handle = env.gm({
+            method: opts.method,
+            url: opts.url,
+            headers: opts.headers || {},
+            data: opts.body == null ? undefined : opts.body,
+            timeout: opts.timeout,
+            onload: r => onResolve({ status: Number(r?.status || 200) || 200, text: String(r?.responseText ?? '') }),
+            onerror: () => onReject(makeError('Network error', 'NETWORK')),
+            ontimeout: () => onReject(makeError('Request timeout', 'TIMEOUT')),
+            onabort: () => onReject(makeError('Request aborted', 'ABORTED'))
+          });
+        } catch (err) { onReject(err); return; }
+        if (controller?.signal) {
+          const abort = () => { try { handle?.abort?.(); } catch {} onReject(makeError('Request aborted', 'ABORTED')); };
+          if (controller.signal.aborted) abort(); else controller.signal.addEventListener('abort', abort, { once: true });
+        }
+      });
+    }
+
+    async function requestViaFetch(opts, controller) {
+      if (!env.fetch) throw makeError('No HTTP transport available', 'NO_TRANSPORT');
+      let timeoutId = null;
+      let timeoutController = controller;
+      if (!timeoutController && typeof AbortController === 'function') timeoutController = new AbortController();
+      if (opts.timeout > 0 && timeoutController) timeoutId = setTimeout(() => timeoutController.abort('timeout'), opts.timeout);
+      try {
+        const res = await env.fetch(opts.url, {
+          method: opts.method,
+          headers: opts.headers || {},
+          body: opts.body == null ? undefined : opts.body,
+          credentials: opts.credentials || 'omit',
+          cache: opts.cacheMode || 'no-store',
+          signal: timeoutController?.signal
+        });
+        return { status: Number(res?.status || 0), text: await res.text() };
+      } catch (err) {
+        if (timeoutController?.signal?.aborted) {
+          const timedOut = timeoutController.signal.reason === 'timeout';
+          throw makeError(timedOut ? 'Request timeout' : 'Request aborted', timedOut ? 'TIMEOUT' : 'ABORTED');
+        }
+        throw makeError(err?.message || 'Network error', 'NETWORK', { cause: err });
+      } finally { if (timeoutId) clearTimeout(timeoutId); }
+    }
+
+    async function transport(opts, controller) {
+      registerEnvironment(currentTransportEnvironment());
+      if (opts.method === 'GET' && env.pda) return requestViaPda(opts);
+      if (env.gm) return requestViaGm(opts, controller);
+      return requestViaFetch(opts, controller);
+    }
+
+    function retryableStatus(status) { return status === 429 || status === 408 || status >= 500; }
+    function retryableError(err) { return ['NETWORK', 'TIMEOUT'].includes(err?.code); }
+
+    function tornError(data) {
+      const raw = data?.error;
+      if (!raw) return null;
+      const message = String(raw?.error ?? raw?.message ?? raw ?? 'Torn API error');
+      const apiCode = Number(raw?.code);
+      const lower = message.toLowerCase();
+      const isRateLimit = apiCode === 5 || /too many|rate.?limit|requests per/i.test(lower);
+      const isInvalidKey = [2, 12, 13, 16].includes(apiCode) || /invalid.*key|key.*invalid|incorrect.*key/i.test(lower);
+      return { message, apiCode: Number.isFinite(apiCode) ? apiCode : null, isRateLimit, isInvalidKey };
+    }
+
+    async function networkRequest(opts, startEpoch) {
+      let attempt = 0;
+      const retries = Math.max(0, Number(opts.retries) || 0);
+      while (true) {
+        if (opts.routeScoped && router.epoch() !== startEpoch) throw makeError('Stale route request', 'STALE_ROUTE');
+        const controller = opts.routeScoped && typeof AbortController === 'function' ? new AbortController() : null;
+        if (controller) routeControllers.add(controller);
+        try {
+          stats.networkRequests++;
+          const result = await transport(opts, controller);
+          if (opts.routeScoped && router.epoch() !== startEpoch) throw makeError('Stale route request', 'STALE_ROUTE');
+          const status = Number(result?.status || 0);
+          if (status >= 200 && status < 300) return String(result?.text ?? '');
+          if (status === 429) stats.rateLimited++;
+          if (attempt < retries && retryableStatus(status)) {
+            stats.retries++;
+            await sleep((Number(opts.retryBase) || 400) * (2 ** attempt));
+            attempt++;
+            continue;
+          }
+          throw makeError(`HTTP ${status || 0}`, 'HTTP', { status, retryable: retryableStatus(status) });
+        } catch (err) {
+          if (err?.code === 'ABORTED' || err?.code === 'STALE_ROUTE') { stats.aborted++; throw err; }
+          if (err?.code === 'TIMEOUT') stats.timeouts++;
+          if (attempt < retries && retryableError(err)) {
+            stats.retries++;
+            await sleep((Number(opts.retryBase) || 400) * (2 ** attempt));
+            attempt++;
+            continue;
+          }
+          throw err;
+        } finally { if (controller) routeControllers.delete(controller); }
+      }
+    }
+
+    function requestText(input = {}) {
+      const opts = typeof input === 'string' ? { url: input } : { ...input };
+      opts.url = String(opts.url || '');
+      opts.method = String(opts.method || 'GET').toUpperCase();
+      opts.timeout = Math.max(0, Number(opts.timeout ?? 15000));
+      opts.retries = Math.max(0, Number(opts.retries ?? 2));
+      opts.retryBase = Math.max(0, Number(opts.retryBase ?? 400));
+      opts.parse = 'text';
+      if (!opts.url) return Promise.reject(makeError('Request URL is required', 'INVALID_REQUEST'));
+
+      stats.requests++;
+      const key = requestKey(opts);
+      const cacheable = opts.method === 'GET' && opts.body == null;
+      if (cacheable && !opts.force) {
+        const cached = cacheRead(key);
+        if (cached != null) { stats.cacheHits++; return Promise.resolve(cached); }
+      }
+      if (cacheable && inflight.has(key)) { stats.deduped++; return inflight.get(key); }
+
+      const startEpoch = router.epoch();
+      const promise = enqueue(() => networkRequest(opts, startEpoch), opts.priority)
+        .then(text => { if (cacheable) cacheWrite(key, text, opts.ttl); return text; })
+        .catch(err => { stats.failures++; throw err; })
+        .finally(() => { if (inflight.get(key) === promise) inflight.delete(key); });
+      if (cacheable) inflight.set(key, promise);
+      return promise;
+    }
+
+    async function requestJson(urlOrOptions, options = {}) {
+      const opts = typeof urlOrOptions === 'string' ? { ...options, url: urlOrOptions } : { ...(urlOrOptions || {}) };
+      const text = await requestText(opts);
+      let data;
+      try { data = text ? JSON.parse(text) : null; }
+      catch (err) { throw makeError('Invalid JSON response', 'INVALID_JSON', { cause: err }); }
+      if (opts.throwApiError) {
+        const info = tornError(data);
+        if (info) {
+          if (info.isRateLimit) stats.rateLimited++;
+          throw makeError(info.message, 'TORN_API_ERROR', info);
+        }
+      }
+      return data;
+    }
+
+    function clearCache(match = null) {
+      if (match == null) { const size = responseCache.size; responseCache.clear(); return size; }
+      const needle = String(match);
+      let removed = 0;
+      for (const key of [...responseCache.keys()]) if (key.includes(needle)) { responseCache.delete(key); removed++; }
+      return removed;
+    }
+
+    function cancelRouteScoped() {
+      let count = 0;
+      for (const controller of [...routeControllers]) { try { controller.abort('route-change'); count++; } catch {} }
+      return count;
+    }
+
+    function configure(options = {}) {
+      if (Number.isFinite(Number(options.maxConcurrent))) maxConcurrent = Math.max(1, Math.min(12, Math.floor(Number(options.maxConcurrent))));
+      pump();
+      return diagnostics();
+    }
+
+    function diagnostics() {
+      return Object.freeze({
+        ...stats,
+        active,
+        queued: queue.length,
+        inflight: inflight.size,
+        cacheEntries: responseCache.size,
+        maxConcurrent,
+        transports: { pda: !!env.pda, gm: !!env.gm, fetch: !!env.fetch }
+      });
+    }
+
+    routeAbortHook = cancelRouteScoped;
+    registerEnvironment(currentTransportEnvironment());
+    return Object.freeze({ request: requestText, requestText, requestJson, clearCache, cancelRouteScoped, configure, diagnostics, registerEnvironment });
+  })();
+
+  const ui = {
+    applyWorkspaceLayout(overlay, panel, options = {}) {
+      if (!overlay || !panel || typeof window === 'undefined') return null;
+      const top = Math.max(0, Number(options.top ?? 0));
+      const bottom = Math.max(0, Number(options.bottom ?? 36));
+      const side = Math.max(0, Number(options.side ?? 4));
+      const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
+      const apply = () => {
+        const vv = window.visualViewport;
+        const width = Math.max(0, Number(vv?.width || window.innerWidth || 0));
+        const height = Math.max(0, Number(vv?.height || window.innerHeight || 0));
+        const offsetTop = Math.max(0, Number(vv?.offsetTop || 0));
+        const offsetLeft = Math.max(0, Number(vv?.offsetLeft || 0));
+        Object.assign(overlay.style, {
+          position: 'fixed',
+          inset: '0px',
+          width: 'auto',
+          height: 'auto',
+          maxHeight: 'none',
+          display: 'block'
+        });
+        const usable = Math.max(240, height - top - bottom);
+        const panelWidth = Math.min(maxWidth, Math.max(240, width - side * 2));
+        Object.assign(panel.style, {
+          position: 'fixed',
+          top: (offsetTop + top) + 'px',
+          bottom: 'auto',
+          left: (offsetLeft + Math.max(side, (width - panelWidth) / 2)) + 'px',
+          width: panelWidth + 'px',
+          height: usable + 'px',
+          maxHeight: usable + 'px',
+          margin: '0',
+          boxSizing: 'border-box'
+        });
+      };
+      apply();
+      const vv = window.visualViewport;
+      vv?.addEventListener?.('resize', apply);
+      vv?.addEventListener?.('scroll', apply);
+      window.addEventListener?.('resize', apply);
+      return () => {
+        vv?.removeEventListener?.('resize', apply);
+        vv?.removeEventListener?.('scroll', apply);
+        window.removeEventListener?.('resize', apply);
+      };
+    },
+    ensureSharedSkin() {
+      if (typeof document === 'undefined' || typeof document.createElement !== 'function' || document.getElementById('sakalux-shared-hub-skin')) return;
+      const st = document.createElement('style');
+      st.id = 'sakalux-shared-hub-skin';
+      st.textContent = `
+:root{--slx-bg:#0b1118;--slx-card:#111a24;--slx-card2:#172331;--slx-border:#34465b;--slx-border-soft:rgba(255,255,255,.09);--slx-text:#edf3fa;--slx-muted:#93a4b7;--slx-blue:#4f8fe8;--slx-gold:#dfbd61;--slx-green:#55d98a;--slx-red:#ff6b78;--slx-shadow:0 16px 40px rgba(0,0,0,.46)}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button,body [id^="slx-"] button,body [class^="sakalux-"] button,body [class*=" sakalux-"] button{border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);font-family:Inter,Arial,sans-serif;transition:border-color .15s ease,background .15s ease,transform .08s ease,opacity .15s ease}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button:active,body [id^="slx-"] button:active{transform:scale(.985)}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) input,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) select,body [id^="slx-"] input,body [id^="slx-"] select{border-radius:10px;border-color:#3a4d63;background:#151f2b;color:var(--slx-text);font-family:Inter,Arial,sans-serif}
+body [id*="sakalux"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="panel"],body [id*="sakalux"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *))[id*="modal"],body [id*="slx"][id*="panel"],body [id*="slx"][id*="modal"],body #slx-stock-inline{font-family:Inter,Arial,sans-serif;color:var(--slx-text);border-color:var(--slx-border);box-shadow:var(--slx-shadow)}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .header,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .head,body [id^="slx-"] .header,body [id^="slx-"] .head{background:radial-gradient(circle at 12% -20%,rgba(79,143,232,.18),transparent 42%),linear-gradient(155deg,#18212d 0%,#101720 72%);border-color:var(--slx-border-soft)}
+body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) .card,body [id^="slx-"] .card{border-color:var(--slx-border-soft);background:linear-gradient(180deg,rgba(19,28,39,.98),rgba(11,17,24,.98))}
+@media(max-width:700px){body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) button,body [id^="slx-"] button{min-height:36px}body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) input,body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #sakalux-hub-overlay *, #sakalux-hub-panel *)) select,body [id^="slx-"] input,body [id^="slx-"] select{min-height:36px}}
+`;
+      (document.head || document.documentElement).appendChild(st);
+    }
+  };
+
+  const logger = {
+    debug(...args) { if (storage.get('SakaLuX_DEBUG', false)) console.debug('[SakaLuX]', ...args); },
+    warn(...args) { console.warn('[SakaLuX]', ...args); },
+    error(...args) { console.error('[SakaLuX]', ...args); }
+  };
+
+  const core = Object.freeze({ version: CORE_VERSION, perf, hub, storage, settings, router, dock, api, ui, logger });
+
+  g[NS] = core;
+  g.SakaLuXPerf = perf;
+  settings.autoGuardCurrentScript();
+  routeKey = router.key();
+  ui.ensureSharedSkin();
+})();
+/* SakaLuX Shared Core — END */
+
+(() => {
+  'use strict';
+
+  const VERSION = '0.2.0';
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
   const FF_TTL = 12 * 60 * 60 * 1000;
@@ -34,9 +691,10 @@
     ff: 'SLX_HALLOWEEN_FF_KEY',
     board: 'SLX_HALLOWEEN_BOARD_CACHE_V1',
     ffCache: 'SLX_HALLOWEEN_FF_CACHE_V1',
-    statusCache: 'SLX_HALLOWEEN_STATUS_CACHE_V1'
+    statusCache: 'SLX_HALLOWEEN_STATUS_CACHE_V1',
+    targetPool: 'SLX_HALLOWEEN_TARGET_POOL_V1'
   });
-  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 25, statusChecks: 80, autoRefresh: true, refreshSeconds: 90 });
+  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 80, autoRefresh: true, refreshSeconds: 90 });
   const $ = (query, root = document) => root.querySelector(query);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -44,9 +702,17 @@
   const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } };
 
   let settings = { ...DEFAULTS, ...read(KEYS.settings, {}) };
+  try {
+    if (!localStorage.getItem('SLX_HALLOWEEN_MIGRATED_020')) {
+      if (num(settings.maxResults) === 25) settings.maxResults = 50;
+      localStorage.setItem('SLX_HALLOWEEN_MIGRATED_020', '1');
+      write(KEYS.settings, settings);
+    }
+  } catch {}
   let boardCache = read(KEYS.board, { at: 0, rows: [] });
   let ffCache = { ...read('SLX_BOUNTY_FF_CACHE_V1', {}), ...read(KEYS.ffCache, {}) };
   let statusCache = read(KEYS.statusCache, {});
+  let targetPool = read(KEYS.targetPool, { at: 0, rows: [] });
   let targets = [];
   let scanning = false;
   let timer = 0;
@@ -54,6 +720,12 @@
   let lastWarning = '';
   let lastScanMs = 0;
   let rateLimited = false;
+
+  try {
+    globalThis.SakaLuXCore?.settings?.register?.({ id: 'halloween-assistant', version: 1, keys: Object.values(KEYS) });
+    globalThis.SakaLuXCore?.api?.configure?.({ maxConcurrent: 8 });
+    globalThis.SakaLuXCore?.ui?.ensureSharedSkin?.();
+  } catch {}
 
   function getHubKey() {
     try {
@@ -172,6 +844,8 @@
       level: pick(item, 'level') ?? pick(player, 'level') ?? null,
       reward: num(pick(item, 'reward', 'amount', 'money', 'bounty')),
       count: 1,
+      hasBounty: true,
+      source: 'Bounty board',
       ff: null,
       bs: null,
       status: 'Unknown',
@@ -217,6 +891,54 @@
     return rows;
   }
 
+  function normalizeTargetPool(data) {
+    const list = Array.isArray(data?.targets) ? data.targets : Array.isArray(data) ? data : [];
+    return list.map(item => {
+      const id = num(item.player_id ?? item.id);
+      if (!Number.isSafeInteger(id) || id <= 0) return null;
+      return {
+        id,
+        name: String(item.name || ('Player ' + id)),
+        level: item.level == null ? null : num(item.level),
+        reward: 0,
+        count: 0,
+        hasBounty: false,
+        source: 'FFScouter targets',
+        ff: Number.isFinite(Number(item.fair_fight ?? item.ff)) ? Number(item.fair_fight ?? item.ff) : null,
+        bs: Number.isFinite(Number(item.bs_estimate ?? item.bss_public ?? item.battle_stats)) ? Number(item.bs_estimate ?? item.bss_public ?? item.battle_stats) : null,
+        status: 'Unknown',
+        statusVerified: false,
+        lastAction: item.last_action ? String(item.last_action) : ''
+      };
+    }).filter(Boolean);
+  }
+
+  async function loadSupplementalTargets() {
+    const key = getFFKey();
+    if (!validKey(key)) return Array.isArray(targetPool.rows) ? targetPool.rows.map(row => ({ ...row })) : [];
+    const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
+    const url = 'https://ffscouter.com/api/v1/get-targets?key=' + encodeURIComponent(key) + '&minlevel=1&maxlevel=100&minff=1&maxff=' + encodeURIComponent(maxFF) + '&inactiveonly=0&limit=50';
+    try {
+      const rows = normalizeTargetPool(await requestJSON(url));
+      if (rows.length) {
+        targetPool = { at: Date.now(), rows };
+        write(KEYS.targetPool, targetPool);
+        for (const row of rows) ffCache[String(row.id)] = { at: Date.now(), ff: row.ff, bs: row.bs };
+      }
+      return rows;
+    } catch (error) {
+      lastWarning = friendlyError(error, 'FFScouter');
+      return Array.isArray(targetPool.rows) ? targetPool.rows.map(row => ({ ...row })) : [];
+    }
+  }
+
+  function mergeTargetSources(bounties, supplemental) {
+    const merged = new Map();
+    for (const row of bounties) merged.set(String(row.id), { ...row, hasBounty: true });
+    for (const row of supplemental) if (!merged.has(String(row.id))) merged.set(String(row.id), { ...row, hasBounty: false, reward: 0, count: 0 });
+    return [...merged.values()];
+  }
+
   function normalizeFF(data) {
     const list = Array.isArray(data) ? data : Array.isArray(data?.players) ? data.players : Array.isArray(data?.data) ? data.data : [];
     return list.map(item => ({
@@ -231,6 +953,10 @@
     const now = Date.now();
     const needed = [];
     for (const row of rows) {
+      if (row.ff != null || row.bs != null) {
+        ffCache[String(row.id)] = { at: now, ff: row.ff, bs: row.bs };
+        continue;
+      }
       const cached = ffCache[String(row.id)];
       if (cached && now - num(cached.at) < FF_TTL) { row.ff = cached.ff; row.bs = cached.bs; }
       else needed.push(row.id);
@@ -302,6 +1028,10 @@
     const aLevel = a.level == null ? 999 : num(a.level), bLevel = b.level == null ? 999 : num(b.level);
     return aLevel - bLevel || b.reward - a.reward;
   }
+  function targetCompare(a, b) {
+    if (Boolean(a.hasBounty) !== Boolean(b.hasBounty)) return a.hasBounty ? -1 : 1;
+    return quickCompare(a, b);
+  }
   function speedLabel(row) {
     if (row.ff == null && row.bs == null) return 'LEVEL PICK';
     if (row.ff <= 1.15 && (row.bs == null || row.bs <= 1e6)) return '⚡ VERY FAST';
@@ -310,8 +1040,7 @@
   }
   function candidateRows(rows) {
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
-    const known = rows.filter(row => row.ff != null && row.ff >= 1 && row.ff <= maxFF);
-    return (known.length ? known : rows).sort(quickCompare);
+    return rows.filter(row => row.ff == null || (row.ff >= 1 && row.ff <= maxFF)).sort(targetCompare);
   }
   function applyCachedIntelligence(rows) {
     const now = Date.now();
@@ -341,8 +1070,9 @@
     lastWarning = '';
     updateControls();
     try {
-      if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(boardCache.rows);
-      let rows = await loadBoard(false);
+      if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(boardCache.rows, targetPool.rows || []));
+      const [bounties, supplemental] = await Promise.all([loadBoard(false), loadSupplementalTargets()]);
+      let rows = mergeTargetSources(bounties, supplemental);
       paintInstantCache(rows);
       try { rows = await enrichFF(rows); }
       catch (error) { lastWarning = friendlyError(error, 'FFScouter'); }
@@ -359,7 +1089,7 @@
         if (verified.length >= wanted || rateLimited) break;
       }
       write(KEYS.statusCache, statusCache);
-      if (verified.length || !rateLimited) targets = verified.sort(quickCompare).slice(0, wanted);
+      if (verified.length || !rateLimited) targets = verified.sort(targetCompare).slice(0, wanted);
       renderTargets();
       lastScanMs = Math.round(performance.now() - started);
       setProgress((lastWarning ? lastWarning + ' · ' : rateLimited ? 'API limit reached · cached live list kept · ' : 'Ready · ') + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
@@ -404,7 +1134,8 @@
     for (const row of targets) {
       const card = document.createElement('article'); card.className = 'ha-target';
       const intel = `${row.ff != null ? ' · FF ' + num(row.ff).toFixed(2) : ''}${row.bs != null ? ' · BS ' + esc(formatBS(row.bs)) : ''}`;
-      card.innerHTML = `<div><div class="ha-name">${esc(row.name)} <small>[${row.id}]</small></div><div class="ha-meta"><span class="ha-speed">${esc(speedLabel(row))}</span> · LIVE OKAY ✓${intel}${row.level != null ? ' · L' + esc(row.level) : ''} · ${row.count} bount${row.count === 1 ? 'y' : 'ies'} ${money(row.reward)}</div></div><div class="ha-links"><a href="https://www.torn.com/page.php?sid=attack&user2ID=${row.id}" title="Attack">ATK</a><a href="https://www.torn.com/profiles.php?XID=${row.id}" target="_blank" rel="noopener noreferrer" title="Profile">👤</a></div>`;
+      const bounty = row.hasBounty ? ` · 🎯 BOUNTY ${money(row.reward)}` : ' · FĂRĂ BOUNTY';
+      card.innerHTML = `<div><div class="ha-name">${esc(row.name)} <small>[${row.id}]</small></div><div class="ha-meta"><span class="ha-speed">${esc(speedLabel(row))}</span> · LIVE OKAY ✓${intel}${row.level != null ? ' · L' + esc(row.level) : ''}${bounty}</div></div><div class="ha-links"><a href="https://www.torn.com/page.php?sid=attack&user2ID=${row.id}" title="Attack">ATK</a><a href="https://www.torn.com/profiles.php?XID=${row.id}" target="_blank" rel="noopener noreferrer" title="Profile">👤</a></div>`;
       list.appendChild(card);
     }
   }
@@ -433,7 +1164,7 @@
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
-      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Cheie Torn<input data-torn type="password" maxlength="16" placeholder="Hub/PDA automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" placeholder="Opțională"></label><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ</button><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div></div><div class="ha-hint">Doar ținte verificate LIVE OKAY · cele mai ușoare apar primele</div><div class="ha-list"></div><footer>Atac manual · SakaLuX [2380374]</footer></section>`;
+      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(globalThis.SakaLuXCore?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Cheie Torn<input data-torn type="password" maxlength="16" placeholder="Hub/PDA automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" placeholder="Opțională"></label><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ</button><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div></div><div class="ha-hint">LIVE OKAY · întâi cu bounty, apoi fără bounty · cele mai ușoare primele</div><div class="ha-list"></div><footer>Atac manual · SakaLuX [2380374]</footer></section>`;
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
@@ -446,7 +1177,7 @@
   function open() { const overlay = ensureUI(); overlay.hidden = false; renderTargets(); if (!targets.length && !scanning) void scan(false); return true; }
   function close() { const overlay = $('#' + IDS.overlay); if (overlay) overlay.hidden = true; }
   function schedule() { clearInterval(timer); if (settings.autoRefresh) timer = setInterval(() => { if (!document.hidden && !scanning) void scan(false); }, Math.max(30, num(settings.refreshSeconds) || 90) * 1000); }
-  function health() { return { version: VERSION, ready: true, scanning, targets: targets.length, lastScanMs, boardCacheAge: Date.now() - num(boardCache.at), ffCache: Object.keys(ffCache).length, statusCache: Object.keys(statusCache).length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError }; }
+  function health() { return { version: VERSION, core: globalThis.SakaLuXCore?.version || null, ready: true, scanning, targets: targets.length, bountyTargets: targets.filter(row => row.hasBounty).length, supplementalTargets: targets.filter(row => !row.hasBounty).length, lastScanMs, boardCacheAge: Date.now() - num(boardCache.at), targetPoolAge: Date.now() - num(targetPool.at), ffCache: Object.keys(ffCache).length, statusCache: Object.keys(statusCache).length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError, lastWarning }; }
 
   globalThis.SakaLuXHalloweenAssistant = Object.freeze({ version: VERSION, open, close, scan: () => scan(true), health });
   function start() { pruneCaches(); ensureUI(); schedule(); window.dispatchEvent(new CustomEvent('SakaLuXHalloweenAssistantReady', { detail: { version: VERSION } })); }
