@@ -6,7 +6,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.1';
+  const CORE_VERSION = '1.2.2';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -575,6 +575,39 @@
   })();
 
   const ui = {
+    ensureDonationFooter(rootOrSelector, options = {}) {
+      if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
+      const root = typeof rootOrSelector === 'string' ? document.querySelector(rootOrSelector) : rootOrSelector;
+      if (!root) return null;
+      const moduleId = String(options.id || 'module').replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+      const id = 'sakalux-inline-footer-' + moduleId;
+      const existing = root.querySelector?.('#' + id) || document.getElementById(id);
+      if (existing) { if (existing.parentElement !== root) root.appendChild(existing); return existing; }
+      const profile = String(options.profile || 'https://www.torn.com/profiles.php?XID=2380374');
+      const author = String(options.author || 'SakaLuX [2380374]');
+      if (!document.getElementById('sakalux-shared-donation-footer-style')) {
+        const style = document.createElement('style');
+        style.id = 'sakalux-shared-donation-footer-style';
+        style.textContent = `.slx-shared-donation{display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#080d13!important;font-family:Inter,Arial,sans-serif!important}.slx-shared-donation *{box-sizing:border-box!important}.slx-shared-donation-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;height:28px!important;padding:4px 10px!important}.slx-shared-donation button{display:block!important;width:100%!important;height:20px!important;min-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:8px!important;background:#151f2a!important;color:#c5d2df!important;font:900 8px/1.2 Inter,Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important}.slx-shared-donation-made{height:22px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;padding:0 6px!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important;font:500 9px/20px Inter,Arial,sans-serif!important;white-space:nowrap!important}.slx-shared-donation-made a{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}`;
+        (document.head || document.documentElement).appendChild(style);
+      }
+      const footer = document.createElement('div');
+      footer.id = id;
+      footer.className = 'slx-shared-donation';
+      footer.innerHTML = `<div class="slx-shared-donation-actions"><button type="button" data-slx-donate="money">💸 SEND MONEY</button><button type="button" data-slx-donate="items">🎁 SEND ITEMS</button></div><div class="slx-shared-donation-made">Made with ❤️ by <a href="${profile}">${author}</a></div>`;
+      footer.addEventListener('click', event => {
+        const action = event.target?.closest?.('[data-slx-donate]');
+        const link = event.target?.closest?.('a');
+        if (!action && !link) return;
+        event.preventDefault();
+        if (action && typeof options.onDonate === 'function') {
+          try { options.onDonate(action.dataset.slxDonate, profile); return; } catch {}
+        }
+        if (typeof location !== 'undefined') location.href = profile;
+      });
+      root.appendChild(footer);
+      return footer;
+    },
     applyWorkspaceLayout(overlay, panel, options = {}) {
       if (!overlay || !panel || typeof window === 'undefined') return null;
       const top = Math.max(0, Number(options.top ?? 0));
