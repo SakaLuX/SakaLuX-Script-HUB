@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.2.2
+// @version      0.2.3
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -25,7 +25,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.3';
+  const CORE_VERSION = '1.2.4';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -630,7 +630,7 @@
     applyWorkspaceLayout(overlay, panel, options = {}) {
       if (!overlay || !panel || typeof window === 'undefined') return null;
       const top = Math.max(0, Number(options.top ?? 0));
-      const bottom = Math.max(0, Number(options.bottom ?? 36));
+      const bottom = Math.max(0, Number(options.bottom ?? 0));
       const side = Math.max(0, Number(options.side ?? 4));
       const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
       if (typeof document !== 'undefined' && !document.getElementById('sakalux-shared-workspace-layout-style')) {
@@ -725,7 +725,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.2.2';
+  const VERSION = '0.2.3';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1214,16 +1214,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
-      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Cheie Torn<input data-torn type="password" maxlength="16" placeholder="Hub/PDA automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" placeholder="Opțională"></label><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ</button><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div></div><div class="ha-hint">LIVE OKAY · întâi cu bounty, apoi fără bounty · cele mai ușoare primele</div><div class="ha-list"></div></section>`;
+      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Cheie Torn<input data-torn type="password" maxlength="16" placeholder="Hub/PDA automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" placeholder="Opțională"></label><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ</button><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div></div><div class="ha-hint">LIVE OKAY · întâi cu bounty, apoi fără bounty · cele mai ușoare primele</div><div class="ha-list"></div></section>`;
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
       $('[data-scan]', overlay).onclick = () => { saveSettingsFromUI(); void scan(true); };
       $('[data-settings]', overlay).onclick = () => { const panel = $('.ha-settings', overlay); panel.hidden = !panel.hidden; };
+      $('[data-key]', overlay).onclick = () => { const settingsPanel = $('.ha-settings', overlay); settingsPanel.hidden = false; $('[data-torn]', overlay)?.focus(); };
       document.body.appendChild(overlay);
       const panel = $('.ha-panel', overlay);
       SHARED_CORE?.ui?.ensureDonationFooter?.(panel, { id: 'halloween-assistant' });
-      overlay._slxWorkspaceCleanup = SHARED_CORE?.ui?.applyWorkspaceLayout?.(overlay, panel, { top: 0, bottom: 36, side: 4, maxWidth: 760 }) || null;
+      overlay._slxWorkspaceCleanup = SHARED_CORE?.ui?.applyWorkspaceLayout?.(overlay, panel, { top: 0, bottom: 0, side: 4, maxWidth: 760 }) || null;
     }
     return overlay;
   }
