@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.4.2
+// @version      0.4.3
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -834,7 +834,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.4.2';
+  const VERSION = '0.4.3';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1076,12 +1076,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     write(KEYS.discovered, discoveredPool);
     return fresh;
   }
+  const BALDR_FALLBACK_IDS = '320161,488552,810355,524912,1682111,387822,566484,298167,879148,234429,428732,18798,476620,472351,807823,1379450,316768,153910,76096,659852,738073,284536,263120,729174,1489357,669996,191060,454302,1046495,1199189,485156,1399310,581300,211286,469582,652354,491724,233040,688148,442427,588113,669588,1265642,861978,993561,475911,853558,1199867,556637,318410,627612,719349,969920,656275,587991,590277,44940,983314,888467,567611,1269587,782249,56712,383473,894205,1016568,874491,481648,1032025,443421,194310,573258,104318,1011379,33084,1387230,353299,542048,659243,1104804,352232,670186,448387,441061,652570,693146,595042,63476,508876,640180,104247,534510,507739,172402,508367,456008,591855,247701,470393,471778,323695,969780,1389629,685929,524902,974933,497977,1022737,794755,1171459,422145,581343,648698,857866,849660,313327,512249,904225,342880,1101484,582138,790460,525298,677104,580371,921628,894666,1413853,693966,579753,428350,982909,671763,678613,238623,469387,96674,298602,490998,916404,577479,323067,1073189,239449,509029,938020,331666,1306189,1151368,785081,640201,999990,956400,295976,424049,848845,1003142,257120,279869,1011214,865088,774785,734208,782638,512111,901426,1423394,1075217,870109,296249,1183664,789256,430140,935251,1169008,367428,555271,750371,1380052,477364,1442848,430622,1394290,552906,91892,849274,1663511,75522,95057,21631,76480,87572,241909,200728,943004,87461,929257,136660,1514039,34069,556583,173148,247665,850551,320301,583658,813216,41317,50835,14641,222151,26299,340810,27340,54567,228704,359740,185958,316174,431576,244123,188142,45179,17003,251077,313353,353885,514096,753853,458343,237866,451695,953808,162476,802907,800608,67254,147082,792900,275866,365986,264257,464079,342150,372870,14092,905822,575176,815125,983447,330496,436308,280295,660205,478962,382338,229632,488384,465467,381995,342907,432474,1177887,451753,83039,421949,740967,470180,1082559,644384,484743,281747,1210736,938350,768356,232564,668705,758810,343321,65146,384786,466947,325378,1278107,463919,930653,380958,349371,184845,931279,355177,228051,545762,507362,28699,421990,327989,1399729,197040,451340,768647,353161,347364,787968,504786,714004,510003,553287,535986,971899,916292,670897,522148,446282,512527,344390,1013307,292411,482042,970145,273087,233737,272293,19864,568129,525550,992984,314252,882854,914038,183886,742707,543610,950733,610508,465776,984505,773962,528613,163117,517671,432385,218930,857383,13800,1064044,918435,1201,20230,1258259,566824,305270,627428,31580,185939,232200,666693,165654,170474,367657,507984,218703,769246,525046,297041,295463,148374,295547,714273,247192,466216,729522,30117,556294,670286,1978001,2150020,1893007,2061354,1964175,1999595,1776074';
+  function baldrFallbackRows() {
+    return BALDR_FALLBACK_IDS.split(',').map(id => ({
+      id: Number(id), name: 'Player ' + id, level: null, reward: 0, count: 0,
+      hasBounty: false, source: 'Baldr backup', ff: null, bs: null,
+      status: 'Unknown', statusVerified: false, lastAction: '', lastActionStatus: ''
+    }));
+  }
+  let sourceDiagnostics = {};
   async function loadBaldrTargets() {
-    if (!settings.includeInactive || !settings.useBaldr) return [];
+    if (!settings.includeInactive || !settings.useBaldr) { sourceDiagnostics.Baldr = 'OFF'; return []; }
     try {
       const data = await requestJSON('https://raw.githubusercontent.com/OranWeb/tc-baldrs-levelling-list/master/data.json');
       const lists = Object.values(data || {}).flatMap(v => Array.isArray(v) ? v : []);
-      return lists.map(p => {
+      const found = lists.map(p => {
         const id = Number(p.id);
         if (!Number.isSafeInteger(id) || id <= 0) return null;
         return { id, name: String(p.name || 'Player ' + id), level: Number(p.lvl) || null,
@@ -1089,8 +1098,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
           bs: Number(p.total) || null, status: 'Unknown', statusVerified: false,
           lastAction: '', lastActionStatus: '' };
       }).filter(Boolean);
+      sourceDiagnostics.Baldr = found.length + ' ID-uri';
+      return found.length ? found : baldrFallbackRows();
     } catch (error) {
-      lastWarning = friendlyError(error, 'Baldr'); return [];
+      sourceDiagnostics.Baldr = 'backup local: ' + baldrFallbackRows().length + ' · ' + String(error?.message || error).slice(0,80);
+      return baldrFallbackRows();
     }
   }
   function importedTargetRows(text) {
@@ -1149,7 +1161,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   async function loadSupplementalTargets() {
-    if (!settings.includeInactive) return [];
+    if (!settings.includeInactive) { sourceDiagnostics.FFScouter = 'OFF'; return []; }
     const key = getFFKey();
     if (!validKey(key)) return Array.isArray(targetPool.rows) ? targetPool.rows.map(row => ({ ...row })) : [];
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
@@ -1161,8 +1173,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         write(KEYS.targetPool, targetPool);
         for (const row of rows) ffCache[String(row.id)] = { at: Date.now(), ff: row.ff, bs: row.bs };
       }
+      sourceDiagnostics.FFScouter = rows.length + ' ID-uri';
       return rows;
     } catch (error) {
+      sourceDiagnostics.FFScouter = 'eroare: ' + String(error?.message || error).slice(0,80);
       lastWarning = friendlyError(error, 'FFScouter');
       return Array.isArray(targetPool.rows) ? targetPool.rows.map(row => ({ ...row })) : [];
     }
@@ -1319,6 +1333,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     lastScanMs = 0;
     lastError = '';
     lastWarning = '';
+    sourceDiagnostics = {};
     updateControls();
     try {
       if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(settings.includeBounties && !settings.includeInactive ? boardCache.rows : [], settings.includeInactive ? compactPool([...(targetPool.rows || []), ...(discoveredPool.rows || [])]) : []));
@@ -1331,6 +1346,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       paintInstantCache(rows);
       try { rows = await enrichFF(rows); }
       catch (error) { lastWarning = friendlyError(error, 'FFScouter'); }
+      sourceDiagnostics.Local = discoveredPool.rows.length + ' ID-uri memorate';
       const candidates = candidateRows(rows);
       const limit = Math.max(10, Math.min(160, Math.floor(num(settings.statusChecks) || DEFAULTS.statusChecks)));
       const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
@@ -1349,7 +1365,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       targets = verified.filter(row => row.status === 'Okay' && row.statusVerified && Date.now() - num(row.verifiedAt) <= STATUS_TTL).sort(targetCompare).slice(0, wanted);
       renderTargets();
       lastScanMs = Math.round(performance.now() - started);
-      setProgress((lastWarning ? lastWarning + ' · ' : rateLimited ? 'API limit reached · ' : 'Ready · ') + candidates.length + ' candidați · ' + verified.length + ' verificați eligibili · ' + targets.length + ' LIVE · ' + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
+      setProgress((rateLimited ? 'Torn API limit · ' : '') + Object.entries(sourceDiagnostics).map(([k,v]) => k + ': ' + v).join(' · ') + ' · ' + candidates.length + ' candidați · ' + verified.length + ' eligibili · ' + targets.length + ' LIVE · ' + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
       return true;
     } catch (error) {
       lastError = friendlyError(error, 'Torn');
