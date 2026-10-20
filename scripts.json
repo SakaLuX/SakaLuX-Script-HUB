@@ -649,7 +649,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Editable Baldr, Hank, Aec3, Balanced, 2-stat, 3-stat and Custom starting templates; manual stat values and local snapshots. No automatic training or gym switching. Template weights are not verified StatForge formula parity.",
@@ -661,12 +661,12 @@
         }
       ],
       "release": {
-        "version": "1.0.1",
+        "version": "1.0.2",
         "date": "2026-10-20",
         "notes": [
-          "Render Gym Optimizer inline in the native Gym page, not as a floating popup.",
-          "Auto-remount after TornPDA SPA navigation.",
-          "Keep locked gym switch protection and editable presets."
+          "Compact inline widget no longer covers the Gym interface.",
+          "Strategy and input controls hidden under Settings by default.",
+          "StatForge-inspired compact Train Next / Gym status sections."
         ]
       },
       "accessTier": "free",
