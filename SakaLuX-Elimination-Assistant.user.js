@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.64
+// @version      1.3.65
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1551,7 +1551,7 @@ function openSettings(){
   $('#slx-save-manual',m).onclick=()=>{const n=Number($('#slx-manual',m).value||0);if(n>0){state.my={total:n,at:Date.now(),source:'manual'};save(K.my,state.my);apply();$('#slx-save-manual',m).textContent='SAVED ✓'}};
   return true;
 }
-function saveSettings(){const m=$('#slx-settings');state.tornKey=$('#slx-torn',m).value.trim();state.ffKey=$('#slx-ffkey',m).value.trim();const n=Number($('#slx-manual',m).value||0);if(n>0){state.my={total:n,at:Date.now(),source:'manual'};save(K.my,state.my)}localStorage.setItem(K.torn,state.tornKey);localStorage.setItem(K.ff,state.ffKey);m.classList.remove('open');busy(refresh)}
+function saveSettings(){const m=$('#slx-settings');const newTorn=$('#slx-torn',m).value.trim(),newFF=$('#slx-ffkey',m).value.trim();if(newTorn)state.tornKey=newTorn;if(newFF)state.ffKey=newFF;const n=Number($('#slx-manual',m).value||0);if(n>0){state.my={total:n,at:Date.now(),source:'manual'};save(K.my,state.my)}if(state.tornKey)localStorage.setItem(K.torn,state.tornKey);if(state.ffKey)localStorage.setItem(K.ff,state.ffKey);m.classList.remove('open');busy(refresh)}
 async function testKey(keyOverride=''){
   const typed=String(keyOverride||$('#slx-torn')?.value||'').trim();
   if(typed){state.tornKey=typed;localStorage.setItem(K.torn,typed)}
