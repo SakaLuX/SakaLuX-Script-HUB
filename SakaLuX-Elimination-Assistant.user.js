@@ -987,11 +987,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.3.65';
-  try {
-    const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
-    if (meta) v = String(meta);
-  } catch {}
+  const v = '1.3.65'; // This script's own @version; global GM_info can belong to another TornPDA userscript.
   const g = globalThis;
   g.__SakaLuXInstalledVersions = g.__SakaLuXInstalledVersions || Object.create(null);
   g.__SakaLuXInstalledVersions['elimination-assistant'] = v;
