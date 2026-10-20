@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.985
+// @version      0.9.986
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -641,7 +641,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.985';
+  const VERSION = '0.9.986';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -10804,6 +10804,9 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
     let observer = null;
     let timer = 0;
     let active = false;
+    let running = false;
+    let stopRequested = false;
+    let remaining = 0;
 
     function isLotteryPage() {
       const url = String(location.href || '');
@@ -10826,6 +10829,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       }
       const text = String(document.body?.innerText || document.body?.textContent || '').replace(/\s+/g, ' ');
       const patterns = [
+        /you\s+have.{0,80}?\band\s+([\d,.]+)\s+(?:casino\s+)?tokens?/i,
         /you\s+have\s+([\d,.]+)\s+(?:casino\s+)?tokens?/i,
         /(?:casino\s+)?tokens?\s*(?:available|remaining|left)\s*[:\-]?\s*([\d,.]+)/i,
         /([\d,.]+)\s+(?:casino\s+)?tokens?\s*(?:available|remaining|left)/i
@@ -10837,76 +10841,120 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       return 0;
     }
 
-    function ticketLimit(input, card) {
-      const limits = [];
-      const inputMax = amount(input.max || input.getAttribute('max'));
-      if (inputMax) limits.push(inputMax);
-      const cardText = String(card?.innerText || card?.textContent || '').replace(/\s+/g, ' ');
-      const localPatterns = [
-        /(?:maximum|max)\s*(?:purchase|buy|tickets?)?\s*[:\-]?\s*([\d,.]+)/i,
-        /([\d,.]+)\s+tickets?\s*(?:maximum|max|remaining|available)/i
-      ];
-      for (const pattern of localPatterns) {
-        const value = amount(cardText.match(pattern)?.[1]);
-        if (value) limits.push(value);
-      }
-      const tokens = availableTokens();
-      if (tokens) limits.push(tokens);
-      return limits.length ? Math.max(1, Math.min(...limits)) : 0;
+    function controlText(control) {
+      return String(control?.textContent || control?.value || control?.getAttribute?.('aria-label') || '').replace(/\s+/g, ' ').trim();
     }
 
-    function findLotteryCard(input) {
-      let node = input.parentElement;
+    function isNativeBuy(control) {
+      return !control?.classList?.contains(BUTTON_CLASS) && /^buy$/i.test(controlText(control));
+    }
+
+    function findLotteryCard(control) {
+      let node = control.parentElement;
       for (let depth = 0; node && depth < 9; depth++, node = node.parentElement) {
         const text = String(node.textContent || '').replace(/\s+/g, ' ');
         if (!LOTTERY_RE.test(text)) continue;
-        const hasBuy = [...node.querySelectorAll('button,input[type="submit"],a')]
-          .some(control => /buy|purchase|get\s*tickets?|enter/i.test(String(control.textContent || control.value || control.getAttribute?.('aria-label') || '')));
+        const hasBuy = [...node.querySelectorAll('button,input[type="button"],input[type="submit"],a,[role="button"]')]
+          .some(isNativeBuy);
         if (hasBuy) return node;
       }
       return null;
     }
 
-    function setNativeValue(input, value) {
-      const previous = input.value;
-      const prototype = input instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
-      const setter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
-      if (setter) setter.call(input, String(value));
-      else input.value = String(value);
-      input._valueTracker?.setValue?.(previous);
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      input.dispatchEvent(new Event('change', { bubbles: true }));
+    function visible(control) {
+      return Boolean(control && !control.disabled && control.getAttribute?.('aria-disabled') !== 'true' && (control.offsetParent !== null || control.getClientRects?.().length));
     }
 
-    function injectButton(input, card) {
-      if (input.disabled || input.readOnly) return;
-      const existing = input.nextElementSibling?.classList?.contains(BUTTON_CLASS) ? input.nextElementSibling : null;
-      if (existing) {
-        const maximum = ticketLimit(input, card);
-        existing.textContent = maximum ? `MAX BUY · ${maximum}` : 'MAX BUY';
+    function nativeBuyControls(root = document) {
+      return [...root.querySelectorAll('button,input[type="button"],input[type="submit"],a,[role="button"]')]
+        .filter(control => isNativeBuy(control) && visible(control) && !control.closest('#sakalux-master-suite-panel'));
+    }
+
+    function currentNativeBuy() {
+      return nativeBuyControls(document).find(control => findLotteryCard(control)) || null;
+    }
+
+    function updateActionButtons() {
+      const tokens = availableTokens();
+      document.querySelectorAll('.' + BUTTON_CLASS).forEach(button => {
+        if (running) {
+          button.disabled = false;
+          button.textContent = `STOP · ${Math.max(0, remaining || tokens)}`;
+          button.dataset.running = '1';
+        } else {
+          button.disabled = !tokens;
+          button.textContent = tokens ? `MAX BUY · ${tokens}` : 'MAX BUY';
+          delete button.dataset.running;
+        }
+      });
+    }
+
+    function waitForTokenDecrease(before, timeout = 4500) {
+      return new Promise(resolve => {
+        const started = Date.now();
+        const check = () => {
+          const now = availableTokens();
+          if (now < before) { resolve(now); return; }
+          if (!active || stopRequested || Date.now() - started >= timeout) { resolve(before); return; }
+          setTimeout(check, 100);
+        };
+        check();
+      });
+    }
+
+    async function runMaxBuy() {
+      if (running) {
+        stopRequested = true;
+        context.showToast?.('Lottery Max Buy: oprire solicitată');
         return;
       }
-      input.dataset.slxLotteryMaxBound = '1';
+      const startTokens = availableTokens();
+      if (!startTokens) {
+        context.showToast?.('Lottery Max Buy: numărul de Casino Tokens nu a putut fi citit');
+        return;
+      }
+      if (!confirm(`Cumperi maximum ${startTokens} bilete folosind toate Casino Tokens disponibile?`)) return;
+      running = true;
+      stopRequested = false;
+      remaining = startTokens;
+      updateActionButtons();
+      let bought = 0;
+      let before = startTokens;
+      while (active && !stopRequested && before > 0 && bought < startTokens) {
+        const nativeBuy = currentNativeBuy();
+        if (!nativeBuy) break;
+        nativeBuy.click();
+        const after = await waitForTokenDecrease(before);
+        if (after >= before) break;
+        bought += before - after;
+        before = after;
+        remaining = after;
+        updateActionButtons();
+        await new Promise(resolve => setTimeout(resolve, 120));
+      }
+      running = false;
+      remaining = 0;
+      const stopped = stopRequested;
+      stopRequested = false;
+      schedule(0);
+      if (bought) context.showToast?.(`Lottery Max Buy: ${bought} bilete cumpărate${stopped ? ' · oprit' : ''}`);
+      else context.showToast?.('Lottery Max Buy: Torn nu a confirmat prima cumpărare; verifică dialogul paginii');
+    }
+
+    function injectBesideBuy(nativeBuy) {
+      const existing = nativeBuy.nextElementSibling?.classList?.contains(BUTTON_CLASS) ? nativeBuy.nextElementSibling : null;
+      if (existing) { updateActionButtons(); return; }
       const button = document.createElement('button');
       button.type = 'button';
       button.className = BUTTON_CLASS;
-      button.textContent = 'MAX BUY';
-      button.title = 'Completează numărul maxim de bilete permis de Casino Tokens disponibile';
+      button.title = 'Cumpără controlat câte un bilet până la epuizarea Casino Tokens';
       button.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
-        const maximum = ticketLimit(input, card);
-        if (!maximum) {
-          context.showToast?.('Lottery Max Buy: numărul de Casino Tokens nu a putut fi citit');
-          return;
-        }
-        setNativeValue(input, maximum);
-        input.focus?.();
-        context.showToast?.(`Lottery Max Buy: ${maximum} bilete selectate — confirmă pe butonul Torn`);
+        void runMaxBuy();
       });
-      input.insertAdjacentElement('afterend', button);
-      const maximum = ticketLimit(input, card);
-      if (maximum) button.textContent = `MAX BUY · ${maximum}`;
+      nativeBuy.insertAdjacentElement('afterend', button);
+      updateActionButtons();
     }
 
     function scan() {
@@ -10916,12 +10964,9 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
         document.querySelectorAll('[data-slx-lottery-max-bound]').forEach(input => delete input.dataset.slxLotteryMaxBound);
         return;
       }
-      const inputs = [...document.querySelectorAll('input[type="number"],input[inputmode="numeric"],input[type="text"]')];
-      for (const input of inputs) {
-        if (input.closest('#sakalux-master-suite-panel')) continue;
-        const card = findLotteryCard(input);
-        if (card) injectButton(input, card);
-      }
+      nativeBuyControls(document).forEach(control => {
+        if (findLotteryCard(control)) injectBesideBuy(control);
+      });
     }
 
     function schedule(delay = 100) {
@@ -10933,7 +10978,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       if (document.getElementById(STYLE_ID)) return;
       const style = document.createElement('style');
       style.id = STYLE_ID;
-      style.textContent = `.${BUTTON_CLASS}{display:inline-flex!important;align-items:center;justify-content:center;min-height:34px;margin-left:6px;padding:6px 11px;border:1px solid #e5962f!important;border-radius:8px;background:linear-gradient(180deg,#e98119,#a94709)!important;color:#fff!important;font:900 11px/1 system-ui,sans-serif!important;letter-spacing:.04em;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)!important;cursor:pointer}.${BUTTON_CLASS}:active{transform:scale(.97)}@media(max-width:650px){.${BUTTON_CLASS}{min-height:36px;margin-left:5px;padding:6px 9px;font-size:10px}}`;
+      style.textContent = `.${BUTTON_CLASS}{display:inline-flex!important;align-items:center;justify-content:center;min-height:34px;margin-left:6px;padding:6px 11px;border:1px solid #e5962f!important;border-radius:8px;background:linear-gradient(180deg,#e98119,#a94709)!important;color:#fff!important;font:900 11px/1 system-ui,sans-serif!important;letter-spacing:.04em;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.2)!important;cursor:pointer}.${BUTTON_CLASS}[data-running="1"]{border-color:#ff6574!important;background:linear-gradient(180deg,#b9283a,#74141f)!important}.${BUTTON_CLASS}:active{transform:scale(.97)}.${BUTTON_CLASS}:disabled{opacity:.55;cursor:not-allowed}@media(max-width:650px){.${BUTTON_CLASS}{min-height:36px;margin-left:7px;padding:6px 10px;font-size:10px}}`;
       (document.head || document.documentElement).appendChild(style);
     }
 
@@ -10948,6 +10993,8 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
 
     function destroy() {
       active = false;
+      stopRequested = true;
+      running = false;
       clearTimeout(timer);
       observer?.disconnect();
       observer = null;
@@ -46841,7 +46888,7 @@ function scan(){
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
 (() => {
 'use strict';
-const VERSION='0.9.985';
+const VERSION='0.9.986';
 const MODULES=[
  ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],
  ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],
