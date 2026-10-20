@@ -912,6 +912,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.144", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.143", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.142", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.141", "date": "2026-10-20", "changes": ["Version synchronization"]},
