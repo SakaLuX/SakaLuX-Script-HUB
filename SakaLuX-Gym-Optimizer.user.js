@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.5.7
+// @version      1.5.8
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -13,7 +13,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.5.7',root=document.documentElement;
+    const id='gym-optimizer',v='1.5.8',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -850,7 +850,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.5.7',id='gym-optimizer';
+    const ver='1.5.8',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -897,6 +897,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   css.textContent += '#slx-gym-panel .slx-settings-panel{padding:2px 5px 10px!important}#slx-gym-panel .slx-settings-panel .sf-section{margin:9px 0 5px!important;padding:6px 0 4px!important;font-size:11px!important;letter-spacing:1.4px!important}#slx-gym-panel .slx-choice-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px!important;margin:2px 0 8px!important}#slx-gym-panel .slx-choice-list button{font-size:11px!important;letter-spacing:.3px!important;padding:7px 3px!important;background:#222!important;border:1px solid #343434!important;line-height:1.15!important}#slx-gym-panel .slx-choice-list button.slx-selected{background:#233745!important;border-color:#3c7697!important}#slx-gym-panel .slx-order-list{gap:3px!important}#slx-gym-panel .slx-order-row{padding:7px 8px!important;font-size:11px!important;grid-template-columns:minmax(95px,1fr) minmax(75px,1fr) auto!important}#slx-gym-panel .slx-multiplier-grid{gap:7px!important;margin:6px 0!important}#slx-gym-panel .slx-multiplier-grid input{padding:6px 7px!important;margin-top:3px!important}#slx-gym-panel .slx-settings-help{font-size:11px!important;line-height:1.35!important;margin:2px 0 6px!important}#slx-gym-panel .slx-settings-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:4px!important}#slx-gym-panel .slx-settings-actions button{padding:8px 5px!important;font-size:11px!important}#slx-gym-panel #slx-gym-create-key{background:#27556b!important;border-color:#357c99!important;grid-column:1/-1;font-weight:800!important}#slx-gym-panel .slx-stat-bonuses{gap:3px!important}';
 
+  css.textContent += '#slx-gym-panel .slx-multiplier-grid label{color:inherit!important;font-weight:800!important;min-width:0;overflow-wrap:anywhere}#slx-gym-panel .slx-multiplier-grid label:nth-child(1){color:#38cb78!important}#slx-gym-panel .slx-multiplier-grid label:nth-child(2){color:#37c9d9!important}#slx-gym-panel .slx-multiplier-grid label:nth-child(3){color:#ff8754!important}#slx-gym-panel .slx-multiplier-grid label:nth-child(4){color:#ab86ec!important}#slx-gym-panel .slx-settings-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}#slx-gym-panel #slx-gym-create-key{grid-column:auto!important;font-size:10px!important;padding:7px 2px!important}';
   (document.head||document.documentElement).append(css);
   const toggle=document.createElement('button');toggle.id='slx-gym-toggle';toggle.textContent='GYM  [ENERGY] ';
   const panel=document.createElement('section');panel.id='slx-gym-panel';panel.hidden=true;
@@ -1063,7 +1064,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.5.7',id='gym-optimizer';
+      const version='1.5.8',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1079,22 +1080,70 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       } else fetch(url).then(r=>r.json()).then(resolve,reject);
     });
   }
+  // Torn v1 returns separate *_perks arrays at the response root. Torn v2
+  // returns categorized arrays under "perks". Both formats are supported.
+  function perkGroups(){
+    const sources=[gymApi.perkData,gymApi.data?.perks,gymApi.data].filter(Boolean);
+    const found=[],seen=new Set();
+    for(const source of sources){
+      const roots=[source,source?.perks].filter(x=>x&&typeof x==='object');
+      for(const root of roots)for(const [group,entries] of Object.entries(root)){
+        if(!Array.isArray(entries)||!(/_perks$/.test(group)||root===source?.perks))continue;
+        for(const entry of entries){
+          const line=typeof entry==='string'?entry:String(entry?.description||entry?.name||entry?.text||'').trim();
+          if(!line||!/gym|train|steadfast|stat gain/i.test(line))continue;
+          const key=group+'|'+line;
+          if(!seen.has(key)){seen.add(key);found.push({group,line})}
+        }
+      }
+    }
+    const groups=new Map();
+    for(const entry of found){if(!groups.has(entry.group))groups.set(entry.group,[]);groups.get(entry.group).push(entry.line)}
+    return [...groups].map(([group,entries])=>({group,entries}));
+  }
+  function gymPerkEffects(stat){
+    const output=[];
+    for(const {group,entries} of perkGroups())for(const line of entries){
+      const lower=line.toLowerCase();
+      if(!/(?:gym|training|train|steadfast)/.test(lower)||!/(?:gain|bonus|increase|steadfast)/.test(lower))continue;
+      const statRefs=['strength','speed','defense','dexterity'].filter(n=>new RegExp('\\b'+n+'\\b','i').test(line));
+      if(statRefs.length&&!statRefs.includes(stat.toLowerCase()))continue;
+      const percentages=[...line.matchAll(/([+-]?\d+(?:\.\d+)?)\s*%/g)];
+      if(!percentages.length){output.push({group,text:line,value:null});continue}
+      const pct=Number(percentages[0][1]);
+      if(!Number.isFinite(pct)||pct < -99 || pct > 200){output.push({group,text:line,value:null});continue}
+      output.push({group,text:line,value:pct});
+    }
+    return output;
+  }
   async function refreshGymApi(){
     const key=hubApiKey();
-    if(!key){gymApi.status='No Hub API key available';render();return}
+    if(!key){gymApi.status='No Hub or personal API key available';render();return}
     gymApi.status='Loading';render();
     try{
-      const data=await apiRequest('https://api.torn.com/user/?selections=perks,bars,gym,battlestats&key='+encodeURIComponent(key));
-      if(data?.error)throw Error(data.error.error||'Torn API returned an error');
-      gymApi={status:'Updated',data,at:Date.now()};
-    }catch(e){gymApi.status='Unavailable: '+String(e.message||e).slice(0,100)}
+      // A dedicated perks request works with legacy Torn API field layouts
+      // and prevents other selections from hiding or overwriting perk data.
+      const perks=await apiRequest('https://api.torn.com/user/?selections=perks&key='+encodeURIComponent(key));
+      if(perks?.error)throw Error('Torn perks: '+(perks.error.error||'API error'));
+      if(!perks||typeof perks!=='object')throw Error('Empty perks response');
+      gymApi.perkData=perks;
+      gymApi.at=Date.now();
+      const fields=Object.entries(perks).filter(([k,v])=>Array.isArray(v)&&/_perks$/.test(k));
+      const nested=perks.perks&&typeof perks.perks==='object'?Object.values(perks.perks).filter(Array.isArray):[];
+      gymApi.status=fields.length||nested.length?'Updated: '+(fields.length||nested.length)+' perk groups':'Updated: no perk groups returned';
+      try{
+        const data=await apiRequest('https://api.torn.com/user/?selections=bars,gym,battlestats&key='+encodeURIComponent(key));
+        if(data&&!data.error)gymApi.data=data;
+      }catch(e){} // Optional secondary context must not hide valid perk results.
+    }catch(e){
+      gymApi.status='Unavailable: '+String(e.message||e).replace(key,'[key]').slice(0,100);
+    }
     render();
   }
-  function perkGroups(){
-    const p=gymApi.data?.perks||{};
-    return Object.entries(p).filter(([,v])=>Array.isArray(v))
-      .map(([group,entries])=>({group,entries:entries.map(x=>typeof x==='string'?x:(x?.description||x?.name||'')).filter(t=>/gym|train|steadfast|strength|speed|defense|dexterity|happy|energy/i.test(t))}))
-      .filter(g=>g.entries.length);
+  function gymGainPercent(stat){
+    const perks=gymPerkEffects(stat),known=perks.filter(x=>Number.isFinite(x.value));
+    const factor=known.reduce((v,x)=>v*(1+x.value/100),1);
+    return {known:known.length,unknown:perks.length-known.length,value:Math.round((factor-1)*10000)/100,perks};
   }
   function gymEnergy(){
     const d=gymApi.data||{},current=d.energy||d.bars?.energy;
@@ -1131,21 +1180,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       if(total!==null&&current!==null&&total>=current)return {remaining:total-current,source:'API gym experience'};
       return null;
     },
-    modifiers(stat){
-      const out=[];for(const group of perkGroups()){
-        for(const line of group.entries){
-          const t=line.toLowerCase();
-          if(!/gym gain|gym train|train.*gain|steadfast/.test(t))continue;
-          const names=['strength','speed','defense','dexterity'];
-          const references=names.filter(n=>t.includes(n));
-          if(references.length&&!references.includes(stat.toLowerCase()))continue;
-          const m=line.match(/(?:increase|bonus|gain|steadfast)[^%]*?(\d+(?:\.\d+)?)\s*%/i)||line.match(/(\d+(?:\.\d+)?)\s*%[^.]*gym/i);
-          if(!m){out.push({group:group.group,text:line,value:null});continue}
-          const pct=Number(m[1]);if(pct>=0&&pct<=200)out.push({group:group.group,text:line,value:pct});
-        }
-      }
-      return out;
-    },
+    modifiers(stat){return gymPerkEffects(stat)},
     gain(stat,rep=1){
       const st=Number(gymApi.data?.[stat.toLowerCase()]??state.values[stat]);
       const happiness=Number(gymApi.data?.happy?.current??gymApi.data?.bars?.happy?.current);
@@ -1183,7 +1218,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   // Settings UI follows the mobile StatForge-style hierarchy while retaining SakaLuX mechanics.
   const ratioOrder=()=>{const high=stats.includes(state.highStat)?state.highStat:'Dexterity';const dump=stats.includes(state.dumpStat)&&state.dumpStat!==high?state.dumpStat:'Defense';return [high,...stats.filter(n=>n!==high&&n!==dump).sort((a,b)=>(Number(state.weights[b])||0)-(Number(state.weights[a])||0)),dump]};
-  const ratioTemplates={Baldr:[1,.8,.6,.6],Hank:[1,.8,.8,0],Aec3:[1,.8,.5,0],SakaLuX:[1,.8,.5,0]};
+  const ratioTemplates={Baldr:[1,.8,.6,.6],Hank:[1,.8,.8,0],SakaLuX:[1,.8,.5,0]};
   function applySelectedRatio(){
     const order=ratioOrder();const multipliers=ratioTemplates[state.mode];
     if(multipliers)order.forEach((n,i)=>{state.weights[n]=multipliers[i]});
@@ -1194,7 +1229,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const color=statColors, weights=order.map(n=>Number(state.weights[n])||0);
     const section=(name)=>'<div class="sf-section">'+name+'</div>';
     const choices=(items,attr,active)=>'<div class="slx-choice-list">'+items.map(v=>'<button type="button" data-'+attr+'="'+v+'" class="'+selected(v,active)+'">'+(attr==='dump'? 'DUMP ':'')+v.toUpperCase()+'</button>').join('')+'</div>';
-    let html=section('ACTIVE RATIO')+choices(['Baldr','Hank','Aec3','SakaLuX','Custom'],'ratio',mode);
+    let html=section('ACTIVE RATIO')+choices(['Baldr','Hank','SakaLuX','Custom'],'ratio',mode);
     html+=section('YOUR HIGHEST STAT')+choices(stats,'high',order[0]);
     html+=section('DUMP STAT')+choices(stats.filter(n=>n!==order[0]),'dump',order[3]);
     html+=section('CURRENT STAT ORDER FOR '+escape(mode.toUpperCase())+' RATIO');
@@ -1202,20 +1237,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     html+='<div class="slx-order-list">'+order.map((n,i)=>'<div class="slx-order-row"><span>'+(i===0?'1ST - HIGHEST':i===3?'4TH - DUMP/LOWEST':i===1?'2ND':'3RD')+'</span><strong style="color:'+color[n]+'">'+n+'</strong><b>'+((weights[i]===0)?'<span class="slx-dump-value">dump (x0)</span>':'x'+weights[i].toFixed(2))+'</b></div>').join('')+'</div>';
     html+=section('DISPLAY')+choices(['Dark','Light'],'display',state.display||'Dark');
     html+=section('RATIO MULTIPLIERS')+'<p class="slx-settings-help">Relative training targets for the current stat order. Save as Custom to preserve your own values.</p>';
-    html+='<div class="slx-multiplier-grid">'+order.map((n,i)=>'<label style="color:'+color[n]+'">'+(i===0?'1ST':i===1?'2ND':i===2?'3RD':'4TH / DUMP')+' - <span style="color:'+color[n]+'">'+n.toUpperCase()+'</span><input type="number" step="0.05" min="0" '+(i===0?'readonly ':'')+'data-slx-multi="'+n+'" value="'+(i===0?'1.00':weights[i].toString())+'"></label>').join('')+'</div><button type="button" id="slx-save-custom">SAVE AS CUSTOM RATIO</button>';
+    html+='<div class="slx-multiplier-grid">'+order.map((n,i)=>'<label style="color:'+color[n]+'">'+(i===0?'1ST':i===1?'2ND':i===2?'3RD':'4TH / DUMP')+' - '+n.toUpperCase()+'<input type="number" step="0.05" min="0" '+(i===0?'readonly ':'')+'data-slx-multi="'+n+'" value="'+(i===0?'1.00':weights[i].toString())+'"></label>').join('')+'</div><button type="button" id="slx-save-custom">SAVE AS CUSTOM RATIO</button>';
     html+=section('GYM GAIN MULTIPLIERS (STEADFAST + PERKS)')+'<p class="slx-settings-help">Values below come from known Torn API gym-gain perks, including Steadfast, education and other modifiers when provided. Unknown bonuses are never assumed.</p>';
     html+='<div class="slx-stat-bonuses">'+stats.map(n=>{
-      const all=gymCalc.modifiers(n),known=all.filter(x=>Number.isFinite(x.value)),unknown=all.filter(x=>!Number.isFinite(x.value));
-      const sum=known.reduce((total,x)=>total+x.value,0);
-      const value=known.length?(sum?'+'+Number(sum.toFixed(2))+'%':'0%'):'--';
-      const status=known.length? (unknown.length?'partial bonus':'API bonus'):'not verified';
+      const result=gymGainPercent(n);
+      const value=result.known?(result.value>=0?'+':'')+result.value+'%':'--';
+      const status=result.known?(result.unknown?'partial':'API verified'):'not verified';
       return '<div class="slx-bonus-line" style="color:'+statColors[n]+'"><span>'+n+':</span> <b>'+value+'</b><small>'+status+'</small></div>';
     }).join('')+'</div>';
     const groups=perkGroups();
     html+='<div class="slx-perk-list">'+(groups.length?'<details><summary>VIEW API PERK DETAILS</summary>'+groups.map(g=>'<p><b>'+escape(g.group)+'</b>: '+g.entries.map(escape).join('; ')+'</p>').join('')+'</details>':'<p>API: '+escape(gymApi.status)+'. Tap REFRESH NOW to load confirmed gym perks. If nothing is returned, gym bonuses remain unverified.</p>')+'</div>';
     html+=section('SPECIAL-GYM ACCESS PROTECTION')+'<p class="slx-settings-help">'+escape(specialGymSafety(actual))+'</p>';
     html+=section('LAST UPDATED')+'<p class="slx-settings-help">'+(gymApi.at?escape(new Date(gymApi.at).toLocaleString()):'API data not yet refreshed')+'</p>';
-    html+=section('API ACCESS')+'<p class="slx-settings-help">Uses your SakaLuX Hub API key when available; a personal fallback key can be stored locally.</p><input id="slx-gym-private-key" type="password" autocomplete="off" placeholder="16-character Torn API key" maxlength="16"><div class="slx-settings-actions"><button id="slx-gym-save-key">SET API KEY</button><button id="slx-gym-create-key">CREATE GYM API KEY</button><button id="slx-gym-clear-key">CLEAR KEY</button><button id="slx-gym-api-refresh">REFRESH NOW</button></div><div id="slx-gym-key-message" role="status">'+(hubApiKey()?'API key available':'No key found')+'</div>';
+    html+=section('API ACCESS')+'<p class="slx-settings-help">Uses your SakaLuX Hub API key when available; a personal fallback key can be stored locally.</p><input id="slx-gym-private-key" type="password" autocomplete="off" placeholder="16-character Torn API key" maxlength="16"><div class="slx-settings-actions"><button id="slx-gym-save-key">SET API KEY</button><button id="slx-gym-create-key">CREATE KEY</button><button id="slx-gym-clear-key">CLEAR KEY</button><button id="slx-gym-api-refresh">REFRESH NOW</button></div><div id="slx-gym-key-message" role="status">'+(hubApiKey()?'API key available':'No key found')+'</div>';
     return '<div class="slx-settings-panel'+((state.display||'Dark')==='Light'?' slx-light':'')+'">'+html+'</div>';
   }
 
@@ -1321,7 +1355,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.7',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.8',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
