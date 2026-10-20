@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.5.0
+// @version      0.5.1
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -834,7 +834,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.5.0';
+  const VERSION = '0.5.1';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1425,7 +1425,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     settings.useBaldr = true;
     settings.inactiveDays = Math.max(1, Math.min(365, Math.floor(num($('[data-days]', overlay)?.value) || 1)));
 
-    settings.discoveryLimit = Math.max(100, Math.min(10000, Math.floor(num($('[data-poollimit]', overlay)?.value) || 2500)));
+    settings.discoveryLimit = 2500;
     write(KEYS.settings, settings);
     setProgress('Setările scanării au fost salvate');
   }
@@ -1479,7 +1479,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
-      $('[data-import-save]', overlay).onclick = () => { const field = $('[data-import]', overlay); const rows = importedTargetRows(field?.value); if (rows.length) { const total = saveDiscovery(rows).length; field.value = ''; setProgress('Importate ' + rows.length + ' ID-uri · bază: ' + total); void scan(true); } else setProgress('Nu au fost identificate ID-uri valide'); };
+
       $('[data-api-save]', overlay).onclick = saveApiKeysFromUI;
       $('[data-api-clear]', overlay).onclick = clearApiKeys;
       $('[data-api-close]', overlay).onclick = () => { $('.ha-api-panel', overlay).hidden = true; };
