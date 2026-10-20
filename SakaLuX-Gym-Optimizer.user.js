@@ -1,12 +1,11 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.5.1
+// @version      1.5.2
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
-// @grant        GM_xmlhttpRequest
-// @connect      api.torn.com
+// @grant        none
 // @license      All Rights Reserved
 // @homepageURL  https://github.com/SakaLuX/SakaLuX-Script-HUB
 // ==/UserScript==
@@ -827,6 +826,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Core — END */
 (() => {
   'use strict';
+  // Register in a DOM bridge visible across userscript execution contexts.
+  // Do this before the duplicate-instance guard: legacy live instances can still be detected.
+  try {
+    const ver='1.5.2',id='gym-optimizer';
+    const html=document.documentElement;
+    html?.setAttribute('data-sakalux-installed-'+id,ver);
+    let node=document.getElementById('sakalux-module-bridge-'+id);
+    if(!node){node=document.createElement('span');node.id='sakalux-module-bridge-'+id;node.hidden=true;(document.body||html)?.appendChild(node)}
+    node.dataset.version=ver;
+  }catch{}
   if (window.SakaLuXGymOptimizer) return;
   const KEY='slx_gym_optimizer_v1';
   const stats=['Strength','Speed','Defense','Dexterity'];
@@ -1027,7 +1036,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.5.1',id='gym-optimizer';
+      const version='1.5.2',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1235,7 +1244,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ▴':'Settings ▾'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.1',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.2',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
