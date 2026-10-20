@@ -371,12 +371,11 @@
         }
       ],
       "release": {
-        "version": "0.5.19",
-        "date": "2026-10-10",
+        "version": "0.5.20",
+        "date": "2026-10-20",
         "notes": [
-          "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
-          "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
-          "No change to free/premium entitlements or server-side license rules."
+          "Align embedded runtime version with @version to prevent false Hub update alerts.",
+          "Preserve existing script functionality and API key settings."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -384,8 +383,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.19",
-      "detailsRevision": 27,
+      "version": "0.5.20",
+      "detailsRevision": 28,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -474,18 +473,17 @@
         }
       ],
       "release": {
-        "version": "1.3.64",
-        "date": "2026-10-10",
+        "version": "1.3.65",
+        "date": "2026-10-20",
         "notes": [
-          "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
-          "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
-          "No change to free/premium entitlements or server-side license rules."
+          "Align embedded runtime version with @version to prevent false Hub update alerts.",
+          "Preserve existing script functionality and API key settings."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.64",
-      "detailsRevision": 28,
+      "version": "1.3.65",
+      "detailsRevision": 29,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
