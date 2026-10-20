@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.0.4 — Native training anchor fix (2026-10-20)
+
+- Mounts directly before the native four-stat training tiles, not within an arbitrary Gym root container.
+- Forces normal-flow/static positioning to prevent covering HUD, stat bars and train buttons on TornPDA.
+- Fails closed (hides the script panel) when its training anchor is not identifiable.
+- Still a simplified planner; full StatForge formula/visual parity remains pending.
+
+
 ## Gym Optimizer v1.0.3 — Dark Gym interface and safer mount (2026-10-20)
 
 - Restyled sections toward StatForge's dark native Gym appearance.
