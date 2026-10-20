@@ -1,5 +1,14 @@
 # Changelog
 
+## Gym Optimizer v1.5.8 - Torn gym perk parser and compact Settings (2026-10-21)
+
+- Remove Aec3 from ratio selection; legacy saved choice migrates to SakaLuX.
+- Align Defense with the other ratio multiplier labels and preserve its purple color; dump (x0) remains red.
+- Position smaller CREATE KEY beside SET API KEY in Settings.
+- Fix gym gain multiplier reading from Torn API v1 root-level faction_perks, education_perks, property_perks etc. Also handle v2 categorized perks. Request perks separately for reliable parsing and display response status.
+- Combine verified independent training bonus percentages multiplicatively, not additively. Do not invent unknown bonus percentages.
+- Tests with sample Torn API v1 and v2 perk payloads passed; device test remains pending.
+
 ## Gym Optimizer v1.5.7 / Hub v1.9.149 - compact UI and key permissions (2026-10-21)
 
 - Gym: reduce spacing in ratio choices, stat order, multiplier inputs and API controls for TornPDA.
