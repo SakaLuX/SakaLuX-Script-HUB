@@ -2039,7 +2039,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.3.1",
+                "version": "1.4.0",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2056,12 +2056,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.1",
+                    "version": "1.4.0",
                     "date": "2026-10-21",
                     "notes": [
-                        "Restore installable Gym Optimizer entry in both remote and embedded Hub registry.",
-                        "Correct source/download URL and inline panel selector.",
-                        "Detect module through SakaLuXGymOptimizer global on Gym page."
+                        "API refresh for perks, bars, gym and battle stats using Hub key.",
+                        "Perks grouped by source, stale/missing data visibly identified.",
+                        "DEX ratio safety display and conservative repetitions using explicit energy-cost metadata only.",
+                        "Exact combined perks/gain formula, gym XP and special access remain unverified."
                     ]
                 },
                 "accessTier": "free",
