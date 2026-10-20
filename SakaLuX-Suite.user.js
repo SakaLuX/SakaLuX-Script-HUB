@@ -30,13 +30,14 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.1.0';
+  const CORE_VERSION = '1.2.7';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
     { match: /Account Auditor/i, id: 'account-auditor', version: 1, keys: ['SakaLuX_AUDITOR_SETTINGS_V3'] },
     { match: /Bazaar Smart Pricer/i, id: 'bazaar-smart-pricer', version: 1, keys: ['SakaLuX_BAZAAR_SMART_PRICER_SETTINGS'] },
     { match: /Bazaar Thanker/i, id: 'bazaar', version: 1, keys: ['sakalux_bazaar_thanker_v5'] },
+    { match: /Bounty Hunter/i, id: 'bounty-hunter', version: 1, keys: ['SLX_BOUNTY_SETTINGS_V3','SLX_BOUNTY_WATCH_V1','SLX_BOUNTY_BLACK_V1','SLX_BOUNTY_CACHE_V2','SLX_BOUNTY_USER_CACHE_V1','SLX_BOUNTY_FF_CACHE_V1','SLX_BOUNTY_SCAN_STATE_V1'] },
     { match: /Chat Intelligence/i, id: 'chat-intelligence', version: 1, keys: ['SLX_CHAT_CFG4'] },
     { match: /Company Intelligence/i, id: 'company-intelligence', version: 1, keys: ['sak_ci:mode', 'sak_ci:tab', 'sak_ci:compact', 'sak_ci:enabled'] },
     { match: /Elimination Assistant/i, id: 'elimination-assistant', version: 1, keys: ['slx_elim_ui_v1'] },
@@ -298,7 +299,7 @@
 
   const dock = {
     ORDER: Object.freeze([
-      'enhancer','bazaar','bazaar-smart-pricer','mission-rewards','market-intelligence',
+      'enhancer','bazaar','bazaar-smart-pricer','bounty-hunter','mission-rewards','market-intelligence',
       'elimination-assistant','company-intelligence','chat-intelligence','stock-manager-advisor','account-auditor'
     ]),
     dedupe(registrations = []) {
@@ -598,6 +599,208 @@
   })();
 
   const ui = {
+    makeDraggable(element, options = {}) {
+      if (!element || typeof window === 'undefined' || typeof element.addEventListener !== 'function') return null;
+      if (element.dataset.slxDraggable === '1') return element._slxDragCleanup || null;
+      const storageKey = String(options.storageKey || ('SLX_DRAG_POSITION_' + (element.id || 'BUTTON')));
+      const padding = Math.max(0, Number(options.padding ?? 6));
+      let drag = null;
+      let suppressClick = false;
+      let releaseClickTimer = 0;
+      const viewport = () => ({
+        width: Math.max(0, Number(window.visualViewport?.width || window.innerWidth || 0)),
+        height: Math.max(0, Number(window.visualViewport?.height || window.innerHeight || 0))
+      });
+      const place = (x, y) => {
+        const view = viewport();
+        const width = Math.max(1, element.offsetWidth || 48);
+        const height = Math.max(1, element.offsetHeight || 48);
+        const left = Math.min(Math.max(padding, Number(x) || padding), Math.max(padding, view.width - width - padding));
+        const top = Math.min(Math.max(padding, Number(y) || padding), Math.max(padding, view.height - height - padding));
+        Object.assign(element.style, { left: left + 'px', top: top + 'px', right: 'auto', bottom: 'auto', touchAction: 'none', userSelect: 'none' });
+        return { x: left, y: top };
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) place(saved.x, saved.y);
+      } catch {}
+      const onPointerDown = event => {
+        if (event.button != null && event.button !== 0) return;
+        const rect = element.getBoundingClientRect();
+        drag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, moved: false };
+        element.setPointerCapture?.(event.pointerId);
+      };
+      const onPointerMove = event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 5) return;
+        drag.moved = true;
+        event.preventDefault();
+        place(event.clientX - drag.offsetX, event.clientY - drag.offsetY);
+      };
+      const onPointerUp = event => {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        element.releasePointerCapture?.(event.pointerId);
+        if (drag.moved) {
+          const rect = element.getBoundingClientRect();
+          const position = place(rect.left, rect.top);
+          try { localStorage.setItem(storageKey, JSON.stringify(position)); } catch {}
+          suppressClick = true;
+          clearTimeout(releaseClickTimer);
+          releaseClickTimer = setTimeout(() => { suppressClick = false; }, 0);
+        }
+        drag = null;
+      };
+      const onClick = event => {
+        if (!suppressClick) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      };
+      const onResize = () => {
+        if (element.style.left && element.style.top) place(parseFloat(element.style.left), parseFloat(element.style.top));
+      };
+      element.dataset.slxDraggable = '1';
+      element.addEventListener('pointerdown', onPointerDown);
+      element.addEventListener('pointermove', onPointerMove);
+      element.addEventListener('pointerup', onPointerUp);
+      element.addEventListener('pointercancel', onPointerUp);
+      element.addEventListener('click', onClick, true);
+      window.addEventListener('resize', onResize);
+      const cleanup = () => {
+        clearTimeout(releaseClickTimer);
+        element.removeEventListener('pointerdown', onPointerDown);
+        element.removeEventListener('pointermove', onPointerMove);
+        element.removeEventListener('pointerup', onPointerUp);
+        element.removeEventListener('pointercancel', onPointerUp);
+        element.removeEventListener('click', onClick, true);
+        window.removeEventListener('resize', onResize);
+        delete element.dataset.slxDraggable;
+        delete element._slxDragCleanup;
+      };
+      element._slxDragCleanup = cleanup;
+      return cleanup;
+    },
+    ensureDonationFooter(rootOrSelector, options = {}) {
+      if (typeof document === 'undefined' || typeof document.createElement !== 'function') return null;
+      const root = typeof rootOrSelector === 'string' ? document.querySelector(rootOrSelector) : rootOrSelector;
+      if (!root) return null;
+      const moduleId = String(options.id || 'module').replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+      const id = 'sakalux-inline-footer-' + moduleId;
+      const existing = root.querySelector?.('#' + id) || document.getElementById(id);
+      if (existing) { if (existing.parentElement !== root) root.appendChild(existing); return existing; }
+      const profile = String(options.profile || 'https://www.torn.com/profiles.php?XID=2380374');
+      const author = String(options.author || 'SakaLuX [2380374]');
+      const showMoney = options.showMoney !== false;
+      const showItems = options.showItems !== false;
+      const moneyLabel = String(options.moneyLabel || '💸 SEND MONEY');
+      const itemsLabel = String(options.itemsLabel || '🎁 SEND ITEMS');
+      if (!document.getElementById('sakalux-shared-donation-footer-style')) {
+        const style = document.createElement('style');
+        style.id = 'sakalux-shared-donation-footer-style';
+        style.textContent = `.slx-shared-donation{display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#080d13!important;font-family:Inter,Arial,sans-serif!important}.slx-shared-donation *{box-sizing:border-box!important}.slx-shared-donation-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;height:28px!important;padding:4px 10px!important}.slx-shared-donation button{display:block!important;width:100%!important;height:20px!important;min-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:8px!important;background:#151f2a!important;color:#c5d2df!important;font:900 8px/1.2 Inter,Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important}.slx-shared-donation-made{height:22px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;padding:0 6px!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important;font:500 9px/20px Inter,Arial,sans-serif!important;white-space:nowrap!important}.slx-shared-donation-made a{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}`;
+        (document.head || document.documentElement).appendChild(style);
+      }
+      const footer = document.createElement('div');
+      footer.id = id;
+      footer.className = 'slx-shared-donation';
+      const actions = document.createElement('div');
+      actions.className = 'slx-shared-donation-actions';
+      const actionDefinitions = [];
+      if (showMoney) actionDefinitions.push(['money', moneyLabel]);
+      if (showItems) actionDefinitions.push(['items', itemsLabel]);
+      actions.style.gridTemplateColumns = `repeat(${Math.max(1, actionDefinitions.length)}, minmax(0, 1fr))`;
+      for (const [actionName, actionLabel] of actionDefinitions) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.slxDonate = actionName;
+        button.textContent = actionLabel;
+        actions.appendChild(button);
+      }
+      const made = document.createElement('div');
+      made.className = 'slx-shared-donation-made';
+      made.appendChild(document.createTextNode('Made with ❤️ by '));
+      const authorLink = document.createElement('a');
+      authorLink.href = profile;
+      authorLink.textContent = author;
+      made.appendChild(authorLink);
+      footer.append(actions, made);
+      footer.addEventListener('click', event => {
+        const action = event.target?.closest?.('[data-slx-donate]');
+        const link = event.target?.closest?.('a');
+        if (!action && !link) return;
+        event.preventDefault();
+        if (action && typeof options.onDonate === 'function') {
+          try { options.onDonate(action.dataset.slxDonate, profile); return; } catch {}
+        }
+        if (typeof location !== 'undefined') location.href = profile;
+      });
+      root.appendChild(footer);
+      return footer;
+    },
+    applyWorkspaceLayout(overlay, panel, options = {}) {
+      if (!overlay || !panel || typeof window === 'undefined') return null;
+      const top = Math.max(0, Number(options.top ?? 0));
+      const bottom = Math.max(0, Number(options.bottom ?? 8));
+      const side = Math.max(0, Number(options.side ?? 4));
+      const maxWidth = Math.max(240, Number(options.maxWidth ?? 760));
+      const radius = Math.max(0, Number(options.radius ?? 16));
+      if (typeof document !== 'undefined' && !document.getElementById('sakalux-shared-workspace-layout-style')) {
+        const style = document.createElement('style');
+        style.id = 'sakalux-shared-workspace-layout-style';
+        style.textContent = `[data-slx-workspace-layout="1"],[data-slx-workspace-layout="1"] *,[data-slx-workspace-panel="1"],[data-slx-workspace-panel="1"] *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important}[data-slx-workspace-layout="1"]{background:transparent!important;background-image:none!important;box-shadow:none!important}`;
+        (document.head || document.documentElement).appendChild(style);
+      }
+      overlay.dataset.slxWorkspaceLayout = '1';
+      panel.dataset.slxWorkspacePanel = '1';
+      const apply = () => {
+        const vv = window.visualViewport;
+        const width = Math.max(0, Number(vv?.width || window.innerWidth || 0));
+        const height = Math.max(0, Number(vv?.height || window.innerHeight || 0));
+        const offsetTop = Math.max(0, Number(vv?.offsetTop || 0));
+        const offsetLeft = Math.max(0, Number(vv?.offsetLeft || 0));
+        Object.assign(overlay.style, {
+          position: 'fixed',
+          inset: `0px 0px ${bottom}px 0px`,
+          width: 'auto',
+          height: 'auto',
+          maxHeight: 'none',
+          display: 'block',
+          background: 'transparent',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+          boxShadow: 'none'
+        });
+        const usable = Math.max(240, height - top - bottom);
+        const panelWidth = Math.min(maxWidth, Math.max(240, width - side * 2));
+        Object.assign(panel.style, {
+          position: 'fixed',
+          top: (offsetTop + top) + 'px',
+          bottom: 'auto',
+          left: (offsetLeft + Math.max(side, (width - panelWidth) / 2)) + 'px',
+          width: panelWidth + 'px',
+          height: usable + 'px',
+          maxHeight: usable + 'px',
+          margin: '0',
+          boxSizing: 'border-box',
+          borderRadius: radius + 'px',
+          overflow: 'hidden',
+          boxShadow: 'none',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none'
+        });
+      };
+      apply();
+      const vv = window.visualViewport;
+      vv?.addEventListener?.('resize', apply);
+      vv?.addEventListener?.('scroll', apply);
+      window.addEventListener?.('resize', apply);
+      return () => {
+        vv?.removeEventListener?.('resize', apply);
+        vv?.removeEventListener?.('scroll', apply);
+        window.removeEventListener?.('resize', apply);
+        delete overlay.dataset.slxWorkspaceLayout;
+        delete panel.dataset.slxWorkspacePanel;
+      };
+    },
     ensureSharedSkin() {
       if (typeof document === 'undefined' || typeof document.createElement !== 'function' || document.getElementById('sakalux-shared-hub-skin')) return;
       const st = document.createElement('style');
