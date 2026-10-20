@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.2.0 — StatForge-style secondary tabs (2026-10-21)
+
+- History: 15 snapshots in colored Strength, Speed, Defense, Dexterity, TBS table with deltas and clear history.
+- Export: formatted text report with clipboard copy, plus CSV history.
+- Info: ratio explanations, gym dots, and four-stat guide.
+- Existing Overview and DEX-first strategy preserved; gym unlock verification remains pending.
+
+
 ## Gym Optimizer v1.1.0 — StatForge-reference full layout (2026-10-21)
 
 - Rebuilt mobile interface with Overview, History, Export, Settings and Info tabs matching the reference information hierarchy.
