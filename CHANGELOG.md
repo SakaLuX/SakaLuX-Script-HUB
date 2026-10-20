@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.0.0 — Initial MVP (2026-10-20)
+
+- New TornPDA/Tampermonkey userscript with Balanced, 2-stat, 3-stat, Baldr, Hank, Aec3 and Custom editable templates.
+- Manual stat values, relative catch-up recommendation and local snapshots.
+- Strict no-switch behavior for any unverified gym (including locked Deep Burn).
+- Hub registry entry, standalone source and release notes.
+- Limitations: preset weights are starting templates, not verified StatForge formula parity; no auto-training or verified gym unlock tracking yet.
+
 ## Enhancer Guard v1.3.73 — Faction Deposit visibility fix (2026-10-18)
 
 - Excluded all Faction Armory/Deposit views from protected-sale row filtering.
