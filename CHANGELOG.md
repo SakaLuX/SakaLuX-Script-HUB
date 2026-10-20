@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.0.1 — Inline Gym integration (2026-10-20)
+
+- Embedded the optimizer within the native Gym content column above gym training controls.
+- Removed the separate floating launcher and fixed-position popup; live remount supports TornPDA route navigation.
+- Retained manual stats, strategy templates and no-switch safety for unverified gyms.
+- Needs real-device TornPDA layout testing; gym data autofill remains pending.
+
+
 ## Gym Optimizer v1.0.0 — Initial MVP (2026-10-20)
 
 - New TornPDA/Tampermonkey userscript with Balanced, 2-stat, 3-stat, Baldr, Hank, Aec3 and Custom editable templates.
