@@ -892,7 +892,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.147';
+    const VERSION = '1.9.148';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -912,6 +912,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.148", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.147", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.146", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.145", "date": "2026-10-20", "changes": ["Version synchronization"]},
@@ -2058,12 +2059,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.5.2",
+                    "version": "1.5.3",
                     "date": "2026-10-21",
                     "notes": [
-                        "Restore @grant none compatibility with working Gym versions before v1.4.0.",
-                        "Publish DOM installed marker before duplicate guard for Hub visibility.",
-                        "Recheck explicit bridge in Hub v1.9.147."
+                        "Early installed marker before embedded Shared Core startup.",
+                        "Separate loaded/ready/error diagnostics for Gym in DOM.",
+                        "Guard initial render failures without losing script installation signal."
                     ]
                 },
                 "accessTier": "free",
