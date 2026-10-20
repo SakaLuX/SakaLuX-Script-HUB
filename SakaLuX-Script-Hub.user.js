@@ -911,6 +911,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.142", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.141", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.140", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {version:'1.9.131',date:'2026-10-11',changes:['Starts shared PRO license verification at startup, without opening Hub.','Reuses the existing verified entitlement cache and shared request broker.']},
