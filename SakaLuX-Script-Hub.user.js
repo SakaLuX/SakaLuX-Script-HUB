@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.141
+// @version      1.9.142
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -891,7 +891,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.141';
+    const VERSION = '1.9.142';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2146,7 +2146,23 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     let languageObserver;
     function applyLanguage(){translateSakaLuX(document);window.dispatchEvent(new CustomEvent('SakaLuX:LanguageChanged',{detail:{language:language()}}))}
-    function startLanguageObserver(){applyLanguage()}
+    function startLanguageObserver(){
+        applyLanguage();
+        if (languageObserver) return;
+        languageObserver = new MutationObserver(records => {
+            if (language() !== 'ro') return;
+            for (const record of records) {
+                for (const node of record.addedNodes || []) {
+                    if (node.nodeType === 1 && isSakaLuXNode(node)) translateSakaLuX(node);
+                    else if (node.nodeType === 3 && isSakaLuXNode(node.parentElement)) {
+                        const value = translateValue(node.nodeValue);
+                        if (value !== node.nodeValue) node.nodeValue = value;
+                    }
+                }
+            }
+        });
+        languageObserver.observe(document.body, {childList:true,subtree:true});
+    }
 
     // Persist the shared key in both Torn local storage and userscript storage.
     // Never overwrite a nonempty key with an empty value during startup.
