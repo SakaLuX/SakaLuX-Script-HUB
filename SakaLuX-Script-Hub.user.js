@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.147
+// @version      1.9.148
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2041,7 +2041,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.5.2",
+                "version": "1.5.3",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2426,6 +2426,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             try {
                 add(document.getElementById('sakalux-module-bridge-gym-optimizer')?.dataset.version);
                 add(document.documentElement.getAttribute('data-sakalux-installed-gym-optimizer'));
+            }catch{}
+        }
+        // Distinguish script present from fully initialized; Gym may be loaded
+        // while its page-specific UI is unavailable or an initialization error occurred.
+        if(script.id==='gym-optimizer'){
+            try {
+                add(document.documentElement?.getAttribute('data-sakalux-installed-gym-optimizer'));
+                add(document.getElementById('sakalux-module-bridge-gym-optimizer')?.dataset.version);
             }catch{}
         }
         if (!versions.length) return null;

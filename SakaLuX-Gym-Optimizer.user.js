@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.5.2
+// @version      1.5.3
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -9,6 +9,27 @@
 // @license      All Rights Reserved
 // @homepageURL  https://github.com/SakaLuX/SakaLuX-Script-HUB
 // ==/UserScript==
+
+// Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
+;(() => {
+  try {
+    const id='gym-optimizer',v='1.5.3',root=document.documentElement;
+    if(!root)return;
+    root.setAttribute('data-sakalux-installed-'+id,v);
+    root.setAttribute('data-sakalux-gym-boot','loaded');
+    let marker=document.getElementById('sakalux-module-bridge-'+id);
+    if(!marker){marker=document.createElement('span');marker.id='sakalux-module-bridge-'+id;marker.hidden=true;root.appendChild(marker)}
+    marker.dataset.version=v;
+    marker.dataset.stage='loaded';
+    addEventListener('error',event=>{
+      const source=String(event.filename||'');
+      if(source.includes('SakaLuX-Gym-Optimizer')||source.includes('sakalux-gym')){
+        root.setAttribute('data-sakalux-gym-boot','error');
+        marker.dataset.stage='error';
+      }
+    });
+  } catch(e) {}
+})();
 
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
@@ -829,7 +850,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.5.2',id='gym-optimizer';
+    const ver='1.5.3',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -1036,7 +1057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.5.2',id='gym-optimizer';
+      const version='1.5.3',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1244,7 +1265,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ▴':'Settings ▾'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.2',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.3',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
@@ -1277,7 +1298,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     panel.hidden=false;
   }
-  registerGym();render();mount();
+  registerGym();
+  try {
+    render();mount();
+    document.documentElement?.setAttribute('data-sakalux-gym-boot','ready');
+    document.getElementById('sakalux-module-bridge-gym-optimizer')?.setAttribute('data-stage','ready');
+  } catch(error) {
+    document.documentElement?.setAttribute('data-sakalux-gym-boot','error');
+    document.getElementById('sakalux-module-bridge-gym-optimizer')?.setAttribute('data-stage','error');
+    console.error('[SakaLuX Gym] Initial render failed:',error);
+  }
   // TornPDA navigates without full reload. Move the inline widget when Gym's React root is replaced.
   let lastUrl=location.href;
   setInterval(()=>{if(location.href!==lastUrl){lastUrl=location.href;render()}registerGym();mount()},1100);
