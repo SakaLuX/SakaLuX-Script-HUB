@@ -892,7 +892,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.145';
+    const VERSION = '1.9.146';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -912,6 +912,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.146", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.145", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.144", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.143", "date": "2026-10-20", "changes": ["Version synchronization"]},
@@ -2039,7 +2040,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.5.0",
+                "version": "1.5.1",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2056,13 +2057,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.5.0",
+                    "version": "1.5.1",
                     "date": "2026-10-21",
                     "notes": [
-                        "Wiki-formula gain estimates incorporating verified parseable gym perks.",
-                        "DEX 1.25 secondary headroom calculation.",
-                        "Next gym energy remaining/ETA only from explicit API values and verified regeneration rate.",
-                        "No invented ETA when API fields unavailable."
+                        "Explicit installed version markers and Hub detection when inline panel is hidden.",
+                        "Use Hub API key or a separate locally saved private Gym API key.",
+                        "Persistent key controls in Gym Settings."
                     ]
                 },
                 "accessTier": "free",
