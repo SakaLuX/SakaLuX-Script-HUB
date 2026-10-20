@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.134
+// @version      1.9.135
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2118,7 +2118,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function getSharedApiKey() {
         let key = '';
         try { key = String(localStorage.getItem(STORAGE.apiKey) || '').trim(); } catch {}
-        if (key) return key;
+        if (key) {
+            try {
+                if (typeof GM_getValue === 'function' && typeof GM_setValue === 'function') {
+                    const existing = GM_getValue(SHARED_API_BACKUP, '');
+                    if (typeof existing === 'string' && existing !== key) {
+                        const result = GM_setValue(SHARED_API_BACKUP, key);
+                        if (result && typeof result.catch === 'function') result.catch(() => {});
+                    }
+                }
+            } catch {}
+            return key;
+        }
         try {
             const backup = typeof GM_getValue === 'function' ? GM_getValue(SHARED_API_BACKUP, '') : '';
             if (typeof backup === 'string' && /^[a-zA-Z0-9]{16}$/.test(backup.trim())) {
