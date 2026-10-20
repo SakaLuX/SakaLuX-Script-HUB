@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.2.0
+// @version      1.2.1
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -858,10 +858,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   css.textContent += '#slx-gym-panel{background:#1c1c1c!important;color:#ddd!important;border:1px solid #303030!important;border-radius:7px!important;padding:5px 9px!important;margin:8px 0 14px!important;font:12px Arial,sans-serif!important;line-height:1.25!important}#slx-gym-panel .head{background:transparent!important;border-bottom:1px solid #363636!important;padding:7px 3px!important;font-size:12px!important}#slx-gym-panel .body{padding:5px 3px!important}#slx-gym-panel .notice{padding:7px 9px!important;margin:5px 0 9px!important;border-radius:5px!important;font-size:12px!important}#slx-gym-panel .slx-g-title{padding:5px 0 3px!important;margin:6px 0!important;font-size:11px!important}#slx-gym-panel .slx-g-stat{margin:7px 1px!important}#slx-gym-panel .slx-g-statline{font-size:12px!important}#slx-gym-panel .slx-g-track{height:7px!important;margin:4px 0!important}#slx-gym-panel .hint{font-size:11px!important;line-height:1.25!important}#slx-gym-panel button,#slx-gym-panel select{font-size:12px!important;padding:4px 6px!important}';
   css.textContent += '#slx-gym-panel{padding:0!important;background:#171717!important;border:1px solid #343434!important;border-top:3px solid #67b9eb!important;border-radius:5px!important;color:#ccc!important;font:12px Arial,sans-serif!important;overflow:hidden!important}#slx-gym-panel>.head{display:none!important}#slx-gym-panel .body{padding:0!important}#slx-gym-panel .sf-top{display:flex;justify-content:space-between;align-items:center;padding:13px 17px 12px;background:#171717;font-size:17px;letter-spacing:2px;border-bottom:1px solid #050505}#slx-gym-panel .sf-top strong{color:#78bdf0}#slx-gym-panel .sf-top span{color:#888;font-size:10px;letter-spacing:1px}#slx-gym-panel .sf-tabs{display:flex;justify-content:space-around;gap:1px;border-bottom:1px solid #070707;background:#161616}#slx-gym-panel .sf-tabs button{background:transparent!important;border:0!important;color:#888!important;padding:8px 3px!important;font-weight:bold!important;letter-spacing:1px!important;font-size:10px!important;flex:1}#slx-gym-panel .sf-tabs button.active{color:#6db9e5!important;border-bottom:2px solid #67baff!important}#slx-gym-panel .sf-overview{display:flex;justify-content:space-between;padding:20px 16px 12px;gap:7px}#slx-gym-panel .sf-eyebrow,#slx-gym-panel .sf-section{color:#999;letter-spacing:2px;font-size:11px;font-weight:bold}#slx-gym-panel .sf-ratio{display:flex;gap:9px;align-items:center;margin-top:9px}#slx-gym-panel .sf-ratio>b{font-size:40px;color:#f2bc32}#slx-gym-panel .sf-ratio span{font-weight:bold}#slx-gym-panel .sf-ratio small{display:block;color:#999}#slx-gym-panel .sf-total{font-size:28px;font-weight:bold;color:#78bafb;margin:6px 0}#slx-gym-panel .sf-gain{font-size:10px;letter-spacing:1px;color:#49cc83;font-weight:bold}#slx-gym-panel .sf-section{border-top:1px solid #323232;margin:9px 17px;padding-top:9px}#slx-gym-panel .sf-card{background:#242424;border:1px solid #3a3a3a;border-left:4px solid #5fb8ee;margin:6px 17px 14px;padding:12px 15px;border-radius:5px;line-height:1.4;color:#aaa;font-weight:600}#slx-gym-panel .sf-main{font-size:19px;font-weight:900;margin-bottom:3px}#slx-gym-panel .sf-purple{color:#b58dd8}#slx-gym-panel .sf-gold{color:#e9c247;margin-top:5px}#slx-gym-panel .sf-cap{display:flex;justify-content:space-between;margin:8px 0;font-size:13px}#slx-gym-panel .sf-card p{font-size:11px;color:#999;font-weight:400;margin-top:10px}#slx-gym-panel .sf-stat{margin:9px 17px 13px}#slx-gym-panel .sf-statline{display:flex;align-items:baseline;gap:7px;font-weight:800;font-size:14px}#slx-gym-panel .sf-statline small{font-size:10px;color:#aaa}#slx-gym-panel .sf-statline b{margin-left:auto;font-size:12px}#slx-gym-panel .sf-track{height:9px;border-radius:10px;background:#303030;margin:6px 0;overflow:hidden}#slx-gym-panel .sf-track>div{height:100%;border-radius:9px}#slx-gym-panel .sf-statmessage{font-size:11px;color:#aaa}#slx-gym-panel .sf-settings{padding:8px 16px 17px}#slx-gym-panel .sf-edit{display:grid;grid-template-columns:1fr 100px 58px;gap:5px;margin:7px 0;align-items:center}#slx-gym-panel .sf-edit input{min-width:0}#slx-gym-panel select{max-width:70%}';
   css.textContent += '#slx-gym-panel .sf-hrow{display:grid;grid-template-columns:1.1fr repeat(4,1fr) 1fr;gap:3px;text-align:center;align-items:center;padding:9px 1px;border-bottom:1px solid #303030;font-size:11px;font-weight:800}#slx-gym-panel .sf-history{margin:12px 15px;overflow-x:auto}#slx-gym-panel .sf-hrow small{display:block;color:#43cc84;font-size:10px}#slx-gym-panel .sf-hhead{color:#9a9a9a;font-size:9px;letter-spacing:0}#slx-gym-panel .sf-history-actions{display:flex;flex-direction:column;margin:12px 16px;gap:8px}#slx-gym-panel .sf-export{padding:5px 16px 20px}#slx-gym-panel .sf-export pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#242424;border:1px solid #3b3b3b;padding:12px;font:11px/1.5 monospace;color:#c7c7c7}#slx-gym-panel .sf-export button{width:100%;border:0!important;letter-spacing:1px!important}#slx-gym-panel .sf-info{padding:4px 4px 16px}#slx-gym-panel .sf-info p{padding:0 16px;line-height:1.6;font-weight:600;font-size:13px}#slx-gym-panel .sf-three{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 16px}#slx-gym-panel .sf-three div{background:#242424;border:1px solid #414141;padding:9px 2px;text-align:center;font-size:9px;color:#aaa}#slx-gym-panel .sf-three strong{display:block;font-size:22px;color:#e5ba54}';
+  css.textContent += '#slx-gym-panel{max-height:none!important;overflow:visible!important;touch-action:pan-y!important}#slx-gym-panel .body{height:auto!important;max-height:none!important;overflow:visible!important;touch-action:pan-y!important}#slx-gym-panel .sf-card{padding:8px 10px!important;margin:5px 12px 9px!important}#slx-gym-panel .sf-overview{padding:11px 12px 5px!important}#slx-gym-panel .sf-section{margin:5px 12px!important;padding-top:5px!important}#slx-gym-panel .sf-stat{margin:6px 12px 9px!important}#slx-gym-panel .sf-top{padding:8px 12px!important}#slx-gym-panel .sf-tabs button{padding:6px 2px!important}#slx-gym-panel .sf-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}#slx-gym-panel .sf-feedback{font-size:11px;color:#b7c9d3}';
   (document.head||document.documentElement).append(css);
   const toggle=document.createElement('button');toggle.id='slx-gym-toggle';toggle.textContent='GYM ⚡';
   const panel=document.createElement('section');panel.id='slx-gym-panel';panel.hidden=true;
-  panel.innerHTML='<div class="head"><span>SAKALUX GYM · v1.2.0</span><button data-settings>Settings ▾</button></div><div class="body"></div>';
+  panel.innerHTML='<div class="head"><span>SAKALUX GYM · v1.2.1</span><button data-settings>Settings ▾</button></div><div class="body"></div>';
   (document.body||document.documentElement).append(panel);
   toggle.hidden=true;
   const body=panel.querySelector('.body');
@@ -900,6 +901,42 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     return found;
   }
+  function nativeStatTile(name){
+    const candidates=[...document.querySelectorAll('button,input[type="button"]')].filter(b=>!panel.contains(b)&&/^train$/i.test((b.innerText||b.value||'').trim()));
+    for(const b of candidates){
+      let p=b.parentElement;
+      for(let i=0;p&&i<5;i++,p=p.parentElement){
+        const t=(p.innerText||'').slice(0,350);
+        if(new RegExp('^\\s*'+name+'\\b','i').test(t))return p;
+      }
+    }
+    return null;
+  }
+  function setNativeReps(stat,reps){
+    const tile=nativeStatTile(stat);
+    if(!tile)return false;
+    const input=tile.querySelector('input[type="number"],input[inputmode="numeric"],input[type="text"]');
+    if(!input||input.disabled||input.readOnly)return false;
+    const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set;
+    if(!setter)return false;
+    setter.call(input,String(Math.max(1,Math.min(999,Math.floor(reps)))));
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+    input.focus();
+    return true;
+  }
+  function unlockedGymButton(name){
+    const all=[...document.querySelectorAll('button,[role="button"]')].filter(b=>!panel.contains(b));
+    return all.find(b=>{
+      const label=(b.innerText||b.getAttribute('aria-label')||'').trim();
+      if(!label.toLowerCase().includes(name.toLowerCase()))return false;
+      const outer=(b.className||'')+' '+(b.parentElement?.className||'');
+      const disabled=b.disabled||b.getAttribute('aria-disabled')==='true'||/locked|disabled|unavailable|purchase/i.test(outer);
+      // Require affirmative unlock data; lack of a lock CSS class is not proof.
+      const affirmative=b.dataset.unlocked==='true'||b.getAttribute('data-unlocked')==='true'||b.getAttribute('aria-label')?.toLowerCase().includes('unlocked');
+      return Boolean(affirmative&&!disabled);
+    })||null;
+  }
   function render(){
     const live=nativeStats(),actual={...state.values,...live};
     const active=stats.filter(n=>Number(state.weights[n])>0 && Number(actual[n])>0);
@@ -919,7 +956,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const tabs=['OVERVIEW','HISTORY','EXPORT','SETTINGS','INFO'];
     const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>SAKALUX · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
     const info='<div class="sf-overview"><div><div class="sf-eyebrow">RATIO HEALTH</div><div class="sf-ratio"><b>'+(!complete?'—':pct>=98?'A':pct>=90?'B':pct>=80?'C':'D')+'</b><span>'+(!complete?'Awaiting stats':pct+'% toward targets')+'<small>SakaLuX Ratio</small></span></div></div><div style="text-align:right"><div class="sf-eyebrow">TOTAL BATTLE STATS</div><div class="sf-total">'+(total?fmt(total):'—')+'</div><div class="sf-gain">'+(gain==null?'NO SAVED BASELINE':(gain>=0?'+':'')+fmt(gain)+' SINCE SNAPSHOT')+'</div></div></div>';
-    const train='<div class="sf-section">TRAIN NEXT</div><div class="sf-card">'+(next?'<div class="sf-main" style="color:'+statColors[next.stat]+'">'+esc(next.stat)+'</div><div>Currently at '+fmt(actual[next.stat])+' - Target '+fmt(targets[next.stat])+' - Need +'+fmt(next.gap)+'</div><div class="sf-purple">Catch-up — train the furthest-behind active stat.</div>':'<div class="sf-main">Waiting for stat values</div><div>Open Settings if automatic reading is incomplete.</div>')+'<div class="sf-gold">Best gym: '+(gym?esc(gym)+' (current; unlock verified only for current gym)':'not verified — choose manually in Torn')+'</div></div>';
+    const train='<div class="sf-section">TRAIN NEXT</div><div class="sf-card">'+(next?'<div class="sf-main" style="color:'+statColors[next.stat]+'">'+esc(next.stat)+'</div><div>Currently at '+fmt(actual[next.stat])+' - Target '+fmt(targets[next.stat])+' - Need +'+fmt(next.gap)+'</div><div class="sf-purple">Catch-up — train the furthest-behind active stat.</div>':'<div class="sf-main">Waiting for stat values</div><div>Open Settings if automatic reading is incomplete.</div>')+ '<div class="sf-actions">'+(next?'<button data-reps="'+next.stat+'">SET 999 '+next.stat.toUpperCase()+'</button>':'')+'</div><div class="sf-gold">Best gym: '+(gym?esc(gym)+' (currently selected)':'not verified — choose manually in Torn')+'</div><div class="sf-actions"><button id="slx-gym-switch" type="button">SWITCH GYM (VERIFY UNLOCK)</button></div><div class="sf-feedback" role="status"></div></div>';
     const headroom='<div class="sf-section">▼ HEADROOM TO GYM LIMIT</div><div class="sf-card"><div>Energy: read from Torn HUD</div>'+stats.map(n=>'<div class="sf-cap"><b style="color:'+statColors[n]+'">'+n+'</b><span>limit not verified</span></div>').join('')+'<p>Special gym caps cannot be validated. No locked gym will be recommended or switched to.</p></div>';
     const statView='<div class="sf-section">▼ STATS</div>'+stats.map((n,i)=>{
       const value=Number(actual[n])||0,t=targets[n],w=Number(state.weights[n])||0,progress=t?Math.min(100,100*value/t):0;
@@ -939,6 +976,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const exporter='<div class="sf-section">EXPORT SNAPSHOT</div><div class="sf-export"><p>Copy a plain-text summary of your current ratio health and target stats.</p><button id="slx-gym-copy">COPY TO CLIPBOARD</button><pre>'+escape(summary)+'</pre><button id="slx-gym-export">EXPORT HISTORY CSV</button></div>';
     const about='<div class="sf-info"><div class="sf-section">WHY NOT JUST TRAIN ALL STATS EQUALLY?</div><p>Specialist gyms offer different training gains and ratio requirements. A ratio plan helps balance training priorities while preserving gym access.</p><div class="sf-section">GYM DOTS — WHY THEY MATTER</div><p>More gym dots generally mean greater gains per energy, but eligibility and training costs vary. Always verify unlocks in Torn.</p><div class="sf-three"><div>GEORGE’S GYM<strong>~7.3</strong></div><div>SPECIAL GYMS<strong>~7.5</strong></div><div>ELITE GYMS<strong>~8.0</strong></div></div><div class="sf-section">BALDR’S RATIO</div><p>Balanced specialist plan using multiple trained stats. Suitable when avoiding a very low dump stat.</p><div class="sf-section">HANK’S RATIO</div><p>A three-stat emphasis with one dump stat. The dump may reduce combat effectiveness, so choose carefully.</p><div class="sf-section">SAKALUX · DEXTERITY HIGH</div><p>DEX is primary, Speed secondary, Strength supporting, and Defense is the default dump. Exact unlock rules are not automatically verified.</p><div class="sf-section">STATS EXPLAINED</div><p><b>Strength:</b> damage when you hit.</p><p><b>Speed:</b> chance to hit an opponent.</p><p><b>Defense:</b> reduces damage from landed hits.</p><p><b>Dexterity:</b> improves dodging.</p></div>';
     body.innerHTML=header+(tab==='OVERVIEW'?info+train+headroom+statView:tab==='HISTORY'?history:tab==='EXPORT'?exporter:tab==='SETTINGS'?settings:about);
+    body.querySelector('[data-reps]')?.addEventListener('click',e=>{
+      const stat=e.currentTarget.dataset.reps;
+      const ok=setNativeReps(stat,999);
+      const msg=body.querySelector('.sf-feedback');
+      if(msg)msg.textContent=ok?'Set 999 repetitions for '+stat+'. Press Torn TRAIN to confirm.':'Could not identify an editable '+stat+' repetition field. Nothing changed.';
+    });
+    body.querySelector('#slx-gym-switch')?.addEventListener('click',()=>{
+      const msg=body.querySelector('.sf-feedback');
+      const target=confirmedGym();
+      if(!msg)return;
+      msg.textContent='Gym switching unavailable: the script has not confirmed another gym is unlocked. Use the native Torn gym chooser.';
+      // No click until gym unlock metadata is independently verified.
+    });
     body.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{panel.dataset.tab=b.dataset.tab;render()});
     body.querySelector('#slx-gym-mode')?.addEventListener('change',e=>{state.mode=e.target.value;stats.forEach((n,i)=>state.weights[n]=presets[state.mode][i]);save();render()});
     body.querySelector('#slx-gym-calc')?.addEventListener('click',()=>{
@@ -958,7 +1008,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ▴':'Settings ▾'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.2.0',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.2.1',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
