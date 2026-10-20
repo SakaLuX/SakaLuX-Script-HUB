@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.0.3
+// @version      1.0.4
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -851,10 +851,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   css.textContent='#slx-gym-toggle{position:fixed;right:10px;bottom:80px;z-index:2147483000;padding:9px 13px;background:#164d62;color:white;border:1px solid #59b9d5;border-radius:13px;font-weight:800}#slx-gym-panel{position:relative;z-index:1;width:100%;inset:auto;max-width:100%;margin:12px 0;background:#131923;color:#e8edf4;border:1px solid #52667a;border-radius:14px;display:flex;flex-direction:column;font:14px Arial,sans-serif;box-sizing:border-box;overflow:hidden}#slx-gym-panel[hidden],#slx-gym-toggle[hidden]{display:none!important}#slx-gym-panel .body{max-height:none!important}#slx-gym-panel .head button{display:none}#slx-gym-panel .head{display:flex;justify-content:space-between;padding:14px;background:#212c3b;font-weight:800}#slx-gym-panel .body{padding:12px;overflow:auto;flex:1}#slx-gym-panel input,#slx-gym-panel select{background:#0c1017;color:white;border:1px solid #52667a;border-radius:7px;padding:7px;max-width:100%;box-sizing:border-box}#slx-gym-panel button{background:#24566a;color:white;border:1px solid #557a8d;border-radius:8px;padding:8px;cursor:pointer}#slx-gym-panel .stat{display:grid;grid-template-columns:1fr 112px 64px;gap:6px;margin:7px 0;align-items:center}#slx-gym-panel .hint{font-size:12px;color:#aebdca;line-height:1.5}#slx-gym-panel .notice{padding:10px;background:#243544;border-radius:10px;margin:12px 0}';
   css.textContent += '#slx-gym-panel .slx-g-title{color:#888!important;font-size:12px!important;letter-spacing:2px!important;font-weight:bold!important;border-bottom:1px solid #333!important;padding:9px 0 5px!important;margin:8px 0!important}#slx-gym-panel{display:block!important;min-height:0!important;height:auto!important;overflow:visible!important;margin:8px 0 12px!important;border-radius:10px!important;background:#1b1b1b!important;border:1px solid #424242!important}#slx-gym-panel[hidden]{display:none!important}#slx-gym-panel .head{padding:8px 11px!important;font-size:13px!important;background:#303030!important;align-items:center}#slx-gym-panel .body{display:block!important;padding:10px!important;overflow:visible!important;flex:none!important}#slx-gym-panel .stat{grid-template-columns:minmax(65px,1fr) 90px 52px!important;gap:5px!important;margin:4px 0!important}#slx-gym-panel input,#slx-gym-panel select{padding:5px!important;font-size:13px!important;min-width:0!important}#slx-gym-panel .notice{margin:6px 0!important;padding:9px!important;border-left:3px solid #428cbe!important;background:#282828!important;font-size:13px!important}#slx-gym-panel .hint{font-size:11px!important;line-height:1.3!important}#slx-gym-panel .settings{display:none}#slx-gym-panel.expanded .settings{display:block}#slx-gym-panel .head button{display:inline-block!important;padding:4px 9px!important;font-size:12px!important}#slx-gym-panel .summary{font-size:12px;color:#c8d3dc;margin:5px 0}#slx-gym-panel .actions{display:flex;flex-wrap:wrap;gap:5px}#slx-gym-panel button{padding:6px!important;font-size:12px!important}';
   css.textContent += '#slx-gym-panel{font:13px Arial,sans-serif!important;background:#1b1b1b!important;color:#ddd!important;border:1px solid #383838!important;border-radius:6px!important;margin:10px 0!important;padding:8px 12px!important;box-shadow:none!important;position:relative!important;height:auto!important;max-height:none!important;z-index:1!important}#slx-gym-panel .head{background:transparent!important;color:#bbb!important;border-bottom:1px solid #383838!important;padding:8px 2px!important;letter-spacing:1px;font-size:13px!important}#slx-gym-panel .body{padding:4px!important;background:transparent!important;overflow:visible!important}#slx-gym-panel .notice{background:#262626!important;border:1px solid #383838!important;border-left:4px solid #4b96c3!important;color:#ddd!important;border-radius:6px!important;margin:8px 0!important;padding:12px 10px!important;font-size:13px!important}#slx-gym-panel .hint{color:#b1b1b1!important}#slx-gym-panel .settings{border-top:1px solid #393939!important;padding-top:8px}#slx-gym-panel .stat{margin:5px 0!important}#slx-gym-panel[hidden]{display:none!important}';
+  css.textContent += '#slx-gym-panel{position:static!important;inset:auto!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;transform:none!important;float:none!important;clear:both!important;display:block!important;width:100%!important;max-width:100%!important;height:auto!important;min-height:0!important;overflow:visible!important;margin:12px 0!important;isolation:isolate!important}#slx-gym-panel[hidden]{display:none!important}';
   (document.head||document.documentElement).append(css);
   const toggle=document.createElement('button');toggle.id='slx-gym-toggle';toggle.textContent='GYM ⚡';
   const panel=document.createElement('section');panel.id='slx-gym-panel';panel.hidden=true;
-  panel.innerHTML='<div class="head"><span>SAKALUX GYM · v1.0.3</span><button data-settings>Settings ▾</button></div><div class="body"></div>';
+  panel.innerHTML='<div class="head"><span>SAKALUX GYM · v1.0.4</span><button data-settings>Settings ▾</button></div><div class="body"></div>';
   (document.body||document.documentElement).append(panel);
   toggle.hidden=true;
   const body=panel.querySelector('.body');
@@ -906,21 +907,37 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ▴':'Settings ▾'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.0.3',getState:()=>({...state})};
-  function gymRoot(){
-    // Scope to Torn's central content. Never insert into chat, navigation, or an unrelated sidebar.
-    const candidates=['#gymroot','#gym-root','[class*="gymPage"]','[class*="gymWrapper"]'];
-    for(const selector of candidates){
-      const root=document.querySelector(selector);
-      if(root && root.getBoundingClientRect().width>220 && !root.closest('#slx-gym-panel'))return root;
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.0.4',getState:()=>({...state})};
+  // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
+  // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
+  function trainingAnchor(){
+    const trainButtons=[...document.querySelectorAll('button,input[type="button"],[role="button"]')]
+      .filter(el=>!panel.contains(el) && /^(train)$/i.test((el.innerText||el.value||'').trim()));
+    for(const btn of trainButtons){
+      let node=btn.parentElement;
+      for(let depth=0;node&&depth<8;depth++,node=node.parentElement){
+        if(node===document.body || node===document.documentElement)break;
+        if(node.contains(panel))break;
+        const text=(node.innerText||'').slice(0,5000);
+        const count=[...node.querySelectorAll('button,input[type="button"],[role="button"]')]
+          .filter(b=>/^(train)$/i.test((b.innerText||b.value||'').trim())).length;
+        if(count>=3 && count<=5 && /strength/i.test(text) && /dexterity/i.test(text) && node.parentElement){
+          // Never mount inside a floating, fixed, or absolute wrapper.
+          const parent=node.parentElement;
+          if(parent===document.body||parent===document.documentElement) return null;
+          return node;
+        }
+      }
     }
     return null;
   }
   function mount(){
     if(!onGym()||!state.enabled){panel.hidden=true;return}
-    const root=gymRoot();
-    if(!root){panel.hidden=true;return}
-    if(panel.parentElement!==root || root.firstElementChild!==panel)root.insertBefore(panel,root.firstChild);
+    const anchor=trainingAnchor();
+    if(!anchor){panel.hidden=true;return}
+    if(panel.parentElement!==anchor.parentElement || panel.nextElementSibling!==anchor){
+      anchor.parentElement.insertBefore(panel,anchor);
+    }
     panel.hidden=false;
   }
   render();mount();
