@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.1.0 — StatForge-reference full layout (2026-10-21)
+
+- Rebuilt mobile interface with Overview, History, Export, Settings and Info tabs matching the reference information hierarchy.
+- Added Ratio Health summary, Total Battle Stats, Train Next, Headroom, four color-coded stat rows, local history and CSV export.
+- Preserved SakaLuX DEX-focused training preset, native Gym insertion and locked-gym safeguards.
+- Exact StatForge formula parity and true special gym headroom remain unsupported; values are marked as unverified instead of being invented.
+
+
 ## Gym Optimizer v1.0.6 — SakaLuX DEX focus and compact UI (2026-10-21)
 
 - Renamed Aec3 template to SakaLuX, with default DEX-priority weights (DEX 1.25, Speed 1, Strength 0.8, Defense dump).
