@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.133
+// @version      1.9.134
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2112,19 +2112,42 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function applyLanguage(){translateSakaLuX(document);window.dispatchEvent(new CustomEvent('SakaLuX:LanguageChanged',{detail:{language:language()}}))}
     function startLanguageObserver(){applyLanguage()}
 
+    // Persist the shared key in both Torn local storage and userscript storage.
+    // Never overwrite a nonempty key with an empty value during startup.
+    const SHARED_API_BACKUP = 'SakaLuX_HUB_TORN_API_KEY_BACKUP_V1';
     function getSharedApiKey() {
-        try { return (localStorage.getItem(STORAGE.apiKey) || '').trim(); }
-        catch { return ''; }
+        let key = '';
+        try { key = String(localStorage.getItem(STORAGE.apiKey) || '').trim(); } catch {}
+        if (key) return key;
+        try {
+            const backup = typeof GM_getValue === 'function' ? GM_getValue(SHARED_API_BACKUP, '') : '';
+            if (typeof backup === 'string' && /^[a-zA-Z0-9]{16}$/.test(backup.trim())) {
+                key = backup.trim();
+                try { localStorage.setItem(STORAGE.apiKey, key); } catch {}
+            }
+        } catch {}
+        return key;
     }
 
     function setSharedApiKey(value) {
         const key = String(value || '').trim();
+        if (key && !/^[a-zA-Z0-9]{16}$/.test(key)) return false;
+        let saved = false;
         try {
-            if (key) localStorage.setItem(STORAGE.apiKey, key);
-            else localStorage.removeItem(STORAGE.apiKey);
+            if (key) { localStorage.setItem(STORAGE.apiKey, key); saved = localStorage.getItem(STORAGE.apiKey) === key; }
+            else { localStorage.removeItem(STORAGE.apiKey); saved = true; }
         } catch {}
+        try {
+            if (typeof GM_setValue === 'function') {
+                const result = GM_setValue(SHARED_API_BACKUP, key);
+                // Some managers expose asynchronous APIs. Prevent unhandled rejection.
+                if (result && typeof result.catch === 'function') result.catch(() => {});
+                saved = saved || Boolean(result === undefined || result);
+            }
+        } catch {}
+        if (key && !saved) return false;
         window.dispatchEvent(new CustomEvent('SakaLuX:HubApiKeyChanged', { detail: { available: Boolean(key) } }));
-        return Boolean(key);
+        return !key || saved;
     }
 
     async function testSharedApiKey(key = getSharedApiKey()) {
@@ -4063,7 +4086,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             const status = document.getElementById('slhs-api-status');
             const key = input.value.trim() || getSharedApiKey();
             status.style.color = '#e7c675'; status.textContent = '⏳ Testing shared key...';
-            try { await testSharedApiKey(key); setSharedApiKey(key); input.value = ''; status.style.color = '#72d6a2'; status.textContent = '✅ Shared key valid and saved'; }
+            try { await testSharedApiKey(key); if (!setSharedApiKey(key)) throw new Error('Nu am putut salva cheia în stocarea locală'); input.value = ''; status.style.color = '#72d6a2'; status.textContent = '✅ Shared key valid and saved'; }
             catch (error) { status.style.color = '#f09aa8'; status.textContent = '❌ ' + String(error?.message || error); }
         };
         document.getElementById('slhs-api-clear').onclick = () => { if (!confirm('Remove the shared SakaLuX Torn API key?')) return; setSharedApiKey(''); openSettings(); };
