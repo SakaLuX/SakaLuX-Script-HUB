@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.5.5
+// @version      0.5.6
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -834,15 +834,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.5.5';
+  const VERSION = '0.5.6';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
   const FF_TTL = 12 * 60 * 60 * 1000;
-  const STATUS_TTL = 15000;
+  const STATUS_TTL = 30000;
   const BOARD_CONCURRENCY = 3;
   const FF_CONCURRENCY = 2;
-  const STATUS_CONCURRENCY = 1;
+  const STATUS_CONCURRENCY = 6;
   const IDS = Object.freeze({ launcher: 'slx-halloween-launcher', overlay: 'slx-halloween-overlay', style: 'slx-halloween-style' });
   const KEYS = Object.freeze({
     settings: 'SLX_HALLOWEEN_SETTINGS_V1',
@@ -1335,7 +1335,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     lastError = '';
     lastWarning = '';
     sourceDiagnostics = {};
-    sourceDiagnostics.Config = 'FFScouter → Baldr → Torn LIVE/inactiv';
+    sourceDiagnostics.Config = 'FFScouter → Baldr → Torn LIVE/inactiv · FAST';
     updateControls();
     try {
       if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(settings.includeBounties && !settings.includeInactive ? boardCache.rows : [], settings.includeInactive ? compactPool([...(targetPool.rows || []), ...(discoveredPool.rows || [])]) : []));
@@ -1352,7 +1352,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const candidates = candidateRows(rows);
       sourceDiagnostics.EligibleCandidates = candidates.length;
       if (!candidates.length) sourceDiagnostics.Hint = 'No candidates available from enabled sources';
-      const limit = Math.max(10, Math.min(160, Math.floor(num(settings.statusChecks) || DEFAULTS.statusChecks)));
+      const limit = Math.max(10, Math.min(40, Math.floor(num(settings.statusChecks) || DEFAULTS.statusChecks)));
       const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
       const verified = [];
       const checkedStatuses = { okay: 0, offline: 0, unknown: 0, excluded: 0 };
@@ -1360,8 +1360,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       for (let index = 0; index < checkCount; index += STATUS_CONCURRENCY) {
         const batch = candidates.slice(index, index + STATUS_CONCURRENCY);
         setProgress('Verifying attack-ready status', Math.min(index, limit), Math.min(limit, candidates.length));
-        const checked = await mapLimit(batch, STATUS_CONCURRENCY, row => rateLimited ? row : checkStatus(row, force));
-        if (!rateLimited && index + STATUS_CONCURRENCY < checkCount) await new Promise(resolve => setTimeout(resolve, 2100));
+        const checked = await mapLimit(batch, STATUS_CONCURRENCY, row => rateLimited ? row : checkStatus(row, false));
+
         for (const item of checked) {
           if (item.status === 'Okay' && item.statusVerified) checkedStatuses.okay++;
           else checkedStatuses.unknown++;
