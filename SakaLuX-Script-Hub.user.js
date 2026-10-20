@@ -2038,18 +2038,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.2.0",
+                "version": "1.2.1",
                 "sourceUrl": "",
                 "downloadUrl": "",
                 "info": "Editable Baldr, Hank, Aec3, Balanced, 2-stat, 3-stat and Custom starting templates; manual stat values and local snapshots. No automatic training or gym switching. Template weights are not verified StatForge formula parity.",
                 "quickActions": [],
                 "release": {
-                    "version": "1.2.0",
+                    "version": "1.2.1",
                     "date": "2026-10-21",
                     "notes": [
-                        "15-snapshot 6-column history with per-stat deltas",
-                        "Formatted text snapshot with copy and CSV export",
-                        "Expanded explanatory Info tab and gym-dot comparisons"
+                        "Set 999 reps for recommended stat without executing TRAIN.",
+                        "Only allow switching after explicit unlock confirmation; otherwise block.",
+                        "Fix touch scrolling and compact UI."
                     ]
                 },
                 "accessTier": "free",
