@@ -16,8 +16,13 @@ def sync_runtime(source, version):
         text = re.sub(r"(\bconst\s+VERSION\s*=\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
         text = re.sub(r"(\blet\s+v\s*=\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
         text = re.sub(r"(\{\s*version\s*:\s*['\"])[^'\"]+(['\"]\s*\}\s*\)\))", lambda m: m[1]+version+m[2], text)
-        if 'SakaLuX Shared Dock Registration' in text:
-            text = re.sub(r"(\bversion\s*:\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text, count=1)
+        if '/* SakaLuX Shared Dock Registration — BEGIN */' in text:
+            a = text.index('/* SakaLuX Shared Dock Registration — BEGIN */')
+            b = text.find('/* SakaLuX Shared Dock Registration — END */', a)
+            if b > a:
+                fragment = text[a:b]
+                fragment = re.sub(r"(\bversion\s*:\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], fragment, count=1)
+                text = text[:a] + fragment + text[b:]
         text = re.sub(r"(\bconst\s+APP\s*=\s*\{\s*name\s*:\s*['\"][^'\"]+['\"]\s*,\s*version\s*:\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
         text = re.sub(r"(Object.assign\(e.dataset,\{id:'chat-intelligence'[^\n]*?version:')[^']+(')", lambda m: m[1]+version+m[2], text)
         parts[i] = text
