@@ -499,6 +499,12 @@ INFO describes each module’s purpose and features. NEW shows that module’s c
 - Updates the current release notes and documentation; INFO explains features and NEW lists changes.
 - Includes Shared Standalone Dock Runtime v1.1.10: the gold S stays first in the status bar and sits 2px lower.
 
+### suite v0.9.986
+
+- Fixes Lottery Max Buy visibility on Torn's button-only Lottery interface.
+- Adds `MAX BUY · tokens` directly beside the native `BUY` button, with confirmation and a live `STOP · remaining` state.
+- Purchases sequentially only after Torn confirms each Casino Token decrease and stops on errors or user cancellation.
+
 ### suite v0.9.985
 
 - Adds the enabled-by-default **Lottery Max Buy** Casino module for Daily Dime, Lucky Shot Lotto and Holy Grail.
