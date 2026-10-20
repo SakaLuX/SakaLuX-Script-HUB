@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.3.7
+// @version      0.4.0
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -11,6 +11,7 @@
 // @connect      api.torn.com
 // @connect      ffscouter.com
 // @connect      torntargets.net
+// @connect      raw.githubusercontent.com
 // @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Halloween-Assistant.user.js
 // @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Halloween-Assistant.user.js
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
@@ -835,7 +836,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.3.7';
+  const VERSION = '0.4.0';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -855,7 +856,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     targetPool: 'SLX_HALLOWEEN_TARGET_POOL_V1',
     discovered: 'SLX_HALLOWEEN_DISCOVERED_V1'
   });
-  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 80, autoRefresh: true, refreshSeconds: 90, includeBounties: false, includeInactive: true, inactiveDays: 1, useTornTargets: false, discoveryLimit: 2500 });
+  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 80, autoRefresh: true, refreshSeconds: 90, includeBounties: false, includeInactive: true, inactiveDays: 1, useTornTargets: false, useBaldr: true, discoveryLimit: 2500 });
   const $ = (query, root = document) => root.querySelector(query);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -1076,6 +1077,23 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     discoveredPool = { at: Date.now(), rows: fresh };
     write(KEYS.discovered, discoveredPool);
     return fresh;
+  }
+  async function loadBaldrTargets() {
+    if (!settings.includeInactive || !settings.useBaldr) return [];
+    try {
+      const data = await requestJSON('https://raw.githubusercontent.com/OranWeb/tc-baldrs-levelling-list/master/data.json');
+      const lists = Object.values(data || {}).flatMap(v => Array.isArray(v) ? v : []);
+      return lists.map(p => {
+        const id = Number(p.id);
+        if (!Number.isSafeInteger(id) || id <= 0) return null;
+        return { id, name: String(p.name || 'Player ' + id), level: Number(p.lvl) || null,
+          reward: 0, count: 0, hasBounty: false, source: 'Baldr list', ff: null,
+          bs: Number(p.total) || null, status: 'Unknown', statusVerified: false,
+          lastAction: '', lastActionStatus: '' };
+      }).filter(Boolean);
+    } catch (error) {
+      lastWarning = friendlyError(error, 'Baldr'); return [];
+    }
   }
   function importedTargetRows(text) {
     const ids = [...new Set(String(text || '').match(/\b\d{2,9}\b/g) || [])].slice(0, 10000);
@@ -1306,12 +1324,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     updateControls();
     try {
       if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(settings.includeBounties && !settings.includeInactive ? boardCache.rows : [], settings.includeInactive ? compactPool([...(targetPool.rows || []), ...(discoveredPool.rows || [])]) : []));
-      const [bounties, supplemental, externalRows] = await Promise.all([
+      const [bounties, supplemental, externalRows, baldrRows] = await Promise.all([
         settings.includeBounties && !settings.includeInactive ? loadBoard(false) : Promise.resolve([]),
-        loadSupplementalTargets(), loadTornTargets()
+        loadSupplementalTargets(), loadTornTargets(), loadBaldrTargets()
       ]);
-      if (settings.includeInactive) saveDiscovery([...supplemental, ...externalRows]);
-      let rows = mergeTargetSources(bounties, settings.includeInactive ? compactPool([...discoveredPool.rows, ...supplemental, ...externalRows]) : []);
+      if (settings.includeInactive) saveDiscovery([...supplemental, ...externalRows, ...baldrRows]);
+      let rows = mergeTargetSources(bounties, settings.includeInactive ? compactPool([...discoveredPool.rows, ...supplemental, ...externalRows, ...baldrRows]) : []);
       paintInstantCache(rows);
       try { rows = await enrichFF(rows); }
       catch (error) { lastWarning = friendlyError(error, 'FFScouter'); }
@@ -1390,6 +1408,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     settings.includeBounties = Boolean($('[data-bounties]', overlay)?.checked);
     settings.includeInactive = Boolean($('[data-inactive]', overlay)?.checked);
     settings.useTornTargets = Boolean($('[data-torntargets]', overlay)?.checked);
+    settings.useBaldr = Boolean($('[data-baldr]', overlay)?.checked);
     settings.inactiveDays = Math.max(1, Math.min(365, Math.floor(num($('[data-days]', overlay)?.value) || 1)));
     const targetKey = String($('[data-ttkey]', overlay)?.value || '').trim();
     if (targetKey) localStorage.setItem('SLX_HALLOWEEN_TORN_TARGETS_KEY', targetKey);
@@ -1443,7 +1462,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
-      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-api-panel" hidden><div class="ha-api-head"><b>🔑 CHEI API</b><button class="ha-api-close" data-api-close>×</button></div><div class="ha-api-status" data-api-source></div><label>Cheie Torn<input data-torn type="password" maxlength="16" autocomplete="off" placeholder="Hub/PDA folosit automat"></label><a class="ha-setup" data-generate-torn href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Halloween%20Assistant&user=basic&torn=bounties" target="_blank" rel="noopener noreferrer">🔑 GENEREAZĂ CHEIE TORN PENTRU HALLOWEEN</a><label>Cheie FFScouter<input data-ff type="password" maxlength="16" autocomplete="off" placeholder="Opțională"></label><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">🔑 OBȚINE CHEIE FFSCOUTER</a><div class="ha-api-actions"><button data-api-save>SALVEAZĂ CHEILE</button><button data-api-clear>ȘTERGE LOCALE</button></div><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><label class="ha-toggle-row"><span>🎯 Include Bounty</span><span class="ha-switch"><input data-bounties type="checkbox" ${settings.includeBounties ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label class="ha-toggle-row"><span>💤 Doar jucători inactivi</span><span class="ha-switch"><input data-inactive type="checkbox" ${settings.includeInactive ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label class="ha-toggle-row"><span>🌐 Torn Targets API</span><span class="ha-switch"><input data-torntargets type="checkbox" ${settings.useTornTargets ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label>Cheie Torn Targets<input data-ttkey type="password" autocomplete="off" placeholder="Cheie separată Torn Targets"></label><a class="ha-setup" href="https://torntargets.net/" target="_blank" rel="noopener noreferrer">🔑 DESCHIDE TORN TARGETS PENTRU CHEIE</a><label>Importă Baldr / TornStats / orice listă de ID-uri<textarea data-import rows="3" placeholder="Lipește aici ID-uri separate prin spațiu sau virgulă"></textarea></label><button data-import-save type="button">IMPORTĂ ID-URI</button><label>Inactiv minimum (zile)<select data-days>${[1,3,7,14,30].map(d => '<option value="' + d + '"' + (num(settings.inactiveDays) === d ? ' selected' : '') + '>' + d + ' zile</option>').join('')}</select></label><label>Limită bază locală<input data-poollimit type="number" min="100" max="10000" value="${settings.discoveryLimit}"></label><div class="ha-actions"><button data-save>SALVEAZĂ SETĂRILE</button></div></div><div class="ha-hint">LIVE OKAY · inactivi numai după verificare Torn · surse externe & import</div><div class="ha-list"></div></section>`;
+      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-api-panel" hidden><div class="ha-api-head"><b>🔑 CHEI API</b><button class="ha-api-close" data-api-close>×</button></div><div class="ha-api-status" data-api-source></div><label>Cheie Torn<input data-torn type="password" maxlength="16" autocomplete="off" placeholder="Hub/PDA folosit automat"></label><a class="ha-setup" data-generate-torn href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Halloween%20Assistant&user=basic&torn=bounties" target="_blank" rel="noopener noreferrer">🔑 GENEREAZĂ CHEIE TORN PENTRU HALLOWEEN</a><label>Cheie FFScouter<input data-ff type="password" maxlength="16" autocomplete="off" placeholder="Opțională"></label><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">🔑 OBȚINE CHEIE FFSCOUTER</a><div class="ha-api-actions"><button data-api-save>SALVEAZĂ CHEILE</button><button data-api-clear>ȘTERGE LOCALE</button></div><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><label class="ha-toggle-row"><span>🎯 Include Bounty</span><span class="ha-switch"><input data-bounties type="checkbox" ${settings.includeBounties ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label class="ha-toggle-row"><span>💤 Doar jucători inactivi</span><span class="ha-switch"><input data-inactive type="checkbox" ${settings.includeInactive ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label class="ha-toggle-row"><span>📋 Baldr list · automat</span><span class="ha-switch"><input data-baldr type="checkbox" ${settings.useBaldr ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label class="ha-toggle-row"><span>🌐 Torn Targets API</span><span class="ha-switch"><input data-torntargets type="checkbox" ${settings.useTornTargets ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label>Cheie Torn Targets<input data-ttkey type="password" autocomplete="off" placeholder="Cheie separată Torn Targets"></label><a class="ha-setup" href="https://torntargets.net/" target="_blank" rel="noopener noreferrer">🔑 DESCHIDE TORN TARGETS PENTRU CHEIE</a><label>Importă Baldr / TornStats / orice listă de ID-uri<textarea data-import rows="3" placeholder="Lipește aici ID-uri separate prin spațiu sau virgulă"></textarea></label><button data-import-save type="button">IMPORTĂ ID-URI</button><label>Inactiv minimum (zile)<select data-days>${[1,3,7,14,30].map(d => '<option value="' + d + '"' + (num(settings.inactiveDays) === d ? ' selected' : '') + '>' + d + ' zile</option>').join('')}</select></label><label>Limită bază locală<input data-poollimit type="number" min="100" max="10000" value="${settings.discoveryLimit}"></label><div class="ha-actions"><button data-save>SALVEAZĂ SETĂRILE</button></div></div><div class="ha-hint">LIVE OKAY · inactivi numai după verificare Torn · surse externe & import</div><div class="ha-list"></div></section>`;
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
