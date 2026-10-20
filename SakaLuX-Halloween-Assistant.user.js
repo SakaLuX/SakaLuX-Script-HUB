@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.2.7
+// @version      0.2.8
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -834,7 +834,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.2.7';
+  const VERSION = '0.2.8';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -853,7 +853,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     statusCache: 'SLX_HALLOWEEN_STATUS_CACHE_V1',
     targetPool: 'SLX_HALLOWEEN_TARGET_POOL_V1'
   });
-  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 80, autoRefresh: true, refreshSeconds: 90 });
+  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 80, autoRefresh: true, refreshSeconds: 90, includeBounties: false, includeInactive: true });
   const $ = (query, root = document) => root.querySelector(query);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -1073,10 +1073,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   async function loadSupplementalTargets() {
+    if (!settings.includeInactive) return [];
     const key = getFFKey();
     if (!validKey(key)) return Array.isArray(targetPool.rows) ? targetPool.rows.map(row => ({ ...row })) : [];
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
-    const url = 'https://ffscouter.com/api/v1/get-targets?key=' + encodeURIComponent(key) + '&minlevel=1&maxlevel=100&minff=1&maxff=' + encodeURIComponent(maxFF) + '&inactiveonly=0&limit=50';
+    const url = 'https://ffscouter.com/api/v1/get-targets?key=' + encodeURIComponent(key) + '&minlevel=1&maxlevel=100&minff=1&maxff=' + encodeURIComponent(maxFF) + '&inactiveonly=1&limit=50';
     try {
       const rows = normalizeTargetPool(await requestJSON(url));
       if (rows.length) {
@@ -1153,7 +1154,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     else if (/federal/i.test(text)) state = 'Federal';
     else if (/travel|abroad|flying|returning/i.test(text)) state = 'Abroad';
     else if (/okay|healthy|available/i.test(text)) state = 'Okay';
-    return { status: state, name: String(user.name || user.player_name || ''), level: user.level == null ? null : num(user.level), lastAction: String(user.last_action?.relative || user.last_action?.status || '') };
+    return { status: state, name: String(user.name || user.player_name || ''), level: user.level == null ? null : num(user.level), lastAction: String(user.last_action?.relative || ''), lastActionStatus: String(user.last_action?.status || '') };
   }
   async function checkStatus(row, force = false) {
     const cached = statusCache[String(row.id)];
@@ -1197,9 +1198,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (row.ff <= 1.3) return '⚡ FAST';
     return '✓ EASY';
   }
+  function isInactiveTarget(row) {
+    const lastAction = String(row.lastAction || '').toLowerCase();
+    const lastStatus = String(row.lastActionStatus || '').toLowerCase();
+    return lastStatus === 'offline' && (/(?:\b[1-9]\d*\s*days?\b|\bweeks?\b|\bmonths?\b|\byears?\b)/i.test(lastAction) || /\b(?:[2-9]\d|1\d{2,})\s*hours?\b/i.test(lastAction));
+  }
+  function permittedSource(row) {
+    return (settings.includeBounties && row.hasBounty) || (settings.includeInactive && !row.hasBounty);
+  }
   function candidateRows(rows) {
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
-    return rows.filter(row => row.ff == null || (row.ff >= 1 && row.ff <= maxFF)).sort(targetCompare);
+    return rows.filter(row => permittedSource(row) && (row.ff == null || (row.ff >= 1 && row.ff <= maxFF))).sort(targetCompare);
   }
   function applyCachedIntelligence(rows) {
     const now = Date.now();
@@ -1214,7 +1223,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function paintInstantCache(rows) {
     const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
-    const instant = candidateRows(applyCachedIntelligence(rows)).filter(row => row.statusVerified === true && row.status === 'Okay').slice(0, wanted);
+    const instant = candidateRows(applyCachedIntelligence(rows)).filter(row => row.statusVerified === true && row.status === 'Okay' && isInactiveTarget(row)).slice(0, wanted);
     if (instant.length) { targets = instant; renderTargets(); setProgress('Instant cache · refreshing live', instant.length, instant.length); }
     return instant.length;
   }
@@ -1229,8 +1238,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     lastWarning = '';
     updateControls();
     try {
-      if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(boardCache.rows, targetPool.rows || []));
-      const [bounties, supplemental] = await Promise.all([loadBoard(false), loadSupplementalTargets()]);
+      if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(settings.includeBounties ? boardCache.rows : [], settings.includeInactive ? (targetPool.rows || []) : []));
+      const [bounties, supplemental] = await Promise.all([settings.includeBounties ? loadBoard(false) : Promise.resolve([]), loadSupplementalTargets()]);
       let rows = mergeTargetSources(bounties, supplemental);
       paintInstantCache(rows);
       try { rows = await enrichFF(rows); }
@@ -1244,7 +1253,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const batch = candidates.slice(index, index + STATUS_CONCURRENCY);
         setProgress('Verifying attack-ready status', Math.min(index, limit), Math.min(limit, candidates.length));
         const checked = await mapLimit(batch, STATUS_CONCURRENCY, row => rateLimited ? row : checkStatus(row, force));
-        verified.push(...checked.filter(row => row.statusVerified === true && row.status === 'Okay'));
+        verified.push(...checked.filter(row => row.statusVerified === true && row.status === 'Okay' && isInactiveTarget(row)));
         if (verified.length >= wanted || rateLimited) break;
       }
       write(KEYS.statusCache, statusCache);
@@ -1304,6 +1313,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     settings.maxFF = Math.max(1, Math.min(3, num($('[data-maxff]', overlay)?.value) || DEFAULTS.maxFF));
     settings.maxResults = Math.max(5, Math.min(100, num($('[data-results]', overlay)?.value) || DEFAULTS.maxResults));
     settings.statusChecks = Math.max(10, Math.min(160, num($('[data-checks]', overlay)?.value) || DEFAULTS.statusChecks));
+    settings.includeBounties = Boolean($('[data-bounties]', overlay)?.checked);
+    settings.includeInactive = Boolean($('[data-inactive]', overlay)?.checked);
     write(KEYS.settings, settings);
     setProgress('Setările scanării au fost salvate');
   }
@@ -1353,7 +1364,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
-      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-api-panel" hidden><div class="ha-api-head"><b>🔑 CHEI API</b><button class="ha-api-close" data-api-close>×</button></div><div class="ha-api-status" data-api-source></div><label>Cheie Torn<input data-torn type="password" maxlength="16" autocomplete="off" placeholder="Hub/PDA folosit automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" autocomplete="off" placeholder="Opțională"></label><div class="ha-api-actions"><button data-api-save>SALVEAZĂ CHEILE</button><button data-api-clear>ȘTERGE LOCALE</button></div><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ SETĂRILE</button></div></div><div class="ha-hint">LIVE OKAY · întâi cu bounty, apoi fără bounty · cele mai ușoare primele</div><div class="ha-list"></div></section>`;
+      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-api-panel" hidden><div class="ha-api-head"><b>🔑 CHEI API</b><button class="ha-api-close" data-api-close>×</button></div><div class="ha-api-status" data-api-source></div><label>Cheie Torn<input data-torn type="password" maxlength="16" autocomplete="off" placeholder="Hub/PDA folosit automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" autocomplete="off" placeholder="Opțională"></label><div class="ha-api-actions"><button data-api-save>SALVEAZĂ CHEILE</button><button data-api-clear>ȘTERGE LOCALE</button></div><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><label><input data-bounties type="checkbox" ${settings.includeBounties ? "checked" : ""}> Include jucători cu bounty (implicit OFF)</label><label><input data-inactive type="checkbox" ${settings.includeInactive ? "checked" : ""}> Adaugă automat jucători inactivi (implicit ON)</label><div class="ha-actions"><button data-save>SALVEAZĂ SETĂRILE</button></div></div><div class="ha-hint">LIVE OKAY · offline de minimum o zi · bounty opțional · cele mai ușoare primele</div><div class="ha-list"></div></section>`;
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
