@@ -1,5 +1,12 @@
 # Changelog
 
+## Gym Optimizer v1.5.5 - expanded Settings and Details (2026-10-21)
+
+- Rebuild Settings with mobile ratio choice, highest/dump stat, color-coded order, editable custom multipliers and Dark/Light controls.
+- Show available gym perks, latest API update time and guarded API key controls.
+- Restore expanded, color-coded Info cards for gym dots, Baldr/Hank builds and four stat explanations.
+- Keep script source ASCII-safe to prevent the TornPDA loading regression. Device validation of this new build pending.
+
 ## Gym Optimizer v1.5.4 — TornPDA startup compatibility (2026-10-21)
 
 - Fixes a script-loading regression introduced in Gym Optimizer v1.2.0, traced with isolated TornPDA tests to special Unicode typography in the Info section.
