@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.5.0 — Gain model, headroom and conditional ETA (2026-10-21)
+
+- Computes approximate training gains using the wiki formula and parseable, per-stat gym perk percentages.
+- Computes DEX 1.25 specialist ratio headroom for secondary stats (advisory, not ownership status).
+- Next-gym remaining energy and ETA use explicit API fields if available; never substitutes a fabricated estimate when progress or regeneration is unavailable.
+- Precise perk stacking and unlock ETA remain dependent on verified v2 API fields and player-specific readings; gym switching remains guarded.
+
+
 ## Gym Optimizer v1.4.0 — API perks and safer gym calculations (2026-10-21)
 
 - Added Torn user API refresh for perks, bars, gym and battle stats using the Hub API key; reports missing authorization or errors.
