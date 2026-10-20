@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.0.2 — Compact Gym layout fix (2026-10-20)
+
+- Replaced oversized expanded form with compact inline Train Next and Gym summary.
+- Moved stat inputs, strategy editing, snapshots into collapsible Settings.
+- Reduced height, width and spacing so native Torn gym training stays visible and accessible.
+- No unverified gym switch automation. Actual TornPDA device regression testing remains required.
+
+
 ## Gym Optimizer v1.0.1 — Inline Gym integration (2026-10-20)
 
 - Embedded the optimizer within the native Gym content column above gym training controls.
