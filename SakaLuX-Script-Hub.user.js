@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.143
+// @version      1.9.144
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -892,7 +892,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.143';
+    const VERSION = '1.9.144';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2137,7 +2137,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     async function loadLocaleRegistry(){const cached=loadJson(STORAGE.locales,null);mergeLocaleRegistry(cached);try{const data=JSON.parse(await httpGet(LOCALES_URL+'?v='+Date.now()));if(mergeLocaleRegistry(data))saveJson(STORAGE.locales,data)}catch(error){console.warn('[SakaLuX Hub] Locale registry fallback:',error?.message||error)}if(!LOCALES[settings.language]){settings.language='en';saveJson(STORAGE.settings,settings)}}
     function translateValue(value, lang=language()){
         const raw=String(value??''),lead=raw.match(/^\s*/)?.[0]||'',trail=raw.match(/\s*$/)?.[0]||'',key=raw.trim();
-        if(!key)return raw;let canonical=key;for(const locale of Object.values(LOCALES)){const hit=Object.entries(locale.translations||{}).find(([,translated])=>String(translated).toLowerCase()===key.toLowerCase());if(hit){canonical=hit[0];break}}const map=LOCALES[lang]?.translations||{};let translated=lang==='en'?canonical:map[canonical];if(translated===undefined){const hit=Object.entries(map).find(([source])=>source.toLowerCase()===canonical.toLowerCase());translated=hit?.[1]}if(translated===undefined)return raw;if(key===key.toUpperCase())translated=String(translated).toUpperCase();return lead+translated+trail;
+        if(!key)return raw;let canonical=key;for(const locale of Object.values(LOCALES)){const hit=Object.entries(locale.translations||{}).find(([,translated])=>String(translated).toLowerCase()===key.toLowerCase());if(hit){canonical=hit[0];break}}const map=LOCALES[lang]?.translations||{};if(lang==='ro' && /^(?:ON|OFF|PORNIT|OPRIT)$/i.test(key))return lead+(key==='OFF'||key==='OPRIT'?'OFF':'ON')+trail;let translated=lang==='en'?canonical:map[canonical];if(translated===undefined){const hit=Object.entries(map).find(([source])=>source.toLowerCase()===canonical.toLowerCase());translated=hit?.[1]}if(translated===undefined)return raw;if(key===key.toUpperCase())translated=String(translated).toUpperCase();return lead+translated+trail;
     }
     function isSakaLuXNode(node){const el=node?.nodeType===1?node:node?.parentElement;if(!el)return false;return !!el.closest('[id^="sakalux"],[id^="sl-"],[id^="slx-"],[id^="ci-"],[id^="apm-"],[class*="sakalux"],[class^="sl-"],[class*=" sl-"],[class^="slx-"],[class*=" slx-"],[class^="ci-"],[class*=" ci-"],[class^="apm-"],[class*=" apm-"]')}
     function translateSakaLuX(root=document){
@@ -2720,7 +2720,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 .slh-card .slh-card-tool,.slh-card .slh-switch,.slh-card .slh-primary{width:100%!important;min-width:0!important;min-height:34px!important;height:34px!important;padding:4px 5px!important;font-size:8px!important;border-radius:9px!important;box-sizing:border-box!important}
 .slh-card .slh-switch{justify-content:space-between!important;gap:3px!important}
 .slh-card .slh-switch-track{transform:scale(.88)!important;transform-origin:left center!important}
-\n/* Keep switch labels inside the available mobile card column. */\n.slh-card .slh-switch{grid-template-columns:minmax(0,34px) minmax(0,1fr)!important;overflow:hidden!important;padding:3px 4px!important;column-gap:3px!important;min-width:0!important;max-width:100%!important;font-size:7px!important;letter-spacing:-.02em!important}.slh-card .slh-switch b{min-width:0!important;max-width:100%!important;overflow:hidden!important;text-overflow:clip!important;white-space:nowrap!important;font-size:7px!important;line-height:1.15!important}.slh-card .slh-switch-track{max-width:30px!important}.slh-card{min-width:0!important}.slh-card .slh-card-controls{min-width:0!important;max-width:100%!important}\n.slh-card-name{font-size:11px!important}.slh-card-meta{gap:4px!important}.slh-chip{font-size:7px!important;padding:3px 5px!important}
+\n/* Keep switch labels inside the available mobile card column. */\n.slh-card .slh-switch{grid-template-columns:34px minmax(0,1fr)!important;overflow:hidden!important;padding:4px 5px!important;gap:4px!important;min-width:0!important;max-width:100%!important;font-size:9px!important;letter-spacing:0!important}.slh-card .slh-switch b{min-width:0!important;overflow:visible!important;white-space:nowrap!important;font-size:9px!important;line-height:1.15!important}.slh-card .slh-switch-track{max-width:30px!important}.slh-card{min-width:0!important}.slh-card .slh-card-controls{min-width:0!important;max-width:100%!important}\n.slh-card-name{font-size:11px!important}.slh-card-meta{gap:4px!important}.slh-chip{font-size:7px!important;padding:3px 5px!important}
 .slh-settings .slh-setting{padding:8px 9px!important;margin-bottom:7px!important}
 .slh-settings .slh-setting-row{min-height:40px!important;gap:9px!important}
 .slh-settings .slh-setting-title{font-size:9px!important}.slh-settings .slh-setting-desc{font-size:8px!important;line-height:1.35!important}
