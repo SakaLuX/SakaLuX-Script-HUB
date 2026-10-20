@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.0.3 — Dark Gym interface and safer mount (2026-10-20)
+
+- Restyled sections toward StatForge's dark native Gym appearance.
+- Disabled generic main-container insertion to avoid overlapping Torn's navigation and native controls.
+- Retained collapsed settings and nonautomatic training.
+- Further exact StatForge feature and stats parity remains pending.
+
+
 ## Gym Optimizer v1.0.2 — Compact Gym layout fix (2026-10-20)
 
 - Replaced oversized expanded form with compact inline Train Next and Gym summary.
