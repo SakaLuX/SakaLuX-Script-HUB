@@ -1,7 +1,12 @@
 # SakaLuX Bounty Hunter
 
 ## Current version
-**v0.5.19**
+**v0.5.20**
+
+### 2026-10-20 · Version consistency
+- Fixed embedded runtime version reporting to match userscript `@version`.
+- Updated Hub registry release metadata to prevent mismatched version labels.
+- GreasyFork publication status must be verified separately; updating this document does not publish the script.
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
@@ -52,7 +57,7 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Release history / Changelog
 
-### v0.5.19 — 2026-10-10
+### v0.5.20 — 2026-10-10
 - Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.
 - The purchase information applies to users with or without active PRO. License enforcement rules are unchanged.
 
