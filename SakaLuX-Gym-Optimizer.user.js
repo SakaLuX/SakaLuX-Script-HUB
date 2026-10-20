@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.5.6
+// @version      1.5.7
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -13,7 +13,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.5.6',root=document.documentElement;
+    const id='gym-optimizer',v='1.5.7',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -850,7 +850,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.5.6',id='gym-optimizer';
+    const ver='1.5.7',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -894,6 +894,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   css.textContent += '#slx-gym-panel .slx-order-row .slx-dump-value{color:#ec6873!important;font-weight:900}#slx-gym-panel .slx-order-row strong{display:block;min-width:0}#slx-gym-panel .slx-multiplier-grid label{color:#909090!important}#slx-gym-panel .slx-multiplier-grid label span{font-weight:900}#slx-gym-panel .slx-stat-bonuses{padding:6px 3px;display:flex;flex-direction:column;gap:6px}#slx-gym-panel .slx-bonus-line{font-size:14px;font-weight:800;display:flex;align-items:center;gap:4px}#slx-gym-panel .slx-bonus-line small{font-size:10px;font-weight:500;color:#949da4;margin-left:auto}#slx-gym-panel .slx-perk-list details{padding:5px 0}#slx-gym-panel .slx-perk-list summary{cursor:pointer;font-size:11px}';
   css.textContent += '#slx-gym-panel .slx-settings-panel{padding:5px 6px 18px;background:#171717;color:#dedede}#slx-gym-panel .slx-settings-panel .sf-section{letter-spacing:2px;color:#888;font-weight:800;font-size:12px;margin:16px 0 8px}#slx-gym-panel .slx-choice-list{display:flex;flex-direction:column;gap:1px;margin-bottom:14px}#slx-gym-panel .slx-choice-list button{background:transparent!important;border:0!important;border-radius:4px;color:#c2c2c2;font-weight:800;letter-spacing:1px;padding:7px 4px;text-align:center}#slx-gym-panel .slx-choice-list button.slx-selected{color:#61b6ed!important;background:#202d37!important}#slx-gym-panel .slx-settings-help{color:#a1a1a1;font-size:12px;line-height:1.4;margin:4px 0 10px}#slx-gym-panel .slx-order-list{display:flex;flex-direction:column;gap:5px}#slx-gym-panel .slx-order-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;background:#252525;padding:10px 11px;border-radius:5px;font-size:12px}#slx-gym-panel .slx-order-row>span{color:#888;font-weight:800}#slx-gym-panel .slx-order-row>b{color:#bcbcbc}#slx-gym-panel .slx-multiplier-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}#slx-gym-panel .slx-multiplier-grid label{font-weight:800;font-size:11px;line-height:1.4}#slx-gym-panel .slx-multiplier-grid input{width:100%;display:block;margin-top:6px;background:#292929;color:#e6e6e6;border:1px solid #4e4e4e;padding:9px}#slx-gym-panel #slx-save-custom{width:100%;background:transparent;border:0;font-weight:800;letter-spacing:1px}#slx-gym-panel .slx-settings-actions{display:flex;flex-wrap:wrap;gap:7px}#slx-gym-panel .slx-perk-list{color:#a3cbb9;font-size:12px}#slx-gym-panel .slx-light{background:#f3f4f5!important;color:#242424!important}#slx-gym-panel .slx-light .slx-order-row{background:#e3e6e9!important}#slx-gym-panel .slx-light .slx-choice-list button{color:#484848!important}#slx-gym-panel .slx-light .slx-settings-help{color:#444!important}';
+
+  css.textContent += '#slx-gym-panel .slx-settings-panel{padding:2px 5px 10px!important}#slx-gym-panel .slx-settings-panel .sf-section{margin:9px 0 5px!important;padding:6px 0 4px!important;font-size:11px!important;letter-spacing:1.4px!important}#slx-gym-panel .slx-choice-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px!important;margin:2px 0 8px!important}#slx-gym-panel .slx-choice-list button{font-size:11px!important;letter-spacing:.3px!important;padding:7px 3px!important;background:#222!important;border:1px solid #343434!important;line-height:1.15!important}#slx-gym-panel .slx-choice-list button.slx-selected{background:#233745!important;border-color:#3c7697!important}#slx-gym-panel .slx-order-list{gap:3px!important}#slx-gym-panel .slx-order-row{padding:7px 8px!important;font-size:11px!important;grid-template-columns:minmax(95px,1fr) minmax(75px,1fr) auto!important}#slx-gym-panel .slx-multiplier-grid{gap:7px!important;margin:6px 0!important}#slx-gym-panel .slx-multiplier-grid input{padding:6px 7px!important;margin-top:3px!important}#slx-gym-panel .slx-settings-help{font-size:11px!important;line-height:1.35!important;margin:2px 0 6px!important}#slx-gym-panel .slx-settings-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:4px!important}#slx-gym-panel .slx-settings-actions button{padding:8px 5px!important;font-size:11px!important}#slx-gym-panel #slx-gym-create-key{background:#27556b!important;border-color:#357c99!important;grid-column:1/-1;font-weight:800!important}#slx-gym-panel .slx-stat-bonuses{gap:3px!important}';
 
   (document.head||document.documentElement).append(css);
   const toggle=document.createElement('button');toggle.id='slx-gym-toggle';toggle.textContent='GYM  [ENERGY] ';
@@ -1061,7 +1063,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.5.6',id='gym-optimizer';
+      const version='1.5.7',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1213,7 +1215,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     html+='<div class="slx-perk-list">'+(groups.length?'<details><summary>VIEW API PERK DETAILS</summary>'+groups.map(g=>'<p><b>'+escape(g.group)+'</b>: '+g.entries.map(escape).join('; ')+'</p>').join('')+'</details>':'<p>API: '+escape(gymApi.status)+'. Tap REFRESH NOW to load confirmed gym perks. If nothing is returned, gym bonuses remain unverified.</p>')+'</div>';
     html+=section('SPECIAL-GYM ACCESS PROTECTION')+'<p class="slx-settings-help">'+escape(specialGymSafety(actual))+'</p>';
     html+=section('LAST UPDATED')+'<p class="slx-settings-help">'+(gymApi.at?escape(new Date(gymApi.at).toLocaleString()):'API data not yet refreshed')+'</p>';
-    html+=section('API ACCESS')+'<p class="slx-settings-help">Uses your SakaLuX Hub API key when available; a personal fallback key can be stored locally.</p><input id="slx-gym-private-key" type="password" autocomplete="off" placeholder="16-character Torn API key" maxlength="16"><div class="slx-settings-actions"><button id="slx-gym-save-key">SET API KEY</button><button id="slx-gym-clear-key">CLEAR KEY</button><button id="slx-gym-api-refresh">REFRESH NOW</button></div><div id="slx-gym-key-message" role="status">'+(hubApiKey()?'API key available':'No key found')+'</div>';
+    html+=section('API ACCESS')+'<p class="slx-settings-help">Uses your SakaLuX Hub API key when available; a personal fallback key can be stored locally.</p><input id="slx-gym-private-key" type="password" autocomplete="off" placeholder="16-character Torn API key" maxlength="16"><div class="slx-settings-actions"><button id="slx-gym-save-key">SET API KEY</button><button id="slx-gym-create-key">CREATE GYM API KEY</button><button id="slx-gym-clear-key">CLEAR KEY</button><button id="slx-gym-api-refresh">REFRESH NOW</button></div><div id="slx-gym-key-message" role="status">'+(hubApiKey()?'API key available':'No key found')+'</div>';
     return '<div class="slx-settings-panel'+((state.display||'Dark')==='Light'?' slx-light':'')+'">'+html+'</div>';
   }
 
@@ -1289,6 +1291,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     body.querySelector('#slx-gym-api-refresh')?.addEventListener('click',refreshGymApi);
     body.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{panel.dataset.tab=b.dataset.tab;render();if(b.dataset.tab==='SETTINGS'&&gymApi.status==='Not checked'&&hubApiKey())refreshGymApi()});
     body.querySelector('#slx-gym-save-key')?.addEventListener('click',()=>{const val=body.querySelector('#slx-gym-private-key')?.value;const ok=savePersonalKey(val);const label=body.querySelector('#slx-gym-key-message');if(label)label.textContent=ok?'Personal API key saved locally':'Invalid key: expected 16 letters/numbers';if(ok)refreshGymApi()});
+    body.querySelector('#slx-gym-create-key')?.addEventListener('click',()=>{
+      try{sessionStorage.setItem('SakaLuX_GYM_KEY_SETUP_PENDING','1')}catch{}
+      location.href='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Gym%20Optimizer&user=perks,bars,gym,battlestats';
+    });
     body.querySelector('#slx-gym-clear-key')?.addEventListener('click',()=>{savePersonalKey('');const label=body.querySelector('#slx-gym-key-message');if(label)label.textContent='Personal key cleared; Hub shared key is still available if configured.'});
 
     body.querySelectorAll('[data-ratio]').forEach(b=>b.addEventListener('click',()=>{state.mode=b.dataset.ratio;applySelectedRatio()}));
@@ -1315,7 +1321,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.6',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.7',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
