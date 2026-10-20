@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.3.4
+// @version      0.3.5
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -835,7 +835,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.3.4';
+  const VERSION = '0.3.5';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -875,6 +875,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   let statusCache = read(KEYS.statusCache, {});
   let targetPool = read(KEYS.targetPool, { at: 0, rows: [] });
   let discoveredPool = read(KEYS.discovered, { at: 0, rows: [] });
+  // Old faction discovery rows must not survive migration to the source-only scanner.
+  if (Array.isArray(discoveredPool.rows)) {
+    const clean = discoveredPool.rows.filter(row => row?.source !== 'Torn faction');
+    if (clean.length !== discoveredPool.rows.length) {
+      discoveredPool = { at: Date.now(), rows: clean };
+      write(KEYS.discovered, discoveredPool);
+    }
+  }
   let targets = [];
   let scanning = false;
   let timer = 0;
