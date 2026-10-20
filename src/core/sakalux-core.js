@@ -6,7 +6,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.6';
+  const CORE_VERSION = '1.2.7';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -665,6 +665,10 @@
       if (existing) { if (existing.parentElement !== root) root.appendChild(existing); return existing; }
       const profile = String(options.profile || 'https://www.torn.com/profiles.php?XID=2380374');
       const author = String(options.author || 'SakaLuX [2380374]');
+      const showMoney = options.showMoney !== false;
+      const showItems = options.showItems !== false;
+      const moneyLabel = String(options.moneyLabel || '💸 SEND MONEY');
+      const itemsLabel = String(options.itemsLabel || '🎁 SEND ITEMS');
       if (!document.getElementById('sakalux-shared-donation-footer-style')) {
         const style = document.createElement('style');
         style.id = 'sakalux-shared-donation-footer-style';
@@ -674,7 +678,27 @@
       const footer = document.createElement('div');
       footer.id = id;
       footer.className = 'slx-shared-donation';
-      footer.innerHTML = `<div class="slx-shared-donation-actions"><button type="button" data-slx-donate="money">💸 SEND MONEY</button><button type="button" data-slx-donate="items">🎁 SEND ITEMS</button></div><div class="slx-shared-donation-made">Made with ❤️ by <a href="${profile}">${author}</a></div>`;
+      const actions = document.createElement('div');
+      actions.className = 'slx-shared-donation-actions';
+      const actionDefinitions = [];
+      if (showMoney) actionDefinitions.push(['money', moneyLabel]);
+      if (showItems) actionDefinitions.push(['items', itemsLabel]);
+      actions.style.gridTemplateColumns = `repeat(${Math.max(1, actionDefinitions.length)}, minmax(0, 1fr))`;
+      for (const [actionName, actionLabel] of actionDefinitions) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.slxDonate = actionName;
+        button.textContent = actionLabel;
+        actions.appendChild(button);
+      }
+      const made = document.createElement('div');
+      made.className = 'slx-shared-donation-made';
+      made.appendChild(document.createTextNode('Made with ❤️ by '));
+      const authorLink = document.createElement('a');
+      authorLink.href = profile;
+      authorLink.textContent = author;
+      made.appendChild(authorLink);
+      footer.append(actions, made);
       footer.addEventListener('click', event => {
         const action = event.target?.closest?.('[data-slx-donate]');
         const link = event.target?.closest?.('a');
