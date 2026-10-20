@@ -1,5 +1,11 @@
 # Changelog
 
+## Gym Optimizer v1.5.4 — TornPDA startup compatibility (2026-10-21)
+
+- Fixes a script-loading regression introduced in Gym Optimizer v1.2.0, traced with isolated TornPDA tests to special Unicode typography in the Info section.
+- Replaces problematic non-ASCII UI strings with ASCII-safe equivalents throughout Gym Optimizer; preserves existing training, API, Gym, and History functions.
+- Verified on TornPDA with Gym v1.5.3 ASCII Test before official publication.
+
 ## Gym Optimizer v1.5.3 / Hub v1.9.148 — early startup diagnostics (2026-10-21)
 
 - Bootstrap installs a DOM marker before Shared Core or Gym UI to diagnose startup errors, rather than relying on the Gym page being rendered.
