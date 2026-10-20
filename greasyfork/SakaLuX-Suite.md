@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.985**
+**v0.9.986**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v0.9.985**
+- Canonical version: **v0.9.986**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -48,12 +48,17 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.985 — Lottery Max Buy**
-- Adds an enabled-by-default Casino module for Daily Dime, Lucky Shot Lotto and Holy Grail.
-- Reads the available Casino Token count and adds a mobile-friendly `MAX BUY` button beside the ticket quantity field.
-- Fills the maximum permitted ticket quantity but leaves the final purchase confirmation to Torn's native button.
+**v0.9.986 — Lottery Max Buy for Torn's button-only form**
+- Places `MAX BUY · tokens` directly beside Torn's native `BUY` button.
+- Requests confirmation, purchases one ticket at a time through Torn's native button and stops when the tokens run out.
+- Changes to `STOP · remaining` during the operation, allowing immediate cancellation.
 
 ## Release history / Changelog
+
+### v0.9.986 — 2026-10-20
+- Fixes Lottery Max Buy not appearing because Torn's Lottery screen has no ticket quantity field.
+- Injects beside the native `BUY` control and follows dynamically replaced controls after each ticket.
+- Waits for Torn to confirm each token decrease before continuing; stops safely on errors, confirmation dialogs or user request.
 
 ### v0.9.985 — 2026-10-20
 - Adds **Lottery Max Buy** under `Master Control → Casino` and enables it by default.
