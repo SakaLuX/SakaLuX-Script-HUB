@@ -1,5 +1,12 @@
 # Changelog
 
+## Gym Optimizer v1.5.3 / Hub v1.9.148 — early startup diagnostics (2026-10-21)
+
+- Bootstrap installs a DOM marker before Shared Core or Gym UI to diagnose startup errors, rather than relying on the Gym page being rendered.
+- Separates loaded, ready and error states; guarded initial render preserves the installed marker.
+- Hub reads the marker even if Gym initialization fails. Device validation still needed.
+
+
 ## Gym Optimizer v1.5.2 / Hub v1.9.147 — TornPDA installed-state regression fix (2026-10-21)
 
 - Reverted Gym Optimizer to page-context `@grant none`, matching versions that were recognized before v1.4.0.
