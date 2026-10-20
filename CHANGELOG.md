@@ -1,5 +1,12 @@
 # Changelog
 
+## Gym Optimizer v1.3.1 / Script Hub v1.9.145 — Installation detection fix (2026-10-21)
+
+- Restored Gym Optimizer installable status and GitHub raw download URLs in both scripts.json and Hub offline registry.
+- Replaced stale floating button selector with the real inline Gym panel selector.
+- Preserved Gym config and runtime while advancing the metadata version.
+
+
 ## Gym Optimizer v1.3.0 — Verified gym routing and Train action (2026-10-21)
 
 - Added gym-dot table for standard gyms, per-stat best available gym among explicitly confirmed unlocked gyms.
