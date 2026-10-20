@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.0.5
+// @version      1.0.6
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -829,7 +829,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   if (window.SakaLuXGymOptimizer) return;
   const KEY='slx_gym_optimizer_v1';
   const stats=['Strength','Speed','Defense','Dexterity'];
-  const defaults={mode:'Balanced',weights:{Strength:1,Speed:1,Defense:1,Dexterity:1},values:{Strength:0,Speed:0,Defense:0,Dexterity:0},history:[],enabled:true};
+  const defaults={mode:'SakaLuX',weights:{Strength:0.8,Speed:1,Defense:0,Dexterity:1.25},values:{Strength:0,Speed:0,Defense:0,Dexterity:0},history:[],enabled:true};
   const presets={
     Balanced:[1,1,1,1],
     '3-stat (Defense dump)':[1,1,0,1],
@@ -839,11 +839,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     // Strategy labels are adjustable starting templates, NOT purported StatForge equations.
     Baldr:[0.8,1,0,1],
     Hank:[1,1,1,0],
-    Aec3:[1,1,1,1],
+    SakaLuX:[0.8,1,0,1.25],
     Custom:[1,1,1,1]
   };
   let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch{}
-  const state={...defaults,...saved,values:{...defaults.values,...saved.values},weights:{...defaults.weights,...saved.weights}};
+  const legacy=saved.mode==='Aec3';
+  const state={...defaults,...saved,mode:legacy?'SakaLuX':(saved.mode||defaults.mode),values:{...defaults.values,...saved.values},weights:legacy?{Strength:0.8,Speed:1,Defense:0,Dexterity:1.25}:{...defaults.weights,...saved.weights}};
+  if(legacy)try{localStorage.setItem(KEY,JSON.stringify(state))}catch{}
   const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
   const onGym=()=>/gym\.php/i.test(location.href)||/\bGym\b/i.test(document.title)&&/torn/i.test(location.host);
   const fmt=n=>Math.round(Number(n)||0).toLocaleString('en-US');
@@ -853,10 +855,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   css.textContent += '#slx-gym-panel{font:13px Arial,sans-serif!important;background:#1b1b1b!important;color:#ddd!important;border:1px solid #383838!important;border-radius:6px!important;margin:10px 0!important;padding:8px 12px!important;box-shadow:none!important;position:relative!important;height:auto!important;max-height:none!important;z-index:1!important}#slx-gym-panel .head{background:transparent!important;color:#bbb!important;border-bottom:1px solid #383838!important;padding:8px 2px!important;letter-spacing:1px;font-size:13px!important}#slx-gym-panel .body{padding:4px!important;background:transparent!important;overflow:visible!important}#slx-gym-panel .notice{background:#262626!important;border:1px solid #383838!important;border-left:4px solid #4b96c3!important;color:#ddd!important;border-radius:6px!important;margin:8px 0!important;padding:12px 10px!important;font-size:13px!important}#slx-gym-panel .hint{color:#b1b1b1!important}#slx-gym-panel .settings{border-top:1px solid #393939!important;padding-top:8px}#slx-gym-panel .stat{margin:5px 0!important}#slx-gym-panel[hidden]{display:none!important}';
   css.textContent += '#slx-gym-panel{position:static!important;inset:auto!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;transform:none!important;float:none!important;clear:both!important;display:block!important;width:100%!important;max-width:100%!important;height:auto!important;min-height:0!important;overflow:visible!important;margin:12px 0!important;isolation:isolate!important}#slx-gym-panel[hidden]{display:none!important}';
   css.textContent += '#slx-gym-panel .slx-g-stat{margin:10px 1px!important}#slx-gym-panel .slx-g-statline{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px!important}#slx-gym-panel .slx-g-track{height:9px;border-radius:8px;background:#343434;margin:5px 0;overflow:hidden}';
+  css.textContent += '#slx-gym-panel{background:#1c1c1c!important;color:#ddd!important;border:1px solid #303030!important;border-radius:7px!important;padding:5px 9px!important;margin:8px 0 14px!important;font:12px Arial,sans-serif!important;line-height:1.25!important}#slx-gym-panel .head{background:transparent!important;border-bottom:1px solid #363636!important;padding:7px 3px!important;font-size:12px!important}#slx-gym-panel .body{padding:5px 3px!important}#slx-gym-panel .notice{padding:7px 9px!important;margin:5px 0 9px!important;border-radius:5px!important;font-size:12px!important}#slx-gym-panel .slx-g-title{padding:5px 0 3px!important;margin:6px 0!important;font-size:11px!important}#slx-gym-panel .slx-g-stat{margin:7px 1px!important}#slx-gym-panel .slx-g-statline{font-size:12px!important}#slx-gym-panel .slx-g-track{height:7px!important;margin:4px 0!important}#slx-gym-panel .hint{font-size:11px!important;line-height:1.25!important}#slx-gym-panel button,#slx-gym-panel select{font-size:12px!important;padding:4px 6px!important}';
   (document.head||document.documentElement).append(css);
   const toggle=document.createElement('button');toggle.id='slx-gym-toggle';toggle.textContent='GYM ⚡';
   const panel=document.createElement('section');panel.id='slx-gym-panel';panel.hidden=true;
-  panel.innerHTML='<div class="head"><span>SAKALUX GYM · v1.0.5</span><button data-settings>Settings ▾</button></div><div class="body"></div>';
+  panel.innerHTML='<div class="head"><span>SAKALUX GYM · v1.0.6</span><button data-settings>Settings ▾</button></div><div class="body"></div>';
   (document.body||document.documentElement).append(panel);
   toggle.hidden=true;
   const body=panel.querySelector('.body');
@@ -901,15 +904,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const active=stats.filter(n=>Number(state.weights[n])>0 && Number(actual[n])>0);
     const baseline=active.length?Math.max(...active.map(n=>actual[n]/state.weights[n])):0;
     const gaps=active.map(n=>({stat:n,gap:Math.max(0,Math.ceil(baseline*state.weights[n]-actual[n]))})).sort((a,b)=>b.gap-a.gap);
-    const recommendation=gaps[0]||null;
+    const recommendation=active.length>=2 && gaps.some(g=>g.gap>0)?gaps[0]:null;
     const gym=confirmedGym();
     body.innerHTML='<label>Strategy <select id="slx-gym-mode">'+Object.keys(presets).map(n=>'<option '+(state.mode===n?'selected':'')+'>'+escape(n)+'</option>').join('')+'</select></label>'+
       '<div class="settings"><div class="hint">Edit current stats and strategy weights here. These values are stored locally.</div>'+
       stats.map(s=>'<div class="stat"><label>'+s+'</label><input type="number" min="0" step="1" data-value="'+s+'" value="'+(Number(state.values[s])||0)+'"><input aria-label="'+s+' weight" type="number" min="0" max="100" step=".1" data-weight="'+s+'" value="'+(Number(state.weights[s])||0)+'"></div>').join('')+
       '<button id="slx-gym-calc">Calculate & save</button></div>'+
-      '<div class="slx-g-title">TRAIN NEXT</div><div class="notice"><b>'+(recommendation?escape(recommendation.stat)+' (gap '+fmt(recommendation.gap)+')':'Select at least one weighted stat')+
+      '<div class="slx-g-title">TRAIN NEXT</div><div class="notice"><b>'+(recommendation?'<span style="color:'+statColors[recommendation.stat]+'">'+escape(recommendation.stat)+'</span> · Need +'+fmt(recommendation.gap):'Waiting for valid stat data')+
       '<div class="hint">Relative catch-up recommendation; does not predict gym gains or special gym caps.</div></div>'+
-      '<div class="slx-g-title">HEADROOM TO GYM LIMIT</div><div class="notice"><b>GYM:</b> '+(gym?'Current: '+escape(gym):'Availability not verified')+
+      '<div class="slx-g-title">HEADROOM TO GYM LIMIT</div><div class="notice"><b>GYM:</b> '+(gym?'Current: '+escape(gym):'Unlock status unavailable')+
       '<div class="hint">Locked gyms cannot be selected automatically.</div></div>'+
       '<div class="slx-g-title">STATS</div>'+stats.map(n=>{const value=Number(actual[n])||0;const w=Number(state.weights[n])||0;const cap=w?Math.ceil(baseline*w):0;const pct=cap?Math.min(100,100*value/cap):0;const gap=Math.max(0,cap-value);return '<div class="slx-g-stat"><div class="slx-g-statline"><b style="color:'+statColors[n]+'">'+n+'</b><b>'+fmt(value)+(cap?' / '+fmt(cap):'')+'</b></div><div class="slx-g-track"><div style="width:'+pct+'%;background:'+statColors[n]+';height:100%;border-radius:8px"></div></div><div class="hint">'+(w===0?'DUMP · minimize':(!value?'Value unavailable':gap?'Need +'+fmt(gap):'At target'))+'</div></div>'}).join('')+'<div class="settings"><div class="hint">Local snapshots: '+state.history.length+'. No automatic training or API requests.</div>'+
       '<button id="slx-gym-history">Save snapshot</button> <button id="slx-gym-clear">Clear snapshots</button></div>';
@@ -932,7 +935,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ▴':'Settings ▾'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.0.5',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.0.6',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
