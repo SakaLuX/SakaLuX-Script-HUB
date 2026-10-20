@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.2.5
+// @version      0.2.6
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -25,7 +25,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.6';
+  const CORE_VERSION = '1.2.7';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -684,6 +684,10 @@
       if (existing) { if (existing.parentElement !== root) root.appendChild(existing); return existing; }
       const profile = String(options.profile || 'https://www.torn.com/profiles.php?XID=2380374');
       const author = String(options.author || 'SakaLuX [2380374]');
+      const showMoney = options.showMoney !== false;
+      const showItems = options.showItems !== false;
+      const moneyLabel = String(options.moneyLabel || '💸 SEND MONEY');
+      const itemsLabel = String(options.itemsLabel || '🎁 SEND ITEMS');
       if (!document.getElementById('sakalux-shared-donation-footer-style')) {
         const style = document.createElement('style');
         style.id = 'sakalux-shared-donation-footer-style';
@@ -693,7 +697,27 @@
       const footer = document.createElement('div');
       footer.id = id;
       footer.className = 'slx-shared-donation';
-      footer.innerHTML = `<div class="slx-shared-donation-actions"><button type="button" data-slx-donate="money">💸 SEND MONEY</button><button type="button" data-slx-donate="items">🎁 SEND ITEMS</button></div><div class="slx-shared-donation-made">Made with ❤️ by <a href="${profile}">${author}</a></div>`;
+      const actions = document.createElement('div');
+      actions.className = 'slx-shared-donation-actions';
+      const actionDefinitions = [];
+      if (showMoney) actionDefinitions.push(['money', moneyLabel]);
+      if (showItems) actionDefinitions.push(['items', itemsLabel]);
+      actions.style.gridTemplateColumns = `repeat(${Math.max(1, actionDefinitions.length)}, minmax(0, 1fr))`;
+      for (const [actionName, actionLabel] of actionDefinitions) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.slxDonate = actionName;
+        button.textContent = actionLabel;
+        actions.appendChild(button);
+      }
+      const made = document.createElement('div');
+      made.className = 'slx-shared-donation-made';
+      made.appendChild(document.createTextNode('Made with ❤️ by '));
+      const authorLink = document.createElement('a');
+      authorLink.href = profile;
+      authorLink.textContent = author;
+      made.appendChild(authorLink);
+      footer.append(actions, made);
       footer.addEventListener('click', event => {
         const action = event.target?.closest?.('[data-slx-donate]');
         const link = event.target?.closest?.('a');
@@ -809,7 +833,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.2.5';
+  const VERSION = '0.2.6';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1340,7 +1364,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       $('[data-key]', overlay).onclick = () => { const panel = $('.ha-api-panel', overlay); $('.ha-settings', overlay).hidden = true; panel.hidden = !panel.hidden; refreshApiPanel(overlay); if (!panel.hidden) $('[data-torn]', overlay)?.focus(); };
       document.body.appendChild(overlay);
       const panel = $('.ha-panel', overlay);
-      SHARED_CORE?.ui?.ensureDonationFooter?.(panel, { id: 'halloween-assistant' });
+      SHARED_CORE?.ui?.ensureDonationFooter?.(panel, {
+        id: 'halloween-assistant',
+        showMoney: false,
+        itemsLabel: '🇷🇴 Special for REK family 🪖'
+      });
       overlay._slxWorkspaceCleanup = SHARED_CORE?.ui?.applyWorkspaceLayout?.(overlay, panel, { top: 0, bottom: 8, side: 4, maxWidth: 760, radius: 16 }) || null;
       refreshApiPanel(overlay);
     }
