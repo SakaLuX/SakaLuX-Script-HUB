@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.4.0 — API perks and safer gym calculations (2026-10-21)
+
+- Added Torn user API refresh for perks, bars, gym and battle stats using the Hub API key; reports missing authorization or errors.
+- Displays available gym-relevant perks by source, energy, timestamp and DEX ratio safety.
+- Repetition limit derives from energy only when the native tile explicitly supplies an energy cost; otherwise preserves manual input and warnings.
+- Accurate combined gym-gain multipliers, special gym limits and real remaining gym EXP require validated server response schemas and are NOT yet delivered.
+
+
 ## Gym Optimizer v1.3.1 / Script Hub v1.9.145 — Installation detection fix (2026-10-21)
 
 - Restored Gym Optimizer installable status and GitHub raw download URLs in both scripts.json and Hub offline registry.
