@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.142
+// @version      1.9.143
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -13,6 +13,7 @@
 // @connect      raw.githubusercontent.com
 // @connect      api.torn.com
 // @connect      sakalux.ro
+// @connect      api.mymemory.translated.net
 // @license      All Rights Reserved
 // @downloadURL  https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js
 // @updateURL    https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.meta.js
@@ -891,7 +892,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.142';
+    const VERSION = '1.9.143';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2718,7 +2719,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 .slh-card .slh-card-tool,.slh-card .slh-switch,.slh-card .slh-primary{width:100%!important;min-width:0!important;min-height:34px!important;height:34px!important;padding:4px 5px!important;font-size:8px!important;border-radius:9px!important;box-sizing:border-box!important}
 .slh-card .slh-switch{justify-content:space-between!important;gap:3px!important}
 .slh-card .slh-switch-track{transform:scale(.88)!important;transform-origin:left center!important}
-.slh-card-name{font-size:11px!important}.slh-card-meta{gap:4px!important}.slh-chip{font-size:7px!important;padding:3px 5px!important}
+\n/* Keep switch labels inside the available mobile card column. */\n.slh-card .slh-switch{grid-template-columns:minmax(0,34px) minmax(0,1fr)!important;overflow:hidden!important;padding:3px 4px!important;column-gap:3px!important;min-width:0!important;max-width:100%!important;font-size:7px!important;letter-spacing:-.02em!important}.slh-card .slh-switch b{min-width:0!important;max-width:100%!important;overflow:hidden!important;text-overflow:clip!important;white-space:nowrap!important;font-size:7px!important;line-height:1.15!important}.slh-card .slh-switch-track{max-width:30px!important}.slh-card{min-width:0!important}.slh-card .slh-card-controls{min-width:0!important;max-width:100%!important}\n.slh-card-name{font-size:11px!important}.slh-card-meta{gap:4px!important}.slh-chip{font-size:7px!important;padding:3px 5px!important}
 .slh-settings .slh-setting{padding:8px 9px!important;margin-bottom:7px!important}
 .slh-settings .slh-setting-row{min-height:40px!important;gap:9px!important}
 .slh-settings .slh-setting-title{font-size:9px!important}.slh-settings .slh-setting-desc{font-size:8px!important;line-height:1.35!important}
@@ -3494,9 +3495,49 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
     const MODULE_INFO_RO = {"enhancer":"Scop\nMonitorizează obiectele Enhancer și relicvele din inventar și ajută la protejarea lor împotriva utilizării accidentale.\n\nFuncții\nCăutare, filtre, favorite, afișarea cantităților și actualizarea inventarului prin API.","bazaar":"Scop\nUrmărește cumpărătorii din bazarul tău și te ajută să pregătești mesaje de mulțumire.\n\nFuncții\nOrganizarea vânzărilor și acces rapid la instrumentele bazarului.","bazaar-smart-pricer":"Scop\nAjută la stabilirea prețurilor produselor din bazar pe baza informațiilor disponibile despre piață.\n\nFuncții\nComparații de preț și recomandări pentru gestionarea ofertelor.","mission-rewards":"Scop\nOferă informații suplimentare despre recompensele din magazinul de misiuni.\n\nFuncții\nCompararea valorii recompenselor și a muniției înainte de cheltuirea creditelor.","market-intelligence":"Scop\nAnalizează prețurile și oportunitățile de tranzacționare din Torn.\n\nFuncții\nComparații între piețe, instrumente pentru bazar și călătorii, estimări de profit și selectarea celor mai bune oportunități.","bounty-hunter":"Scop\nGăsește și organizează ținte cu recompensă din Torn.\n\nScanare\nParcurge lista de recompense, verifică disponibilitatea jucătorilor și folosește date FFScouter, dacă sunt disponibile.\n\nFiltre\nRecompensă, nivel, dificultate, timp până la ieșirea din spital, lista favorită și lista de excludere.","elimination-assistant":"Scop\nAsistent pentru evenimentul Elimination, dedicat găsirii și comparării adversarilor.\n\nFuncții\nÎncărcarea echipelor, căutare, filtre, estimări SAFE/RISKY/SKIP, calibrare, ținte salvate și export pentru Torn PDA.\n\nAPI\nAcceptă cheia comună din Hub sau cheia proprie și, opțional, FFScouter.","company-intelligence":"Scop\nCentralizează informațiile despre compania Torn și angajații ei.\n\nFuncții\nAnaliza posturilor, a cerințelor, a eficienței și a datelor disponibile despre companie.","stock-manager-advisor":"Scop\nAsistent pentru gestionarea investițiilor în acțiunile Torn.\n\nFuncții\nMonitorizarea portofoliului, beneficiilor, costurilor și a datelor despre acțiuni.","gym-optimizer":"În curând\nModul pentru planificarea antrenamentelor din sală.\n\nFuncții planificate\nȘabloane de distribuire a statisticilor, comparații și afișarea progresului. Instalarea nu este încă disponibilă."};
     const MODULE_RELEASE_RO = {"enhancer":["Păstrează temporar verificarea PRO confirmată, maximum 10 minute și niciodată după expirarea licenței.","Menține preferințele PORNIT/OPRIT indiferent de întreruperile temporare ale verificării licenței.","Reactivează funcțiile premium după confirmarea autorizării."],"bazaar":["Păstrează temporar verificarea PRO confirmată, maximum 10 minute și niciodată după expirarea licenței.","Menține preferințele PORNIT/OPRIT indiferent de întreruperile temporare ale verificării licenței.","Reactivează funcțiile premium după confirmarea autorizării."],"bazaar-smart-pricer":["Dialogurile PRO prezintă oferta de 1 Xanax pentru 7 zile PRO și un link către profilul SakaLuX.","Linkul ofertei rămâne vizibil în dialogurile PRO chiar dacă licența este deja activă.","Drepturile FREE/PRO și regulile de licențiere de pe server nu se schimbă."],"mission-rewards":["Dialogurile PRO prezintă oferta de 1 Xanax pentru 7 zile PRO și un link către profilul SakaLuX.","Linkul ofertei rămâne vizibil în dialogurile PRO chiar dacă licența este deja activă.","Drepturile FREE/PRO și regulile de licențiere de pe server nu se schimbă."],"market-intelligence":["Panourile de călătorie apar numai în agenția de voiaj, în timpul zborului sau în străinătate, nu în bazar ori pe profiluri.","Detectarea paginilor identifică întâi explicit bazarul, profilul, inventarul și piața.","Răspunsurile întârziate YATA și cele cu prețuri nu mai afișează Best Route Basket după navigarea în altă pagină."],"bounty-hunter":["Versiunea internă a fost sincronizată cu @version pentru a evita alertele de actualizare incorecte din Hub.","Funcțiile existente și setările cheilor API au fost păstrate."],"elimination-assistant":["Versiunea internă a fost sincronizată cu @version pentru a evita alertele de actualizare incorecte din Hub.","Funcțiile existente și setările cheilor API au fost păstrate."],"company-intelligence":["Dialogurile PRO prezintă oferta de 1 Xanax pentru 7 zile PRO și un link către profilul SakaLuX.","Linkul ofertei rămâne vizibil în dialogurile PRO chiar dacă licența este deja activă.","Drepturile FREE/PRO și regulile de licențiere de pe server nu se schimbă."],"stock-manager-advisor":["Corectează marcajul vechi al versiunii instalate din Torn PDA: raportează 0.8.34 dacă GM_info lipsește.","Sincronizează raportarea versiunii între sursă, execuție, registru și Hub."],"gym-optimizer":["Rânduri de progres și culori pentru cele patru statistici, inspirate de StatForge.","Citește valorile din casetele native ale sălii, unde este posibil.","Păstrează accesul sigur la antrenamentul nativ, fără schimbarea automată a sălii blocate."]};
+    // Translate newly published public INFO/release text on demand, with a local cache.
+    // Existing curated Romanian text remains the fallback when the service is unavailable.
+    const SLH_TRANSLATION_CACHE = 'SakaLuX_HUB_TRANSLATIONS_RO_V1';
+    let slhTranslated = loadJson(SLH_TRANSLATION_CACHE, {});
+    async function translatePublishedText(text) {
+        const value = String(text || '').trim();
+        if (!value || language() !== 'ro' || value.length > 12000) return value;
+        if (slhTranslated[value]) return slhTranslated[value];
+        const pieces = value.match(/[\\s\\S]{1,450}/g) || [];
+        const translated = [];
+        for (const piece of pieces) {
+            try {
+                const url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(piece) + '&langpair=en%7Cro';
+                const payload = JSON.parse(await httpGet(url));
+                const result = String(payload?.responseData?.translatedText || '').trim();
+                if (!result || /MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(result)) throw new Error('No translation');
+                translated.push(result.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
+            } catch {
+                return value; // No invented translation; retain original text on failure.
+            }
+        }
+        const result = translated.join('');
+        slhTranslated[value] = result;
+        const keys = Object.keys(slhTranslated);
+        if (keys.length > 80) for (const key of keys.slice(0, keys.length - 80)) delete slhTranslated[key];
+        saveJson(SLH_TRANSLATION_CACHE, slhTranslated);
+        return result;
+    }
+    async function translateModuleView(script, elementId, originalText, fallbackText, renderTranslated) {
+        if (language() !== 'ro' || !document.getElementById(elementId)) return;
+        // Cache is keyed by the original source, not module id or version.
+        const translated = await translatePublishedText(originalText);
+        const root = document.getElementById(elementId);
+        if (!root || language() !== 'ro') return;
+        if (translated !== originalText) renderTranslated(root, translated);
+        else if (fallbackText) renderTranslated(root, fallbackText);
+    }
     function openModuleInfo(script) {
         if (!script) return;
-        createOverlay(`${headerMarkup(script.name, 'What this module does', 'slhmi-close', script.icon || '🧩', 'MODULE INFORMATION')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(script.version || script.expectedVersion || '?')} <span class="slh-version-date">${escapeHtml(script.category || 'Other')}</span></div><div style="margin-top:8px">${String(language() === 'ro' ? (MODULE_INFO_RO[script.id] || script.info || script.description || 'No module information available.') : (script.info || script.description || 'No module information available.')).split(/\n\s*\n/).map(section => { const lines = section.split('\n'); return lines.length > 1 ? `<section style="margin-bottom:16px"><h3 style="margin:0 0 6px;color:#f3f7fb;font-size:12px">${escapeHtml(lines.shift())}</h3><p style="margin:0;line-height:1.6">${escapeHtml(lines.join('\n'))}</p></section>` : `<p style="margin:0 0 12px;line-height:1.6">${escapeHtml(section)}</p>`; }).join('')}</div></div><button class="slh-big-btn gray" id="slhmi-back">← BACK</button></div>`);
+        createOverlay(`${headerMarkup(script.name, 'What this module does', 'slhmi-close', script.icon || '🧩', 'MODULE INFORMATION')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(script.version || script.expectedVersion || '?')} <span class="slh-version-date">${escapeHtml(script.category || 'Other')}</span></div><div id="slh-info-auto" style="margin-top:8px">${String(language() === 'ro' ? (MODULE_INFO_RO[script.id] || script.info || script.description || 'No module information available.') : (script.info || script.description || 'No module information available.')).split(/\n\s*\n/).map(section => { const lines = section.split('\n'); return lines.length > 1 ? `<section style="margin-bottom:16px"><h3 style="margin:0 0 6px;color:#f3f7fb;font-size:12px">${escapeHtml(lines.shift())}</h3><p style="margin:0;line-height:1.6">${escapeHtml(lines.join('\n'))}</p></section>` : `<p style="margin:0 0 12px;line-height:1.6">${escapeHtml(section)}</p>`; }).join('')}</div></div><button class="slh-big-btn gray" id="slhmi-back">← BACK</button></div>`);
+        translateModuleView(script, 'slh-info-auto', String(script.info || script.description || ''), MODULE_INFO_RO[script.id], (root, translated) => {
+            root.innerHTML = translated.split(/\\n\\s*\\n/).map(part => '<p style="margin:0 0 12px;line-height:1.6">' + escapeHtml(part) + '</p>').join('');
+        });
         document.getElementById('slhmi-close').onclick = closeHub;
         document.getElementById('slhmi-back').onclick = openHub;
     }
@@ -3508,7 +3549,10 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const notes = Array.isArray(localizedNotes) && localizedNotes.length
             ? localizedNotes.map(note => `<div>• ${escapeHtml(note)}</div>`).join('')
             : '<div>No release notes available yet.</div>';
-        createOverlay(`${headerMarkup(script.name, 'Current module release notes', 'slhmn-close', '✦', 'RELEASE CENTER')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version || script.version || script.expectedVersion || '?')} ${release.date ? `<span class="slh-version-date">${escapeHtml(release.date)}</span>` : ''}</div><div style="margin-top:8px">${notes}</div></div><button class="slh-big-btn gray" id="slhmn-back">← BACK</button></div>`);
+        createOverlay(`${headerMarkup(script.name, 'Current module release notes', 'slhmn-close', '✦', 'RELEASE CENTER')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version || script.version || script.expectedVersion || '?')} ${release.date ? `<span class="slh-version-date">${escapeHtml(release.date)}</span>` : ''}</div><div id="slh-release-auto" style="margin-top:8px">${notes}</div></div><button class="slh-big-btn gray" id="slhmn-back">← BACK</button></div>`);
+        translateModuleView(script, 'slh-release-auto', (release.notes || []).join('\\n'), (MODULE_RELEASE_RO[script.id] || []).join('\\n'), (root, translated) => {
+            root.innerHTML = translated.split('\\n').map(line => '<div>• ' + escapeHtml(line) + '</div>').join('');
+        });
         document.getElementById('slhmn-close').onclick = closeHub;
         document.getElementById('slhmn-back').onclick = openHub;
     }
