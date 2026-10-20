@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.5.1 / Hub v1.9.146 — Install detection and API persistence (2026-10-21)
+
+- Register Gym Optimizer version in explicit document and global installation markers even outside Gym.
+- Hub prioritizes the Gym runtime global when evaluating installed version.
+- Gym API access uses Hub shared key when exposed and locally persisted personal key fallback.
+- Settings adds save/clear controls for personal 16-character Torn API key; key never appears in UI logs.
+
+
 ## Gym Optimizer v1.5.0 — Gain model, headroom and conditional ETA (2026-10-21)
 
 - Computes approximate training gains using the wiki formula and parseable, per-stat gym perk percentages.
