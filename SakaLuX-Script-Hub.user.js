@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.135
+// @version      1.9.136
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2221,6 +2221,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function getInstallUrl(script) {
+        if (script.comingSoon || script.installable === false) return '';
         // User-facing installation and updates use the GreasyFork distribution URL.
         if (script.downloadUrl) return script.downloadUrl;
         const data = updateCache[script.id];
@@ -2533,7 +2534,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (status.code === 'WRONG_PAGE') return { label: 'OPEN PAGE', kind: 'page' };
         if (status.code === 'API_ERROR') return { label: 'FIX API', kind: 'api' };
         if (status.code === 'CHECK_ERROR') return { label: 'RECHECK', kind: 'recheck' };
-        if (status.code === 'NOT_INSTALLED') return { label: 'INSTALL', kind: 'install' };
+        if (status.code === 'NOT_INSTALLED') return script.comingSoon ? null : { label: 'INSTALL', kind: 'install' };
         return null;
     }
 
@@ -3831,7 +3832,9 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const moduleStatus = getModuleStatus(script);
         const healthChipClass = health.state === 'ok' ? 'good' : health.state === 'error' ? 'bad' : 'warn';
         const statusChipClass = moduleStatus.level === 'ok' ? 'good' : moduleStatus.level === 'bad' ? 'bad' : 'warn';
-        const controls = missing
+        const controls = missing && script.comingSoon
+            ? `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button></div><button class="slh-primary" disabled type="button">COMING SOON</button>`
+            : missing
             ? `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch off" type="button" role="switch" aria-checked="false" disabled><span class="slh-switch-track"><i></i></span><b>OFF</b></button><button class="slh-primary install" data-install="${escapeHtml(script.id)}">INSTALL</button>`
             : `<div class="slh-card-tools"><button class="slh-card-tool info" data-module-info="${escapeHtml(script.id)}" type="button">INFO</button><button class="slh-card-tool new" data-module-new="${escapeHtml(script.id)}" type="button">✦ NEW</button></div><button class="slh-switch ${enabled ? 'on' : 'off'}" type="button" role="switch" aria-checked="${enabled ? 'true' : 'false'}" data-module-toggle="${escapeHtml(script.id)}" title="${powerReady ? `Turn ${escapeHtml(script.name)} ${enabled ? 'off' : 'on'}` : `Update ${escapeHtml(script.name)} to enable native power control`}" ${powerReady ? '' : 'disabled'}><span class="slh-switch-track"><i></i></span><b>${enabled ? 'ON' : 'OFF'}</b></button><button class="slh-primary" data-script="${escapeHtml(script.id)}" data-action="${escapeHtml(primary.id)}" ${enabled ? '' : 'disabled'}>${primaryLabel}</button>`;
         return `<div class="slh-card ${update.state === 'available' ? 'update' : ''} ${missing ? 'missing' : ''} ${!missing && !enabled ? 'off' : ''}">
