@@ -26,6 +26,8 @@ jobs:
             echo "Checking $file"
             node --check "$file"
           done
+      - name: Test mandatory Ed25519 license verification
+        run: node tests/license-signed-enforcement.cjs
       - name: Check entitlement broker invariants
         shell: bash
         run: |
