@@ -1,5 +1,14 @@
 # Changelog
 
+## Gym Optimizer v1.3.0 — Verified gym routing and Train action (2026-10-21)
+
+- Added gym-dot table for standard gyms, per-stat best available gym among explicitly confirmed unlocked gyms.
+- Switch button appears only for positively verified unlocked gyms; a label alone is not proof.
+- TRAIN button requests one native training action on explicit user press, checking the preferred verified gym first.
+- Added wiki-based approximate energy per standard unlock step; cannot claim accurate remaining energy or ETA without gym EXP data.
+- Actual TornPDA selectors must be regression-tested on device before relying on actions.
+
+
 ## Gym Optimizer v1.2.1 — Train Next interaction and mobile scroll (2026-10-21)
 
 - Train Next can set 999 repetitions in the matching native stat tile; Torn TRAIN remains a manual action.
