@@ -1,5 +1,14 @@
 # Changelog
 
+## Gym Optimizer v1.0.6 — SakaLuX DEX focus and compact UI (2026-10-21)
+
+- Renamed Aec3 template to SakaLuX, with default DEX-priority weights (DEX 1.25, Speed 1, Strength 0.8, Defense dump).
+- Migrates prior Aec3 selections to SakaLuX automatically, preserving other strategies.
+- Tightened widget spacing, headings and colored stat bars toward StatForge reference.
+- Suppressed misleading initial Train Next results without sufficient stat values.
+- Strategy weights remain custom training targets, not a mathematically verified reproduction of Aec3.
+
+
 ## Gym Optimizer v1.0.5 — Stat bars and native stat reading (2026-10-20)
 
 - Added compact four-stat colored progress bars and target/gap indicators like the StatForge layout.
