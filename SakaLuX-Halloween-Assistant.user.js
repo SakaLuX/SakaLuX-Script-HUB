@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.5.3
+// @version      0.5.4
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -834,7 +834,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.5.3';
+  const VERSION = '0.5.4';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -842,7 +842,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const STATUS_TTL = 15000;
   const BOARD_CONCURRENCY = 3;
   const FF_CONCURRENCY = 2;
-  const STATUS_CONCURRENCY = 8;
+  const STATUS_CONCURRENCY = 2;
   const IDS = Object.freeze({ launcher: 'slx-halloween-launcher', overlay: 'slx-halloween-overlay', style: 'slx-halloween-style' });
   const KEYS = Object.freeze({
     settings: 'SLX_HALLOWEEN_SETTINGS_V1',
@@ -854,7 +854,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     targetPool: 'SLX_HALLOWEEN_TARGET_POOL_V1',
     discovered: 'SLX_HALLOWEEN_DISCOVERED_V1'
   });
-  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 80, autoRefresh: true, refreshSeconds: 90, includeBounties: false, includeInactive: true, inactiveDays: 1, useTornTargets: false, useBaldr: true, discoveryLimit: 2500 });
+  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 30, autoRefresh: true, refreshSeconds: 240, includeBounties: false, includeInactive: true, inactiveDays: 1, useTornTargets: false, useBaldr: true, discoveryLimit: 2500 });
   const $ = (query, root = document) => root.querySelector(query);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -889,6 +889,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   let lastWarning = '';
   let lastScanMs = 0;
   let rateLimited = false;
+  let rateLimitReason = '';
+  let rateLimitUntil = 0;
 
   try {
     SHARED_CORE?.settings?.register?.({ id: 'halloween-assistant', version: 2, keys: Object.values(KEYS) });
@@ -1262,7 +1264,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         result = statusFrom(await requestJSON(url));
         if (result.status !== 'Unknown') break;
       } catch (error) {
-        if (isRateLimitError(error)) { rateLimited = true; break; }
+        if (isRateLimitError(error)) { rateLimited = true; rateLimitReason = String(error?.message || error).slice(0,150); rateLimitUntil = Date.now() + 65000; break; }
       }
     }
     if (!result || result.status === 'Unknown') return { ...row, status: 'Unknown', statusVerified: false, verifiedAt: 0 };
@@ -1323,11 +1325,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   async function scan(force = false) {
     if (scanning) return false;
+    if (Date.now() < rateLimitUntil) { setProgress('Torn API cooldown: așteaptă ' + Math.ceil((rateLimitUntil - Date.now()) / 1000) + 's · ' + rateLimitReason); return false; }
     const started = performance.now();
     scanning = true;
     targets = [];
     renderTargets();
     rateLimited = false;
+    rateLimitReason = '';
     lastScanMs = 0;
     lastError = '';
     lastWarning = '';
@@ -1366,6 +1370,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
           else checkedStatuses.excluded++;
         }
         sourceDiagnostics.Torn = `${checkedStatuses.okay} Okay · ${checkedStatuses.offline} offline · ${checkedStatuses.unknown} necunoscuți · ${checkedStatuses.excluded} excluși`;
+        if (rateLimited) sourceDiagnostics.ApiError = rateLimitReason;
         targets = verified.filter(row => Date.now() - num(row.verifiedAt) <= STATUS_TTL).sort(targetCompare).slice(0, wanted);
         renderTargets();
         if (verified.length >= wanted || rateLimited) break;
@@ -1430,7 +1435,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     settings.maxPages = DEFAULTS.maxPages;
     settings.maxFF = DEFAULTS.maxFF;
     settings.maxResults = Math.max(5, Math.min(100, num($('[data-results]', overlay)?.value) || DEFAULTS.maxResults));
-    settings.statusChecks = Math.max(10, Math.min(160, num($('[data-checks]', overlay)?.value) || DEFAULTS.statusChecks));
+    settings.statusChecks = Math.max(10, Math.min(40, num($('[data-checks]', overlay)?.value) || DEFAULTS.statusChecks));
     settings.includeBounties = false;
     settings.includeInactive = true;
     settings.useTornTargets = false;
@@ -1487,7 +1492,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
-      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-api-panel" hidden><div class="ha-api-head"><b>🔑 CHEI API</b><button class="ha-api-close" data-api-close>×</button></div><div class="ha-api-status" data-api-source></div><div class="ha-keyline"><label>Cheie Torn<input data-torn type="password" maxlength="16" autocomplete="off" placeholder="Hub/PDA automat"></label><a class="ha-setup" data-generate-torn href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Halloween%20Assistant&user=basic&torn=bounties" target="_blank" rel="noopener noreferrer">🔑 GENEREAZĂ</a></div><div class="ha-keyline"><label>Cheie FFScouter<input data-ff type="password" maxlength="16" autocomplete="off" placeholder="Cheie FFScouter"></label><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">🔑 OBȚINE</a></div><div class="ha-api-actions"><button data-api-save>SALVEAZĂ CHEILE</button><button data-api-clear>ȘTERGE LOCALE</button></div></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><label>Inactiv minimum (zile)<select data-days>${[1,3,7,14,30].map(d => '<option value="' + d + '"' + (num(settings.inactiveDays) === d ? ' selected' : '') + '>' + d + ' zile</option>').join('')}</select></label><div class="ha-actions"><button data-save>SALVEAZĂ SETĂRILE</button></div></div><div class="ha-hint">FFSCOUTER → BALDR · doar Torn Okay + inactivi</div><div class="ha-list"></div></section>`;
+      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-api-panel" hidden><div class="ha-api-head"><b>🔑 CHEI API</b><button class="ha-api-close" data-api-close>×</button></div><div class="ha-api-status" data-api-source></div><div class="ha-keyline"><label>Cheie Torn<input data-torn type="password" maxlength="16" autocomplete="off" placeholder="Hub/PDA automat"></label><a class="ha-setup" data-generate-torn href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Halloween%20Assistant&user=basic&torn=bounties" target="_blank" rel="noopener noreferrer">🔑 GENEREAZĂ</a></div><div class="ha-keyline"><label>Cheie FFScouter<input data-ff type="password" maxlength="16" autocomplete="off" placeholder="Cheie FFScouter"></label><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">🔑 OBȚINE</a></div><div class="ha-api-actions"><button data-api-save>SALVEAZĂ CHEILE</button><button data-api-clear>ȘTERGE LOCALE</button></div></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="40" value="${Math.min(40,settings.statusChecks)}"></label><label>Inactiv minimum (zile)<select data-days>${[1,3,7,14,30].map(d => '<option value="' + d + '"' + (num(settings.inactiveDays) === d ? ' selected' : '') + '>' + d + ' zile</option>').join('')}</select></label><div class="ha-actions"><button data-save>SALVEAZĂ SETĂRILE</button></div></div><div class="ha-hint">FFSCOUTER → BALDR · doar Torn Okay + inactivi</div><div class="ha-list"></div></section>`;
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
