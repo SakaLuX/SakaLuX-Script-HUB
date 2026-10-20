@@ -8,7 +8,7 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-10**
+- Verified: **2026-10-20**
 - Canonical version: **v1.8.73**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
@@ -32,9 +32,10 @@
 
 ## Current release note
 
-**v1.8.71 — 2026-10-10**
-- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
-- FREE controls stay visible and existing license checks and saved settings are preserved.
+**v1.8.73 — Version and release synchronization**
+- Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.
+- The offer link remains visible in a PRO dialog regardless of whether a license is already active.
+- No change to free/premium entitlements or server-side license rules.
 
 ## Release history / Changelog
 

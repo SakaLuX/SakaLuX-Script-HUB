@@ -19,8 +19,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-10**
-- Canonical version: **v5.3.70**
+- Verified: **2026-10-20**
+- Canonical version: **v5.3.71**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -37,11 +37,18 @@
 
 ## Current release note
 
-**v5.3.69 — 2026-10-10**
-- Expands visible ✦ PRO badge matching to cover premium controls and available selection choices.
-- Avoids duplicate PRO badges without changing FREE options or license checks.
+**v5.3.71 — Version and release synchronization**
+- Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.
+- Preserve preferred ON/OFF independent of transient license check.
+- Restore premium runtime after confirmed authorization.
 
 ## Release history / Changelog
+
+
+### v5.3.71 — 2026-10-20
+- Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.
+- Preserve preferred ON/OFF independent of transient license check.
+- Restore premium runtime after confirmed authorization.
 
 ### v5.3.70 — 2026-10-10
 - Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.

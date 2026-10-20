@@ -51,9 +51,9 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.17 — 2026-10-10**
-- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
-- FREE controls stay visible and existing license checks and saved settings are preserved.
+**v0.5.20 — Version and release synchronization**
+- Align embedded runtime version with @version to prevent false Hub update alerts.
+- Preserve existing script functionality and API key settings.
 
 ## Release history / Changelog
 

@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.133**
+**v1.9.140**
 
 ### Early PRO verification — 2026-10-11
 - Starts shared entitlement verification as soon as Hub loads, without opening the UI.
@@ -35,8 +35,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-10**
-- Canonical version: **v1.9.126**
+- Verified: **2026-10-20**
+- Canonical version: **v1.9.140**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -61,12 +61,14 @@
 
 ## Current release note
 
-**v1.9.125 — 2026-10-10**
-- Broadcasts verified premium entitlement status to installed SakaLuX modules.
-- Refreshes PRO status every five minutes while Torn is visible, including with Hub panel closed.
-- Updates the embedded module registry and release NEWS for license-sensitive preference restoration.
+**v1.9.140 — Version and release synchronization**
+- Version 1.9.140: internal runtime and registry synchronization.
 
 ## Release history / Changelog
+
+
+### v1.9.140 — 2026-10-20
+- Version 1.9.140: internal runtime and registry synchronization.
 
 ### v1.9.126 — 2026-10-10
 - Improved premium badge coverage while preserving FREE controls.

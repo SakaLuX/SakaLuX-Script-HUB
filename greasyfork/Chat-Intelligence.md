@@ -8,7 +8,7 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-07**
+- Verified: **2026-10-20**
 - Canonical version: **v1.2.39**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
@@ -25,9 +25,7 @@
 ## Current release note
 
 **v1.2.39 — Version and release synchronization**
-- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
-- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
-- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
+- Version 1.2.39: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 

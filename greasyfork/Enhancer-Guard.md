@@ -24,7 +24,7 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-18**
+- Verified: **2026-10-20**
 - Canonical version: **v1.3.73**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
@@ -45,9 +45,10 @@
 
 ## Current release note
 
-**v1.3.70 — 2026-10-10**
-- Expands visible ✦ PRO badge matching to cover premium controls and available selection choices.
-- Avoids duplicate PRO badges without changing FREE options or license checks.
+**v1.3.73 — Version and release synchronization**
+- Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.
+- Preserve preferred ON/OFF independent of transient license check.
+- Restore premium runtime after confirmed authorization.
 
 ## Release history / Changelog
 

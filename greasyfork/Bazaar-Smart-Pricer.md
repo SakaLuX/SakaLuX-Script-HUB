@@ -18,7 +18,7 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-10**
+- Verified: **2026-10-20**
 - Canonical version: **v1.1.28**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
@@ -50,9 +50,10 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.27 — 2026-10-10**
-- Expands visible ✦ PRO badge matching to cover premium controls and available selection choices.
-- Avoids duplicate PRO badges without changing FREE options or license checks.
+**v1.1.28 — Version and release synchronization**
+- Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.
+- The offer link remains visible in a PRO dialog regardless of whether a license is already active.
+- No change to free/premium entitlements or server-side license rules.
 
 ## Release history / Changelog
 

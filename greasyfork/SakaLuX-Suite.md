@@ -8,7 +8,7 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-07**
+- Verified: **2026-10-20**
 - Canonical version: **v0.9.986**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
@@ -48,10 +48,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.986 — Lottery Max Buy for Torn's button-only form**
-- Places `MAX BUY · tokens` directly beside Torn's native `BUY` button.
-- Requests confirmation, purchases one ticket at a time through Torn's native button and stops when the tokens run out.
-- Changes to `STOP · remaining` during the operation, allowing immediate cancellation.
+**v0.9.986 — Version and release synchronization**
+- Version 0.9.986: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 

@@ -51,8 +51,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-10**
-- Canonical version: **v1.17.74**
+- Verified: **2026-10-20**
+- Canonical version: **v1.17.87**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -75,11 +75,18 @@
 
 ## Current release note
 
-**v1.17.73 — 2026-10-10**
-- Expands visible ✦ PRO badge matching to cover premium controls and available selection choices.
-- Avoids duplicate PRO badges without changing FREE options or license checks.
+**v1.17.87 — Version and release synchronization**
+- Travel panels are restricted to true Travel Agency/in-flight/abroad page contexts, never Bazaar or profiles.
+- Route detection prioritizes explicit Bazaar, profile, inventory and market pages before SPA travel headings.
+- Late YATA and market-price responses cannot paint Best Route Basket after navigation away.
 
 ## Release history / Changelog
+
+
+### v1.17.87 — 2026-10-20
+- Travel panels are restricted to true Travel Agency/in-flight/abroad page contexts, never Bazaar or profiles.
+- Route detection prioritizes explicit Bazaar, profile, inventory and market pages before SPA travel headings.
+- Late YATA and market-price responses cannot paint Best Route Basket after navigation away.
 
 ### v1.17.74 — 2026-10-10
 - Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.

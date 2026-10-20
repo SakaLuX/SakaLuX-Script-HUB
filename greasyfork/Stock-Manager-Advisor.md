@@ -16,8 +16,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-10**
-- Canonical version: **v0.8.30**
+- Verified: **2026-10-20**
+- Canonical version: **v0.8.34**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -42,9 +42,9 @@
 
 ## Current release note
 
-**v0.8.28 — 2026-10-10**
-- PRO badge coverage extended to premium switches, buttons, labels and selection choices.
-- FREE controls stay visible and existing license checks and saved settings are preserved.
+**v0.8.34 — Version and release synchronization**
+- Fixes stale TornPDA canonical installed-version fallback 0.8.30; reports 0.8.34 when GM_info is absent.
+- Aligns source, runtime, registry and Hub version reporting.
 
 ## Release history / Changelog
 
