@@ -3,7 +3,12 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.64**
+**v1.3.65**
+
+### 2026-10-20 · Version consistency
+- Fixed embedded runtime version reporting to match userscript `@version`.
+- Updated Hub registry release metadata to prevent mismatched version labels.
+- GreasyFork publication status must be verified separately; updating this document does not publish the script.
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -20,7 +25,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-10**
-- Canonical version: **v1.3.64**
+- Canonical version: **v1.3.65**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -50,7 +55,7 @@
 
 ## Release history / Changelog
 
-### v1.3.64 — 2026-10-10
+### v1.3.65 — 2026-10-10
 - Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.
 - The purchase information applies to users with or without active PRO. License enforcement rules are unchanged.
 
