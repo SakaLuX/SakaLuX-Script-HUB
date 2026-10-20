@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         SakaLuX Halloween Assistant TEST v0.3.3
-// @namespace    sakalux.halloween.assistant.test.033
-// @version      0.3.3
+// @name         SakaLuX Halloween Assistant TEST v0.2.6
+// @namespace    sakalux.halloween.assistant.test.026
+// @version      0.2.6
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -23,7 +23,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.8';
+  const CORE_VERSION = '1.2.7';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -686,16 +686,15 @@
       const showItems = options.showItems !== false;
       const moneyLabel = String(options.moneyLabel || '💸 SEND MONEY');
       const itemsLabel = String(options.itemsLabel || '🎁 SEND ITEMS');
-      const inlineLayout = options.layout === 'inline';
       if (!document.getElementById('sakalux-shared-donation-footer-style')) {
         const style = document.createElement('style');
         style.id = 'sakalux-shared-donation-footer-style';
-        style.textContent = `.slx-shared-donation{display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#080d13!important;font-family:Inter,Arial,sans-serif!important}.slx-shared-donation *{box-sizing:border-box!important}.slx-shared-donation-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;height:28px!important;padding:4px 10px!important}.slx-shared-donation button{display:block!important;width:100%!important;height:20px!important;min-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:8px!important;background:#151f2a!important;color:#c5d2df!important;font:900 8px/1.2 Inter,Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important}.slx-shared-donation-made{height:22px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;padding:0 6px!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important;font:500 9px/20px Inter,Arial,sans-serif!important;white-space:nowrap!important}.slx-shared-donation-made a{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}.slx-shared-donation.slx-shared-donation-inline{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;flex:0 0 29px!important;height:29px!important;min-height:29px!important}.slx-shared-donation-inline .slx-shared-donation-actions{height:29px!important;padding:4px 6px 4px 10px!important}.slx-shared-donation-inline .slx-shared-donation-made{height:29px!important;border-top:0!important;padding:0 10px 0 6px!important}`;
+        style.textContent = `.slx-shared-donation{display:block!important;flex:0 0 50px!important;width:100%!important;height:50px!important;min-height:50px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;overflow:hidden!important;border-top:1px solid rgba(255,255,255,.08)!important;background:#080d13!important;font-family:Inter,Arial,sans-serif!important}.slx-shared-donation *{box-sizing:border-box!important}.slx-shared-donation-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;height:28px!important;padding:4px 10px!important}.slx-shared-donation button{display:block!important;width:100%!important;height:20px!important;min-height:20px!important;margin:0!important;padding:0 4px!important;border:1px solid #2d3d50!important;border-radius:8px!important;background:#151f2a!important;color:#c5d2df!important;font:900 8px/1.2 Inter,Arial,sans-serif!important;letter-spacing:.04em!important;white-space:nowrap!important;box-shadow:none!important}.slx-shared-donation-made{height:22px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;padding:0 6px!important;border-top:1px solid rgba(223,154,55,.52)!important;color:#df9a37!important;font:500 9px/20px Inter,Arial,sans-serif!important;white-space:nowrap!important}.slx-shared-donation-made a{color:#78aef2!important;font-weight:900!important;text-decoration:none!important}`;
         (document.head || document.documentElement).appendChild(style);
       }
       const footer = document.createElement('div');
       footer.id = id;
-      footer.className = 'slx-shared-donation' + (inlineLayout ? ' slx-shared-donation-inline' : '');
+      footer.className = 'slx-shared-donation';
       const actions = document.createElement('div');
       actions.className = 'slx-shared-donation-actions';
       const actionDefinitions = [];
@@ -832,12 +831,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.3.3';
+  const VERSION = '0.2.6';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
   const FF_TTL = 12 * 60 * 60 * 1000;
-  const STATUS_TTL = 15000;
+  const STATUS_TTL = 30000;
   const BOARD_CONCURRENCY = 3;
   const FF_CONCURRENCY = 2;
   const STATUS_CONCURRENCY = 8;
@@ -849,10 +848,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     board: 'SLX_HALLOWEEN_BOARD_CACHE_V1',
     ffCache: 'SLX_HALLOWEEN_FF_CACHE_V1',
     statusCache: 'SLX_HALLOWEEN_STATUS_CACHE_V1',
-    targetPool: 'SLX_HALLOWEEN_TARGET_POOL_V1',
-    discovered: 'SLX_HALLOWEEN_DISCOVERED_V1'
+    targetPool: 'SLX_HALLOWEEN_TARGET_POOL_V1'
   });
-  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 80, autoRefresh: true, refreshSeconds: 90, includeBounties: false, includeInactive: true, inactiveDays: 1, scanFactions: true, factionIds: '', discoveryLimit: 2500 });
+  const DEFAULTS = Object.freeze({ maxPages: 10, maxFF: 1.5, maxResults: 50, statusChecks: 80, autoRefresh: true, refreshSeconds: 90 });
   const $ = (query, root = document) => root.querySelector(query);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -871,7 +869,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   let ffCache = { ...read('SLX_BOUNTY_FF_CACHE_V1', {}), ...read(KEYS.ffCache, {}) };
   let statusCache = read(KEYS.statusCache, {});
   let targetPool = read(KEYS.targetPool, { at: 0, rows: [] });
-  let discoveredPool = read(KEYS.discovered, { at: 0, rows: [] });
   let targets = [];
   let scanning = false;
   let timer = 0;
@@ -881,7 +878,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   let rateLimited = false;
 
   try {
-    SHARED_CORE?.settings?.register?.({ id: 'halloween-assistant', version: 2, keys: Object.values(KEYS) });
+    SHARED_CORE?.settings?.register?.({ id: 'halloween-assistant', version: 1, keys: Object.values(KEYS) });
     SHARED_CORE?.api?.configure?.({ maxConcurrent: 8 });
     SHARED_CORE?.ui?.ensureSharedSkin?.();
   } catch {}
@@ -1050,55 +1047,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     return rows;
   }
 
-  function compactPool(rows) {
-    const map = new Map();
-    for (const row of rows || []) {
-      const id = Number(row?.id);
-      if (!Number.isSafeInteger(id) || id <= 0 || id === 2380374) continue;
-      const previous = map.get(id);
-      if (!previous || (row.name && !/^Player \d+$/.test(row.name))) map.set(id, { ...previous, ...row, id });
-    }
-    return [...map.values()].slice(-Math.max(100, Math.min(10000, num(settings.discoveryLimit) || 2500)));
-  }
-  function saveDiscovery(rows) {
-    const fresh = compactPool([...discoveredPool.rows || [], ...rows]);
-    discoveredPool = { at: Date.now(), rows: fresh };
-    write(KEYS.discovered, discoveredPool);
-    return fresh;
-  }
-  function factionMemberRows(data) {
-    const raw = data?.members || data?.faction?.members || [];
-    const list = Array.isArray(raw) ? raw : Object.entries(raw).map(([id, value]) => ({ ...value, id: value?.id || id }));
-    return list.map(p => {
-      const id = Number(p.id || p.user_id || p.player_id);
-      if (!Number.isSafeInteger(id) || id <= 0) return null;
-      return { id, name: String(p.name || 'Player ' + id), level: p.level ?? null, reward: 0,
-        count: 0, hasBounty: false, source: 'Torn faction', ff: null, bs: null, status: 'Unknown',
-        statusVerified: false, lastAction: String(p.last_action?.relative || ''),
-        lastActionStatus: String(p.last_action?.status || '') };
-    }).filter(Boolean);
-  }
-  async function loadFactionTargets() {
-    if (!settings.includeInactive || !settings.scanFactions) return [];
-    const key = getTornKey();
-    if (!validKey(key)) return [];
-    const ids = [...new Set(String(settings.factionIds || '').split(/[^0-9]+/).map(Number)
-      .filter(id => Number.isSafeInteger(id) && id > 0))].slice(0, 15);
-    if (!ids.length) return [];
-    let found = [];
-    for (const id of ids) {
-      if (rateLimited) break;
-      try {
-        const data = await requestJSON('https://api.torn.com/v2/faction/' + id + '/members?key=' + encodeURIComponent(key));
-        found.push(...factionMemberRows(data));
-      } catch (error) {
-        if (isRateLimitError(error)) { rateLimited = true; break; }
-        lastWarning = 'Faction ' + id + ': ' + friendlyError(error, 'Torn');
-      }
-    }
-    if (found.length) saveDiscovery(found);
-    return found;
-  }
   function normalizeTargetPool(data) {
     const list = Array.isArray(data?.targets) ? data.targets : Array.isArray(data) ? data : [];
     return list.map(item => {
@@ -1122,11 +1070,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   async function loadSupplementalTargets() {
-    if (!settings.includeInactive) return [];
     const key = getFFKey();
     if (!validKey(key)) return Array.isArray(targetPool.rows) ? targetPool.rows.map(row => ({ ...row })) : [];
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
-    const url = 'https://ffscouter.com/api/v1/get-targets?key=' + encodeURIComponent(key) + '&minlevel=1&maxlevel=100&minff=1&maxff=' + encodeURIComponent(maxFF) + '&inactiveonly=1&limit=50';
+    const url = 'https://ffscouter.com/api/v1/get-targets?key=' + encodeURIComponent(key) + '&minlevel=1&maxlevel=100&minff=1&maxff=' + encodeURIComponent(maxFF) + '&inactiveonly=0&limit=50';
     try {
       const rows = normalizeTargetPool(await requestJSON(url));
       if (rows.length) {
@@ -1203,11 +1150,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     else if (/federal/i.test(text)) state = 'Federal';
     else if (/travel|abroad|flying|returning/i.test(text)) state = 'Abroad';
     else if (/okay|healthy|available/i.test(text)) state = 'Okay';
-    return { status: state, name: String(user.name || user.player_name || ''), level: user.level == null ? null : num(user.level), lastAction: String(user.last_action?.relative || ''), lastActionStatus: String(user.last_action?.status || '') };
+    return { status: state, name: String(user.name || user.player_name || ''), level: user.level == null ? null : num(user.level), lastAction: String(user.last_action?.relative || user.last_action?.status || '') };
   }
   async function checkStatus(row, force = false) {
     const cached = statusCache[String(row.id)];
-    if (!force && cached && Date.now() - num(cached.at) < STATUS_TTL) return { ...row, ...cached.data, statusVerified: cached.data.status === 'Okay', verifiedAt: cached.at, ff: row.ff, bs: row.bs };
+    if (!force && cached && Date.now() - num(cached.at) < STATUS_TTL) return { ...row, ...cached.data, statusVerified: cached.data.status !== 'Unknown', ff: row.ff, bs: row.bs };
     const key = getTornKey();
     const routes = [
       'https://api.torn.com/v2/user/' + row.id + '/basic?striptags=true&key=' + encodeURIComponent(key),
@@ -1224,9 +1171,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (isRateLimitError(error)) { rateLimited = true; break; }
       }
     }
-    if (!result || result.status === 'Unknown') return { ...row, status: 'Unknown', statusVerified: false, verifiedAt: 0 };
+    if (!result) return row;
     statusCache[String(row.id)] = { at: Date.now(), data: result };
-    return { ...row, ...result, name: result.name || row.name, level: result.level ?? row.level, statusVerified: result.status === 'Okay', verifiedAt: Date.now(), ff: row.ff, bs: row.bs };
+    return { ...row, ...result, name: result.name || row.name, level: result.level ?? row.level, statusVerified: result.status !== 'Unknown', ff: row.ff, bs: row.bs };
   }
 
   function quickCompare(a, b) {
@@ -1247,20 +1194,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (row.ff <= 1.3) return '⚡ FAST';
     return '✓ EASY';
   }
-  function isInactiveTarget(row) {
-    const lastAction = String(row.lastAction || '').toLowerCase();
-    const days = Math.max(1, Math.min(365, Math.floor(num(settings.inactiveDays) || 1)));
-    const parsed = lastAction.match(/(\d+)\s*(minute|hour|day|week|month|year)s?/i);
-    const ageHours = parsed ? Number(parsed[1]) * ({minute:1/60,hour:1,day:24,week:168,month:720,year:8760}[parsed[2]] || 0) : 0;
-    const lastStatus = String(row.lastActionStatus || '').toLowerCase();
-    return lastStatus === 'offline' && ageHours >= days * 24;
-  }
-  function permittedSource(row) {
-    return settings.includeInactive ? !row.hasBounty : (settings.includeBounties && row.hasBounty);
-  }
   function candidateRows(rows) {
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
-    return rows.filter(row => permittedSource(row) && (row.ff == null || (row.ff >= 1 && row.ff <= maxFF))).sort(targetCompare);
+    return rows.filter(row => row.ff == null || (row.ff >= 1 && row.ff <= maxFF)).sort(targetCompare);
   }
   function applyCachedIntelligence(rows) {
     const now = Date.now();
@@ -1269,15 +1205,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const status = statusCache[String(row.id)];
       const next = { ...row };
       if (ff && now - num(ff.at) < FF_TTL) { next.ff = ff.ff; next.bs = ff.bs; }
-      if (status && now - num(status.at) < STATUS_TTL) Object.assign(next, status.data, { statusVerified: status.data.status === 'Okay', verifiedAt: status.at });
+      if (status && now - num(status.at) < STATUS_TTL) Object.assign(next, status.data, { statusVerified: status.data.status !== 'Unknown' });
       return next;
     });
   }
   function paintInstantCache(rows) {
-    // Fail closed: cache cannot put an unverified target on the attack list.
-    return 0;
     const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
-    const instant = candidateRows(applyCachedIntelligence(rows)).filter(row => row.statusVerified === true && row.status === 'Okay' && isInactiveTarget(row)).slice(0, wanted);
+    const instant = candidateRows(applyCachedIntelligence(rows)).filter(row => row.statusVerified === true && row.status === 'Okay').slice(0, wanted);
     if (instant.length) { targets = instant; renderTargets(); setProgress('Instant cache · refreshing live', instant.length, instant.length); }
     return instant.length;
   }
@@ -1286,21 +1220,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (scanning) return false;
     const started = performance.now();
     scanning = true;
-    targets = [];
-    renderTargets();
     rateLimited = false;
     lastScanMs = 0;
     lastError = '';
     lastWarning = '';
     updateControls();
     try {
-      if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(settings.includeBounties && !settings.includeInactive ? boardCache.rows : [], settings.includeInactive ? compactPool([...(targetPool.rows || []), ...(discoveredPool.rows || [])]) : []));
-      const [bounties, supplemental, factionRows] = await Promise.all([
-        settings.includeBounties && !settings.includeInactive ? loadBoard(false) : Promise.resolve([]),
-        loadSupplementalTargets(), loadFactionTargets()
-      ]);
-      if (settings.includeInactive) saveDiscovery([...supplemental, ...factionRows]);
-      let rows = mergeTargetSources(bounties, settings.includeInactive ? compactPool([...discoveredPool.rows, ...supplemental, ...factionRows]) : []);
+      if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(boardCache.rows, targetPool.rows || []));
+      const [bounties, supplemental] = await Promise.all([loadBoard(false), loadSupplementalTargets()]);
+      let rows = mergeTargetSources(bounties, supplemental);
       paintInstantCache(rows);
       try { rows = await enrichFF(rows); }
       catch (error) { lastWarning = friendlyError(error, 'FFScouter'); }
@@ -1313,18 +1241,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const batch = candidates.slice(index, index + STATUS_CONCURRENCY);
         setProgress('Verifying attack-ready status', Math.min(index, limit), Math.min(limit, candidates.length));
         const checked = await mapLimit(batch, STATUS_CONCURRENCY, row => rateLimited ? row : checkStatus(row, force));
-        verified.push(...checked.filter(row => row.statusVerified === true && row.status === 'Okay' && isInactiveTarget(row)));
+        verified.push(...checked.filter(row => row.statusVerified === true && row.status === 'Okay'));
         if (verified.length >= wanted || rateLimited) break;
       }
       write(KEYS.statusCache, statusCache);
-      targets = verified.filter(row => row.status === 'Okay' && row.statusVerified && Date.now() - num(row.verifiedAt) <= STATUS_TTL).sort(targetCompare).slice(0, wanted);
+      if (verified.length || !rateLimited) targets = verified.sort(targetCompare).slice(0, wanted);
       renderTargets();
       lastScanMs = Math.round(performance.now() - started);
       setProgress((lastWarning ? lastWarning + ' · ' : rateLimited ? 'API limit reached · cached live list kept · ' : 'Ready · ') + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
       return true;
     } catch (error) {
       lastError = friendlyError(error, 'Torn');
-      targets = [];
       renderTargets();
       setProgress('Error: ' + lastError, 0, 0);
       return false;
@@ -1338,7 +1265,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function ensureStyle() {
     if ($(('#' + IDS.style))) return;
     const style = document.createElement('style'); style.id = IDS.style;
-    style.textContent = `.ha-toggle-row{display:flex!important;flex-direction:row!important;align-items:center;justify-content:space-between;gap:12px;padding:10px 6px}.ha-switch{position:relative;display:inline-flex;flex:0 0 48px;width:48px;height:27px}.ha-switch input{position:absolute;opacity:0;width:48px;height:27px;margin:0;z-index:2;cursor:pointer}.ha-switch-track{width:48px;height:27px;background:#555;border-radius:99px;transition:background .2s;pointer-events:none}.ha-switch-track:before{content:'';display:block;width:21px;height:21px;background:white;border-radius:50%;margin:3px;transition:transform .2s}.ha-switch input:checked+.ha-switch-track{background:#16a34a}.ha-switch input:checked+.ha-switch-track:before{transform:translateX(21px)}.ha-switch input:focus-visible+.ha-switch-track{outline:2px solid #f59e0b;outline-offset:2px}#${IDS.launcher}{position:fixed;right:12px;bottom:88px;z-index:2147483000;width:48px;height:48px;border:1px solid #f59e0b;border-radius:15px;background:linear-gradient(160deg,#542109,#1a1212);color:#fff;font-size:24px;box-shadow:0 10px 28px #000a;touch-action:none;user-select:none}#${IDS.overlay}{position:fixed;inset:0;z-index:2147483600;display:flex;align-items:flex-end;justify-content:center;background:transparent;background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;color:#f8fafc;font:14px/1.4 system-ui,sans-serif}#${IDS.overlay}[hidden]{display:none!important}#${IDS.overlay} .ha-panel{width:min(760px,100%);height:min(92dvh,920px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #6b3b1c;border-radius:18px;background:linear-gradient(155deg,#1d1620,#0d141d 55%);box-shadow:none}#${IDS.overlay} header{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #483020;background:#201822}#${IDS.overlay} header b{flex:1;color:#ffd894}#${IDS.overlay} button,#${IDS.overlay} input{border:1px solid #594a43;border-radius:9px;background:#17202a;color:#fff;min-height:38px;padding:7px 10px}#${IDS.overlay} .ha-head-btn{width:40px;padding:0}#${IDS.overlay} .ha-progress{padding:10px 12px;color:#cbd5e1;border-bottom:1px solid #2f3037}#${IDS.overlay} .ha-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid #2f3037}#${IDS.overlay} label{display:grid;gap:4px;color:#cbd5e1;font-size:11px}#${IDS.overlay} .ha-wide{grid-column:1/-1}#${IDS.overlay} .ha-actions{display:flex;gap:8px;grid-column:1/-1}#${IDS.overlay} .ha-actions button{flex:1;font-weight:800}#${IDS.overlay} [data-scan]{background:linear-gradient(#e57b18,#a8450b);border-color:#ffad45}#${IDS.overlay} .ha-list{flex:1;min-height:0;overflow:auto;display:grid;align-content:start;gap:8px;padding:10px}#${IDS.overlay} .ha-target{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:11px;border:1px solid #3c4655;border-radius:12px;background:#131c27}#${IDS.overlay} .ha-name{font-weight:900;color:#fff}#${IDS.overlay} .ha-meta{margin-top:4px;color:#aebdce;font-size:11px}#${IDS.overlay} .ha-speed{color:#ffcc70;font-weight:900}#${IDS.overlay} .ha-links{display:flex;gap:6px;align-items:center}#${IDS.overlay} .ha-links a{display:grid;place-items:center;width:42px;height:38px;border:1px solid #87531f;border-radius:9px;background:#42230c;color:#fff;text-decoration:none;font-weight:900}#${IDS.overlay} .ha-empty{padding:30px;text-align:center;color:#aebdce}#${IDS.overlay} footer{padding:8px 12px;border-top:1px solid #2f3037;color:#8998aa;font-size:10px}@media(max-width:540px){#${IDS.overlay} .ha-panel{height:94dvh}#${IDS.overlay} .ha-settings{grid-template-columns:1fr 1fr}#${IDS.overlay} .ha-target{grid-template-columns:1fr}#${IDS.overlay} .ha-links{justify-content:flex-end}}`;
+    style.textContent = `#${IDS.launcher}{position:fixed;right:12px;bottom:88px;z-index:2147483000;width:48px;height:48px;border:1px solid #f59e0b;border-radius:15px;background:linear-gradient(160deg,#542109,#1a1212);color:#fff;font-size:24px;box-shadow:0 10px 28px #000a;touch-action:none;user-select:none}#${IDS.overlay}{position:fixed;inset:0;z-index:2147483600;display:flex;align-items:flex-end;justify-content:center;background:transparent;background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;color:#f8fafc;font:14px/1.4 system-ui,sans-serif}#${IDS.overlay}[hidden]{display:none!important}#${IDS.overlay} .ha-panel{width:min(760px,100%);height:min(92dvh,920px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #6b3b1c;border-radius:18px;background:linear-gradient(155deg,#1d1620,#0d141d 55%);box-shadow:none}#${IDS.overlay} header{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #483020;background:#201822}#${IDS.overlay} header b{flex:1;color:#ffd894}#${IDS.overlay} button,#${IDS.overlay} input{border:1px solid #594a43;border-radius:9px;background:#17202a;color:#fff;min-height:38px;padding:7px 10px}#${IDS.overlay} .ha-head-btn{width:40px;padding:0}#${IDS.overlay} .ha-progress{padding:10px 12px;color:#cbd5e1;border-bottom:1px solid #2f3037}#${IDS.overlay} .ha-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid #2f3037}#${IDS.overlay} label{display:grid;gap:4px;color:#cbd5e1;font-size:11px}#${IDS.overlay} .ha-wide{grid-column:1/-1}#${IDS.overlay} .ha-actions{display:flex;gap:8px;grid-column:1/-1}#${IDS.overlay} .ha-actions button{flex:1;font-weight:800}#${IDS.overlay} [data-scan]{background:linear-gradient(#e57b18,#a8450b);border-color:#ffad45}#${IDS.overlay} .ha-list{flex:1;min-height:0;overflow:auto;display:grid;align-content:start;gap:8px;padding:10px}#${IDS.overlay} .ha-target{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:11px;border:1px solid #3c4655;border-radius:12px;background:#131c27}#${IDS.overlay} .ha-name{font-weight:900;color:#fff}#${IDS.overlay} .ha-meta{margin-top:4px;color:#aebdce;font-size:11px}#${IDS.overlay} .ha-speed{color:#ffcc70;font-weight:900}#${IDS.overlay} .ha-links{display:flex;gap:6px;align-items:center}#${IDS.overlay} .ha-links a{display:grid;place-items:center;width:42px;height:38px;border:1px solid #87531f;border-radius:9px;background:#42230c;color:#fff;text-decoration:none;font-weight:900}#${IDS.overlay} .ha-empty{padding:30px;text-align:center;color:#aebdce}#${IDS.overlay} footer{padding:8px 12px;border-top:1px solid #2f3037;color:#8998aa;font-size:10px}@media(max-width:540px){#${IDS.overlay} .ha-panel{height:94dvh}#${IDS.overlay} .ha-settings{grid-template-columns:1fr 1fr}#${IDS.overlay} .ha-target{grid-template-columns:1fr}#${IDS.overlay} .ha-links{justify-content:flex-end}}`;
     style.textContent += `#${IDS.overlay} .ha-panel{height:min(86dvh,780px);border-radius:16px;background:linear-gradient(180deg,#17131d,#0b1119 42%)}#${IDS.overlay} header{min-height:48px;padding:7px 10px}#${IDS.overlay} header b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#${IDS.overlay} .ha-head-btn{width:36px;min-height:36px}#${IDS.overlay} .ha-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;padding:8px 10px;border-bottom:1px solid #302c35;background:#111722}#${IDS.overlay} .ha-key{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8fd6ad;font-size:11px;font-weight:800}#${IDS.overlay} .ha-toolbar button{min-height:34px;padding:5px 11px;font-size:12px;font-weight:900}#${IDS.overlay} .ha-progress{padding:7px 10px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#${IDS.overlay} .ha-settings[hidden],#${IDS.overlay} .ha-api-panel[hidden]{display:none!important}#${IDS.overlay} .ha-settings,#${IDS.overlay} .ha-api-panel{max-height:50dvh;overflow:auto;background:#111722}#${IDS.overlay} .ha-api-panel{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;border-bottom:1px solid #2f3037}#${IDS.overlay} .ha-api-head,#${IDS.overlay} .ha-api-status,#${IDS.overlay} .ha-api-actions,#${IDS.overlay} .ha-api-panel .ha-setup{grid-column:1/-1}#${IDS.overlay} .ha-api-head{display:flex;align-items:center;gap:8px;color:#ffd894}#${IDS.overlay} .ha-api-head b{flex:1}#${IDS.overlay} .ha-api-close{width:36px;min-height:34px;padding:0}#${IDS.overlay} .ha-api-status{color:#8fd6ad;font-size:11px}#${IDS.overlay} .ha-api-actions{display:flex;gap:8px}#${IDS.overlay} .ha-api-actions button{flex:1;font-weight:800}#${IDS.overlay} [data-api-save]{background:linear-gradient(#e57b18,#a8450b);border-color:#ffad45}#${IDS.overlay} .ha-hint{padding:6px 10px;color:#8e9cad;font-size:10px;border-bottom:1px solid #29313a}#${IDS.overlay} .ha-setup{display:grid;place-items:center;flex:1;min-height:38px;border:1px solid #594a43;border-radius:9px;background:#17202a;color:#ffd894;text-decoration:none;font-weight:800}#${IDS.overlay} footer{padding:5px 10px;text-align:center}@media(max-width:540px){#${IDS.overlay}{font-size:13px}#${IDS.overlay} .ha-panel{height:84dvh;border-radius:16px}#${IDS.overlay} .ha-settings,#${IDS.overlay} .ha-api-panel{grid-template-columns:1fr 1fr;gap:7px;padding:8px}#${IDS.overlay} label{font-size:10px}#${IDS.overlay} input{min-height:36px;padding:5px 8px}#${IDS.overlay} .ha-list{padding:7px;gap:7px}#${IDS.overlay} .ha-target{grid-template-columns:minmax(0,1fr) auto;padding:9px}#${IDS.overlay} .ha-links{justify-content:initial}#${IDS.overlay} .ha-links a{width:40px;height:35px}#${IDS.overlay} .ha-hint{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}`;
     (document.head || document.documentElement).appendChild(style);
   }
@@ -1352,8 +1279,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (button) { button.disabled = scanning; button.textContent = scanning ? 'SCANNING…' : 'SCAN NOW'; }
   }
   function renderTargets() {
-    targets = targets.filter(row => row.statusVerified === true && row.status === 'Okay' &&
-      num(row.verifiedAt) > 0 && Date.now() - num(row.verifiedAt) <= STATUS_TTL && isInactiveTarget(row));
     const list = $('.ha-list', $('#' + IDS.overlay));
     if (!list) return;
     list.replaceChildren();
@@ -1376,12 +1301,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     settings.maxFF = Math.max(1, Math.min(3, num($('[data-maxff]', overlay)?.value) || DEFAULTS.maxFF));
     settings.maxResults = Math.max(5, Math.min(100, num($('[data-results]', overlay)?.value) || DEFAULTS.maxResults));
     settings.statusChecks = Math.max(10, Math.min(160, num($('[data-checks]', overlay)?.value) || DEFAULTS.statusChecks));
-    settings.includeBounties = Boolean($('[data-bounties]', overlay)?.checked);
-    settings.includeInactive = Boolean($('[data-inactive]', overlay)?.checked);
-    settings.scanFactions = Boolean($('[data-factions]', overlay)?.checked);
-    settings.inactiveDays = Math.max(1, Math.min(365, Math.floor(num($('[data-days]', overlay)?.value) || 1)));
-    settings.factionIds = String($('[data-factionids]', overlay)?.value || '').slice(0, 250);
-    settings.discoveryLimit = Math.max(100, Math.min(10000, Math.floor(num($('[data-poollimit]', overlay)?.value) || 2500)));
     write(KEYS.settings, settings);
     setProgress('Setările scanării au fost salvate');
   }
@@ -1431,7 +1350,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     let overlay = $('#' + IDS.overlay);
     if (!overlay) {
       overlay = document.createElement('div'); overlay.id = IDS.overlay; overlay.hidden = true;
-      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-api-panel" hidden><div class="ha-api-head"><b>🔑 CHEI API</b><button class="ha-api-close" data-api-close>×</button></div><div class="ha-api-status" data-api-source></div><label>Cheie Torn<input data-torn type="password" maxlength="16" autocomplete="off" placeholder="Hub/PDA folosit automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" autocomplete="off" placeholder="Opțională"></label><div class="ha-api-actions"><button data-api-save>SALVEAZĂ CHEILE</button><button data-api-clear>ȘTERGE LOCALE</button></div><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><label class="ha-toggle-row"><span>🎯 Include Bounty</span><span class="ha-switch"><input data-bounties type="checkbox" ${settings.includeBounties ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label class="ha-toggle-row"><span>💤 Doar jucători inactivi</span><span class="ha-switch"><input data-inactive type="checkbox" ${settings.includeInactive ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label class="ha-toggle-row"><span>🔎 Descoperă membri din facțiuni</span><span class="ha-switch"><input data-factions type="checkbox" ${settings.scanFactions ? "checked" : ""}><span class="ha-switch-track"></span></span></label><label>ID-uri facțiuni (separate prin virgulă)<input data-factionids type="text" value="${esc(settings.factionIds)}" placeholder="Ex: 123, 456"></label><label>Inactiv minimum (zile)<select data-days>${[1,3,7,14,30].map(d => '<option value="' + d + '"' + (num(settings.inactiveDays) === d ? ' selected' : '') + '>' + d + ' zile</option>').join('')}</select></label><label>Limită bază locală<input data-poollimit type="number" min="100" max="10000" value="${settings.discoveryLimit}"></label><div class="ha-actions"><button data-save>SALVEAZĂ SETĂRILE</button></div></div><div class="ha-hint">LIVE OKAY · Inactivi ON = exclusiv inactivi fără bounty · cele mai ușoare primele</div><div class="ha-list"></div></section>`;
+      overlay.innerHTML = `<section class="ha-panel"><header><b>🎃 Halloween Assistant <small>v${VERSION}</small></b><button class="ha-head-btn" data-key title="Chei API">🔑</button><button class="ha-head-btn" data-close>×</button></header><div class="ha-toolbar"><span class="ha-key">API: ${esc(keySource())} · CORE ${esc(SHARED_CORE?.version || '—')}</span><button data-settings>⚙ SETĂRI</button><button data-scan>SCAN</button></div><div class="ha-api-panel" hidden><div class="ha-api-head"><b>🔑 CHEI API</b><button class="ha-api-close" data-api-close>×</button></div><div class="ha-api-status" data-api-source></div><label>Cheie Torn<input data-torn type="password" maxlength="16" autocomplete="off" placeholder="Hub/PDA folosit automat"></label><label>Cheie FFScouter<input data-ff type="password" maxlength="16" autocomplete="off" placeholder="Opțională"></label><div class="ha-api-actions"><button data-api-save>SALVEAZĂ CHEILE</button><button data-api-clear>ȘTERGE LOCALE</button></div><a class="ha-setup" href="https://ffscouter.com/" target="_blank" rel="noopener noreferrer">ACTIVEAZĂ FFSCOUTER</a></div><div class="ha-progress" data-progress>Pregătit pentru scanare</div><div class="ha-settings" hidden><label>Pagini<input data-pages type="number" min="1" max="60" value="${settings.maxPages}"></label><label>FF maxim<input data-maxff type="number" min="1" max="3" step="0.05" value="${settings.maxFF}"></label><label>Rezultate<input data-results type="number" min="5" max="100" value="${settings.maxResults}"></label><label>Verificări live<input data-checks type="number" min="10" max="160" value="${settings.statusChecks}"></label><div class="ha-actions"><button data-save>SALVEAZĂ SETĂRILE</button></div></div><div class="ha-hint">LIVE OKAY · întâi cu bounty, apoi fără bounty · cele mai ușoare primele</div><div class="ha-list"></div></section>`;
       overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
       $('[data-close]', overlay).onclick = close;
       $('[data-save]', overlay).onclick = saveSettingsFromUI;
@@ -1446,18 +1365,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       SHARED_CORE?.ui?.ensureDonationFooter?.(panel, {
         id: 'halloween-assistant',
         showMoney: false,
-        itemsLabel: '🇷🇴 Special for REK family 🪖',
-        layout: 'inline'
+        itemsLabel: '🇷🇴 Special for REK family 🪖'
       });
       overlay._slxWorkspaceCleanup = SHARED_CORE?.ui?.applyWorkspaceLayout?.(overlay, panel, { top: 0, bottom: 8, side: 4, maxWidth: 760, radius: 16 }) || null;
       refreshApiPanel(overlay);
     }
     return overlay;
   }
-  function open() { const overlay = ensureUI(); overlay.hidden = false; targets = []; renderTargets(); if (!scanning) void scan(true); return true; }
+  function open() { const overlay = ensureUI(); overlay.hidden = false; renderTargets(); if (!targets.length && !scanning) void scan(false); return true; }
   function close() { const overlay = $('#' + IDS.overlay); if (overlay) overlay.hidden = true; }
-  setInterval(() => { if (targets.length) renderTargets(); }, 5000);
-  function schedule() { clearInterval(timer); if (settings.autoRefresh) timer = setInterval(() => { if (!document.hidden && !scanning) { targets = []; renderTargets(); void scan(true); } }, Math.max(30, num(settings.refreshSeconds) || 90) * 1000); }
+  function schedule() { clearInterval(timer); if (settings.autoRefresh) timer = setInterval(() => { if (!document.hidden && !scanning) void scan(false); }, Math.max(30, num(settings.refreshSeconds) || 90) * 1000); }
   function health() { return { version: VERSION, core: SHARED_CORE?.version || null, ready: true, scanning, targets: targets.length, bountyTargets: targets.filter(row => row.hasBounty).length, supplementalTargets: targets.filter(row => !row.hasBounty).length, lastScanMs, boardCacheAge: Date.now() - num(boardCache.at), targetPoolAge: Date.now() - num(targetPool.at), ffCache: Object.keys(ffCache).length, statusCache: Object.keys(statusCache).length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError, lastWarning }; }
 
   globalThis.SakaLuXHalloweenAssistant = Object.freeze({ version: VERSION, open, close, scan: () => scan(true), health });
