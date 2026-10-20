@@ -647,7 +647,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.5.7",
+      "version": "1.5.8",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -664,13 +664,14 @@
         }
       ],
       "release": {
-        "version": "1.5.7",
+        "version": "1.5.8",
         "date": "2026-10-21",
         "notes": [
-          "Compact Gym Settings for TornPDA with tighter button grids, stat rows and API actions.",
-          "Add Create Gym API Key shortcut to Torn with required perks, bars, gym and battle stats selections; the user confirms key creation in Torn.",
-          "Preserve colored stats and red dump multiplier; preserve ASCII-safe startup fix.",
-          "Hub 1.9.149 centralizes shared API key scopes and explicitly excludes Auditor-only selections; existing keys must be reissued to change permissions."
+          "Remove Aec3 from ratio choice while keeping backwards-compatible migration for stored settings.",
+          "Align all four stat labels including Defense, preserving individual stat colors and red dump marker.",
+          "Reposition compact CREATE KEY beside SET API KEY.",
+          "Correct Torn API v1 flat *_perks fields and v2 nested perks reading, calculate gym percentages from reported bonuses multiplicatively and show API status.",
+          "Keep ASCII-only script text for TornPDA."
         ]
       },
       "accessTier": "free",
