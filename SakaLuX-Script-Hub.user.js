@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.148
+// @version      1.9.149
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -892,12 +892,26 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.148';
+    const VERSION = '1.9.149';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
     const LOCALES_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/locales.json';
-    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks,bars,cooldowns,education,jobpoints,merits,refills,notifications,properties,weaponexp,skills,networth,criminalrecord,bazaar,crimes,hof,calendar,casino,competition,enlistedcars,faction,gym,honors,itemmarket,itemmods,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,personalstats&company=profile,employees,stock&torn=items,elimination,eliminationteam,stocks,bounties,merits,education&market=itemmarket';
+        // Audited union of installed SakaLuX add-ons using the shared key. Deliberately
+    // excludes private Account Auditor-only selections (log, events, messages,
+    // attacksfull, private forum/discord data, snapshot, etc).
+    // Torn still asks the user to confirm the requested permissions.
+    const HUB_MASTER_SCOPES = Object.freeze({
+        user: 'basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks,bars,cooldowns,education,jobpoints,merits,refills,notifications,properties,weaponexp,skills,networth,criminalrecord,bazaar,crimes,hof,calendar,casino,competition,enlistedcars,faction,gym,honors,itemmarket,itemmods,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,personalstats'.split(','),
+        company: 'profile,employees,stock'.split(','),
+        torn: 'items,elimination,eliminationteam,stocks,bounties,merits,education'.split(','),
+        market: 'itemmarket'.split(',')
+    });
+    const AUDITOR_ONLY_DENY = new Set(['attacksfull','messages','events','log','snapshot','forumfeed','forumfriends','forumposts','forumthreads','forumsubscribedthreads','forumsubscribedthreads','list','discord','display','icons']);
+    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub'
+        + Object.entries(HUB_MASTER_SCOPES).map(([group, selections]) =>
+            '&' + group + '=' + [...new Set(selections.filter(name => group !== 'user' || !AUDITOR_ONLY_DENY.has(name)))].join(',')
+        ).join('');
     const UPDATE_CACHE_TIME = 60 * 60 * 1000;
 
     const IDS = {
