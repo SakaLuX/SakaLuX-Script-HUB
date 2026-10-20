@@ -926,6 +926,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.149", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.148", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.147", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.146", "date": "2026-10-20", "changes": ["Version synchronization"]},
@@ -2056,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.5.6",
+                "version": "1.5.7",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2073,13 +2074,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.5.6",
+                    "version": "1.5.7",
                     "date": "2026-10-21",
                     "notes": [
-                        "Restore red dump (x0) marker alongside four color-coded stat multipliers.",
-                        "Render separate gym gain perk values for Strength, Speed, Defense and Dexterity; unknown values remain unverified.",
-                        "Refresh gym API when Settings opens if a key is available, plus manual REFRESH NOW.",
-                        "Keep ASCII-safe TornPDA compatibility."
+                        "Compact Gym Settings for TornPDA with tighter button grids, stat rows and API actions.",
+                        "Add Create Gym API Key shortcut to Torn with required perks, bars, gym and battle stats selections; the user confirms key creation in Torn.",
+                        "Preserve colored stats and red dump multiplier; preserve ASCII-safe startup fix.",
+                        "Hub 1.9.149 centralizes shared API key scopes and explicitly excludes Auditor-only selections; existing keys must be reissued to change permissions."
                     ]
                 },
                 "accessTier": "free",
