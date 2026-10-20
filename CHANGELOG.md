@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.5.2 / Hub v1.9.147 — TornPDA installed-state regression fix (2026-10-21)
+
+- Reverted Gym Optimizer to page-context `@grant none`, matching versions that were recognized before v1.4.0.
+- Install version bridge is published before duplicate-script detection and visible via document DOM.
+- Hub explicitly checks the bridge independently of any inline Gym panel.
+- All existing saved strategies and personal API keys are retained.
+
+
 ## Gym Optimizer v1.5.1 / Hub v1.9.146 — Install detection and API persistence (2026-10-21)
 
 - Register Gym Optimizer version in explicit document and global installation markers even outside Gym.
