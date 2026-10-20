@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.5.2
+// @version      0.5.3
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -834,7 +834,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.5.2';
+  const VERSION = '0.5.3';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1343,20 +1343,29 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const previous = (discoveredPool.rows || []).filter(row => /FFScouter|Baldr/.test(String(row.source || '')));
       saveDiscovery([...previous, ...baldrRows, ...ffRows]);
       let rows = compactPool([...ffRows, ...baldrRows, ...previous]);
-      // FFScouter statistics enrich known candidates; errors do not cancel the scan.
-      try { rows = await enrichFF(rows); } catch (error) { sourceDiagnostics.FFStats = friendlyError(error, 'FFScouter'); }
+      // Verify live status first. FF enrichment is optional and must not delay target discovery.
       sourceDiagnostics.Local = discoveredPool.rows.length + ' ID-uri memorate';
       sourceDiagnostics.Pool = rows.length + ' ID-uri după combinare';
       const candidates = candidateRows(rows);
+      sourceDiagnostics.EligibleCandidates = candidates.length;
+      if (!candidates.length) sourceDiagnostics.Hint = 'No candidates available from enabled sources';
       const limit = Math.max(10, Math.min(160, Math.floor(num(settings.statusChecks) || DEFAULTS.statusChecks)));
       const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
       const verified = [];
+      const checkedStatuses = { okay: 0, offline: 0, unknown: 0, excluded: 0 };
       const checkCount = Math.min(limit, candidates.length);
       for (let index = 0; index < checkCount; index += STATUS_CONCURRENCY) {
         const batch = candidates.slice(index, index + STATUS_CONCURRENCY);
         setProgress('Verifying attack-ready status', Math.min(index, limit), Math.min(limit, candidates.length));
         const checked = await mapLimit(batch, STATUS_CONCURRENCY, row => rateLimited ? row : checkStatus(row, force));
-        verified.push(...checked.filter(row => row.statusVerified === true && row.status === 'Okay' && (!settings.includeInactive || isInactiveTarget(row))));
+        for (const item of checked) {
+          if (item.status === 'Okay' && item.statusVerified) checkedStatuses.okay++;
+          else checkedStatuses.unknown++;
+          if (String(item.lastActionStatus || '').toLowerCase() === 'offline') checkedStatuses.offline++;
+          if (item.statusVerified && item.status === 'Okay' && (!settings.includeInactive || isInactiveTarget(item))) verified.push(item);
+          else checkedStatuses.excluded++;
+        }
+        sourceDiagnostics.Torn = `${checkedStatuses.okay} Okay · ${checkedStatuses.offline} offline · ${checkedStatuses.unknown} necunoscuți · ${checkedStatuses.excluded} excluși`;
         targets = verified.filter(row => Date.now() - num(row.verifiedAt) <= STATUS_TTL).sort(targetCompare).slice(0, wanted);
         renderTargets();
         if (verified.length >= wanted || rateLimited) break;
