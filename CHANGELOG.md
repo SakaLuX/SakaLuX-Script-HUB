@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.5.7 / Hub v1.9.149 - compact UI and key permissions (2026-10-21)
+
+- Gym: reduce spacing in ratio choices, stat order, multiplier inputs and API controls for TornPDA.
+- Gym: add CREATE GYM API KEY before CLEAR KEY. Opens Torn custom key creation with user perks, bars, gym and battlestats preselected; Torn still requires user confirmation and the key must be pasted/saved.
+- Hub: centralize the existing combined master API scope list covering the examined SakaLuX add-ons, excluding Auditor-only private selections (e.g. logs, messages, attack history and private forum data). Master key URL requests necessary scopes but cannot modify an existing key. Re-create/save the key to change its permissions.
+- No API secrets are generated, sent, or copied by SakaLuX.
+- Static JavaScript parsing verified; TornPDA on-device validation pending.
+
 ## Gym Optimizer v1.5.6 - Settings stat colors and API gym bonuses (2026-10-21)
 
 - Color the dump (x0) multiplier red and keep Defense in the same four-stat display order and label layout.
