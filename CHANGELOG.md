@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.0.5 — Stat bars and native stat reading (2026-10-20)
+
+- Added compact four-stat colored progress bars and target/gap indicators like the StatForge layout.
+- Reads displayed values from native Gym training tiles when recognized, with manual values as fallback.
+- Preserves safe training-grid anchor; does not guess gym unlocks or cap values.
+- Baldr, Hank and Aec3 still use editable starter templates rather than proven StatForge algorithms.
+
+
 ## Gym Optimizer v1.0.4 — Native training anchor fix (2026-10-20)
 
 - Mounts directly before the native four-stat training tiles, not within an arbitrary Gym root container.

@@ -649,7 +649,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Editable Baldr, Hank, Aec3, Balanced, 2-stat, 3-stat and Custom starting templates; manual stat values and local snapshots. No automatic training or gym switching. Template weights are not verified StatForge formula parity.",
@@ -661,12 +661,12 @@
         }
       ],
       "release": {
-        "version": "1.0.4",
+        "version": "1.0.5",
         "date": "2026-10-20",
         "notes": [
-          "Mount strictly before Torn's actual native training tile group, not in Gym root.",
-          "CSS static normal-flow enforced to prevent overlap.",
-          "Hide panel safely when the real training group cannot be located."
+          "StatForge-style four-stat progress rows and colors.",
+          "Read displayed stats from individual native gym tiles where possible.",
+          "Keep safe native training anchor and no locked-gym switch."
         ]
       },
       "accessTier": "free",
