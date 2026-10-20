@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.3.1
+// @version      1.4.0
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
-// @grant        none
+// @grant        GM_xmlhttpRequest
+// @connect      api.torn.com
 // @license      All Rights Reserved
 // @homepageURL  https://github.com/SakaLuX/SakaLuX-Script-HUB
 // ==/UserScript==
@@ -995,6 +996,59 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(!train)return false;
     train.click();return true;
   }
+
+  // Perks are displayed only when returned by Torn API. An unknown stacking rule is
+  // never silently converted into a claimed exact training bonus.
+  let gymApi={status:'Not checked',data:null,at:0};
+  function hubApiKey(){
+    const h=window.SakaLuXScriptHub;
+    try{return typeof h?.getApiKey==='function'?String(h.getApiKey()||'').trim():''}catch{return ''}
+  }
+  function apiRequest(url){
+    return new Promise((resolve,reject)=>{
+      if(typeof GM_xmlhttpRequest==='function'){
+        GM_xmlhttpRequest({method:'GET',url,timeout:12000,onload:r=>{try{resolve(JSON.parse(r.responseText))}catch(e){reject(e)}},onerror:()=>reject(new Error('Network error')),ontimeout:()=>reject(new Error('Timeout'))});
+      } else fetch(url).then(r=>r.json()).then(resolve,reject);
+    });
+  }
+  async function refreshGymApi(){
+    const key=hubApiKey();
+    if(!key){gymApi.status='No Hub API key available';render();return}
+    gymApi.status='Loading';render();
+    try{
+      const data=await apiRequest('https://api.torn.com/user/?selections=perks,bars,gym,battlestats&key='+encodeURIComponent(key));
+      if(data?.error)throw Error(data.error.error||'Torn API returned an error');
+      gymApi={status:'Updated',data,at:Date.now()};
+    }catch(e){gymApi.status='Unavailable: '+String(e.message||e).slice(0,100)}
+    render();
+  }
+  function perkGroups(){
+    const p=gymApi.data?.perks||{};
+    return Object.entries(p).filter(([,v])=>Array.isArray(v))
+      .map(([group,entries])=>({group,entries:entries.map(x=>typeof x==='string'?x:(x?.description||x?.name||'')).filter(t=>/gym|train|steadfast|strength|speed|defense|dexterity|happy|energy/i.test(t))}))
+      .filter(g=>g.entries.length);
+  }
+  function gymEnergy(){
+    const d=gymApi.data||{},current=d.energy||d.bars?.energy;
+    return Number(current?.current??current?.amount??d?.energy?.current);
+  }
+  function safeReps(stat){
+    const energy=gymEnergy();
+    // An exact limit cannot be inferred from a displayed ratio alone because
+    // special-gym criteria vary. Conservatively avoid automatic cap extrapolation.
+    const tile=nativeStatTile(stat);
+    const input=tile?.querySelector('input[type="number"],input[inputmode="numeric"],input[type="text"]');
+    const cost=Number(tile?.getAttribute('data-energy-cost'));
+    if(!Number.isFinite(energy)||energy<1||!Number.isFinite(cost)||cost<=0)return null;
+    return Math.max(0,Math.min(999,Math.floor(energy/cost)));
+  }
+  function specialGymSafety(actual){
+    const high=Number(actual.Dexterity)||0;
+    const secondary=Math.max(Number(actual.Strength)||0,Number(actual.Speed)||0);
+    if(!high||!secondary)return 'Ratio safety not verified — missing stats';
+    const ratio=high/secondary;
+    return 'DEX / highest secondary = '+ratio.toFixed(3)+'×. Gym eligibility must still be checked in Torn.';
+  }
   function render(){
     const live=nativeStats(),actual={...state.values,...live};
     const active=stats.filter(n=>Number(state.weights[n])>0 && Number(actual[n])>0);
@@ -1028,6 +1082,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const message=w===0?'! Dump - minimize':!value?'Unknown - enter stats':value>=t?'OK - on target':'Need +'+fmt(t-value);
       return '<div class="sf-stat"><div class="sf-statline"><span style="color:'+statColors[n]+'">'+n+'</span><small>'+(w===0?'DUMP':order===1?'1ST':order===2?'2ND':order===3?'3RD':'4TH')+'</small><b>'+fmt(value)+(t?' / '+fmt(t):'')+'</b></div><div class="sf-track"><div style="width:'+progress+'%;background:'+statColors[n]+'"></div></div><div class="sf-statmessage">'+message+'</div></div>';
     }).join('');
+    const groups=perkGroups();
+    const perkPanel='<div class="sf-section">GYM PERKS & ENERGY</div><div class="sf-card"><button id="slx-gym-api-refresh">REFRESH API</button><div>API: '+escape(gymApi.status)+(gymApi.at?' · '+new Date(gymApi.at).toLocaleTimeString():'')+'</div><div>Energy: '+(Number.isFinite(gymEnergy())?fmt(gymEnergy()):'unavailable')+'</div><div>'+escape(specialGymSafety(actual))+'</div><div class="sf-perks">'+(groups.length?groups.map(g=>'<p><b>'+escape(g.group)+'</b>: '+g.entries.map(escape).join(' · ')+'</p>').join(''):'No verified gym perks loaded')+'</div><small>Steadfast, Education, Property, Books, jobs and other perks are shown when returned by Torn. Exact stacked gains and gym caps are not claimed until validated.</small></div>';
     const settings='<div class="sf-section">STRATEGY SETTINGS</div><div class="sf-settings"><label>Strategy <select id="slx-gym-mode">'+Object.keys(presets).map(n=>'<option '+(state.mode===n?'selected':'')+'>'+esc(n)+'</option>').join('')+'</select></label><p>Custom weights are planning targets; exact StatForge formulas are not yet verified.</p>'+stats.map(n=>'<div class="sf-edit"><label>'+n+'</label><input type="number" data-value="'+n+'" value="'+(Number(actual[n])||0)+'"><input type="number" step=".05" min="0" data-weight="'+n+'" value="'+(Number(state.weights[n])||0)+'"></div>').join('')+'<button id="slx-gym-calc">Save values</button></div>';
     const compact=n=>{const v=Number(n)||0;return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1000?Math.round(v/1000)+'K':fmt(v)};
     const rows=snapshots.slice(-15).reverse();
@@ -1039,12 +1095,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const summary='=== SakaLuX Gym Export ===\nDate: '+new Date().toLocaleString()+'\nRatio: '+state.mode+' | High: '+(state.highStat||'Dexterity')+'\nHealth: '+(complete?pct+'%':'unverified')+' | TBS: '+fmt(total)+'\n\nSTAT       CURRENT     TARGET      STATUS\n'+stats.map(n=>n.padEnd(11)+fmt(actual[n]).padEnd(12)+(targets[n]?fmt(targets[n]):'dump').padEnd(12)+(Number(state.weights[n])===0?'Minimize':(actual[n]>=targets[n]?'At target':'Below target'))).join('\n');
     const exporter='<div class="sf-section">EXPORT SNAPSHOT</div><div class="sf-export"><p>Copy a plain-text summary of your current ratio health and target stats.</p><button id="slx-gym-copy">COPY TO CLIPBOARD</button><pre>'+escape(summary)+'</pre><button id="slx-gym-export">EXPORT HISTORY CSV</button></div>';
     const about='<div class="sf-info"><div class="sf-section">WHY NOT JUST TRAIN ALL STATS EQUALLY?</div><p>Specialist gyms offer different training gains and ratio requirements. A ratio plan helps balance training priorities while preserving gym access.</p><div class="sf-section">GYM DOTS — WHY THEY MATTER</div><p>More gym dots generally mean greater gains per energy, but eligibility and training costs vary. Always verify unlocks in Torn.</p><div class="sf-three"><div>GEORGE’S GYM<strong>~7.3</strong></div><div>SPECIAL GYMS<strong>~7.5</strong></div><div>ELITE GYMS<strong>~8.0</strong></div></div><div class="sf-section">BALDR’S RATIO</div><p>Balanced specialist plan using multiple trained stats. Suitable when avoiding a very low dump stat.</p><div class="sf-section">HANK’S RATIO</div><p>A three-stat emphasis with one dump stat. The dump may reduce combat effectiveness, so choose carefully.</p><div class="sf-section">SAKALUX · DEXTERITY HIGH</div><p>DEX is primary, Speed secondary, Strength supporting, and Defense is the default dump. Exact unlock rules are not automatically verified.</p><div class="sf-section">STATS EXPLAINED</div><p><b>Strength:</b> damage when you hit.</p><p><b>Speed:</b> chance to hit an opponent.</p><p><b>Defense:</b> reduces damage from landed hits.</p><p><b>Dexterity:</b> improves dodging.</p></div>';
-    body.innerHTML=header+(tab==='OVERVIEW'?info+train+headroom+statView:tab==='HISTORY'?history:tab==='EXPORT'?exporter:tab==='SETTINGS'?settings:about);
+    body.innerHTML=header+(tab==='OVERVIEW'?info+train+headroom+perkPanel+statView:tab==='HISTORY'?history:tab==='EXPORT'?exporter:tab==='SETTINGS'?settings:about);
     body.querySelector('[data-reps]')?.addEventListener('click',e=>{
       const stat=e.currentTarget.dataset.reps;
-      const ok=setNativeReps(stat,999);
+      const reps=safeReps(stat);
+      const ok=setNativeReps(stat,reps??999);
       const msg=body.querySelector('.sf-feedback');
-      if(msg)msg.textContent=ok?'Set 999 repetitions for '+stat+'. Press Torn TRAIN to confirm.':'Could not identify an editable '+stat+' repetition field. Nothing changed.';
+      if(msg)msg.textContent=ok?'Set '+(reps??999)+' repetitions for '+stat+'. Verify energy and press TRAIN to confirm.':'Could not identify an editable '+stat+' repetition field. Nothing changed.';
     });
     body.querySelector('#slx-gym-switch')?.addEventListener('click',e=>{
       const name=e.currentTarget.dataset.gym;
@@ -1061,6 +1118,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       if(!clickNativeTrain(stat)){if(msg)msg.textContent='Native TRAIN control unavailable. No training executed.';return}
       if(msg)msg.textContent='One native '+stat+' TRAIN action requested. Verify the Torn result.';
     });
+    body.querySelector('#slx-gym-api-refresh')?.addEventListener('click',refreshGymApi);
     body.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{panel.dataset.tab=b.dataset.tab;render()});
     body.querySelector('#slx-gym-mode')?.addEventListener('change',e=>{state.mode=e.target.value;stats.forEach((n,i)=>state.weights[n]=presets[state.mode][i]);save();render()});
     body.querySelector('#slx-gym-calc')?.addEventListener('click',()=>{
@@ -1080,7 +1138,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ▴':'Settings ▾'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.3.1',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.4.0',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
