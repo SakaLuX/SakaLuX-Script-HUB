@@ -647,7 +647,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.5.5",
+      "version": "1.5.6",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -664,13 +664,13 @@
         }
       ],
       "release": {
-        "version": "1.5.5",
+        "version": "1.5.6",
         "date": "2026-10-21",
         "notes": [
-          "Rebuild Settings page with mobile ratio, highest-stat, dump-stat, custom multipliers and Dark/Light controls.",
-          "Show stat ordering and available Torn API perks, with conservative gym-access guidance.",
-          "Restore expanded, color-coded Info explanations and gym comparison cards.",
-          "Preserve ASCII-safe source to avoid TornPDA startup regression."
+          "Restore red dump (x0) marker alongside four color-coded stat multipliers.",
+          "Render separate gym gain perk values for Strength, Speed, Defense and Dexterity; unknown values remain unverified.",
+          "Refresh gym API when Settings opens if a key is available, plus manual REFRESH NOW.",
+          "Keep ASCII-safe TornPDA compatibility."
         ]
       },
       "accessTier": "free",
