@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.139
+// @version      1.9.140
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -891,7 +891,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.139';
+    const VERSION = '1.9.140';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2325,15 +2325,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function getInstalledVersion(script) {
         // TornPDA can retain an old canonical marker. Compare ALL live version signals.
         const versions = [];
-        try { addCanonicalVersionSignals(); } catch {}
-        function addCanonicalVersionSignals() {
-            add(globalThis.__SakaLuXInstalledVersions?.[script.id]);
-            add(document.documentElement?.getAttribute('data-sakalux-installed-' + script.id));
-        }
         const add = value => {
             const v = String(value || '').trim();
             if (/^\d+(?:\.\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?$/.test(v)) versions.push(v);
         };
+        // Read metadata markers only after the collector has been initialized.
+        try {
+            add(globalThis.__SakaLuXInstalledVersions?.[script.id]);
+            add(document.documentElement?.getAttribute('data-sakalux-installed-' + script.id));
+        } catch {}
         try {
             const bridge = document.getElementById('sakalux-module-bridge-' + script.id);
             add(bridge?.dataset?.version);
