@@ -896,7 +896,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
     const LOCALES_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/locales.json';
-    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks&company=profile,employees,stock&torn=items,elimination,eliminationteam,stocks,bounties&market=itemmarket';
+    const SHARED_API_KEY_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks,bars,cooldowns,education,jobpoints,merits,refills,notifications,properties,weaponexp,skills,networth,criminalrecord,bazaar,crimes,hof,calendar,casino,competition,enlistedcars,faction,gym,honors,itemmarket,itemmods,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,personalstats&company=profile,employees,stock&torn=items,elimination,eliminationteam,stocks,bounties,merits,education&market=itemmarket';
     const UPDATE_CACHE_TIME = 60 * 60 * 1000;
 
     const IDS = {
