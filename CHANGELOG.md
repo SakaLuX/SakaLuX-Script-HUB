@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.2.1 — Train Next interaction and mobile scroll (2026-10-21)
+
+- Train Next can set 999 repetitions in the matching native stat tile; Torn TRAIN remains a manual action.
+- Gym switch requires explicit unlock proof and therefore refuses unverified gyms instead of trying Deep Burn.
+- Reduced padding and removed overflow constraints that prevented TornPDA scrolling.
+- Exact automatic best-gym switching requires verified unlocked gym state; not claimed as delivered.
+
+
 ## Gym Optimizer v1.2.0 — StatForge-style secondary tabs (2026-10-21)
 
 - History: 15 snapshots in colored Strength, Speed, Defense, Dexterity, TBS table with deltas and clear history.
