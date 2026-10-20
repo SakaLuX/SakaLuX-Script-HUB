@@ -2038,18 +2038,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.0.5",
+                "version": "1.0.6",
                 "sourceUrl": "",
                 "downloadUrl": "",
                 "info": "Editable Baldr, Hank, Aec3, Balanced, 2-stat, 3-stat and Custom starting templates; manual stat values and local snapshots. No automatic training or gym switching. Template weights are not verified StatForge formula parity.",
                 "quickActions": [],
                 "release": {
-                    "version": "1.0.5",
-                    "date": "2026-10-20",
+                    "version": "1.0.6",
+                    "date": "2026-10-21",
                     "notes": [
-                        "StatForge-style four-stat progress rows and colors.",
-                        "Read displayed stats from individual native gym tiles where possible.",
-                        "Keep safe native training anchor and no locked-gym switch."
+                        "Aec3 renamed to SakaLuX with DEX-primary preset.",
+                        "Migrates prior Aec3 selection automatically.",
+                        "Denser StatForge-inspired inline style, without changing native training controls.",
+                        "No fake recommendations when fewer than two stats are available."
                     ]
                 },
                 "accessTier": "free",
