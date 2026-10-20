@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.144
+// @version      1.9.145
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2031,18 +2031,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             {
                 "active": true,
                 "apiGlobal": "SakaLuXGymOptimizer",
-                "buttonSelector": "#slx-gym-toggle",
+                "buttonSelector": "#slx-gym-panel",
                 "category": "Gym",
-                "description": "COMING SOON — Gym Optimizer is in development and cannot be installed yet.",
+                "description": "SakaLuX Gym Optimizer — inline gym planner for TornPDA.",
                 "id": "gym-optimizer",
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.3.0",
-                "sourceUrl": "",
-                "downloadUrl": "",
+                "version": "1.3.1",
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
+                "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Editable Baldr, Hank, Aec3, Balanced, 2-stat, 3-stat and Custom starting templates; manual stat values and local snapshots. No automatic training or gym switching. Template weights are not verified StatForge formula parity.",
-                "quickActions": [],
+                "quickActions": [{"id":"open","label":"OPEN","method":"open"},{"id":"refresh","label":"REFRESH","method":"refresh"}],
                 "release": {
                     "version": "1.3.0",
                     "date": "2026-10-21",
@@ -2055,8 +2055,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "accessTier": "free",
                 "license": "All Rights Reserved",
-                "comingSoon": true,
-                "installable": false
+                "comingSoon": false,
+                "installable": true
             }
         ],
         "lastVerified": "2026-10-20",
