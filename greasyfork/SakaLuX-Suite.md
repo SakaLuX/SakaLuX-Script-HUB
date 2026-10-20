@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.984**
+**v0.9.985**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-07**
-- Canonical version: **v0.9.984**
+- Canonical version: **v0.9.985**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -33,6 +33,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Company Console
 - Race League Board
 - Odds Scout
+- Lottery Max Buy
 - Target Alerts
 
 ### Additional SakaLuX tools
@@ -47,12 +48,17 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.984 — Version and release synchronization**
-- Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.
-- Synchronizes the installed version reported to Script Hub with userscript metadata and the module runtime.
-- Updates the current release notes and documentation; INFO explains features and NEW lists changes.
+**v0.9.985 — Lottery Max Buy**
+- Adds an enabled-by-default Casino module for Daily Dime, Lucky Shot Lotto and Holy Grail.
+- Reads the available Casino Token count and adds a mobile-friendly `MAX BUY` button beside the ticket quantity field.
+- Fills the maximum permitted ticket quantity but leaves the final purchase confirmation to Torn's native button.
 
 ## Release history / Changelog
+
+### v0.9.985 — 2026-10-20
+- Adds **Lottery Max Buy** under `Master Control → Casino` and enables it by default.
+- Supports Daily Dime, Lucky Shot Lotto and Holy Grail across Torn and Torn PDA route changes.
+- Uses native input/change events for Torn's reactive form and never clicks the purchase button automatically.
 
 ### v0.9.941 — Graffiti Spray Guide + Hub state authority
 - Adds **Graffiti Spray Guide** under `Master Control → Crimes`, using the TornPDA/mobile-friendly helper behaviour as the primary presentation and adding progress, goals, stock and warning intelligence from the advanced helper.
