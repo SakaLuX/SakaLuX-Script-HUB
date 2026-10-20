@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.4.0
+// @version      0.4.1
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -836,7 +836,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.4.0';
+  const VERSION = '0.4.1';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1232,7 +1232,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     else if (/federal/i.test(text)) state = 'Federal';
     else if (/travel|abroad|flying|returning/i.test(text)) state = 'Abroad';
     else if (/okay|healthy|available/i.test(text)) state = 'Okay';
-    return { status: state, name: String(user.name || user.player_name || ''), level: user.level == null ? null : num(user.level), lastAction: String(user.last_action?.relative || ''), lastActionStatus: String(user.last_action?.status || '') };
+    return { status: state, name: String(user.name || user.player_name || ''), level: user.level == null ? null : num(user.level), lastAction: String(user.last_action?.relative || ''), lastActionStatus: String(user.last_action?.status || ''), lastActionTimestamp: Number(user.last_action?.timestamp) || 0 };
   }
   async function checkStatus(row, force = false) {
     const cached = statusCache[String(row.id)];
@@ -1280,7 +1280,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const lastAction = String(row.lastAction || '').toLowerCase();
     const days = Math.max(1, Math.min(365, Math.floor(num(settings.inactiveDays) || 1)));
     const parsed = lastAction.match(/(\d+)\s*(minute|hour|day|week|month|year)s?/i);
-    const ageHours = parsed ? Number(parsed[1]) * ({minute:1/60,hour:1,day:24,week:168,month:720,year:8760}[parsed[2]] || 0) : 0;
+    const ageHours = num(row.lastActionTimestamp) > 0 ? Math.max(0, (Date.now() / 1000 - num(row.lastActionTimestamp)) / 3600) : parsed ? Number(parsed[1]) * ({minute:1/60,hour:1,day:24,week:168,month:720,year:8760}[parsed[2]] || 0) : 0;
     const lastStatus = String(row.lastActionStatus || '').toLowerCase();
     return lastStatus === 'offline' && ageHours >= days * 24;
   }
@@ -1342,14 +1342,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const batch = candidates.slice(index, index + STATUS_CONCURRENCY);
         setProgress('Verifying attack-ready status', Math.min(index, limit), Math.min(limit, candidates.length));
         const checked = await mapLimit(batch, STATUS_CONCURRENCY, row => rateLimited ? row : checkStatus(row, force));
-        verified.push(...checked.filter(row => row.statusVerified === true && row.status === 'Okay' && isInactiveTarget(row)));
+        verified.push(...checked.filter(row => row.statusVerified === true && row.status === 'Okay' && (!settings.includeInactive || isInactiveTarget(row))));
+        targets = verified.filter(row => Date.now() - num(row.verifiedAt) <= STATUS_TTL).sort(targetCompare).slice(0, wanted);
+        renderTargets();
         if (verified.length >= wanted || rateLimited) break;
       }
       write(KEYS.statusCache, statusCache);
       targets = verified.filter(row => row.status === 'Okay' && row.statusVerified && Date.now() - num(row.verifiedAt) <= STATUS_TTL).sort(targetCompare).slice(0, wanted);
       renderTargets();
       lastScanMs = Math.round(performance.now() - started);
-      setProgress((lastWarning ? lastWarning + ' · ' : rateLimited ? 'API limit reached · cached live list kept · ' : 'Ready · ') + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
+      setProgress((lastWarning ? lastWarning + ' · ' : rateLimited ? 'API limit reached · ' : 'Ready · ') + candidates.length + ' candidați · ' + verified.length + ' verificați eligibili · ' + targets.length + ' LIVE · ' + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
       return true;
     } catch (error) {
       lastError = friendlyError(error, 'Torn');
@@ -1382,7 +1384,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function renderTargets() {
     targets = targets.filter(row => row.statusVerified === true && row.status === 'Okay' &&
-      num(row.verifiedAt) > 0 && Date.now() - num(row.verifiedAt) <= STATUS_TTL && isInactiveTarget(row));
+      num(row.verifiedAt) > 0 && Date.now() - num(row.verifiedAt) <= STATUS_TTL && (!settings.includeInactive || isInactiveTarget(row)));
     const list = $('.ha-list', $('#' + IDS.overlay));
     if (!list) return;
     list.replaceChildren();
