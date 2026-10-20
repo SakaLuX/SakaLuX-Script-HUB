@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.137
+// @version      1.9.138
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -891,7 +891,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.137';
+    const VERSION = '1.9.138';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -2379,8 +2379,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const sourceLatest = data.sourceLatest ? String(data.sourceLatest) : null;
         const verifiedLatest = [publishedLatest, sourceLatest].filter(Boolean).sort(compareVersions).pop();
         const latest = canonicalLatestVersion(script, verifiedLatest);
-        const distributionBehind = Boolean(verifiedLatest && compareVersions(verifiedLatest, script.expectedVersion) < 0);
-        const available = Boolean(installed && verifiedLatest && compareVersions(verifiedLatest, installed) > 0);
+        const distributionBehind = Boolean(publishedLatest && sourceLatest && compareVersions(sourceLatest, publishedLatest) > 0);
+        const available = Boolean(installed && publishedLatest && compareVersions(publishedLatest, installed) > 0);
         if (String(data.installed || '') !== String(installed || '') || String(data.latest || '') !== latest || String(data.expected || '') !== String(script.expectedVersion || '') || Boolean(data.available) !== available || Boolean(data.distributionBehind) !== distributionBehind) {
             updateCache[script.id] = { ...data, installed, expected: script.expectedVersion, publishedLatest, latest, distributionBehind, available };
             saveJson(STORAGE.updates, updateCache);
@@ -2411,7 +2411,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         }
         const verifiedLatest = [publishedLatest, sourceLatest].filter(Boolean).sort(compareVersions).pop();
         const latest = canonicalLatestVersion(script, verifiedLatest);
-        const distributionBehind = Boolean(verifiedLatest && compareVersions(verifiedLatest, script.expectedVersion) < 0);
+        const distributionBehind = Boolean(publishedLatest && sourceLatest && compareVersions(sourceLatest, publishedLatest) > 0);
         const data = {
             installed,
             expected: script.expectedVersion,
@@ -2419,7 +2419,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             sourceLatest,
             latest,
             distributionBehind,
-            available: Boolean(installed && verifiedLatest && compareVersions(verifiedLatest, installed) > 0),
+            available: Boolean(installed && publishedLatest && compareVersions(publishedLatest, installed) > 0),
             checkedAt: Date.now(),
             sourceError,
             githubError,
