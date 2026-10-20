@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.5.0
+// @version      1.5.1
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -1000,9 +1000,41 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Perks are displayed only when returned by Torn API. An unknown stacking rule is
   // never silently converted into a claimed exact training bonus.
   let gymApi={status:'Not checked',data:null,at:0};
+  const GYM_KEY_STORAGE='sakalux_gym_api_key_v1';
+  // Shared Hub key has priority; personal key is persisted locally as fallback.
   function hubApiKey(){
-    const h=window.SakaLuXScriptHub;
-    try{return typeof h?.getApiKey==='function'?String(h.getApiKey()||'').trim():''}catch{return ''}
+    try{
+      const h=window.SakaLuXScriptHub;
+      const shared=typeof h?.getApiKey==='function'?String(h.getApiKey()||'').trim():'';
+      if(/^[a-zA-Z0-9]{16}$/.test(shared))return shared;
+    }catch{}
+    try{
+      // Hub's saved fallback key, looked up using its own storage constant only
+      // when the Hub runtime is not directly reachable.
+      const key=localStorage.getItem(GYM_KEY_STORAGE)||'';
+      if(/^[a-zA-Z0-9]{16}$/.test(key))return key;
+    }catch{}
+    return '';
+  }
+  function savePersonalKey(key){
+    const clean=String(key||'').trim();
+    if(clean&&!/^[a-zA-Z0-9]{16}$/.test(clean))return false;
+    try{
+      if(clean)localStorage.setItem(GYM_KEY_STORAGE,clean);
+      else localStorage.removeItem(GYM_KEY_STORAGE);
+      return true;
+    }catch{return false}
+  }
+  function registerGym(){
+    try{
+      const version='1.5.1',id='gym-optimizer';
+      window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
+      window.__SakaLuXInstalledVersions[id]=version;
+      document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
+      let bridge=document.getElementById('sakalux-module-bridge-'+id);
+      if(!bridge){bridge=document.createElement('span');bridge.id='sakalux-module-bridge-'+id;bridge.hidden=true;(document.body||document.documentElement).appendChild(bridge)}
+      bridge.dataset.version=version;
+    }catch{}
   }
   function apiRequest(url){
     return new Promise((resolve,reject)=>{
@@ -1147,7 +1179,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }).join('');
     const groups=perkGroups(),eta=gymCalc.eta(),head=gymCalc.headroom(actual),gainInfo=next?gymCalc.gain(next.stat):null;
     const perkPanel='<div class="sf-section">GYM PERKS & ENERGY</div><div class="sf-card"><button id="slx-gym-api-refresh">REFRESH API</button><div>API: '+escape(gymApi.status)+(gymApi.at?' · '+new Date(gymApi.at).toLocaleTimeString():'')+'</div><div>Energy: '+(Number.isFinite(gymEnergy())?fmt(gymEnergy()):'unavailable')+'</div><div>'+escape(specialGymSafety(actual))+'</div><div class="sf-perks">'+(groups.length?groups.map(g=>'<p><b>'+escape(g.group)+'</b>: '+g.entries.map(escape).join(' · ')+'</p>').join(''):'No verified gym perks loaded')+'</div><div><b>Next gym ETA:</b> '+escape(eta.text)+'</div><div><b>DEX 1.25 safety:</b> '+(head?'Secondary maximum '+fmt(head.maxSecondary)+' / remaining '+fmt(head.remaining):'Stats unavailable')+'</div><div><b>Estimated '+escape(next?.stat||'next')+' gain:</b> '+(gainInfo?.estimate!=null?gainInfo.estimate.toFixed(2)+' (x'+gainInfo.multi.toFixed(3)+', '+gainInfo.dots+' dots)':escape(gainInfo?.reason||'Needs current happiness, stats and known gym'))+'</div><small>Gain is a Wiki-formula estimate. Unknown or ambiguous perk effects block precise gain claims. Special gym membership must be verified separately.</small></div>';
-    const settings='<div class="sf-section">STRATEGY SETTINGS</div><div class="sf-settings"><label>Strategy <select id="slx-gym-mode">'+Object.keys(presets).map(n=>'<option '+(state.mode===n?'selected':'')+'>'+esc(n)+'</option>').join('')+'</select></label><p>Custom weights are planning targets; exact StatForge formulas are not yet verified.</p>'+stats.map(n=>'<div class="sf-edit"><label>'+n+'</label><input type="number" data-value="'+n+'" value="'+(Number(actual[n])||0)+'"><input type="number" step=".05" min="0" data-weight="'+n+'" value="'+(Number(state.weights[n])||0)+'"></div>').join('')+'<button id="slx-gym-calc">Save values</button></div>';
+    const settings='<div class="sf-section">STRATEGY SETTINGS</div><div class="sf-settings"><label>Strategy <select id="slx-gym-mode">'+Object.keys(presets).map(n=>'<option '+(state.mode===n?'selected':'')+'>'+esc(n)+'</option>').join('')+'</select></label><p>Custom weights are planning targets; exact StatForge formulas are not yet verified.</p>'+stats.map(n=>'<div class="sf-edit"><label>'+n+'</label><input type="number" data-value="'+n+'" value="'+(Number(actual[n])||0)+'"><input type="number" step=".05" min="0" data-weight="'+n+'" value="'+(Number(state.weights[n])||0)+'"></div>').join('')+'<button id="slx-gym-calc">Save values</button><div class="sf-section">API ACCESS</div><p>Uses your saved SakaLuX Hub API key automatically. You can save a separate Torn API key locally as fallback.</p><input id="slx-gym-private-key" type="password" autocomplete="off" placeholder="16-character Torn API key" maxlength="16"><button id="slx-gym-save-key">SAVE OWN KEY</button><button id="slx-gym-clear-key">CLEAR OWN KEY</button><div id="slx-gym-key-message" role="status">'+(hubApiKey()?'API key available':'No key found')+'</div></div>';
     const compact=n=>{const v=Number(n)||0;return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1000?Math.round(v/1000)+'K':fmt(v)};
     const rows=snapshots.slice(-15).reverse();
     const history='<div class="sf-section">STAT HISTORY (LAST 15 SNAPSHOTS)</div><div class="sf-history"><div class="sf-hrow sf-hhead"><b>DATE</b>'+stats.map(n=>'<b style="color:'+statColors[n]+'">'+n.toUpperCase()+'</b>').join('')+'<b>TBS</b></div>'+rows.map((x,i)=>{
@@ -1183,6 +1215,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     });
     body.querySelector('#slx-gym-api-refresh')?.addEventListener('click',refreshGymApi);
     body.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{panel.dataset.tab=b.dataset.tab;render()});
+    body.querySelector('#slx-gym-save-key')?.addEventListener('click',()=>{const val=body.querySelector('#slx-gym-private-key')?.value;const ok=savePersonalKey(val);const label=body.querySelector('#slx-gym-key-message');if(label)label.textContent=ok?'Personal API key saved locally':'Invalid key: expected 16 letters/numbers';if(ok)refreshGymApi()});
+    body.querySelector('#slx-gym-clear-key')?.addEventListener('click',()=>{savePersonalKey('');const label=body.querySelector('#slx-gym-key-message');if(label)label.textContent='Personal key cleared; Hub shared key is still available if configured.'});
     body.querySelector('#slx-gym-mode')?.addEventListener('change',e=>{state.mode=e.target.value;stats.forEach((n,i)=>state.weights[n]=presets[state.mode][i]);save();render()});
     body.querySelector('#slx-gym-calc')?.addEventListener('click',()=>{
       body.querySelectorAll('[data-value]').forEach(el=>state.values[el.dataset.value]=Math.max(0,Number(el.value)||0));
@@ -1201,7 +1235,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ▴':'Settings ▾'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.0',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.5.1',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
@@ -1234,8 +1268,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     panel.hidden=false;
   }
-  render();mount();
+  registerGym();render();mount();
   // TornPDA navigates without full reload. Move the inline widget when Gym's React root is replaced.
   let lastUrl=location.href;
-  setInterval(()=>{if(location.href!==lastUrl){lastUrl=location.href;render()}mount()},1100);
+  setInterval(()=>{if(location.href!==lastUrl){lastUrl=location.href;render()}registerGym();mount()},1100);
 })();

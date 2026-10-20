@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.145
+// @version      1.9.146
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2398,6 +2398,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             const v = String(value || '').trim();
             if (/^\d+(?:\.\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?$/.test(v)) versions.push(v);
         };
+        // Gym registers explicitly even when its inline Gym-only panel is hidden.
+        if(script.id==='gym-optimizer'){
+            try { add(globalThis.SakaLuXGymOptimizer?.version); } catch {}
+        }
         // Read metadata markers only after the collector has been initialized.
         try {
             add(globalThis.__SakaLuXInstalledVersions?.[script.id]);
