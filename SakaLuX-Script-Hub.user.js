@@ -2038,18 +2038,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.2.1",
+                "version": "1.3.0",
                 "sourceUrl": "",
                 "downloadUrl": "",
                 "info": "Editable Baldr, Hank, Aec3, Balanced, 2-stat, 3-stat and Custom starting templates; manual stat values and local snapshots. No automatic training or gym switching. Template weights are not verified StatForge formula parity.",
                 "quickActions": [],
                 "release": {
-                    "version": "1.2.1",
+                    "version": "1.3.0",
                     "date": "2026-10-21",
                     "notes": [
-                        "Set 999 reps for recommended stat without executing TRAIN.",
-                        "Only allow switching after explicit unlock confirmation; otherwise block.",
-                        "Fix touch scrolling and compact UI."
+                        "Best stat gym from Torn wiki gym dots, but only among explicitly verified unlocked gyms.",
+                        "Estimate next standard gym total-step energy (not remaining energy).",
+                        "Switch to verified gym and one-click native TRAIN on explicit user press.",
+                        "Maintain compact layout and scrolling."
                     ]
                 },
                 "accessTier": "free",
