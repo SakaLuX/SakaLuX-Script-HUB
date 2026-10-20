@@ -647,18 +647,18 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "sourceUrl": "",
       "downloadUrl": "",
       "info": "Editable Baldr, Hank, Aec3, Balanced, 2-stat, 3-stat and Custom starting templates; manual stat values and local snapshots. No automatic training or gym switching. Template weights are not verified StatForge formula parity.",
       "quickActions": [],
       "release": {
-        "version": "1.1.0",
+        "version": "1.2.0",
         "date": "2026-10-21",
         "notes": [
-          "StatForge-reference five-tab layout: Overview, History, Export, Settings and Info.",
-          "Ratio Health, Total Battle Stats, Train Next, Headroom and four progress bars.",
-          "Preserve native Gym training controls and guard locked gyms."
+          "15-snapshot 6-column history with per-stat deltas",
+          "Formatted text snapshot with copy and CSV export",
+          "Expanded explanatory Info tab and gym-dot comparisons"
         ]
       },
       "accessTier": "free",
