@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.5.7
+// @version      0.5.8
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -834,7 +834,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.5.7';
+  const VERSION = '0.5.8';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
@@ -1088,7 +1088,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   let sourceDiagnostics = {};
   async function loadBaldrTargets() {
-    if (!settings.includeInactive || !settings.useBaldr) { sourceDiagnostics.Baldr = 'OFF'; return []; }
+    if (!settings.useBaldr) { sourceDiagnostics.Baldr = 'OFF'; return []; }
     try {
       const data = await requestJSON('https://raw.githubusercontent.com/OranWeb/tc-baldrs-levelling-list/master/data.json');
       const lists = Object.values(data || {}).flatMap(v => Array.isArray(v) ? v : []);
@@ -1163,7 +1163,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   async function loadSupplementalTargets() {
-    if (!settings.includeInactive) { sourceDiagnostics.FFScouter = 'OFF'; return []; }
+    // FFScouter remains a source whether inactive-only filtering is on or off.
     const key = getFFKey();
     if (!validKey(key)) return Array.isArray(targetPool.rows) ? targetPool.rows.map(row => ({ ...row })) : [];
     const maxFF = Math.max(1, num(settings.maxFF) || DEFAULTS.maxFF);
@@ -1253,14 +1253,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (!force && cached && Date.now() - num(cached.at) < STATUS_TTL) return { ...row, ...cached.data, statusVerified: cached.data.status === 'Okay', verifiedAt: cached.at, ff: row.ff, bs: row.bs };
     const key = getTornKey();
     const routes = [
-      'https://api.torn.com/v2/user/' + row.id + '/basic?key=' + encodeURIComponent(key)
+      'https://api.torn.com/v2/user/' + row.id + '/basic?key=' + encodeURIComponent(key),
+      'https://api.torn.com/user/' + row.id + '?selections=basic&key=' + encodeURIComponent(key)
     ];
     let result = null;
     for (const url of routes) {
       if (rateLimited) break;
       try {
         result = statusFrom(await requestJSON(url));
-        if (result.status !== 'Unknown') break;
+        if (result.status !== 'Unknown' && (!settings.includeInactive || result.lastActionStatus)) break;
       } catch (error) {
         if (isRateLimitError(error)) { rateLimited = true; rateLimitReason = String(error?.message || error).slice(0,150); rateLimitUntil = Date.now() + 65000; break; }
         sourceDiagnostics.TornError = String(error?.message || error).slice(0,150);
@@ -1335,7 +1336,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     lastError = '';
     lastWarning = '';
     sourceDiagnostics = {};
-    sourceDiagnostics.Config = 'FFScouter → Baldr → Torn LIVE/inactiv · FAST';
+    sourceDiagnostics.Config = 'FFScouter → Baldr · Inactivi ' + (settings.includeInactive ? 'ON' : 'OFF') + ' · Bounty ' + (settings.includeBounties ? 'ON' : 'OFF');
     updateControls();
     try {
       if (Array.isArray(boardCache.rows) && boardCache.rows.length) paintInstantCache(mergeTargetSources(settings.includeBounties && !settings.includeInactive ? boardCache.rows : [], settings.includeInactive ? compactPool([...(targetPool.rows || []), ...(discoveredPool.rows || [])]) : []));
