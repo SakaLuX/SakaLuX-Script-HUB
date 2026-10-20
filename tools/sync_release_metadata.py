@@ -16,6 +16,8 @@ def sync_runtime(source, version):
         text = re.sub(r"(\bconst\s+VERSION\s*=\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
         text = re.sub(r"(\blet\s+v\s*=\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
         text = re.sub(r"(\{\s*version\s*:\s*['\"])[^'\"]+(['\"]\s*\}\s*\)\))", lambda m: m[1]+version+m[2], text)
+        if 'SakaLuX Shared Dock Registration' in text:
+            text = re.sub(r"(\bversion\s*:\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text, count=1)
         text = re.sub(r"(\bconst\s+APP\s*=\s*\{\s*name\s*:\s*['\"][^'\"]+['\"]\s*,\s*version\s*:\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
         text = re.sub(r"(Object.assign\(e.dataset,\{id:'chat-intelligence'[^\n]*?version:')[^']+(')", lambda m: m[1]+version+m[2], text)
         parts[i] = text
@@ -49,9 +51,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--bump', action='store_true', help='Increment patch, removing fourth version component')
     parser.add_argument('--date', default=__import__('datetime').date.today().isoformat())
-    parser.add_argument('--notes', type=Path, required=True, help='JSON mapping script IDs to accurate release notes')
+    parser.add_argument('--notes', type=Path, help='JSON mapping script IDs to accurate release notes; omitted for version-only synchronization')
     args = parser.parse_args()
-    notes_by_id = json.loads(args.notes.read_text())
+    notes_by_id = json.loads(args.notes.read_text()) if args.notes else {}
     config = json.loads((ROOT/'release-config.json').read_text())
     registry = json.loads((ROOT/'scripts.json').read_text())
     by_id = {row['id']: row for row in registry['scripts']}
@@ -66,7 +68,9 @@ def main():
             if len(digits) not in (3, 4):
                 raise ValueError(f'Unsupported version: {old}')
             version = f'{digits[0]}.{digits[1]}.{digits[2]+1}'
-        notes = notes_by_id[entry['id']]
+        row = by_id.get(entry['id'], {})
+        old_notes = row.get('release', {}).get('notes', [])
+        notes = notes_by_id.get(entry['id'], old_notes or [f'Version {version}: internal runtime and registry synchronization.'])
         source = re.sub(r'(?m)^(//\s*@version\s+)\S+', lambda m: m[1]+version, source, count=1)
         source = sync_runtime(source, version)
         path.write_text(source)
@@ -91,7 +95,7 @@ def main():
     hub = hub[:a]+start+json.dumps(registry, indent=4, ensure_ascii=False).replace('\n', '\n    ')+hub[b:]
     version = next(v for key, _, v in changes if key == 'script-hub')
     if not re.search(rf"[\"']version[\"']?\s*:\s*[\"']{re.escape(version)}[\"']", hub[:a]):
-        changelog = {'version': version, 'date': args.date, 'changes': notes_by_id['script-hub']}
+        changelog = {'version': version, 'date': args.date, 'changes': notes_by_id.get('script-hub', ['Version synchronization'])}
         hub = hub.replace('    const HUB_CHANGELOG = [\n', '    const HUB_CHANGELOG = [\n        '+json.dumps(changelog, ensure_ascii=False)+',\n', 1)
     hub_path.write_text(hub)
     hub_doc = ROOT/'greasyfork/Script-Hub.md'
