@@ -3504,7 +3504,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         const value = String(text || '').trim();
         if (!value || language() !== 'ro' || value.length > 12000) return value;
         if (slhTranslated[value]) return slhTranslated[value];
-        const pieces = value.match(/[\\s\\S]{1,450}/g) || [];
+        const pieces = value.match(/[\s\S]{1,450}/g) || [];
         const translated = [];
         for (const piece of pieces) {
             try {
@@ -3537,7 +3537,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if (!script) return;
         createOverlay(`${headerMarkup(script.name, 'What this module does', 'slhmi-close', script.icon || '🧩', 'MODULE INFORMATION')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(script.version || script.expectedVersion || '?')} <span class="slh-version-date">${escapeHtml(script.category || 'Other')}</span></div><div id="slh-info-auto" style="margin-top:8px">${String(language() === 'ro' ? (MODULE_INFO_RO[script.id] || script.info || script.description || 'No module information available.') : (script.info || script.description || 'No module information available.')).split(/\n\s*\n/).map(section => { const lines = section.split('\n'); return lines.length > 1 ? `<section style="margin-bottom:16px"><h3 style="margin:0 0 6px;color:#f3f7fb;font-size:12px">${escapeHtml(lines.shift())}</h3><p style="margin:0;line-height:1.6">${escapeHtml(lines.join('\n'))}</p></section>` : `<p style="margin:0 0 12px;line-height:1.6">${escapeHtml(section)}</p>`; }).join('')}</div></div><button class="slh-big-btn gray" id="slhmi-back">← BACK</button></div>`);
         translateModuleView(script, 'slh-info-auto', String(script.info || script.description || ''), MODULE_INFO_RO[script.id], (root, translated) => {
-            root.innerHTML = translated.split(/\\n\\s*\\n/).map(part => '<p style="margin:0 0 12px;line-height:1.6">' + escapeHtml(part) + '</p>').join('');
+            root.innerHTML = translated.split(/\n\s*\n/).map(part => '<p style="margin:0 0 12px;line-height:1.6">' + escapeHtml(part) + '</p>').join('');
         });
         document.getElementById('slhmi-close').onclick = closeHub;
         document.getElementById('slhmi-back').onclick = openHub;
@@ -3551,8 +3551,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             ? localizedNotes.map(note => `<div>• ${escapeHtml(note)}</div>`).join('')
             : '<div>No release notes available yet.</div>';
         createOverlay(`${headerMarkup(script.name, 'Current module release notes', 'slhmn-close', '✦', 'RELEASE CENTER')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version || script.version || script.expectedVersion || '?')} ${release.date ? `<span class="slh-version-date">${escapeHtml(release.date)}</span>` : ''}</div><div id="slh-release-auto" style="margin-top:8px">${notes}</div></div><button class="slh-big-btn gray" id="slhmn-back">← BACK</button></div>`);
-        translateModuleView(script, 'slh-release-auto', (release.notes || []).join('\\n'), (MODULE_RELEASE_RO[script.id] || []).join('\\n'), (root, translated) => {
-            root.innerHTML = translated.split('\\n').map(line => '<div>• ' + escapeHtml(line) + '</div>').join('');
+        translateModuleView(script, 'slh-release-auto', (release.notes || []).join('\n'), (MODULE_RELEASE_RO[script.id] || []).join('\n'), (root, translated) => {
+            root.innerHTML = translated.split('\n').map(line => '<div>• ' + escapeHtml(line) + '</div>').join('');
         });
         document.getElementById('slhmn-close').onclick = closeHub;
         document.getElementById('slhmn-back').onclick = openHub;
