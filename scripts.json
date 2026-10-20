@@ -647,7 +647,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.5.3",
+      "version": "1.5.4",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -664,12 +664,12 @@
         }
       ],
       "release": {
-        "version": "1.5.3",
+        "version": "1.5.4",
         "date": "2026-10-21",
         "notes": [
-          "Early installed marker before embedded Shared Core startup.",
-          "Separate loaded/ready/error diagnostics for Gym in DOM.",
-          "Guard initial render failures without losing script installation signal."
+          "Fix TornPDA Gym startup by replacing problematic Unicode characters with ASCII-safe text.",
+          "Retain v1.5.3 Gym features and existing Hub integration.",
+          "Validated on-device using the v1.5.3 ASCII diagnostic build."
         ]
       },
       "accessTier": "free",
