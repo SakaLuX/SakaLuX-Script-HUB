@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Halloween Assistant
 // @namespace    sakalux.halloween.assistant
-// @version      0.3.0
+// @version      0.3.1
 // @description  Finds only live attack-ready Torn Halloween targets and ranks the quickest estimated defeats first.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -834,12 +834,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (() => {
   'use strict';
 
-  const VERSION = '0.3.0';
+  const VERSION = '0.3.1';
   const SHARED_CORE = globalThis.SakaLuXCore || null;
   const PDA_KEY = '###PDA-APIKEY###';
   const BOARD_TTL = 120000;
   const FF_TTL = 12 * 60 * 60 * 1000;
-  const STATUS_TTL = 30000;
+  const STATUS_TTL = 15000;
   const BOARD_CONCURRENCY = 3;
   const FF_CONCURRENCY = 2;
   const STATUS_CONCURRENCY = 8;
@@ -1209,7 +1209,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   async function checkStatus(row, force = false) {
     const cached = statusCache[String(row.id)];
-    if (!force && cached && Date.now() - num(cached.at) < STATUS_TTL) return { ...row, ...cached.data, statusVerified: cached.data.status !== 'Unknown', ff: row.ff, bs: row.bs };
+    if (!force && cached && Date.now() - num(cached.at) < STATUS_TTL) return { ...row, ...cached.data, statusVerified: cached.data.status === 'Okay', verifiedAt: cached.at, ff: row.ff, bs: row.bs };
     const key = getTornKey();
     const routes = [
       'https://api.torn.com/v2/user/' + row.id + '/basic?striptags=true&key=' + encodeURIComponent(key),
@@ -1226,9 +1226,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (isRateLimitError(error)) { rateLimited = true; break; }
       }
     }
-    if (!result) return row;
+    if (!result || result.status === 'Unknown') return { ...row, status: 'Unknown', statusVerified: false, verifiedAt: 0 };
     statusCache[String(row.id)] = { at: Date.now(), data: result };
-    return { ...row, ...result, name: result.name || row.name, level: result.level ?? row.level, statusVerified: result.status !== 'Unknown', ff: row.ff, bs: row.bs };
+    return { ...row, ...result, name: result.name || row.name, level: result.level ?? row.level, statusVerified: result.status === 'Okay', verifiedAt: Date.now(), ff: row.ff, bs: row.bs };
   }
 
   function quickCompare(a, b) {
@@ -1271,11 +1271,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const status = statusCache[String(row.id)];
       const next = { ...row };
       if (ff && now - num(ff.at) < FF_TTL) { next.ff = ff.ff; next.bs = ff.bs; }
-      if (status && now - num(status.at) < STATUS_TTL) Object.assign(next, status.data, { statusVerified: status.data.status !== 'Unknown' });
+      if (status && now - num(status.at) < STATUS_TTL) Object.assign(next, status.data, { statusVerified: status.data.status === 'Okay', verifiedAt: status.at });
       return next;
     });
   }
   function paintInstantCache(rows) {
+    // Fail closed: cache cannot put an unverified target on the attack list.
+    return 0;
     const wanted = Math.max(5, Math.min(100, Math.floor(num(settings.maxResults) || DEFAULTS.maxResults)));
     const instant = candidateRows(applyCachedIntelligence(rows)).filter(row => row.statusVerified === true && row.status === 'Okay' && isInactiveTarget(row)).slice(0, wanted);
     if (instant.length) { targets = instant; renderTargets(); setProgress('Instant cache · refreshing live', instant.length, instant.length); }
@@ -1286,6 +1288,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (scanning) return false;
     const started = performance.now();
     scanning = true;
+    targets = [];
+    renderTargets();
     rateLimited = false;
     lastScanMs = 0;
     lastError = '';
@@ -1315,13 +1319,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if (verified.length >= wanted || rateLimited) break;
       }
       write(KEYS.statusCache, statusCache);
-      if (verified.length || !rateLimited) targets = verified.sort(targetCompare).slice(0, wanted);
+      targets = verified.filter(row => row.status === 'Okay' && row.statusVerified && Date.now() - num(row.verifiedAt) <= STATUS_TTL).sort(targetCompare).slice(0, wanted);
       renderTargets();
       lastScanMs = Math.round(performance.now() - started);
       setProgress((lastWarning ? lastWarning + ' · ' : rateLimited ? 'API limit reached · cached live list kept · ' : 'Ready · ') + (lastScanMs / 1000).toFixed(1) + 's', targets.length, targets.length);
       return true;
     } catch (error) {
       lastError = friendlyError(error, 'Torn');
+      targets = [];
       renderTargets();
       setProgress('Error: ' + lastError, 0, 0);
       return false;
@@ -1349,6 +1354,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if (button) { button.disabled = scanning; button.textContent = scanning ? 'SCANNING…' : 'SCAN NOW'; }
   }
   function renderTargets() {
+    targets = targets.filter(row => row.statusVerified === true && row.status === 'Okay' &&
+      num(row.verifiedAt) > 0 && Date.now() - num(row.verifiedAt) <= STATUS_TTL && isInactiveTarget(row));
     const list = $('.ha-list', $('#' + IDS.overlay));
     if (!list) return;
     list.replaceChildren();
@@ -1449,9 +1456,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     return overlay;
   }
-  function open() { const overlay = ensureUI(); overlay.hidden = false; renderTargets(); if (!targets.length && !scanning) void scan(false); return true; }
+  function open() { const overlay = ensureUI(); overlay.hidden = false; targets = []; renderTargets(); if (!scanning) void scan(true); return true; }
   function close() { const overlay = $('#' + IDS.overlay); if (overlay) overlay.hidden = true; }
-  function schedule() { clearInterval(timer); if (settings.autoRefresh) timer = setInterval(() => { if (!document.hidden && !scanning) void scan(false); }, Math.max(30, num(settings.refreshSeconds) || 90) * 1000); }
+  function schedule() { clearInterval(timer); if (settings.autoRefresh) timer = setInterval(() => { if (!document.hidden && !scanning) { targets = []; renderTargets(); void scan(true); } }, Math.max(30, num(settings.refreshSeconds) || 90) * 1000); }
   function health() { return { version: VERSION, core: SHARED_CORE?.version || null, ready: true, scanning, targets: targets.length, bountyTargets: targets.filter(row => row.hasBounty).length, supplementalTargets: targets.filter(row => !row.hasBounty).length, lastScanMs, boardCacheAge: Date.now() - num(boardCache.at), targetPoolAge: Date.now() - num(targetPool.at), ffCache: Object.keys(ffCache).length, statusCache: Object.keys(statusCache).length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError, lastWarning }; }
 
   globalThis.SakaLuXHalloweenAssistant = Object.freeze({ version: VERSION, open, close, scan: () => scan(true), health });
