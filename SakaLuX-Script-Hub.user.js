@@ -892,7 +892,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.144';
+    const VERSION = '1.9.145';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -912,6 +912,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.145", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.144", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.143", "date": "2026-10-20", "changes": ["Version synchronization"]},
         {"version": "1.9.142", "date": "2026-10-20", "changes": ["Version synchronization"]},
@@ -2033,7 +2034,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "apiGlobal": "SakaLuXGymOptimizer",
                 "buttonSelector": "#slx-gym-panel",
                 "category": "Gym",
-                "description": "SakaLuX Gym Optimizer — inline gym planner for TornPDA.",
+                "description": "SakaLuX Gym Optimizer — inline gym ratios, history, Train Next and verified-gym recommendations.",
                 "id": "gym-optimizer",
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
@@ -2041,16 +2042,26 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "version": "1.3.1",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
-                "info": "Editable Baldr, Hank, Aec3, Balanced, 2-stat, 3-stat and Custom starting templates; manual stat values and local snapshots. No automatic training or gym switching. Template weights are not verified StatForge formula parity.",
-                "quickActions": [{"id":"open","label":"OPEN","method":"open"},{"id":"refresh","label":"REFRESH","method":"refresh"}],
+                "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
+                "quickActions": [
+                    {
+                        "id": "open",
+                        "label": "OPEN",
+                        "method": "open"
+                    },
+                    {
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    }
+                ],
                 "release": {
-                    "version": "1.3.0",
+                    "version": "1.3.1",
                     "date": "2026-10-21",
                     "notes": [
-                        "Best stat gym from Torn wiki gym dots, but only among explicitly verified unlocked gyms.",
-                        "Estimate next standard gym total-step energy (not remaining energy).",
-                        "Switch to verified gym and one-click native TRAIN on explicit user press.",
-                        "Maintain compact layout and scrolling."
+                        "Restore installable Gym Optimizer entry in both remote and embedded Hub registry.",
+                        "Correct source/download URL and inline panel selector.",
+                        "Detect module through SakaLuXGymOptimizer global on Gym page."
                     ]
                 },
                 "accessTier": "free",
