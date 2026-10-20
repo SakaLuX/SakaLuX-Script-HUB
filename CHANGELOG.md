@@ -1,5 +1,12 @@
 # Changelog
 
+## Gym Optimizer v1.5.6 - Settings stat colors and API gym bonuses (2026-10-21)
+
+- Color the dump (x0) multiplier red and keep Defense in the same four-stat display order and label layout.
+- Show per-stat API-derived gym gain modifiers with individual stat colors. Display unverified or partial status instead of invented figures.
+- Refresh Torn gym data on the first Settings opening when an API key is available. Manual REFRESH NOW remains available.
+- Preserve ASCII-only script text for TornPDA compatibility. Device validation pending.
+
 ## Gym Optimizer v1.5.5 - expanded Settings and Details (2026-10-21)
 
 - Rebuild Settings with mobile ratio choice, highest/dump stat, color-coded order, editable custom multipliers and Dark/Light controls.
