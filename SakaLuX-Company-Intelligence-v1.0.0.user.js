@@ -2104,8 +2104,8 @@ async function importMyTrainingLog(){
     const collect=(obj,depth=0)=>{
      if(depth>5||obj==null)return;
      if(typeof obj==='string'){
-      for(const hit of obj.matchAll(/(?:([\\d,.]+)\\s+(manual(?:\\s+labor|\\s+labour)?|intelligence|endurance)|(?:manual(?:\\s+labor|\\s+labour)?|intelligence|endurance)\\s*(?:\\+|gained?\\s+)\\s*([\\d,.]+))/gi))
-       add(hit[2]||hit[0].match(/manual(?:\\s+labor|\\s+labour)?|intelligence|endurance/i)?.[0],hit[1]||hit[3]);
+      for(const hit of obj.matchAll(/(?:([\d,.]+)\s+(manual(?:\s+labor|\s+labour)?|intelligence|endurance)|(?:manual(?:\s+labor|\s+labour)?|intelligence|endurance)\s*(?:\+|gained?\s+)\s*([\d,.]+))/gi))
+       add(hit[2]||hit[0].match(/manual(?:\s+labor|\s+labour)?|intelligence|endurance/i)?.[0],hit[1]||hit[3]);
       return;
      }
      if(typeof obj!=='object')return;
