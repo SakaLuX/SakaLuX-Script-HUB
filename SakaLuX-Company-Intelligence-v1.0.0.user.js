@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.82
+// @version      1.8.83
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.82',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.83',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2071,8 +2071,20 @@ async function importMyTrainingLog(){
    if(entries.length<100||!Number.isFinite(oldest)||oldest<=from||!newItems)break;
    to=oldest-1;
   }
-  if(found.length)set(KEY.trains,saved.concat(found));
-  alert('Import Company: '+found.length+' trainuri noi · '+trainingCandidates+' evenimente training · '+events+' loguri verificate în '+pages+' pagini (ultimele 90 zile).'+(!trainingCandidates?' Dacă trainurile apar în Torn Log, verifică permisiunile categoriei Company și tipurile de jurnal accesibile cheii.':''));
+  if(found.length){
+   const merged=saved.concat(found);
+   // TornPDA can expose an asynchronous userscript storage backend.
+   try{
+    const result=typeof GM_setValue==='function'?GM_setValue(KEY.trains,merged):null;
+    if(result&&typeof result.then==='function')await result;
+   }catch(e){console.warn('[SakaLuX Company] GM storage:',e)}
+   // Maintain a durable fallback for the current Torn site context.
+   try{localStorage.setItem(KEY.trains,JSON.stringify(merged))}catch(e){console.warn('[SakaLuX Company] local storage:',e)}
+   render();
+  }
+  const reread=arr(KEY.trains),storedIds=new Set((Array.isArray(reread)?reread:[]).map(row=>String(row.apiLogId||'')));
+  const persisted=found.filter(row=>storedIds.has(String(row.apiLogId))).length;
+  alert('Import Company: '+found.length+' trainuri noi detectate · '+persisted+' confirmate în stocare · '+trainingCandidates+' evenimente training · '+events+' loguri verificate în '+pages+' pagini. '+(found.length&&!persisted?'Salvarea nu a fost confirmată; verifică stocarea Torn PDA.':!trainingCandidates?'Nu s-au identificat evenimente training în intervalul verificat.':''));
  }catch(e){
   const code=num(e?.code,-1),msg=String(e?.message||e);
   alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă. Verificarea Company s-a oprit.':code===16?'Cheia nu are acces la toate logurile Company necesare. Verifică User: Log în permisiunile cheii.':'Import imposibil: '+msg);
