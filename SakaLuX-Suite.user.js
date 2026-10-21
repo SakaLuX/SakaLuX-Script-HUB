@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.990
+// @version      0.9.991
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39087,13 +39087,15 @@ function tlApiExtract(raw,types){
     };
     return rows.map(item=>{
         const d=item.data||{},detail=item.details||{};
-        const type=String(item.log??item.type??detail.log??"");
-        const title=typeTitle(type)||String(detail.title||item.title||"");
-        const desc=String(item.action||item.description||item.message||"");
+        const type=String(item.log??item.type??detail.log??detail.type??"");
+        const title=String(detail.title||item.title||typeTitle(type)||"");
+        const desc=String(item.action||item.description||item.message||detail.description||"");
         const category=String(detail.category||item.category||"");
-        const combined=title+" "+desc+" "+category;
-        // Company training is a distinct log event; generic job salary/gym training does not count.
-        if(!/train(?:ed|ing)?/i.test(combined)||!/company|employee|job|train(?:ed)? you/i.test(combined)||/gym training|battle stats/i.test(combined))return null;
+        const context=title+" "+desc+" "+category+" "+typeTitle(type);
+        // Torn's structured log descriptions can identify received job training without the word "company".
+        const training=/(train(?:ed|ing)?|received? train|job stat(?:s)? gain)/i.test(context);
+        const jobContext=/(company|employee|job|employment|director|trained you|training received)/i.test(context);
+        if(!training||!jobContext||/(gym training|battle stats|train(?:ed|ing)? at (?:the )?gym)/i.test(context))return null;
         const epoch=Number(item.timestamp||item.time||0);
         const ts=epoch<1e12?epoch*1000:epoch;
         const id=String(item._id||item.id||item.log_id||"").trim();
