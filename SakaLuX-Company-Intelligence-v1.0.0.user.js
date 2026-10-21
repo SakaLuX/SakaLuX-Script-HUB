@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.86
+// @version      1.8.87
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.86',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.87',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1373,6 +1373,37 @@ const first=(o,paths,f=null)=>{
  return f;
 };
 let companyTrainsMemory=null;
+// Hydrate async TornPDA userscript storage before relying on the in-memory training list.
+let companyTrainHydration=null;
+function hydrateCompanyTrains(){
+ if(companyTrainHydration)return companyTrainHydration;
+ companyTrainHydration=(async()=>{
+  let remote=[];
+  try{
+   if(typeof GM_getValue==='function'){
+    const result=GM_getValue(KEY.trains,[]);
+    const value=result&&typeof result.then==='function'?await result:result;
+    if(Array.isArray(value))remote=value;
+   }
+  }catch(e){console.warn('[SakaLuX Company] training hydration:',e)}
+  let local=[];
+  try{const value=JSON.parse(localStorage.getItem(KEY.trains)||'[]');if(Array.isArray(value))local=value}catch{}
+  const existing=Array.isArray(companyTrainsMemory)?companyTrainsMemory:[];
+  const merged=[],seen=new Set();
+  for(const row of [...existing,...local,...remote]){
+   if(!row||typeof row!=='object')continue;
+   const id=String(row.apiLogId||'');
+   const hash=id?'api:'+id:'manual:'+String(row.ts)+'|'+String(row.employee||'')+'|'+String(row.primary||'')+'|'+String(row.note||'');
+   if(seen.has(hash))continue;
+   seen.add(hash);merged.push(row);
+  }
+  companyTrainsMemory=merged;
+  if(merged.length)try{localStorage.setItem(KEY.trains,JSON.stringify(merged))}catch{}
+  if(S.open&&S.mode==='employee'&&S.tab==='trains')render();
+  return merged;
+ })();
+ return companyTrainHydration;
+}
 const get=(k,f=null)=>{if(k===KEY.trains){if(Array.isArray(companyTrainsMemory))return companyTrainsMemory;try{const v=localStorage.getItem(k);if(v!==null){const parsed=JSON.parse(v);if(Array.isArray(parsed)){companyTrainsMemory=parsed;return parsed}}}catch{}}try{if(typeof GM_getValue==='function'){const result=GM_getValue(k,f);if(result&&typeof result.then==='function')return f;if(k===KEY.trains&&Array.isArray(result))companyTrainsMemory=result;return result}}catch{};try{let v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch{return f}};
 const set=(k,v)=>{if(k===KEY.trains&&Array.isArray(v))companyTrainsMemory=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){if(k===KEY.trains)console.warn('[SakaLuX Company] local train storage unavailable',e)}try{if(typeof GM_setValue==='function')return GM_setValue(k,v)}catch(e){if(k===KEY.trains)console.warn('[SakaLuX Company] GM train storage unavailable',e)}};
 const del=k=>{try{if(typeof GM_deleteValue==='function')return GM_deleteValue(k)}catch{};try{localStorage.removeItem(k)}catch{}};
@@ -2033,6 +2064,7 @@ async function importMyTrainingLog(){
  if(importMyTrainingLog.busy)return;
  importMyTrainingLog.busy=true;
  try{
+  await hydrateCompanyTrains();
   let cats;
   try { cats=await req('https://api.torn.com/v2/torn/logcategories?key='+encodeURIComponent(key)); }
   catch(error){throw new Error('Endpoint Torn: Log Categories: '+String(error?.message||error)+' (cod '+String(error?.code??'?')+'). Cheia generată anterior nu includea Torn: Log Categories; recreează cheia din butonul actualizat și salveaz-o local.')}
@@ -2065,8 +2097,22 @@ async function importMyTrainingLog(){
     trainingCandidates++;
     if(known.has(id)||!Number.isFinite(stamp)||stamp<=0)continue;
     const employee=String(data?.employee_name||data?.employee?.name||data?.employee||data?.target?.name||me()?.name||'').trim();
-    const gained=Object.entries(data).filter(([k,v])=>/manual|intelligence|endurance|gain|stat/i.test(k)&&['string','number'].includes(typeof v)).map(([k,v])=>k+': '+v).slice(0,5).join(', ');
-    found.push({employee,primary:'Unknown',secondary:'Unknown',price:0,ts:stamp<1e12?stamp*1000:stamp,note:'Train Company / '+title+(gained?' · '+gained:''),apiLogId:id,source:'Torn user/log'});
+    const statFields={manual:'Manual Labor',manual_labor:'Manual Labor',man:'Manual Labor',int:'Intelligence',intelligence:'Intelligence',end:'Endurance',endurance:'Endurance'};
+    const gains=[];
+    const collect=(obj)=>{
+     if(!obj||typeof obj!=='object')return;
+     for(const [key,val] of Object.entries(obj)){
+      const low=key.toLowerCase().replace(/[^a-z_]/g,'');
+      const label=statFields[low]||(/manual/.test(low)?'Manual Labor':/intelligence/.test(low)?'Intelligence':/endurance/.test(low)?'Endurance':'');
+      const amount=typeof val==='number'?val:(typeof val==='string'&&/^\\d+(?:\\.\\d+)?$/.test(val)?Number(val):NaN);
+      if(label&&Number.isFinite(amount)&&amount>0)gains.push({stat:label,amount});
+     }
+    };
+    collect(data);collect(data?.stats);collect(data?.gains);collect(data?.working_stats);collect(x?.params);
+    const unique=[...new Map(gains.map(g=>[g.stat,g])).values()];
+    const gained=unique.map(g=>g.stat+' +'+g.amount).join(', ');
+    const first=unique[0]?.stat||'Unknown',second=unique[1]?.stat||'Unknown';
+    found.push({employee,primary:first,secondary:second,gains:unique,price:0,ts:stamp<1e12?stamp*1000:stamp,note:'Train Company / '+title+(gained?' · '+gained:''),apiLogId:id,source:'Torn user/log'});
     known.add(id);
    }
    if(entries.length<100||!Number.isFinite(oldest)||oldest<=from||!newItems)break;
@@ -2075,7 +2121,19 @@ async function importMyTrainingLog(){
   if(found.length){
    const merged=saved.concat(found);
    companyTrainsMemory=merged;
-   try {const writing=set(KEY.trains,merged);if(writing&&typeof writing.then==='function')await writing;}catch(e){console.warn('[SakaLuX Company] train save failed',e);}
+   let gmSaved=false,localSaved=false;
+   try{
+    if(typeof GM_setValue==='function'){
+     const writing=GM_setValue(KEY.trains,merged);
+     if(writing&&typeof writing.then==='function')await writing;
+     gmSaved=true;
+    }
+   }catch(e){console.warn('[SakaLuX Company] GM training persistence failed:',e)}
+   try{
+    localStorage.setItem(KEY.trains,JSON.stringify(merged));
+    localSaved=true;
+   }catch(e){console.warn('[SakaLuX Company] local training persistence failed:',e)}
+   if(!gmSaved&&!localSaved)console.warn('[SakaLuX Company] Training records kept in session memory only');
    render();
   }
   const visible=arr(KEY.trains),displayed=found.filter(x=>visible.some(y=>String(y.apiLogId)===String(x.apiLogId))).length;
@@ -2084,7 +2142,7 @@ async function importMyTrainingLog(){
   if(!diskConfirmed&&typeof GM_getValue==='function'&&found.length){
    try{const read=GM_getValue(KEY.trains,[]);const stored=read&&typeof read.then==='function'?await read:read;diskConfirmed=found.filter(x=>Array.isArray(stored)&&stored.some(y=>String(y.apiLogId)===String(x.apiLogId))).length;}catch{}
   }
-  alert('Import Company: '+found.length+' trainuri noi · '+displayed+' vizibile în Train History · '+diskConfirmed+' confirmate în stocare persistentă · '+trainingCandidates+' evenimente training. '+(found.length&&!diskConfirmed?'Istoricul apare în panou, dar stocarea persistentă trebuie verificată după repornirea Torn PDA.':''));
+  alert('Import Company: '+found.length+' noi · '+displayed+' vizibile · '+diskConfirmed+' confirmate la recitire. '+trainingCandidates+' evenimente training. '+(!diskConfirmed?'Salvarea locală nu a putut fi verificată imediat; la redeschidere vom recupera și din stocarea GM.':''));
  }catch(e){
   const code=num(e?.code,-1),msg=String(e?.message||e);
   alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă. Verificarea Company s-a oprit.':code===16?'Cheia nu are acces la toate logurile Company necesare. Verifică User: Log în permisiunile cheii.':'Import imposibil: '+msg);
@@ -2643,4 +2701,5 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
 }
 \n#ci-root .ci-employee-train-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,.75fr) minmax(0,1.2fr)!important;gap:5px!important;flex-wrap:nowrap!important;width:100%!important}\n#ci-root .ci-employee-train-actions .ci-btn{width:100%!important;min-width:0!important;margin:0!important;padding:7px 3px!important;font-size:10px!important;white-space:nowrap!important;box-sizing:border-box!important;text-align:center!important}\n\n/* Employee train action layout overrides the global two-column rule. */\n#ci-root .ci-body .ci-actions.ci-employee-train-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,.65fr) minmax(0,1.15fr)!important;gap:5px!important;width:100%!important;flex-wrap:nowrap!important}\n#ci-root .ci-body .ci-actions.ci-employee-train-actions>.ci-btn{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0 3px!important;white-space:nowrap!important;font-size:clamp(8px,2.25vw,11px)!important;overflow:hidden!important}\n/* Put editable dialogs above the Hub, Torn panels and shared footers. */\n#ci-root .ci-dialogback{position:fixed!important;inset:0!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}\n#ci-root .ci-dialogback>.ci-dialog{position:relative!important;z-index:1!important;max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 32px)!important;overflow:auto!important}\n`;
   (document.head||document.documentElement).appendChild(st);
+try{hydrateCompanyTrains()}catch(e){console.warn('[SakaLuX Company] hydrate:',e)}
 })();
