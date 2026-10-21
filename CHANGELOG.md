@@ -1,5 +1,12 @@
 # Changelog
 
+## Gym Optimizer v1.6.6 - reliable gym confirmation and four-stat headroom (2026-10-21)
+
+- Prefer the active gym name from Torn's own energy banner to transient icon selection when they disagree. Fallback to explicit selected icon only if banner not available.
+- Restore four-stat headroom display using current configured ratio and actual battle stats, showing current/target plus need per Strength, Speed, Defense and Dexterity. Dump stat clearly marked.
+- Clarify that special gym unlocks need the specific ratio and additional gym prerequisites, which can include previous gym access, energy spent or membership; targets are planning guidance only.
+- JavaScript/ASCII verified and simulated conflicting banner versus selected-icon readings; on-device verification pending.
+
 ## Gym Optimizer v1.6.5 - Torn stepper repetitions and headroom clarity (2026-10-21)
 
 - Detect the native TornPDA repetition spinner [-] 999 [+] even without a text input and use that value to advance the gold button sequence.
