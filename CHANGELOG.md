@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.5.9 - full perk-source audit and single-row controls (2026-10-21)
+
+- Check all nine supported Torn user perk categories: faction, education, property, company, job, book, merit, stock and enhancer (API v1 flat arrays and v2 nested arrays).
+- Show returned categories out of nine, active perk counts by source and gym-related entries, including active books and faction perks. Distinguish 0 active from missing API information.
+- Center all stat names, including Defense, within the same middle column; preserve red dump marker.
+- Fit each Active Ratio, Highest Stat and Dump Stat selection in a single row and abbreviate the stat buttons STR, SPD, DEF, DEX.
+- Tested parser with mocked API v1/v2 payloads and verified JavaScript syntax; real account/on-device confirmation pending.
+
 ## Gym Optimizer v1.5.8 - Torn gym perk parser and compact Settings (2026-10-21)
 
 - Remove Aec3 from ratio selection; legacy saved choice migrates to SakaLuX.
