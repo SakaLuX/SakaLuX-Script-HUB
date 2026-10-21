@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.6.3 - gym selection and UI stability (2026-10-21)
+
+- Detect the active Torn Gym from its exact name displayed together with the native energy banner, including Complete Cardio; no longer rely exclusively on CSS class names.
+- Keep SakaLuX Gym visible while Torn temporarily removes its training tiles when changing gym selection. Reattach after the native tiles return.
+- Track the last confirmed active gym during redraws and clear the pending gym switch after selection confirmation; avoid repeatedly asking to select the gym.
+- The lock badge marked 3% in the user's screenshot belongs to the NEXT locked gym; it is distinct from the active Complete Cardio header. Do not interpret unrelated percentages as current gym progress.
+- Static syntax and ASCII validation passed. TornPDA device validation pending.
+
 ## Gym Optimizer v1.6.2 - automatic updates and gym energy progression (2026-10-21)
 
 - Overview displays total battle stats and the latest verified auto-saved delta as +X SINCE LAST TRAIN, not since snapshot. Without two real samples it says AWAITING NEXT TRAIN.
