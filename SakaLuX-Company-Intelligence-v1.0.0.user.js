@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.74
+// @version      1.8.75
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.74',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.75',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2025,6 +2025,35 @@ function employeeOptimizer(){
  const rows=list.map(e=>{const stats={manual:e.manual,intelligence:e.intelligence,endurance:e.endurance},ranked=pos.map(p=>({...p,score:fit(stats,p)})).sort((a,b)=>(Number(b.qualified)-Number(a.qualified))||(b.demand||0)-(a.demand||0)||b.score-a.score),best=ranked[0],current=ranked.find(p=>p.name===e.position),gain=best?Math.max(0,best.score-(current?.score||0)):0;return {...e,best:best?.name||'No requirements',fit:best?.score||0,gain}}).sort((a,b)=>b.gain-a.gain||a.effectiveness-b.effectiveness);
  return card('Employee Effectiveness & Position Optimizer',`<div class="ci-tablewrap ci-mobile-cards ci-optimizer-table"><table><thead><tr><th>Employee</th><th>Current</th><th>EE</th><th>Suggested</th><th>Fit</th><th>Potential</th></tr></thead><tbody>${rows.map(e=>`<tr><td class="ci-person-cell" data-label="Employee"><b>${esc(e.name)}</b><small>#${e.id||''}</small></td><td data-label="Current">${esc(e.position||'Unassigned')}</td><td data-label="Effectiveness">${fmt(e.effectiveness)}</td><td data-label="Suggested"><b>${esc(e.best)}</b></td><td data-label="Fit">${e.fit}%</td><td data-label="Potential">${e.gain?badge('+'+e.gain+' fit','good'):badge('KEEP')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">Suggestions use official position requirements when available. Torn's effectiveness value remains authoritative.</p>`);
 }
+// Employee-only import: request personal logs; never assume access to director news.
+async function importMyTrainingLog(){
+ const key=apiKey();
+ if(!key){alert('Adaugă întâi cheia Torn API în Hub sau în Company Intelligence.');return}
+ try{
+  const data=await req('https://api.torn.com/v2/user/log?limit=100&key='+encodeURIComponent(key));
+  const raw=data?.log||data?.logs||[];
+  const entries=Array.isArray(raw)?raw:Object.entries(raw).map(([id,row])=>({...row,id}));
+  const saved=arr(KEY.trains),known=new Set(saved.filter(x=>x.apiLogId).map(x=>String(x.apiLogId)));
+  const fresh=[];
+  for(const x of entries){
+   const id=String(x?.id||x?.log_id||'');
+   const title=String(x?.title||x?.log_type||x?.type||'');
+   const details=x?.data||{};
+   const message=String(x?.message||x?.text||x?.description||'');
+   const category=String(x?.category||'');
+   const stamp=Number(x?.timestamp||x?.time);
+   // Accept only logs explicitly identifying a COMPANY employee training event.
+   if(!id||known.has(id)||!Number.isFinite(stamp)||stamp<=0)continue;
+   if(!/train/i.test(title+' '+message)||!(/company|employee|job/i.test(title+' '+category+' '+message)))continue;
+   const employee=String(details.employee_name||details.employee||details.name||me()?.name||'').trim();
+   if(!employee)continue;
+   fresh.push({employee,primary:'Unknown',secondary:'Unknown',price:0,ts:stamp<1e12?stamp*1000:stamp,note:'Antrenament din jurnalul personal Torn API',apiLogId:id,source:'Torn user/log'});
+   known.add(id);
+  }
+  if(fresh.length)set(KEY.trains,saved.concat(fresh));
+  alert('Import personal: '+fresh.length+' antrenamente confirmate după identificarea tipului de eveniment. Dacă lipsesc antrenamente, jurnalul API poate să nu le expună.');
+ }catch(e){alert('Import indisponibil: '+String(e?.message||e)+'. Pentru user/log este necesară permisiunea explicită User: Log; cheia Master nu o include.')}
+}
 // API import is read-only and strictly accepts identifiable company training news.
 let trainImportBusy=false;
 async function importConfirmedCompanyTrains(){
@@ -2091,7 +2120,7 @@ function employeeProgress(){
  const delta=k=>previous&&latest?num(latest.workstats?.[k])-num(previous.workstats?.[k]):null;
  const row=(label,value)=>kv(label,value==null?'Waiting for history':`${value>0?'+':''}${fmt(value)}`);
  const weeklyGain=['manual','intelligence','endurance'].reduce((a,k)=>a+Math.max(0,num(delta(k))),0),covered=previous&&latest?Math.max(1,days(num(latest.ts)-num(previous.ts))):0,perDay=covered?weeklyGain/covered:0;
- return `<div class="ci-grid">${card('Current Employment',kv('Position',position?esc(position):'Not returned by Torn API')+kv('Effectiveness',effectiveness==null?'Not exposed yet':fmt(effectiveness))+kv('Tracked samples',samples.length))}${card('Work Stats Progress',row('Manual Labor',delta('manual'))+row('Intelligence',delta('intelligence'))+row('Endurance',delta('endurance'))+kv('Observed daily pace',covered?fmt(Math.round(perDay)):'Waiting for history'))}${card('Train Compliance',agreement?kv('Promised / week',fmt(agreement.perWeek))+kv('Received last 7 days',`${received7} / ${fmt(agreement.perWeek)}`)+kv('Status',received7>=num(agreement.perWeek)?badge('ON TRACK','good'):badge(`${Math.max(0,num(agreement.perWeek)-received7)} DUE`,'warn')):empty('Add a train agreement from Trains to monitor compliance.'))}${card('Projection',covered&&perDay>0?kv('Next 30 days','~+'+fmt(Math.round(perDay*30))+' total work stats')+kv('Next 90 days','~+'+fmt(Math.round(perDay*90))+' total work stats')+`<p class="ci-note">Projection uses your observed saved history and is not a guarantee.</p>`:empty('Refresh after your stats change to create a usable projection.'))}</div>`;
+ return `<div class="ci-actions"><button class="ci-btn" data-act="import-my-trains">↻ IMPORTĂ TRAINURI (API)</button></div><div class="ci-grid">${card('Current Employment',kv('Position',position?esc(position):'Not returned by Torn API')+kv('Effectiveness',effectiveness==null?'Not exposed yet':fmt(effectiveness))+kv('Tracked samples',samples.length))}${card('Work Stats Progress',row('Manual Labor',delta('manual'))+row('Intelligence',delta('intelligence'))+row('Endurance',delta('endurance'))+kv('Observed daily pace',covered?fmt(Math.round(perDay)):'Waiting for history'))}${card('Train Compliance',agreement?kv('Promised / week',fmt(agreement.perWeek))+kv('Received last 7 days',`${received7} / ${fmt(agreement.perWeek)}`)+kv('Status',received7>=num(agreement.perWeek)?badge('ON TRACK','good'):badge(`${Math.max(0,num(agreement.perWeek)-received7)} DUE`,'warn')):empty('Add a train agreement from Trains to monitor compliance.'))}${card('Projection',covered&&perDay>0?kv('Next 30 days','~+'+fmt(Math.round(perDay*30))+' total work stats')+kv('Next 90 days','~+'+fmt(Math.round(perDay*90))+' total work stats')+`<p class="ci-note">Projection uses your observed saved history and is not a guarantee.</p>`:empty('Refresh after your stats change to create a usable projection.'))}</div>`;
 }
 function employeePosition(){
  const w=work(),a=advisor(w),observed=!a.length?observedPositionAdvisor(w):[],rows=a.length?a:observed,best=rows[0],current=currentPosition(),eff=currentEffectiveness(),daysHere=ownDaysInCompany(),estimated=!a.length;
@@ -2291,6 +2320,7 @@ function act(a){
  if(a==='clear-key'){del(KEY.api);globalThis.SakaLuXDialog.notice(hubApiKey()?'Local key cleared. The SakaLuX Hub key remains active.':'Local API key cleared.');render();return}
  if(a==='new-agreement')return dialog('Train Agreement',[{name:'company',label:'Company / employee',value:meta().name},{name:'perWeek',label:'Trains promised/week',type:'number',value:10},{name:'cost',label:'Cost/train (0 = free)',type:'number',value:0},{name:'startDate',label:'Starts / wait note',value:'Immediately'},{name:'note',label:'Notes',wide:true}],d=>{let x=arr(KEY.agreements);x.push({...d,perWeek:num(d.perWeek),cost:num(d.cost),ts:now(),active:true});set(KEY.agreements,x)});
  if(a==='import-trains-api')return importConfirmedCompanyTrains();
+ if(a==='import-my-trains')return importMyTrainingLog();
  if(a==='log-train')return dialog('Log Train',[{name:'employee',label:'Employee / buyer',value:me()?.name||''},{name:'primary',label:'Primary stat',type:'select',options:['Intelligence','Endurance','Manual Labor','Unknown']},{name:'secondary',label:'Secondary stat',type:'select',options:['Endurance','Intelligence','Manual Labor','Unknown']},{name:'price',label:'Price received/paid',type:'number',value:0},{name:'note',label:'Note',wide:true}],d=>{let x=arr(KEY.trains);x.push({...d,price:num(d.price),ts:now()});set(KEY.trains,x)});
  if(a==='new-contract')return dialog('Train Sale Contract',[{name:'employee',label:'Employee / buyer'},{name:'totalTrains',label:'Total trains',type:'number',value:10},{name:'perWeek',label:'Promised per week',type:'number',value:10},{name:'pricePerTrain',label:'Price per train',type:'number',value:500000},{name:'startDate',label:'Start date',value:new Date().toISOString().slice(0,10)},{name:'note',label:'Notes',wide:true}],d=>{const x=arr(KEY.contracts);x.push({...d,id:String(now()),totalTrains:num(d.totalTrains),perWeek:num(d.perWeek),pricePerTrain:num(d.pricePerTrain),ts:now(),active:true,paid:false});set(KEY.contracts,x)});
  if(a==='new-benchmark')return dialog('Add Competitor Benchmark',[{name:'name',label:'Company name'},{name:'type',label:'Company type',value:meta().type},{name:'stars',label:'Stars',type:'number',value:Math.min(10,meta().stars+1)},{name:'weeklyIncome',label:'Weekly income',type:'number',value:0},{name:'customers',label:'Weekly customers',type:'number',value:0}],d=>{const x=arr(KEY.benchmarks);x.push({...d,stars:num(d.stars),weeklyIncome:num(d.weeklyIncome),customers:num(d.customers),ts:now()});set(KEY.benchmarks,x)});
