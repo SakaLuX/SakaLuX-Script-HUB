@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.87
+// @version      1.8.88
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.87',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.88',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2072,7 +2072,7 @@ async function importMyTrainingLog(){
   const company=categories.find(x=>/^(?:company|companies|employment)$/i.test(String(x?.title||'').trim()))||categories.find(x=>/company|companies|employment/i.test(String(x?.title||'')));
   if(!company || !Number.isFinite(Number(company.id)))throw new Error('Categoria Company nu a fost identificată în lista oficială Torn.');
   const categoryId=Number(company.id),saved=arr(KEY.trains),known=new Set(saved.filter(x=>x.apiLogId).map(x=>String(x.apiLogId))),found=[];
-  const seenPageIds=new Set();let events=0,trainingCandidates=0,to=0,pages=0;
+  const seenPageIds=new Set();let events=0,trainingCandidates=0,to=0,pages=0,enriched=0;
   const from=Math.floor((Date.now()-90*86400000)/1000);
   for(let page=0;page<12;page++){
    const url='https://api.torn.com/v2/user/log?cat='+categoryId+'&limit=100&from='+from+(to?'&to='+to:'')+'&key='+encodeURIComponent(key);
@@ -2095,30 +2095,49 @@ async function importMyTrainingLog(){
     // Restrict to explicit employee/company TRAINING; do not import salary/job point or generic gym logs.
     if(!/(train(?:ed|ing)?|instruire|antrenament)/i.test(label))continue;
     trainingCandidates++;
-    if(known.has(id)||!Number.isFinite(stamp)||stamp<=0)continue;
+    if(!Number.isFinite(stamp)||stamp<=0)continue;
     const employee=String(data?.employee_name||data?.employee?.name||data?.employee||data?.target?.name||me()?.name||'').trim();
     const statFields={manual:'Manual Labor',manual_labor:'Manual Labor',man:'Manual Labor',int:'Intelligence',intelligence:'Intelligence',end:'Endurance',endurance:'Endurance'};
     const gains=[];
-    const collect=(obj)=>{
-     if(!obj||typeof obj!=='object')return;
+    const normalStat=v=>/manual/i.test(String(v))?'Manual Labor':/intelligence|^int$/i.test(String(v))?'Intelligence':/endurance|^end$/i.test(String(v))?'Endurance':'';
+    const add=(stat,value)=>{const name=normalStat(stat),amount=Number(String(value).replace(/,/g,''));if(name&&Number.isFinite(amount)&&amount>0&&amount<1e8)gains.push({stat:name,amount})};
+    const collect=(obj,depth=0)=>{
+     if(depth>5||obj==null)return;
+     if(typeof obj==='string'){
+      for(const hit of obj.matchAll(/(?:([\\d,.]+)\\s+(manual(?:\\s+labor|\\s+labour)?|intelligence|endurance)|(?:manual(?:\\s+labor|\\s+labour)?|intelligence|endurance)\\s*(?:\\+|gained?\\s+)\\s*([\\d,.]+))/gi))
+       add(hit[2]||hit[0].match(/manual(?:\\s+labor|\\s+labour)?|intelligence|endurance/i)?.[0],hit[1]||hit[3]);
+      return;
+     }
+     if(typeof obj!=='object')return;
+     if(Array.isArray(obj)){obj.slice(0,40).forEach(v=>collect(v,depth+1));return}
+     const stat=obj.stat||obj.stat_name||obj.stat_type||obj.work_stat;
+     const value=obj.gain??obj.gained??obj.amount??obj.points??obj.increase;
+     if(stat!=null&&value!=null)add(stat,value);
      for(const [key,val] of Object.entries(obj)){
-      const low=key.toLowerCase().replace(/[^a-z_]/g,'');
-      const label=statFields[low]||(/manual/.test(low)?'Manual Labor':/intelligence/.test(low)?'Intelligence':/endurance/.test(low)?'Endurance':'');
-      const amount=typeof val==='number'?val:(typeof val==='string'&&/^\\d+(?:\\.\\d+)?$/.test(val)?Number(val):NaN);
-      if(label&&Number.isFinite(amount)&&amount>0)gains.push({stat:label,amount});
+      if(normalStat(key)&&typeof val!=='object')add(key,val);
+      else if(val&&typeof val==='object')collect(val,depth+1);
+      else if(typeof val==='string'&&/train|gain|manual|intelligence|endurance/i.test(val))collect(val,depth+1);
      }
     };
-    collect(data);collect(data?.stats);collect(data?.gains);collect(data?.working_stats);collect(x?.params);
+    collect(data);collect(x?.params);collect(x?.details?.data);collect(description);collect(title);
     const unique=[...new Map(gains.map(g=>[g.stat,g])).values()];
     const gained=unique.map(g=>g.stat+' +'+g.amount).join(', ');
     const first=unique[0]?.stat||'Unknown',second=unique[1]?.stat||'Unknown';
+    if(known.has(id)){
+      const old=saved.find(row=>String(row.apiLogId||'')===id);
+      if(old&&unique.length&&(!Array.isArray(old.gains)||!old.gains.length)){
+       old.primary=first;old.secondary=second;old.gains=unique;
+       old.note='Train Company / '+title+' · '+gained;enriched++;
+      }
+      continue;
+    }
     found.push({employee,primary:first,secondary:second,gains:unique,price:0,ts:stamp<1e12?stamp*1000:stamp,note:'Train Company / '+title+(gained?' · '+gained:''),apiLogId:id,source:'Torn user/log'});
     known.add(id);
    }
    if(entries.length<100||!Number.isFinite(oldest)||oldest<=from||!newItems)break;
    to=oldest-1;
   }
-  if(found.length){
+  if(found.length||enriched){
    const merged=saved.concat(found);
    companyTrainsMemory=merged;
    let gmSaved=false,localSaved=false;
@@ -2232,7 +2251,7 @@ function employeeTrains(){
  return `<div class="ci-actions ci-employee-train-actions"><button class="ci-btn primary" data-act="new-agreement">+ Agreement</button><button class="ci-btn" data-act="import-my-trains">↻ IMPORT</button><button class="ci-btn" data-act="log-train">+ Received train</button></div>
  <div class="ci-grid">${card('Current Agreement',ag?kv('Promised',fmt(ag.perWeek)+'/week')+kv('Received 7d',got+'/'+fmt(ag.perWeek))+kv('Price',ag.cost?money(ag.cost):'FREE')+kv('Starts',esc(ag.startDate||'Now')):empty('No active agreement.'))}
  ${card('Projection',ag?kv('7 days','~+'+fmt(weekly)+' work stats')+kv('30 days','~+'+fmt(weekly*30/7))+kv('90 days','~+'+fmt(weekly*90/7))+kv('Weekly cost',money(num(ag.perWeek)*num(ag.cost))):empty('Add an agreement first.'))}</div>
- ${card('Train History',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Primary</th><th>Secondary</th><th>Note</th></tr></thead><tbody>${logs.slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleString()}</td><td>${esc(x.primary)}</td><td>${esc(x.secondary)}</td><td>${esc(x.note||'')}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
+ ${card('Train History',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Primary</th><th>Secondary</th><th>Gains</th><th>Note</th></tr></thead><tbody>${logs.slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleString()}</td><td>${esc(x.primary)}</td><td>${esc(x.secondary)}</td><td>${esc(Array.isArray(x.gains)&&x.gains.length?x.gains.map(g=>g.stat+' +'+g.amount).join(', '):'Nespecificat în API')}</td><td>${esc(x.note||'')}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
 }
 function offerScore(o){return num(o.dailySalary)*7+num(o.trainsPerWeek)*(num(o.trainValue,500000)-num(o.trainCost))+num(o.stars)*50000}
 function employeeOffers(){
