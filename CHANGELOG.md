@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.6.8 - stable gym confirmation and affordable trains (2026-10-21)
+
+- Cache an explicitly confirmed native Gym banner for up to 15 seconds while Torn redraws Gym controls; invalidate it on a gym switch. This prevents the gold button from falling back to WAIT FOR GYM CONFIRMATION while the overview still displays the active gym.
+- Calculate native training repetitions using remaining energy and the displayed energy per train. Example: with 10 E in Complete Cardio, only 1 repetition is affordable, so do not assume 999 repetitions can be performed.
+- Ask the user to set the native selector manually if Torn exposes only arrow controls. Update the gold button after native changes.
+- Before executing an explicitly requested TRAIN, recheck gym, repetitions, remaining energy and training cost; never blindly train when values are unavailable.
+- Mock validation for 0/10/20/150 E, Javascript parse and ASCII checks passed; on-device validation remains pending.
+
 ## Gym Optimizer v1.6.7 - energy status and actual specialist gym requirements (2026-10-21)
 
 - Show NO ENERGY - WAIT FOR REGENERATION when live Torn HUD or verified API says 0 E; distinguish from gym selection errors. For nonzero insufficient E, show required energy per train where identified.
