@@ -2057,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.6.0",
+                "version": "1.6.1",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2074,13 +2074,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.6.0",
+                    "version": "1.6.1",
                     "date": "2026-10-21",
                     "notes": [
-                        "Replace multiple Train Next actions with one premium gold button that changes from SET 999 to SWITCH GYM (only verified unlocked) to TRAIN.",
-                        "Every action requires its own explicit tap; only the TRAIN tap clicks the native Torn training control once.",
-                        "Reread Torn gym controls and repetition count before actions, with disabled states when controls are missing.",
-                        "Show why Best verified gym might be unavailable: only selected gyms and explicitly unlocked controls qualify."
+                        "Auto-save a Gym history snapshot after a stable, verified change in all four native stats; no Save Snapshot button needed.",
+                        "Avoid duplicates and reject partial or implausibly reduced stat reads.",
+                        "Show the last 15 snapshots with compact colored stats and green per-stat/TBS gains.",
+                        "Preserve Clear History, local snapshot retention and CSV export, plus ASCII-only TornPDA compatibility."
                     ]
                 },
                 "accessTier": "free",
