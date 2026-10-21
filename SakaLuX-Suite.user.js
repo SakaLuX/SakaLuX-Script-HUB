@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.987
+// @version      0.9.988
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39024,11 +39024,42 @@ function tlApiKey(){
     return"";
 }
 function tlApiRead(url,key){
+    const full=url+(url.includes("?")?"&":"?")+"key="+encodeURIComponent(key)+"&striptags=true";
     return new Promise((resolve,reject)=>{
-        if(typeof GM_xmlhttpRequest!=="function"){reject(new Error("GM_xmlhttpRequest unavailable"));return;}
-        GM_xmlhttpRequest({method:"GET",url:url+(url.includes("?")?"&":"?")+"key="+encodeURIComponent(key),timeout:18000,
-            onload:r=>{try{const j=JSON.parse(r.responseText||"{}");if(j.error)throw new Error(j.error.error||"Torn API error");resolve(j);}catch(e){reject(e);}},
-            onerror:()=>reject(new Error("API network error")),ontimeout:()=>reject(new Error("API timeout"))});
+        let settled=false;
+        const fail=err=>{if(!settled){settled=true;reject(err instanceof Error?err:new Error(String(err)));}};
+        const done=payload=>{
+            if(settled)return;
+            try{
+                const body=typeof payload==="string"?payload:payload?.responseText??payload?.response??payload;
+                if(body==null||body==="")throw new Error("Empty API response");
+                const parsed=typeof body==="string"?JSON.parse(body):body;
+                if(!parsed||typeof parsed!=="object")throw new Error("Unexpected API response");
+                if(parsed.error)throw new Error(parsed.error.error||("Torn API error "+parsed.error.code));
+                settled=true;resolve(parsed);
+            }catch(e){fail(e);}
+        };
+        const fallback=()=>{
+            if(settled)return;
+            fetch(full,{credentials:"omit",cache:"no-store"}).then(async response=>{
+                if(!response.ok)throw new Error("HTTP "+response.status);
+                return response.text();
+            }).then(done,fail);
+        };
+        try{
+            if(typeof GM_xmlhttpRequest==="function"){
+                const request=GM_xmlhttpRequest({method:"GET",url:full,timeout:18000,
+                    onload:response=>{
+                        // Torn PDA may invoke callbacks without a response object.
+                        if(response==null){fallback();return;}
+                        done(response);
+                    },
+                    onerror:()=>fallback(),ontimeout:()=>fallback()});
+                if(request&&typeof request.then==="function")request.then(done,()=>fallback());
+                return;
+            }
+            fallback();
+        }catch(e){fallback();}
     });
 }
 function tlApiSetStatus(message){const e=document.getElementById("tl-api-status");if(e)e.textContent=message;}
