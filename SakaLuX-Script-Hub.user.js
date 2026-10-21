@@ -2057,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.6.7",
+                "version": "1.6.8",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2074,13 +2074,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.6.7",
+                    "version": "1.6.8",
                     "date": "2026-10-21",
                     "notes": [
-                        "Display NO ENERGY - WAIT FOR REGENERATION when Torn HUD or API confirms 0 energy, instead of misleading GYM CONFIRMATION message.",
-                        "Replace planner-only Headroom with real requirement checks for Elites, Total Rebound, Gym 3000, Mr. Isoyamas, Balboas, Frontline Fitness and Sports Science Lab.",
-                        "Report ratio gaps from actual stats separately from standard gym prerequisites and membership cost, without assuming unlocked gym status.",
-                        "Save selected specialist gym, continue native TRAIN safety and ASCII compatibility."
+                        "Stabilize selected gym proof during temporary TornPDA redraws, preventing contradictory WAIT FOR GYM CONFIRMATION while the active gym banner is visible.",
+                        "Match the native repetitions selector to energy actually available, e.g. 10 E at Complete Cardio permits one 10 E train, not 999 repetitions.",
+                        "Recheck native repetitions, available energy and train cost immediately before a single explicitly clicked TRAIN action.",
+                        "Keep ASCII-only source and auto-update metadata."
                     ]
                 },
                 "accessTier": "free",
