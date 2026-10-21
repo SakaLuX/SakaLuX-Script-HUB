@@ -1352,6 +1352,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const train=tile&&[...tile.querySelectorAll('button,input[type="button"],[role="button"]')]
       .find(b=>/^(train)$/i.test((b.innerText||b.value||'').trim())&&!b.disabled&&b.getAttribute('aria-disabled')!=='true');
     const current=confirmedGym();
+    if(gymTransitionPending&&current&&current.toLowerCase()===gymTransitionPending.toLowerCase())gymTransitionPending=null;
     // No automatic training when an alternative gym was clicked but not yet confirmed.
     if(gymTransitionPending && (!current||current.toLowerCase()!==gymTransitionPending.toLowerCase()))
       return {step:'blocked',label:'CONFIRM GYM SWITCH',disabled:true,stat};
@@ -1579,5 +1580,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   // TornPDA navigates without full reload. Move the inline widget when Gym's React root is replaced.
   let lastUrl=location.href;
-  setInterval(()=>{if(location.href!==lastUrl){lastUrl=location.href;render()}registerGym();mount();watchGymHistory()},1100);
+  let previousGymUiName=null;
+  setInterval(()=>{
+    if(location.href!==lastUrl){lastUrl=location.href;render()}
+    registerGym();mount();watchGymHistory();
+    const current=confirmedGym();
+    if(current&&current!==previousGymUiName){
+      previousGymUiName=current;
+      if(gymTransitionPending&&gymTransitionPending.toLowerCase()===current.toLowerCase())gymTransitionPending=null;
+      if((panel.dataset.tab||'OVERVIEW')==='OVERVIEW')render();
+    }
+  },1100);
 })();
