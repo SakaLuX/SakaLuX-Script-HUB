@@ -993,8 +993,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const title=gymBannerName(),selected=selectedGymIconName();
     const confirmed=title||selected;
     if(confirmed){
+      const previous=activeGymProof;
       activeGymProof={name:confirmed,at:Date.now(),fromStorage:false};
-      try{localStorage.setItem(GYM_ACTIVE_CACHE_KEY,JSON.stringify(activeGymProof))}catch{}
+      if(!previous||previous.name!==confirmed||Date.now()-previous.at>60000){
+        try{localStorage.setItem(GYM_ACTIVE_CACHE_KEY,JSON.stringify(activeGymProof))}catch{}
+      }
       return confirmed;
     }
     // A gym switch invalidates fallback until Torn confirms the new gym.
