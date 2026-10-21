@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.989
+// @version      0.9.990
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39080,55 +39080,83 @@ function tlApiRead(url,key){
 }
 function tlApiSetStatus(message){const e=document.getElementById("tl-api-status");if(e)e.textContent=message;}
 function tlApiExtract(raw,types){
-    const rows=Array.isArray(raw?.log)?raw.log:Object.entries(raw?.log||{}).map(([id,item])=>({...item,_id:id}));
-    return rows.filter(item=>{
-        const id=String(item.log??item.type??"");
-        const label=String(types[id]?.name??types[id]?.title??types[id]??item.title??item.name??"");
-        const text=(label+" "+String(item.action||"")+" "+String(item.description||"")).toLowerCase();
-        // Match only explicit company/job trains; exclude gym training, job-point spending and unrelated events.
-        return /(?:company|employee|job).{0,30}train|train.{0,30}(?:company|employee|job)/i.test(text)&&!/gym|battle stat|personal train/i.test(text);
-    }).map(item=>{
-        const d=item.data||{};
-        const ts=Number(item.timestamp||item.time||0)*1000;
-        const name=String(d.employee_name||d.employee?.name||d.target_name||d.target?.name||d.user_name||d.name||"").trim();
+    const rows=Array.isArray(raw?.log)?raw.log:Object.entries(raw?.log||{}).map(([id,item])=>({...item,_id:item?.id||id}));
+    const typeTitle=id=>{
+        const info=types?.[id]||types?.[String(id)]||{};
+        return typeof info==="string"?info:String(info?.name||info?.title||info?.description||"");
+    };
+    return rows.map(item=>{
+        const d=item.data||{},detail=item.details||{};
+        const type=String(item.log??item.type??detail.log??"");
+        const title=typeTitle(type)||String(detail.title||item.title||"");
+        const desc=String(item.action||item.description||item.message||"");
+        const category=String(detail.category||item.category||"");
+        const combined=title+" "+desc+" "+category;
+        // Company training is a distinct log event; generic job salary/gym training does not count.
+        if(!/train(?:ed|ing)?/i.test(combined)||!/company|employee|job|train(?:ed)? you/i.test(combined)||/gym training|battle stats/i.test(combined))return null;
+        const epoch=Number(item.timestamp||item.time||0);
+        const ts=epoch<1e12?epoch*1000:epoch;
         const id=String(item._id||item.id||item.log_id||"").trim();
-        if(!Number.isFinite(ts)||ts<=0||ts>Date.now()+86400000||!name)return null;
-        const gains=["manual_labor","intelligence","endurance"].flatMap(k=>Number(d[k]||0)>0?[k+" +"+d[k]]:[]);
-        return{ts,name,company:String(d.company_name||""),role:String(d.position||""),gains,apiLogId:id||String(item.log)+":"+ts+":"+name,apiImported:true};
+        if(!id||!Number.isFinite(ts)||ts<=0||ts>Date.now()+86400000)return null;
+        // Training received by the key owner: no employee field is required in the event.
+        const name=String(d.employee_name||d.employee?.name||d.target_name||d.target?.name||d.user_name||d.name||"Me").trim();
+        const gains=["manual_labor","manual","intelligence","endurance"].flatMap(k=>Number(d[k]||0)>0?[k+" +"+d[k]]:[]);
+        return {ts,name,company:String(d.company_name||d.company?.name||""),role:String(d.position||""),gains,apiLogId:id,apiImported:true};
     }).filter(Boolean);
 }
 async function tlSyncApi(manual=false){
     if(tlApiSyncBusy)return;
     const keys=tlApiKeys();
     if(!keys.length){tlApiSetStatus("Torn API key missing — configure it in SakaLuX Hub.");return;}
+    const state=JSON.parse(localStorage.getItem(TL_API_SYNC_KEY)||"{}");
+    if(!manual&&Date.now()-Number(state.lastCheck||0)<5*60000)return;
     tlApiSyncBusy=true;const btn=document.getElementById("tl-api-import");if(btn)btn.disabled=true;
-    tlApiSetStatus("Reading confirmed company trains from Torn API…");
+    tlApiSetStatus("Checking Company training logs (90 days)…");
     try{
-        const state=JSON.parse(localStorage.getItem(TL_API_SYNC_KEY)||"{}");
-        if(!manual&&Date.now()-Number(state.lastCheck||0)<5*60000)return;
-        let result=null,selected=null,lastError=null;
+        let selected=null,categoryId=null,types={},lastError=null;
         for(const candidate of keys){
             try{
-                result=await tlApiRead("https://api.torn.com/v2/user/log?limit=100",candidate.key);
-                selected=candidate;break;
-            }catch(e){
-                lastError=e;
-                if(!/incorrect key|invalid key|key is invalid/i.test(String(e.message||e)))throw e;
+                const results=await Promise.all([
+                    tlApiRead("https://api.torn.com/v2/torn/logcategories",candidate.key),
+                    tlApiRead("https://api.torn.com/v2/torn/logtypes",candidate.key)
+                ]);
+                const c=results[0].logcategories||{},list=Array.isArray(c)?c:Object.entries(c).map(([id,row])=>({id,title:typeof row==="string"?row:(row?.title||row?.name||"")}));
+                const match=list.find(row=>/^(company|companies|employment)$/i.test(String(row?.title||row?.name||"").trim()))||
+                    list.find(row=>/company|employment/i.test(String(row?.title||row?.name||"")));
+                if(!match||!Number.isFinite(Number(match.id)))throw new Error("Company category not listed in Torn logcategories");
+                categoryId=Number(match.id);types=results[1].logtypes||results[1].log_types||{};selected=candidate;break;
+            }catch(e){lastError=e;}
+        }
+        if(!selected)throw lastError||new Error("No Torn API key with access to Company logs and log categories.");
+        const cutoff=Date.now()-CFG.logRetainDays*86400000;
+        const from=Math.floor(cutoff/1000),data=tlLoad();
+        const known=new Set(data.entries.filter(x=>x.apiLogId).map(x=>String(x.apiLogId)));
+        const pagesSeen=new Set();let to=0,scanned=0,pages=0,added=0,matched=0;
+        for(let page=0;page<12;page++){
+            const url="https://api.torn.com/v2/user/log?cat="+categoryId+"&limit=100&from="+from+(to?"&to="+to:"");
+            const result=await tlApiRead(url,selected.key);
+            const rows=Array.isArray(result.log)?result.log:Object.entries(result.log||{}).map(([id,item])=>({...item,_id:item?.id||id}));
+            if(!rows.length)break;
+            pages++;scanned+=rows.length;
+            const candidates=tlApiExtract({log:rows},types);matched+=candidates.length;
+            let oldest=Infinity,newIds=0;
+            for(const row of rows){
+                const id=String(row._id||row.id||row.log_id||"");
+                if(id&&!pagesSeen.has(id)){pagesSeen.add(id);newIds++;}
+                const ts=Number(row.timestamp||row.time);
+                if(Number.isFinite(ts)&&ts>0)oldest=Math.min(oldest,ts>1e12?Math.floor(ts/1000):ts);
             }
+            for(const entry of candidates){
+                if(known.has(entry.apiLogId)||entry.ts<cutoff)continue;
+                known.add(entry.apiLogId);data.entries.push(entry);added++;
+            }
+            if(rows.length<100||oldest<=from||!Number.isFinite(oldest)||!newIds)break;
+            to=oldest-1;
         }
-        if(!selected)throw new Error("No valid Torn API key found in Hub/Suite ("+keys.length+" checked). Check API Access settings.");
-        const typeResult=await tlApiRead("https://api.torn.com/v2/torn/logtypes",selected.key);
-        const types=typeResult.logtypes||typeResult.log_types||{};
-        const candidates=tlApiExtract(result,types);
-        const data=tlLoad(),seen=new Set(data.entries.filter(x=>x.apiLogId).map(x=>String(x.apiLogId)));
-        let count=0;
-        for(const entry of candidates){
-            if(seen.has(entry.apiLogId)||entry.ts<Date.now()-CFG.logRetainDays*86400000)continue;
-            seen.add(entry.apiLogId);data.entries.push(entry);count++;
-        }
-        if(count){data.entries.sort((a,b)=>b.ts-a.ts);tlSave(data);}
-        localStorage.setItem(TL_API_SYNC_KEY,JSON.stringify({lastCheck:Date.now(),lastImported:count}));
-        tlApiSetStatus(count?count+" confirmed train(s) imported.":"No new identifiable company trains in the latest 100 logs.");
+        if(added){data.entries.sort((a,b)=>b.ts-a.ts);tlSave(data);}
+        const check=tlLoad();const persisted=check.entries.filter(x=>x.apiImported).length;
+        localStorage.setItem(TL_API_SYNC_KEY,JSON.stringify({lastCheck:Date.now(),lastImported:added}));
+        tlApiSetStatus(added+" new trains imported · "+matched+" matching events · "+scanned+" Company logs / "+pages+" page(s). Saved API trains: "+persisted+".");
         const modal=document.getElementById("fc-tlog-modal");
         if(modal?.classList.contains("fc-vis"))renderTab(modal.querySelector(".tl-tab.active")?.dataset.tltab||"calendar");
     }catch(e){tlApiSetStatus("Import failed: "+String(e.message||e));}
@@ -40163,7 +40191,7 @@ function buildTrainingLogModal(){
     if(document.getElementById("fc-tlog-modal"))return;
     const ov=document.createElement("div");ov.id="fc-tlog-overlay";
     const m=document.createElement("div");m.id="fc-tlog-modal";
-    m.innerHTML=`<div class="tl-head"><div class="tl-head-left"><div class="tl-title">Training Log</div><div class="tl-subtitle" id="tl-subtitle">Loading…</div></div><div class="tl-head-right"><button type="button" class="tl-add-btn" id="tl-api-import" style="margin-bottom:0">Import API</button><button type="button" class="tl-add-btn" id="tl-quick-add" style="margin-bottom:0">+ Add Entry</button><button type="button" class="tl-close" id="fc-tlog-close">×</button></div></div><div class="tl-tabs"><div class="tl-tab active" data-tltab="calendar">Calendar</div><div class="tl-tab" data-tltab="schedule">Schedule</div><div class="tl-tab" data-tltab="employees">By Employee</div><div class="tl-tab" data-tltab="log">Full Log</div></div><div class="tl-body" id="tl-body"></div><div class="tl-foot"><div><div class="tl-foot-note" id="tl-foot-note"></div><div class="tl-foot-note" id="tl-api-status">API sync available · last 100 logs</div></div><button type="button" class="tl-btn-clear" id="tl-btn-clear">Clear All Logs</button></div>`;
+    m.innerHTML=`<div class="tl-head"><div class="tl-head-left"><div class="tl-title">Training Log</div><div class="tl-subtitle" id="tl-subtitle">Loading…</div></div><div class="tl-head-right"><button type="button" class="tl-add-btn" id="tl-api-import" style="margin-bottom:0">Import API</button><button type="button" class="tl-add-btn" id="tl-quick-add" style="margin-bottom:0">+ Add Entry</button><button type="button" class="tl-close" id="fc-tlog-close">×</button></div></div><div class="tl-tabs"><div class="tl-tab active" data-tltab="calendar">Calendar</div><div class="tl-tab" data-tltab="schedule">Schedule</div><div class="tl-tab" data-tltab="employees">By Employee</div><div class="tl-tab" data-tltab="log">Full Log</div></div><div class="tl-body" id="tl-body"></div><div class="tl-foot"><div><div class="tl-foot-note" id="tl-foot-note"></div><div class="tl-foot-note" id="tl-api-status">API sync available · Company logs (90 days)</div></div><button type="button" class="tl-btn-clear" id="tl-btn-clear">Clear All Logs</button></div>`;
     document.body.appendChild(ov);document.body.appendChild(m);
     const hide=()=>{ov.style.display="none";m.classList.remove("fc-vis");_activeDayKey=null;};
     ov.addEventListener("click",hide);
