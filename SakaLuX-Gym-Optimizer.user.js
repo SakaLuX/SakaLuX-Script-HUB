@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.6.6
+// @version      1.6.7
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.6.6',root=document.documentElement;
+    const id='gym-optimizer',v='1.6.7',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.6.6',id='gym-optimizer';
+    const ver='1.6.7',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -907,6 +907,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   css.textContent += '#slx-gym-panel .slx-auto-history{margin:4px 2px 8px!important;overflow-x:auto!important}#slx-gym-panel .slx-auto-history .sf-hrow{display:grid!important;grid-template-columns:.88fr 1fr 1fr 1fr 1fr .9fr!important;gap:2px!important;padding:10px 2px!important;align-items:start!important;text-align:center!important;border-bottom:1px solid #2d3136!important}#slx-gym-panel .slx-auto-history .sf-hhead{font-size:9px!important;padding:7px 2px!important;letter-spacing:0!important}#slx-gym-panel .slx-auto-history .sf-hhead b{font-size:9px!important;overflow:hidden!important}#slx-gym-panel .slx-hdate{color:#c4c6ca;font-size:11px;font-weight:800;padding-top:2px;white-space:nowrap}#slx-gym-panel .slx-hstat{font-size:14px;font-weight:900;line-height:1.15;text-align:center!important;white-space:nowrap!important}#slx-gym-panel .slx-htotal{color:#76bafa!important}#slx-gym-panel .slx-hgain{display:block!important;color:#47d48b!important;font-size:11px!important;font-weight:900!important;line-height:1.4!important}#slx-gym-panel .slx-history-footer{font-size:10px;text-align:center;color:#7f9b89;padding:6px 0 7px}#slx-gym-panel .slx-history-empty{font-size:12px;color:#a7b0bc;padding:12px 7px;line-height:1.4}#slx-gym-panel .sf-history-actions{margin:4px 4px 8px!important}#slx-gym-panel #slx-gym-clear{width:100%;background:linear-gradient(180deg,#843646,#4a202c)!important;border:1px solid #995069!important;border-radius:6px!important;letter-spacing:1px!important}';
 
   css.textContent += '#slx-gym-panel .slx-ratio-cap{display:grid!important;grid-template-columns:1fr auto!important;column-gap:7px!important;row-gap:1px!important;padding:9px 0!important;border-bottom:1px solid #30353b!important}#slx-gym-panel .slx-ratio-cap strong{grid-column:1/-1;font-size:11px!important;letter-spacing:.5px!important}#slx-gym-panel .slx-cap-need{color:#f5c75e!important}#slx-gym-panel .slx-cap-ok{color:#44d18c!important}#slx-gym-panel .slx-cap-dump{color:#ed768c!important}#slx-gym-panel .slx-special-gym-note{padding:9px!important;border-left:3px solid #d9ac46!important;background:#25231a!important;margin:10px 0 2px!important;line-height:1.45!important}';
+
+  css.textContent += '#slx-gym-panel .slx-special-select{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-bottom:10px}#slx-gym-panel .slx-special-select button{font-size:10px!important;min-height:35px!important;padding:6px 3px!important;background:#22272d!important;border:1px solid #3c4550!important;border-radius:6px!important;line-height:1.15!important;color:#d1d4da!important}#slx-gym-panel .slx-special-select button.active{background:#3d321b!important;color:#ffe29d!important;border-color:#d1a345!important;font-weight:900!important}';
 
   (document.head||document.documentElement).append(css);
   const toggle=document.createElement('button');toggle.id='slx-gym-toggle';toggle.textContent='GYM  [ENERGY] ';
@@ -1176,7 +1178,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.6.6',id='gym-optimizer';
+      const version='1.6.7',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1268,6 +1270,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function gymEnergy(){
     const d=gymApi.data||{},current=d.energy||d.bars?.energy;
     return Number(current?.current??current?.amount??d?.energy?.current);
+  }
+  function reliableGymEnergy(){
+    // Prefer the Torn API's bars.energy.current if it is a finite number.
+    // Never coerce missing API fields to zero.
+    const val=gymApi.data?.bars?.energy?.current??gymApi.data?.energy?.current??gymApi.data?.energy?.amount;
+    if(val!==undefined&&val!==null&&val!==''&&Number.isFinite(Number(val))&&Number(val)>=0)
+      return {value:Number(val),source:'Torn API'};
+    // Native HUD label with explicit energy semantics is the secondary source.
+    for(const node of document.querySelectorAll('[aria-label*="energy" i],[title*="energy" i],[data-testid*="energy" i]')){
+      if(panel.contains(node))continue;
+      const text=[node.getAttribute('aria-label'),node.getAttribute('title'),node.textContent].filter(Boolean).join(' ');
+      const match=text.match(/(?:energy\s*:?\s*)?(\d{1,3})\s*\/\s*(\d{2,3})/i);
+      if(match&&Number(match[2])>=Number(match[1]))return {value:Number(match[1]),source:'Torn HUD'};
+    }
+    return null;
   }
   function safeReps(stat){
     const energy=gymEnergy();
@@ -1373,6 +1390,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function gymTrainInput(stat){return nativeRepetitionControl(stat).input}
   function gymNextAction(stat){
     if(!stat)return {step:'waiting',label:'WAITING FOR STATS',disabled:true};
+    const availableEnergy=reliableGymEnergy();
+    if(availableEnergy&&availableEnergy.value<=0)
+      return {step:'blocked',label:'NO ENERGY - WAIT FOR REGENERATION',disabled:true};
+
     const control=nativeRepetitionControl(stat);
     if(!control.tile)return {step:'blocked',label:'WAIT FOR TORN GYM TILES',disabled:true};
     if(!Number.isFinite(control.value))
@@ -1381,6 +1402,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       return {step:control.input?'reps':'manual-reps',
         label:control.input?'SET 999 - '+stat.toUpperCase():'SET 999 IN TORN - '+stat.toUpperCase(),
         disabled:false,stat};
+    const energyCostMatch=(control.tile.innerText||control.tile.textContent||'').match(/(\d+)\s*energy per train/i);
+    const energyCost=energyCostMatch?Number(energyCostMatch[1]):null;
+    if(availableEnergy&&Number.isFinite(energyCost)&&energyCost>0&&availableEnergy.value<energyCost)
+      return {step:'blocked',label:'INSUFFICIENT ENERGY - NEED '+energyCost+' E',disabled:true};
     const gym=confirmedGym();
     if(!gym)return {step:'blocked',label:'WAIT FOR GYM CONFIRMATION',disabled:true};
     const currentBest=bestAvailable(stat);
@@ -1466,6 +1491,46 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(['HISTORY','OVERVIEW'].includes(panel.dataset.tab||'OVERVIEW'))render();
   }
 
+  // Actual Torn specialist gym requirements, independent of the user's planner ratio.
+  const SPECIAL_GYMS=[
+    {id:'Elites',stat:'Dexterity',kind:'single',prereq:"George's",price:100000000,dots:8},
+    {id:'Total Rebound',stat:'Speed',kind:'single',prereq:"George's",price:100000000,dots:8},
+    {id:'Gym 3000',stat:'Strength',kind:'single',prereq:"George's",price:100000000,dots:8},
+    {id:'Mr. Isoyamas',stat:'Defense',kind:'single',prereq:"George's",price:100000000,dots:8},
+    {id:'Balboas Gym',kind:'paired',favored:['Defense','Dexterity'],other:['Strength','Speed'],prereq:"Cha Cha's",price:50000000,dots:7.5},
+    {id:'Frontline Fitness',kind:'paired',favored:['Strength','Speed'],other:['Defense','Dexterity'],prereq:"Cha Cha's",price:50000000,dots:7.5},
+    {id:'The Sports Science Lab',kind:'special',prereq:'Last Round',price:500000000,dots:9}
+  ];
+  let selectedSpecialGym='Elites';
+  function specialistRequirement(gym,actual){
+    const numbers=Object.fromEntries(stats.map(n=>[n,Number(actual[n])||0]));
+    const valid=stats.every(n=>numbers[n]>0);
+    const index=gymTable.findIndex(g=>g[0]===gym.prereq),activeGym=confirmedGym();
+    const activeIndex=gymTable.findIndex(g=>g[0]===activeGym);
+    const unlocked=gymAvailability().has(gym.prereq.toLowerCase())||activeIndex>=index&&index>=0;
+    const pre='Required standard gym: '+gym.prereq+' - '+(unlocked?'PROGRESSION REACHED':'NOT VERIFIED / NOT YET REACHED');
+    if(!valid)return {rows:stats.map(n=>({stat:n,value:numbers[n],label:'STAT NOT VERIFIED'})),status:'Waiting for all four stat values',pre,ready:false};
+    if(gym.kind==='single'){
+      const high=numbers[gym.stat],second=Math.max(...stats.filter(n=>n!==gym.stat).map(n=>numbers[n]));
+      const required=Math.ceil((1.25*second)*100)/100; // keep fractional values for accurate display
+      const gain=Math.max(0,required-high);
+      const allowed=high/1.25;
+      return {rows:stats.map(n=>({stat:n,value:numbers[n],label:n===gym.stat?(gain>0?'NEED +'+fmt(Math.ceil(gain)):'RATIO MET'):(numbers[n]>allowed?'SECONDARY TOO HIGH':'WITHIN LIMIT'),limit:n===gym.stat?required:allowed})),
+        status:gym.stat+' must be >= 1.25 x second-highest stat. '+(gain>0?'Train '+gym.stat+' approximately +'+fmt(Math.ceil(gain))+' if the other stats stay unchanged.':'Stat ratio currently met.'),
+        ready:gain<=0,pre};
+    }
+    if(gym.kind==='paired'){
+      const favored=gym.favored.reduce((a,n)=>a+numbers[n],0),others=gym.other.reduce((a,n)=>a+numbers[n],0);
+      const target=1.25*others,gain=Math.max(0,Math.ceil(target-favored));
+      return {rows:stats.map(n=>({stat:n,value:numbers[n],label:gym.favored.includes(n)?(gain?'PAIR NEEDS +'+fmt(gain):'PAIR RATIO MET'):'OPPOSING PAIR'})),
+        status:gym.favored.join(' + ')+' must be >= 1.25 x ('+gym.other.join(' + ')+'). '+(gain?'Train a combined +'+fmt(gain)+' in the favored pair if the opposing pair stays unchanged.':'Stat ratio met.'),
+        ready:gain===0,pre};
+    }
+    return {rows:stats.map(n=>({stat:n,value:numbers[n],label:'NO STAT RATIO'})),
+      status:'No stat ratio requirement. Xanax and Ecstasy taken in total must be <= 150; not verified by this panel.',
+      ready:false,pre};
+  }
+
   function render(){
     const live=nativeStats(),actual={...state.values,...live};
     const active=stats.filter(n=>Number(state.weights[n])>0 && Number(actual[n])>0);
@@ -1495,24 +1560,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       +(estimate?'<div class="sf-estimate">'+esc(estimate.text)+'</div>':'')
       +'<div class="sf-feedback" role="status"></div></div>';
     const planningHeadroom=gymCalc.headroom(actual);
-    const ordered=ratioOrder();
-    const primary=ordered[0],leader=Number(actual[primary])||0;
-    const safeTargetFor=(stat)=>{
-      const weight=Number(state.weights[stat])||0;
-      if(weight<=0)return null;
-      const peak=Math.max(leader,...stats.filter(n=>Number(state.weights[n])>0).map(n=>(Number(actual[n])||0)/(Number(state.weights[n])||1)));
-      return Math.ceil(peak*weight);
-    };
-    const headroom='<div class="sf-section">HEADROOM TO SPECIAL GYM RATIO</div><div class="sf-card">'
-      +'<div class="sf-estimate">Current plan: '+escape(state.mode)+' | Highest: '+escape(primary)+'. These are calculated stat targets for your chosen ratio.</div>'
-      +stats.map(n=>{
-        const weight=Number(state.weights[n])||0,current=Number(actual[n])||0,target=safeTargetFor(n);
-        const status=target===null?'DUMP - minimize':!current?'Current stat unavailable':current>=target?'AT TARGET':'NEED +'+fmt(target-current);
-        return '<div class="sf-cap slx-ratio-cap"><b style="color:'+statColors[n]+'">'+n+'</b>'
-          +'<span>'+(target===null?'DUMP':fmt(current)+' / '+fmt(target))+'</span>'
-          +'<strong class="'+(target===null?'slx-cap-dump':current>=target?'slx-cap-ok':'slx-cap-need')+'">'+status+'</strong></div>';
-      }).join('')
-      +'<p class="sf-estimate slx-special-gym-note"><b>SPECIAL GYM NEEDS:</b> the required stat ratio AND all Torn unlock prerequisites (which may include another gym, energy spent, or membership). Reaching these targets alone does not confirm eligibility. Check the specific gym in Torn before switching.</p></div>';
+    const chosenSpecial=SPECIAL_GYMS.find(g=>g.id===selectedSpecialGym)||SPECIAL_GYMS[0];
+    const gymReq=specialistRequirement(chosenSpecial,actual);
+    const headroom='<div class="sf-section">SPECIAL GYM - OFFICIAL REQUIREMENTS</div><div class="sf-card slx-special-card">'
+      +'<div class="slx-special-select">'+SPECIAL_GYMS.map(g=>'<button data-special-gym="'+escape(g.id)+'" type="button" class="'+(g.id===chosenSpecial.id?'active':'')+'">'+escape(g.id)+'</button>').join('')+'</div>'
+      +'<div class="sf-estimate"><b>'+escape(chosenSpecial.id)+'</b> - '+chosenSpecial.dots+' dots; membership $'+fmt(chosenSpecial.price)+'.</div>'
+      +gymReq.rows.map(x=>'<div class="sf-cap slx-ratio-cap"><b style="color:'+statColors[x.stat]+'">'+x.stat+'</b>'
+       +'<span>'+fmt(x.value)+(x.limit!=null?' / '+fmt(x.limit):'')+'</span>'
+       +'<strong class="'+(/MET|WITHIN LIMIT/.test(x.label)?'slx-cap-ok':/NEED|TOO HIGH/.test(x.label)?'slx-cap-need':'slx-cap-dump')+'">'+escape(x.label)+'</strong></div>').join('')
+      +'<div class="sf-estimate slx-special-gym-note"><b>REQUIRED RATIO:</b> '+escape(gymReq.status)+'</div>'
+      +'<div class="sf-estimate slx-special-gym-note"><b>OTHER REQUIREMENTS:</b> '+escape(gymReq.pre)+'. Membership must also be purchased in Torn. This panel does not confirm unlock eligibility.</div></div>';
     const statView='<div class="sf-section">v STATS</div>'+stats.map((n,i)=>{
       const value=Number(actual[n])||0,t=targets[n],w=Number(state.weights[n])||0,progress=t?Math.min(100,100*value/t):0;
       const order=[...stats].sort((a,b)=>(Number(actual[b])||0)-(Number(actual[a])||0)).indexOf(n)+1;
@@ -1544,6 +1601,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const about='<div class="sf-info"><div class="sf-section">WHY NOT JUST TRAIN ALL STATS EQUALLY?</div><p>Torn has specialist gyms that give significantly better gains than regular gyms, but they have stat ratio requirements to unlock and keep access. Baldr and Hank are two popular ways to structure stats for those gyms.</p><div class="sf-section">GYM DOTS - WHY THEY MATTER</div><p>Gym dots indicate relative training gains per energy. Higher dots generally mean more gains, but exact gains and eligibility vary by gym.</p><div class="sf-three"><div>GEORGES GYM<strong style="color:#e9b84c">~7.3</strong><small>10e / train<br>No specialist ratio</small></div><div>SPECIAL GYMS<strong style="color:#ef9a45">~7.5</strong><small>Often 25e / train<br>Ratio required</small></div><div>ELITE GYMS<strong style="color:#50d18d">~8.0</strong><small>Often 50e / train<br>Strict ratio rules</small></div></div><div class="sf-section">BALDRS RATIO - 1.25 : 1 : 0.75 : 0.75</div><p>A balanced specialist build. The leading stat is 1.25, secondary 1, and the two lower stats 0.75 each. This keeps the lower stats meaningful rather than dumping one completely.</p><p>Baldr-style builds can aim for specialist gym access while maintaining a more balanced combat profile. Actual unlocks must be checked in Torn.</p><p style="color:#55d991;border-left:4px solid #32c778;padding:10px;background:#123224">BEST FOR: Balanced offensive or defensive builds; fewer extreme weaknesses.</p><div class="sf-section">HANKS RATIO - 1.25 : 1 : 1 : ~0</div><p>An aggressive three-stat build with one dump stat kept very low. It emphasizes gains for three stats, but the dump can create a major combat weakness.</p><p style="color:#f0b46b;border-left:4px solid #d68b39;padding:10px;background:#332619">TRADE-OFF: Higher specialization at the cost of one neglected stat. Verify gym unlock rules before choosing.</p><div class="sf-section">SAKALUX - DEXTERITY HIGH</div><p><b style="color:#49d994">DEXTERITY:</b> primary dodge stat. <b style="color:#47d7eb">SPEED:</b> secondary accuracy stat. <b style="color:#f18a5a">STRENGTH:</b> supporting damage stat. <b style="color:#b18af1">DEFENSE:</b> dump stat. Your custom weights can be changed in Settings.</p><p>Ratios are training targets, not proof that a particular specialist gym is unlocked.</p><div class="sf-section">STATS EXPLAINED</div><p><b style="color:#f18a5a">STRENGTH - DAMAGE</b><br>Determines how much damage your successful hits can deal. It works together with weapon damage and other combat modifiers.</p><p><b style="color:#47d7eb">SPEED - ACCURACY</b><br>Helps your attacks connect against opponents with Dexterity. Speed alone does not determine damage.</p><p><b style="color:#b18af1">DEFENSE - DAMAGE REDUCTION</b><br>Helps reduce damage when an attack lands. Low Defense can leave you vulnerable if you fail to dodge.</p><p><b style="color:#49d994">DEXTERITY - DODGING</b><br>Helps you avoid incoming attacks against opponents Speed. A dodge-focused build can still be hit.</p><div class="sf-section">IMPORTANT NOTES</div><p>Gym dot values are approximate. Specialist eligibility depends on the games current requirements. The optimizer should not automatically assume a gym is unlocked or spend energy without your confirmation.</p></div>';
     body.innerHTML=header+(tab==='OVERVIEW'?info+train+headroom+perkPanel+statView:tab==='HISTORY'?history:tab==='EXPORT'?exporter:tab==='SETTINGS'?settings:about);
     body.querySelector('#slx-gym-next-action')?.addEventListener('click',onGymNextAction);
+    body.querySelectorAll('[data-special-gym]').forEach(b=>b.addEventListener('click',()=>{selectedSpecialGym=b.dataset.specialGym;render()}));
     body.querySelector('#slx-gym-api-refresh')?.addEventListener('click',refreshGymApi);
     body.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{panel.dataset.tab=b.dataset.tab;render();if(b.dataset.tab==='SETTINGS'&&gymApi.status==='Not checked'&&hubApiKey())refreshGymApi()});
     body.querySelector('#slx-gym-save-key')?.addEventListener('click',()=>{const val=body.querySelector('#slx-gym-private-key')?.value;const ok=savePersonalKey(val);const label=body.querySelector('#slx-gym-key-message');if(label)label.textContent=ok?'Personal API key saved locally':'Invalid key: expected 16 letters/numbers';if(ok)refreshGymApi()});
@@ -1577,7 +1635,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.6',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.7',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
