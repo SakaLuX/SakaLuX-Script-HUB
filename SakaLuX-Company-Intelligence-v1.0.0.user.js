@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.73
+// @version      1.8.74
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2025,12 +2025,39 @@ function employeeOptimizer(){
  const rows=list.map(e=>{const stats={manual:e.manual,intelligence:e.intelligence,endurance:e.endurance},ranked=pos.map(p=>({...p,score:fit(stats,p)})).sort((a,b)=>(Number(b.qualified)-Number(a.qualified))||(b.demand||0)-(a.demand||0)||b.score-a.score),best=ranked[0],current=ranked.find(p=>p.name===e.position),gain=best?Math.max(0,best.score-(current?.score||0)):0;return {...e,best:best?.name||'No requirements',fit:best?.score||0,gain}}).sort((a,b)=>b.gain-a.gain||a.effectiveness-b.effectiveness);
  return card('Employee Effectiveness & Position Optimizer',`<div class="ci-tablewrap ci-mobile-cards ci-optimizer-table"><table><thead><tr><th>Employee</th><th>Current</th><th>EE</th><th>Suggested</th><th>Fit</th><th>Potential</th></tr></thead><tbody>${rows.map(e=>`<tr><td class="ci-person-cell" data-label="Employee"><b>${esc(e.name)}</b><small>#${e.id||''}</small></td><td data-label="Current">${esc(e.position||'Unassigned')}</td><td data-label="Effectiveness">${fmt(e.effectiveness)}</td><td data-label="Suggested"><b>${esc(e.best)}</b></td><td data-label="Fit">${e.fit}%</td><td data-label="Potential">${e.gain?badge('+'+e.gain+' fit','good'):badge('KEEP')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">Suggestions use official position requirements when available. Torn's effectiveness value remains authoritative.</p>`);
 }
+// API import is read-only and strictly accepts identifiable company training news.
+let trainImportBusy=false;
+async function importConfirmedCompanyTrains(){
+ if(trainImportBusy)return;
+ trainImportBusy=true;
+ try{
+  const data=await api('company/news?limit=100');
+  const records=Array.isArray(data?.news)?data.news:Object.entries(data?.news||{}).map(([id,row])=>({...row,id}));
+  const existing=arr(KEY.trains),seen=new Set(existing.map(x=>String(x.apiNewsId||'')));
+  let added=0,skipped=0;
+  for(const row of records){
+   const id=String(row?.id||row?.news_id||'');
+   const message=String(row?.news||row?.text||row?.message||row?.description||'');
+   const timestamp=Number(row?.timestamp||row?.time||row?.date);
+   if(!id||!message||!Number.isFinite(timestamp)||timestamp<=0||seen.has(id)){skipped++;continue}
+   if(!/\btrain(?:ed|ing)?\b/i.test(message)){skipped++;continue}
+   const who=message.match(/(?:trained|training for|train to|trained employee)\s+(?:<[^>]+>)*([\w -]{2,45})/i);
+   if(!who){skipped++;continue}
+   const date=timestamp<1e12?timestamp*1000:timestamp;
+   existing.push({employee:who[1].trim(),primary:'Unknown',secondary:'Unknown',price:0,note:'Import automat din Torn company/news: '+message.slice(0,250),ts:date,apiNewsId:id,source:'Torn company/news'});
+   seen.add(id);added++;
+  }
+  if(added)set(KEY.trains,existing);
+  alert('Import API: '+added+' antrenamente adăugate, '+skipped+' intrări ignorate. Doar evenimentele identificabile au fost importate.');
+ }catch(error){alert('Import imposibil: '+String(error?.message||error)+'. Verifică permisiunea Company: News pentru cheia API.')}
+ finally{trainImportBusy=false}
+}
 function trainingManager(){
  const list=employees().map(normEmp),logs=arr(KEY.trains),contracts=arr(KEY.contracts).filter(x=>x.active!==false),week=logs.filter(x=>now()-x.ts<7*86400000),counts=new Map();
  for(const x of week){const n=String(x.employee||'');if(n)counts.set(n,(counts.get(n)||0)+1)}
  const rotation=list.slice().sort((a,b)=>(counts.get(a.name)||0)-(counts.get(b.name)||0));
  const contractRows=contracts.map(c=>{const start=Date.parse(c.startDate)||c.ts||now(),weeks=Math.max(0,(now()-start)/604800000),owed=Math.floor(weeks*num(c.perWeek)),given=logs.filter(x=>String(x.employee||'').toLowerCase()===String(c.employee||'').toLowerCase()&&x.ts>=start).length;return {...c,owed,given,debt:Math.max(0,owed-given)}}).sort((a,b)=>b.debt-a.debt);
- return `<div class="ci-actions"><button class="ci-btn primary" data-act="log-train">+ LOG TRAIN</button><button class="ci-btn" data-act="new-contract">+ CONTRACT</button></div><div class="ci-grid">${card('Fair Rotation',rotation.length?rotation.slice(0,10).map((e,i)=>`<div class="ci-line"><span>${i===0?'NEXT · ':''}${esc(e.name)} <small>${esc(e.position)}</small></span><b>${counts.get(e.name)||0} / 7d</b></div>`).join(''):empty('Sync employees to calculate rotation.'))}${card('Training Debt',contractRows.length?contractRows.map(c=>`<div class="ci-line"><span>${esc(c.employee)} <small>${fmt(c.given)} given · ${fmt(c.owed)} expected</small></span><b class="${c.debt?'neg':'pos'}">${c.debt} owed</b></div>`).join(''):empty('No active training contracts.'))}</div>${card('Recent Training Log',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Employee</th><th>Primary</th><th>Price</th></tr></thead><tbody>${logs.slice().sort((a,b)=>b.ts-a.ts).slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleDateString()}</td><td>${esc(x.employee||'Unassigned')}</td><td>${esc(x.primary)}</td><td>${money(x.price)}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
+ return `<div class="ci-actions"><button class="ci-btn primary" data-act="log-train">+ LOG TRAIN</button><button class="ci-btn" data-act="import-trains-api">↻ IMPORT API</button><button class="ci-btn" data-act="new-contract">+ CONTRACT</button></div><div class="ci-grid">${card('Fair Rotation',rotation.length?rotation.slice(0,10).map((e,i)=>`<div class="ci-line"><span>${i===0?'NEXT · ':''}${esc(e.name)} <small>${esc(e.position)}</small></span><b>${counts.get(e.name)||0} / 7d</b></div>`).join(''):empty('Sync employees to calculate rotation.'))}${card('Training Debt',contractRows.length?contractRows.map(c=>`<div class="ci-line"><span>${esc(c.employee)} <small>${fmt(c.given)} given · ${fmt(c.owed)} expected</small></span><b class="${c.debt?'neg':'pos'}">${c.debt} owed</b></div>`).join(''):empty('No active training contracts.'))}</div>${card('Recent Training Log',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Employee</th><th>Primary</th><th>Price</th></tr></thead><tbody>${logs.slice().sort((a,b)=>b.ts-a.ts).slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleDateString()}</td><td>${esc(x.employee||'Unassigned')}</td><td>${esc(x.primary)}</td><td>${money(x.price)}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
 }
 function trainContracts(){
  const rows=arr(KEY.contracts),logs=arr(KEY.trains);
@@ -2263,6 +2290,7 @@ function act(a){
  if(a==='test-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');S.tab='overview';set(KEY.tab,S.tab);refresh();return}
  if(a==='clear-key'){del(KEY.api);globalThis.SakaLuXDialog.notice(hubApiKey()?'Local key cleared. The SakaLuX Hub key remains active.':'Local API key cleared.');render();return}
  if(a==='new-agreement')return dialog('Train Agreement',[{name:'company',label:'Company / employee',value:meta().name},{name:'perWeek',label:'Trains promised/week',type:'number',value:10},{name:'cost',label:'Cost/train (0 = free)',type:'number',value:0},{name:'startDate',label:'Starts / wait note',value:'Immediately'},{name:'note',label:'Notes',wide:true}],d=>{let x=arr(KEY.agreements);x.push({...d,perWeek:num(d.perWeek),cost:num(d.cost),ts:now(),active:true});set(KEY.agreements,x)});
+ if(a==='import-trains-api')return importConfirmedCompanyTrains();
  if(a==='log-train')return dialog('Log Train',[{name:'employee',label:'Employee / buyer',value:me()?.name||''},{name:'primary',label:'Primary stat',type:'select',options:['Intelligence','Endurance','Manual Labor','Unknown']},{name:'secondary',label:'Secondary stat',type:'select',options:['Endurance','Intelligence','Manual Labor','Unknown']},{name:'price',label:'Price received/paid',type:'number',value:0},{name:'note',label:'Note',wide:true}],d=>{let x=arr(KEY.trains);x.push({...d,price:num(d.price),ts:now()});set(KEY.trains,x)});
  if(a==='new-contract')return dialog('Train Sale Contract',[{name:'employee',label:'Employee / buyer'},{name:'totalTrains',label:'Total trains',type:'number',value:10},{name:'perWeek',label:'Promised per week',type:'number',value:10},{name:'pricePerTrain',label:'Price per train',type:'number',value:500000},{name:'startDate',label:'Start date',value:new Date().toISOString().slice(0,10)},{name:'note',label:'Notes',wide:true}],d=>{const x=arr(KEY.contracts);x.push({...d,id:String(now()),totalTrains:num(d.totalTrains),perWeek:num(d.perWeek),pricePerTrain:num(d.pricePerTrain),ts:now(),active:true,paid:false});set(KEY.contracts,x)});
  if(a==='new-benchmark')return dialog('Add Competitor Benchmark',[{name:'name',label:'Company name'},{name:'type',label:'Company type',value:meta().type},{name:'stars',label:'Stars',type:'number',value:Math.min(10,meta().stars+1)},{name:'weeklyIncome',label:'Weekly income',type:'number',value:0},{name:'customers',label:'Weekly customers',type:'number',value:0}],d=>{const x=arr(KEY.benchmarks);x.push({...d,stars:num(d.stars),weeklyIncome:num(d.weeklyIncome),customers:num(d.customers),ts:now()});set(KEY.benchmarks,x)});
