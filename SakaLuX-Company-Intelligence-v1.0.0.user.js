@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.88
+// @version      1.8.89
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.88',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.89',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2116,10 +2116,10 @@ async function importMyTrainingLog(){
      for(const [key,val] of Object.entries(obj)){
       if(normalStat(key)&&typeof val!=='object')add(key,val);
       else if(val&&typeof val==='object')collect(val,depth+1);
-      else if(typeof val==='string'&&/train|gain|manual|intelligence|endurance/i.test(val))collect(val,depth+1);
+      else if(typeof val==='string')collect(val,depth+1);
      }
     };
-    collect(data);collect(x?.params);collect(x?.details?.data);collect(description);collect(title);
+    collect(data);collect(x?.params);collect(x?.details);collect(x?.details?.data);collect(description);collect(title);
     const unique=[...new Map(gains.map(g=>[g.stat,g])).values()];
     const gained=unique.map(g=>g.stat+' +'+g.amount).join(', ');
     const first=unique[0]?.stat||'Unknown',second=unique[1]?.stat||'Unknown';
@@ -2161,7 +2161,8 @@ async function importMyTrainingLog(){
   if(!diskConfirmed&&typeof GM_getValue==='function'&&found.length){
    try{const read=GM_getValue(KEY.trains,[]);const stored=read&&typeof read.then==='function'?await read:read;diskConfirmed=found.filter(x=>Array.isArray(stored)&&stored.some(y=>String(y.apiLogId)===String(x.apiLogId))).length;}catch{}
   }
-  alert('Import Company: '+found.length+' noi · '+displayed+' vizibile · '+diskConfirmed+' confirmate la recitire. '+trainingCandidates+' evenimente training. '+(!diskConfirmed?'Salvarea locală nu a putut fi verificată imediat; la redeschidere vom recupera și din stocarea GM.':''));
+  const total=arr(KEY.trains).filter(row=>row.apiLogId).length;
+  alert('Import Company: '+found.length+' noi · '+total+' trainuri din API în istoric · '+trainingCandidates+' evenimente training găsite. '+(found.length&&!diskConfirmed?'Stocarea persistentă nu a confirmat încă datele; reimportul le poate recupera.':found.length===0?'Nu sunt trainuri noi: evenimentele existente au fost deja importate.':''));
  }catch(e){
   const code=num(e?.code,-1),msg=String(e?.message||e);
   alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă. Verificarea Company s-a oprit.':code===16?'Cheia nu are acces la toate logurile Company necesare. Verifică User: Log în permisiunile cheii.':'Import imposibil: '+msg);
@@ -2251,7 +2252,7 @@ function employeeTrains(){
  return `<div class="ci-actions ci-employee-train-actions"><button class="ci-btn primary" data-act="new-agreement">+ Agreement</button><button class="ci-btn" data-act="import-my-trains">↻ IMPORT</button><button class="ci-btn" data-act="log-train">+ Received train</button></div>
  <div class="ci-grid">${card('Current Agreement',ag?kv('Promised',fmt(ag.perWeek)+'/week')+kv('Received 7d',got+'/'+fmt(ag.perWeek))+kv('Price',ag.cost?money(ag.cost):'FREE')+kv('Starts',esc(ag.startDate||'Now')):empty('No active agreement.'))}
  ${card('Projection',ag?kv('7 days','~+'+fmt(weekly)+' work stats')+kv('30 days','~+'+fmt(weekly*30/7))+kv('90 days','~+'+fmt(weekly*90/7))+kv('Weekly cost',money(num(ag.perWeek)*num(ag.cost))):empty('Add an agreement first.'))}</div>
- ${card('Train History',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Primary</th><th>Secondary</th><th>Gains</th><th>Note</th></tr></thead><tbody>${logs.slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleString()}</td><td>${esc(x.primary)}</td><td>${esc(x.secondary)}</td><td>${esc(Array.isArray(x.gains)&&x.gains.length?x.gains.map(g=>g.stat+' +'+g.amount).join(', '):'Nespecificat în API')}</td><td>${esc(x.note||'')}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
+ ${card('Train History',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Primary</th><th>Secondary</th><th>Gains</th><th>Note</th></tr></thead><tbody>${logs.slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleString()}</td><td>${esc(x.primary)}</td><td>${esc(x.secondary)}</td><td>${esc(Array.isArray(x.gains)&&x.gains.length?x.gains.map(g=>g.stat+' +'+g.amount).join(', ') :'Nespecificat în logul API')}</td><td>${esc(x.note||'')}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
 }
 function offerScore(o){return num(o.dailySalary)*7+num(o.trainsPerWeek)*(num(o.trainValue,500000)-num(o.trainCost))+num(o.stars)*50000}
 function employeeOffers(){
