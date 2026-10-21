@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.7.0
+// @version      1.7.1
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.7.0',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.1',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.7.0',id='gym-optimizer';
+    const ver='1.7.1',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -1258,7 +1258,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.7.0',id='gym-optimizer';
+      const version='1.7.1',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1352,18 +1352,45 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     return Number(current?.current??current?.amount??d?.energy?.current);
   }
   function reliableGymEnergy(){
-    // Prefer live Torn HUD over cached API, especially after an energy refill.
-    // Missing energy readings never become zero.
+    // Read Torn's *live* Gym banner first. This is the source visible as:
+    // "You have 15/150 energy" directly under "Legs, Bums and Tums".
+    // It remains readable while the viewport is scrolled to the script panel.
+    const rx=/You have\s*(\d{1,4})\s*\/\s*(\d{1,4})\s*energy/i;
+    const gymNames=gymTable.map(g=>g[0].toLowerCase());
+    const matches=[];
+    for(const el of document.querySelectorAll('div,span,p,strong,[class*="gym" i]')){
+      if(panel.contains(el)||el.children.length>5)continue;
+      const content=String(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();
+      if(content.length>350)continue;
+      const m=content.match(rx);
+      if(!m)continue;
+      const value=Number(m[1]),max=Number(m[2]);
+      if(!Number.isFinite(value)||!Number.isFinite(max)||max<1||value<0||value>max)continue;
+      // Prefer the smallest native banner that contains a recognizable gym name.
+      let context=el;
+      for(let i=0;context&&i<3;i++,context=context.parentElement){
+        if(panel.contains(context))break;
+        const text=String(context.innerText||context.textContent||'').slice(0,400).toLowerCase();
+        if(gymNames.some(n=>text.includes(n))){
+          matches.push({value,max,source:'Torn Gym banner',size:content.length});
+          break;
+        }
+      }
+    }
+    if(matches.length){matches.sort((x,y)=>x.size-y.size);return matches[0]}
+    // The HUD also exposes an energy bar in many TornPDA layouts.
     for(const node of document.querySelectorAll('[aria-label*="energy" i],[title*="energy" i],[data-testid*="energy" i],[class*="energyBar"],[class*="energy-bar"]')){
       if(panel.contains(node))continue;
       const text=[node.getAttribute('aria-label'),node.getAttribute('title'),node.textContent].filter(Boolean).join(' ');
-      const match=text.match(/(?:energy\s*:?\s*)?(\d{1,3})\s*\/\s*(\d{2,3})/i);
-      if(match&&Number(match[2])>=Number(match[1]))
-        return {value:Number(match[1]),source:'Torn HUD'};
+      const match=text.match(/(?:energy\s*:?\s*)?(\d{1,4})\s*\/\s*(\d{2,4})/i);
+      if(match&&Number(match[2])>=Number(match[1]))return {value:Number(match[1]),max:Number(match[2]),source:'Torn HUD'};
     }
+    // API is a last resort and can be stale between regen and training.
     const val=gymApi.data?.bars?.energy?.current??gymApi.data?.energy?.current??gymApi.data?.energy?.amount;
-    if(val!==undefined&&val!==null&&val!==''&&Number.isFinite(Number(val))&&Number(val)>=0)
-      return {value:Number(val),source:'Torn API'};
+    const updated=gymApi.at;
+    if(val!==undefined&&val!==null&&val!==''&&Number.isFinite(Number(val))&&Number(val)>=0
+       &&updated&&Date.now()-updated<30000)
+      return {value:Number(val),source:'recent Torn API'};
     return null;
   }
   function safeReps(stat){
@@ -1481,7 +1508,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(!active)return {step:'blocked',label:'CHECK ACTIVE GYM BANNER',disabled:true};
     if(!Number.isFinite(control.value)||control.value<1)
       return {step:'blocked',label:'CHECK NATIVE REPETITIONS',disabled:true};
-    const affordable=energy&&Number.isFinite(cost)&&cost>0?Math.floor(energy.value/cost):null;
+    if(!energy)return {step:'blocked',label:'CHECK LIVE GYM ENERGY',disabled:true};
+    if(!Number.isFinite(cost)||cost<=0)return {step:'blocked',label:'CHECK GYM ENERGY COST',disabled:true};
+    const affordable=Math.floor(energy.value/cost);
     if(affordable!==null&&affordable<1)
       return {step:'blocked',label:'INSUFFICIENT ENERGY - NEED '+cost+' E',disabled:true};
     if(gymTransitionPending&&active.toLowerCase()===gymTransitionPending.toLowerCase())
@@ -1503,7 +1532,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     // Torn receives exactly one native TRAIN click. The user-selected count may
     // be 999, while only fewer repetitions are affordable; Torn validates and
     // caps/rejects the request server-side. Never synthesize 999 clicks.
-    return {step:'train',label:'TRAIN '+stat.toUpperCase()+' - UP TO '+(affordable??control.value)+' REP'+((affordable??control.value)===1?'':'S'),
+    return {step:'train',label:'TRAIN '+stat.toUpperCase()+' - '+affordable+' AVAILABLE REP'+(affordable===1?'':'S'),
       disabled:false,stat,reps:control.value,affordable,cost,
       recommendedGym:best&&!best.active?best.name:null};
   }
@@ -1548,12 +1577,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const match=(liveReps.tile?.innerText||liveReps.tile?.textContent||'').match(/(\d+)\s*energy per train/i);
       const cost=match?Number(match[1]):null,available=reliableGymEnergy();
       if(!available||!Number.isFinite(cost)||cost<=0||available.value<cost){
-        report('Not enough verified energy for even one repetition. No training performed.');return;
+        report('Training blocked: '+(available?'Energy '+available.value+' E, cost '+(cost??'unknown')+' E':'live Gym energy unreadable')+'. No training performed.');return;
       }
       // Allow a native selection such as 999 with 10 E. Torn owns the actual
       // transaction and will validate / cap / reject according to its rules.
       if(!clickNativeTrain(next.stat)){report('Native TRAIN is unavailable.');return}
-      report('Native TRAIN clicked once with '+available.value+' E. Torn will confirm or reject the requested training. Check your stat/energy result.');
+      report('One native TRAIN click at '+available.value+' E ('+available.source+'). Check Torn result for the completed training.');
       return;
     }
   }
@@ -1732,7 +1761,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.0',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.1',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
