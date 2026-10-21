@@ -2057,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.6.2",
+                "version": "1.6.3",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2074,13 +2074,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.6.2",
+                    "version": "1.6.3",
                     "date": "2026-10-21",
                     "notes": [
-                        "Overview shows latest automatic stat gain as SINCE LAST TRAIN, not snapshot.",
-                        "Refresh Overview as soon as an auto-saved Gym stat change is confirmed.",
-                        "Remove time-based gym unlock ETA: report verified energy remaining or an explicitly labeled approximate energy estimate only when gym and progress are identified.",
-                        "Add @downloadURL, @updateURL and compact meta.js for automatic update checks through GitHub; configure TornPDA remote URL once."
+                        "Keep Gym panel mounted while Torn updates the training tiles or selected gym.",
+                        "Cross-check gym banner and selected gym icon; do not claim confirmed gym when display conflicts.",
+                        "Clear pending gym-switch state only when Torn confirms the requested gym.",
+                        "Read a locked gym percentage only if its tile can be matched unambiguously to the next gym; otherwise do not guess.",
+                        "Preserve ASCII-safe compatibility and automatic update metadata."
                     ]
                 },
                 "accessTier": "free",
