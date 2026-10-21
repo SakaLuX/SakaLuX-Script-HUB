@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.6.0 - sequential gold Train Next action (2026-10-21)
+
+- Replace SET 999, SWITCH GYM and TRAIN buttons in Overview with one styled gold action, conditional on Torn gym state.
+- The user must tap separately for each stage. SET 999 checks the native input; SWITCH GYM requires affirmative unlock evidence; TRAIN rechecks the native 999 field and clicks Torn TRAIN only once.
+- Best verified gym only appears when the current selected gym can be identified or a gym control has explicit unlocked evidence; otherwise shows not verified.
+- Existing Gym perk/category checks are unchanged. Company NOT RETURNED means API did not provide a company_perks array, not necessarily that the user has no company bonus.
+- JavaScript syntax and ASCII check passed; TornPDA functional testing of actions is still required. Do not use live training until tested.
+
 ## Gym Optimizer v1.5.9 - full perk-source audit and single-row controls (2026-10-21)
 
 - Check all nine supported Torn user perk categories: faction, education, property, company, job, book, merit, stock and enhancer (API v1 flat arrays and v2 nested arrays).
