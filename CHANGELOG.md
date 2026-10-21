@@ -1,5 +1,12 @@
 # Changelog
 
+## Gym Optimizer v1.6.9 - persisted active gym confirmation (2026-10-21)
+
+- Save the gym name only after Torn has positively confirmed it, and reuse the cached selection when Torn temporarily removes the gym banner while updating controls. This fixes a gold button repeatedly displaying CHECK ACTIVE GYM BANNER while Overview still shows the selected gym.
+- Do not treat a cached gym as an unlocked-gym list. A requested change of gym invalidates the fallback until Torn confirms the new selection.
+- Throttle local writes and retain the energy-aware native repetition and TRAIN checks.
+- Mock tests passed for disappearing banner and switching gym; full script parses and remains ASCII-only. TornPDA live check pending.
+
 ## Gym Optimizer v1.6.8 - stable gym confirmation and affordable trains (2026-10-21)
 
 - Cache an explicitly confirmed native Gym banner for up to 15 seconds while Torn redraws Gym controls; invalidate it on a gym switch. This prevents the gold button from falling back to WAIT FOR GYM CONFIRMATION while the overview still displays the active gym.
