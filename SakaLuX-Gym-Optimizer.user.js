@@ -994,10 +994,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function readGymProgress(){
     try{
       const data=JSON.parse(localStorage.getItem(GYM_PROGRESS_CACHE_KEY)||'null');
-      if(!data||!Number.isInteger(data.highestIndex))return {highestIndex:-1,confirmed:[]};
+      if(!data||!Number.isInteger(data.highestIndex))return {highestIndex:-1,confirmed:[],explicitUnlocked:[]};
       return {highestIndex:Math.max(-1,Math.min(gymTable.length-1,data.highestIndex)),
-        confirmed:Array.isArray(data.confirmed)?data.confirmed.filter(n=>!!knownGymName(n)):[]};
-    }catch{return {highestIndex:-1,confirmed:[]}}
+        confirmed:Array.isArray(data.confirmed)?data.confirmed.filter(n=>!!knownGymName(n)):[],
+        explicitUnlocked:Array.isArray(data.explicitUnlocked)?data.explicitUnlocked.filter(n=>!!knownGymName(n)):[]};
+    }catch{return {highestIndex:-1,confirmed:[],explicitUnlocked:[]}}
   }
   function recordGymProgress(name){
     const index=gymTable.findIndex(g=>g[0]===name);
@@ -1006,12 +1007,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const highestIndex=Math.max(data.highestIndex,index);
     const confirmed=[...new Set([...data.confirmed,name])];
     if(data.highestIndex===highestIndex&&data.confirmed.includes(name))return;
-    try{localStorage.setItem(GYM_PROGRESS_CACHE_KEY,JSON.stringify({highestIndex,confirmed,at:Date.now()}))}catch{}
+    try{localStorage.setItem(GYM_PROGRESS_CACHE_KEY,JSON.stringify({highestIndex,confirmed,explicitUnlocked:data.explicitUnlocked,at:Date.now()}))}catch{}
+  }
+  function recordExplicitGymUnlock(name){
+    if(!knownGymName(name))return;
+    const data=readGymProgress();
+    if(data.explicitUnlocked.includes(name))return;
+    data.explicitUnlocked.push(name);
+    try{localStorage.setItem(GYM_PROGRESS_CACHE_KEY,JSON.stringify({...data,at:Date.now()}))}catch{}
   }
   function gymProgressSummary(){
     const data=readGymProgress();
     return {name:data.highestIndex>=0?gymTable[data.highestIndex][0]:null,
-      count:Math.max(0,data.highestIndex+1),confirmed:data.confirmed};
+      count:Math.max(0,data.highestIndex+1),confirmed:data.confirmed,explicitUnlocked:data.explicitUnlocked};
   }
 
   function confirmedGym(){
@@ -1145,6 +1153,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         evidence:progress.confirmed.includes(name)?'previously active':'sequential progression',
         switchVerified:false});
     }
+    for(const name of progress.explicitUnlocked){
+      if(!choices.has(name.toLowerCase()))
+        choices.set(name.toLowerCase(),{name,active:false,button:null,evidence:'saved explicit unlock',switchVerified:false});
+    }
     if(activeName)choices.set(activeName.toLowerCase(),
       {name:activeName,active:true,button:null,evidence:'active native banner',switchVerified:true});
     const candidates=[...document.querySelectorAll('button,[role="button"],a')].filter(el=>!panel.contains(el));
@@ -1158,6 +1170,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         ||el.getAttribute('data-locked')==='true'
         ||/locked|disabled|unavailable|purchase/i.test(String(el.className||''));
       if(!explicit||locked)continue;
+      recordExplicitGymUnlock(g[0]);
       const prior=choices.get(g[0].toLowerCase());
       choices.set(g[0].toLowerCase(),{name:g[0],active:g[0]===activeName,
         button:g[0]===activeName?null:el,evidence:'Torn explicit unlocked',
@@ -1490,7 +1503,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     // Torn receives exactly one native TRAIN click. The user-selected count may
     // be 999, while only fewer repetitions are affordable; Torn validates and
     // caps/rejects the request server-side. Never synthesize 999 clicks.
-    return {step:'train',label:'TRAIN '+stat.toUpperCase()+' - UP TO '+(affordable??control.value)+' REPS',
+    return {step:'train',label:'TRAIN '+stat.toUpperCase()+' - UP TO '+(affordable??control.value)+' REP'+((affordable??control.value)===1?'':'S'),
       disabled:false,stat,reps:control.value,affordable,cost,
       recommendedGym:best&&!best.active?best.name:null};
   }
