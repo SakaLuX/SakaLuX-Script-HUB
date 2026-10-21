@@ -18,7 +18,7 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-20**
+- Verified: **2026-10-21**
 - Canonical version: **v1.1.28**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js

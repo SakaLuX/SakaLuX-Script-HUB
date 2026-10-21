@@ -1445,7 +1445,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.3.73",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.",
                         "Preserve preferred ON/OFF independent of transient license check.",
@@ -1500,7 +1500,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "5.3.71",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.",
                         "Preserve preferred ON/OFF independent of transient license check.",
@@ -1559,7 +1559,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "version": "1.1.28",
                 "release": {
                     "version": "1.1.28",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
                         "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
@@ -1624,7 +1624,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.0.61",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
                         "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
@@ -1702,7 +1702,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.17.87",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Travel panels are restricted to true Travel Agency/in-flight/abroad page contexts, never Bazaar or profiles.",
                         "Route detection prioritizes explicit Bazaar, profile, inventory and market pages before SPA travel headings.",
@@ -1782,7 +1782,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "0.5.20",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Align embedded runtime version with @version to prevent false Hub update alerts.",
                         "Preserve existing script functionality and API key settings."
@@ -1884,7 +1884,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.3.65",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Align embedded runtime version with @version to prevent false Hub update alerts.",
                         "Preserve existing script functionality and API key settings."
@@ -1948,7 +1948,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.8.73",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
                         "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
@@ -2014,7 +2014,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "0.8.34",
-                    "date": "2026-10-20",
+                    "date": "2026-10-21",
                     "notes": [
                         "Fixes stale TornPDA canonical installed-version fallback 0.8.30; reports 0.8.34 when GM_info is absent.",
                         "Aligns source, runtime, registry and Hub version reporting."
@@ -2057,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.5.8",
+                "version": "1.5.9",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2074,14 +2074,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.5.8",
+                    "version": "1.5.9",
                     "date": "2026-10-21",
                     "notes": [
-                        "Remove Aec3 from ratio choice while keeping backwards-compatible migration for stored settings.",
-                        "Align all four stat labels including Defense, preserving individual stat colors and red dump marker.",
-                        "Reposition compact CREATE KEY beside SET API KEY.",
-                        "Correct Torn API v1 flat *_perks fields and v2 nested perks reading, calculate gym percentages from reported bonuses multiplicatively and show API status.",
-                        "Keep ASCII-only script text for TornPDA."
+                        "Audit nine Torn API perk categories: faction, education, property, company, job, book, merit, stock, enhancer.",
+                        "Display API category coverage, active perk counts and relevant Gym perks; report unreturned categories honestly.",
+                        "Put Active Ratio, Highest Stat and Dump Stat choices in single compact rows using short labels.",
+                        "Center Defense and every other stat consistently within stat-order rows.",
+                        "Retain ASCII-safe source and calculated verified Gym perk bonuses."
                     ]
                 },
                 "accessTier": "free",
@@ -2090,7 +2090,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "installable": true
             }
         ],
-        "lastVerified": "2026-10-20",
+        "lastVerified": "2026-10-21",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 
