@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.6.2
+// @version      1.6.3
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.6.2',root=document.documentElement;
+    const id='gym-optimizer',v='1.6.3',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.6.2',id='gym-optimizer';
+    const ver='1.6.3',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -923,11 +923,48 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const gaps=active.map(i=>({stat:stats[i],gap:Math.max(0,Math.ceil(mean*weights[i]-state.values[stats[i]]))}));
     gaps.sort((a,b)=>b.gap-a.gap);return gaps[0];
   };
+  const GYM_LAST_VERIFIED_KEY='sakalux_gym_last_confirmed_v1';
+  function knownGymName(text){
+    const t=String(text||'').replace(/\s+/g,' ').trim().toLowerCase();
+    return gymTable.find(g=>g[0].toLowerCase()===t)?.[0]||null;
+  }
+  function gymBannerName(){
+    const candidates=[...document.querySelectorAll('[class*="gymName"],[class*="selectedGym"],[data-testid="current-gym"],[class*="gymHeader"],[class*="gymTitle"]')]
+      .filter(el=>!panel.contains(el)&&el.getBoundingClientRect().width>0);
+    for(const el of candidates){
+      const title=knownGymName(el.textContent);
+      if(title)return title;
+    }
+    return null;
+  }
+  function selectedGymIconName(){
+    // A selected icon often contains a gym emblem, not text: use only explicit
+    // selected/active DOM state, with a full gym name from trusted title/alt.
+    const active=[...document.querySelectorAll('[aria-selected="true"],[aria-current="true"],[data-selected="true"],[class*="selected"],[class*="active"]')]
+      .filter(el=>!panel.contains(el));
+    const names=new Set();
+    for(const el of active){
+      if(el.closest('#slx-gym-panel'))continue;
+      const full=knownGymName(el.getAttribute('title')||el.getAttribute('aria-label')||el.getAttribute('data-gym-name')||el.textContent);
+      if(full)names.add(full);
+      for(const img of el.querySelectorAll('img[alt],img[title]')){
+        const n=knownGymName(img.alt||img.title);
+        if(n)names.add(n);
+      }
+    }
+    return names.size===1?[...names][0]:null;
+  }
   function confirmedGym(){
-    // Never infer unlocked status from missing CSS classes, a gym title, or the existence of a locked button.
-    // A user-confirmed gym is the one currently selected; alternate gyms require manual selection.
-    const gym=document.querySelector('[class*="gymName"],[class*="selectedGym"],[data-testid="current-gym"]');
-    return gym?.textContent?.trim().slice(0,80)||null;
+    const title=gymBannerName(),selected=selectedGymIconName();
+    // A click can update the tile before Torn updates the active gym banner.
+    // Refuse to claim either as verified while the UI disagrees.
+    if(title&&selected&&title!==selected)return null;
+    const confirmed=title||selected;
+    if(confirmed){
+      try{sessionStorage.setItem(GYM_LAST_VERIFIED_KEY,confirmed)}catch{}
+      return confirmed;
+    }
+    return null;
   }
   const statColors={Strength:'#ff8754',Speed:'#37c9d9',Defense:'#ab86ec',Dexterity:'#38cb78'};
   const statNumber=s=>Number(String(s).replace(/,/g,''))||0;
@@ -1026,24 +1063,24 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       .map(g=>({name:g[0],dot:g[2][ix],energy:g[1],...owned.get(g[0].toLowerCase())}))
       .sort((a,b)=>b.dot-a.dot)[0]||null;
   }
-  function gymProgressPercent(){
-    // Accept only Gym-labeled progress, never generic XP or energy-bar percentages.
-    const selectors=['[data-testid*="gym-progress" i]','[data-testid*="gym-exp" i]',
-      '[data-testid*="gym-unlock" i]','[class*="gymProgress"]','[class*="gymExp"]',
-      '[class*="gymExperience"]','[aria-label*="gym experience" i]','[aria-label*="next gym" i]'];
-    for(const el of document.querySelectorAll(selectors.join(','))){
-      if(panel.contains(el))continue;
-      const info=String(el.getAttribute('aria-label')||'')+' '+String(el.textContent||'');
-      const matched=info.match(/(?:gym|unlock|progress|exp)[^%]{0,60}?(\d{1,3}(?:\.\d+)?)\s*%/i)
-        ||info.match(/(\d{1,3}(?:\.\d+)?)\s*%[^.]{0,45}(?:gym|unlock|progress|exp)/i);
-      const value=matched?Number(matched[1]):null;
-      if(value!==null&&Number.isFinite(value)&&value>=0&&value<=100)return {value,source:'Torn Gym progress display'};
-      const now=el.getAttribute('aria-valuenow'),maximum=el.getAttribute('aria-valuemax');
-      if(now!=null&&maximum!=null){
-        const current=Number(now),max=Number(maximum);
-        if(Number.isFinite(current)&&Number.isFinite(max)&&max>0&&current>=0&&current<=max)
-          return {value:100*current/max,source:'Torn Gym progress bar'};
-      }
+  function gymProgressPercent(nextName){
+    if(!nextName)return null;
+    const selectors='[class*="gym"],[data-testid*="gym"],[aria-label*="gym" i]';
+    for(const node of document.querySelectorAll(selectors)){
+      if(panel.contains(node))continue;
+      // Only accept percent from an explicitly locked gym entry, not HUD XP.
+      const locked=node.querySelector?.('[class*="lock"],[data-locked="true"],[aria-label*="locked" i]')||(/locked|lock/i.test(String(node.className||''))?node:null);
+      if(!locked)continue;
+      const text=String(node.textContent||'').trim();
+      const matched=text.match(/\b(\d{1,3}(?:\.\d+)?)\s*%/);
+      if(!matched)continue;
+      const value=Number(matched[1]);
+      if(!Number.isFinite(value)||value<0||value>100)continue;
+      // Matching only against the named next gym is robust; icon-only locked
+      // entries are not sufficient proof of which stage the 3% belongs to.
+      const label=[node.getAttribute('aria-label'),node.getAttribute('title'),node.getAttribute('data-gym-name'),node.textContent].filter(Boolean).join(' ');
+      if(label.toLowerCase().includes(nextName.toLowerCase()))
+        return {value,source:'Torn locked '+nextName+' gym tile'};
     }
     return null;
   }
@@ -1051,7 +1088,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const current=confirmedGym(),idx=gymTable.findIndex(g=>g[0].toLowerCase()===String(current||'').toLowerCase());
     if(idx<0)return {text:'Current gym not verified. Select a gym in Torn to identify the next standard gym.'};
     if(idx>=gymTable.length-1)return {text:'George is the final standard gym: no further standard-gym unlock.'};
-    const next=gymTable[idx+1],energy=gymTable[idx][3],progress=gymProgressPercent(),xp=gymCalc.xp();
+    const next=gymTable[idx+1],energy=gymTable[idx][3],progress=gymProgressPercent(next[0]),xp=gymCalc.xp();
     if(xp&&xp.remaining>=0)
       return {name:next[0],remaining:xp.remaining,source:'API',text:'Next: '+next[0]+' - '+fmt(xp.remaining)+' gym E remaining ('+xp.source+').'};
     if(Number.isFinite(energy)&&energy>0&&progress){
@@ -1099,7 +1136,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.6.2',id='gym-optimizer';
+      const version='1.6.3',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1408,7 +1445,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       +(next?'<div class="sf-main" style="color:'+statColors[next.stat]+'">'+esc(next.stat)+'</div><div>Currently '+fmt(actual[next.stat])+' - Target '+fmt(targets[next.stat])+' - Need +'+fmt(next.gap)+'</div>':'<div class="sf-main">Waiting for stat values</div>')
       +'<div class="sf-actions slx-next-action"><button type="button" id="slx-gym-next-action"'+(nextAction.disabled?' disabled':'')+'>'+esc(nextAction.label)+'</button></div>'
       +'<div class="sf-gold">Best verified gym: '+(planGym?esc(planGym.name)+' ('+planGym.dot+' dots)':'not verified')+'</div>'
-      +'<p class="sf-estimate">Only the currently active gym or gyms explicitly marked unlocked by Torn are treated as verified. You may need to open the gym selection list.</p>'
+      +'<p class="sf-estimate">'+(gym?'Active gym confirmed: '+esc(gym):'Gym selection is still loading or Torn displays conflicting gym indicators. Recheck the selected gym banner.')+'</p>'
       +(estimate?'<div class="sf-estimate">'+esc(estimate.text)+'</div>':'')
       +'<div class="sf-feedback" role="status"></div></div>';
     const headroom='<div class="sf-section">v HEADROOM TO GYM LIMIT</div><div class="sf-card"><div>Energy: read from Torn HUD</div>'+stats.map(n=>'<div class="sf-cap"><b style="color:'+statColors[n]+'">'+n+'</b><span>limit not verified</span></div>').join('')+'<p>Special gym caps cannot be validated. No locked gym will be recommended or switched to.</p></div>';
@@ -1476,7 +1513,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.2',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.3',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
@@ -1500,14 +1537,35 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     return null;
   }
+  let lastGymAnchorParent=null,anchorMissingSince=0;
   function mount(){
     if(!onGym()||!state.enabled){panel.hidden=true;return}
     const anchor=trainingAnchor();
-    if(!anchor){panel.hidden=true;return}
-    if(panel.parentElement!==anchor.parentElement || panel.nextElementSibling!==anchor){
-      anchor.parentElement.insertBefore(panel,anchor);
+    if(anchor){
+      lastGymAnchorParent=anchor.parentElement;
+      anchorMissingSince=0;
+      if(panel.parentElement!==anchor.parentElement||panel.nextElementSibling!==anchor)
+        anchor.parentElement.insertBefore(panel,anchor);
+      panel.hidden=false;
+      return;
     }
-    panel.hidden=false;
+    // Torn replaces the training tiles during gym selection. Do not flash/hide
+    // or move the panel on each asynchronous DOM update.
+    if(!anchorMissingSince)anchorMissingSince=Date.now();
+    const parent=lastGymAnchorParent;
+    if(parent?.isConnected&&panel.isConnected){
+      panel.hidden=false;return;
+    }
+    // Where native Gym controls have not mounted yet, find a stable gym heading.
+    const headings=[...document.querySelectorAll('h1,h2,h3,[class*="gymHeader"],[class*="gymTitle"]')];
+    const heading=headings.find(el=>!panel.contains(el)&&/^\s*Gym\s*$/i.test(el.textContent||''));
+    if(heading?.parentElement&&heading.parentElement!==document.body){
+      const container=heading.parentElement;
+      if(panel.parentElement!==container)container.append(panel);
+      panel.hidden=false;return;
+    }
+    // Don't render the control floating on other pages.
+    panel.hidden=true;
   }
   registerGym();
   try {
