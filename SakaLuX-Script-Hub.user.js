@@ -2057,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.6.6",
+                "version": "1.6.7",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2074,13 +2074,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.6.6",
+                    "version": "1.6.7",
                     "date": "2026-10-21",
                     "notes": [
-                        "Prefer authoritative selected Gym banner when gym-icon selection state is stale or conflicting, avoiding WAIT FOR GYM CONFIRMATION.",
-                        "Restore four-row stat Headroom with exact ratio-plan target values and remaining gains per stat.",
-                        "Explicitly label that special gyms require both their stat ratio and other gym-specific unlock conditions; plan targets do not guarantee eligibility.",
-                        "Keep native TRAIN safety, ASCII-only syntax and automatic update metadata."
+                        "Display NO ENERGY - WAIT FOR REGENERATION when Torn HUD or API confirms 0 energy, instead of misleading GYM CONFIRMATION message.",
+                        "Replace planner-only Headroom with real requirement checks for Elites, Total Rebound, Gym 3000, Mr. Isoyamas, Balboas, Frontline Fitness and Sports Science Lab.",
+                        "Report ratio gaps from actual stats separately from standard gym prerequisites and membership cost, without assuming unlocked gym status.",
+                        "Save selected specialist gym, continue native TRAIN safety and ASCII compatibility."
                     ]
                 },
                 "accessTier": "free",
