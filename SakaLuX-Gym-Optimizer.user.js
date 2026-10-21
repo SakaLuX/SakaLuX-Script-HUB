@@ -1627,11 +1627,26 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     console.error('[SakaLuX Gym] Initial render failed:',error);
   }
   // TornPDA navigates without full reload. Move the inline widget when Gym's React root is replaced.
+  function syncNextActionButton(){
+    if((panel.dataset.tab||'OVERVIEW')!=='OVERVIEW')return;
+    const button=body.querySelector('#slx-gym-next-action');
+    if(!button)return;
+    const actual={...state.values,...nativeStats()};
+    const active=stats.filter(n=>Number(state.weights[n])>0&&Number(actual[n])>0);
+    if(active.length<2)return;
+    const baseline=Math.max(...active.map(n=>Number(actual[n])/Number(state.weights[n])));
+    const next=active.map(n=>({stat:n,gap:Math.max(0,Math.ceil(baseline*state.weights[n])-Number(actual[n]))}))
+      .filter(x=>x.gap>0).sort((a,b)=>b.gap-a.gap)[0];
+    const action=gymNextAction(next?.stat);
+    if(button.textContent!==action.label)button.textContent=action.label;
+    if(button.disabled!==Boolean(action.disabled))button.disabled=Boolean(action.disabled);
+  }
+
   let lastUrl=location.href;
   let previousGymUiName=null;
   setInterval(()=>{
     if(location.href!==lastUrl){lastUrl=location.href;render()}
-    registerGym();mount();watchGymHistory();
+    registerGym();mount();watchGymHistory();syncNextActionButton();
     const current=confirmedGym();
     if(current&&current!==previousGymUiName){
       previousGymUiName=current;
