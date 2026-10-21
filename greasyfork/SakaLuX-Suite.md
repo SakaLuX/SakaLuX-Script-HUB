@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.986**
+**v0.9.987**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-21**
-- Canonical version: **v0.9.986**
+- Canonical version: **v0.9.987**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -48,10 +48,14 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.986 — Version and release synchronization**
-- Version 0.9.986: internal runtime and registry synchronization.
+**v0.9.987 — Version and release synchronization**
+- Version 0.9.987: internal runtime and registry synchronization.
 
 ## Release history / Changelog
+
+
+### v0.9.987 — 2026-10-21
+- Version 0.9.987: internal runtime and registry synchronization.
 
 ### v0.9.986 — 2026-10-20
 - Fixes Lottery Max Buy not appearing because Torn's Lottery screen has no ticket quantity field.
