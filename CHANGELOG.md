@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.6.5 - Torn stepper repetitions and headroom clarity (2026-10-21)
+
+- Detect the native TornPDA repetition spinner [-] 999 [+] even without a text input and use that value to advance the gold button sequence.
+- Keep the single gold button synchronized with Torn control changes without losing UI state; native TRAIN remains an explicit, separately tapped action.
+- Where the native selector is not safely editable programmatically, direct user to select 999 in Torn instead of assuming it was set.
+- Replace nonfunctional four-line 'limit not verified' placeholders with labeled DEX-ratio planning headroom and a warning that specialist gym eligibility is not confirmed.
+- Preserve ASCII syntax and GitHub automatic update metadata. TornPDA on-device control matching still needs confirmation.
+
 ## Gym Optimizer v1.6.4 - TornPDA active gym banner detection (2026-10-21)
 
 - Also detect the active gym through the visible native banner name plus 'You have X/Y energy', including Complete Cardio, when class-based Gym title detection fails.
