@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.986
+// @version      0.9.987
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39013,6 +39013,73 @@ function bpLoad()            { try{return JSON.parse(localStorage.getItem(CFG.ba
 function bpSave(d)           { localStorage.setItem(CFG.basePayKey,JSON.stringify(d)); }
 function bpGet(roleName)     { return bpLoad()[normRole(roleName)]||0; }
 function bpSet(roleName,amt) { const d=bpLoad(); d[normRole(roleName)]=amt; bpSave(d); }
+
+/* Training Log API import — read-only sync of confirmed company trains. */
+const TL_API_SYNC_KEY="sakalux_suite_training_log_api_sync_v1";
+let tlApiSyncBusy=false;
+function tlApiKey(){
+    try{const k=String(window.SakaLuXScriptHub?.getApiKey?.()||"").trim();if(k)return k;}catch{}
+    const walk=(value,depth=0)=>{if(depth>5||!value||typeof value!=="object")return"";for(const [name,v] of Object.entries(value)){if(/^(apiKey|api_key|key)$/i.test(name)&&typeof v==="string"&&v.trim().length>=8)return v.trim();if(typeof v==="object"){const found=walk(v,depth+1);if(found)return found;}}return"";};
+    for(const name of ["sakalux_master_suite_settings_v1","SakaLuX_HUB_SETTINGS_V16","SakaLuX_HUB_SETTINGS_V15"]){try{const k=walk(JSON.parse(localStorage.getItem(name)||"null"));if(k)return k;}catch{}}
+    return"";
+}
+function tlApiRead(url,key){
+    return new Promise((resolve,reject)=>{
+        if(typeof GM_xmlhttpRequest!=="function"){reject(new Error("GM_xmlhttpRequest unavailable"));return;}
+        GM_xmlhttpRequest({method:"GET",url:url+(url.includes("?")?"&":"?")+"key="+encodeURIComponent(key),timeout:18000,
+            onload:r=>{try{const j=JSON.parse(r.responseText||"{}");if(j.error)throw new Error(j.error.error||"Torn API error");resolve(j);}catch(e){reject(e);}},
+            onerror:()=>reject(new Error("API network error")),ontimeout:()=>reject(new Error("API timeout"))});
+    });
+}
+function tlApiSetStatus(message){const e=document.getElementById("tl-api-status");if(e)e.textContent=message;}
+function tlApiExtract(raw,types){
+    const rows=Array.isArray(raw?.log)?raw.log:Object.entries(raw?.log||{}).map(([id,item])=>({...item,_id:id}));
+    return rows.filter(item=>{
+        const id=String(item.log??item.type??"");
+        const label=String(types[id]?.name??types[id]?.title??types[id]??item.title??item.name??"");
+        const text=(label+" "+String(item.action||"")+" "+String(item.description||"")).toLowerCase();
+        // Match only explicit company/job trains; exclude gym training, job-point spending and unrelated events.
+        return /(?:company|employee|job).{0,30}train|train.{0,30}(?:company|employee|job)/i.test(text)&&!/gym|battle stat|personal train/i.test(text);
+    }).map(item=>{
+        const d=item.data||{};
+        const ts=Number(item.timestamp||item.time||0)*1000;
+        const name=String(d.employee_name||d.employee?.name||d.target_name||d.target?.name||d.user_name||d.name||"").trim();
+        const id=String(item._id||item.id||item.log_id||"").trim();
+        if(!Number.isFinite(ts)||ts<=0||ts>Date.now()+86400000||!name)return null;
+        const gains=["manual_labor","intelligence","endurance"].flatMap(k=>Number(d[k]||0)>0?[k+" +"+d[k]]:[]);
+        return{ts,name,company:String(d.company_name||""),role:String(d.position||""),gains,apiLogId:id||String(item.log)+":"+ts+":"+name,apiImported:true};
+    }).filter(Boolean);
+}
+async function tlSyncApi(manual=false){
+    if(tlApiSyncBusy)return;
+    const key=tlApiKey();
+    if(!key){tlApiSetStatus("API key missing — configure it in SakaLuX Hub.");return;}
+    tlApiSyncBusy=true;const btn=document.getElementById("tl-api-import");if(btn)btn.disabled=true;
+    tlApiSetStatus("Reading confirmed company trains from Torn API…");
+    try{
+        const state=JSON.parse(localStorage.getItem(TL_API_SYNC_KEY)||"{}");
+        if(!manual&&Date.now()-Number(state.lastCheck||0)<5*60000)return;
+        const [result,typeResult]=await Promise.all([
+            tlApiRead("https://api.torn.com/v2/user/log?limit=100",key),
+            tlApiRead("https://api.torn.com/v2/torn/logtypes",key)
+        ]);
+        const types=typeResult.logtypes||typeResult.log_types||{};
+        const candidates=tlApiExtract(result,types);
+        const data=tlLoad(),seen=new Set(data.entries.filter(x=>x.apiLogId).map(x=>String(x.apiLogId)));
+        let count=0;
+        for(const entry of candidates){
+            if(seen.has(entry.apiLogId)||entry.ts<Date.now()-CFG.logRetainDays*86400000)continue;
+            seen.add(entry.apiLogId);data.entries.push(entry);count++;
+        }
+        if(count){data.entries.sort((a,b)=>b.ts-a.ts);tlSave(data);}
+        localStorage.setItem(TL_API_SYNC_KEY,JSON.stringify({lastCheck:Date.now(),lastImported:count}));
+        tlApiSetStatus(count?count+" confirmed train(s) imported.":"No new identifiable company trains in the latest 100 logs.");
+        const modal=document.getElementById("fc-tlog-modal");
+        if(modal?.classList.contains("fc-vis"))renderTab(modal.querySelector(".tl-tab.active")?.dataset.tltab||"calendar");
+    }catch(e){tlApiSetStatus("Import failed: "+String(e.message||e));}
+    finally{tlApiSyncBusy=false;if(btn)btn.disabled=false;}
+}
+
 function tlLoad() { try{return JSON.parse(localStorage.getItem(CFG.trainLogKey)||'{"entries":[]}');}catch{return{entries:[]};} }
 function tlSave(d) { localStorage.setItem(CFG.trainLogKey,JSON.stringify(d)); }
 function tlAdd(entry) {
@@ -40041,7 +40108,7 @@ function buildTrainingLogModal(){
     if(document.getElementById("fc-tlog-modal"))return;
     const ov=document.createElement("div");ov.id="fc-tlog-overlay";
     const m=document.createElement("div");m.id="fc-tlog-modal";
-    m.innerHTML=`<div class="tl-head"><div class="tl-head-left"><div class="tl-title">Training Log</div><div class="tl-subtitle" id="tl-subtitle">Loading…</div></div><div class="tl-head-right"><button type="button" class="tl-add-btn" id="tl-quick-add" style="margin-bottom:0">+ Add Entry</button><button type="button" class="tl-close" id="fc-tlog-close">×</button></div></div><div class="tl-tabs"><div class="tl-tab active" data-tltab="calendar">Calendar</div><div class="tl-tab" data-tltab="schedule">Schedule</div><div class="tl-tab" data-tltab="employees">By Employee</div><div class="tl-tab" data-tltab="log">Full Log</div></div><div class="tl-body" id="tl-body"></div><div class="tl-foot"><div class="tl-foot-note" id="tl-foot-note"></div><button type="button" class="tl-btn-clear" id="tl-btn-clear">Clear All Logs</button></div>`;
+    m.innerHTML=`<div class="tl-head"><div class="tl-head-left"><div class="tl-title">Training Log</div><div class="tl-subtitle" id="tl-subtitle">Loading…</div></div><div class="tl-head-right"><button type="button" class="tl-add-btn" id="tl-api-import" style="margin-bottom:0">Import API</button><button type="button" class="tl-add-btn" id="tl-quick-add" style="margin-bottom:0">+ Add Entry</button><button type="button" class="tl-close" id="fc-tlog-close">×</button></div></div><div class="tl-tabs"><div class="tl-tab active" data-tltab="calendar">Calendar</div><div class="tl-tab" data-tltab="schedule">Schedule</div><div class="tl-tab" data-tltab="employees">By Employee</div><div class="tl-tab" data-tltab="log">Full Log</div></div><div class="tl-body" id="tl-body"></div><div class="tl-foot"><div><div class="tl-foot-note" id="tl-foot-note"></div><div class="tl-foot-note" id="tl-api-status">API sync available · last 100 logs</div></div><button type="button" class="tl-btn-clear" id="tl-btn-clear">Clear All Logs</button></div>`;
     document.body.appendChild(ov);document.body.appendChild(m);
     const hide=()=>{ov.style.display="none";m.classList.remove("fc-vis");_activeDayKey=null;};
     ov.addEventListener("click",hide);
@@ -40049,6 +40116,7 @@ function buildTrainingLogModal(){
     document.addEventListener("keydown",e=>{if(e.key==="Escape"&&m.classList.contains("fc-vis"))hide();});
     m.querySelectorAll(".tl-tab").forEach(tab=>{tab.addEventListener("click",()=>{m.querySelectorAll(".tl-tab").forEach(t=>t.classList.remove("active"));tab.classList.add("active");_activeDayKey=null;renderTab(tab.dataset.tltab);});});
     m.querySelector("#tl-btn-clear").addEventListener("click",()=>{if(!confirm("Clear all training log entries? This cannot be undone."))return;tlClear();renderTab(m.querySelector(".tl-tab.active")?.dataset.tltab||"calendar");});
+    m.querySelector("#tl-api-import").addEventListener("click",()=>tlSyncApi(true));
     m.querySelector("#tl-quick-add").addEventListener("click",()=>{m.querySelectorAll(".tl-tab").forEach(t=>t.classList.remove("active"));m.querySelector('[data-tltab="calendar"]')?.classList.add("active");renderTab("calendar");const todayKey=tlDayKey(Date.now());setTimeout(()=>openDayPanel(todayKey,false),50);});
     m.querySelector("#tl-body").addEventListener("click",e=>{const cell=e.target.closest(".tl-cal-cell[data-day]");if(!cell)return;const key=cell.dataset.day;const todayKey=tlDayKey(Date.now());const isFuture=key>todayKey;if(_activeDayKey===key){document.getElementById("tl-day-panel")?.remove();_activeDayKey=null;return;}openDayPanel(key,isFuture);document.querySelectorAll(".tl-cal-cell.selected").forEach(c=>c.classList.remove("selected"));cell.classList.add("selected");});
 }
@@ -40085,7 +40153,7 @@ function wireScheduleDeletes(body){
         mountTrainCounters();
     });
 }
-function openTrainingLog(){buildTrainingLogModal();const ov=document.getElementById("fc-tlog-overlay"),m=document.getElementById("fc-tlog-modal");m.querySelectorAll(".tl-tab").forEach(t=>t.classList.remove("active"));m.querySelector('[data-tltab="calendar"]')?.classList.add("active");renderTab("calendar");ov.style.display="block";m.classList.add("fc-vis");}
+function openTrainingLog(){buildTrainingLogModal();const ov=document.getElementById("fc-tlog-overlay"),m=document.getElementById("fc-tlog-modal");m.querySelectorAll(".tl-tab").forEach(t=>t.classList.remove("active"));m.querySelector('[data-tltab="calendar"]')?.classList.add("active");renderTab("calendar");ov.style.display="block";m.classList.add("fc-vis");tlSyncApi(false);}
 function mountTrainingLogBtn(){if(document.getElementById("fc-tlog-btn"))return;const hdr=document.querySelector("#employees .title-black")||document.querySelector("#employees .title")||document.querySelector(".company-employees .title-black")||document.querySelector(".company-employees .title")||document.querySelector(".employees-list .title-black")||document.querySelector(".employees-list .title")||document.querySelector('[aria-controls="employees"]')?.closest("li")?.parentElement?.nextElementSibling?.querySelector(".title-black")||document.querySelector(".manage-employees .title-black")||document.querySelector(".manage-employees .title");if(!hdr)return;hdr.classList.add("fc-header");const btn=document.createElement("button");btn.id="fc-tlog-btn";btn.type="button";btn.textContent="Training Log";btn.className="fc-btn fc-btn--navy";btn.addEventListener("click",openTrainingLog);hdr.appendChild(btn);}
 function getScheduledTrainCount(name){
     if(!name)return 0;
