@@ -1,5 +1,12 @@
 # Changelog
 
+## Gym Optimizer v1.6.1 - automatic training history and compact gains (2026-10-21)
+
+- Automatically capture stat snapshots on Gym when all four native stats are present and stable across two polls. First complete reading establishes a baseline; subsequent increases are saved.
+- Skip duplicates, partial readings and suspicious stat decreases. Retain up to 180 snapshots locally, displaying the newest 15.
+- Show per-stat increases and TBS gains in green below colored compact values; remove manual SAVE SNAPSHOT button. Retain CLEAR HISTORY and CSV export.
+- Pure logic tests confirmed baseline, increases, no duplicates, incomplete values and decrease rejection. Real TornPDA validation pending.
+
 ## Gym Optimizer v1.6.0 - sequential gold Train Next action (2026-10-21)
 
 - Replace SET 999, SWITCH GYM and TRAIN buttons in Overview with one styled gold action, conditional on Torn gym state.
