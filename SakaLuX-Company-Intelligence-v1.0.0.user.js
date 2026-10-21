@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.81
+// @version      1.8.82
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,9 +1333,9 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.81',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.82',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
-const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock';
+const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
 const KEY={
  api:APP.key+':api', mode:APP.key+':mode', tab:APP.key+':tab', compact:APP.key+':compact', enabled:APP.key+':enabled',
@@ -2032,7 +2032,9 @@ async function importMyTrainingLog(){
  if(importMyTrainingLog.busy)return;
  importMyTrainingLog.busy=true;
  try{
-  const cats=await req('https://api.torn.com/v2/torn/logcategories?key='+encodeURIComponent(key));
+  let cats;
+  try { cats=await req('https://api.torn.com/v2/torn/logcategories?key='+encodeURIComponent(key)); }
+  catch(error){throw new Error('Endpoint Torn: Log Categories: '+String(error?.message||error)+' (cod '+String(error?.code??'?')+'). Cheia generată anterior nu includea Torn: Log Categories; recreează cheia din butonul actualizat și salveaz-o local.')}
   const categories=Array.isArray(cats?.logcategories)?cats.logcategories:Object.entries(cats?.logcategories||{}).map(([id,title])=>({id,title:typeof title==='object'?title.title:title}));
   const company=categories.find(x=>/^(?:company|companies|employment)$/i.test(String(x?.title||'').trim()))||categories.find(x=>/company|companies|employment/i.test(String(x?.title||'')));
   if(!company || !Number.isFinite(Number(company.id)))throw new Error('Categoria Company nu a fost identificată în lista oficială Torn.');
@@ -2041,7 +2043,9 @@ async function importMyTrainingLog(){
   const from=Math.floor((Date.now()-90*86400000)/1000);
   for(let page=0;page<12;page++){
    const url='https://api.torn.com/v2/user/log?cat='+categoryId+'&limit=100&from='+from+(to?'&to='+to:'')+'&key='+encodeURIComponent(key);
-   const response=await req(url);
+   let response;
+   try { response=await req(url); }
+   catch(error){throw new Error('Endpoint User: Log, categoria Company: '+String(error?.message||error)+' (cod '+String(error?.code??'?')+'). Verifică selecția User: Log și accesul la categoria Company.')}
    const raw=response?.log||response?.logs||[];
    const entries=Array.isArray(raw)?raw:Object.entries(raw).map(([id,row])=>({...row,id:row?.id||id}));
    if(!entries.length)break;
@@ -2199,7 +2203,7 @@ function directorStock(){
  const a=stocks();return card('Stock Intelligence',a.length?`<div class="ci-tablewrap"><table><thead><tr><th>Item</th><th>Current</th><th>Cost</th><th>Value</th><th>Status</th></tr></thead><tbody>${a.map(x=>{const q=num(first(x,['quantity','stock','amount'],0)),c=num(first(x,['cost','price','unit_cost'],0)),cap=num(first(x,['capacity','max','maximum'],0)),ratio=cap?q/cap:1;return `<tr><td>${esc(x.name||x.item||x.item_name||'Stock')}</td><td>${fmt(q)}${cap?' / '+fmt(cap):''}</td><td>${money(c)}</td><td>${money(num(first(x,['value','total_value'],q*c)))}</td><td>${ratio<.2?badge('LOW','bad'):ratio<.4?badge('WATCH','warn'):badge('OK','good')}</td></tr>`}).join('')}</tbody></table></div>`:empty('No stock data exposed for this company/API response.'));
 }
 function settings(){
- return `<div class="ci-grid">${card('🔑 API Access',`<div class="ci-api-required"><b>Required Torn access</b><span>User: Basic, Profile, Work Stats, Job, Log (Full Access / custom)</span><span>Company: Profile, Employees, Stock</span></div><a class="ci-btn ci-api-create" href="${API_CREATE_URL}" target="_self">CREATE REQUIRED TORN KEY</a><div class="ci-api-source"><span>Active source</span><b>${esc(apiSource())}</b></div>${hubApiKey()?'<p class="ci-note ci-good-note">The shared Hub key is active. A local key is optional and remains available when this script runs separately.</p>':''}<label class="ci-field"><span>Standalone Torn API key</span><input id="ci-api" type="password" value="${esc(get(KEY.api,''))}" placeholder="Paste API key"></label><div class="ci-actions ci-api-actions"><button class="ci-btn primary" data-act="save-key">SAVE KEY</button><button class="ci-btn" data-act="test-key">TEST & REFRESH</button><button class="ci-btn danger" data-act="clear-key">CLEAR LOCAL KEY</button></div><p class="ci-note">The key is stored locally only. Director data is available only when Torn allows the key owner to access that company information.</p>`)}
+ return `<div class="ci-grid">${card('🔑 API Access',`<div class="ci-api-required"><b>Required Torn access</b><span>User: Basic, Profile, Work Stats, Job, Log</span><span>Company: Profile, Employees, Stock</span><span>Torn: Log Categories (necesar pentru filtrarea jurnalului)</span></div><a class="ci-btn ci-api-create" href="${API_CREATE_URL}" target="_self">CREATE REQUIRED TORN KEY</a><div class="ci-api-source"><span>Active source</span><b>${esc(apiSource())}</b></div>${hubApiKey()?'<p class="ci-note ci-good-note">The shared Hub key is active. A local key is optional and remains available when this script runs separately.</p>':''}<label class="ci-field"><span>Standalone Torn API key</span><input id="ci-api" type="password" value="${esc(get(KEY.api,''))}" placeholder="Paste API key"></label><div class="ci-actions ci-api-actions"><button class="ci-btn primary" data-act="save-key">SAVE KEY</button><button class="ci-btn" data-act="test-key">TEST & REFRESH</button><button class="ci-btn danger" data-act="clear-key">CLEAR LOCAL KEY</button></div><p class="ci-note">The key is stored locally only. Director data is available only when Torn allows the key owner to access that company information.</p>`)}
  ${card('Interface',`<label class="ci-check"><input id="ci-compact" type="checkbox" ${S.compact?'checked':''}> Compact PDA mode</label>`)}
  ${card('Local data',`<div class="ci-actions"><button class="ci-btn" data-act="export">Export</button><button class="ci-btn" data-act="import">Import</button><button class="ci-btn danger" data-act="clear">Clear history</button></div>`)}</div>`;
 }
