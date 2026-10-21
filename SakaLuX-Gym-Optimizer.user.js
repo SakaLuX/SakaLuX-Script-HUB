@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.6.2
+// @version      1.6.3
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.6.2',root=document.documentElement;
+    const id='gym-optimizer',v='1.6.3',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.6.2',id='gym-optimizer';
+    const ver='1.6.3',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -923,11 +923,32 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const gaps=active.map(i=>({stat:stats[i],gap:Math.max(0,Math.ceil(mean*weights[i]-state.values[stats[i]]))}));
     gaps.sort((a,b)=>b.gap-a.gap);return gaps[0];
   };
+  let lastVerifiedGymName=null;
   function confirmedGym(){
-    // Never infer unlocked status from missing CSS classes, a gym title, or the existence of a locked button.
-    // A user-confirmed gym is the one currently selected; alternate gyms require manual selection.
-    const gym=document.querySelector('[class*="gymName"],[class*="selectedGym"],[data-testid="current-gym"]');
-    return gym?.textContent?.trim().slice(0,80)||null;
+    const known=gymTable.map(g=>g[0]);
+    const normalize=t=>String(t||'').trim().replace(/\s+/g,' ').toLowerCase();
+    const canonical=t=>known.find(g=>normalize(g)===normalize(t))||null;
+    for(const el of document.querySelectorAll('[data-testid="current-gym"],[class*="selectedGym"],[class*="gymName"]')){
+      if(panel.contains(el))continue;
+      const name=canonical(el.textContent);
+      if(name){lastVerifiedGymName=name;return name}
+    }
+    // Verify the exact current Gym banner by its accompanying energy label.
+    const candidates=[...document.querySelectorAll('h1,h2,h3,h4,div,span,strong')]
+      .filter(el=>!panel.contains(el)&&el.children.length<3&&canonical(el.textContent));
+    for(const el of candidates){
+      const name=canonical(el.textContent);
+      let parent=el.parentElement;
+      for(let depth=0;parent&&depth<4;depth++,parent=parent.parentElement){
+        if(panel.contains(parent))break;
+        const text=(parent.innerText||parent.textContent||'').slice(0,450);
+        if(/You have\s*[\d,.]+\s*\/\s*[\d,.]+\s*energy/i.test(text)){
+          lastVerifiedGymName=name;
+          return name;
+        }
+      }
+    }
+    return lastVerifiedGymName;
   }
   const statColors={Strength:'#ff8754',Speed:'#37c9d9',Defense:'#ab86ec',Dexterity:'#38cb78'};
   const statNumber=s=>Number(String(s).replace(/,/g,''))||0;
@@ -1099,7 +1120,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.6.2',id='gym-optimizer';
+      const version='1.6.3',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1318,6 +1339,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     // No automatic training when an alternative gym was clicked but not yet confirmed.
     if(gymTransitionPending && (!current||current.toLowerCase()!==gymTransitionPending.toLowerCase()))
       return {step:'blocked',label:'CONFIRM GYM SWITCH',disabled:true,stat};
+    if(gymTransitionPending&&current&&current.toLowerCase()===gymTransitionPending.toLowerCase())gymTransitionPending=null;
     return {step:train?'train':'blocked',label:train?'TRAIN '+stat.toUpperCase()+' - 999':'WAIT FOR TRAIN CONTROL',disabled:!train,stat};
   }
   let gymTransitionPending=null;
@@ -1476,7 +1498,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.2',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.3',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
@@ -1501,12 +1523,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     return null;
   }
   function mount(){
-    if(!onGym()||!state.enabled){panel.hidden=true;return}
+    if(!onGym()||!state.enabled){panel.hidden=true;lastVerifiedGymName=null;return}
     const anchor=trainingAnchor();
-    if(!anchor){panel.hidden=true;return}
-    if(panel.parentElement!==anchor.parentElement || panel.nextElementSibling!==anchor){
-      anchor.parentElement.insertBefore(panel,anchor);
+    if(anchor){
+      if(panel.parentElement!==anchor.parentElement || panel.nextElementSibling!==anchor)
+        anchor.parentElement.insertBefore(panel,anchor);
+      panel.hidden=false;
+      return;
     }
+    // Torn removes native train tiles temporarily during gym switches.
+    // Preserve visible widget state instead of repeatedly unmounting it.
+    if(!panel.isConnected)(document.body||document.documentElement).append(panel);
     panel.hidden=false;
   }
   registerGym();
@@ -1521,5 +1548,22 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   // TornPDA navigates without full reload. Move the inline widget when Gym's React root is replaced.
   let lastUrl=location.href;
-  setInterval(()=>{if(location.href!==lastUrl){lastUrl=location.href;render()}registerGym();mount();watchGymHistory()},1100);
+  let lastDisplayedGym=confirmedGym();
+  setInterval(()=>{
+    if(location.href!==lastUrl){
+      lastUrl=location.href;
+      lastVerifiedGymName=null;
+      gymTransitionPending=null;
+      render();
+    }
+    mount();
+    const activeName=confirmedGym();
+    if(activeName&&activeName!==lastDisplayedGym){
+      lastDisplayedGym=activeName;
+      gymTransitionPending=null;
+      render();
+    }
+    registerGym();
+    watchGymHistory();
+  },1100);
 })();
