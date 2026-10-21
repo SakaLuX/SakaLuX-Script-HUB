@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.78
+// @version      1.8.79
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.78',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.79',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2051,7 +2051,8 @@ async function importMyTrainingLog(){
    known.add(id);
   }
   if(fresh.length)set(KEY.trains,saved.concat(fresh));
-  alert('Import personal: '+fresh.length+' antrenamente confirmate după identificarea tipului de eveniment. Dacă lipsesc antrenamente, jurnalul API poate să nu le expună.');
+  const eventTitles=[...new Set(entries.map(x=>String(x?.title||x?.log_type||x?.type||'').trim()).filter(Boolean))].slice(0,6);
+  alert('Import: '+fresh.length+' antrenamente găsite din '+entries.length+' evenimente API. '+(fresh.length?'':'Nu s-a identificat un eveniment de training confirmat în răspunsul primit. ')+'Tipuri de evenimente disponibile: '+(eventTitles.join(', ')||'necunoscute')+'.');
  }catch(e){const code=num(e?.code,-1);const msg=String(e?.message||e);alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă (100 cereri/minut pe utilizator). Reîncearcă după ce expiră limitarea; nu este o eroare de permisiuni.':code===16?'Cheia nu are acces la User: Log. Creează o cheie personalizată cu această permisiune.':'Import indisponibil: '+msg);}
 }
 // API import is read-only and strictly accepts identifiable company training news.
@@ -2307,7 +2308,7 @@ function render(){
 function dialog(title,fields,onSave){
  const back=document.createElement('div');back.className='ci-dialogback';
  back.innerHTML=`<div class="ci-dialog"><h3>${esc(title)}</h3><div class="ci-form">${fields.map(f=>f.type==='select'?`<label class="ci-field ${f.wide?'wide':''}"><span>${esc(f.label)}</span><select name="${esc(f.name)}">${f.options.map(o=>`<option>${esc(o)}</option>`).join('')}</select></label>`:`<label class="ci-field ${f.wide?'wide':''}"><span>${esc(f.label)}</span><input name="${esc(f.name)}" type="${f.type||'text'}" value="${esc(f.value??'')}" placeholder="${esc(f.placeholder||'')}"></label>`).join('')}</div><div class="ci-actions"><button class="ci-btn primary" data-save>Save</button><button class="ci-btn" data-cancel>Cancel</button></div></div>`;
- document.body.appendChild(back);$('[data-cancel]',back).onclick=()=>back.remove();$('[data-save]',back).onclick=()=>{const d={};fields.forEach(f=>d[f.name]=$(`[name="${CSS.escape(f.name)}"]`,back)?.value??'');onSave(d);back.remove();render()};
+ (document.getElementById('ci-root')||document.body).appendChild(back);$('[data-cancel]',back).onclick=()=>back.remove();$('[data-save]',back).onclick=()=>{const d={};fields.forEach(f=>d[f.name]=$(`[name="${CSS.escape(f.name)}"]`,back)?.value??'');onSave(d);back.remove();render()};
 }
 function downloadCsv(name,rows){const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n'),blob=new Blob([csv],{type:'text/csv'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function act(a){
@@ -2604,6 +2605,6 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   #ci-root .ci-brand b{font-size:14px!important}
   #ci-root .ci-brand small{font-size:9px!important}
 }
-\n#ci-root .ci-employee-train-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,.75fr) minmax(0,1.2fr)!important;gap:5px!important;flex-wrap:nowrap!important;width:100%!important}\n#ci-root .ci-employee-train-actions .ci-btn{width:100%!important;min-width:0!important;margin:0!important;padding:7px 3px!important;font-size:10px!important;white-space:nowrap!important;box-sizing:border-box!important;text-align:center!important}\n`;
+\n#ci-root .ci-employee-train-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,.75fr) minmax(0,1.2fr)!important;gap:5px!important;flex-wrap:nowrap!important;width:100%!important}\n#ci-root .ci-employee-train-actions .ci-btn{width:100%!important;min-width:0!important;margin:0!important;padding:7px 3px!important;font-size:10px!important;white-space:nowrap!important;box-sizing:border-box!important;text-align:center!important}\n\n/* Employee train action layout overrides the global two-column rule. */\n#ci-root .ci-body .ci-actions.ci-employee-train-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,.65fr) minmax(0,1.15fr)!important;gap:5px!important;width:100%!important;flex-wrap:nowrap!important}\n#ci-root .ci-body .ci-actions.ci-employee-train-actions>.ci-btn{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0 3px!important;white-space:nowrap!important;font-size:clamp(8px,2.25vw,11px)!important;overflow:hidden!important}\n/* Put editable dialogs above the Hub, Torn panels and shared footers. */\n#ci-root .ci-dialogback{position:fixed!important;inset:0!important;z-index:2147483647!important;display:flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}\n#ci-root .ci-dialogback>.ci-dialog{position:relative!important;z-index:1!important;max-width:calc(100vw - 24px)!important;max-height:calc(100dvh - 32px)!important;overflow:auto!important}\n`;
   (document.head||document.documentElement).appendChild(st);
 })();
