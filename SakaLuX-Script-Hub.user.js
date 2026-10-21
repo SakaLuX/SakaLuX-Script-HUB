@@ -2057,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.6.4",
+                "version": "1.6.5",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2074,12 +2074,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.6.4",
+                    "version": "1.6.5",
                     "date": "2026-10-21",
                     "notes": [
-                        "Identify active gym from Torn's named banner and its matching energy text, covering Complete Cardio on TornPDA.",
-                        "Build on v1.6.3 persistent panel/re-render and gym tile detection fix.",
-                        "Keep verified-unlock protection and do not assume the unlabeled 3% lock badge belongs to a named gym."
+                        "Recognize native TornPDA [-] 999 [+] repetitions selectors alongside editable inputs.",
+                        "Reevaluate the single gold button as the native Torn repetitions display changes, without losing the state or re-rendering the whole widget.",
+                        "For non-editable native selectors, guide users to choose 999 in Torn; never blindly simulate clicks or train.",
+                        "Replace permanent unverified headroom table with an explicit illustrative Dex ratio check, without claiming gym unlocks."
                     ]
                 },
                 "accessTier": "free",
