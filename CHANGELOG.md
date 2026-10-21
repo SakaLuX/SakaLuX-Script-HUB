@@ -1,5 +1,12 @@
 # Changelog
 
+## Gym Optimizer v1.7.1 - live Gym energy detection (2026-10-21)
+
+- Fix false 'Not enough verified energy for even one repetition' with energy available. Prefer Torn's native Gym banner 'You have 15/150 energy' over stale API bars or generic HUD values.
+- Use recent (<30 seconds) API energy only as a fallback, and never advertise 999 available reps when actual current energy or cost cannot be confirmed.
+- Report the checked energy and cost when a train cannot be performed. Single native TRAIN click remains an explicit user action and Torn owns final transaction validation.
+- Keep v1.7.0 local active/unlocked gym evidence ledger. Mock tested 15/150, 10/150, 0/150 and stale API responses; JavaScript parser and ASCII checks passed. On-device confirmation pending.
+
 ## Gym Optimizer v1.7.0 - 10 E native TRAIN and locally remembered gym progression (2026-10-21)
 
 - Permit one explicit native TRAIN click when the player has enough energy for one repetition, even when Torn's own selector shows 999. Torn performs final validation; never synthesize 999 clicks. Preserve 0 E and insufficient-E safeguards.
