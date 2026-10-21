@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.83
+// @version      1.8.84
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.83',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.84',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1372,8 +1372,8 @@ const first=(o,paths,f=null)=>{
  for(const path of paths){let x=o,ok=true;for(const p of path.split('.')){if(x==null||!(p in Object(x))){ok=false;break;}x=x[p];}if(ok&&x!=null)return x}
  return f;
 };
-const get=(k,f=null)=>{try{if(typeof GM_getValue==='function')return GM_getValue(k,f)}catch{};try{let v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch{return f}};
-const set=(k,v)=>{try{if(typeof GM_setValue==='function')return GM_setValue(k,v)}catch{};try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const get=(k,f=null)=>{if(k===KEY.trains){try{const v=localStorage.getItem(k);if(v!==null){const parsed=JSON.parse(v);if(Array.isArray(parsed))return parsed}}catch{}}try{if(typeof GM_getValue==='function'){const result=GM_getValue(k,f);if(result&&typeof result.then==='function')return f;return result}}catch{};try{let v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch{return f}};
+const set=(k,v)=>{if(k===KEY.trains){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){console.warn('[SakaLuX Company] train local save failed',e)}}try{if(typeof GM_setValue==='function')return GM_setValue(k,v)}catch{};try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const del=k=>{try{if(typeof GM_deleteValue==='function')return GM_deleteValue(k)}catch{};try{localStorage.removeItem(k)}catch{}};
 function hubApiKey(){try{const k=String(window.SakaLuXScriptHub?.getApiKey?.()||'').trim();if(k)return k}catch{}try{if(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button'))return String(localStorage.getItem(HUB_API_STORAGE)||'').trim()}catch{}return''}
 function apiKey(){return hubApiKey()||String(get(KEY.api,'')||'').trim()}
