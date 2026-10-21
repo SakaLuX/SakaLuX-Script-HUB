@@ -1,5 +1,11 @@
 # Changelog
 
+## Gym Optimizer v1.6.4 - TornPDA active gym banner detection (2026-10-21)
+
+- Also detect the active gym through the visible native banner name plus 'You have X/Y energy', including Complete Cardio, when class-based Gym title detection fails.
+- Retain v1.6.3's persistent panel across React gym switches and safety checks on selected gym icons.
+- Do not guess which gym an unlabeled 3% lock tile refers to. Device verification pending.
+
 ## Gym Optimizer v1.6.3 - persistent Gym panel and safer gym selection (2026-10-21)
 
 - Keep Gym interface visible during Torn React re-mount and gym selection changes; fallback to a stable Gym heading if the native training tile anchor is temporarily absent.
