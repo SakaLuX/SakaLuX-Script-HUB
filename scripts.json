@@ -647,7 +647,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.6.9",
+      "version": "1.7.0",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -664,13 +664,14 @@
         }
       ],
       "release": {
-        "version": "1.6.9",
+        "version": "1.7.0",
         "date": "2026-10-21",
         "notes": [
-          "Persist the last positively confirmed active gym in local storage and reuse it during TornPDA interface redraws.",
-          "Refresh stored gym from Torn's visible native banner and explicit selected icon; do not cache other merely available gyms as unlocked.",
-          "Invalidate active-gym fallback when the Gym Optimizer requests a different gym; preserve energy/repetition checks and explicit TRAIN-only action.",
-          "Keep ASCII-safe scripts and auto-update metadata."
+          "Permit a single native Torn TRAIN click at 10 energy even when the native repetitions selector displays 999; Torn validates or rejects the requested training, and the script never simulates 999 clicks.",
+          "Fix native TRAIN button lookup under TornPDA WebView by checking textContent as well as innerText.",
+          "Persist locally the highest confirmed standard gym progression, previously active gyms, and separately observed explicit unlocked gym controls.",
+          "Recommend the best stat-specific gym from recorded progression while requiring a currently verified selectable Torn control for automatic gym switching.",
+          "Keep direct gym confirmation, current energy minimum and stat safety checks."
         ]
       },
       "accessTier": "free",

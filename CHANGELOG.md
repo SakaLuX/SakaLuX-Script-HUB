@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.7.0 - 10 E native TRAIN and locally remembered gym progression (2026-10-21)
+
+- Permit one explicit native TRAIN click when the player has enough energy for one repetition, even when Torn's own selector shows 999. Torn performs final validation; never synthesize 999 clicks. Preserve 0 E and insufficient-E safeguards.
+- Match TornPDA TRAIN control using innerText, textContent and value to address WebView button detection.
+- Keep a separate local gym progression ledger: highest native-confirmed active gym, explicitly observed unlocked gym controls and earlier sequential standard gym stages for recommendations. Prior stages count as reached but do not imply paid ownership.
+- Select the best dot-value gym for recommended stat from recorded progression; switch automatically only if the current Torn UI explicitly exposes an unlocked clickable control. No guessing at locked icons.
+- Mock-verified 10 E / 999 selection, 0 E, 5 E, progression and explicit unlock persistence. JavaScript syntax and ASCII checks passed; on-device training result still unconfirmed.
+
 ## Gym Optimizer v1.6.9 - persisted active gym confirmation (2026-10-21)
 
 - Save the gym name only after Torn has positively confirmed it, and reuse the cached selection when Torn temporarily removes the gym banner while updating controls. This fixes a gold button repeatedly displaying CHECK ACTIVE GYM BANNER while Overview still shows the selected gym.

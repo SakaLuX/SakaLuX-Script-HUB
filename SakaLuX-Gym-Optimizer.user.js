@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.6.9
+// @version      1.7.0
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.6.9',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.0',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.6.9',id='gym-optimizer';
+    const ver='1.7.0',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -986,6 +986,42 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }catch{}
     return null;
   }
+  // Evidence-led local progression ledger. Standard gyms are sequential: once
+  // a later standard gym is positively active, previous standard stages are
+  // remembered as reached, but paid membership / selectable controls are not
+  // inferred. Never persist a locked icon as owned.
+  const GYM_PROGRESS_CACHE_KEY='sakalux_gym_standard_progress_v1';
+  function readGymProgress(){
+    try{
+      const data=JSON.parse(localStorage.getItem(GYM_PROGRESS_CACHE_KEY)||'null');
+      if(!data||!Number.isInteger(data.highestIndex))return {highestIndex:-1,confirmed:[],explicitUnlocked:[]};
+      return {highestIndex:Math.max(-1,Math.min(gymTable.length-1,data.highestIndex)),
+        confirmed:Array.isArray(data.confirmed)?data.confirmed.filter(n=>!!knownGymName(n)):[],
+        explicitUnlocked:Array.isArray(data.explicitUnlocked)?data.explicitUnlocked.filter(n=>!!knownGymName(n)):[]};
+    }catch{return {highestIndex:-1,confirmed:[],explicitUnlocked:[]}}
+  }
+  function recordGymProgress(name){
+    const index=gymTable.findIndex(g=>g[0]===name);
+    if(index<0)return;
+    const data=readGymProgress();
+    const highestIndex=Math.max(data.highestIndex,index);
+    const confirmed=[...new Set([...data.confirmed,name])];
+    if(data.highestIndex===highestIndex&&data.confirmed.includes(name))return;
+    try{localStorage.setItem(GYM_PROGRESS_CACHE_KEY,JSON.stringify({highestIndex,confirmed,explicitUnlocked:data.explicitUnlocked,at:Date.now()}))}catch{}
+  }
+  function recordExplicitGymUnlock(name){
+    if(!knownGymName(name))return;
+    const data=readGymProgress();
+    if(data.explicitUnlocked.includes(name))return;
+    data.explicitUnlocked.push(name);
+    try{localStorage.setItem(GYM_PROGRESS_CACHE_KEY,JSON.stringify({...data,at:Date.now()}))}catch{}
+  }
+  function gymProgressSummary(){
+    const data=readGymProgress();
+    return {name:data.highestIndex>=0?gymTable[data.highestIndex][0]:null,
+      count:Math.max(0,data.highestIndex+1),confirmed:data.confirmed,explicitUnlocked:data.explicitUnlocked};
+  }
+
   function confirmedGym(){
     if(!onGym())return null;
     // Avoid searching DOM again within the same interval if a verified gym is
@@ -995,6 +1031,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(confirmed){
       const previous=activeGymProof;
       activeGymProof={name:confirmed,at:Date.now(),fromStorage:false};
+      if(title||selected)recordGymProgress(confirmed);
       if(!previous||previous.name!==confirmed||Date.now()-previous.at>60000){
         try{localStorage.setItem(GYM_ACTIVE_CACHE_KEY,JSON.stringify(activeGymProof))}catch{}
       }
@@ -1107,17 +1144,37 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // The currently active gym is known usable; any other gym must be explicitly marked unlocked/owned
   // by Torn's own DOM before actions are permitted.
   function gymAvailability(){
-    const activeName=confirmedGym();
+    const activeName=confirmedGym(),progress=readGymProgress();
     const choices=new Map();
-    if(activeName)choices.set(activeName.toLowerCase(),{name:activeName,active:true,button:null});
+    // Previous standard gyms are recorded as reached for recommendations only.
+    for(let i=0;i<=progress.highestIndex;i++){
+      const name=gymTable[i][0];
+      choices.set(name.toLowerCase(),{name,active:name===activeName,button:null,
+        evidence:progress.confirmed.includes(name)?'previously active':'sequential progression',
+        switchVerified:false});
+    }
+    for(const name of progress.explicitUnlocked){
+      if(!choices.has(name.toLowerCase()))
+        choices.set(name.toLowerCase(),{name,active:false,button:null,evidence:'saved explicit unlock',switchVerified:false});
+    }
+    if(activeName)choices.set(activeName.toLowerCase(),
+      {name:activeName,active:true,button:null,evidence:'active native banner',switchVerified:true});
     const candidates=[...document.querySelectorAll('button,[role="button"],a')].filter(el=>!panel.contains(el));
     for(const el of candidates){
       const label=(el.textContent||el.getAttribute('aria-label')||'').trim().replace(/\s+/g,' ');
       const g=gymTable.find(g=>label.toLowerCase()===g[0].toLowerCase());
       if(!g)continue;
-      const explicit=el.getAttribute('data-unlocked')==='true'||el.dataset?.unlocked==='true'||el.getAttribute('aria-label')?.toLowerCase().includes('unlocked');
-      if(!explicit||el.disabled||el.getAttribute('aria-disabled')==='true')continue;
-      choices.set(g[0].toLowerCase(),{name:g[0],active:false,button:el});
+      const explicit=el.getAttribute('data-unlocked')==='true'||el.dataset?.unlocked==='true'
+        ||el.getAttribute('aria-label')?.toLowerCase().includes('unlocked');
+      const locked=el.disabled||el.getAttribute('aria-disabled')==='true'
+        ||el.getAttribute('data-locked')==='true'
+        ||/locked|disabled|unavailable|purchase/i.test(String(el.className||''));
+      if(!explicit||locked)continue;
+      recordExplicitGymUnlock(g[0]);
+      const prior=choices.get(g[0].toLowerCase());
+      choices.set(g[0].toLowerCase(),{name:g[0],active:g[0]===activeName,
+        button:g[0]===activeName?null:el,evidence:'Torn explicit unlocked',
+        switchVerified:true,...(prior?.active?{active:true,button:null}:{})});
     }
     return choices;
   }
@@ -1166,7 +1223,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const tile=nativeStatTile(stat);
     if(!tile)return false;
     const train=[...tile.querySelectorAll('button,input[type="button"],[role="button"]')]
-      .find(b=>/^(train)$/i.test((b.innerText||b.value||'').trim())&&!b.disabled&&b.getAttribute('aria-disabled')!=='true');
+      .find(b=>/^train$/i.test((b.innerText||b.textContent||b.value||'').trim())&&!b.disabled&&b.getAttribute('aria-disabled')!=='true');
     if(!train)return false;
     train.click();return true;
   }
@@ -1201,7 +1258,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.6.9',id='gym-optimizer';
+      const version='1.7.0',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1422,31 +1479,33 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const cost=found?Number(found[1]):null;
     const active=confirmedGym();
     if(!active)return {step:'blocked',label:'CHECK ACTIVE GYM BANNER',disabled:true};
-    if(!Number.isFinite(control.value))
+    if(!Number.isFinite(control.value)||control.value<1)
       return {step:'blocked',label:'CHECK NATIVE REPETITIONS',disabled:true};
     const affordable=energy&&Number.isFinite(cost)&&cost>0?Math.floor(energy.value/cost):null;
-    if(affordable!==null&&affordable<=0)
+    if(affordable!==null&&affordable<1)
       return {step:'blocked',label:'INSUFFICIENT ENERGY - NEED '+cost+' E',disabled:true};
-    // Set repetitions to the maximum actually affordable. A count of 999
-    // with 10 E must never be treated as 999 executable training actions.
-    const desired=affordable!==null?Math.min(999,affordable):999;
-    if(control.value!==desired)
-      return {step:control.input?'reps':'manual-reps',label:control.input?
-          'SET '+desired+' REPS - '+stat.toUpperCase():
-          'SET '+desired+' REPS IN TORN',disabled:false,stat,reps:desired};
     if(gymTransitionPending&&active.toLowerCase()===gymTransitionPending.toLowerCase())
       gymTransitionPending=null;
     if(gymTransitionPending)return {step:'blocked',label:'CONFIRM GYM SWITCH',disabled:true};
-    const currentBest=bestAvailable(stat);
-    if(currentBest&&!currentBest.active){
-      if(!currentBest.button)return {step:'blocked',label:'GYM SWITCH UNVERIFIED',disabled:true,stat};
-      return {step:'switch',label:'SWITCH GYM - '+currentBest.name.toUpperCase(),disabled:false,stat,gym:currentBest.name};
+    const best=bestAvailable(stat);
+    // Recommend progression-reached gyms but only click gym controls when Torn
+    // positively supplies an unlocked selectable button.
+    if(best&&!best.active){
+      if(best.switchVerified&&best.button)return {step:'switch',label:'SWITCH GYM - '+best.name.toUpperCase(),
+        disabled:false,stat,gym:best.name};
+      // Do not block a valid train in the ACTIVE gym on a recommendation that
+      // cannot be switched to safely.
     }
     const train=[...control.tile.querySelectorAll('button,input[type="button"],[role="button"]')]
-      .find(b=>/^train$/i.test((b.innerText||b.textContent||b.value||'').trim())&&!b.disabled&&b.getAttribute('aria-disabled')!=='true');
-    return {step:train?'train':'blocked',label:train?
-      'TRAIN '+stat.toUpperCase()+' - '+desired+' REP'+(desired===1?'':'S'):
-      'WAIT FOR NATIVE TRAIN',disabled:!train,stat,reps:desired};
+      .find(b=>/^train$/i.test((b.innerText||b.textContent||b.value||'').trim())
+         &&!b.disabled&&b.getAttribute('aria-disabled')!=='true');
+    if(!train)return {step:'blocked',label:'WAIT FOR NATIVE TRAIN',disabled:true};
+    // Torn receives exactly one native TRAIN click. The user-selected count may
+    // be 999, while only fewer repetitions are affordable; Torn validates and
+    // caps/rejects the request server-side. Never synthesize 999 clicks.
+    return {step:'train',label:'TRAIN '+stat.toUpperCase()+' - UP TO '+(affordable??control.value)+' REP'+((affordable??control.value)===1?'':'S'),
+      disabled:false,stat,reps:control.value,affordable,cost,
+      recommendedGym:best&&!best.active?best.name:null};
   }
   let gymTransitionPending=null;
   function onGymNextAction(){
@@ -1485,14 +1544,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(action.step==='train'){
       if(!confirmedGym()){report('Wait for the gym to finish loading.');return}
       const liveReps=nativeRepetitionControl(next.stat);
-      if(Number(liveReps.value)!==action.reps){report('Repetitions changed. Set '+action.reps+' again.');return}
+      if(Number(liveReps.value)!==action.reps){report('Repetitions changed; refresh the action.');return}
       const match=(liveReps.tile?.innerText||liveReps.tile?.textContent||'').match(/(\d+)\s*energy per train/i);
       const cost=match?Number(match[1]):null,available=reliableGymEnergy();
-      if(!available||!Number.isFinite(cost)||cost<=0||available.value<cost*action.reps){
-        report('Energy or native training cost not verified for '+action.reps+' repetitions. No training performed.');return;
+      if(!available||!Number.isFinite(cost)||cost<=0||available.value<cost){
+        report('Not enough verified energy for even one repetition. No training performed.');return;
       }
+      // Allow a native selection such as 999 with 10 E. Torn owns the actual
+      // transaction and will validate / cap / reject according to its rules.
       if(!clickNativeTrain(next.stat)){report('Native TRAIN is unavailable.');return}
-      report('Native TRAIN clicked once for '+next.stat+'. Check the Torn result.');
+      report('Native TRAIN clicked once with '+available.value+' E. Torn will confirm or reject the requested training. Check your stat/energy result.');
       return;
     }
   }
@@ -1591,6 +1652,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       +(next?'<div class="sf-main" style="color:'+statColors[next.stat]+'">'+esc(next.stat)+'</div><div>Currently '+fmt(actual[next.stat])+' - Target '+fmt(targets[next.stat])+' - Need +'+fmt(next.gap)+'</div>':'<div class="sf-main">Waiting for stat values</div>')
       +'<div class="sf-actions slx-next-action"><button type="button" id="slx-gym-next-action"'+(nextAction.disabled?' disabled':'')+'>'+esc(nextAction.label)+'</button></div>'
       +'<div class="sf-gold">Best verified gym: '+(planGym?esc(planGym.name)+' ('+planGym.dot+' dots)':'not verified')+'</div>'
+      +'<p class="sf-estimate">Standard gym progression remembered: '+esc(gymProgressSummary().name||'not yet verified')+' ('+gymProgressSummary().count+' standard stages reached). Previous gyms are suggestions; switch requires Torn confirmation.</p>'
       +'<p class="sf-estimate">'+(gym?'Active gym confirmed: '+esc(gym):'Gym selection is still loading or Torn displays conflicting gym indicators. Recheck the selected gym banner.')+'</p>'
       +(estimate?'<div class="sf-estimate">'+esc(estimate.text)+'</div>':'')
       +'<div class="sf-feedback" role="status"></div></div>';
@@ -1670,7 +1732,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.9',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.0',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
