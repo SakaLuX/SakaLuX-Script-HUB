@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.6.7 - energy status and actual specialist gym requirements (2026-10-21)
+
+- Show NO ENERGY - WAIT FOR REGENERATION when live Torn HUD or verified API says 0 E; distinguish from gym selection errors. For nonzero insufficient E, show required energy per train where identified.
+- Rebuild Headroom using Torn wiki specialist gym rules, independent of saved SakaLuX ratios. Select Elites, Total Rebound, Gym 3000, Mr. Isoyamas, Balboas, Frontline Fitness or Sports Science Lab; see current stat requirements, precise gap, prerequisites and purchase cost.
+- Explain specific preceding standard gyms: George's, Cha Cha's or Last Round. Do not claim eligibility if prereq/fees/consumables are unverified.
+- Persist specialist gym selection; prioritize live Torn energy bar over cached API.
+- Calculations verified using sample user's public stat values; Javascript parse and ASCII checks passed. TornPDA device test pending.
+
 ## Gym Optimizer v1.6.6 - reliable gym confirmation and four-stat headroom (2026-10-21)
 
 - Prefer the active gym name from Torn's own energy banner to transient icon selection when they disagree. Fallback to explicit selected icon only if banner not available.
