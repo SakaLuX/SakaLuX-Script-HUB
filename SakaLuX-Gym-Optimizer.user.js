@@ -1272,18 +1272,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     return Number(current?.current??current?.amount??d?.energy?.current);
   }
   function reliableGymEnergy(){
-    // Prefer the Torn API's bars.energy.current if it is a finite number.
-    // Never coerce missing API fields to zero.
-    const val=gymApi.data?.bars?.energy?.current??gymApi.data?.energy?.current??gymApi.data?.energy?.amount;
-    if(val!==undefined&&val!==null&&val!==''&&Number.isFinite(Number(val))&&Number(val)>=0)
-      return {value:Number(val),source:'Torn API'};
-    // Native HUD label with explicit energy semantics is the secondary source.
-    for(const node of document.querySelectorAll('[aria-label*="energy" i],[title*="energy" i],[data-testid*="energy" i]')){
+    // Prefer live Torn HUD over cached API, especially after an energy refill.
+    // Missing energy readings never become zero.
+    for(const node of document.querySelectorAll('[aria-label*="energy" i],[title*="energy" i],[data-testid*="energy" i],[class*="energyBar"],[class*="energy-bar"]')){
       if(panel.contains(node))continue;
       const text=[node.getAttribute('aria-label'),node.getAttribute('title'),node.textContent].filter(Boolean).join(' ');
       const match=text.match(/(?:energy\s*:?\s*)?(\d{1,3})\s*\/\s*(\d{2,3})/i);
-      if(match&&Number(match[2])>=Number(match[1]))return {value:Number(match[1]),source:'Torn HUD'};
+      if(match&&Number(match[2])>=Number(match[1]))
+        return {value:Number(match[1]),source:'Torn HUD'};
     }
+    const val=gymApi.data?.bars?.energy?.current??gymApi.data?.energy?.current??gymApi.data?.energy?.amount;
+    if(val!==undefined&&val!==null&&val!==''&&Number.isFinite(Number(val))&&Number(val)>=0)
+      return {value:Number(val),source:'Torn API'};
     return null;
   }
   function safeReps(stat){
@@ -1501,7 +1501,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     {id:'Frontline Fitness',kind:'paired',favored:['Strength','Speed'],other:['Defense','Dexterity'],prereq:"Cha Cha's",price:50000000,dots:7.5},
     {id:'The Sports Science Lab',kind:'special',prereq:'Last Round',price:500000000,dots:9}
   ];
-  let selectedSpecialGym='Elites';
+  let selectedSpecialGym=SPECIAL_GYMS.some(g=>g.id===state.specialGym)?state.specialGym:'Elites';
   function specialistRequirement(gym,actual){
     const numbers=Object.fromEntries(stats.map(n=>[n,Number(actual[n])||0]));
     const valid=stats.every(n=>numbers[n]>0);
@@ -1601,7 +1601,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const about='<div class="sf-info"><div class="sf-section">WHY NOT JUST TRAIN ALL STATS EQUALLY?</div><p>Torn has specialist gyms that give significantly better gains than regular gyms, but they have stat ratio requirements to unlock and keep access. Baldr and Hank are two popular ways to structure stats for those gyms.</p><div class="sf-section">GYM DOTS - WHY THEY MATTER</div><p>Gym dots indicate relative training gains per energy. Higher dots generally mean more gains, but exact gains and eligibility vary by gym.</p><div class="sf-three"><div>GEORGES GYM<strong style="color:#e9b84c">~7.3</strong><small>10e / train<br>No specialist ratio</small></div><div>SPECIAL GYMS<strong style="color:#ef9a45">~7.5</strong><small>Often 25e / train<br>Ratio required</small></div><div>ELITE GYMS<strong style="color:#50d18d">~8.0</strong><small>Often 50e / train<br>Strict ratio rules</small></div></div><div class="sf-section">BALDRS RATIO - 1.25 : 1 : 0.75 : 0.75</div><p>A balanced specialist build. The leading stat is 1.25, secondary 1, and the two lower stats 0.75 each. This keeps the lower stats meaningful rather than dumping one completely.</p><p>Baldr-style builds can aim for specialist gym access while maintaining a more balanced combat profile. Actual unlocks must be checked in Torn.</p><p style="color:#55d991;border-left:4px solid #32c778;padding:10px;background:#123224">BEST FOR: Balanced offensive or defensive builds; fewer extreme weaknesses.</p><div class="sf-section">HANKS RATIO - 1.25 : 1 : 1 : ~0</div><p>An aggressive three-stat build with one dump stat kept very low. It emphasizes gains for three stats, but the dump can create a major combat weakness.</p><p style="color:#f0b46b;border-left:4px solid #d68b39;padding:10px;background:#332619">TRADE-OFF: Higher specialization at the cost of one neglected stat. Verify gym unlock rules before choosing.</p><div class="sf-section">SAKALUX - DEXTERITY HIGH</div><p><b style="color:#49d994">DEXTERITY:</b> primary dodge stat. <b style="color:#47d7eb">SPEED:</b> secondary accuracy stat. <b style="color:#f18a5a">STRENGTH:</b> supporting damage stat. <b style="color:#b18af1">DEFENSE:</b> dump stat. Your custom weights can be changed in Settings.</p><p>Ratios are training targets, not proof that a particular specialist gym is unlocked.</p><div class="sf-section">STATS EXPLAINED</div><p><b style="color:#f18a5a">STRENGTH - DAMAGE</b><br>Determines how much damage your successful hits can deal. It works together with weapon damage and other combat modifiers.</p><p><b style="color:#47d7eb">SPEED - ACCURACY</b><br>Helps your attacks connect against opponents with Dexterity. Speed alone does not determine damage.</p><p><b style="color:#b18af1">DEFENSE - DAMAGE REDUCTION</b><br>Helps reduce damage when an attack lands. Low Defense can leave you vulnerable if you fail to dodge.</p><p><b style="color:#49d994">DEXTERITY - DODGING</b><br>Helps you avoid incoming attacks against opponents Speed. A dodge-focused build can still be hit.</p><div class="sf-section">IMPORTANT NOTES</div><p>Gym dot values are approximate. Specialist eligibility depends on the games current requirements. The optimizer should not automatically assume a gym is unlocked or spend energy without your confirmation.</p></div>';
     body.innerHTML=header+(tab==='OVERVIEW'?info+train+headroom+perkPanel+statView:tab==='HISTORY'?history:tab==='EXPORT'?exporter:tab==='SETTINGS'?settings:about);
     body.querySelector('#slx-gym-next-action')?.addEventListener('click',onGymNextAction);
-    body.querySelectorAll('[data-special-gym]').forEach(b=>b.addEventListener('click',()=>{selectedSpecialGym=b.dataset.specialGym;render()}));
+    body.querySelectorAll('[data-special-gym]').forEach(b=>b.addEventListener('click',()=>{selectedSpecialGym=b.dataset.specialGym;state.specialGym=selectedSpecialGym;save();render()}));
     body.querySelector('#slx-gym-api-refresh')?.addEventListener('click',refreshGymApi);
     body.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{panel.dataset.tab=b.dataset.tab;render();if(b.dataset.tab==='SETTINGS'&&gymApi.status==='Not checked'&&hubApiKey())refreshGymApi()});
     body.querySelector('#slx-gym-save-key')?.addEventListener('click',()=>{const val=body.querySelector('#slx-gym-private-key')?.value;const ok=savePersonalKey(val);const label=body.querySelector('#slx-gym-key-message');if(label)label.textContent=ok?'Personal API key saved locally':'Invalid key: expected 16 letters/numbers';if(ok)refreshGymApi()});
