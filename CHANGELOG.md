@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.6.3 - persistent Gym panel and safer gym selection (2026-10-21)
+
+- Keep Gym interface visible during Torn React re-mount and gym selection changes; fallback to a stable Gym heading if the native training tile anchor is temporarily absent.
+- Require an unambiguous selected gym; avoid trusting an outdated banner if selection icon conflicts.
+- Clear pending gym switch only after selected gym confirmation. Update Overview after the active gym changes.
+- Associate locked gym progress only with a clearly labeled next gym tile; icon-only 3 percent is not enough to infer its identity or energy remaining.
+- Keep update metadata and ASCII compatibility. Device verification pending.
+
 ## Gym Optimizer v1.6.2 - automatic updates and gym energy progression (2026-10-21)
 
 - Overview displays total battle stats and the latest verified auto-saved delta as +X SINCE LAST TRAIN, not since snapshot. Without two real samples it says AWAITING NEXT TRAIN.
