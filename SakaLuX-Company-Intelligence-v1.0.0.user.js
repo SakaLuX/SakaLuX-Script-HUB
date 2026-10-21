@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.85
+// @version      1.8.86
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.85',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.86',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1372,8 +1372,9 @@ const first=(o,paths,f=null)=>{
  for(const path of paths){let x=o,ok=true;for(const p of path.split('.')){if(x==null||!(p in Object(x))){ok=false;break;}x=x[p];}if(ok&&x!=null)return x}
  return f;
 };
-const get=(k,f=null)=>{if(k===KEY.trains){try{const v=localStorage.getItem(k);if(v!==null){const parsed=JSON.parse(v);if(Array.isArray(parsed))return parsed}}catch{}}try{if(typeof GM_getValue==='function'){const result=GM_getValue(k,f);if(result&&typeof result.then==='function')return f;return result}}catch{};try{let v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch{return f}};
-const set=(k,v)=>{if(k===KEY.trains){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){console.warn('[SakaLuX Company] train local save failed',e)}}try{if(typeof GM_setValue==='function')return GM_setValue(k,v)}catch{};try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+let companyTrainsMemory=null;
+const get=(k,f=null)=>{if(k===KEY.trains){if(Array.isArray(companyTrainsMemory))return companyTrainsMemory;try{const v=localStorage.getItem(k);if(v!==null){const parsed=JSON.parse(v);if(Array.isArray(parsed)){companyTrainsMemory=parsed;return parsed}}}catch{}}try{if(typeof GM_getValue==='function'){const result=GM_getValue(k,f);if(result&&typeof result.then==='function')return f;if(k===KEY.trains&&Array.isArray(result))companyTrainsMemory=result;return result}}catch{};try{let v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch{return f}};
+const set=(k,v)=>{if(k===KEY.trains&&Array.isArray(v))companyTrainsMemory=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){if(k===KEY.trains)console.warn('[SakaLuX Company] local train storage unavailable',e)}try{if(typeof GM_setValue==='function')return GM_setValue(k,v)}catch(e){if(k===KEY.trains)console.warn('[SakaLuX Company] GM train storage unavailable',e)}};
 const del=k=>{try{if(typeof GM_deleteValue==='function')return GM_deleteValue(k)}catch{};try{localStorage.removeItem(k)}catch{}};
 function hubApiKey(){try{const k=String(window.SakaLuXScriptHub?.getApiKey?.()||'').trim();if(k)return k}catch{}try{if(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button'))return String(localStorage.getItem(HUB_API_STORAGE)||'').trim()}catch{}return''}
 function apiKey(){return String(get(KEY.api,'')||'').trim()||hubApiKey()}
@@ -2073,18 +2074,17 @@ async function importMyTrainingLog(){
   }
   if(found.length){
    const merged=saved.concat(found);
-   // TornPDA can expose an asynchronous userscript storage backend.
-   try{
-    const result=typeof GM_setValue==='function'?GM_setValue(KEY.trains,merged):null;
-    if(result&&typeof result.then==='function')await result;
-   }catch(e){console.warn('[SakaLuX Company] GM storage:',e)}
-   // Maintain a durable fallback for the current Torn site context.
-   try{localStorage.setItem(KEY.trains,JSON.stringify(merged))}catch(e){console.warn('[SakaLuX Company] local storage:',e)}
+   companyTrainsMemory=merged;
+   try {const writing=set(KEY.trains,merged);if(writing&&typeof writing.then==='function')await writing;}catch(e){console.warn('[SakaLuX Company] train save failed',e);}
    render();
   }
-  const reread=arr(KEY.trains),storedIds=new Set((Array.isArray(reread)?reread:[]).map(row=>String(row.apiLogId||'')));
-  const persisted=found.filter(row=>storedIds.has(String(row.apiLogId))).length;
-  alert('Import Company: '+found.length+' trainuri noi detectate · '+persisted+' confirmate în stocare · '+trainingCandidates+' evenimente training · '+events+' loguri verificate în '+pages+' pagini. '+(found.length&&!persisted?'Salvarea nu a fost confirmată; verifică stocarea Torn PDA.':!trainingCandidates?'Nu s-au identificat evenimente training în intervalul verificat.':''));
+  const visible=arr(KEY.trains),displayed=found.filter(x=>visible.some(y=>String(y.apiLogId)===String(x.apiLogId))).length;
+  let diskConfirmed=0;
+  try{const stored=JSON.parse(localStorage.getItem(KEY.trains)||'[]');diskConfirmed=found.filter(x=>Array.isArray(stored)&&stored.some(y=>String(y.apiLogId)===String(x.apiLogId))).length;}catch{}
+  if(!diskConfirmed&&typeof GM_getValue==='function'&&found.length){
+   try{const read=GM_getValue(KEY.trains,[]);const stored=read&&typeof read.then==='function'?await read:read;diskConfirmed=found.filter(x=>Array.isArray(stored)&&stored.some(y=>String(y.apiLogId)===String(x.apiLogId))).length;}catch{}
+  }
+  alert('Import Company: '+found.length+' trainuri noi · '+displayed+' vizibile în Train History · '+diskConfirmed+' confirmate în stocare persistentă · '+trainingCandidates+' evenimente training. '+(found.length&&!diskConfirmed?'Istoricul apare în panou, dar stocarea persistentă trebuie verificată după repornirea Torn PDA.':''));
  }catch(e){
   const code=num(e?.code,-1),msg=String(e?.message||e);
   alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă. Verificarea Company s-a oprit.':code===16?'Cheia nu are acces la toate logurile Company necesare. Verifică User: Log în permisiunile cheii.':'Import imposibil: '+msg);
