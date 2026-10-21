@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.6.7
+// @version      1.6.8
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.6.7',root=document.documentElement;
+    const id='gym-optimizer',v='1.6.8',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.6.7',id='gym-optimizer';
+    const ver='1.6.8',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -970,15 +970,20 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     return names.size===1?[...names][0]:null;
   }
+  // Keep a short-lived confirmation while Torn React redraws its gym tiles.
+  // Never use cached gym identity when leaving Gym or when switching gym.
+  let activeGymProof=null;
   function confirmedGym(){
+    if(!onGym()){activeGymProof=null;return null}
     const title=gymBannerName(),selected=selectedGymIconName();
-    // The energy banner is the authoritative CURRENT gym. An icon selection
-    // can be stale during React redraws, so do not let it block the banner.
     const confirmed=title||selected;
     if(confirmed){
+      activeGymProof={name:confirmed,at:Date.now()};
       try{sessionStorage.setItem(GYM_LAST_VERIFIED_KEY,confirmed)}catch{}
       return confirmed;
     }
+    if(!gymTransitionPending&&activeGymProof&&Date.now()-activeGymProof.at<15000)
+      return activeGymProof.name;
     return null;
   }
   const statColors={Strength:'#ff8754',Speed:'#37c9d9',Defense:'#ab86ec',Dexterity:'#38cb78'};
@@ -1178,7 +1183,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.6.7',id='gym-optimizer';
+      const version='1.6.8',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1390,36 +1395,40 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function gymTrainInput(stat){return nativeRepetitionControl(stat).input}
   function gymNextAction(stat){
     if(!stat)return {step:'waiting',label:'WAITING FOR STATS',disabled:true};
-    const availableEnergy=reliableGymEnergy();
-    if(availableEnergy&&availableEnergy.value<=0)
-      return {step:'blocked',label:'NO ENERGY - WAIT FOR REGENERATION',disabled:true};
-
+    const energy=reliableGymEnergy();
+    if(energy&&energy.value===0)return {step:'blocked',label:'NO ENERGY - WAIT FOR REGENERATION',disabled:true};
     const control=nativeRepetitionControl(stat);
-    if(!control.tile)return {step:'blocked',label:'WAIT FOR TORN GYM TILES',disabled:true};
+    if(!control.tile)return {step:'blocked',label:'WAIT FOR NATIVE GYM CONTROLS',disabled:true};
+    const raw=(control.tile.innerText||control.tile.textContent||'');
+    const found=raw.match(/(\d+)\s*energy per train/i);
+    const cost=found?Number(found[1]):null;
+    const active=confirmedGym();
+    if(!active)return {step:'blocked',label:'CHECK ACTIVE GYM BANNER',disabled:true};
     if(!Number.isFinite(control.value))
       return {step:'blocked',label:'CHECK NATIVE REPETITIONS',disabled:true};
-    if(control.value!==999)
-      return {step:control.input?'reps':'manual-reps',
-        label:control.input?'SET 999 - '+stat.toUpperCase():'SET 999 IN TORN - '+stat.toUpperCase(),
-        disabled:false,stat};
-    const energyCostMatch=(control.tile.innerText||control.tile.textContent||'').match(/(\d+)\s*energy per train/i);
-    const energyCost=energyCostMatch?Number(energyCostMatch[1]):null;
-    if(availableEnergy&&Number.isFinite(energyCost)&&energyCost>0&&availableEnergy.value<energyCost)
-      return {step:'blocked',label:'INSUFFICIENT ENERGY - NEED '+energyCost+' E',disabled:true};
-    const gym=confirmedGym();
-    if(!gym)return {step:'blocked',label:'WAIT FOR GYM CONFIRMATION',disabled:true};
+    const affordable=energy&&Number.isFinite(cost)&&cost>0?Math.floor(energy.value/cost):null;
+    if(affordable!==null&&affordable<=0)
+      return {step:'blocked',label:'INSUFFICIENT ENERGY - NEED '+cost+' E',disabled:true};
+    // Set repetitions to the maximum actually affordable. A count of 999
+    // with 10 E must never be treated as 999 executable training actions.
+    const desired=affordable!==null?Math.min(999,affordable):999;
+    if(control.value!==desired)
+      return {step:control.input?'reps':'manual-reps',label:control.input?
+          'SET '+desired+' REPS - '+stat.toUpperCase():
+          'SET '+desired+' REPS IN TORN',disabled:false,stat,reps:desired};
+    if(gymTransitionPending&&active.toLowerCase()===gymTransitionPending.toLowerCase())
+      gymTransitionPending=null;
+    if(gymTransitionPending)return {step:'blocked',label:'CONFIRM GYM SWITCH',disabled:true};
     const currentBest=bestAvailable(stat);
     if(currentBest&&!currentBest.active){
       if(!currentBest.button)return {step:'blocked',label:'GYM SWITCH UNVERIFIED',disabled:true,stat};
       return {step:'switch',label:'SWITCH GYM - '+currentBest.name.toUpperCase(),disabled:false,stat,gym:currentBest.name};
     }
-    if(gymTransitionPending&&gym.toLowerCase()===gymTransitionPending.toLowerCase())
-      gymTransitionPending=null;
-    if(gymTransitionPending)return {step:'blocked',label:'CONFIRM GYM SWITCH',disabled:true,stat};
-    const button=[...control.tile.querySelectorAll('button,input[type="button"],[role="button"]')]
-      .find(b=>/^train$/i.test((b.innerText||b.textContent||b.value||'').trim())&&
-        !b.disabled&&b.getAttribute('aria-disabled')!=='true');
-    return {step:button?'train':'blocked',label:button?'TRAIN '+stat.toUpperCase()+' - 999':'WAIT FOR NATIVE TRAIN',disabled:!button,stat};
+    const train=[...control.tile.querySelectorAll('button,input[type="button"],[role="button"]')]
+      .find(b=>/^train$/i.test((b.innerText||b.textContent||b.value||'').trim())&&!b.disabled&&b.getAttribute('aria-disabled')!=='true');
+    return {step:train?'train':'blocked',label:train?
+      'TRAIN '+stat.toUpperCase()+' - '+desired+' REP'+(desired===1?'':'S'):
+      'WAIT FOR NATIVE TRAIN',disabled:!train,stat,reps:desired};
   }
   let gymTransitionPending=null;
   function onGymNextAction(){
@@ -1434,28 +1443,35 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const report=(text)=>{if(msg)msg.textContent=text};
     if(action.disabled){report('Action unavailable: '+action.label);return}
     if(action.step==='reps'){
-      if(!setNativeReps(next.stat,999)){report('Could not set repetitions. Please use the native Torn control.');return}
+      if(!setNativeReps(next.stat,action.reps)){report('Could not set repetitions. Please use the native Torn control.');return}
       const input=gymTrainInput(next.stat);
-      if(Number(nativeRepetitionControl(next.stat).value)!==999){report('Native Torn did not accept 999; no training was performed.');return}
+      if(Number(nativeRepetitionControl(next.stat).value)!==action.reps){report('Native Torn did not accept '+action.reps+' repetitions; no training was performed.');return}
       render();return;
     }
     if(action.step==='manual-reps'){
       const native=nativeRepetitionControl(next.stat);
       native.display?.scrollIntoView?.({block:'center',behavior:'smooth'});
-      report('Use the native Torn arrows to select 999. This control is not an editable input; no training was performed.');
+      report('Use the native Torn arrows to select '+action.reps+' repetitions. No training was performed.');
       return;
     }
     if(action.step==='switch'){
       const available=gymAvailability().get(action.gym.toLowerCase());
       if(!available?.button||available.active){report('Gym switch is not verified; no action executed.');return}
       gymTransitionPending=action.gym;
+      activeGymProof=null;
       available.button.click();
       report('Gym switch requested. Verify it is selected before training.');
       return;
     }
     if(action.step==='train'){
       if(!confirmedGym()){report('Wait for the gym to finish loading.');return}
-      if(Number(nativeRepetitionControl(next.stat).value)!==999){report('Repetitions changed. Set 999 again.');return}
+      const liveReps=nativeRepetitionControl(next.stat);
+      if(Number(liveReps.value)!==action.reps){report('Repetitions changed. Set '+action.reps+' again.');return}
+      const match=(liveReps.tile?.innerText||liveReps.tile?.textContent||'').match(/(\d+)\s*energy per train/i);
+      const cost=match?Number(match[1]):null,available=reliableGymEnergy();
+      if(!available||!Number.isFinite(cost)||cost<=0||available.value<cost*action.reps){
+        report('Energy or native training cost not verified for '+action.reps+' repetitions. No training performed.');return;
+      }
       if(!clickNativeTrain(next.stat)){report('Native TRAIN is unavailable.');return}
       report('Native TRAIN clicked once for '+next.stat+'. Check the Torn result.');
       return;
@@ -1635,7 +1651,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.7',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.8',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
