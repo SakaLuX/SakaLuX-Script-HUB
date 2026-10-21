@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.75
+// @version      1.8.76
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,9 +1333,9 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.75',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.76',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
-const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job&company=profile,employees,stock';
+const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
 const KEY={
  api:APP.key+':api', mode:APP.key+':mode', tab:APP.key+':tab', compact:APP.key+':compact', enabled:APP.key+':enabled',
@@ -2120,7 +2120,7 @@ function employeeProgress(){
  const delta=k=>previous&&latest?num(latest.workstats?.[k])-num(previous.workstats?.[k]):null;
  const row=(label,value)=>kv(label,value==null?'Waiting for history':`${value>0?'+':''}${fmt(value)}`);
  const weeklyGain=['manual','intelligence','endurance'].reduce((a,k)=>a+Math.max(0,num(delta(k))),0),covered=previous&&latest?Math.max(1,days(num(latest.ts)-num(previous.ts))):0,perDay=covered?weeklyGain/covered:0;
- return `<div class="ci-actions"><button class="ci-btn" data-act="import-my-trains">↻ IMPORTĂ TRAINURI (API)</button></div><div class="ci-grid">${card('Current Employment',kv('Position',position?esc(position):'Not returned by Torn API')+kv('Effectiveness',effectiveness==null?'Not exposed yet':fmt(effectiveness))+kv('Tracked samples',samples.length))}${card('Work Stats Progress',row('Manual Labor',delta('manual'))+row('Intelligence',delta('intelligence'))+row('Endurance',delta('endurance'))+kv('Observed daily pace',covered?fmt(Math.round(perDay)):'Waiting for history'))}${card('Train Compliance',agreement?kv('Promised / week',fmt(agreement.perWeek))+kv('Received last 7 days',`${received7} / ${fmt(agreement.perWeek)}`)+kv('Status',received7>=num(agreement.perWeek)?badge('ON TRACK','good'):badge(`${Math.max(0,num(agreement.perWeek)-received7)} DUE`,'warn')):empty('Add a train agreement from Trains to monitor compliance.'))}${card('Projection',covered&&perDay>0?kv('Next 30 days','~+'+fmt(Math.round(perDay*30))+' total work stats')+kv('Next 90 days','~+'+fmt(Math.round(perDay*90))+' total work stats')+`<p class="ci-note">Projection uses your observed saved history and is not a guarantee.</p>`:empty('Refresh after your stats change to create a usable projection.'))}</div>`;
+ return `<div class="ci-grid">${card('Current Employment',kv('Position',position?esc(position):'Not returned by Torn API')+kv('Effectiveness',effectiveness==null?'Not exposed yet':fmt(effectiveness))+kv('Tracked samples',samples.length))}${card('Work Stats Progress',row('Manual Labor',delta('manual'))+row('Intelligence',delta('intelligence'))+row('Endurance',delta('endurance'))+kv('Observed daily pace',covered?fmt(Math.round(perDay)):'Waiting for history'))}${card('Train Compliance',agreement?kv('Promised / week',fmt(agreement.perWeek))+kv('Received last 7 days',`${received7} / ${fmt(agreement.perWeek)}`)+kv('Status',received7>=num(agreement.perWeek)?badge('ON TRACK','good'):badge(`${Math.max(0,num(agreement.perWeek)-received7)} DUE`,'warn')):empty('Add a train agreement from Trains to monitor compliance.'))}${card('Projection',covered&&perDay>0?kv('Next 30 days','~+'+fmt(Math.round(perDay*30))+' total work stats')+kv('Next 90 days','~+'+fmt(Math.round(perDay*90))+' total work stats')+`<p class="ci-note">Projection uses your observed saved history and is not a guarantee.</p>`:empty('Refresh after your stats change to create a usable projection.'))}</div>`;
 }
 function employeePosition(){
  const w=work(),a=advisor(w),observed=!a.length?observedPositionAdvisor(w):[],rows=a.length?a:observed,best=rows[0],current=currentPosition(),eff=currentEffectiveness(),daysHere=ownDaysInCompany(),estimated=!a.length;
@@ -2134,7 +2134,7 @@ function employeePosition(){
 }
 function employeeTrains(){
  const ag=arr(KEY.agreements).filter(x=>x.active!==false).slice(-1)[0],logs=arr(KEY.trains).slice().sort((a,b)=>b.ts-a.ts),got=logs.filter(x=>now()-x.ts<7*86400000).length,weekly=ag?num(ag.perWeek)*75:0;
- return `<div class="ci-actions"><button class="ci-btn primary" data-act="new-agreement">+ Agreement</button><button class="ci-btn" data-act="log-train">+ Received train</button></div>
+ return `<div class="ci-actions"><button class="ci-btn primary" data-act="new-agreement">+ Agreement</button><button class="ci-btn" data-act="import-my-trains">↻ IMPORTĂ TRAINURI (API)</button><button class="ci-btn" data-act="log-train">+ Received train</button></div>
  <div class="ci-grid">${card('Current Agreement',ag?kv('Promised',fmt(ag.perWeek)+'/week')+kv('Received 7d',got+'/'+fmt(ag.perWeek))+kv('Price',ag.cost?money(ag.cost):'FREE')+kv('Starts',esc(ag.startDate||'Now')):empty('No active agreement.'))}
  ${card('Projection',ag?kv('7 days','~+'+fmt(weekly)+' work stats')+kv('30 days','~+'+fmt(weekly*30/7))+kv('90 days','~+'+fmt(weekly*90/7))+kv('Weekly cost',money(num(ag.perWeek)*num(ag.cost))):empty('Add an agreement first.'))}</div>
  ${card('Train History',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Primary</th><th>Secondary</th><th>Note</th></tr></thead><tbody>${logs.slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleString()}</td><td>${esc(x.primary)}</td><td>${esc(x.secondary)}</td><td>${esc(x.note||'')}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
