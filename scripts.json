@@ -647,7 +647,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.6.1",
+      "version": "1.6.2",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -664,13 +664,13 @@
         }
       ],
       "release": {
-        "version": "1.6.1",
+        "version": "1.6.2",
         "date": "2026-10-21",
         "notes": [
-          "Auto-save a Gym history snapshot after a stable, verified change in all four native stats; no Save Snapshot button needed.",
-          "Avoid duplicates and reject partial or implausibly reduced stat reads.",
-          "Show the last 15 snapshots with compact colored stats and green per-stat/TBS gains.",
-          "Preserve Clear History, local snapshot retention and CSV export, plus ASCII-only TornPDA compatibility."
+          "Overview shows latest automatic stat gain as SINCE LAST TRAIN, not snapshot.",
+          "Refresh Overview as soon as an auto-saved Gym stat change is confirmed.",
+          "Remove time-based gym unlock ETA: report verified energy remaining or an explicitly labeled approximate energy estimate only when gym and progress are identified.",
+          "Add @downloadURL, @updateURL and compact meta.js for automatic update checks through GitHub; configure TornPDA remote URL once."
         ]
       },
       "accessTier": "free",
