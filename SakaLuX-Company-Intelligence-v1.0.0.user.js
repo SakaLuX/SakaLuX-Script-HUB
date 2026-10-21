@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.76
+// @version      1.8.77
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.76',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.77',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2027,8 +2027,8 @@ function employeeOptimizer(){
 }
 // Employee-only import: request personal logs; never assume access to director news.
 async function importMyTrainingLog(){
- const key=apiKey();
- if(!key){alert('Adaugă întâi cheia Torn API în Hub sau în Company Intelligence.');return}
+ const key=String(get(KEY.api,'')||'').trim() || apiKey();
+ if(!key){alert('Adaugă o cheie Torn API cu permisiunea User: Log.');return}
  try{
   const data=await req('https://api.torn.com/v2/user/log?limit=100&key='+encodeURIComponent(key));
   const raw=data?.log||data?.logs||[];
@@ -2052,7 +2052,7 @@ async function importMyTrainingLog(){
   }
   if(fresh.length)set(KEY.trains,saved.concat(fresh));
   alert('Import personal: '+fresh.length+' antrenamente confirmate după identificarea tipului de eveniment. Dacă lipsesc antrenamente, jurnalul API poate să nu le expună.');
- }catch(e){alert('Import indisponibil: '+String(e?.message||e)+'. Pentru user/log este necesară permisiunea explicită User: Log; cheia Master nu o include.')}
+ }catch(e){const code=num(e?.code,-1);const msg=String(e?.message||e);alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă (100 cereri/minut pe utilizator). Reîncearcă după ce expiră limitarea; nu este o eroare de permisiuni.':code===16?'Cheia nu are acces la User: Log. Creează o cheie personalizată cu această permisiune.':'Import indisponibil: '+msg);}
 }
 // API import is read-only and strictly accepts identifiable company training news.
 let trainImportBusy=false;
@@ -2178,7 +2178,7 @@ function directorStock(){
  const a=stocks();return card('Stock Intelligence',a.length?`<div class="ci-tablewrap"><table><thead><tr><th>Item</th><th>Current</th><th>Cost</th><th>Value</th><th>Status</th></tr></thead><tbody>${a.map(x=>{const q=num(first(x,['quantity','stock','amount'],0)),c=num(first(x,['cost','price','unit_cost'],0)),cap=num(first(x,['capacity','max','maximum'],0)),ratio=cap?q/cap:1;return `<tr><td>${esc(x.name||x.item||x.item_name||'Stock')}</td><td>${fmt(q)}${cap?' / '+fmt(cap):''}</td><td>${money(c)}</td><td>${money(num(first(x,['value','total_value'],q*c)))}</td><td>${ratio<.2?badge('LOW','bad'):ratio<.4?badge('WATCH','warn'):badge('OK','good')}</td></tr>`}).join('')}</tbody></table></div>`:empty('No stock data exposed for this company/API response.'));
 }
 function settings(){
- return `<div class="ci-grid">${card('🔑 API Access',`<div class="ci-api-required"><b>Required Torn access</b><span>User: Basic, Profile, Work Stats, Job</span><span>Company: Profile, Employees, Stock</span></div><a class="ci-btn ci-api-create" href="${API_CREATE_URL}" target="_self">CREATE REQUIRED TORN KEY</a><div class="ci-api-source"><span>Active source</span><b>${esc(apiSource())}</b></div>${hubApiKey()?'<p class="ci-note ci-good-note">The shared Hub key is active. A local key is optional and remains available when this script runs separately.</p>':''}<label class="ci-field"><span>Standalone Torn API key</span><input id="ci-api" type="password" value="${esc(get(KEY.api,''))}" placeholder="Paste API key"></label><div class="ci-actions ci-api-actions"><button class="ci-btn primary" data-act="save-key">SAVE KEY</button><button class="ci-btn" data-act="test-key">TEST & REFRESH</button><button class="ci-btn danger" data-act="clear-key">CLEAR LOCAL KEY</button></div><p class="ci-note">The key is stored locally only. Director data is available only when Torn allows the key owner to access that company information.</p>`)}
+ return `<div class="ci-grid">${card('🔑 API Access',`<div class="ci-api-required"><b>Required Torn access</b><span>User: Basic, Profile, Work Stats, Job, Log (Full Access / custom)</span><span>Company: Profile, Employees, Stock</span></div><a class="ci-btn ci-api-create" href="${API_CREATE_URL}" target="_self">CREATE REQUIRED TORN KEY</a><div class="ci-api-source"><span>Active source</span><b>${esc(apiSource())}</b></div>${hubApiKey()?'<p class="ci-note ci-good-note">The shared Hub key is active. A local key is optional and remains available when this script runs separately.</p>':''}<label class="ci-field"><span>Standalone Torn API key</span><input id="ci-api" type="password" value="${esc(get(KEY.api,''))}" placeholder="Paste API key"></label><div class="ci-actions ci-api-actions"><button class="ci-btn primary" data-act="save-key">SAVE KEY</button><button class="ci-btn" data-act="test-key">TEST & REFRESH</button><button class="ci-btn danger" data-act="clear-key">CLEAR LOCAL KEY</button></div><p class="ci-note">The key is stored locally only. Director data is available only when Torn allows the key owner to access that company information.</p>`)}
  ${card('Interface',`<label class="ci-check"><input id="ci-compact" type="checkbox" ${S.compact?'checked':''}> Compact PDA mode</label>`)}
  ${card('Local data',`<div class="ci-actions"><button class="ci-btn" data-act="export">Export</button><button class="ci-btn" data-act="import">Import</button><button class="ci-btn danger" data-act="clear">Clear history</button></div>`)}</div>`;
 }
