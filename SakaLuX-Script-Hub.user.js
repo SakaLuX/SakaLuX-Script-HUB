@@ -2057,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.6.5",
+                "version": "1.6.6",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2074,13 +2074,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.6.5",
+                    "version": "1.6.6",
                     "date": "2026-10-21",
                     "notes": [
-                        "Recognize native TornPDA [-] 999 [+] repetitions selectors alongside editable inputs.",
-                        "Reevaluate the single gold button as the native Torn repetitions display changes, without losing the state or re-rendering the whole widget.",
-                        "For non-editable native selectors, guide users to choose 999 in Torn; never blindly simulate clicks or train.",
-                        "Replace permanent unverified headroom table with an explicit illustrative Dex ratio check, without claiming gym unlocks."
+                        "Prefer authoritative selected Gym banner when gym-icon selection state is stale or conflicting, avoiding WAIT FOR GYM CONFIRMATION.",
+                        "Restore four-row stat Headroom with exact ratio-plan target values and remaining gains per stat.",
+                        "Explicitly label that special gyms require both their stat ratio and other gym-specific unlock conditions; plan targets do not guarantee eligibility.",
+                        "Keep native TRAIN safety, ASCII-only syntax and automatic update metadata."
                     ]
                 },
                 "accessTier": "free",
