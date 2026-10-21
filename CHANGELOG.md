@@ -1,5 +1,13 @@
 # Changelog
 
+## Gym Optimizer v1.6.2 - automatic updates and gym energy progression (2026-10-21)
+
+- Overview displays total battle stats and the latest verified auto-saved delta as +X SINCE LAST TRAIN, not since snapshot. Without two real samples it says AWAITING NEXT TRAIN.
+- Overview rerenders after automatic stat changes are saved, as already done for History.
+- Next gym progress is expressed in gym energy. Only show exact energy remaining when a relevant API field exists; otherwise, with verified current gym and progress percentage, use the Wiki approximate gym energy threshold to show explicitly approximate energy remaining. Without progress show the stage total only; never invent clock-based ETA.
+- Add Github raw @downloadURL and @updateURL metadata, plus SakaLuX-Gym-Optimizer.meta.js to support manager update checks. TornPDA remote URL may require initial configuration.
+- Verified JavaScript parsing and tested 3%, direct API remaining, missing progress and unknown gym outcomes in a controlled mock. Device confirmation pending.
+
 ## Gym Optimizer v1.6.1 - automatic training history and compact gains (2026-10-21)
 
 - Automatically capture stat snapshots on Gym when all four native stats are present and stable across two polls. First complete reading establishes a baseline; subsequent increases are saved.
