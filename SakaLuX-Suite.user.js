@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.988
+// @version      0.9.989
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39017,12 +39017,28 @@ function bpSet(roleName,amt) { const d=bpLoad(); d[normRole(roleName)]=amt; bpSa
 /* Training Log API import — read-only sync of confirmed company trains. */
 const TL_API_SYNC_KEY="sakalux_suite_training_log_api_sync_v1";
 let tlApiSyncBusy=false;
-function tlApiKey(){
-    try{const k=String(window.SakaLuXScriptHub?.getApiKey?.()||"").trim();if(k)return k;}catch{}
-    const walk=(value,depth=0)=>{if(depth>5||!value||typeof value!=="object")return"";for(const [name,v] of Object.entries(value)){if(/^(apiKey|api_key|key)$/i.test(name)&&typeof v==="string"&&v.trim().length>=8)return v.trim();if(typeof v==="object"){const found=walk(v,depth+1);if(found)return found;}}return"";};
-    for(const name of ["sakalux_master_suite_settings_v1","SakaLuX_HUB_SETTINGS_V16","SakaLuX_HUB_SETTINGS_V15"]){try{const k=walk(JSON.parse(localStorage.getItem(name)||"null"));if(k)return k;}catch{}}
-    return"";
+function tlApiKeys(){
+    const keys=[],seen=new Set();
+    const add=(value,source)=>{
+        const k=String(value||"").trim();
+        // Torn keys are alphanumeric; never accidentally treat a license token as the API key.
+        if(!/^[a-z0-9]{16,32}$/i.test(k)||seen.has(k))return;
+        seen.add(k);keys.push({key:k,source});
+    };
+    try{add(window.SakaLuXScriptHub?.getApiKey?.(),"Hub");}catch{}
+    const walk=(value,source,depth=0)=>{
+        if(depth>5||!value||typeof value!=="object")return;
+        for(const [name,v] of Object.entries(value)){
+            if(/^(apiKey|api_key|tornApiKey)$/i.test(name))add(v,source);
+            else if(name==="key"&&/api/i.test(source))add(v,source);
+            if(v&&typeof v==="object")walk(v,source+"."+name,depth+1);
+        }
+    };
+    const stores=["sakalux_master_suite_settings_v1","SakaLuX_HUB_SETTINGS_V16","SakaLuX_HUB_SETTINGS_V15"];
+    for(const store of stores){try{walk(JSON.parse(localStorage.getItem(store)||"null"),store);}catch{}}
+    return keys;
 }
+function tlApiKey(){return tlApiKeys()[0]?.key||"";}
 function tlApiRead(url,key){
     const full=url+(url.includes("?")?"&":"?")+"key="+encodeURIComponent(key)+"&striptags=true";
     return new Promise((resolve,reject)=>{
@@ -39083,17 +39099,25 @@ function tlApiExtract(raw,types){
 }
 async function tlSyncApi(manual=false){
     if(tlApiSyncBusy)return;
-    const key=tlApiKey();
-    if(!key){tlApiSetStatus("API key missing — configure it in SakaLuX Hub.");return;}
+    const keys=tlApiKeys();
+    if(!keys.length){tlApiSetStatus("Torn API key missing — configure it in SakaLuX Hub.");return;}
     tlApiSyncBusy=true;const btn=document.getElementById("tl-api-import");if(btn)btn.disabled=true;
     tlApiSetStatus("Reading confirmed company trains from Torn API…");
     try{
         const state=JSON.parse(localStorage.getItem(TL_API_SYNC_KEY)||"{}");
         if(!manual&&Date.now()-Number(state.lastCheck||0)<5*60000)return;
-        const [result,typeResult]=await Promise.all([
-            tlApiRead("https://api.torn.com/v2/user/log?limit=100",key),
-            tlApiRead("https://api.torn.com/v2/torn/logtypes",key)
-        ]);
+        let result=null,selected=null,lastError=null;
+        for(const candidate of keys){
+            try{
+                result=await tlApiRead("https://api.torn.com/v2/user/log?limit=100",candidate.key);
+                selected=candidate;break;
+            }catch(e){
+                lastError=e;
+                if(!/incorrect key|invalid key|key is invalid/i.test(String(e.message||e)))throw e;
+            }
+        }
+        if(!selected)throw new Error("No valid Torn API key found in Hub/Suite ("+keys.length+" checked). Check API Access settings.");
+        const typeResult=await tlApiRead("https://api.torn.com/v2/torn/logtypes",selected.key);
         const types=typeResult.logtypes||typeResult.log_types||{};
         const candidates=tlApiExtract(result,types);
         const data=tlLoad(),seen=new Set(data.entries.filter(x=>x.apiLogId).map(x=>String(x.apiLogId)));
