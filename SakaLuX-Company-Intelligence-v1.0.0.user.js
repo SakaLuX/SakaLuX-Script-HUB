@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.77
+// @version      1.8.78
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.77',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.78',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2134,7 +2134,7 @@ function employeePosition(){
 }
 function employeeTrains(){
  const ag=arr(KEY.agreements).filter(x=>x.active!==false).slice(-1)[0],logs=arr(KEY.trains).slice().sort((a,b)=>b.ts-a.ts),got=logs.filter(x=>now()-x.ts<7*86400000).length,weekly=ag?num(ag.perWeek)*75:0;
- return `<div class="ci-actions"><button class="ci-btn primary" data-act="new-agreement">+ Agreement</button><button class="ci-btn" data-act="import-my-trains">↻ IMPORTĂ TRAINURI (API)</button><button class="ci-btn" data-act="log-train">+ Received train</button></div>
+ return `<div class="ci-actions ci-employee-train-actions"><button class="ci-btn primary" data-act="new-agreement">+ Agreement</button><button class="ci-btn" data-act="import-my-trains">↻ IMPORT</button><button class="ci-btn" data-act="log-train">+ Received train</button></div>
  <div class="ci-grid">${card('Current Agreement',ag?kv('Promised',fmt(ag.perWeek)+'/week')+kv('Received 7d',got+'/'+fmt(ag.perWeek))+kv('Price',ag.cost?money(ag.cost):'FREE')+kv('Starts',esc(ag.startDate||'Now')):empty('No active agreement.'))}
  ${card('Projection',ag?kv('7 days','~+'+fmt(weekly)+' work stats')+kv('30 days','~+'+fmt(weekly*30/7))+kv('90 days','~+'+fmt(weekly*90/7))+kv('Weekly cost',money(num(ag.perWeek)*num(ag.cost))):empty('Add an agreement first.'))}</div>
  ${card('Train History',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Primary</th><th>Secondary</th><th>Note</th></tr></thead><tbody>${logs.slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleString()}</td><td>${esc(x.primary)}</td><td>${esc(x.secondary)}</td><td>${esc(x.note||'')}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
@@ -2604,6 +2604,6 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
   #ci-root .ci-brand b{font-size:14px!important}
   #ci-root .ci-brand small{font-size:9px!important}
 }
-`;
+\n#ci-root .ci-employee-train-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,.75fr) minmax(0,1.2fr)!important;gap:5px!important;flex-wrap:nowrap!important;width:100%!important}\n#ci-root .ci-employee-train-actions .ci-btn{width:100%!important;min-width:0!important;margin:0!important;padding:7px 3px!important;font-size:10px!important;white-space:nowrap!important;box-sizing:border-box!important;text-align:center!important}\n`;
   (document.head||document.documentElement).appendChild(st);
 })();
