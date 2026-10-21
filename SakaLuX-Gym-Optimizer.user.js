@@ -1210,7 +1210,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const tile=nativeStatTile(stat);
     if(!tile)return false;
     const train=[...tile.querySelectorAll('button,input[type="button"],[role="button"]')]
-      .find(b=>/^(train)$/i.test((b.innerText||b.value||'').trim())&&!b.disabled&&b.getAttribute('aria-disabled')!=='true');
+      .find(b=>/^train$/i.test((b.innerText||b.textContent||b.value||'').trim())&&!b.disabled&&b.getAttribute('aria-disabled')!=='true');
     if(!train)return false;
     train.click();return true;
   }
@@ -1540,7 +1540,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       // Allow a native selection such as 999 with 10 E. Torn owns the actual
       // transaction and will validate / cap / reject according to its rules.
       if(!clickNativeTrain(next.stat)){report('Native TRAIN is unavailable.');return}
-      report('One native TRAIN click sent. Available energy permits up to '+Math.floor(available.value/cost)+' reps. Verify the Torn result.');
+      report('Native TRAIN clicked once with '+available.value+' E. Torn will confirm or reject the requested training. Check your stat/energy result.');
       return;
     }
   }
