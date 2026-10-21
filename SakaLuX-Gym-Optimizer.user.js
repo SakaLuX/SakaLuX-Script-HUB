@@ -1,19 +1,21 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.6.1
+// @version      1.6.2
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
 // @grant        none
 // @license      All Rights Reserved
 // @homepageURL  https://github.com/SakaLuX/SakaLuX-Script-HUB
+// @downloadURL  https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js
+// @updateURL    https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.meta.js
 // ==/UserScript==
 
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.6.1',root=document.documentElement;
+    const id='gym-optimizer',v='1.6.2',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -850,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.6.1',id='gym-optimizer';
+    const ver='1.6.2',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -1024,12 +1026,39 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       .map(g=>({name:g[0],dot:g[2][ix],energy:g[1],...owned.get(g[0].toLowerCase())}))
       .sort((a,b)=>b.dot-a.dot)[0]||null;
   }
+  function gymProgressPercent(){
+    // Accept only Gym-labeled progress, never generic XP or energy-bar percentages.
+    const selectors=['[data-testid*="gym-progress" i]','[data-testid*="gym-exp" i]',
+      '[data-testid*="gym-unlock" i]','[class*="gymProgress"]','[class*="gymExp"]',
+      '[class*="gymExperience"]','[aria-label*="gym experience" i]','[aria-label*="next gym" i]'];
+    for(const el of document.querySelectorAll(selectors.join(','))){
+      if(panel.contains(el))continue;
+      const info=String(el.getAttribute('aria-label')||'')+' '+String(el.textContent||'');
+      const matched=info.match(/(?:gym|unlock|progress|exp)[^%]{0,60}?(\d{1,3}(?:\.\d+)?)\s*%/i)
+        ||info.match(/(\d{1,3}(?:\.\d+)?)\s*%[^.]{0,45}(?:gym|unlock|progress|exp)/i);
+      const value=matched?Number(matched[1]):null;
+      if(value!==null&&Number.isFinite(value)&&value>=0&&value<=100)return {value,source:'Torn Gym progress display'};
+      const now=el.getAttribute('aria-valuenow'),maximum=el.getAttribute('aria-valuemax');
+      if(now!=null&&maximum!=null){
+        const current=Number(now),max=Number(maximum);
+        if(Number.isFinite(current)&&Number.isFinite(max)&&max>0&&current>=0&&current<=max)
+          return {value:100*current/max,source:'Torn Gym progress bar'};
+      }
+    }
+    return null;
+  }
   function nextGymEstimate(){
     const current=confirmedGym(),idx=gymTable.findIndex(g=>g[0].toLowerCase()===String(current||'').toLowerCase());
-    if(idx<0||idx>=gymTable.length-1)return null;
-    // Wiki value is an estimate for that step, not a live remaining-gym-XP amount.
-    const next=gymTable[idx+1],energy=gymTable[idx][3];
-    return {name:next[0],energy,minimumDays:energy?Math.ceil(energy/150):null};
+    if(idx<0)return {text:'Current gym not verified. Select a gym in Torn to identify the next standard gym.'};
+    if(idx>=gymTable.length-1)return {text:'George is the final standard gym: no further standard-gym unlock.'};
+    const next=gymTable[idx+1],energy=gymTable[idx][3],progress=gymProgressPercent(),xp=gymCalc.xp();
+    if(xp&&xp.remaining>=0)
+      return {name:next[0],remaining:xp.remaining,source:'API',text:'Next: '+next[0]+' - '+fmt(xp.remaining)+' gym E remaining ('+xp.source+').'};
+    if(Number.isFinite(energy)&&energy>0&&progress){
+      const remaining=Math.max(0,Math.ceil(energy*(1-progress.value/100)));
+      return {name:next[0],remaining,energy,source:'estimated',text:'Next: '+next[0]+' - approx. '+fmt(remaining)+' gym E remaining; '+progress.value.toFixed(1)+'% Gym progress. Stage total ~'+fmt(energy)+' E. Estimate only.'};
+    }
+    return {name:next[0],energy,source:'stage-only',text:'Next: '+next[0]+(energy?' - ~'+fmt(energy)+' gym E estimated for this whole stage. Remaining E requires verified Gym progress.':' - remaining energy unavailable.')};
   }
   function clickNativeTrain(stat){
     const tile=nativeStatTile(stat);
@@ -1070,7 +1099,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.6.1',id='gym-optimizer';
+      const version='1.6.2',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1209,17 +1238,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const one=(3.480061091e-7*Math.log(H)+3.091619094e-6)*st+6.82775184551527e-5*H-0.0301431777;
       const estimate=Math.max(0,multi*dots*row[1]*one*rep);
       return {estimate,multi,dots,effects,happiness};
-    },
-    eta(){
-      const xp=this.xp(),e=gymEnergy();
-      const progress=gymApi.data?.gym||{};
-      const regeneration=Number(progress.energy_per_day??progress.daily_energy);
-      const rate=Number.isFinite(regeneration)&&regeneration>0?regeneration:null;
-      if(!xp)return {text:'ETA unavailable: Gym EXP / energy remaining is not exposed by the current response.'};
-      if(xp.remaining===0)return {text:'Next gym threshold reached  -  check membership in Torn.'};
-      if(!rate)return {text:'Remaining: '+fmt(xp.remaining)+' gym energy ('+xp.source+'). ETA needs verified energy/day; no guessed unlock time.'};
-      const days=xp.remaining/rate;
-      return {text:'~'+days.toFixed(1)+' days ('+fmt(xp.remaining)+' energy remaining at '+fmt(rate)+' E/day). Estimation assumes all future energy is spent at Gym.'};
     },
     headroom(actual){
       const dex=Number(actual.Dexterity);
@@ -1362,7 +1380,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     state.history.push({at:new Date().toISOString(),values:{...live},source:'auto'});
     state.history=state.history.slice(-180);
     save();
-    if((panel.dataset.tab||'OVERVIEW')==='HISTORY')render();
+    if(['HISTORY','OVERVIEW'].includes(panel.dataset.tab||'OVERVIEW'))render();
   }
 
   function render(){
@@ -1377,21 +1395,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const complete=stats.every(n=>Number(actual[n])>0);
     const pct=active.length?Math.round(100*active.reduce((sum,n)=>sum+Math.min(1,(actual[n]||0)/(targets[n]||1)),0)/active.length):0;
     const snapshots=state.history||[];
-    const previous=snapshots[snapshots.length-1]?.values||{};
-    const oldTotal=stats.reduce((sum,n)=>sum+(Number(previous[n])||0),0);
-    const gain=oldTotal?total-oldTotal:null;
+    const previousTrain=snapshots[snapshots.length-2]?.values||null;
+    const latestTrain=snapshots[snapshots.length-1]?.values||null;
+    const gain=previousTrain&&latestTrain?Math.max(0,Math.round(stats.reduce((sum,n)=>sum+(Number(latestTrain[n])-Number(previousTrain[n])),0))):null;
     const tab=panel.dataset.tab||'OVERVIEW';
     const esc=escape;
     const tabs=['OVERVIEW','HISTORY','EXPORT','SETTINGS','INFO'];
     const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>SAKALUX  -  DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
-    const info='<div class="sf-overview"><div><div class="sf-eyebrow">RATIO HEALTH</div><div class="sf-ratio"><b>'+(!complete?' - ':pct>=98?'A':pct>=90?'B':pct>=80?'C':'D')+'</b><span>'+(!complete?'Awaiting stats':pct+'% toward targets')+'<small>SakaLuX Ratio</small></span></div></div><div style="text-align:right"><div class="sf-eyebrow">TOTAL BATTLE STATS</div><div class="sf-total">'+(total?fmt(total):' - ')+'</div><div class="sf-gain">'+(gain==null?'NO SAVED BASELINE':(gain>=0?'+':'')+fmt(gain)+' SINCE SNAPSHOT')+'</div></div></div>';
+    const info='<div class="sf-overview"><div><div class="sf-eyebrow">RATIO HEALTH</div><div class="sf-ratio"><b>'+(!complete?' - ':pct>=98?'A':pct>=90?'B':pct>=80?'C':'D')+'</b><span>'+(!complete?'Awaiting stats':pct+'% toward targets')+'<small>SakaLuX Ratio</small></span></div></div><div style="text-align:right"><div class="sf-eyebrow">TOTAL BATTLE STATS</div><div class="sf-total">'+(total?fmt(total):' - ')+'</div><div class="sf-gain">'+(gain==null?'AWAITING NEXT TRAIN':'+'+fmt(gain)+' SINCE LAST TRAIN')+'</div></div></div>';
     const nextAction=gymNextAction(next?.stat);
     const train='<div class="sf-section">TRAIN NEXT</div><div class="sf-card">'
       +(next?'<div class="sf-main" style="color:'+statColors[next.stat]+'">'+esc(next.stat)+'</div><div>Currently '+fmt(actual[next.stat])+' - Target '+fmt(targets[next.stat])+' - Need +'+fmt(next.gap)+'</div>':'<div class="sf-main">Waiting for stat values</div>')
       +'<div class="sf-actions slx-next-action"><button type="button" id="slx-gym-next-action"'+(nextAction.disabled?' disabled':'')+'>'+esc(nextAction.label)+'</button></div>'
       +'<div class="sf-gold">Best verified gym: '+(planGym?esc(planGym.name)+' ('+planGym.dot+' dots)':'not verified')+'</div>'
       +'<p class="sf-estimate">Only the currently active gym or gyms explicitly marked unlocked by Torn are treated as verified. You may need to open the gym selection list.</p>'
-      +(estimate?'<div class="sf-estimate">Next standard gym: '+esc(estimate.name)+' - approx. '+fmt(estimate.energy)+' energy for this unlock step, not remaining energy.</div>':'')
+      +(estimate?'<div class="sf-estimate">'+esc(estimate.text)+'</div>':'')
       +'<div class="sf-feedback" role="status"></div></div>';
     const headroom='<div class="sf-section">v HEADROOM TO GYM LIMIT</div><div class="sf-card"><div>Energy: read from Torn HUD</div>'+stats.map(n=>'<div class="sf-cap"><b style="color:'+statColors[n]+'">'+n+'</b><span>limit not verified</span></div>').join('')+'<p>Special gym caps cannot be validated. No locked gym will be recommended or switched to.</p></div>';
     const statView='<div class="sf-section">v STATS</div>'+stats.map((n,i)=>{
@@ -1400,8 +1418,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const message=w===0?'! Dump - minimize':!value?'Unknown - enter stats':value>=t?'OK - on target':'Need +'+fmt(t-value);
       return '<div class="sf-stat"><div class="sf-statline"><span style="color:'+statColors[n]+'">'+n+'</span><small>'+(w===0?'DUMP':order===1?'1ST':order===2?'2ND':order===3?'3RD':'4TH')+'</small><b>'+fmt(value)+(t?' / '+fmt(t):'')+'</b></div><div class="sf-track"><div style="width:'+progress+'%;background:'+statColors[n]+'"></div></div><div class="sf-statmessage">'+message+'</div></div>';
     }).join('');
-    const groups=perkGroups(),eta=gymCalc.eta(),head=gymCalc.headroom(actual),gainInfo=next?gymCalc.gain(next.stat):null;
-    const perkPanel='<div class="sf-section">GYM PERKS & ENERGY</div><div class="sf-card"><button id="slx-gym-api-refresh">REFRESH API</button><div>API: '+escape(gymApi.status)+(gymApi.at?'  -  '+new Date(gymApi.at).toLocaleTimeString():'')+'</div><div>Energy: '+(Number.isFinite(gymEnergy())?fmt(gymEnergy()):'unavailable')+'</div><div>'+escape(specialGymSafety(actual))+'</div><div class="sf-perks">'+(groups.length?groups.map(g=>'<p><b>'+escape(g.group)+'</b>: '+g.entries.map(escape).join('  -  ')+'</p>').join(''):'No verified gym perks loaded')+'</div><div><b>Next gym ETA:</b> '+escape(eta.text)+'</div><div><b>DEX 1.25 safety:</b> '+(head?'Secondary maximum '+fmt(head.maxSecondary)+' / remaining '+fmt(head.remaining):'Stats unavailable')+'</div><div><b>Estimated '+escape(next?.stat||'next')+' gain:</b> '+(gainInfo?.estimate!=null?gainInfo.estimate.toFixed(2)+' (x'+gainInfo.multi.toFixed(3)+', '+gainInfo.dots+' dots)':escape(gainInfo?.reason||'Needs current happiness, stats and known gym'))+'</div><small>Gain is a Wiki-formula estimate. Unknown or ambiguous perk effects block precise gain claims. Special gym membership must be verified separately.</small></div>';
+    const groups=perkGroups(),head=gymCalc.headroom(actual),gainInfo=next?gymCalc.gain(next.stat):null;
+    const perkPanel='<div class="sf-section">GYM PERKS & ENERGY</div><div class="sf-card"><button id="slx-gym-api-refresh">REFRESH API</button><div>API: '+escape(gymApi.status)+(gymApi.at?'  -  '+new Date(gymApi.at).toLocaleTimeString():'')+'</div><div>Energy: '+(Number.isFinite(gymEnergy())?fmt(gymEnergy()):'unavailable')+'</div><div>'+escape(specialGymSafety(actual))+'</div><div class="sf-perks">'+(groups.length?groups.map(g=>'<p><b>'+escape(g.group)+'</b>: '+g.entries.map(escape).join('  -  ')+'</p>').join(''):'No verified gym perks loaded')+'</div><div><b>NEXT GYM - ENERGY TO UNLOCK:</b> '+escape(estimate?.text||'Gym progress unavailable')+'</div><div><b>DEX 1.25 safety:</b> '+(head?'Secondary maximum '+fmt(head.maxSecondary)+' / remaining '+fmt(head.remaining):'Stats unavailable')+'</div><div><b>Estimated '+escape(next?.stat||'next')+' gain:</b> '+(gainInfo?.estimate!=null?gainInfo.estimate.toFixed(2)+' (x'+gainInfo.multi.toFixed(3)+', '+gainInfo.dots+' dots)':escape(gainInfo?.reason||'Needs current happiness, stats and known gym'))+'</div><small>Gain is a Wiki-formula estimate. Unknown or ambiguous perk effects block precise gain claims. Special gym membership must be verified separately.</small></div>';
     const settings=settingsMarkup(actual);
     const compact=n=>{const v=Number(n)||0;return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1000?Math.round(v/1000)+'K':fmt(v)};
     const rows=snapshots.slice(-15).reverse();
@@ -1458,7 +1476,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.1',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.6.2',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
