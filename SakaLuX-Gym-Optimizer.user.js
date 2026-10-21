@@ -1445,7 +1445,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(action.step==='reps'){
       if(!setNativeReps(next.stat,action.reps)){report('Could not set repetitions. Please use the native Torn control.');return}
       const input=gymTrainInput(next.stat);
-      if(Number(nativeRepetitionControl(next.stat).value)!==action.reps){report('Native Torn did not accept 999; no training was performed.');return}
+      if(Number(nativeRepetitionControl(next.stat).value)!==action.reps){report('Native Torn did not accept '+action.reps+' repetitions; no training was performed.');return}
       render();return;
     }
     if(action.step==='manual-reps'){
@@ -1465,7 +1465,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     if(action.step==='train'){
       if(!confirmedGym()){report('Wait for the gym to finish loading.');return}
-      if(Number(nativeRepetitionControl(next.stat).value)!==action.reps){report('Repetitions changed. Set '+action.reps+' again.');return}
+      const liveReps=nativeRepetitionControl(next.stat);
+      if(Number(liveReps.value)!==action.reps){report('Repetitions changed. Set '+action.reps+' again.');return}
+      const match=(liveReps.tile?.innerText||liveReps.tile?.textContent||'').match(/(\d+)\s*energy per train/i);
+      const cost=match?Number(match[1]):null,available=reliableGymEnergy();
+      if(!available||!Number.isFinite(cost)||cost<=0||available.value<cost*action.reps){
+        report('Energy or native training cost not verified for '+action.reps+' repetitions. No training performed.');return;
+      }
       if(!clickNativeTrain(next.stat)){report('Native TRAIN is unavailable.');return}
       report('Native TRAIN clicked once for '+next.stat+'. Check the Torn result.');
       return;
