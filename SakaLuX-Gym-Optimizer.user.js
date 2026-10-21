@@ -1239,17 +1239,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const estimate=Math.max(0,multi*dots*row[1]*one*rep);
       return {estimate,multi,dots,effects,happiness};
     },
-    eta(){
-      const xp=this.xp(),e=gymEnergy();
-      const progress=gymApi.data?.gym||{};
-      const regeneration=Number(progress.energy_per_day??progress.daily_energy);
-      const rate=Number.isFinite(regeneration)&&regeneration>0?regeneration:null;
-      if(!xp)return {text:'ETA unavailable: Gym EXP / energy remaining is not exposed by the current response.'};
-      if(xp.remaining===0)return {text:'Next gym threshold reached  -  check membership in Torn.'};
-      if(!rate)return {text:'Remaining: '+fmt(xp.remaining)+' gym energy ('+xp.source+'). ETA needs verified energy/day; no guessed unlock time.'};
-      const days=xp.remaining/rate;
-      return {text:'~'+days.toFixed(1)+' days ('+fmt(xp.remaining)+' energy remaining at '+fmt(rate)+' E/day). Estimation assumes all future energy is spent at Gym.'};
-    },
     headroom(actual){
       const dex=Number(actual.Dexterity);
       const second=Math.max(Number(actual.Strength),Number(actual.Speed),Number(actual.Defense));
@@ -1429,7 +1418,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       const message=w===0?'! Dump - minimize':!value?'Unknown - enter stats':value>=t?'OK - on target':'Need +'+fmt(t-value);
       return '<div class="sf-stat"><div class="sf-statline"><span style="color:'+statColors[n]+'">'+n+'</span><small>'+(w===0?'DUMP':order===1?'1ST':order===2?'2ND':order===3?'3RD':'4TH')+'</small><b>'+fmt(value)+(t?' / '+fmt(t):'')+'</b></div><div class="sf-track"><div style="width:'+progress+'%;background:'+statColors[n]+'"></div></div><div class="sf-statmessage">'+message+'</div></div>';
     }).join('');
-    const groups=perkGroups(),eta=gymCalc.eta(),head=gymCalc.headroom(actual),gainInfo=next?gymCalc.gain(next.stat):null;
+    const groups=perkGroups(),head=gymCalc.headroom(actual),gainInfo=next?gymCalc.gain(next.stat):null;
     const perkPanel='<div class="sf-section">GYM PERKS & ENERGY</div><div class="sf-card"><button id="slx-gym-api-refresh">REFRESH API</button><div>API: '+escape(gymApi.status)+(gymApi.at?'  -  '+new Date(gymApi.at).toLocaleTimeString():'')+'</div><div>Energy: '+(Number.isFinite(gymEnergy())?fmt(gymEnergy()):'unavailable')+'</div><div>'+escape(specialGymSafety(actual))+'</div><div class="sf-perks">'+(groups.length?groups.map(g=>'<p><b>'+escape(g.group)+'</b>: '+g.entries.map(escape).join('  -  ')+'</p>').join(''):'No verified gym perks loaded')+'</div><div><b>NEXT GYM - ENERGY TO UNLOCK:</b> '+escape(estimate?.text||'Gym progress unavailable')+'</div><div><b>DEX 1.25 safety:</b> '+(head?'Secondary maximum '+fmt(head.maxSecondary)+' / remaining '+fmt(head.remaining):'Stats unavailable')+'</div><div><b>Estimated '+escape(next?.stat||'next')+' gain:</b> '+(gainInfo?.estimate!=null?gainInfo.estimate.toFixed(2)+' (x'+gainInfo.multi.toFixed(3)+', '+gainInfo.dots+' dots)':escape(gainInfo?.reason||'Needs current happiness, stats and known gym'))+'</div><small>Gain is a Wiki-formula estimate. Unknown or ambiguous perk effects block precise gain claims. Special gym membership must be verified separately.</small></div>';
     const settings=settingsMarkup(actual);
     const compact=n=>{const v=Number(n)||0;return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1000?Math.round(v/1000)+'K':fmt(v)};
