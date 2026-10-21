@@ -2031,7 +2031,7 @@ async function importConfirmedCompanyTrains(){
  if(trainImportBusy)return;
  trainImportBusy=true;
  try{
-  const data=await api('company/news?limit=100');
+  const data=await api('/company/news?limit=100');
   const records=Array.isArray(data?.news)?data.news:Object.entries(data?.news||{}).map(([id,row])=>({...row,id}));
   const existing=arr(KEY.trains),seen=new Set(existing.map(x=>String(x.apiNewsId||'')));
   let added=0,skipped=0;
