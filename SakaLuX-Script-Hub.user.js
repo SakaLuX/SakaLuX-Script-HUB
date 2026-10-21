@@ -2057,7 +2057,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.6.8",
+                "version": "1.6.9",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2074,13 +2074,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.6.8",
+                    "version": "1.6.9",
                     "date": "2026-10-21",
                     "notes": [
-                        "Stabilize selected gym proof during temporary TornPDA redraws, preventing contradictory WAIT FOR GYM CONFIRMATION while the active gym banner is visible.",
-                        "Match the native repetitions selector to energy actually available, e.g. 10 E at Complete Cardio permits one 10 E train, not 999 repetitions.",
-                        "Recheck native repetitions, available energy and train cost immediately before a single explicitly clicked TRAIN action.",
-                        "Keep ASCII-only source and auto-update metadata."
+                        "Persist the last positively confirmed active gym in local storage and reuse it during TornPDA interface redraws.",
+                        "Refresh stored gym from Torn's visible native banner and explicit selected icon; do not cache other merely available gyms as unlocked.",
+                        "Invalidate active-gym fallback when the Gym Optimizer requests a different gym; preserve energy/repetition checks and explicit TRAIN-only action.",
+                        "Keep ASCII-safe scripts and auto-update metadata."
                     ]
                 },
                 "accessTier": "free",
