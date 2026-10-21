@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.79
+// @version      1.8.80
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.79',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.80',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2032,29 +2032,39 @@ async function importMyTrainingLog(){
  try{
   const data=await req('https://api.torn.com/v2/user/log?limit=100&key='+encodeURIComponent(key));
   const raw=data?.log||data?.logs||[];
-  const entries=Array.isArray(raw)?raw:Object.entries(raw).map(([id,row])=>({...row,id}));
+  const entries=Array.isArray(raw)?raw:Object.entries(raw).map(([id,row])=>({...row,id:row?.id||id}));
   const saved=arr(KEY.trains),known=new Set(saved.filter(x=>x.apiLogId).map(x=>String(x.apiLogId)));
-  const fresh=[];
+  const fresh=[],categories=new Map();
+  let candidateCount=0;
   for(const x of entries){
    const id=String(x?.id||x?.log_id||'');
-   const title=String(x?.title||x?.log_type||x?.type||'');
-   const details=x?.data||{};
+   const info=x?.details||{};
+   const title=String(info?.title||x?.title||x?.log_type||x?.type||'');
+   const category=String(info?.category||x?.category||'');
+   const payload=x?.data||{};
+   const params=x?.params||{};
    const message=String(x?.message||x?.text||x?.description||'');
-   const category=String(x?.category||'');
+   const descriptor=(category+' '+title+' '+message).trim();
+   if(category||title) categories.set(category+' / '+title,(categories.get(category+' / '+title)||0)+1);
+   const isCompany=/(company|employee|job|employment|director|companie|angajat)/i.test(descriptor);
+   const isTraining=/(train|training|trained|instruire|antrenament)/i.test(descriptor);
+   if(!isCompany||!isTraining)continue;
+   candidateCount++;
    const stamp=Number(x?.timestamp||x?.time);
-   // Accept only logs explicitly identifying a COMPANY employee training event.
    if(!id||known.has(id)||!Number.isFinite(stamp)||stamp<=0)continue;
-   if(!/train/i.test(title+' '+message)||!(/company|employee|job/i.test(title+' '+category+' '+message)))continue;
-   const employee=String(details.employee_name||details.employee||details.name||me()?.name||'').trim();
-   if(!employee)continue;
-   fresh.push({employee,primary:'Unknown',secondary:'Unknown',price:0,ts:stamp<1e12?stamp*1000:stamp,note:'Antrenament din jurnalul personal Torn API',apiLogId:id,source:'Torn user/log'});
+   const self=me()?.name||'';
+   const employee=String(payload?.employee_name||payload?.employee?.name||payload?.employee||payload?.target?.name||params?.employee_name||self).trim();
+   const gained=Object.entries(payload).filter(([k,v])=>/manual|intelligence|endurance|gain|stat/i.test(k)&&['string','number'].includes(typeof v)).map(([k,v])=>k+': '+v).slice(0,5).join(', ');
+   const date=stamp<1e12?stamp*1000:stamp;
+   fresh.push({employee,primary:'Unknown',secondary:'Unknown',price:0,ts:date,note:'Training confirmat în jurnalul Torn: '+title+(gained?' ('+gained+')':''),apiLogId:id,source:'Torn user/log'});
    known.add(id);
   }
   if(fresh.length)set(KEY.trains,saved.concat(fresh));
-  const eventTitles=[...new Set(entries.map(x=>String(x?.title||x?.log_type||x?.type||'').trim()).filter(Boolean))].slice(0,6);
-  alert('Import: '+fresh.length+' antrenamente găsite din '+entries.length+' evenimente API. '+(fresh.length?'':'Nu s-a identificat un eveniment de training confirmat în răspunsul primit. ')+'Tipuri de evenimente disponibile: '+(eventTitles.join(', ')||'necunoscute')+'.');
- }catch(e){const code=num(e?.code,-1);const msg=String(e?.message||e);alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă (100 cereri/minut pe utilizator). Reîncearcă după ce expiră limitarea; nu este o eroare de permisiuni.':code===16?'Cheia nu are acces la User: Log. Creează o cheie personalizată cu această permisiune.':'Import indisponibil: '+msg);}
+  const top=[...categories.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5).map(([name,n])=>name+' ('+n+')');
+  alert('Import: '+fresh.length+' noi, '+candidateCount+' evenimente de training în '+entries.length+' loguri. '+(!candidateCount?'Categorii disponibile: '+(top.join('; ')||'necunoscute')+'. Verifică și că în cheia personalizată User: Log este inclusă categoria Company.':'Evenimentele deja importate nu au fost duplicate.'));
+ }catch(e){const code=num(e?.code,-1);const msg=String(e?.message||e);alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă. Reîncearcă după resetarea limitei; nu este o eroare de permisiuni.':code===16?'Cheia nu are acces la User: Log. Creează o cheie personalizată cu această permisiune.':'Import indisponibil: '+msg);}
 }
+
 // API import is read-only and strictly accepts identifiable company training news.
 let trainImportBusy=false;
 async function importConfirmedCompanyTrains(){
