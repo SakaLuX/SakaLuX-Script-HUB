@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.996
+// @version      0.9.997
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -40302,15 +40302,15 @@ function tlRenderSchedule(){const upcoming=schUpcoming();if(!upcoming.length)ret
 function tlRenderByEmployee(entries){if(!entries.length)return`<div class="tl-empty">No training recorded yet.</div>`;const now=Date.now();const map={};entries.forEach(e=>{if(!map[e.name])map[e.name]={name:e.name,last:0,total:0,week:0,month:0,paid:0};map[e.name].total++;if(e.paid)map[e.name].paid++;if(e.ts>map[e.name].last)map[e.name].last=e.ts;if(e.ts>=now-7*86400000)map[e.name].week++;if(e.ts>=now-30*86400000)map[e.name].month++;});const rows=Object.values(map).sort((a,b)=>b.last-a.last);const rowsHtml=rows.map(r=>{const daysSince=Math.floor((now-r.last)/86400000);const stale=daysSince>=7;const unpaid=r.total-r.paid;return`<tr><td><strong>${escHtml(r.name)}</strong></td><td class="${stale?"tl-stale":""}">${tlFmtDateShort(r.last)}<br><span style="font-size:10px;color:var(--sakalux-textMuted)">${daysSince===0?"Today":daysSince===1?"Yesterday":`${daysSince}d ago`}</span></td><td><span class="tl-emp-badge ${r.week>0?"active":""}">${r.week}</span></td><td><span class="tl-emp-badge ${r.month>0?"active":""}">${r.month}</span></td><td>${r.total}</td><td><span style="color:var(--sakalux-green2);font-weight:400">${r.paid}</span>${unpaid>0?` <span style="color:var(--sakalux-textMuted);font-size:11px">/ ${unpaid} unpaid</span>`:""}</td></tr>`;}).join("");return`<table class="tl-emp-table"><thead><tr><th>Employee</th><th>Last Trained</th><th>This Week</th><th>This Month</th><th>Total</th><th>Paid</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;}
 function tlDisplayGains(entry){
     if(Array.isArray(entry.gains)&&entry.gains.length)return entry.gains;
-    // Repair older saved entries that only contain the raw API field.
-    const raw=String(entry.receivedDebug??"").trim().replace(/^["']|["']$/g,"");
-    const values=raw.split(",").map(x=>x.trim());
-    if(values.length!==3||!values.every(x=>/^[-+]?\\d+(?:\\.\\d+)?$/.test(x)))return [];
-    const gains=["MAN","INT","END"].flatMap((stat,i)=>{
-        const amount=Number(values[i]);
-        return Number.isFinite(amount)&&amount>0?[stat+" +"+amount.toLocaleString("en-US")]:[];
-    });
-    return gains;
+    // Backfill previously imported events using saved Torn CSV: MAN,INT,END.
+    let raw=String(entry.receivedDebug??"").trim();
+    if(raw.startsWith('"')&&raw.endsWith('"'))raw=raw.slice(1,-1);
+    if(raw.startsWith("'")&&raw.endsWith("'"))raw=raw.slice(1,-1);
+    const parts=raw.split(",").map(value=>value.trim());
+    if(parts.length!==3)return [];
+    const numbers=parts.map(value=>value!==""?Number(value):NaN);
+    if(!numbers.every(value=>Number.isFinite(value)&&value>=0))return [];
+    return ["MAN","INT","END"].flatMap((name,index)=>numbers[index]>0?[name+" +"+numbers[index].toLocaleString("en-US")]:[]);
 }
 function tlRenderLog(entries){
     if(!entries.length)return`<div class="tl-empty">No training recorded yet.</div>`;
