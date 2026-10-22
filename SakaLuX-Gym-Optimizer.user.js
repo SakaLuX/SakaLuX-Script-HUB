@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.7.4
+// @version      1.7.5
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.7.4',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.5',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.7.4',id='gym-optimizer';
+    const ver='1.7.5',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -1287,7 +1287,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.7.4',id='gym-optimizer';
+      const version='1.7.5',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1530,9 +1530,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(!activeGym)return {step:'blocked',label:'CHECK ACTIVE GYM BANNER',disabled:true};
     if(gymTransitionPending&&activeGym.toLowerCase()===gymTransitionPending.toLowerCase())gymTransitionPending=null;
     if(gymTransitionPending)return {step:'blocked',label:'CONFIRM GYM SWITCH',disabled:true};
-    const best=bestAvailable(stat);
-    const activeDots=gymTable.find(g=>g[0].toLowerCase()===activeGym.toLowerCase())?.[2]?.[stats.indexOf(stat)]||0;
-    if(best&&!best.active&&best.dot>activeDots){
+    const statIndex=stats.indexOf(stat);
+    const activeEntry=gymTable.find(g=>g[0].toLowerCase()===activeGym.toLowerCase());
+    const activeDots=activeEntry?.[2]?.[statIndex]??0;
+    const available=gymAvailability();
+    // Only propose gyms with strictly better dots than the *confirmed active* gym.
+    // This protects against stale recommendation caches and prevents downgrades.
+    const better=[...available.values()].map(g=>{
+      const entry=gymTable.find(row=>row[0].toLowerCase()===g.name.toLowerCase());
+      return {...g,dot:entry?.[2]?.[statIndex]??0};
+    }).filter(g=>g.name.toLowerCase()!==activeGym.toLowerCase()&&g.dot>activeDots+0.0001)
+      .sort((a,b)=>b.dot-a.dot);
+    const best=better[0]||null;
+    if(best){
       if(best.switchVerified&&best.button)return {step:'switch',label:'SWITCH GYM - '+best.name.toUpperCase(),disabled:false,stat,gym:best.name};
       return {step:'blocked',label:'SWITCH TO '+best.name.toUpperCase()+' IN TORN FIRST',disabled:true};
     }
@@ -1785,7 +1795,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.4',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.5',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
