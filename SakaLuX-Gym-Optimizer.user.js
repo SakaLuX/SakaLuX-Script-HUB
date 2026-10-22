@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.7.7
+// @version      1.7.8
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.7.7',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.8',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.7.7',id='gym-optimizer';
+    const ver='1.7.8',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -933,23 +933,21 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     return gymTable.find(g=>g[0].toLowerCase()===t)?.[0]||null;
   }
   function gymBannerName(){
-    // ONLY the live gym header paired with Torn's current-energy banner proves
-    // the active gym. A selected icon, historical title or persisted cache does not.
-    const rx=/You have\s*[\d,.]+\s*\/\s*[\d,.]+\s*energy/i;
-    const candidates=[...document.querySelectorAll('h1,h2,h3,h4,strong,span,div,[data-testid="current-gym"]')]
-      .filter(el=>!panel.contains(el)&&el.children.length<=2);
-    const found=new Set();
-    for(const el of candidates){
-      const title=knownGymName(el.textContent);
-      if(!title)continue;
-      let parent=el.parentElement;
-      for(let i=0;parent&&i<3;i++,parent=parent.parentElement){
-        if(panel.contains(parent))break;
-        const text=String(parent.innerText||parent.textContent||'').slice(0,500);
-        if(rx.test(text)){found.add(title);break}
-      }
+    // Torn's visible "GYM NAME / You have N/M energy" banner is authoritative.
+    // Parse the banner as a unit; do not depend on its internal span nesting.
+    const energy=/You have\s*[\d,.]+\s*\/\s*[\d,.]+\s*energy/i;
+    const matches=[];
+    for(const el of document.querySelectorAll('div,section,header,article')){
+      if(panel.contains(el))continue;
+      const raw=String(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();
+      if(raw.length>240||!energy.test(raw))continue;
+      const names=gymTable.map(g=>g[0]).filter(n=>raw.toLowerCase().includes(n.toLowerCase()));
+      if(names.length===1)matches.push({name:names[0],size:raw.length});
     }
-    return found.size===1?[...found][0]:null;
+    if(!matches.length)return null;
+    matches.sort((a,b)=>a.size-b.size);
+    // The smallest native element containing both labels is the active banner.
+    return matches[0].name;
   }
   function selectedGymIconName(){
     // A selected icon often contains a gym emblem, not text: use only explicit
@@ -1278,7 +1276,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.7.7',id='gym-optimizer';
+      const version='1.7.8',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1515,9 +1513,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // A single explicit action at a time. Never auto-chain a native TRAIN click.
   // The controls are re-checked before each action to avoid stale gym state.
   function gymTrainInput(stat){return nativeRepetitionControl(stat).input}
-  function gymNextAction(stat){
+  function gymNextAction(stat,verifiedActiveGym=null){
     if(!stat)return {step:'waiting',label:'WAITING FOR STATS',disabled:true};
-    const activeGym=confirmedGym();
+    const activeGym=verifiedActiveGym||confirmedGym();
     if(!activeGym)return {step:'blocked',label:'CHECK ACTIVE GYM BANNER',disabled:true};
     if(gymTransitionPending&&activeGym.toLowerCase()===gymTransitionPending.toLowerCase())gymTransitionPending=null;
     if(gymTransitionPending)return {step:'blocked',label:'CONFIRM GYM SWITCH',disabled:true};
@@ -1699,9 +1697,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const tab=panel.dataset.tab||'OVERVIEW';
     const esc=escape;
     const tabs=['OVERVIEW','HISTORY','EXPORT','SETTINGS','INFO'];
-    const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>v1.7.7 · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
+    const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>v1.7.8 · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
     const info='<div class="sf-overview"><div><div class="sf-eyebrow">RATIO HEALTH</div><div class="sf-ratio"><b>'+(!complete?' - ':pct>=98?'A':pct>=90?'B':pct>=80?'C':'D')+'</b><span>'+(!complete?'Awaiting stats':pct+'% toward targets')+'<small>SakaLuX Ratio</small></span></div></div><div style="text-align:right"><div class="sf-eyebrow">TOTAL BATTLE STATS</div><div class="sf-total">'+(total?fmt(total):' - ')+'</div><div class="sf-gain">'+(gain==null?'AWAITING NEXT TRAIN':'+'+fmt(gain)+' SINCE LAST TRAIN')+'</div></div></div>';
-    const nextAction=gymNextAction(next?.stat);
+    const nextAction=gymNextAction(next?.stat,gym);
     const train='<div class="sf-section">TRAIN NEXT</div><div class="sf-card">'
       +(next?'<div class="sf-main" style="color:'+statColors[next.stat]+'">'+esc(next.stat)+'</div><div>Currently '+fmt(actual[next.stat])+' - Target '+fmt(targets[next.stat])+' - Need +'+fmt(next.gap)+'</div>':'<div class="sf-main">Waiting for stat values</div>')
       +'<div class="sf-actions slx-next-action"><button type="button" id="slx-gym-next-action"'+(nextAction.disabled?' disabled':'')+'>'+esc(nextAction.label)+'</button></div>'
@@ -1786,7 +1784,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.7',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.8',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
