@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.995
+// @version      0.9.996
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -40300,11 +40300,24 @@ function tlRenderCalendar(logEntries){const today=new Date();today.setHours(0,0,
 function tlRenderStats(entries){const now=Date.now();const week=entries.filter(e=>e.ts>=now-7*86400000).length;const month=entries.filter(e=>e.ts>=now-30*86400000).length;const total=entries.length;const paid=entries.filter(e=>e.paid).length;const unpaid=total-paid;const names=new Set(entries.map(e=>e.name));return`<div class="tl-stats"><div class="tl-stat"><div class="tl-stat-lbl">This Week</div><div class="tl-stat-val">${week}</div></div><div class="tl-stat"><div class="tl-stat-lbl">This Month</div><div class="tl-stat-val">${month}</div></div><div class="tl-stat"><div class="tl-stat-lbl">Paid / Unpaid</div><div class="tl-stat-val" style="font-size:16px"><span style="color:var(--sakalux-green2)">${paid}</span> <span style="color:var(--sakalux-textMuted);font-size:12px">/</span> <span style="color:var(--sakalux-textMuted)">${unpaid}</span></div></div><div class="tl-stat"><div class="tl-stat-lbl">Employees</div><div class="tl-stat-val">${names.size}</div></div></div>`;}
 function tlRenderSchedule(){const upcoming=schUpcoming();if(!upcoming.length)return`<div class="tl-empty">No upcoming trains scheduled.<br><span style="font-size:11px">Click any future day on the Calendar tab to schedule a train.</span></div>`;const now=Date.now();const html=upcoming.map(s=>{const d=new Date(s.ts);const daysAway=Math.ceil((s.ts-now)/86400000);const dayStr=daysAway===0?"Today":daysAway===1?"Tomorrow":`In ${daysAway} days`;return`<div class="tl-sched-entry"><div class="tl-sched-date"><div class="tl-sched-day">${d.getDate()}</div><div class="tl-sched-mon">${d.toLocaleDateString(undefined,{month:"short"})}</div><div style="font-size:9px;color:var(--sakalux-textMuted);margin-top:2px">${dayStr}</div></div><div><div class="tl-sched-name">${escHtml(s.name)}</div>${s.note?`<div class="tl-sched-note">${escHtml(s.note)}</div>`:""} ${s.paid?`<span style="font-size:10px;color:var(--sakalux-green2);font-weight:400">✓ Paid</span>`:`<span style="font-size:10px;color:var(--sakalux-textMuted)">Unpaid</span>`}</div><button type="button" class="tl-sched-del" data-del-sched="${s.id}">Remove</button></div>`;}).join("");return`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button type="button" class="tl-btn-clear" id="tl-clear-schedule">Clear All Scheduled Trains</button></div><div class="tl-sched-list">${html}</div>`;}
 function tlRenderByEmployee(entries){if(!entries.length)return`<div class="tl-empty">No training recorded yet.</div>`;const now=Date.now();const map={};entries.forEach(e=>{if(!map[e.name])map[e.name]={name:e.name,last:0,total:0,week:0,month:0,paid:0};map[e.name].total++;if(e.paid)map[e.name].paid++;if(e.ts>map[e.name].last)map[e.name].last=e.ts;if(e.ts>=now-7*86400000)map[e.name].week++;if(e.ts>=now-30*86400000)map[e.name].month++;});const rows=Object.values(map).sort((a,b)=>b.last-a.last);const rowsHtml=rows.map(r=>{const daysSince=Math.floor((now-r.last)/86400000);const stale=daysSince>=7;const unpaid=r.total-r.paid;return`<tr><td><strong>${escHtml(r.name)}</strong></td><td class="${stale?"tl-stale":""}">${tlFmtDateShort(r.last)}<br><span style="font-size:10px;color:var(--sakalux-textMuted)">${daysSince===0?"Today":daysSince===1?"Yesterday":`${daysSince}d ago`}</span></td><td><span class="tl-emp-badge ${r.week>0?"active":""}">${r.week}</span></td><td><span class="tl-emp-badge ${r.month>0?"active":""}">${r.month}</span></td><td>${r.total}</td><td><span style="color:var(--sakalux-green2);font-weight:400">${r.paid}</span>${unpaid>0?` <span style="color:var(--sakalux-textMuted);font-size:11px">/ ${unpaid} unpaid</span>`:""}</td></tr>`;}).join("");return`<table class="tl-emp-table"><thead><tr><th>Employee</th><th>Last Trained</th><th>This Week</th><th>This Month</th><th>Total</th><th>Paid</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;}
+function tlDisplayGains(entry){
+    if(Array.isArray(entry.gains)&&entry.gains.length)return entry.gains;
+    // Repair older saved entries that only contain the raw API field.
+    const raw=String(entry.receivedDebug??"").trim().replace(/^["']|["']$/g,"");
+    const values=raw.split(",").map(x=>x.trim());
+    if(values.length!==3||!values.every(x=>/^[-+]?\\d+(?:\\.\\d+)?$/.test(x)))return [];
+    const gains=["MAN","INT","END"].flatMap((stat,i)=>{
+        const amount=Number(values[i]);
+        return Number.isFinite(amount)&&amount>0?[stat+" +"+amount.toLocaleString("en-US")]:[];
+    });
+    return gains;
+}
 function tlRenderLog(entries){
     if(!entries.length)return`<div class="tl-empty">No training recorded yet.</div>`;
     const html=entries.map(e=>{
-        const gainHtml=e.gains?.length
-            ?`<div class="tl-log-gains">${e.gains.map(g=>`<span class="tl-log-gain">${escHtml(g)}</span>`).join("")}</div>`
+        const displayed=tlDisplayGains(e);
+        const gainHtml=displayed.length
+            ?`<div class="tl-log-gains">${displayed.map(g=>`<span class="tl-log-gain">${escHtml(g)}</span>`).join("")}</div>`
             :`<div style="font-size:11px;color:var(--sakalux-textMuted);margin-top:8px">No exact stat breakdown found. <div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">working_stats_received: ${escHtml(e.receivedDebug||"not stored")}</div>${e.apiSchema?.length?`<div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">Available fields: ${escHtml(e.apiSchema.join(", "))}</div>`:""}</div>`;
         return`<details class="tl-log-entry" style="display:block;cursor:pointer"><summary style="display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none"><span class="tl-log-name">${escHtml(e.name)}${e.manual?' <small>(manual)</small>':""}${e.paid?' <small>✓ Paid</small>':""}</span><span class="tl-log-ts">${tlFmtDate(e.ts)} ▾</span></summary><div style="padding-top:10px;border-top:1px solid var(--sakalux-border);margin-top:10px"><div style="font-size:11px;color:var(--sakalux-textMuted)">Working stats received</div>${gainHtml}</div></details>`;
     }).join("");
