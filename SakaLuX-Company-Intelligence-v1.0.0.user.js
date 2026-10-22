@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.90
+// @version      1.8.91
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.90',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.91',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2073,7 +2073,7 @@ async function importMyTrainingLog(){
   const company=categories.find(x=>/^(?:company|companies|employment)$/i.test(String(x?.title||'').trim()))||categories.find(x=>/company|companies|employment/i.test(String(x?.title||'')));
   if(!company || !Number.isFinite(Number(company.id)))throw new Error('Categoria Company nu a fost identificată în lista oficială Torn.');
   const categoryId=Number(company.id),saved=arr(KEY.trains),known=new Set(saved.filter(x=>x.apiLogId).map(x=>String(x.apiLogId))),found=[];
-  const seenPageIds=new Set();let events=0,trainingCandidates=0,to=0,pages=0,enriched=0;
+  const seenPageIds=new Set();let events=0,trainingCandidates=0,to=0,pages=0,enriched=0,noGains=0;const exampleFields=new Set();
   const from=Math.floor((Date.now()-90*86400000)/1000);
   for(let page=0;page<12;page++){
    const url='https://api.torn.com/v2/user/log?cat='+categoryId+'&limit=100&from='+from+(to?'&to='+to:'')+'&key='+encodeURIComponent(key);
@@ -2098,6 +2098,8 @@ async function importMyTrainingLog(){
     trainingCandidates++;
     if(!Number.isFinite(stamp)||stamp<=0)continue;
     const employee=String(data?.employee_name||data?.employee?.name||data?.employee||data?.target?.name||me()?.name||'').trim();
+    // A valid key grants access to logs, but does not determine their payload shape.
+    // Only numeric gains explicitly associated with a work stat are displayed.
     const statFields={manual:'Manual Labor',manual_labor:'Manual Labor',man:'Manual Labor',int:'Intelligence',intelligence:'Intelligence',end:'Endurance',endurance:'Endurance'};
     const gains=[];
     const normalStat=v=>/manual/i.test(String(v))?'Manual Labor':/intelligence|^int$/i.test(String(v))?'Intelligence':/endurance|^end$/i.test(String(v))?'Endurance':'';
@@ -2121,7 +2123,24 @@ async function importMyTrainingLog(){
      }
     };
     collect(data);collect(x?.params);collect(x?.details);collect(x?.details?.data);collect(description);collect(title);
+    // v2 company training payloads may express gains as a stat name and a
+    // separate numeric field, or as an array of {type, value} records.
+    const nested=[data,x?.params,x?.details?.data,x?.details];
+    for(const obj of nested){
+     if(!obj||typeof obj!=='object')continue;
+     const stat=obj.stat_name||obj.stat_type||obj.work_stat||obj.stat||obj.type;
+     const gain=obj.stat_gain??obj.stat_increase??obj.stats_gained??obj.points_gained??obj.value_gained;
+     if(stat!=null&&gain!=null)add(stat,gain);
+     for(const [k,v] of Object.entries(obj)){
+      const statName=normalStat(k.replace(/(?:_?gain(?:ed)?|_?increase|_?points|_?received)$/i,''));
+      if(statName&&/(gain|increase|points|received)/i.test(k)&&typeof v!=='object')add(statName,v);
+     }
+    }
     const unique=[...new Map(gains.map(g=>[g.stat,g])).values()];
+    if(!unique.length){
+     noGains++;
+     if(exampleFields.size<15)for(const key of Object.keys(data||{}).slice(0,15)){if(exampleFields.size<15)exampleFields.add(key)}
+    }
     const gained=unique.map(g=>g.stat+' +'+g.amount).join(', ');
     const first=unique[0]?.stat||'Unknown',second=unique[1]?.stat||'Unknown';
     if(known.has(id)){
@@ -2163,7 +2182,8 @@ async function importMyTrainingLog(){
    try{const read=GM_getValue(KEY.trains,[]);const stored=read&&typeof read.then==='function'?await read:read;diskConfirmed=found.filter(x=>Array.isArray(stored)&&stored.some(y=>String(y.apiLogId)===String(x.apiLogId))).length;}catch{}
   }
   const total=arr(KEY.trains).filter(row=>row.apiLogId).length;
-  alert('Import Company: '+found.length+' noi · '+total+' trainuri din API în istoric · '+trainingCandidates+' evenimente training găsite. '+(found.length&&!diskConfirmed?'Stocarea persistentă nu a confirmat încă datele; reimportul le poate recupera.':found.length===0?'Nu sunt trainuri noi: evenimentele existente au fost deja importate.':''));
+  alert('Import Company: '+found.length+' noi · '+total+' trainuri în istoric · '+trainingCandidates+' evenimente training · '+noGains+' fără valori numerice identificabile. '+(enriched?enriched+' trainuri vechi completate. ':'')+(noGains?'Câmpuri API (doar nume, fără date personale): '+([...exampleFields].join(', ')||'niciunul')+'. ':'')+(found.length&&!diskConfirmed?'Persistența locală nu este încă confirmată. ':''));
+
  }catch(e){
   const code=num(e?.code,-1),msg=String(e?.message||e);
   alert(code===5||/too many requests/i.test(msg)?'Limită Torn API atinsă. Verificarea Company s-a oprit.':code===16?'Cheia nu are acces la toate logurile Company necesare. Verifică User: Log în permisiunile cheii.':'Import imposibil: '+msg);
