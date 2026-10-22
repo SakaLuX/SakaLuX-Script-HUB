@@ -1,8 +1,6 @@
 name: Update Bounty Hunter v0.4.0
+# Historical one-time updater: manual invocation only to prevent automatic downgrades.
 on:
-  push:
-    paths:
-      - '.github/workflows/update-bounty-hunter-v040.yml'
   workflow_dispatch:
 permissions:
   contents: write
