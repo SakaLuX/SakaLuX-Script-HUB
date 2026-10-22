@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.153
+// @version      1.9.154
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3684,7 +3684,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                             retryNotBefore=0;cached=d;cachedAt=Date.now();
                             updateDiag({state:d.premium_active?(verified?'verified':'unsigned'):'free',received:!!d.signed_certificate,verified,expiresAt:verified?new Date(JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(d.signed_certificate.payload.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-d.signed_certificate.payload.length%4)%4)),c=>c.charCodeAt(0)))).exp*1000).toISOString():null});
                             resolve(d);
-                        }catch(e){if(currentKey===requestKey)updateDiag({state:'verification_error',received:false,verified:false,expiresAt:null});reject(e);}
+                        }catch(e){if(currentKey===requestKey)updateDiag({state:String(e?.message||'verification_error').slice(0,110),received:false,verified:false,expiresAt:null});reject(e);}
                     },
                     onerror:()=>reject(Error('network_unavailable')),
                     ontimeout:()=>reject(Error('timeout'))
@@ -3880,7 +3880,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     showPremium(live.data);
                 }else{
                     const diagnostic=slxLicenseBroker.diagnostics();
-                    showPremium({},'Shared PRO check unavailable ('+String(diagnostic.state||'unknown')+'). Automatic retry is enabled.');
+                    showPremium({},'Shared PRO check unavailable: '+String(diagnostic.state||'unknown')+'. Automatic retry is enabled.');
                 }
             }catch(error){showPremium({},String(error?.message||'License check failed'));}
             finally{button.disabled=false;}
