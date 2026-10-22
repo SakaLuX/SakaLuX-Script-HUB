@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.990
+// @version      0.9.991
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39079,6 +39079,26 @@ function tlApiRead(url,key){
     });
 }
 function tlApiSetStatus(message){const e=document.getElementById("tl-api-status");if(e)e.textContent=message;}
+function tlApiGains(item){
+    const payload=[item?.data,item?.details?.data,item?.details,item?.data?.working_stats,item?.data?.stats,item?.data?.gains].filter(Boolean);
+    const aliases={MAN:["manual_labor","manual","man","manualLabor","manual_labour"],INT:["intelligence","int"],END:["endurance","end"]};
+    const collected={};
+    const find=(value,depth=0)=>{
+        if(!value||typeof value!=="object"||depth>3)return;
+        for(const [key,v] of Object.entries(value)){
+            const normalized=key.replace(/[^a-z]/gi,"").toLowerCase();
+            for(const [short,keys] of Object.entries(aliases)){
+                if(keys.some(k=>k.replace(/[^a-z]/gi,"").toLowerCase()===normalized)){
+                    const amount=Number(v?.gain??v?.increase??v?.amount??v);
+                    if(Number.isFinite(amount)&&amount>0)collected[short]=Math.max(collected[short]||0,amount);
+                }
+            }
+            if(v&&typeof v==="object")find(v,depth+1);
+        }
+    };
+    payload.forEach(p=>find(p));
+    return Object.entries(collected).map(([k,n])=>k+" +"+n.toLocaleString("en-US"));
+}
 function tlApiExtract(raw,types){
     const rows=Array.isArray(raw?.log)?raw.log:Object.entries(raw?.log||{}).map(([id,item])=>({...item,_id:item?.id||id}));
     const typeTitle=id=>{
@@ -39100,7 +39120,7 @@ function tlApiExtract(raw,types){
         if(!id||!Number.isFinite(ts)||ts<=0||ts>Date.now()+86400000)return null;
         // Training received by the key owner: no employee field is required in the event.
         const name=String(d.employee_name||d.employee?.name||d.target_name||d.target?.name||d.user_name||d.name||"Me").trim();
-        const gains=["manual_labor","manual","intelligence","endurance"].flatMap(k=>Number(d[k]||0)>0?[k+" +"+d[k]]:[]);
+        const gains=tlApiGains(item);
         return {ts,name,company:String(d.company_name||d.company?.name||""),role:String(d.position||""),gains,apiLogId:id,apiImported:true};
     }).filter(Boolean);
 }
@@ -39131,7 +39151,7 @@ async function tlSyncApi(manual=false){
         const cutoff=Date.now()-CFG.logRetainDays*86400000;
         const from=Math.floor(cutoff/1000),data=tlLoad();
         const known=new Set(data.entries.filter(x=>x.apiLogId).map(x=>String(x.apiLogId)));
-        const pagesSeen=new Set();let to=0,scanned=0,pages=0,added=0,matched=0;
+        const pagesSeen=new Set();let to=0,scanned=0,pages=0,added=0,updated=0,matched=0;
         for(let page=0;page<12;page++){
             const url="https://api.torn.com/v2/user/log?cat="+categoryId+"&limit=100&from="+from+(to?"&to="+to:"");
             const result=await tlApiRead(url,selected.key);
@@ -39147,16 +39167,25 @@ async function tlSyncApi(manual=false){
                 if(Number.isFinite(ts)&&ts>0)oldest=Math.min(oldest,ts>1e12?Math.floor(ts/1000):ts);
             }
             for(const entry of candidates){
-                if(known.has(entry.apiLogId)||entry.ts<cutoff)continue;
+                if(entry.ts<cutoff)continue;
+                if(known.has(entry.apiLogId)){
+                    const stored=data.entries.find(x=>String(x.apiLogId)===String(entry.apiLogId));
+                    if(stored&&entry.gains.length&&(!stored.gains?.length||stored.gains.join("|")!==entry.gains.join("|"))){
+                        stored.gains=entry.gains;
+                        stored.apiImported=true;
+                        updated++;
+                    }
+                    continue;
+                }
                 known.add(entry.apiLogId);data.entries.push(entry);added++;
             }
             if(rows.length<100||oldest<=from||!Number.isFinite(oldest)||!newIds)break;
             to=oldest-1;
         }
-        if(added){data.entries.sort((a,b)=>b.ts-a.ts);tlSave(data);}
+        if(added||updated){data.entries.sort((a,b)=>b.ts-a.ts);tlSave(data);}
         const check=tlLoad();const persisted=check.entries.filter(x=>x.apiImported).length;
         localStorage.setItem(TL_API_SYNC_KEY,JSON.stringify({lastCheck:Date.now(),lastImported:added}));
-        tlApiSetStatus(added+" new trains imported · "+matched+" matching events · "+scanned+" Company logs / "+pages+" page(s). Saved API trains: "+persisted+".");
+        tlApiSetStatus(added+" new trains imported · "+updated+" gains updated · "+matched+" matching events · "+scanned+" Company logs / "+pages+" page(s). Saved API trains: "+persisted+".");
         const modal=document.getElementById("fc-tlog-modal");
         if(modal?.classList.contains("fc-vis"))renderTab(modal.querySelector(".tl-tab.active")?.dataset.tltab||"calendar");
     }catch(e){tlApiSetStatus("Import failed: "+String(e.message||e));}
@@ -40208,7 +40237,16 @@ function tlRenderCalendar(logEntries){const today=new Date();today.setHours(0,0,
 function tlRenderStats(entries){const now=Date.now();const week=entries.filter(e=>e.ts>=now-7*86400000).length;const month=entries.filter(e=>e.ts>=now-30*86400000).length;const total=entries.length;const paid=entries.filter(e=>e.paid).length;const unpaid=total-paid;const names=new Set(entries.map(e=>e.name));return`<div class="tl-stats"><div class="tl-stat"><div class="tl-stat-lbl">This Week</div><div class="tl-stat-val">${week}</div></div><div class="tl-stat"><div class="tl-stat-lbl">This Month</div><div class="tl-stat-val">${month}</div></div><div class="tl-stat"><div class="tl-stat-lbl">Paid / Unpaid</div><div class="tl-stat-val" style="font-size:16px"><span style="color:var(--sakalux-green2)">${paid}</span> <span style="color:var(--sakalux-textMuted);font-size:12px">/</span> <span style="color:var(--sakalux-textMuted)">${unpaid}</span></div></div><div class="tl-stat"><div class="tl-stat-lbl">Employees</div><div class="tl-stat-val">${names.size}</div></div></div>`;}
 function tlRenderSchedule(){const upcoming=schUpcoming();if(!upcoming.length)return`<div class="tl-empty">No upcoming trains scheduled.<br><span style="font-size:11px">Click any future day on the Calendar tab to schedule a train.</span></div>`;const now=Date.now();const html=upcoming.map(s=>{const d=new Date(s.ts);const daysAway=Math.ceil((s.ts-now)/86400000);const dayStr=daysAway===0?"Today":daysAway===1?"Tomorrow":`In ${daysAway} days`;return`<div class="tl-sched-entry"><div class="tl-sched-date"><div class="tl-sched-day">${d.getDate()}</div><div class="tl-sched-mon">${d.toLocaleDateString(undefined,{month:"short"})}</div><div style="font-size:9px;color:var(--sakalux-textMuted);margin-top:2px">${dayStr}</div></div><div><div class="tl-sched-name">${escHtml(s.name)}</div>${s.note?`<div class="tl-sched-note">${escHtml(s.note)}</div>`:""} ${s.paid?`<span style="font-size:10px;color:var(--sakalux-green2);font-weight:400">✓ Paid</span>`:`<span style="font-size:10px;color:var(--sakalux-textMuted)">Unpaid</span>`}</div><button type="button" class="tl-sched-del" data-del-sched="${s.id}">Remove</button></div>`;}).join("");return`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button type="button" class="tl-btn-clear" id="tl-clear-schedule">Clear All Scheduled Trains</button></div><div class="tl-sched-list">${html}</div>`;}
 function tlRenderByEmployee(entries){if(!entries.length)return`<div class="tl-empty">No training recorded yet.</div>`;const now=Date.now();const map={};entries.forEach(e=>{if(!map[e.name])map[e.name]={name:e.name,last:0,total:0,week:0,month:0,paid:0};map[e.name].total++;if(e.paid)map[e.name].paid++;if(e.ts>map[e.name].last)map[e.name].last=e.ts;if(e.ts>=now-7*86400000)map[e.name].week++;if(e.ts>=now-30*86400000)map[e.name].month++;});const rows=Object.values(map).sort((a,b)=>b.last-a.last);const rowsHtml=rows.map(r=>{const daysSince=Math.floor((now-r.last)/86400000);const stale=daysSince>=7;const unpaid=r.total-r.paid;return`<tr><td><strong>${escHtml(r.name)}</strong></td><td class="${stale?"tl-stale":""}">${tlFmtDateShort(r.last)}<br><span style="font-size:10px;color:var(--sakalux-textMuted)">${daysSince===0?"Today":daysSince===1?"Yesterday":`${daysSince}d ago`}</span></td><td><span class="tl-emp-badge ${r.week>0?"active":""}">${r.week}</span></td><td><span class="tl-emp-badge ${r.month>0?"active":""}">${r.month}</span></td><td>${r.total}</td><td><span style="color:var(--sakalux-green2);font-weight:400">${r.paid}</span>${unpaid>0?` <span style="color:var(--sakalux-textMuted);font-size:11px">/ ${unpaid} unpaid</span>`:""}</td></tr>`;}).join("");return`<table class="tl-emp-table"><thead><tr><th>Employee</th><th>Last Trained</th><th>This Week</th><th>This Month</th><th>Total</th><th>Paid</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;}
-function tlRenderLog(entries){if(!entries.length)return`<div class="tl-empty">No training recorded yet.<br><span style="font-size:11px">Train an employee using the Train button to start logging.</span></div>`;const html=entries.map(e=>`<div class="tl-log-entry"><div><div class="tl-log-name">${escHtml(e.name)}${e.manual?` <span style="font-size:10px;color:var(--sakalux-orange2)">(manual)</span>`:""}${e.paid?` <span style="font-size:10px;color:var(--sakalux-green2);font-weight:400">✓ Paid</span>`:""}</div>${e.gains?.length?`<div class="tl-log-gains">${e.gains.map(g=>`<span class="tl-log-gain">${escHtml(g)}</span>`).join("")}</div>`:""}</div><div class="tl-log-ts">${tlFmtDate(e.ts)}</div></div>`).join("");return`<div class="tl-log-list">${html}</div>`;}
+function tlRenderLog(entries){
+    if(!entries.length)return`<div class="tl-empty">No training recorded yet.</div>`;
+    const html=entries.map(e=>{
+        const gainHtml=e.gains?.length
+            ?`<div class="tl-log-gains">${e.gains.map(g=>`<span class="tl-log-gain">${escHtml(g)}</span>`).join("")}</div>`
+            :`<div style="font-size:11px;color:var(--sakalux-textMuted);margin-top:8px">Stat gains unavailable in the saved API record. Try Import API to refresh.</div>`;
+        return`<details class="tl-log-entry" style="display:block;cursor:pointer"><summary style="display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none"><span class="tl-log-name">${escHtml(e.name)}${e.manual?' <small>(manual)</small>':""}${e.paid?' <small>✓ Paid</small>':""}</span><span class="tl-log-ts">${tlFmtDate(e.ts)} ▾</span></summary><div style="padding-top:10px;border-top:1px solid var(--sakalux-border);margin-top:10px"><div style="font-size:11px;color:var(--sakalux-textMuted)">Working stats received</div>${gainHtml}</div></details>`;
+    }).join("");
+    return`<div class="tl-log-list">${html}</div>`;
+}
 function renderTab(tabName){const m=document.getElementById("fc-tlog-modal");if(!m)return;const body=document.getElementById("tl-body");if(!body)return;_activeDayKey=null;const entries=tlLoad().entries;const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
 function wireScheduleDeletes(body){
     if(body.dataset.fcScheduleWired==="1")return;
