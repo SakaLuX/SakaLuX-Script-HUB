@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.150
+// @version      1.9.151
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3866,7 +3866,27 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
                     headers:{'Content-Type':'application/json','Accept':'application/json'},
                     data:JSON.stringify({api_key:key}),timeout:15000,
-                    onload:r=>{let d;try{d=JSON.parse(r.responseText||'{}')}catch{reject(new Error('Invalid server response'));return}if(r.status<200||r.status>=300){reject(new Error(d.status||'HTTP '+r.status));return}resolve(d)},
+                    onload:r=>{
+                        const http=Number(r.status)||0;
+                        const raw=String(r.responseText||'');
+                        const contentType=String(r.responseHeaders||'').match(/^content-type:\\s*([^\\r\\n;]+)/im)?.[1]?.trim().toLowerCase()||'unknown';
+                        let d;
+                        try{d=JSON.parse(raw);}catch{
+                            const kind=/^\\s*</.test(raw)?'HTML response':!raw.trim()?'empty response':'invalid JSON';
+                            reject(new Error('Server returned '+kind+' (HTTP '+http+', content-type: '+contentType+'). Check hub-premium-check.php and server/PHP logs.'));
+                            return;
+                        }
+                        if(http<200||http>=300){
+                            const reason=(typeof d?.error==='string'?d.error:typeof d?.status==='string'?d.status:'HTTP error');
+                            reject(new Error('Premium check failed: '+reason+' (HTTP '+http+')'));
+                            return;
+                        }
+                        if(!d||typeof d!=='object'||Array.isArray(d)||typeof d.premium_active!=='boolean'){
+                            reject(new Error('Unexpected license JSON structure (HTTP '+http+'). Check server API contract.'));
+                            return;
+                        }
+                        resolve(d);
+                    },
                     onerror:()=>reject(new Error('Network unavailable')),
                     ontimeout:()=>reject(new Error('Request timed out'))
                 }));
