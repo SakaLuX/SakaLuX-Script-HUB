@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.152
+// @version      1.9.153
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3618,6 +3618,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
     const slxLicenseBroker=(()=>{
         const MAX_AGE=5*60*1000;
         let currentKey='',cached=null,cachedAt=0,inFlight=null;
+        let retryNotBefore=0;
         let diagnostic={state:'not_checked',received:false,verified:false,expiresAt:null,checkedAt:null};
         const diag=()=>({...diagnostic});
         const updateDiag=(patch)=>{diagnostic={...diagnostic,...patch,checkedAt:Date.now()};};
@@ -3649,14 +3650,15 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                 JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))throw Error('invalid_certificate_claims');
             return true;
         }
-        function clear(){currentKey='';cached=null;cachedAt=0;inFlight=null;diagnostic={state:'not_checked',received:false,verified:false,expiresAt:null,checkedAt:null};}
+        function clear(){currentKey='';cached=null;cachedAt=0;inFlight=null;retryNotBefore=0;diagnostic={state:'not_checked',received:false,verified:false,expiresAt:null,checkedAt:null};}
         function invalidate(){cached=null;cachedAt=0;}
         function snapshot(){return usable(cached,cachedAt)?{state:cached.premium_active?'pro':'free',checkedAt:cachedAt,expiresAt:cached.expires_at||null}:{state:'unknown'};}
         async function check(key,{force=false}={}){
             if(!/^[A-Za-z0-9]{16}$/.test(key)){updateDiag({state:'invalid_key',received:false,verified:false,expiresAt:null});return {status:'invalid_key',premium_active:false,entitlements:[]};}
-            if(currentKey!==key){currentKey=key;cached=null;cachedAt=0;inFlight=null;updateDiag({state:'checking',received:false,verified:false,expiresAt:null});}
+            if(currentKey!==key){currentKey=key;cached=null;cachedAt=0;inFlight=null;retryNotBefore=0;updateDiag({state:'checking',received:false,verified:false,expiresAt:null});}
             if(!force&&usable(cached,cachedAt))return cached;
             if(inFlight)return inFlight;
+            if(Date.now()<retryNotBefore)throw Error('rate_limited; retry in '+Math.ceil((retryNotBefore-Date.now())/1000)+'s');
             if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
             const requestKey=key;
             const p=new Promise((resolve,reject)=>{
@@ -3667,12 +3669,18 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     onload:async r=>{
                         try{
                             const d=JSON.parse(r.responseText||'{}');
+                            if(r.status===429||d.status==='rate_limited'){
+                                const retryHeader=String(r.responseHeaders||'').match(/^retry-after:\s*(\d+)/im);
+                                const waitSeconds=Math.max(60,Math.min(900,Number(retryHeader?.[1]||90)));
+                                retryNotBefore=Date.now()+waitSeconds*1000;
+                                throw Error('rate_limited; retry in '+waitSeconds+'s');
+                            }
                             if(r.status!==200||d.status!=='ok')throw Error(d.status||'HTTP '+r.status);
                             if(!validResponse(d))throw Error('invalid_license_response');
                             let verified=false;
                             if(d.premium_active&&d.signed_certificate)verified=await slxVerifySignedGrant(d);
                             if(currentKey!==requestKey){reject(Error('identity_changed'));return;}
-                            cached=d;cachedAt=Date.now();
+                            retryNotBefore=0;cached=d;cachedAt=Date.now();
                             updateDiag({state:d.premium_active?(verified?'verified':'unsigned'):'free',received:!!d.signed_certificate,verified,expiresAt:verified?new Date(JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(d.signed_certificate.payload.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-d.signed_certificate.payload.length%4)%4)),c=>c.charCodeAt(0)))).exp*1000).toISOString():null});
                             resolve(d);
                         }catch(e){if(currentKey===requestKey)updateDiag({state:'verification_error',received:false,verified:false,expiresAt:null});reject(e);}
@@ -3863,47 +3871,15 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             const button=document.getElementById('slh-premium');
             if(button?.disabled)return;
             button.disabled=true;
-            try{
-                const data=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
-                    method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-                    headers:{'Content-Type':'application/json','Accept':'application/json'},
-                    data:JSON.stringify({api_key:key}),timeout:15000,
-                    onload:r=>{
-                        const http=Number(r.status)||0;
-                        const raw=String(r.responseText||'');
-                        const contentType=String(r.responseHeaders||'').match(/^content-type:\s*([^\r\n;]+)/im)?.[1]?.trim().toLowerCase()||'unknown';
-                        let d;
-                        try{d=JSON.parse(raw);}catch{
-                            const kind=/^\s*</.test(raw)?'HTML response':!raw.trim()?'empty response':'invalid JSON';
-                            reject(new Error('Server returned '+kind+' (HTTP '+http+', content-type: '+contentType+'). Check hub-premium-check.php and server/PHP logs.'));
-                            return;
-                        }
-                        if(http<200||http>=300){
-                            const reason=(typeof d?.error==='string'?d.error:typeof d?.status==='string'?d.status:'HTTP error');
-                            reject(new Error('Premium check failed: '+reason+' (HTTP '+http+')'));
-                            return;
-                        }
-                        if(!d||typeof d!=='object'||Array.isArray(d)||typeof d.premium_active!=='boolean'){
-                            reject(new Error('Unexpected license JSON structure (HTTP '+http+'). Check server API contract.'));
-                            return;
-                        }
-                        resolve(d);
-                    },
-                    onerror:()=>reject(new Error('Network unavailable')),
-                    ontimeout:()=>reject(new Error('Request timed out'))
-                }));
-                // A successful server response is not enough to enable PRO:
-                // synchronize through the shared broker (including certificate validation).
-                try {
-                    await refreshHubProStatus(true);
-                    const live=globalThis.__SakaLuXPremiumVerified;
-                    if(live?.key===key&&live?.data?.status==='ok'){
-                        showPremium(live.data);
-                    }else{
-                        showPremium(data,'Server confirmed the account, but shared PRO verification has not completed. Check the PRO button diagnostic.');
-                    }
-                }catch(verificationError){
-                    showPremium(data,'Server confirmed the account, but shared PRO verification failed: '+String(verificationError?.message||'unknown error'));
+            try {
+                // Use the same verified broker as background checks: no second HTTP call.
+                await refreshHubProStatus(false);
+                const live=globalThis.__SakaLuXPremiumVerified;
+                if(live?.key===key&&live?.data?.status==='ok'){
+                    showPremium(live.data);
+                }else{
+                    const diagnostic=slxLicenseBroker.diagnostics();
+                    showPremium({},'Shared PRO check unavailable ('+String(diagnostic.state||'unknown')+'). Automatic retry is enabled.');
                 }
             }catch(error){showPremium({},String(error?.message||'License check failed'));}
             finally{button.disabled=false;}
