@@ -28,3 +28,10 @@
 5. Run `python tools/release_preflight.py --all` and test suites in CI, verify installation/update URLs on TornPDA, before merging.
 
 This document distinguishes verified fixes from work not yet done. No claim is made that the entire repository, GitHub Releases, or Greasy Fork are fully synchronized.
+
+## Follow-up pass
+
+- Confirmed `.github/workflows/validate-userscripts.yml` actively references release preflight, consistency checks and regression scripts. Do not prune `tests/` or `.github/scripts/` based on file age alone.
+- Added repository root `README.md` mapping canonical sources, release metadata, documentation and preflight commands.
+- Added `.gitignore` for future `.bak`, `.orig`, `dist/` and temporary/generated files. This does not remove files already tracked by Git.
+- No further backups were deleted: a full tracked-tree inventory and positive working-snapshot verification remain incomplete.
