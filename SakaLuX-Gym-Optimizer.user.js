@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.7.2
+// @version      1.7.3
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.7.2',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.3',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.7.2',id='gym-optimizer';
+    const ver='1.7.3',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -1077,6 +1077,25 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     return null;
   }
+  // Read the energy cost only from the native card belonging to this stat.
+  // TornPDA can render the heading, cost and TRAIN button in sibling wrappers.
+  function nativeGymEnergyCost(stat,tile){
+    if(!tile)return null;
+    const pattern=/(\\d{1,3})\\s*(?:energy|e)\\s*(?:per|\\/)\\s*(?:train|training|rep(?:etition)?)/i;
+    let node=tile;
+    for(let depth=0;node&&depth<5;depth++,node=node.parentElement){
+      if(node.contains(panel))break;
+      const raw=String(node.innerText||node.textContent||'').replace(/\\s+/g,' ').trim();
+      // A containing grid with other stats cannot provide unambiguous cost.
+      if(stats.some(other=>other!==stat&&new RegExp('\\\\b'+other+'\\\\s+[\\\\d,.]+','i').test(raw)))break;
+      const match=raw.match(pattern);
+      if(match){
+        const cost=Number(match[1]);
+        if(Number.isFinite(cost)&&cost>0&&cost<=150)return cost;
+      }
+    }
+    return null;
+  }
   function nativeRepetitionControl(stat){
     const tile=nativeStatTile(stat);
     if(!tile)return {tile:null,value:null,input:null,display:null};
@@ -1268,7 +1287,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.7.2',id='gym-optimizer';
+      const version='1.7.3',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1511,9 +1530,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(energy&&energy.value===0)return {step:'blocked',label:'NO ENERGY - WAIT FOR REGENERATION',disabled:true};
     const control=nativeRepetitionControl(stat);
     if(!control.tile)return {step:'blocked',label:'WAIT FOR NATIVE GYM CONTROLS',disabled:true};
-    const raw=(control.tile.innerText||control.tile.textContent||'');
-    const found=raw.match(/(\d+)\s*energy per train/i);
-    const cost=found?Number(found[1]):null;
+    const cost=nativeGymEnergyCost(stat,control.tile);
     const active=confirmedGym();
     if(!active)return {step:'blocked',label:'CHECK ACTIVE GYM BANNER',disabled:true};
     if(!Number.isFinite(control.value)||control.value<1)
@@ -1584,8 +1601,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       if(!confirmedGym()){report('Wait for the gym to finish loading.');return}
       const liveReps=nativeRepetitionControl(next.stat);
       if(Number(liveReps.value)!==action.reps){report('Repetitions changed; refresh the action.');return}
-      const match=(liveReps.tile?.innerText||liveReps.tile?.textContent||'').match(/(\d+)\s*energy per train/i);
-      const cost=match?Number(match[1]):null,available=reliableGymEnergy();
+      const cost=nativeGymEnergyCost(next.stat,liveReps.tile),available=reliableGymEnergy();
       if(!available||!Number.isFinite(cost)||cost<=0||available.value<cost){
         report('Training blocked: '+(available?'Energy '+available.value+' E, cost '+(cost??'unknown')+' E':'live Gym energy unreadable')+'. No training performed.');return;
       }
@@ -1771,7 +1787,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.2',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.3',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
