@@ -35,3 +35,9 @@ This document distinguishes verified fixes from work not yet done. No claim is m
 - Added repository root `README.md` mapping canonical sources, release metadata, documentation and preflight commands.
 - Added `.gitignore` for future `.bak`, `.orig`, `dist/` and temporary/generated files. This does not remove files already tracked by Git.
 - No further backups were deleted: a full tracked-tree inventory and positive working-snapshot verification remain incomplete.
+
+## Diagnostic snapshot inventory (second pass)
+
+Reviewed 15 `diagnostics/SakaLuX-Gym-*.user.js` files (Diagnostic, Execution-Probe, Lean-Test, Bootstrap-Test, Code-Test, Info-Only-Test, Info-ASCII-Test, Size-Test, Export-Only-Test, Parse-Test, History-Only-Test, CSS-Isolation-Test, v1.5.3-ASCII-Test, History-Isolation-Test, v1.5.5-Details-Test). All 15 returned **distinct Git blob SHAs**, so none is an exact file duplicate of another in this inspected set. These are historical isolation/probe variants and **not** confirmed as valid production backups. They were retained pending a complete workflow and dependency inventory.
+
+GitHub code search for five individual diagnostic file basenames returned no indexed references. A no-result search is insufficient evidence that no dependencies exist, so no diagnostic file deletion was attempted.
