@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.997
+// @version      0.9.998
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -845,7 +845,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.997';
+  const VERSION = '0.9.998';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -47323,7 +47323,7 @@ function scan(){
     const p=document.getElementById('sakalux-suite-daily-progress'); if(!p)return; const s=summary(); const body=p.querySelector('.sdp-body');
     let rows=s.objectives.filter(x=>state.showCompleted||x.status!=='done').filter(x=>state.filter==='all'||x.category===state.filter);
     const cats=['all',...new Set(TASKS.map(x=>x.category))];
-    body.innerHTML=`<div class="sdp-progress"><div class="sdp-track"><div class="sdp-bar" style="width:${s.percent}%"></div></div><div class="sdp-count">${s.done}/${s.total} • ${s.percent}%</div></div><div class="sdp-toolbar"><button class="sdp-btn" data-sdp="refresh">${state.syncing?'SYNCING…':'↻ SYNC API'}</button><button class="sdp-btn ${state.showCompleted?'active':''}" data-sdp="toggle-completed">Show completed</button>${cats.map(c=>`<button class="sdp-btn ${state.filter===c?'active':''}" data-sdp="filter" data-value="${c}">${c==='all'?'All':c}</button>`).join('')}<button class="sdp-btn" data-sdp="reset">Reset today</button></div><div class="sdp-sync">${state.apiError?'⚠ '+state.apiError:(s.api?.lastAt?`Last API sync ${new Date(s.api.lastAt).toLocaleTimeString()}`:'API not synced yet')}</div><div class="sdp-list">${rows.map(x=>`<div class="sdp-task ${x.status}" ${taskNavUrl(x.id)?`data-nav-task="${x.id}" role="link" tabindex="0" style="cursor:pointer"`:''}><div class="sdp-icon">${x.icon||'•'}</div><div><div class="sdp-label">${x.label}</div><div class="sdp-detail">${x.detail||x.source||''}</div></div><div><button class="sdp-pill ${x.status}" data-sdp="toggle-task" data-id="${x.id}">${x.status==='done'?'DONE':x.status==='action'?'ACTION':x.status==='na'?'N/A':'SYNC'}</button>${x.id.startsWith('custom-')?`<button class="sdp-btn" data-sdp="remove" data-id="${x.id}">×</button>`:''}</div></div>`).join('')||'<div class="sdp-sync">No tasks in this view.</div>'}</div><div class="sdp-custom"><input placeholder="Add custom task"><button class="sdp-btn" data-sdp="add">ADD</button></div>`;
+    body.innerHTML=`<div class="sdp-progress"><div class="sdp-track"><div class="sdp-bar" style="width:${s.percent}%"></div></div><div class="sdp-count">${s.done}/${s.total} • ${s.percent}%</div></div><div class="sdp-toolbar"><button class="sdp-btn" data-sdp="refresh">${state.syncing?'SYNCING…':'↻ SYNC API'}</button><button class="sdp-btn ${state.showCompleted?'active':''}" data-sdp="toggle-completed">Show completed</button>${cats.map(c=>`<button class="sdp-btn ${state.filter===c?'active':''}" data-sdp="filter" data-value="${c}">${c==='all'?'All':c}</button>`).join('')}<button class="sdp-btn" data-sdp="npc-best">Best 100 NPC Buy</button><button class="sdp-btn" data-sdp="reset">Reset today</button></div><div class="sdp-sync">${state.apiError?'⚠ '+state.apiError:(s.api?.lastAt?`Last API sync ${new Date(s.api.lastAt).toLocaleTimeString()}`:'API not synced yet')}</div><div class="sdp-list">${rows.map(x=>`<div class="sdp-task ${x.status}" ${taskNavUrl(x.id)?`data-nav-task="${x.id}" role="link" tabindex="0" style="cursor:pointer"`:''}><div class="sdp-icon">${x.icon||'•'}</div><div><div class="sdp-label">${x.label}</div><div class="sdp-detail">${x.detail||x.source||''}</div></div><div><button class="sdp-pill ${x.status}" data-sdp="toggle-task" data-id="${x.id}">${x.status==='done'?'DONE':x.status==='action'?'ACTION':x.status==='na'?'N/A':'SYNC'}</button>${x.id.startsWith('custom-')?`<button class="sdp-btn" data-sdp="remove" data-id="${x.id}">×</button>`:''}</div></div>`).join('')||'<div class="sdp-sync">No tasks in this view.</div>'}</div><div class="sdp-custom"><input placeholder="Add custom task"><button class="sdp-btn" data-sdp="add">ADD</button></div>`;
   }
   function open(){ const p=ensurePanel(); ensureDiagnosticsButton(p); p.classList.add('open'); render(); refreshApi(false); return true; }
   function close(){ const p=document.getElementById('sakalux-suite-daily-progress'); if(p)p.classList.remove('open'); return true; }
@@ -47357,7 +47357,7 @@ function scan(){
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
 (() => {
 'use strict';
-const VERSION='0.9.997';
+const VERSION='0.9.998';
 const MODULES=[
  ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],
  ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],
@@ -47661,4 +47661,19 @@ document.addEventListener('change',schedule,true);document.addEventListener('cli
 new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['checked','disabled','aria-checked','aria-disabled','class']});
 window.addEventListener('SakaLuX:ModuleReady',schedule,{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',schedule,{passive:true});
 setInterval(run,1000);setTimeout(run,60);
+})();
+
+
+/* Best 100 NPC Buy — read-only Daily Progress advisor */
+(()=>{'use strict';
+if(window.__npcAdvisor)return;window.__npcAdvisor=true;
+const names=['Empty Blood Bag','Lollipop','Bottle of Beer','Pepper Spray','Spray Paint Orange','Fruitcake','Lanyard','Brick','Blank DVDs','Kitten Plushie','Sheep Plushie','Teddy Bear Plushie'];
+const shops=['Pharmacy',"Sally's","Bits 'n' Bobs","Big Al's",'Print Store',"Bits 'n' Bobs",'Print Store',"Bits 'n' Bobs",'Super Store',"Bits 'n' Bobs","Bits 'n' Bobs","Bits 'n' Bobs"];
+let rows=[],time=0,error='',loading=false,limit=100;
+const fmt=n=>'$'+Math.round(n).toLocaleString('en-US');
+const safe=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function root(){let e=document.getElementById('npc-best-panel');if(e)return e;e=document.createElement('div');e.id='npc-best-panel';e.style.cssText='display:none;position:fixed;inset:0;z-index:2147483250;background:#070910ef;overflow:auto;padding:16px;color:white;font:13px Arial';e.innerHTML='<section style="max-width:770px;margin:auto;background:#1b2030;border:1px solid #485466;border-radius:12px;padding:16px"></section>';document.body.appendChild(e);e.addEventListener('click',x=>{if(x.target===e||x.target.closest('[data-npc-close]'))e.style.display='none';else if(x.target.closest('[data-npc-refresh]'))sync(true);else if(x.target.closest('[data-npc-city]'))location.href='https://www.torn.com/city.php';});e.addEventListener('change',x=>{if(x.target.matches('[data-npc-limit]')){limit=Math.max(1,Math.min(100,Math.floor(+x.target.value||100)));paint();}});return e;}
+function paint(){let e=document.getElementById('npc-best-panel');if(!e||e.style.display==='none')return;let first=rows.find(x=>x.profit>0);let sum=first?limit+' × '+safe(first.name)+' = '+fmt(limit*first.profit)+' estimated gross profit (subject to stock)':'No verified positive-margin candidate';e.firstElementChild.innerHTML='<header style="display:flex;justify-content:space-between"><b style="font-size:18px">Best 100 NPC Buy</b><button data-npc-close>Close</button></header><p>Read-only. Torn market_value is an estimate, not a live listing. Shop stock and eligibility are not verified.</p><button data-npc-refresh>'+(loading?'Refreshing…':'Refresh prices')+'</button> Remaining purchases <input data-npc-limit type="number" min="1" max="100" value="'+limit+'" style="width:60px"> '+(time?'Updated '+new Date(time).toLocaleTimeString():'Not synced')+(error?'<p style="color:salmon">'+safe(error)+'</p>':'')+'<p><b>'+sum+'</b></p><p>100-unit projections assume sufficient inventory. Daily Progress tracking remains unchanged.</p><div style="overflow:auto"><table style="width:100%;text-align:left"><tr><th>Item / Shop</th><th>Buy</th><th>Market</th><th>Profit/unit</th><th>Profit/100</th></tr>'+rows.map(x=>'<tr><td>'+safe(x.name)+'<small style="display:block">'+safe(x.shop)+'</small></td><td>'+fmt(x.buy)+'</td><td>'+fmt(x.market)+'</td><td>'+fmt(x.profit)+'</td><td>'+fmt(x.profit*100)+'</td></tr>').join('')+'</table></div><button data-npc-city>Open City shops</button>';}
+async function sync(force){if(loading)return;if(!force&&time&&Date.now()-time<900000){paint();return;}const key=String(window.SakaLuXSuiteDailyProgress?.getApiKey?.()||'').trim();if(!key){error='Shared Torn API key unavailable';paint();return;}loading=true;error='';paint();try{const url='https://api.torn.com/v2/torn/items?key='+encodeURIComponent(key);const payload=await new Promise((resolve,reject)=>{const done=t=>{try{const j=JSON.parse(t);if(j.error)throw Error(j.error.error||'API error');resolve(j);}catch(e){reject(e);}};if(typeof GM_xmlhttpRequest==='function')GM_xmlhttpRequest({method:'GET',url,timeout:15000,onload:r=>done(r.responseText),onerror:()=>reject(Error('Network error')),ontimeout:()=>reject(Error('Timeout'))});else fetch(url).then(r=>r.text()).then(done,reject);});const items=payload.items||payload.data?.items||{};let arr=Array.isArray(items)?items:Object.values(items);rows=arr.filter(v=>names.includes(v?.name)).map(v=>({name:v.name,shop:shops[names.indexOf(v.name)],buy:Number(v.buy_price),market:Number(v.market_value)})).filter(v=>v.buy>0&&v.market>0).map(v=>({...v,profit:v.market-v.buy})).sort((a,b)=>b.profit-a.profit);if(!rows.length)throw Error('No matching NPC shop catalog items');time=Date.now();try{localStorage.setItem('sakalux_npc_best100_v1',JSON.stringify({rows,time}));}catch{}}catch(e){error=String(e.message||e);}finally{loading=false;paint();}}
+document.addEventListener('click',e=>{if(!e.target?.closest?.('[data-sdp="npc-best"]'))return;e.preventDefault();e.stopPropagation();let p=root();p.style.display='block';try{let c=JSON.parse(localStorage.getItem('sakalux_npc_best100_v1')||'null');if(c&&Date.now()-c.time<900000){rows=c.rows;time=c.time;}}catch{}paint();sync(false);},true);
 })();
