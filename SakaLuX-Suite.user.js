@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.999
+// @version      0.9.1000
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -845,7 +845,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.999';
+  const VERSION = '0.9.1000';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -47357,7 +47357,7 @@ function scan(){
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
 (() => {
 'use strict';
-const VERSION='0.9.999';
+const VERSION='0.9.1000';
 const MODULES=[
  ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],
  ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],
@@ -47676,6 +47676,9 @@ const money=n=>'$'+Math.round(n).toLocaleString('en-US');
 const escapeText=x=>String(x||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function panel(){let el=document.getElementById('slx-npc-advisor');if(el)return el;el=document.createElement('div');el.id='slx-npc-advisor';el.style.cssText='display:none;position:fixed;inset:0;z-index:2147483400;overflow:auto;background:#080c14ed;padding:14px;color:#f3f5fd;font:13px Arial';el.innerHTML='<section style="max-width:740px;margin:14px auto;background:#1a2231;border:1px solid #516078;border-radius:14px;padding:15px"></section>';document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.closest('[data-npc-close]'))el.style.display='none';if(e.target.closest('[data-npc-refresh]'))refresh(true);if(e.target.closest('[data-npc-city]'))location.href='https://www.torn.com/city.php';});el.addEventListener('change',e=>{if(e.target.matches('[data-npc-remain]')){remaining=Math.max(1,Math.min(100,Number(e.target.value)||100));render();}});return el;}
 function render(){let el=document.getElementById('slx-npc-advisor');if(!el||el.style.display==='none')return;let best=rows.find(x=>x.profit>0);el.firstElementChild.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:18px">🛒 Best 100 NPC Buy</b><button data-npc-close>✕</button></div><p style="color:#b6c4db;line-height:1.5">Shop purchase prices vs. Torn market values. Values are estimates, not confirmed live offers. Shop stock is unknown.</p><div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center"><button data-npc-refresh>'+(busy?'Loading…':'↻ Refresh prices')+'</button><label>Remaining <input type="number" data-npc-remain min="1" max="100" value="'+remaining+'"></label></div><p style="font-size:11px;color:#aebbd0">'+(stamp?'Updated '+new Date(stamp).toLocaleTimeString():'Not synced')+'</p>'+(error?'<p style="color:#ffabab">'+escapeText(error)+'</p>':'')+'<p style="padding:12px;background:#28364d;border-radius:9px"><b>'+(best?escapeText(best.name)+' · '+money(best.profit*remaining)+' gross profit for '+remaining+' units':'No verified profitable candidates')+'</b><small style="display:block;color:#b9c7db">Theoretical maximum, stock not verified.</small></p><div style="overflow:auto"><table style="min-width:530px;width:100%;border-collapse:collapse;text-align:left"><tr><th>Item / shop</th><th>Buy</th><th>Market</th><th>Profit</th><th>100×</th></tr>'+rows.map(x=>'<tr><td><b>'+escapeText(x.name)+'</b><div style="color:#aebbd0">'+escapeText(x.shop)+'</div></td><td>'+money(x.buy)+'</td><td>'+money(x.market)+'</td><td>'+money(x.profit)+'</td><td>'+money(x.profit*100)+'</td></tr>').join('')+'</table></div><button data-npc-city style="margin-top:12px">Open City shops</button>';}
-async function refresh(force=false){if(busy||(!force&&Date.now()-stamp<900000&&rows.length))return;const key=window.SakaLuXSuiteDailyProgress?.getApiKey?.();if(!key){error='Torn API key unavailable';render();return;}busy=true;error='';render();try{const url='https://api.torn.com/torn/?selections=items&key='+encodeURIComponent(key);const data=await new Promise((resolve,reject)=>{const done=t=>{try{const x=JSON.parse(t);if(x.error)throw Error(x.error.error||'API error');resolve(x);}catch(e){reject(e);}};if(typeof GM_xmlhttpRequest==='function')GM_xmlhttpRequest({method:'GET',url,timeout:17000,onload:r=>done(r.responseText),onerror:()=>reject(Error('Network error')),ontimeout:()=>reject(Error('Timeout'))});else fetch(url).then(r=>r.text()).then(done,reject);});rows=Object.values(data.items||{}).filter(x=>candidates[x?.name]).map(x=>({name:x.name,shop:candidates[x.name],buy:Number(x.buy_price),market:Number(x.market_value)})).filter(x=>x.buy>0&&x.market>0).map(x=>({...x,profit:x.market-x.buy})).sort((a,b)=>b.profit-a.profit);if(!rows.length)throw Error('API item catalog returned no matching NPC items');stamp=Date.now();localStorage.setItem('sakalux_npc_best100_fix',JSON.stringify({rows,stamp}));}catch(e){error=String(e.message||e);}finally{busy=false;render();}}
+async function refresh(force=false){if(busy||(!force&&Date.now()-stamp<900000&&rows.length))return;const key=window.SakaLuXSuiteDailyProgress?.getApiKey?.();if(!key){error='Torn API key unavailable';render();return;}busy=true;error='';render();try{const url='https://api.torn.com/torn/?selections=items&key='+encodeURIComponent(key);const data=await new Promise((resolve,reject)=>{const done=t=>{try{const x=JSON.parse(t);if(x.error)throw Error(x.error.error||'API error');resolve(x);}catch(e){reject(e);}};if(typeof GM_xmlhttpRequest==='function')GM_xmlhttpRequest({method:'GET',url,timeout:17000,onload:r=>done(r.responseText),onerror:()=>reject(Error('Network error')),ontimeout:()=>reject(Error('Timeout'))});else fetch(url).then(r=>r.text()).then(done,reject);});rows=Object.values(data.items||{}).filter(x=>candidates[x?.name]).map(x=>({name:x.name,shop:candidates[x.name],buy:Number(x.buy_price),market:Number(x.market_value)})).filter(x=>x.buy>0&&x.market>0).map(x=>({...x,profit:x.market-x.buy})).sort((a,b)=>b.profit-a.profit);if(!rows.length)throw Error('API item catalog returned no matching NPC items');stamp=Date.now();try{localStorage.setItem('sakalux_npc_best100_fix',JSON.stringify({rows,stamp}));}catch(storageError){/* Non-critical cache quota: preserve fetched results in memory. */}}catch(e){error=String(e.message||e);}finally{busy=false;render();}}
 document.addEventListener('click',e=>{if(!e.target?.closest?.('[data-sdp="npc-best"]'))return;e.preventDefault();e.stopImmediatePropagation();let p=panel();p.style.display='block';try{const c=JSON.parse(localStorage.getItem('sakalux_npc_best100_fix')||'null');if(c&&Date.now()-c.stamp<900000){rows=c.rows;stamp=c.stamp;}}catch{}render();refresh();},true);
 })();
+
+/* NPC buy TornPDA theme and readable scroll */
+(()=>{const style=document.createElement('style');style.textContent='#slx-npc-advisor,#slx-npc-advisor section,#slx-npc-advisor table,#slx-npc-advisor th,#slx-npc-advisor td,#slx-npc-advisor td b,#slx-npc-advisor td div{color:#eaf0fc!important}#slx-npc-advisor th{color:#b4c4dd!important}#slx-npc-advisor table{background:#1a2231!important}#slx-npc-advisor{padding-bottom:100px!important;box-sizing:border-box!important}#slx-npc-advisor section{margin-bottom:85px!important}#slx-npc-advisor td{line-height:1.45!important}';document.head.appendChild(style);})();
