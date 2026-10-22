@@ -41,3 +41,10 @@ This document distinguishes verified fixes from work not yet done. No claim is m
 Reviewed 15 `diagnostics/SakaLuX-Gym-*.user.js` files (Diagnostic, Execution-Probe, Lean-Test, Bootstrap-Test, Code-Test, Info-Only-Test, Info-ASCII-Test, Size-Test, Export-Only-Test, Parse-Test, History-Only-Test, CSS-Isolation-Test, v1.5.3-ASCII-Test, History-Isolation-Test, v1.5.5-Details-Test). All 15 returned **distinct Git blob SHAs**, so none is an exact file duplicate of another in this inspected set. These are historical isolation/probe variants and **not** confirmed as valid production backups. They were retained pending a complete workflow and dependency inventory.
 
 GitHub code search for five individual diagnostic file basenames returned no indexed references. A no-result search is insufficient evidence that no dependencies exist, so no diagnostic file deletion was attempted.
+
+## Historical GitHub Actions workflow audit
+
+- `.github/workflows/update-chat-v123.yml` asserts Chat Intelligence `1.2.23`; automatic push triggers have been removed. Manual launch remains available, but may downgrade current scripts.
+- `.github/workflows/update-bounty-hunter-v040.yml` asserts Bounty Hunter `0.4.0`; automatic push triggers have been removed. Manual launch remains available, but may downgrade current scripts.
+- `validate-userscripts.yml`, `release-gate.yml`, and `sakalux-release-sync.yml` remain enabled because they perform current validation or release synchronization.
+- Other version-specific workflows remain to be audited; this is not a complete workflow inventory.
