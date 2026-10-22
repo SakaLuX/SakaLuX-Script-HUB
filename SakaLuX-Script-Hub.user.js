@@ -892,7 +892,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.152';
+    const VERSION = '1.9.153';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -926,6 +926,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.153", "date": "2026-10-22", "changes": ["Version synchronization"]},
         {"version": "1.9.152", "date": "2026-10-22", "changes": ["Version synchronization"]},
         {"version": "1.9.151", "date": "2026-10-22", "changes": ["Version synchronization"]},
         {"version": "1.9.150", "date": "2026-10-21", "changes": ["Version synchronization"]},
