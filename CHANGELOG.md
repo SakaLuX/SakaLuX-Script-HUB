@@ -1,6 +1,6 @@
 # Changelog
 
-## Gym Optimizer v1.7.1 - live Gym energy detection (2026-10-21)
+> **Release metadata note (2026-10-22):** The canonical `SakaLuX-Gym-Optimizer.user.js` and `.meta.js` both declare **v1.7.10**. The Gym release history below currently reaches **v1.7.1**; notes for v1.7.2–v1.7.10 have not been independently reconstructed. Do not treat v1.7.1 as the currently distributed version.\n\n## Gym Optimizer v1.7.1 - live Gym energy detection (2026-10-21)
 
 - Fix false 'Not enough verified energy for even one repetition' with energy available. Prefer Torn's native Gym banner 'You have 15/150 energy' over stale API bars or generic HUD values.
 - Use recent (<30 seconds) API energy only as a fallback, and never advertise 999 available reps when actual current energy or cost cannot be confirmed.
