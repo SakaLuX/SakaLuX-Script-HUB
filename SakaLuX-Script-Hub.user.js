@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.156
+// @version      1.9.157
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3651,7 +3651,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             if(claim.issuer!=='sakalux.ro'||claim.v!==1)throw Error('invalid_certificate_issuer_or_version');
             if(claim.subject!==Number(data.user?.id))throw Error('invalid_certificate_subject');
             if(!Number.isInteger(claim.iat)||!Number.isInteger(claim.exp))throw Error('invalid_certificate_timestamps');
-            if(claim.exp<=now)throw Error('certificate_expired');
+            if(claim.exp<=now)throw Error('certificate_expired_by_'+(now-claim.exp)+'s (issued '+new Date(claim.iat*1000).toISOString()+', expired '+new Date(claim.exp*1000).toISOString()+', device '+new Date(now*1000).toISOString()+')');
             if(claim.iat>now+30)throw Error('certificate_issued_in_future');
             if(claim.exp>claim.iat+300)throw Error('certificate_lifetime_exceeds_300s');
             if(JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))throw Error('certificate_entitlements_mismatch');
