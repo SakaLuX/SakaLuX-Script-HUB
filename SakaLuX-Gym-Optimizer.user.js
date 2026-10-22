@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.7.8
+// @version      1.7.9
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.7.8',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.9',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.7.8',id='gym-optimizer';
+    const ver='1.7.9',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -1276,7 +1276,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.7.8',id='gym-optimizer';
+      const version='1.7.9',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1563,10 +1563,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   let gymTransitionPending=null;
   function onGymNextAction(){
     const current=nativeStats(),actual={...state.values,...current};
-    const active=stats.filter(n=>Number(state.weights[n])>0&&Number(actual[n])>0);
-    const baseline=active.length?Math.max(...active.map(n=>actual[n]/state.weights[n])):0;
-    const next=active.map(n=>({stat:n,gap:Math.max(0,Math.ceil(baseline*state.weights[n])-actual[n])}))
-      .filter(x=>x.gap>0).sort((a,b)=>b.gap-a.gap)[0];
+    const next=recommendedTraining(actual);
     if(!next){render();return}
     const action=gymNextAction(next.stat);
     const msg=body.querySelector('.sf-feedback');
@@ -1679,13 +1676,32 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       ready:false,pre};
   }
 
+  // Prioritize the selected single-stat specialist unlock over ratio balancing.
+  function specialistTrainPriority(actual){
+    const gym=SPECIAL_GYMS.find(g=>g.id===selectedSpecialGym);
+    if(!gym||gym.kind!=='single')return null;
+    const favored=Number(actual[gym.stat]);
+    const secondary=Math.max(...stats.filter(n=>n!==gym.stat).map(n=>Number(actual[n])));
+    if(!Number.isFinite(favored)||!Number.isFinite(secondary)||favored<=0||secondary<=0)return null;
+    const needed=Math.max(0,Math.ceil(secondary*1.25-favored));
+    return needed>0?{stat:gym.stat,gap:needed,target:Math.ceil(secondary*1.25),specialist:true}:null;
+  }
+  function recommendedTraining(actual){
+    const special=specialistTrainPriority(actual);
+    if(special)return special;
+    const active=stats.filter(n=>Number(state.weights[n])>0&&Number(actual[n])>0);
+    if(active.length<2)return null;
+    const baseline=Math.max(...active.map(n=>Number(actual[n])/Number(state.weights[n])));
+    return active.map(n=>({stat:n,gap:Math.max(0,Math.ceil(baseline*state.weights[n])-actual[n])}))
+      .filter(x=>x.gap>0).sort((a,b)=>b.gap-a.gap)[0]||null;
+  }
   function render(){
     const live=nativeStats(),actual={...state.values,...live};
     const active=stats.filter(n=>Number(state.weights[n])>0 && Number(actual[n])>0);
     const baseline=active.length?Math.max(...active.map(n=>actual[n]/state.weights[n])):0;
     const targets=Object.fromEntries(stats.map(n=>[n,Number(state.weights[n])>0?Math.ceil(baseline*state.weights[n]):0]));
     const gaps=active.map(n=>({stat:n,gap:Math.max(0,targets[n]-actual[n])})).sort((a,b)=>b.gap-a.gap);
-    const next=active.length>=2&&gaps.some(x=>x.gap>0)?gaps[0]:null;
+    const next=recommendedTraining(actual);
     const planGym=next?bestAvailable(next.stat):null,estimate=nextGymEstimate();
     const gym=confirmedGym(),total=stats.reduce((sum,n)=>sum+(Number(actual[n])||0),0);
     const complete=stats.every(n=>Number(actual[n])>0);
@@ -1697,11 +1713,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const tab=panel.dataset.tab||'OVERVIEW';
     const esc=escape;
     const tabs=['OVERVIEW','HISTORY','EXPORT','SETTINGS','INFO'];
-    const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>v1.7.8 · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
+    const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>v1.7.9 · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
     const info='<div class="sf-overview"><div><div class="sf-eyebrow">RATIO HEALTH</div><div class="sf-ratio"><b>'+(!complete?' - ':pct>=98?'A':pct>=90?'B':pct>=80?'C':'D')+'</b><span>'+(!complete?'Awaiting stats':pct+'% toward targets')+'<small>SakaLuX Ratio</small></span></div></div><div style="text-align:right"><div class="sf-eyebrow">TOTAL BATTLE STATS</div><div class="sf-total">'+(total?fmt(total):' - ')+'</div><div class="sf-gain">'+(gain==null?'AWAITING NEXT TRAIN':'+'+fmt(gain)+' SINCE LAST TRAIN')+'</div></div></div>';
     const nextAction=gymNextAction(next?.stat,gym);
     const train='<div class="sf-section">TRAIN NEXT</div><div class="sf-card">'
-      +(next?'<div class="sf-main" style="color:'+statColors[next.stat]+'">'+esc(next.stat)+'</div><div>Currently '+fmt(actual[next.stat])+' - Target '+fmt(targets[next.stat])+' - Need +'+fmt(next.gap)+'</div>':'<div class="sf-main">Waiting for stat values</div>')
+      +(next?'<div class="sf-main" style="color:'+statColors[next.stat]+'">'+esc(next.stat)+'</div><div>Currently '+fmt(actual[next.stat])+' - Target '+fmt(next.target||targets[next.stat])+' - Need +'+fmt(next.gap)+'</div>':'<div class="sf-main">Waiting for stat values</div>')
       +'<div class="sf-actions slx-next-action"><button type="button" id="slx-gym-next-action"'+(nextAction.disabled?' disabled':'')+'>'+esc(nextAction.label)+'</button></div>'
       +'<div class="sf-gold">Best verified gym: '+(planGym?esc(planGym.name)+' ('+planGym.dot+' dots)':'not verified')+'</div>'
       +'<p class="sf-estimate">Standard gym progression remembered: '+esc(gymProgressSummary().name||'not yet verified')+' ('+gymProgressSummary().count+' standard stages reached). Previous gyms are suggestions; switch requires Torn confirmation.</p>'
@@ -1784,7 +1800,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.8',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.9',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
@@ -1854,11 +1870,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const button=body.querySelector('#slx-gym-next-action');
     if(!button)return;
     const actual={...state.values,...nativeStats()};
-    const active=stats.filter(n=>Number(state.weights[n])>0&&Number(actual[n])>0);
-    if(active.length<2)return;
-    const baseline=Math.max(...active.map(n=>Number(actual[n])/Number(state.weights[n])));
-    const next=active.map(n=>({stat:n,gap:Math.max(0,Math.ceil(baseline*state.weights[n])-Number(actual[n]))}))
-      .filter(x=>x.gap>0).sort((a,b)=>b.gap-a.gap)[0];
+    const next=recommendedTraining(actual);
     const action=gymNextAction(next?.stat);
     if(button.textContent!==action.label)button.textContent=action.label;
     if(button.disabled!==Boolean(action.disabled))button.disabled=Boolean(action.disabled);
