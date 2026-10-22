@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.89
+// @version      1.8.90
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.89',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.90',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1404,9 +1404,10 @@ function hydrateCompanyTrains(){
  })();
  return companyTrainHydration;
 }
-const get=(k,f=null)=>{if(k===KEY.trains){if(Array.isArray(companyTrainsMemory))return companyTrainsMemory;try{const v=localStorage.getItem(k);if(v!==null){const parsed=JSON.parse(v);if(Array.isArray(parsed)){companyTrainsMemory=parsed;return parsed}}}catch{}}try{if(typeof GM_getValue==='function'){const result=GM_getValue(k,f);if(result&&typeof result.then==='function')return f;if(k===KEY.trains&&Array.isArray(result))companyTrainsMemory=result;return result}}catch{};try{let v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch{return f}};
-const set=(k,v)=>{if(k===KEY.trains&&Array.isArray(v))companyTrainsMemory=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){if(k===KEY.trains)console.warn('[SakaLuX Company] local train storage unavailable',e)}try{if(typeof GM_setValue==='function')return GM_setValue(k,v)}catch(e){if(k===KEY.trains)console.warn('[SakaLuX Company] GM train storage unavailable',e)}};
-const del=k=>{try{if(typeof GM_deleteValue==='function')return GM_deleteValue(k)}catch{};try{localStorage.removeItem(k)}catch{}};
+let companyLocalApiKey=null;
+const get=(k,f=null)=>{if(k===KEY.api){if(typeof companyLocalApiKey==='string')return companyLocalApiKey;try{const v=localStorage.getItem(k);if(v!==null){const saved=JSON.parse(v);if(typeof saved==='string'){companyLocalApiKey=saved;return saved}}}catch{}}if(k===KEY.trains){if(Array.isArray(companyTrainsMemory))return companyTrainsMemory;try{const v=localStorage.getItem(k);if(v!==null){const parsed=JSON.parse(v);if(Array.isArray(parsed)){companyTrainsMemory=parsed;return parsed}}}catch{}}try{if(typeof GM_getValue==='function'){const result=GM_getValue(k,f);if(result&&typeof result.then==='function')return f;if(k===KEY.trains&&Array.isArray(result))companyTrainsMemory=result;return result}}catch{};try{let v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch{return f}};
+const set=(k,v)=>{if(k===KEY.api)companyLocalApiKey=String(v||'').trim();if(k===KEY.trains&&Array.isArray(v))companyTrainsMemory=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){if(k===KEY.trains)console.warn('[SakaLuX Company] local train storage unavailable',e)}try{if(typeof GM_setValue==='function')return GM_setValue(k,v)}catch(e){if(k===KEY.trains)console.warn('[SakaLuX Company] GM train storage unavailable',e)}};
+const del=k=>{if(k===KEY.api)companyLocalApiKey='';try{if(typeof GM_deleteValue==='function')return GM_deleteValue(k)}catch{};try{localStorage.removeItem(k)}catch{}};
 function hubApiKey(){try{const k=String(window.SakaLuXScriptHub?.getApiKey?.()||'').trim();if(k)return k}catch{}try{if(window.SakaLuXScriptHub||document.getElementById('sakalux-hub-button'))return String(localStorage.getItem(HUB_API_STORAGE)||'').trim()}catch{}return''}
 function apiKey(){return String(get(KEY.api,'')||'').trim()||hubApiKey()}
 function apiSource(){return String(get(KEY.api,'')||'').trim()?'Cheie locală Company Intelligence':hubApiKey()?'SakaLuX Script Hub':'Nicio cheie API configurată'}
@@ -2430,8 +2431,8 @@ function act(a){
  if(a==='settings'){S.tab='settings';set(KEY.tab,S.tab);render();return}
  if(a==='refresh'){refresh();return}
  if(a==='edit-positions'){openPositionRequirementsEditor();return}
- if(a==='save-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');globalThis.SakaLuXDialog.notice('API key saved locally.');return}
- if(a==='test-key'){set(KEY.api,$('#ci-api')?.value.trim()||'');S.tab='overview';set(KEY.tab,S.tab);refresh();return}
+ if(a==='save-key'){const value=String($('#ci-api')?.value||'').trim();if(!/^[a-z0-9]{16,32}$/i.test(value)){globalThis.SakaLuXDialog.notice('Introdu o cheie Torn API validă înainte de salvare.');return}set(KEY.api,value);render();globalThis.SakaLuXDialog.notice('Cheie Company salvată. Sursă activă: cheie locală.');return}
+ if(a==='test-key'){const value=String($('#ci-api')?.value||'').trim();if(value){if(!/^[a-z0-9]{16,32}$/i.test(value)){globalThis.SakaLuXDialog.notice('Cheie API invalidă.');return}set(KEY.api,value)}S.tab='overview';set(KEY.tab,S.tab);refresh();return}
  if(a==='clear-key'){del(KEY.api);globalThis.SakaLuXDialog.notice(hubApiKey()?'Local key cleared. The SakaLuX Hub key remains active.':'Local API key cleared.');render();return}
  if(a==='new-agreement')return dialog('Train Agreement',[{name:'company',label:'Company / employee',value:meta().name},{name:'perWeek',label:'Trains promised/week',type:'number',value:10},{name:'cost',label:'Cost/train (0 = free)',type:'number',value:0},{name:'startDate',label:'Starts / wait note',value:'Immediately'},{name:'note',label:'Notes',wide:true}],d=>{let x=arr(KEY.agreements);x.push({...d,perWeek:num(d.perWeek),cost:num(d.cost),ts:now(),active:true});set(KEY.agreements,x)});
  if(a==='import-trains-api')return importConfirmedCompanyTrains();
