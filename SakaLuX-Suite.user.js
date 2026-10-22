@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.992
+// @version      0.9.993
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39097,9 +39097,34 @@ function tlApiGains(item){
         }
     };
     payload.forEach(p=>find(p));
+    // Torn Company training events provide gains in data.working_stats_received.
+    // This field may be a string (e.g. "50 manual labor and 25 intelligence"),
+    // a stat-keyed object, or an array, depending on API representation.
+    const received=item?.data?.working_stats_received;
+    if(received&&typeof received==="object")find(received);
+    const receivedText=typeof received==="string"?received:
+        typeof received==="number"?String(received):"";
+    const parseGainText=(message)=>{
+        const names={MAN:"(?:manual\\s*labou?r|manual|man)",INT:"(?:intelligence|int)",END:"(?:endurance|end)"};
+        for(const [stat,term] of Object.entries(names)){
+            const candidates=[
+                new RegExp("([0-9][0-9,]*)\\s*(?:points?\\s*(?:of|in)\\s*)?"+term+"\\b","ig"),
+                new RegExp(term+"\\s*(?:\\+|:|=|by|of|gained|received)\\s*([0-9][0-9,]*)","ig")
+            ];
+            for(const regex of candidates){
+                let match;
+                while((match=regex.exec(message))!==null){
+                    const n=Number(match[1].replace(/,/g,""));
+                    if(Number.isFinite(n)&&n>0)collected[stat]=Math.max(collected[stat]||0,n);
+                }
+            }
+        }
+    };
+    if(receivedText)parseGainText(receivedText);
     // Some Torn log events place the exact gain only in human-readable text.
     const strings=[item?.description,item?.message,item?.action,item?.details?.description,item?.data?.description,item?.data?.message].filter(x=>typeof x==="string");
     for(const message of strings){
+        parseGainText(message);
         const terms={MAN:"(?:MAN|Manual(?:\\s+Labou?r)?)",INT:"(?:INT|Intelligence)",END:"(?:END|Endurance)"};
         for(const [stat,term] of Object.entries(terms)){
             const m=message.match(new RegExp(term+"\\s*(?:received|gained|increased|by|:|\\+)?\\s*\\+?([0-9][0-9,]*)","i"))||
