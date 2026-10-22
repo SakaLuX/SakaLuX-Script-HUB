@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.155
+// @version      1.9.156
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3647,10 +3647,13 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             if(!await crypto.subtle.verify('Ed25519',key,signature,payloadBytes))throw Error('invalid_certificate_signature');
             const claim=JSON.parse(new TextDecoder().decode(payloadBytes));
             const now=Math.floor(Date.now()/1000);
-            if(claim.issuer!=='sakalux.ro'||claim.v!==1||claim.subject!==Number(data.user?.id)||
-                !Number.isInteger(claim.iat)||!Number.isInteger(claim.exp)||
-                claim.exp<=now||claim.iat>now+30||claim.exp>claim.iat+300||
-                JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))throw Error('invalid_certificate_claims');
+            if(claim.issuer!=='sakalux.ro'||claim.v!==1)throw Error('invalid_certificate_issuer_or_version');
+            if(claim.subject!==Number(data.user?.id))throw Error('invalid_certificate_subject');
+            if(!Number.isInteger(claim.iat)||!Number.isInteger(claim.exp))throw Error('invalid_certificate_timestamps');
+            if(claim.exp<=now)throw Error('certificate_expired');
+            if(claim.iat>now+30)throw Error('certificate_issued_in_future');
+            if(claim.exp>claim.iat+300)throw Error('certificate_lifetime_exceeds_300s');
+            if(JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))throw Error('certificate_entitlements_mismatch');
             return true;
         }
         function clear(){currentKey='';cached=null;cachedAt=0;inFlight=null;retryNotBefore=0;diagnostic={state:'not_checked',received:false,verified:false,expiresAt:null,checkedAt:null};}
