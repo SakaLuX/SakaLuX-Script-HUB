@@ -3870,10 +3870,10 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     onload:r=>{
                         const http=Number(r.status)||0;
                         const raw=String(r.responseText||'');
-                        const contentType=String(r.responseHeaders||'').match(/^content-type:\\s*([^\\r\\n;]+)/im)?.[1]?.trim().toLowerCase()||'unknown';
+                        const contentType=String(r.responseHeaders||'').match(/^content-type:\s*([^\r\n;]+)/im)?.[1]?.trim().toLowerCase()||'unknown';
                         let d;
                         try{d=JSON.parse(raw);}catch{
-                            const kind=/^\\s*</.test(raw)?'HTML response':!raw.trim()?'empty response':'invalid JSON';
+                            const kind=/^\s*</.test(raw)?'HTML response':!raw.trim()?'empty response':'invalid JSON';
                             reject(new Error('Server returned '+kind+' (HTTP '+http+', content-type: '+contentType+'). Check hub-premium-check.php and server/PHP logs.'));
                             return;
                         }
