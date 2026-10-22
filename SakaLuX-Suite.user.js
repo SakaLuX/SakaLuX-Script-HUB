@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.993
+// @version      0.9.994
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39121,6 +39121,19 @@ function tlApiGains(item){
         }
     };
     if(receivedText)parseGainText(receivedText);
+    // Handle API scalar, arrays and JSON-encoded values without guessing stat names.
+    if(typeof received==="string"){
+        try{const parsed=JSON.parse(received);if(parsed&&typeof parsed==="object")find(parsed);}catch{}
+    }
+    if(Array.isArray(received)){
+        for(const value of received){
+            if(typeof value==="string")parseGainText(value);
+            else if(value&&typeof value==="object")find(value);
+        }
+    }
+    if(typeof received==="number"&&Number.isFinite(received)&&received>0&&!Object.keys(collected).length){
+        collected.WORK=""+received;
+    }
     // Some Torn log events place the exact gain only in human-readable text.
     const strings=[item?.description,item?.message,item?.action,item?.details?.description,item?.data?.description,item?.data?.message].filter(x=>typeof x==="string");
     for(const message of strings){
@@ -39156,8 +39169,10 @@ function tlApiExtract(raw,types){
         // Training received by the key owner: no employee field is required in the event.
         const name=String(d.employee_name||d.employee?.name||d.target_name||d.target?.name||d.user_name||d.name||"Me").trim();
         const gains=tlApiGains(item);
+        const received=d.working_stats_received;
+        const receivedDebug=received===undefined?"missing":JSON.stringify(received)?.slice(0,260)||String(received);
         const schemaPaths=(obj,prefix="",depth=0)=>depth>2||!obj||typeof obj!=="object"?[]:Object.entries(obj).flatMap(([k,v])=>{const path=prefix?prefix+"."+k:k;return v&&typeof v==="object"?schemaPaths(v,path,depth+1):[path];}).slice(0,36);
-        return {ts,name,company:String(d.company_name||d.company?.name||""),role:String(d.position||""),gains,apiLogId:id,apiImported:true,apiSchema:schemaPaths({data:d,details:detail})};
+        return {ts,name,company:String(d.company_name||d.company?.name||""),role:String(d.position||""),gains,receivedDebug,apiLogId:id,apiImported:true,apiSchema:schemaPaths({data:d,details:detail})};
     }).filter(Boolean);
 }
 async function tlSyncApi(manual=false){
@@ -39212,6 +39227,7 @@ async function tlSyncApi(manual=false){
                         updated++;
                     }
                     if(entry.apiSchema?.length)stored.apiSchema=entry.apiSchema;
+                    if(entry.receivedDebug!==undefined)stored.receivedDebug=entry.receivedDebug;
                     continue;
                 }
                 known.add(entry.apiLogId);data.entries.push(entry);added++;
@@ -40279,7 +40295,7 @@ function tlRenderLog(entries){
     const html=entries.map(e=>{
         const gainHtml=e.gains?.length
             ?`<div class="tl-log-gains">${e.gains.map(g=>`<span class="tl-log-gain">${escHtml(g)}</span>`).join("")}</div>`
-            :`<div style="font-size:11px;color:var(--sakalux-textMuted);margin-top:8px">No exact gain values in this API log. Try Import API to refresh.${e.apiSchema?.length?`<div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">Available fields: ${escHtml(e.apiSchema.join(", "))}</div>`:""}</div>`;
+            :`<div style="font-size:11px;color:var(--sakalux-textMuted);margin-top:8px">No exact stat breakdown found. <div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">working_stats_received: ${escHtml(e.receivedDebug||"not stored")}</div>${e.apiSchema?.length?`<div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">Available fields: ${escHtml(e.apiSchema.join(", "))}</div>`:""}</div>`;
         return`<details class="tl-log-entry" style="display:block;cursor:pointer"><summary style="display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none"><span class="tl-log-name">${escHtml(e.name)}${e.manual?' <small>(manual)</small>':""}${e.paid?' <small>✓ Paid</small>':""}</span><span class="tl-log-ts">${tlFmtDate(e.ts)} ▾</span></summary><div style="padding-top:10px;border-top:1px solid var(--sakalux-border);margin-top:10px"><div style="font-size:11px;color:var(--sakalux-textMuted)">Working stats received</div>${gainHtml}</div></details>`;
     }).join("");
     return`<div class="tl-log-list">${html}</div>`;
