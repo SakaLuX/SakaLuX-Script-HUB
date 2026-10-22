@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.93
+// @version      1.8.94
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.93',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.94',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2126,6 +2126,16 @@ async function importMyTrainingLog(){
     // Torn Company training exposes received gains as a string, not individual numeric fields.
     const receivedText=String(data?.working_stats_received||'').trim();
     if(receivedText){
+      // Torn's company training log serializes received work stats as
+      // "manual_labor,intelligence,endurance", e.g. "50,25,0".
+      // Empty positions mean zero. Parse the three positions BEFORE text-based parsing.
+      const csv=receivedText.split(',');
+      if(csv.length===3&&csv.every(v=>/^\s*(?:\d+(?:\.\d+)?|)\s*$/.test(v))){
+       ['Manual Labor','Intelligence','Endurance'].forEach((stat,index)=>{
+        const value=Number(csv[index].trim()||0);
+        if(Number.isFinite(value)&&value>0)add(stat,value);
+       });
+      }
       collect(receivedText);
       // Support "+50 intelligence", "50 intelligence", and "intelligence: 50" formats.
       for(const hit of receivedText.matchAll(/(?:\+?([\d,.]+)\s*(?:points?\s*(?:of|in)\s*)?(manual\s*labor|intelligence|endurance)|(manual\s*labor|intelligence|endurance)\s*(?:\+|:|=|gained?\s*)\s*([\d,.]+))/gi))
