@@ -1081,13 +1081,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // TornPDA can render the heading, cost and TRAIN button in sibling wrappers.
   function nativeGymEnergyCost(stat,tile){
     if(!tile)return null;
-    const pattern=/(\\d{1,3})\\s*(?:energy|e)\\s*(?:per|\\/)\\s*(?:train|training|rep(?:etition)?)/i;
+    const pattern=/(\d{1,3})\s*(?:energy|e)\s*(?:per|\/)\s*(?:train|training|rep(?:etition)?)/i;
     let node=tile;
     for(let depth=0;node&&depth<5;depth++,node=node.parentElement){
       if(node.contains(panel))break;
-      const raw=String(node.innerText||node.textContent||'').replace(/\\s+/g,' ').trim();
-      // A containing grid with other stats cannot provide unambiguous cost.
-      if(stats.some(other=>other!==stat&&new RegExp('\\\\b'+other+'\\\\s+[\\\\d,.]+','i').test(raw)))break;
+      const raw=String(node.innerText||node.textContent||'').replace(/\s+/g,' ').trim();
+      // Avoid reading another stat's cost from a multi-card container.
+      if(stats.some(other=>other!==stat&&new RegExp('\\b'+other+'\\s+[\\d,.]+','i').test(raw)))break;
       const match=raw.match(pattern);
       if(match){
         const cost=Number(match[1]);
