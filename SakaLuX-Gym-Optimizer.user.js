@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.7.9
+// @version      1.7.10
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.7.9',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.10',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -852,7 +852,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.7.9',id='gym-optimizer';
+    const ver='1.7.10',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -1276,7 +1276,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.7.9',id='gym-optimizer';
+      const version='1.7.10',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1336,9 +1336,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
     return output;
   }
+  let gymApiRefreshPending=false;
   async function refreshGymApi(){
+    if(gymApiRefreshPending)return;
     const {key,source}=resolveGymApiKey();
     if(!key){gymApi.status='No Hub or personal API key available';render();return}
+    gymApiRefreshPending=true;
     gymApi.status='Loading';render();
     try{
       // A dedicated perks request works with legacy Torn API field layouts
@@ -1358,6 +1361,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }catch(e){
       gymApi.status='Unavailable ('+source+'): '+String(e.message||e).replace(key,'[key]').slice(0,100);
     }
+    gymApiRefreshPending=false;
     render();
   }
   function gymGainPercent(stat){
@@ -1713,7 +1717,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const tab=panel.dataset.tab||'OVERVIEW';
     const esc=escape;
     const tabs=['OVERVIEW','HISTORY','EXPORT','SETTINGS','INFO'];
-    const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>v1.7.9 · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
+    const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>v1.7.10 · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
     const info='<div class="sf-overview"><div><div class="sf-eyebrow">RATIO HEALTH</div><div class="sf-ratio"><b>'+(!complete?' - ':pct>=98?'A':pct>=90?'B':pct>=80?'C':'D')+'</b><span>'+(!complete?'Awaiting stats':pct+'% toward targets')+'<small>SakaLuX Ratio</small></span></div></div><div style="text-align:right"><div class="sf-eyebrow">TOTAL BATTLE STATS</div><div class="sf-total">'+(total?fmt(total):' - ')+'</div><div class="sf-gain">'+(gain==null?'AWAITING NEXT TRAIN':'+'+fmt(gain)+' SINCE LAST TRAIN')+'</div></div></div>';
     const nextAction=gymNextAction(next?.stat,gym);
     const train='<div class="sf-section">TRAIN NEXT</div><div class="sf-card">'
@@ -1800,7 +1804,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.9',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.10',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
@@ -1876,10 +1880,31 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if(button.disabled!==Boolean(action.disabled))button.disabled=Boolean(action.disabled);
   }
 
+  // One API refresh per Gym page entry, approximately 10 seconds after opening.
+  // Route changes cancel pending timers; unrelated Torn pages never trigger Gym API calls.
+  let gymAutoRefreshTimer=null;
+  let gymAutoRefreshEntry=null;
+  function scheduleGymAutoRefresh(){
+    if(!onGym()){
+      if(gymAutoRefreshTimer!==null)clearTimeout(gymAutoRefreshTimer);
+      gymAutoRefreshTimer=null;gymAutoRefreshEntry=null;
+      return;
+    }
+    const entry=location.pathname+location.search;
+    if(gymAutoRefreshEntry===entry)return;
+    if(gymAutoRefreshTimer!==null)clearTimeout(gymAutoRefreshTimer);
+    gymAutoRefreshEntry=entry;
+    gymAutoRefreshTimer=setTimeout(()=>{
+      gymAutoRefreshTimer=null;
+      if(onGym()&&gymAutoRefreshEntry===location.pathname+location.search)refreshGymApi();
+    },10000);
+  }
+  scheduleGymAutoRefresh();
   let lastUrl=location.href;
   let previousGymUiName=null;
   setInterval(()=>{
-    if(location.href!==lastUrl){lastUrl=location.href;render()}
+    if(location.href!==lastUrl){lastUrl=location.href;scheduleGymAutoRefresh();render()}
+    else scheduleGymAutoRefresh();
     registerGym();mount();watchGymHistory();syncNextActionButton();
     const current=confirmedGym();
     if(current&&current!==previousGymUiName){
