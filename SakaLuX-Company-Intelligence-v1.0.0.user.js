@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.94
+// @version      1.8.95
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.94',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.95',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -1397,8 +1397,9 @@ function hydrateCompanyTrains(){
    if(seen.has(hash))continue;
    seen.add(hash);merged.push(row);
   }
-  companyTrainsMemory=merged;
-  if(merged.length)try{localStorage.setItem(KEY.trains,JSON.stringify(merged))}catch{}
+  const cleaned=ciDedupeTrains(merged);
+  companyTrainsMemory=cleaned;
+  if(cleaned.length){try{localStorage.setItem(KEY.trains,JSON.stringify(cleaned))}catch{};try{if(typeof GM_setValue==='function'){const v=GM_setValue(KEY.trains,cleaned);if(v?.then)await v}}catch{}}
   if(S.open&&S.mode==='employee'&&S.tab==='trains')render();
   return merged;
  })();
@@ -2188,7 +2189,7 @@ async function importMyTrainingLog(){
    to=oldest-1;
   }
   if(found.length||enriched){
-   const merged=saved.concat(found);
+   const merged=ciDedupeTrains(saved.concat(found));
    companyTrainsMemory=merged;
    let gmSaved=false,localSaved=false;
    try{
@@ -2298,12 +2299,32 @@ function employeePosition(){
  const table=card('Best Position Advisor',`<div class="ci-tablewrap ci-mobile-cards ci-position-table"><table><thead><tr><th>Position</th><th>Fit</th><th>Primary</th><th>Secondary</th><th>Status</th></tr></thead><tbody>${rows.map(p=>`<tr><td class="ci-person-cell" data-label="Position"><b>${esc(p.name)}${p.name===current?' · CURRENT':''}</b></td><td data-label="Fit">${p.fit}%</td><td data-label="Primary">${p.primary?fmt(p.primary.value)+' '+statShort(p.primary.stat):'—'}</td><td data-label="Secondary">${p.secondary?fmt(p.secondary.value)+' '+statShort(p.secondary.stat):'—'}</td><td data-label="Status">${p.estimated?badge('ESTIMATED','warn'):badge(p.qualified?'QUALIFIED':'BUILD STATS',p.qualified?'good':'warn')}</td></tr>`).join('')}</tbody></table></div><p class="ci-note">${esc(source)}. Priority: Torn API → Company Positions → manual values → coworker estimate.</p>`);
  return `<div class="ci-grid">${currentCard}${recommendation}${table}</div>`;
 }
+function ciShortStat(v){v=String(v||'').toLowerCase();return /manual|^man$/.test(v)?'MAN':/intelligence|^int$/.test(v)?'INT':/endurance|^end$/.test(v)?'END':'—'}
+function ciGains(row){
+ const arr=Array.isArray(row.gains)?row.gains:[],result=new Map();
+ for(const g of arr){const stat=ciShortStat(g.stat||g.name),value=Number(g.amount??g.value);if(stat!=='—'&&Number.isFinite(value)&&value>0)result.set(stat,value)}
+ if(!result.size&&typeof row.rawGains==='string'){const csv=row.rawGains.split(',');if(csv.length===3&&csv.every(v=>/^\s*\d*\s*$/.test(v)))['MAN','INT','END'].forEach((k,i)=>{if(Number(csv[i])>0)result.set(k,Number(csv[i]))})}
+ return [...result].map(([stat,amount])=>({stat,amount}));
+}
+function ciDedupeTrains(rows){
+ const output=[],keys=new Map();
+ for(const row of rows||[]){
+  if(!row||typeof row!=='object')continue;
+  const gains=ciGains(row).map(x=>x.stat+':'+x.amount).sort().join('|');
+  const key=row.apiLogId?'api:'+String(row.apiLogId):'manual:'+Number(row.ts||0)+'|'+String(row.employee||'').toLowerCase()+'|'+gains+'|'+ciShortStat(row.primary)+'|'+ciShortStat(row.secondary);
+  const idx=keys.get(key);
+  if(idx===undefined){keys.set(key,output.length);output.push(row)}
+  else if(ciGains(row).length>ciGains(output[idx]).length)output[idx]=row;
+ }
+ return output;
+}
+function ciTrainNote(row){return row.apiLogId||/torn user\/log|api/i.test(String(row.source||''))?'Adăugat de director':'Adăugat de mine'}
 function employeeTrains(){
- const ag=arr(KEY.agreements).filter(x=>x.active!==false).slice(-1)[0],logs=arr(KEY.trains).slice().sort((a,b)=>b.ts-a.ts),got=logs.filter(x=>now()-x.ts<7*86400000).length,weekly=ag?num(ag.perWeek)*75:0;
+ const ag=arr(KEY.agreements).filter(x=>x.active!==false).slice(-1)[0],logs=ciDedupeTrains(arr(KEY.trains)).slice().sort((a,b)=>b.ts-a.ts),got=logs.filter(x=>now()-x.ts<7*86400000).length,weekly=ag?num(ag.perWeek)*75:0;
  return `<div class="ci-actions ci-employee-train-actions"><button class="ci-btn primary" data-act="new-agreement">+ Agreement</button><button class="ci-btn" data-act="import-my-trains">↻ IMPORT</button><button class="ci-btn" data-act="log-train">+ Received train</button></div>
  <div class="ci-grid">${card('Current Agreement',ag?kv('Promised',fmt(ag.perWeek)+'/week')+kv('Received 7d',got+'/'+fmt(ag.perWeek))+kv('Price',ag.cost?money(ag.cost):'FREE')+kv('Starts',esc(ag.startDate||'Now')):empty('No active agreement.'))}
  ${card('Projection',ag?kv('7 days','~+'+fmt(weekly)+' work stats')+kv('30 days','~+'+fmt(weekly*30/7))+kv('90 days','~+'+fmt(weekly*90/7))+kv('Weekly cost',money(num(ag.perWeek)*num(ag.cost))):empty('Add an agreement first.'))}</div>
- ${card('Train History',logs.length?`<div class="ci-tablewrap"><table><thead><tr><th>Date</th><th>Primary</th><th>Secondary</th><th>Gains</th><th>Note</th></tr></thead><tbody>${logs.slice(0,50).map(x=>`<tr><td>${new Date(x.ts).toLocaleString()}</td><td>${esc(x.primary)}</td><td>${esc(x.secondary)}</td><td>${esc(Array.isArray(x.gains)&&x.gains.length?x.gains.map(g=>g.stat+' +'+g.amount).join(', ')  :x.rawGains||'Nespecificat în logul API')}</td><td>${esc(x.note||'')}</td></tr>`).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
+ ${card('Train History',logs.length?`<div class="ci-tablewrap" style="overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch"><table style="min-width:610px;width:max-content"><thead><tr><th>DATE</th><th>PRIMARY</th><th>SECONDARY</th><th>GAINS</th><th>NOTE</th></tr></thead><tbody>${logs.slice(0,100).map(x=>{const gains=ciGains(x),sorted=gains.slice().sort((a,b)=>b.amount-a.amount),p=sorted[0]?.stat||ciShortStat(x.primary),secondary=sorted[1]?.stat||ciShortStat(x.secondary);return `<tr><td style="white-space:nowrap">${new Date(x.ts).toLocaleString()}</td><td>${esc(p)}</td><td>${esc(secondary)}</td><td style="white-space:nowrap">${esc(gains.length?gains.map(g=>g.stat+' +'+g.amount).join(', '):'—')}</td><td style="white-space:nowrap">${esc(ciTrainNote(x))}</td></tr>`}).join('')}</tbody></table></div>`:empty('No trains logged.'))}`;
 }
 function offerScore(o){return num(o.dailySalary)*7+num(o.trainsPerWeek)*(num(o.trainValue,500000)-num(o.trainCost))+num(o.stars)*50000}
 function employeeOffers(){
