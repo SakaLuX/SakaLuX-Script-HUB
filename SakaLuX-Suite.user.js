@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.994
+// @version      0.9.995
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -39120,7 +39120,17 @@ function tlApiGains(item){
             }
         }
     };
-    if(receivedText)parseGainText(receivedText);
+    if(receivedText){
+        parseGainText(receivedText);
+        // Torn encodes working stats as MAN,INT,END comma-separated triplets.
+        const csv=receivedText.trim().match(/^([+-]?\\d+(?:\\.\\d+)?)\\s*,\\s*([+-]?\\d+(?:\\.\\d+)?)\\s*,\\s*([+-]?\\d+(?:\\.\\d+)?)$/);
+        if(csv){
+            ["MAN","INT","END"].forEach((name,index)=>{
+                const amount=Number(csv[index+1]);
+                if(Number.isFinite(amount)&&amount>0)collected[name]=amount;
+            });
+        }
+    }
     // Handle API scalar, arrays and JSON-encoded values without guessing stat names.
     if(typeof received==="string"){
         try{const parsed=JSON.parse(received);if(parsed&&typeof parsed==="object")find(parsed);}catch{}
