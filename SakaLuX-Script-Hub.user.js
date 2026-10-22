@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.151
+// @version      1.9.152
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3891,7 +3891,19 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                     onerror:()=>reject(new Error('Network unavailable')),
                     ontimeout:()=>reject(new Error('Request timed out'))
                 }));
-                showPremium(data);
+                // A successful server response is not enough to enable PRO:
+                // synchronize through the shared broker (including certificate validation).
+                try {
+                    await refreshHubProStatus(true);
+                    const live=globalThis.__SakaLuXPremiumVerified;
+                    if(live?.key===key&&live?.data?.status==='ok'){
+                        showPremium(live.data);
+                    }else{
+                        showPremium(data,'Server confirmed the account, but shared PRO verification has not completed. Check the PRO button diagnostic.');
+                    }
+                }catch(verificationError){
+                    showPremium(data,'Server confirmed the account, but shared PRO verification failed: '+String(verificationError?.message||'unknown error'));
+                }
             }catch(error){showPremium({},String(error?.message||'License check failed'));}
             finally{button.disabled=false;}
         };
