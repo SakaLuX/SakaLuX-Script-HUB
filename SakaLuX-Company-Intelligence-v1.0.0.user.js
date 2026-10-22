@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.91
+// @version      1.8.92
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1333,7 +1333,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.91',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.92',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2139,7 +2139,18 @@ async function importMyTrainingLog(){
     const unique=[...new Map(gains.map(g=>[g.stat,g])).values()];
     if(!unique.length){
      noGains++;
-     if(exampleFields.size<15)for(const key of Object.keys(data||{}).slice(0,15)){if(exampleFields.size<15)exampleFields.add(key)}
+     if(exampleFields.size<18){
+      const scopes=[['data',data],['params',x?.params],['details',x?.details]];
+      for(const [scope,obj] of scopes){
+       if(!obj||typeof obj!=='object')continue;
+       for(const [key,val] of Object.entries(obj).slice(0,25)){
+        if(exampleFields.size>=18)break;
+        if(/key|token|secret|message|text|name|user|id|company|target/i.test(key))continue;
+        const kind=typeof val==='number'?'number':typeof val==='string'&&/^\\d+(?:\\.\\d+)?$/.test(val)?'numeric-string':Array.isArray(val)?'array':typeof val;
+        exampleFields.add(scope+'.'+key+' ['+kind+']');
+       }
+      }
+     }
     }
     const gained=unique.map(g=>g.stat+' +'+g.amount).join(', ');
     const first=unique[0]?.stat||'Unknown',second=unique[1]?.stat||'Unknown';
@@ -2182,7 +2193,7 @@ async function importMyTrainingLog(){
    try{const read=GM_getValue(KEY.trains,[]);const stored=read&&typeof read.then==='function'?await read:read;diskConfirmed=found.filter(x=>Array.isArray(stored)&&stored.some(y=>String(y.apiLogId)===String(x.apiLogId))).length;}catch{}
   }
   const total=arr(KEY.trains).filter(row=>row.apiLogId).length;
-  alert('Import Company: '+found.length+' noi · '+total+' trainuri în istoric · '+trainingCandidates+' evenimente training · '+noGains+' fără valori numerice identificabile. '+(enriched?enriched+' trainuri vechi completate. ':'')+(noGains?'Câmpuri API (doar nume, fără date personale): '+([...exampleFields].join(', ')||'niciunul')+'. ':'')+(found.length&&!diskConfirmed?'Persistența locală nu este încă confirmată. ':''));
+  alert('Import Company: '+found.length+' noi · '+total+' trainuri în istoric · '+trainingCandidates+' evenimente training · '+noGains+' fără valori numerice identificabile. '+(enriched?enriched+' trainuri vechi completate. ':'')+(noGains?'Structura logului (numai nume de câmpuri și tipuri): '+([...exampleFields].join(', ')||'niciunul')+'. ':'')+(found.length&&!diskConfirmed?'Persistența locală nu este încă confirmată. ':''));
 
  }catch(e){
   const code=num(e?.code,-1),msg=String(e?.message||e);
