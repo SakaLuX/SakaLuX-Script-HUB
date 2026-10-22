@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.154
+// @version      1.9.155
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -3664,13 +3664,13 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
             if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
             const requestKey=key;
             const p=new Promise((resolve,reject)=>{
-                GM_xmlhttpRequest({
-                    method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-                    headers:{'Content-Type':'application/json','Accept':'application/json'},
-                    data:JSON.stringify({api_key:requestKey}),timeout:15000,
-                    onload:async r=>{
-                        try{
-                            const d=JSON.parse(r.responseText||'{}');
+                let settled=false;
+                const fail=e=>{if(settled)return;settled=true;reject(e);};
+                const onResponse=async r=>{
+                    if(settled)return;
+                    if(!r||typeof r!=='object'){fail(Error('transport_empty_response'));return;}
+                    try{
+                        const d=JSON.parse(String(r.responseText??r.response??'{}'));
                             if(r.status===429||d.status==='rate_limited'){
                                 const retryHeader=String(r.responseHeaders||'').match(/^retry-after:\s*(\d+)/im);
                                 const waitSeconds=Math.max(60,Math.min(900,Number(retryHeader?.[1]||90)));
@@ -3681,15 +3681,29 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
                             if(!validResponse(d))throw Error('invalid_license_response');
                             let verified=false;
                             if(d.premium_active&&d.signed_certificate)verified=await slxVerifySignedGrant(d);
-                            if(currentKey!==requestKey){reject(Error('identity_changed'));return;}
+                            if(currentKey!==requestKey){fail(Error('identity_changed'));return;}
                             retryNotBefore=0;cached=d;cachedAt=Date.now();
                             updateDiag({state:d.premium_active?(verified?'verified':'unsigned'):'free',received:!!d.signed_certificate,verified,expiresAt:verified?new Date(JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(d.signed_certificate.payload.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-d.signed_certificate.payload.length%4)%4)),c=>c.charCodeAt(0)))).exp*1000).toISOString():null});
-                            resolve(d);
-                        }catch(e){if(currentKey===requestKey)updateDiag({state:String(e?.message||'verification_error').slice(0,110),received:false,verified:false,expiresAt:null});reject(e);}
-                    },
-                    onerror:()=>reject(Error('network_unavailable')),
-                    ontimeout:()=>reject(Error('timeout'))
-                });
+                            settled=true;resolve(d);
+                        }catch(e){
+                            if(currentKey===requestKey)updateDiag({state:String(e?.message||'verification_error').slice(0,110),received:false,verified:false,expiresAt:null});
+                            fail(e);
+                        }
+                };
+                try{
+                    const request=GM_xmlhttpRequest({
+                        method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+                        headers:{'Content-Type':'application/json','Accept':'application/json'},
+                        data:JSON.stringify({api_key:requestKey}),timeout:15000,
+                        onload:onResponse,
+                        onerror:()=>fail(Error('network_unavailable')),
+                        ontimeout:()=>fail(Error('timeout'))
+                    });
+                    // Torn PDA builds may resolve a Promise rather than call onload.
+                    if(request&&typeof request.then==='function'){
+                        Promise.resolve(request).then(value=>{if(value!==undefined)void onResponse(value);},()=>fail(Error('network_unavailable')));
+                    }
+                }catch(e){fail(e);}
             });
             inFlight=p;
             try{return await p}finally{if(inFlight===p)inFlight=null;}
