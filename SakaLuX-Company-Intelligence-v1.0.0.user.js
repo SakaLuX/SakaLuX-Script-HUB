@@ -839,7 +839,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (()=>{
  'use strict';
  const MATCH=new RegExp("director",'i');
- const ROOT=new RegExp("ci-root|ci-shell|company",'i');
+ const ROOT=new RegExp("(?:^|\\s)(?:ci-root|ci-shell)(?:\\s|$)",'i');
  const STYLE_ID='slx-premium-badge-style';
  function decorate(){
   if(!document.body)return;
