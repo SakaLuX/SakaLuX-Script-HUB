@@ -140,7 +140,7 @@
 - Client-side gating is not tamper-resistant; genuinely protected premium calculations must execute on a licensed backend.
 
 
-### v1.17.64 — 2026-10-10
+**Additional notes for v1.17.64 (historical entry):**
 - Added direct execution-entry checks for covered PRO functionality, including stock rebalance, Bazaar bulk updates, Museum scan and Elimination FF/calibration.
 - Retains basic FREE functions and GreasyFork distribution URLs.
 - Remaining execution paths and browser integration still need verification; JavaScript alone is not a secure server-side paywall.
