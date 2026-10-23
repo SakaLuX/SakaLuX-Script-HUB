@@ -3744,10 +3744,28 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         }))}catch{}
     }
     function discardVerifiedHubPro(){try{localStorage.removeItem(HUB_PRO_CACHE_KEY)}catch{}}
+
+    // Cross-realm transport only. Consumers MUST independently verify Ed25519 and current Torn identity.
+    const SIGNED_GRANT_STORAGE_KEY='SakaLuX_SIGNED_PRO_GRANT_V1';
+    async function publishSignedHubGrant(apiKey,data){
+        if(data?.status!=='ok'||data.premium_active!==true||!data.signed_certificate||
+           slxLicenseBroker.diagnostics()?.verified!==true)return;
+        const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(apiKey));
+        const keyHash=Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
+        if(getSharedApiKey()!==apiKey)return; // account switched during async hashing
+        const payload={status:'ok',premium_active:true,user:data.user,
+            entitlements:data.entitlements,expires_at:data.expires_at,
+            signed_certificate:data.signed_certificate};
+        try{localStorage.setItem(SIGNED_GRANT_STORAGE_KEY,JSON.stringify({keyHash,data:payload}))}catch{}
+    }
+    function clearSignedHubGrant(){
+        try{localStorage.removeItem(SIGNED_GRANT_STORAGE_KEY)}catch{}
+    }
+
     async function refreshHubProStatus(force=false){
         const button=document.getElementById('slh-premium');
         const key=getSharedApiKey();
-        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;hubProPending=null;slxLicenseBroker.clear();delete globalThis.__SakaLuXPremiumVerified;const last=restoreVerifiedHubPro(key);if(last){hubProCache=last.data;hubProCheckedAt=last.at;globalThis.__SakaLuXPremiumVerified={key,data:last.data,at:last.at};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{...last.data,verification_state:'cached'}}));paintHubProStatus(button,last.data);}else window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null,verification_state:'checking'}}));}
+        if(key!==hubProKey){hubProKey=key;hubProCache=null;hubProCheckedAt=0;hubProPending=null;slxLicenseBroker.clear();clearSignedHubGrant();delete globalThis.__SakaLuXPremiumVerified;const last=restoreVerifiedHubPro(key);if(last){hubProCache=last.data;hubProCheckedAt=last.at;globalThis.__SakaLuXPremiumVerified={key,data:last.data,at:last.at};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{...last.data,verification_state:'cached'}}));paintHubProStatus(button,last.data);}else window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:false,entitlements:[],expires_at:null,verification_state:'checking'}}));}
         if(!key){if(button){button.title='Premium: add Torn API key in Settings';button.textContent='PRO';button.style.borderColor='#74603b';}return;}
         if(typeof GM_xmlhttpRequest!=='function'){if(button)button.title='Premium status unavailable';queueHubProRecovery('transport_unavailable');return;}
         const cachedExpiry=hubProCache?.expires_at?Date.parse(String(hubProCache.expires_at).replace(' ','T')+'Z'):NaN;
@@ -3760,7 +3778,7 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if(button)button.title='Checking PRO license…';
         const request=slxLicenseBroker.check(key,{force});
         hubProPending=request;
-        try{const d=await request;if(getSharedApiKey()!==key)return;hubProCache=d;hubProCheckedAt=Date.now();clearHubProRecovery();if(d?.status==='ok'&&d?.premium_active===true)rememberVerifiedHubPro(key,d);else if(d?.status==='ok')discardVerifiedHubPro();globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
+        try{const d=await request;if(getSharedApiKey()!==key)return;hubProCache=d;hubProCheckedAt=Date.now();clearHubProRecovery();if(d?.status==='ok'&&d?.premium_active===true){rememberVerifiedHubPro(key,d);void publishSignedHubGrant(key,d).catch(()=>{});}else if(d?.status==='ok'){discardVerifiedHubPro();clearSignedHubGrant();}globalThis.__SakaLuXPremiumVerified={key:hubProRequestKey,data:d,at:Date.now()};window.dispatchEvent(new CustomEvent('SakaLuX:PremiumStatus',{detail:{premium_active:!!d.premium_active,entitlements:Array.isArray(d.entitlements)?d.entitlements:[],expires_at:d.expires_at||null}}));paintHubProStatus(document.getElementById('slh-premium'),d);}
         catch(error){
             if(getSharedApiKey()!==key)return; // stale in-flight response after account switch
             // A transport/rate-limit failure is UNKNOWN, not FREE. Preserve an unexpired,
