@@ -1,13 +1,9 @@
 name: Prepare PR50 userscript release bumps
 on:
-  push:
-    branches:
-      - release/bump-signed-license-scripts-20261023
-    paths:
-      - '.github/workflows/prepare-pr50-version-bumps.yml'
   pull_request:
     paths:
       - '.github/workflows/prepare-pr50-version-bumps.yml'
+      - 'tools/bump_pr50_releases.py'
   workflow_dispatch:
 permissions:
   contents: write
