@@ -38,7 +38,9 @@
     try{
       const saved=JSON.parse(storage.getItem(STORAGE_KEY)||'null');
       if(saved?.keyHash!==await hash(apiKey))return null;
-      return await verify(saved.data,{apiKey,entitlement,userId})?saved.data:null;
+      if(!await verify(saved.data,{apiKey,entitlement,userId}))return null;
+      const claim=JSON.parse(new TextDecoder().decode(decode(saved.data.signed_certificate.payload)));
+      return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
     }catch{return null}
   }
   root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
