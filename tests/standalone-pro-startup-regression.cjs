@@ -26,7 +26,7 @@ console.log('Standalone Bounty and Stock PRO startup checks wired.');
   const reply = {
     status: 'ok', premium_active: true,
     entitlements: ['bounty-hunter'],
-    expires_at: new Date(Date.now() + 3600000).toISOString()
+    expires_at: new Date(Date.now() + 3600000).toISOString().replace('T',' ').replace(/\\.\\d{3}Z$/,'')
   };
   const GM = options => {
     requests++;
