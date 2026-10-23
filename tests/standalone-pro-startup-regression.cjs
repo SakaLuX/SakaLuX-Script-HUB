@@ -14,5 +14,8 @@ for (const [file, id] of [
     id + ' must initialize entitlement check without opening Hub');
   assert.match(source,/broker\?\.check/,id+' must reuse shared broker');
   assert.match(source,/GM_xmlhttpRequest/,id+' must retain standalone fallback');
+  assert.match(source,/__SakaLuXLicenseStandaloneFlight/,id+' must share in-flight fallback request');
+  assert.match(source,/globalFlight\?\.key===k&&globalFlight\.promise/,id+' must match the correct API key');
+  assert.match(source,/const ok=d\?\.status==='ok'&&accepts\(d,k\)/,id+' must independently validate its own entitlement');
 }
 console.log('Standalone Bounty and Stock PRO startup checks wired.');
