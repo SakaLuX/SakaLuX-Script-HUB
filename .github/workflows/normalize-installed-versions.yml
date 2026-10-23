@@ -1,19 +1,5 @@
 name: Normalize installed versions
 on:
-  push:
-    branches: [main]
-    paths:
-      - '*.user.js'
-      - 'scripts.json'
-      - 'greasyfork/*.md'
-      - 'release-config.json'
-      - 'tools/sync_release_metadata.py'
-      - 'tools/release_preflight.py'
-      - 'tools/verify_premium_badge_release.py'
-      - 'tools/verify_premium_lifecycle.py'
-      - '.github/scripts/verify_release_consistency.py'
-      - '.github/scripts/verify_runtime_version_signals.py'
-      - '.github/workflows/normalize-installed-versions.yml'
   workflow_dispatch:
 permissions:
   contents: read
