@@ -2742,7 +2742,7 @@ async function slxCheckProAccess(){
  if(hub?.key===key&&Date.now()-hub.at<5*60*1000&&hub.data?.premium_active===true){
   const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
   if(Number.isFinite(expiry)&&expiry>Date.now()&&hub.data.entitlements?.includes('enhancer_guard')){
-   return slxConfirmedPro(Math.min(expiry,grant.verifiedGrantExpiresAt));
+   return slxConfirmedPro(Math.min(expiry,Date.now()+300000));
   }
  }
  const broker=globalThis.SakaLuXLicenseBroker;
@@ -2753,7 +2753,7 @@ async function slxCheckProAccess(){
    const allowed=d?.status==='ok'&&d?.premium_active===true&&Array.isArray(d.entitlements)&&
      d.entitlements.includes('enhancer_guard')&&
      Number.isFinite(expiry)&&expiry>Date.now();
-   if(allowed)return slxConfirmedPro(Math.min(expiry,grant.verifiedGrantExpiresAt));
+   if(allowed)return slxConfirmedPro(Math.min(expiry,Date.now()+300000));
    slxProVerification=d?.status==='ok'?'free':'unavailable';
    if(d?.status==='ok'){slxProAllowed=false;slxProExpiry=0;try{localStorage.removeItem(slxLicenseCacheKey)}catch{};return false}
    return slxRestorePro();
