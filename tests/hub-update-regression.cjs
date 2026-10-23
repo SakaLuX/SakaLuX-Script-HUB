@@ -73,4 +73,4 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   assert.equal(api.getInstallUrl(script), script.downloadUrl);
   dom.window.close();
   console.log('Hub updates: four-to-three-part upgrade, stale registry, verified installer, cache invalidation and offline failures passed.');
-})().catch(error => { console.error(error); process.exitCode = 1; });
+})().then(() => { process.exit(0); }).catch(error => { console.error(error); process.exit(1); });
