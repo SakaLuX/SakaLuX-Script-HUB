@@ -48,3 +48,11 @@ GitHub code search for five individual diagnostic file basenames returned no ind
 - `.github/workflows/update-bounty-hunter-v040.yml` asserts Bounty Hunter `0.4.0`; automatic push triggers have been removed. Manual launch remains available, but may downgrade current scripts.
 - `validate-userscripts.yml`, `release-gate.yml`, and `sakalux-release-sync.yml` remain enabled because they perform current validation or release synchronization.
 - Other version-specific workflows remain to be audited; this is not a complete workflow inventory.
+
+## Additional historical workflow checks — 2026-10-23
+
+- Inspected Suite rollback `suite-rollback-v0980.yml`: explicitly restores source from an old Git commit before relabeling it 0.9.980. Disabled its `push` trigger; manual execution remains potentially destructive.
+- Inspected Chat update `update-chat-v136.yml`, Suite patch `suite-smart-daily-v0975.yml`, and Bounty Hunter update `update-bounty-hunter-v045.yml`: each invokes a version-specific patch and can commit code. Disabled their `push` triggers; manual execution remains available for reference but should not be used on current main.
+- Verified `version-consistency-audit.yml` is a validation job and retained its automatic triggers.
+- Confirmed retained release infrastructure: `release-gate.yml`, `validate-userscripts.yml` and `sakalux-release-sync.yml`.
+- Many additional version-specific workflow files exist. They have NOT all been inspected or disabled, and no comprehensive safety assurance is implied.
