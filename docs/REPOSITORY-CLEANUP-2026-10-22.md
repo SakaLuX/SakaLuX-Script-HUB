@@ -56,3 +56,13 @@ GitHub code search for five individual diagnostic file basenames returned no ind
 - Verified `version-consistency-audit.yml` is a validation job and retained its automatic triggers.
 - Confirmed retained release infrastructure: `release-gate.yml`, `validate-userscripts.yml` and `sakalux-release-sync.yml`.
 - Many additional version-specific workflow files exist. They have NOT all been inspected or disabled, and no comprehensive safety assurance is implied.
+
+## Bulk workflow-trigger remediation — 2026-10-23
+
+GitHub indexed **93 workflow files exposing `workflow_dispatch`** during this pass. These were grouped as follows:
+
+- **8 maintained workflows**: `release-gate.yml`, `version-consistency-audit.yml`, `sakalux-release-sync.yml`, `validate-userscripts.yml`, `pro-license-syntax-check.yml`, `test-shared-core-v1.yml`, `test-tornpda-navigation.yml`, and `test-market-travel-state-machine.yml`. Their automatic validation/synchronization triggers are intentionally retained.
+- **85 historical/version-specific workflows**: no longer have their `push` event triggers in this maintenance branch; `workflow_dispatch` remains. **79 were changed in the bulk pass, and 6 had already been changed earlier in the PR.**
+- Representative spot checks confirmed manual-only triggers in `update-chat-v134.yml`, `suite-smart-daily-checklist-v0968.yml`, `publish-license-manager-v2.yml`, and `update-bounty-hunter-v034.yml`. The current `sakalux-release-sync.yml` still has its main-branch push trigger.
+
+**Safety caveat:** Manual execution of retired version-specific workflows may still modify scripts or roll them back. They remain in Git for historical inspection, and no execution was performed. Search indexing is not a Git tree listing; other workflow files without `workflow_dispatch` may exist and were not exhaustively enumerated. GitHub Actions validation and live installation checks remain pending.
