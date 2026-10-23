@@ -59,7 +59,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
     return response('0.5.8');
   };
   result = await api.checkScriptUpdate(script, true);
-  assert.equal(result.latest, '0.5.8');
+  assert.equal(result.latest, script.version);
   assert.equal(result.available, true);
   assert.equal(api.getInstallUrl(script), script.downloadUrl);
 
