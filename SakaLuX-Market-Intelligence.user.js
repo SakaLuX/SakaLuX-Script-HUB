@@ -917,14 +917,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    }}))}catch{}
  }
  function forgetGrant(){verifiedKey='';verifiedUntil=0;try{localStorage.removeItem(CACHE_KEY)}catch{}}
- async function isPro(){
+ async function isPro(forceRevalidate=false){
    const k=key();
    if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false}
-   if(k===verifiedKey&&verifiedUntil>Date.now())return true;
+   if(!forceRevalidate&&k===verifiedKey&&verifiedUntil>Date.now())return true;
    const hub=globalThis.__SakaLuXPremiumVerified;
-   if(hub?.key===k&&Date.now()-hub.at<10*60*1000&&acceptGrant(hub.data,k))return true;
-   if(restoreRecentGrant(k)){
-     // Revalidate asynchronously through the Hub broker when available, not per UI click.
+   if(!forceRevalidate&&hub?.key===k&&Date.now()-hub.at<10*60*1000&&acceptGrant(hub.data,k))return true;
+   if(!forceRevalidate&&restoreRecentGrant(k)){
+     // Startup schedules a single server revalidation; keep the UI responsive meanwhile.
      return true;
    }
    if(pending)return pending;
@@ -966,7 +966,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
  // Hydrate a short-lived, server-confirmed grant before UI startup.
  // Network revalidation remains authoritative and may revoke it immediately.
- try{restoreRecentGrant(key());}catch{}
+ try{if(restoreRecentGrant(key()))setTimeout(()=>{void isPro(true).then(ok=>{if(ok)window.dispatchEvent(new CustomEvent('SakaLuX:MarketProReady'));});},1500);}catch{}
  window.addEventListener('SakaLuX:PremiumStatus',event=>{
    const data=event.detail||{};
    const expiry=Date.parse(String(data.expires_at||'').replace(' ','T')+'Z');
