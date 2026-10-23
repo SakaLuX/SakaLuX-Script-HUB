@@ -1,10 +1,6 @@
 name: Register Bounty Hunter v0.1.0
 
 on:
-  push:
-    paths:
-      - '.github/scripts/register_bounty_hunter_v010.py'
-      - '.github/workflows/register-bounty-hunter-v010.yml'
   workflow_dispatch:
 
 permissions:

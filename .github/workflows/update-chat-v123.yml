@@ -1,10 +1,7 @@
 name: Update Chat Intelligence v1.2.23
 
+# Historical one-time updater: manual invocation only to prevent automatic downgrades.
 on:
-  push:
-    paths:
-      - '.github/scripts/update_chat_v123.py'
-      - '.github/workflows/update-chat-v123.yml'
   workflow_dispatch:
 
 permissions:

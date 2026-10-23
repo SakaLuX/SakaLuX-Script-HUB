@@ -37,7 +37,7 @@ for module in registry["scripts"]:
     path = ROOT / module["sourceUrl"].rsplit("/", 1)[-1]
     source = path.read_text(encoding="utf-8")
     header = version_match(source, r"(?m)^// @version\s+(\S+)", ident + " header")
-    internal = version_match(source, r"const SELF\s*=[^\n]*?version:\s*['\"]([^'\"]+)", ident + " SELF.version")
+    internal = None if ident == "gym-optimizer" else version_match(source, r"const SELF\s*=[^\n]*?version:\s*['\"]([^'\"]+)", ident + " SELF.version")
     offset = hub.find('"id": "' + ident + '"')
     end = hub.find("\n            }", offset)
     if offset < 0 or end < 0:
@@ -45,6 +45,15 @@ for module in registry["scripts"]:
         embedded = []
     else:
         embedded = re.findall(r'"version": "([^"]+)"', hub[offset:end])
+    if ident == "gym-optimizer":
+        if header != expected or module.get("release", {}).get("version") != expected:
+            errors.append(f"gym-optimizer: metadata mismatch with registry version {expected}")
+        if not embedded or any(v != expected for v in embedded):
+            errors.append(f"gym-optimizer: Hub versions={embedded!r}, expected {expected}")
+        meta = (ROOT / "SakaLuX-Gym-Optimizer.meta.js").read_text(encoding="utf-8")
+        if version_match(meta, r"(?m)^// @version\s+(\S+)", "Gym meta @version") != expected:
+            errors.append("gym-optimizer: meta version drift")
+        continue
     document = (ROOT / "greasyfork" / (docs[ident] + ".md")).read_text(encoding="utf-8")
     current_doc = version_match(document, r"## Current version\s*\n\*\*v([^*]+)\*\*", ident + " documentation")
     release = module.get("release", {}).get("version")

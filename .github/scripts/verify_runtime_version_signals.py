@@ -20,7 +20,7 @@ for path in sorted(ROOT.glob('SakaLuX*.user.js')):
     a=text.find(begin); b=text.find(end,a)
     if a>=0 and b>a:
         block=text[a:b]
-        m=re.search(r"let v = '([^']+)';",block)
+        m=re.search(r"(?:const|let)\s+v\s*=\s*'([^']+)';",block)
         if not m: errors.append(f'{path.name}: canonical installed-version marker has no fallback version')
         elif m.group(1)!=version: errors.append(f'{path.name}: canonical marker {m.group(1)} != @version {version}')
 

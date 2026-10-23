@@ -1,10 +1,7 @@
 name: Update Chat Intelligence v1.2.36
 
+# Historical one-time patch: disable automatic push trigger.
 on:
-  push:
-    paths:
-      - '.github/scripts/update_chat_v136.py'
-      - '.github/workflows/update-chat-v136.yml'
   workflow_dispatch:
 
 permissions:

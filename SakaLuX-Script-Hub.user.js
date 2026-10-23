@@ -2065,7 +2065,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.7.1",
+                "version": "1.7.10",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2082,14 +2082,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.7.1",
+                    "version": "1.7.10",
                     "date": "2026-10-21",
                     "notes": [
-                        "Read native Torn Gym banner energy such as You have 15/150 energy before stale cached API or generic HUD selectors.",
-                        "Reject old API energy readings older than 30 seconds when the live page cannot be read.",
-                        "Make the gold button distinguish unverified live energy/cost instead of advertising 999 repetitions.",
-                        "Display available repetitions based on verified live energy and native per-train cost. Preserve one-click native TRAIN and safety checks.",
-                        "Keep saved active and unlocked gym progression from v1.7.0."
+                        "Userscript and metadata declare v1.7.10. Detailed per-version notes for v1.7.2 through v1.7.10 have not yet been reconstructed from verified changes."
                     ]
                 },
                 "accessTier": "free",

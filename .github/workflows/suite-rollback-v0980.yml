@@ -1,10 +1,7 @@
 name: Suite Rollback v0.9.980
 
+# Historical one-time patch: disable automatic push trigger.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/suite-rollback-v0980.yml'
   workflow_dispatch:
 
 permissions:

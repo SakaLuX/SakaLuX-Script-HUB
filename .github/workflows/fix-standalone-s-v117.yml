@@ -1,8 +1,5 @@
 name: Fix plain Standalone S CSS v1.1.7
 on:
-  push:
-    paths:
-      - '.github/workflows/fix-standalone-s-v117.yml'
   workflow_dispatch:
 permissions:
   contents: write

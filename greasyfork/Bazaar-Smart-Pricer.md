@@ -97,7 +97,7 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 - Client-side checks are usability controls; server-hosting premium calculations is required to prevent code bypass.
 
 
-### v1.1.20 — 2026-10-10
+**Additional notes for v1.1.20 (historical entry):**
 - Added direct execution-entry checks for covered PRO functionality, including stock rebalance, Bazaar bulk updates, Museum scan and Elimination FF/calibration.
 - Retains basic FREE functions and GreasyFork distribution URLs.
 - Remaining execution paths and browser integration still need verification; JavaScript alone is not a secure server-side paywall.

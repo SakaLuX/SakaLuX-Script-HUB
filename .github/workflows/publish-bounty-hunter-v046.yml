@@ -1,8 +1,5 @@
 name: Publish Bounty Hunter v0.4.6
 on:
-  push:
-    paths:
-      - '.github/workflows/publish-bounty-hunter-v046.yml'
   workflow_dispatch:
 permissions:
   contents: write

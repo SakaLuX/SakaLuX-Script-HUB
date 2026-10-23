@@ -1,7 +1,5 @@
 name: Restore Sep15 Standalone v1.1.5
 on:
-  push:
-    paths: ['.github/workflows/restore-sep15-standalone-v115.yml']
   workflow_dispatch:
 permissions:
   contents: write

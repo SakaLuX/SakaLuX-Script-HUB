@@ -1,10 +1,6 @@
 name: Suite Smart Daily Checklist v0.9.973
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/suite-smart-daily-v0973.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,8 +1,5 @@
 name: Center Standalone S v1.1.9
 on:
-  push:
-    paths:
-      - '.github/workflows/center-standalone-s-v119.yml'
   workflow_dispatch:
 permissions:
   contents: write

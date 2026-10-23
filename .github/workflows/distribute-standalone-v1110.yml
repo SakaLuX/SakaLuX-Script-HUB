@@ -1,8 +1,5 @@
 name: Distribute Standalone v1.1.10
 on:
-  push:
-    paths:
-      - '.github/workflows/distribute-standalone-v1110.yml'
   workflow_dispatch:
 permissions:
   contents: write

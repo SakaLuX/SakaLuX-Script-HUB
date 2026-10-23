@@ -1,8 +1,5 @@
 name: Update Bounty Hunter v0.3.6
 on:
-  push:
-    paths:
-      - '.github/workflows/update-bounty-hunter-v036.yml'
   workflow_dispatch:
 permissions:
   contents: write

@@ -1,10 +1,5 @@
 name: Fix Graffiti selected spray 0.9.957
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/scripts/fix_graffiti_selected_0957.py'
-      - '.github/workflows/fix-graffiti-selected-0957.yml'
   workflow_dispatch:
 permissions:
   contents: write

@@ -1,10 +1,6 @@
 name: Suite Clickable Daily v0.9.981
 
 on:
-  push:
-    paths:
-      - '.github/scripts/add_suite_clickable_daily_tasks_v0981.py'
-      - '.github/workflows/suite-clickable-daily-v0981.yml'
   workflow_dispatch:
 
 permissions:

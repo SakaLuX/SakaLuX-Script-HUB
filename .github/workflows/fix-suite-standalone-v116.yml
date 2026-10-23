@@ -1,7 +1,5 @@
 name: Fix Suite and plain Standalone S v1.1.6
 on:
-  push:
-    paths: ['.github/workflows/fix-suite-standalone-v116.yml']
   workflow_dispatch:
 permissions:
   contents: write

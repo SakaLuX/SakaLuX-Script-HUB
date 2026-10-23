@@ -1,0 +1,19 @@
+# Local and generated files — do not commit
+__pycache__/
+*.py[cod]
+.pytest_cache/
+node_modules/
+coverage/
+dist/
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local backup copies; committed source and tagged releases remain tracked
+*.bak
+*.bak.*
+*.orig
+*.rej
+*~

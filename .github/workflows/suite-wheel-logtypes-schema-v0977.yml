@@ -1,10 +1,6 @@
 name: Suite Wheel Logtypes Schema v0.9.977
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/suite-wheel-logtypes-schema-v0977.yml'
   workflow_dispatch:
 
 permissions:

@@ -1,8 +1,5 @@
 name: Repair Shared Standalone Dock v1.1.0
 on:
-  push:
-    paths:
-      - '.github/workflows/repair-shared-standalone-v110.yml'
   workflow_dispatch:
 permissions:
   contents: write

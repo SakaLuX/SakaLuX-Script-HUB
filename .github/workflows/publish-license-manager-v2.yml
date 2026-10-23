@@ -1,9 +1,5 @@
 name: Publish License Manager v2 Releases
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'releases/license-manager-v2-2026-10-10.json'
   workflow_dispatch:
 permissions:
   contents: write

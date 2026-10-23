@@ -1,15 +1,6 @@
 name: Embed Shared Core v1
 
 on:
-  push:
-    branches:
-      - main
-      - test/shared-core-v1
-    paths:
-      - src/core/sakalux-core.js
-      - tools/embed-shared-core.cjs
-      - tools/embed-shared-core-all.cjs
-      - .github/workflows/embed-shared-core-v1-branch.yml
   workflow_dispatch:
 
 permissions:

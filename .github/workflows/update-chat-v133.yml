@@ -1,10 +1,6 @@
 name: Update Chat Intelligence v1.2.33
 
 on:
-  push:
-    paths:
-      - '.github/scripts/update_chat_v133.py'
-      - '.github/workflows/update-chat-v133.yml'
   workflow_dispatch:
 
 permissions:

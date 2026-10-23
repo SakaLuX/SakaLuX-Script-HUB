@@ -1,8 +1,5 @@
 name: Standalone Dock v1.1.1 compatibility repair
 on:
-  push:
-    paths:
-      - '.github/workflows/standalone-dock-v111-repair.yml'
   workflow_dispatch:
 permissions:
   contents: write

@@ -1,10 +1,5 @@
 name: Update Stock Manager v0.8.11 vault layout
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/scripts/update_stock_v0811_vault_layout.py'
-      - '.github/workflows/update-stock-v0811-vault-layout.yml'
   workflow_dispatch:
 permissions:
   contents: write

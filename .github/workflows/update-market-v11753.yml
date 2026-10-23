@@ -1,10 +1,5 @@
 name: Update Market Intelligence v1.17.53
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/scripts/update_market_v11753.py'
-      - '.github/workflows/update-market-v11753.yml'
   workflow_dispatch:
 permissions:
   contents: write

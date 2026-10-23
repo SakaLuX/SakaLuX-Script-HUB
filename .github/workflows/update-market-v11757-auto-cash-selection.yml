@@ -1,10 +1,5 @@
 name: Update Market Intelligence v1.17.57 Auto Cash and Selection
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/scripts/update_market_v11757_auto_cash_selection.py'
-      - '.github/workflows/update-market-v11757-auto-cash-selection.yml'
   workflow_dispatch:
 permissions:
   contents: write

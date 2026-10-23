@@ -1,10 +1,5 @@
 name: Fix Graffiti strict match 0.9.958
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/scripts/fix_graffiti_match_0958.py'
-      - '.github/workflows/fix-graffiti-match-0958.yml'
   workflow_dispatch:
 permissions:
   contents: write

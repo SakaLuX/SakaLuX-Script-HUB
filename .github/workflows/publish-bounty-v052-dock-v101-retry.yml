@@ -1,8 +1,5 @@
 name: Publish Bounty v0.5.2 + Standalone Dock v1.0.1 retry
 on:
-  push:
-    paths:
-      - '.github/workflows/publish-bounty-v052-dock-v101-retry.yml'
   workflow_dispatch:
 permissions:
   contents: write

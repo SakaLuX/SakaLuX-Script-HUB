@@ -1,10 +1,6 @@
 name: Suite COPY DEBUG v0.9.978
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/suite-copy-debug-v0978.yml'
   workflow_dispatch:
 
 permissions:

@@ -169,17 +169,17 @@
 - Keeps all installed scripts functioning in beta until the server-backed services are tested.
 
 
-### v1.9.98 — 2026-10-09
+**Additional notes for v1.9.98 (historical entry):**
 - Shows Bazaar Thanker as PRO SOON in the Hub; current installs remain functional pending secure pairing.
 - Defines the future PRO catalog on SakaLuX.ro, without enabling payments.
 
 
-### v1.9.98 — 2026-10-09
+**Additional notes for v1.9.98 (historical entry):**
 - Adds PREMIUM navigation to the account license status page on SakaLuX.ro.
 - Monthly billing is not active; existing modules remain free.
 
 
-### v1.9.98 — 2026-10-08
+**Additional notes for v1.9.98 (historical entry):**
 - Adds WEBSITE navigation in the Hub toolbar.
 - Adds module-specific DOCS links to SakaLuX.ro, preserving local INFO/NEW controls.
 

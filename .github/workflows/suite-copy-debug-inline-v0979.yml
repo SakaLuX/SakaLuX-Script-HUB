@@ -1,10 +1,6 @@
 name: Suite COPY DEBUG Inline v0.9.979
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/suite-copy-debug-inline-v0979.yml'
   workflow_dispatch:
 
 permissions:
