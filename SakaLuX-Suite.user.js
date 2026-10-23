@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.1000
+// @version      0.9.1001
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -845,7 +845,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.1000';
+  const VERSION = '0.9.1001';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -47357,7 +47357,7 @@ function scan(){
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
 (() => {
 'use strict';
-const VERSION='0.9.1000';
+const VERSION='0.9.1001';
 const MODULES=[
  ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],
  ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],
@@ -47682,3 +47682,87 @@ document.addEventListener('click',e=>{if(!e.target?.closest?.('[data-sdp="npc-be
 
 /* NPC buy TornPDA theme and readable scroll */
 (()=>{const style=document.createElement('style');style.textContent='#slx-npc-advisor,#slx-npc-advisor section,#slx-npc-advisor table,#slx-npc-advisor th,#slx-npc-advisor td,#slx-npc-advisor td b,#slx-npc-advisor td div{color:#eaf0fc!important}#slx-npc-advisor th{color:#b4c4dd!important}#slx-npc-advisor table{background:#1a2231!important}#slx-npc-advisor{padding-bottom:100px!important;box-sizing:border-box!important}#slx-npc-advisor section{margin-bottom:85px!important}#slx-npc-advisor td{line-height:1.45!important}';document.head.appendChild(style);})();
+
+
+/* SakaLuX NPC shop links + Torn v2 city shop stock */
+(()=>{'use strict';
+if(window.__slxNpcStockAddon)return;window.__slxNpcStockAddon=true;
+const urls={
+ 'Pharmacy':'/shops.php?step=pharmacy',
+ 'Sallys':'/shops.php?step=candy',
+ 'Bits n Bobs':'/shops.php?step=bitsnbobs',
+ 'Big Als':'/bigalgunshop.php',
+ 'Super Store':'/shops.php?step=super'
+};
+const normalize=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+let stock=new Map(),state='not loaded',updated=0,fetching=false;
+const htmlSafe=x=>String(x||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function inventory(data){
+ const shops=data?.cityshops??data?.data?.cityshops??data?.data??[];
+ const entries=Array.isArray(shops)?shops:Object.values(shops);
+ const map=new Map();
+ for(const shop of entries){const inv=shop?.inventory??shop?.items??[];
+ for(const item of (Array.isArray(inv)?inv:Object.values(inv))){
+   if(!item?.name)continue;
+   const quantity=Number(item.in_stock);
+   if(Number.isFinite(quantity)&&quantity>=0)map.set(normalize(item.name),quantity);
+ }}
+ return map;
+}
+async function fetchStock(force=false){
+ if(fetching||(!force&&updated&&Date.now()-updated<60000))return;
+ const k=window.SakaLuXSuiteDailyProgress?.getApiKey?.();
+ if(!k){state='API key unavailable';decorate();return;}
+ fetching=true;state='loading';decorate();
+ try{
+  const url='https://api.torn.com/v2/torn/cityshops?key='+encodeURIComponent(k);
+  const obj=await new Promise((resolve,reject)=>{
+    const done=t=>{try{const j=JSON.parse(t);if(j.error)throw Error(j.error.error||'API error');resolve(j);}catch(e){reject(e);}};
+    if(typeof GM_xmlhttpRequest==='function')GM_xmlhttpRequest({method:'GET',url,timeout:15000,onload:r=>done(r.responseText),onerror:()=>reject(Error('Network error')),ontimeout:()=>reject(Error('Timeout'))});
+    else fetch(url).then(r=>r.text()).then(done,reject);
+  });
+  const next=inventory(obj);if(!next.size)throw Error('No shop inventory returned');
+  stock=next;updated=Date.now();state='ok';
+ }catch(e){state='unavailable';}
+ finally{fetching=false;decorate();}
+}
+function decorate(){
+ const root=document.getElementById('slx-npc-advisor');if(!root||root.style.display==='none')return;
+ for(const tr of root.querySelectorAll('tbody tr,table tr')){
+   const first=tr.querySelector('td');if(!first)continue;
+   const bold=first.querySelector('b');if(!bold)continue;
+   const item=bold.textContent.trim(),store=first.querySelector('div')?.textContent?.trim()||'';
+   const link=urls[store]||'/city.php';
+   tr.dataset.npcTarget=link;tr.style.cursor='pointer';tr.style.touchAction='manipulation';
+   const old=first.querySelector('[data-slx-stock]');if(old)old.remove();
+   const count=stock.get(normalize(item));
+   const msg=Number.isFinite(count)?(count>0?'Stock: '+count.toLocaleString('en-US'):'Out of stock'):(state==='loading'?'Stock: checking…':'Stock: unknown');
+   const line=document.createElement('div');line.dataset.slxStock='1';line.style.cssText='font-size:11px;color:'+(count===0?'#f5b1a8':'#a9d8b5')+';margin-top:4px';line.textContent=msg+' · Tap to open shop ↗';first.appendChild(line);
+ }
+ const info=root.querySelector('[data-npc-stock-status]');
+ if(info)info.remove();
+ const header=root.querySelector('section > div');
+ if(header){
+  const status=document.createElement('div');status.dataset.npcStockStatus='1';status.style.cssText='font-size:11px;color:#b6c4db;margin-top:8px';
+  status.textContent='Shop stock: '+(state==='ok'?'checked '+new Date(updated).toLocaleTimeString():state==='loading'?'loading…':'unknown (unavailable)');
+  header.after(status);
+ }
+}
+const observer=new MutationObserver(muts=>{
+ if(!muts.some(m=>Array.from(m.addedNodes||[]).some(n=>n.nodeType===1&&!n.matches?.('[data-slx-stock],[data-npc-stock-status]'))))return;
+ if(document.getElementById('slx-npc-advisor')?.style.display==='block')decorate();
+});
+const setup=()=>{observer.observe(document.body,{childList:true,subtree:true});};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
+document.addEventListener('click',e=>{
+ const open=e.target?.closest?.('[data-sdp="npc-best"]');
+ if(open){setTimeout(()=>{decorate();fetchStock(false);},120);return;}
+ const refresh=e.target?.closest?.('#slx-npc-advisor [data-npc-refresh]');
+ if(refresh){fetchStock(true);return;}
+ const tr=e.target?.closest?.('#slx-npc-advisor tr[data-npc-target]');
+ if(!tr)return;
+ e.preventDefault();e.stopImmediatePropagation();
+ const destination=tr.dataset.npcTarget;
+ if(destination&&destination.startsWith('/'))location.assign('https://www.torn.com'+destination);
+},true);
+})();
