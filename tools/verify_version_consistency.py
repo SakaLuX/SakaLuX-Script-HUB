@@ -45,6 +45,15 @@ for module in registry["scripts"]:
         embedded = []
     else:
         embedded = re.findall(r'"version": "([^"]+)"', hub[offset:end])
+    if ident == "gym-optimizer":
+        if header != expected or module.get("release", {}).get("version") != expected:
+            errors.append(f"gym-optimizer: metadata mismatch with registry version {expected}")
+        if not embedded or any(v != expected for v in embedded):
+            errors.append(f"gym-optimizer: Hub versions={embedded!r}, expected {expected}")
+        meta = (ROOT / "SakaLuX-Gym-Optimizer.meta.js").read_text(encoding="utf-8")
+        if version_match(meta, r"(?m)^// @version\\s+(\\S+)", "Gym meta @version") != expected:
+            errors.append("gym-optimizer: meta version drift")
+        continue
     document = (ROOT / "greasyfork" / (docs[ident] + ".md")).read_text(encoding="utf-8")
     current_doc = version_match(document, r"## Current version\s*\n\*\*v([^*]+)\*\*", ident + " documentation")
     release = module.get("release", {}).get("version")
