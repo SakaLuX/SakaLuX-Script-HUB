@@ -28,3 +28,14 @@ Last verified CI workload (offline jsdom fixture):
 ## Guardrails
 
 No API keys or license tokens in logs, no bypass of premium restrictions, no automatic publication, no undocumented version bump, and no deletion of user settings.
+
+## Phase 1 measured result — GitHub Actions run 39906117603
+
+A focused Suite optimization skips DOM mutation batches originating solely in `#chat-box` / `.chat-messages` in three observers: Lottery Max Buy, module-card refresh and ensure-all module cards. Other DOM changes continue to trigger the pre-existing scans.
+
+| Offline jsdom workload | Before | After | Change |
+|---|---:|---:|---:|
+| Suite default scheduled timeouts | 145 | 24 | -121 (~83.4%) |
+| Suite all-native-enabled scheduled timeouts | 318 | 156 | -162 (~50.9%) |
+
+This is not a full TornPDA benchmark: tests use 40 unrelated chat mutations with offline API mocks. CI validation, PRO syntax, release gate, version consistency and TornPDA navigation all passed for the modified PR head. The reduction comes from avoiding irrelevant work, not increasing a timer threshold. Live module behavior remains to be smoke-tested before publication.
