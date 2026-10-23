@@ -11,6 +11,10 @@ assert.match(block, /!forceRevalidate&&hub\?\.key/, 'Forced revalidation must by
 assert.match(block, /!forceRevalidate&&restoreRecentGrant\(k\)/, 'Forced revalidation must bypass persisted grant');
 assert.match(block, /broker\?\.check/, 'Use shared license broker when available');
 assert.match(block, /GM_xmlhttpRequest/, 'Standalone license lookup must work without Hub');
+assert.match(block, /__SakaLuXLicenseStandaloneFlight/, 'Market must share same-key in-flight license requests');
+assert.match(block, /existing\?\.key===k&&existing\.promise/, 'Market must require matching identity');
+assert.match(block, /globalThis\.__SakaLuXLicenseStandaloneFlight===shared/, 'Market must clean up only its own request');
+
 assert.match(source, /if\(restoreRecentGrant\(key\(\)\)\)setTimeout\(\(\)=>\{void isPro\(true\)/,
   'Previously verified cached PRO must trigger a fresh validation at page startup');
 assert.match(block, /forgetGrant\(\);verificationState='free'/, 'Explicit revocation must clear saved grant');
