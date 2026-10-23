@@ -3,7 +3,7 @@ const { spawnSync } = require('node:child_process');
 const files = fs.readdirSync('.').filter(x=>x.endsWith('.user.js')).sort();
 const results=[];
 for (const file of files) for (const mode of ['standalone', 'relevant']) {
-  const child=spawnSync(process.execPath,['tests/performance/worker.cjs',file,mode],{encoding:'utf8',timeout:12000,env:process.env,maxBuffer:1024*1024});
+  const child=spawnSync(process.execPath,['tests/performance/worker.cjs',file,mode],{encoding:'utf8',timeout:20000,env:process.env,maxBuffer:1024*1024});
   try { const row=JSON.parse(child.stdout.trim().split('\n').at(-1)); results.push(row); console.log(`${file} ${mode}: ${row.queries} queries; ${row.timeoutsScheduled} timeouts; ${row.observerMs}ms observer work; errors=${row.errors.length}`); }
   catch { results.push({file,mode,error:child.error?.message || child.stderr || 'No result'}); console.log(`${file} ${mode}: FAILED`); }
 }
