@@ -49,3 +49,10 @@ This is not a full TornPDA benchmark: tests use 40 unrelated chat mutations with
 - Next architectural pass: unify an opt-in broker into a canonical shared-core component and test isolated-world behavior with TornPDA and Tampermonkey before advertising one request across all scripts. Preserve server validation, account identity, signature and revocation handling.
 
 CI note: one run exceeded the former 12-second per-worker **wall-clock** limit for Hub in a loaded CI runner. The process allowance was adjusted to 20 seconds, without increasing the measured timeout-count budget or removing assertions.
+
+## Phase 2 — Company and Enhancer (2026-10-23)
+
+- Company Director now checks the Hub broker first, otherwise joins the same-key standalone in-flight request shared with Market/Bounty/Stock. It checks `company_director` in the response and rejects account-key changes.
+- Enhancer Guard now joins the same-key in-flight request when its broker is absent, validates `enhancer_guard` itself and normalizes UTC expiry.
+- License syntax CI includes `tests/company-enhancer-license-sharing-regression.cjs`, which confirms scoped entitlements and that JavaScript globals **cannot be assumed shared between isolated userscript realms**.
+- Not yet implemented: a secure cross-realm cache. A value in localStorage alone is not trustworthy authorization; each isolated realm would need to authenticate a signed, account-bound, short-lived grant before reusing it. No unsafe PRO flag sharing has been introduced.
