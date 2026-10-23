@@ -30,6 +30,23 @@ const {webcrypto,generateKeyPairSync,sign}=require('node:crypto');
  assert.equal(await api.verify({...data,entitlements:['bounty-hunter','stock-manager-advisor']},{apiKey:key,entitlement:'bounty-hunter',userId:12345}),false);
  assert.equal(await api.verify(data,{apiKey:key,entitlement:'bounty-hunter',userId:12345,now:(now+241)*1000}),false);
  assert.equal(await api.load(adapter,key,'bounty-hunter',54321),null,'Cross-account replay must fail');
+
+ // A separate userscript realm shares only the storage transport, not JS globals.
+ const isolated={crypto:webcrypto,TextEncoder,TextDecoder,atob,Uint8Array};
+ vm.createContext(isolated);vm.runInContext(source,isolated);
+ assert.notEqual(isolated.SakaLuXSignedGrant,api,'Isolated worlds must have separate verifier instances');
+ assert(await isolated.SakaLuXSignedGrant.load(adapter,key,'bounty-hunter',12345),
+   'Signed cache must work in another realm after independent verification');
+ assert.equal(await isolated.SakaLuXSignedGrant.load(adapter,key,'bounty-hunter',54321),null,
+   'Separate realm must reject a different account');
+ const original=storage.get(api.STORAGE_KEY);
+ const tampered=JSON.parse(original);
+ tampered.data.entitlements=['bounty-hunter','stock-manager-advisor'];
+ storage.set(api.STORAGE_KEY,JSON.stringify(tampered));
+ assert.equal(await isolated.SakaLuXSignedGrant.load(adapter,key,'bounty-hunter',12345),null,
+   'Separate realm must reject edited entitlements');
+ storage.set(api.STORAGE_KEY,original);
+
  assert.equal(await api.verify(data,{apiKey:key,entitlement:'bounty-hunter'}),false,'Missing trusted current user identity must fail');
  const altered={...cert,signature:(cert.signature[0]==='A'?'B':'A')+cert.signature.slice(1)};
  assert.equal(await api.verify({...data,signed_certificate:altered},{apiKey:key,entitlement:'bounty-hunter',userId:12345}),false);
