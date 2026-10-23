@@ -12,11 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 CONFIG=json.loads((ROOT/"release-config.json").read_text())
 REGISTRY_PATH=ROOT/"scripts.json"
 registry=json.loads(REGISTRY_PATH.read_text())
-TARGETS={
- "bazaar-smart-pricer","bazaar","bounty-hunter","company-intelligence",
- "elimination-assistant","enhancer","market-intelligence","mission-rewards",
- "script-hub","stock-manager-advisor","suite"
-}
+TARGETS={entry['id'] for entry in CONFIG['scripts']}
 NOTE="Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
 today="2026-10-23"
 mapping={}
@@ -42,7 +38,8 @@ for entry in CONFIG["scripts"]:
     # Current release note and newest history entry are independent of old history.
     doc=re.sub(r"(## Current release note\s*\n+\*\*v)"+re.escape(old),lambda m:m.group(1)+new,doc,count=1)
     hist=re.search(r"(?im)^##\s+Release history\s*/\s*Changelog\s*$",doc)
-    entry_text=f"\n### v{new} — {today}\n- {NOTE}\n"
+    release_note=NOTE if sid not in {"account-auditor","chat-intelligence"} else "Version synchronization for the SakaLuX script release set; no feature behavior change."
+    entry_text=f"\n### v{new} — {today}\n- {release_note}\n"
     if hist:
         pos=hist.end()
         doc=doc[:pos]+entry_text+doc[pos:]
