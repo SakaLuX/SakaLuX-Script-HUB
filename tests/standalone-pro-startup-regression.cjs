@@ -38,6 +38,8 @@ console.log('Standalone Bounty and Stock PRO startup checks wired.');
     const end = text.indexOf('function locked(){',begin);
     assert(begin >= 0 && end > begin, file + ' missing isPro implementation');
     const method = text.slice(begin,end);
+    assert(!method.includes(".replace(' ','T')+'Z'"),file+' must not append duplicate UTC suffix');
+    assert(method.includes(".replace(/Z$/i,'')+'Z'"),file+' must normalize optional UTC suffix');
     const factory = new Function('shared','GM','entitlement','keyValue',`
       const globalThis=shared, GM_xmlhttpRequest=GM;
       let pending=null, verifiedKey='', verifiedUntil=0, verificationState='not_checked';
