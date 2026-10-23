@@ -38,13 +38,22 @@ for module in registry["scripts"]:
     source = path.read_text(encoding="utf-8")
     header = version_match(source, r"(?m)^// @version\s+(\S+)", ident + " header")
     internal = None if ident == "gym-optimizer" else version_match(source, r"const SELF\s*=[^\n]*?version:\s*['\"]([^'\"]+)", ident + " SELF.version")
-    offset = hub.find('"id": "' + ident + '"')
-    end = hub.find("\n            }", offset)
-    if offset < 0 or end < 0:
-        errors.append(ident + " missing in Hub offline registry")
+    # Parse the embedded Hub fallback as JSON rather than scanning through later modules.
+    marker = '    const FALLBACK_REGISTRY = '
+    terminator = '\n\n    const FALLBACK_MODULE_DETAILS = '
+    start = hub.find(marker)
+    stop = hub.find(terminator, start)
+    if start < 0 or stop < 0:
+        errors.append("Hub fallback registry not found")
         embedded = []
     else:
-        embedded = re.findall(r'"version": "([^"]+)"', hub[offset:end])
+        fallback = json.loads(hub[start + len(marker):stop])
+        record = next((m for m in fallback.get("scripts", []) if m.get("id") == ident), None)
+        if record is None:
+            errors.append(ident + " missing in Hub offline registry")
+            embedded = []
+        else:
+            embedded = [record.get("version"), record.get("release", {}).get("version")]
     if ident == "gym-optimizer":
         if header != expected or module.get("release", {}).get("version") != expected:
             errors.append(f"gym-optimizer: metadata mismatch with registry version {expected}")
