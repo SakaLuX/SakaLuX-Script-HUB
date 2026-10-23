@@ -974,7 +974,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
    if(k===verifiedKey&&verifiedUntil>Date.now()){verificationState='pro';return true;}
    const hub=globalThis.__SakaLuXPremiumVerified;
-   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(grant.verifiedGrantExpiresAt,Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));verificationState='pro';return true}
+   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));verificationState='pro';return true}
    // Prefer the Hub's shared broker: one in-flight request for all modules.
    // A server outage is unknown, never proof that the account is FREE.
    const broker=globalThis.SakaLuXLicenseBroker;
