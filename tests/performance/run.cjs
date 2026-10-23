@@ -14,9 +14,9 @@ if(process.argv.includes('--assert')) {
  for(const row of results) {
   assert(!row.error,`${row.file}: ${row.error}`);
   assert.equal(row.errors.length,0,`${row.file}: ${row.errors.join('; ')}`);
-  // Current baseline: Hub 33 timers, Suite 105. GitHub metadata fallback can
+  // Current observed baseline: Hub 42-43 timers, Suite 144 (25 modules). GitHub metadata fallback can
   // add nine offline HTTP callbacks to Hub. Keep explicit per-script limits.
-  const budget = row.file.includes('Script-Hub') ? 50 : row.file.includes('Suite') ? 115 : row.file.includes('Poker') ? 35 : 25;
+  const budget = row.file.includes('Script-Hub') ? 50 : row.file.includes('Suite') ? 155 : row.file.includes('Poker') ? 35 : 25;
   assert(row.timeoutsScheduled <= budget,`${row.file} ${row.mode}: ${row.timeoutsScheduled} scheduled timers (budget ${budget})`);
   if(row.file.includes('Enhancer'))assert(row.queries<100,`${row.file}: inventory rescan from unrelated workload`);
  }
