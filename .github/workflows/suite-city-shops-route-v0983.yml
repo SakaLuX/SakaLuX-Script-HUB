@@ -1,9 +1,5 @@
 name: Suite City Shops Route v0.9.983
 on:
-  push:
-    paths:
-      - '.github/scripts/fix_suite_city_shops_route_v0983.py'
-      - '.github/workflows/suite-city-shops-route-v0983.yml'
   workflow_dispatch:
 permissions:
   contents: write
