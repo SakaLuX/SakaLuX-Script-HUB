@@ -51,7 +51,7 @@ for module in registry["scripts"]:
         if not embedded or any(v != expected for v in embedded):
             errors.append(f"gym-optimizer: Hub versions={embedded!r}, expected {expected}")
         meta = (ROOT / "SakaLuX-Gym-Optimizer.meta.js").read_text(encoding="utf-8")
-        if version_match(meta, r"(?m)^// @version\\s+(\\S+)", "Gym meta @version") != expected:
+        if version_match(meta, r"(?m)^// @version\s+(\S+)", "Gym meta @version") != expected:
             errors.append("gym-optimizer: meta version drift")
         continue
     document = (ROOT / "greasyfork" / (docs[ident] + ".md")).read_text(encoding="utf-8")
