@@ -56,3 +56,15 @@ CI note: one run exceeded the former 12-second per-worker **wall-clock** limit f
 - Enhancer Guard now joins the same-key in-flight request when its broker is absent, validates `enhancer_guard` itself and normalizes UTC expiry.
 - License syntax CI includes `tests/company-enhancer-license-sharing-regression.cjs`, which confirms scoped entitlements and that JavaScript globals **cannot be assumed shared between isolated userscript realms**.
 - Not yet implemented: a secure cross-realm cache. A value in localStorage alone is not trustworthy authorization; each isolated realm would need to authenticate a signed, account-bound, short-lived grant before reusing it. No unsafe PRO flag sharing has been introduced.
+
+## Signed Ed25519 grant foundation — 2026-10-23
+
+The Hub's certificate panel already validates `slx-ed25519-v1` grants; its existing local PRO flag cache does **not** preserve an independently verifiable signed grant. A separate, currently **not yet embedded in production userscripts**, verifier is now available at `src/core/sakalux-signed-license-grant.js`.
+
+- Uses the pinned Ed25519 server public key, signature, issuer/version, account subject, issue/expiry bounds (maximum 300 seconds), and exact entitlement list.
+- Requires the *current Torn account ID obtained independently*; data embedded in a cached grant alone cannot establish identity.
+- Uses a SHA-256 API-key fingerprint in shared storage, without persisting the API key.
+- Storage is untrusted transport; every isolated realm must independently check the signature and current authenticated identity before allowing PRO.
+- Synthetic signed fixture and tampering/expiry/replay tests run as part of PRO License CI.
+
+**Not yet shipped/connected:** publication of authenticated signed grants by Hub, identity retrieval in every userscript realm, secure cache-consumer integration and end-to-end TornPDA/Tampermonkey tests. The screenshot confirms the Hub verification UI, not that these cross-realm steps already work.
