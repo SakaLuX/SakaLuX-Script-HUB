@@ -2,10 +2,6 @@ name: Suite Smart Daily Checklist v0.9.968
 
 # Release workflow for the v0.9.968 checklist rollout.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/suite-smart-daily-checklist-v0968.yml'
   workflow_dispatch:
 
 permissions:
