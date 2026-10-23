@@ -893,7 +893,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    const k=key();if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
    if(k===verifiedKey&&verifiedUntil>Date.now()){verificationState='pro';return true;}
    const hub=globalThis.__SakaLuXPremiumVerified;
-   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));verificationState='pro';return true}
+   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z'));verificationState='pro';return true}
    // Share a short-lived successful server response with other standalone modules.
    // This is a same-realm optimization, never an independent proof of entitlement.
    const sharedCache=globalThis.__SakaLuXLicenseStandaloneCache;
@@ -910,7 +910,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    }
    const broker=globalThis.SakaLuXLicenseBroker;
    if(broker?.check){
-     try{const d=await broker.check(k);const ok=d?.status==='ok'&&accepts(d,k);verificationState=d?.status==='ok'?(ok?'pro':'free'):'unavailable';if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}else{verifiedKey='';verifiedUntil=0}return ok}catch{verificationState='unavailable';return false}
+     try{const d=await broker.check(k);const ok=d?.status==='ok'&&accepts(d,k);verificationState=d?.status==='ok'?(ok?'pro':'free'):'unavailable';if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z'))}else{verifiedKey='';verifiedUntil=0}return ok}catch{verificationState='unavailable';return false}
    }
    if(pending)return pending;
    const globalFlight=globalThis.__SakaLuXLicenseStandaloneFlight;
@@ -918,7 +918,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
      pending=globalFlight.promise.then(d=>{
        const ok=d?.status==='ok'&&accepts(d,k);
        verificationState=d?.status==='ok'?(ok?'pro':'free'):'unavailable';
-       if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));}
+       if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z'));}
        else {verifiedKey='';verifiedUntil=0;}
        return ok;
      },()=>{verificationState='unavailable';return false;});
@@ -948,7 +948,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    pending=flight.then(d=>{
      const ok=accepts(d,k);
      verificationState=ok?'pro':'free';
-     if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));}
+     if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z'));}
      else {verifiedKey='';verifiedUntil=0;}
      return ok;
    },()=>{verificationState='unavailable';return false;});
