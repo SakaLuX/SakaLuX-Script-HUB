@@ -1,9 +1,5 @@
 name: Publish Premium Lifecycle Releases
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/publish-premium-badges-v1.yml'
   workflow_dispatch:
 permissions:
   contents: write
