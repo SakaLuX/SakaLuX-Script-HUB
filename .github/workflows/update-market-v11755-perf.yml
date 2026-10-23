@@ -1,10 +1,5 @@
 name: Update Market Intelligence v1.17.55 Performance
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/scripts/update_market_v11755_perf.py'
-      - '.github/workflows/update-market-v11755-perf.yml'
   workflow_dispatch:
 permissions:
   contents: write
