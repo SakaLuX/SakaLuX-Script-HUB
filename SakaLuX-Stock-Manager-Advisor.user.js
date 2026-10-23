@@ -923,6 +923,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  });
  globalThis.SakaLuXFreemium=globalThis.SakaLuXFreemium||{};
  globalThis.SakaLuXFreemium['stock-manager-advisor']={isPro,locked,isActive:()=>verifiedKey===key()&&verifiedUntil>Date.now()};
+  // Verify entitlement on standalone startup, even when Script Hub stays closed.
+  setTimeout(()=>{void isPro().catch(()=>{});},1200);
  const bypass=new WeakSet();
  document.addEventListener('click',async e=>{
    const button=e.target?.closest?.('button,[role="button"],a');if(!button||bypass.has(button))return;
