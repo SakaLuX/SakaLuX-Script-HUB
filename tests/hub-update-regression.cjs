@@ -24,12 +24,12 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   w.document.documentElement.setAttribute('data-sakalux-installed-bounty-hunter', '0.5.6.7');
   w.fetch = async url => {
     calls.push(url);
-    return response(url.startsWith(script.metaUrl) ? '0.5.6.7' : script.version);
+    return response(url.startsWith(script.metaUrl) ? '0.5.19' : script.version);
   };
   let result = await api.checkScriptUpdate(script, true);
   assert.equal(result.available, true);
   assert.equal(result.latest, script.version);
-  assert.equal(result.distributionBehind, false);
+  assert.equal(result.distributionBehind, true);
   assert.equal(api.getUpdateState(script).state, 'available');
   assert.equal(api.getInstallUrl(script), script.sourceUrl);
   assert(calls.some(url => url.startsWith(script.metaUrl) && url.includes('?t=')));
@@ -61,7 +61,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   result = await api.checkScriptUpdate(script, true);
   assert.equal(result.latest, '0.5.8');
   assert.equal(result.available, true);
-  assert.equal(api.getInstallUrl(script), script.downloadUrl);
+  assert.equal(api.getInstallUrl(script), script.sourceUrl);
 
   w.fetch = async url => {
     if (url.startsWith(script.sourceUrl)) throw Error('GitHub unavailable');
