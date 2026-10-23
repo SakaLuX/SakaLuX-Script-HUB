@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.1001**
+**v0.9.1002**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-23**
-- Canonical version: **v0.9.1001**
+- Canonical version: **v0.9.1002**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -48,7 +48,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1001 — Version and release synchronization**
+**v0.9.1002 — Version and release synchronization**
 - Version 0.9.1001: internal runtime and registry synchronization.
 
 ## Release history / Changelog
@@ -67,6 +67,9 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+### v0.9.1002 — 2026-10-23
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ### v0.9.1001 — 2026-10-23
 - Version 0.9.1001: internal runtime and registry synchronization.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.34
+// @version      0.8.35
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1103,7 +1103,7 @@ if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '0.8.34';
+  let v = '0.8.35';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1438,7 +1438,7 @@ if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"}, { version: "0.8.34" }));
+  const SELF = Object.freeze(Object.assign({"id":"stock-manager-advisor","name":"Stocks","icon":"📊","selector":"#sakalux-module-bridge-stock-manager-advisor","fallback":"https://www.torn.com/page.php?sid=stocks"}, { version: "0.8.35" }));
   const API_GLOBAL = "SakaLuXStockManagerAdvisor";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1489,7 +1489,7 @@ if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
 
   const APP = {
     name: 'SakaLuX Stock Manager & Advisor',
-    version: '0.8.34',
+    version: '0.8.35',
     experimental: false,
     profile: 'https://www.torn.com/profiles.php?XID=2380374',
     stocksUrl: 'https://www.torn.com/page.php?sid=stocks'

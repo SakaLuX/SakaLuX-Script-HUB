@@ -1,7 +1,7 @@
 # SakaLuX Bounty Hunter
 
 ## Current version
-**v0.5.20**
+**v0.5.21**
 
 ### 2026-10-20 · Version consistency
 - Fixed embedded runtime version reporting to match userscript `@version`.
@@ -51,11 +51,14 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.20 — Version and release synchronization**
+**v0.5.21 — Version and release synchronization**
 - Align embedded runtime version with @version to prevent false Hub update alerts.
 - Preserve existing script functionality and API key settings.
 
 ## Release history / Changelog
+
+### v0.5.21 — 2026-10-23
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ### v0.5.20 — 2026-10-10
 - Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.

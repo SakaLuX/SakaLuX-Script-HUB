@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.65**
+**v1.3.66**
 
 ### 2026-10-20 · Version consistency
 - Fixed embedded runtime version reporting to match userscript `@version`.
@@ -25,7 +25,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-23**
-- Canonical version: **v1.3.65**
+- Canonical version: **v1.3.66**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -49,11 +49,14 @@
 
 ## Current release note
 
-**v1.3.65 — Version and release synchronization**
+**v1.3.66 — Version and release synchronization**
 - Align embedded runtime version with @version to prevent false Hub update alerts.
 - Preserve existing script functionality and API key settings.
 
 ## Release history / Changelog
+
+### v1.3.66 — 2026-10-23
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ### v1.3.65 — 2026-10-10
 - Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.

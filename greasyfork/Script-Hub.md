@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.157**
+**v1.9.158**
 
 ### Early PRO verification — 2026-10-11
 - Starts shared entitlement verification as soon as Hub loads, without opening the UI.
@@ -36,7 +36,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-23**
-- Canonical version: **v1.9.157**
+- Canonical version: **v1.9.158**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -61,7 +61,7 @@
 
 ## Current release note
 
-**v1.9.157 — Version and release synchronization**
+**v1.9.158 — Version and release synchronization**
 - Version 1.9.157: internal runtime and registry synchronization.
 
 ## Release history / Changelog
@@ -83,6 +83,9 @@
 
 
 
+
+### v1.9.158 — 2026-10-23
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ### v1.9.157 — 2026-10-22
 - Version 1.9.157: internal runtime and registry synchronization.
