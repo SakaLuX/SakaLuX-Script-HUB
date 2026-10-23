@@ -22,6 +22,8 @@ jobs:
         run: |
           python3 -m pip install PyYAML==6.0.3
           npm install --prefix "$RUNNER_TEMP/dom-tests" jsdom@30.1.0 --no-audit --no-fund
+      - name: Audit complete tracked tree and release documentation
+        run: python3 .github/scripts/audit_tracked_repository.py
       - name: Check workflows, userscripts and registry
         run: python3 .github/scripts/validate_repository.py
       - name: Verify release and changelog consistency
