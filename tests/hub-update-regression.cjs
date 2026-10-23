@@ -38,7 +38,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   w.document.documentElement.setAttribute('data-sakalux-installed-bounty-hunter', script.version);
   assert.equal(api.isUpdateCacheFresh(script), false);
   assert.equal(api.normalizeCachedUpdate(script).available, false);
-  assert.equal(api.getUpdateState(script).state, 'current');
+  assert.equal(api.getUpdateState(script).state, 'pending');
 
   w.fetch = async url => {
     if (url.startsWith(script.metaUrl)) throw Error('GreasyFork unavailable');
