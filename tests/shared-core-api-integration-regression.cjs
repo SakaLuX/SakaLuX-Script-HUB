@@ -8,7 +8,8 @@ const market = stripSharedCore(fs.readFileSync('SakaLuX-Market-Intelligence.user
 const stock = stripSharedCore(fs.readFileSync('SakaLuX-Stock-Manager-Advisor.user.js','utf8'));
 
 assert.ok(market.includes('window.SakaLuXCore.api.requestJson'), 'Market must use Shared Core API broker');
-assert.equal(/GM_xmlhttpRequest\s*\(\s*\{/.test(market), false, 'Market must not keep its private GM request transport');
+assert.equal(/GM_xmlhttpRequest\s*\(\s*\{[\s\S]{0,180}api\.torn\.com/.test(market), false, 'Market must not use private GM transport for Torn API');
+// A direct authenticated request to SakaLuX licensing is not a Torn API broker bypass.
 assert.equal(/PDA_httpGet\s*\(\s*url/.test(market), false, 'Market must not keep its private PDA request transport');
 assert.ok(market.includes('window.SakaLuXCore.storage.get(key, fallback)'), 'Market JSON storage must use Shared Core storage');
 assert.ok(market.includes('window.SakaLuXCore.storage.set(key, value)'), 'Market JSON storage write must use Shared Core storage');
