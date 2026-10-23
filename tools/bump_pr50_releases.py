@@ -34,7 +34,7 @@ for entry in CONFIG["scripts"]:
     if f"**v{old}**" not in doc:
         raise RuntimeError(f"Current version missing in {doc_path}")
     doc=doc.replace(f"**v{old}**",f"**v{new}**",1)
-    doc=re.sub(r"(?m)^(Canonical version:\s*\*\*v)"+re.escape(old)+r"(\*\*)",lambda m:m.group(1)+new+m.group(2),doc,count=1)
+    doc=re.sub(r"(?m)^([ \t]*-?[ \t]*Canonical version:[ \t]*\*\*v)"+re.escape(old)+r"(\*\*)",lambda m:m.group(1)+new+m.group(2),doc,count=1)
     # Current release note and newest history entry are independent of old history.
     doc=re.sub(r"(## Current release note\s*\n+\*\*v)"+re.escape(old),lambda m:m.group(1)+new,doc,count=1)
     hist=re.search(r"(?im)^##\s+Release history\s*/\s*Changelog\s*$",doc)
