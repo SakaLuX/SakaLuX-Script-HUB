@@ -899,11 +899,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    if(sharedCache?.key===k&&sharedCache.data?.status==='ok'&&
       Number.isFinite(sharedCache.at)&&Date.now()>=sharedCache.at&&
       Date.now()-sharedCache.at<(sharedCache.data.premium_active?300000:30000)&&
-      (!sharedCache.data.premium_active||(Number.isFinite(Date.parse(String(sharedCache.data.expires_at).replace(' ','T')+'Z'))&&
-       Date.parse(String(sharedCache.data.expires_at).replace(' ','T')+'Z')>Date.now()))){
+      (!sharedCache.data.premium_active||(Number.isFinite(Date.parse(String(sharedCache.data.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z'))&&
+       Date.parse(String(sharedCache.data.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z')>Date.now()))){
      const ok=accepts(sharedCache.data,k);
      verificationState=ok?'pro':'free';
-     if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(sharedCache.data.expires_at).replace(' ','T')+'Z'));}
+     if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(sharedCache.data.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z'));}
      else {verifiedKey='';verifiedUntil=0;}
      return ok;
    }
