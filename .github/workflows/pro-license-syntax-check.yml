@@ -6,6 +6,8 @@ on:
       - 'tests/market-pro-bootstrap-regression.cjs'
       - 'tests/standalone-pro-startup-regression.cjs'
       - 'tests/company-enhancer-license-sharing-regression.cjs'
+      - 'tests/signed-license-grant-regression.cjs'
+      - 'src/core/sakalux-signed-license-grant.js'
       - '.github/workflows/pro-license-syntax-check.yml'
   workflow_dispatch:
 jobs:
@@ -55,3 +57,5 @@ jobs:
         run: node tests/standalone-pro-startup-regression.cjs
       - name: Check Company and Enhancer license coalescing
         run: node tests/company-enhancer-license-sharing-regression.cjs
+      - name: Verify Ed25519 signed grant in isolated realm
+        run: node tests/signed-license-grant-regression.cjs
