@@ -970,20 +970,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    const k=key();
    // Cross-world authorization requires signed certificate AND authenticated Torn identity.
    // Online SakaLuX verification remains the fallback if either validation fails.
-   if(typeof GM_xmlhttpRequest==='function'&&globalThis.SakaLuXSignedGrant?.load){
+   if(window.SakaLuXCore?.api?.requestJson&&globalThis.SakaLuXSignedGrant?.load){
      try{
        const grantKey=globalThis.SakaLuXSignedGrant.STORAGE_KEY;
        if(localStorage.getItem(grantKey)&&/^[A-Za-z0-9]{16}$/.test(k)){
-         const ownId=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
-           method:'GET',url:'https://api.torn.com/v2/user/basic?key='+encodeURIComponent(k),
-           timeout:10000,
-           onload:r=>{try{
-             const d=JSON.parse(r.responseText||'{}'),id=Number(d.id);
-             if(r.status!==200||d.error||!Number.isSafeInteger(id)||id<=0)throw Error('identity_invalid');
-             resolve(id);
-           }catch(e){reject(e)}},
-           onerror:()=>reject(Error('identity_network')),ontimeout:()=>reject(Error('identity_timeout'))
-         }));
+         const d=await window.SakaLuXCore.api.requestJson(
+           'https://api.torn.com/v2/user/basic?key='+encodeURIComponent(k),
+           {timeout:10000,retries:0,ttl:60000,throwApiError:true}
+         );
+         const ownId=Number(d?.id);
+         if(!Number.isSafeInteger(ownId)||ownId<=0)throw Error('identity_invalid');
          if(k===key()){
            const grant=await globalThis.SakaLuXSignedGrant.load(localStorage,k,ENT,ownId);
            if(grant&&k===key()){
