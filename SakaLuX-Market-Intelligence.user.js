@@ -882,6 +882,57 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Premium Badges v2 — END */
 
 
+/* SakaLuX Signed License Verifier — BEGIN */
+/* SakaLuX signed license grant verifier — independent userscript realms.
+ * Shared storage is a transport only, never an authorization decision.
+ */
+(function(root) {
+  'use strict';
+  const PUBLIC_KEY_B64='Hw+1h/0NZwOLEmJ+sbwgcKBIpJrgE/5kmjGnA7hnrhM=';
+  const STORAGE_KEY='SakaLuX_SIGNED_PRO_GRANT_V1';
+  const decode=s=>Uint8Array.from(atob(String(s).replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-String(s).length%4)%4)),c=>c.charCodeAt(0));
+  const validKey=k=>/^[A-Za-z0-9]{16}$/.test(String(k));
+  const hash=async k=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  async function verify(data,{apiKey,entitlement,userId,now=Date.now()}={}){
+    if(!validKey(apiKey)||typeof entitlement!=='string'||!entitlement||!Number.isSafeInteger(userId)||userId<=0)return false;
+    const cert=data?.signed_certificate;
+    if(data?.status!=='ok'||data.premium_active!==true||cert?.format!=='slx-ed25519-v1')return false;
+    if(!Array.isArray(data.entitlements)||!data.entitlements.includes(entitlement))return false;
+    if(!Number.isSafeInteger(Number(data.user?.id))||Number(data.user.id)<=0)return false;
+    const keyBytes=decode(PUBLIC_KEY_B64),signature=decode(cert.signature),payload=decode(cert.payload);
+    if(keyBytes.length!==32||signature.length!==64)return false;
+    const publicKey=await crypto.subtle.importKey('raw',keyBytes,{name:'Ed25519'},false,['verify']);
+    if(!await crypto.subtle.verify('Ed25519',publicKey,signature,payload))return false;
+    const claim=JSON.parse(new TextDecoder().decode(payload));
+    const t=Math.floor(now/1000);
+    if(claim.issuer!=='sakalux.ro'||claim.v!==1||claim.subject!==Number(data.user.id)||claim.subject!==userId)return false;
+    if(!Number.isInteger(claim.iat)||!Number.isInteger(claim.exp)||claim.exp<=t||claim.iat>t+30||claim.exp>claim.iat+300)return false;
+    if(JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))return false;
+    // The signed claim expires within five minutes; other clients must independently verify it.
+    return true;
+  }
+  async function store(storage,apiKey,data,userId){
+    if(!validKey(apiKey)||!data?.signed_certificate)return false;
+    const entitlements=Array.isArray(data.entitlements)?data.entitlements:[];
+    if(!entitlements.length||!await verify(data,{apiKey,entitlement:entitlements[0],userId}))return false;
+    storage.setItem(STORAGE_KEY,JSON.stringify({keyHash:await hash(apiKey),data}));
+    return true;
+  }
+  async function load(storage,apiKey,entitlement,userId){
+    if(!validKey(apiKey))return null;
+    try{
+      const saved=JSON.parse(storage.getItem(STORAGE_KEY)||'null');
+      if(saved?.keyHash!==await hash(apiKey))return null;
+      if(!await verify(saved.data,{apiKey,entitlement,userId}))return null;
+      const claim=JSON.parse(new TextDecoder().decode(decode(saved.data.signed_certificate.payload)));
+      return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
+    }catch{return null}
+  }
+  root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+/* SakaLuX Signed License Verifier — END */
+
 /* SakaLuX Freemium Control — BEGIN */
 (()=>{
  'use strict';
@@ -917,14 +968,39 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    }}))}catch{}
  }
  function forgetGrant(){verifiedKey='';verifiedUntil=0;try{localStorage.removeItem(CACHE_KEY)}catch{}}
- async function isPro(){
+ async function isPro(forceRevalidate=false){
    const k=key();
+   // Cross-world authorization requires signed certificate AND authenticated Torn identity.
+   // Online SakaLuX verification remains the fallback if either validation fails.
+   if(window.SakaLuXCore?.api?.requestJson&&globalThis.SakaLuXSignedGrant?.load){
+     try{
+       const grantKey=globalThis.SakaLuXSignedGrant.STORAGE_KEY;
+       if(localStorage.getItem(grantKey)&&/^[A-Za-z0-9]{16}$/.test(k)){
+         const d=await window.SakaLuXCore.api.requestJson(
+           'https://api.torn.com/v2/user/basic?key='+encodeURIComponent(k),
+           {timeout:10000,retries:0,ttl:60000,throwApiError:true}
+         );
+         const ownId=Number(d?.id);
+         if(!Number.isSafeInteger(ownId)||ownId<=0)throw Error('identity_invalid');
+         if(k===key()){
+           const grant=await globalThis.SakaLuXSignedGrant.load(localStorage,k,ENT,ownId);
+           if(grant&&k===key()){
+             verifiedKey=k;
+             verifiedUntil=Math.min(grant.verifiedGrantExpiresAt,Date.now()+300000,Date.parse(String(grant.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z'));
+             verificationState='pro';
+             return true;
+           }
+         }
+       }
+     }catch{} // Never grant PRO if cache or Torn identity verification is unavailable.
+   }
+
    if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false}
-   if(k===verifiedKey&&verifiedUntil>Date.now())return true;
+   if(!forceRevalidate&&k===verifiedKey&&verifiedUntil>Date.now())return true;
    const hub=globalThis.__SakaLuXPremiumVerified;
-   if(hub?.key===k&&Date.now()-hub.at<10*60*1000&&acceptGrant(hub.data,k))return true;
-   if(restoreRecentGrant(k)){
-     // Revalidate asynchronously through the Hub broker when available, not per UI click.
+   if(!forceRevalidate&&hub?.key===k&&Date.now()-hub.at<10*60*1000&&acceptGrant(hub.data,k))return true;
+   if(!forceRevalidate&&restoreRecentGrant(k)){
+     // Startup schedules a single server revalidation; keep the UI responsive meanwhile.
      return true;
    }
    if(pending)return pending;
@@ -936,13 +1012,24 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
        if(broker?.check)d=await broker.check(k);
        else{
          if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
-         d=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
-           method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-           headers:{'Content-Type':'application/json','Accept':'application/json'},
-           data:JSON.stringify({api_key:k}),timeout:12000,
-           onload:r=>{try{const data=JSON.parse(r.responseText||'{}');if(r.status===429||data.status==='rate_limited')throw Error('rate_limited');if(r.status!==200)throw Error('HTTP '+r.status);resolve(data)}catch(e){reject(e)}},
-           onerror:()=>reject(Error('network_unavailable')),ontimeout:()=>reject(Error('timeout'))
-         }));
+         // Join a same-key standalone request from Bounty/Stock; avoid duplicate checks.
+         const existing=globalThis.__SakaLuXLicenseStandaloneFlight;
+         if(existing?.key===k&&existing.promise)d=await existing.promise;
+         else{
+           const flight=new Promise((resolve,reject)=>GM_xmlhttpRequest({
+             method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+             headers:{'Content-Type':'application/json','Accept':'application/json'},
+             data:JSON.stringify({api_key:k}),timeout:12000,
+             onload:r=>{try{const data=JSON.parse(r.responseText||'{}');if(r.status===429||data.status==='rate_limited')throw Error('rate_limited');if(r.status!==200||data.status!=='ok')throw Error('HTTP '+r.status);resolve(data)}catch(e){reject(e)}},
+             onerror:()=>reject(Error('network_unavailable')),ontimeout:()=>reject(Error('timeout'))
+           }));
+           const shared={key:k,promise:flight};
+           globalThis.__SakaLuXLicenseStandaloneFlight=shared;
+           try{d=await flight}finally{
+             if(globalThis.__SakaLuXLicenseStandaloneFlight===shared)
+               delete globalThis.__SakaLuXLicenseStandaloneFlight;
+           }
+         }
        }
        if(d?.status!=='ok')throw Error(d?.status||'license_unavailable');
        if(acceptGrant(d,k)){rememberGrant(d,k);return true;}
@@ -966,7 +1053,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
  // Hydrate a short-lived, server-confirmed grant before UI startup.
  // Network revalidation remains authoritative and may revoke it immediately.
- try{restoreRecentGrant(key());}catch{}
+ try{if(restoreRecentGrant(key()))setTimeout(()=>{void isPro(true).then(ok=>{if(ok)window.dispatchEvent(new CustomEvent('SakaLuX:MarketProReady'));});},1500);}catch{}
  window.addEventListener('SakaLuX:PremiumStatus',event=>{
    const data=event.detail||{};
    const expiry=Date.parse(String(data.expires_at||'').replace(' ','T')+'Z');

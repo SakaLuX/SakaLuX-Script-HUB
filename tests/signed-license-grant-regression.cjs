@@ -1,0 +1,59 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),vm=require('node:vm');
+const {webcrypto,generateKeyPairSync,sign}=require('node:crypto');
+(async()=>{
+ const {publicKey,privateKey}=generateKeyPairSync('ed25519');
+ const pub=publicKey.export({format:'der',type:'spki'}).subarray(-32).toString('base64');
+ const source=fs.readFileSync('src/core/sakalux-signed-license-grant.js','utf8').replace('Hw+1h/0NZwOLEmJ+sbwgcKBIpJrgE/5kmjGnA7hnrhM=',pub);
+ const realm={crypto:webcrypto,TextEncoder,TextDecoder,atob,Uint8Array};
+ vm.createContext(realm);vm.runInContext(source,realm);
+ const api=realm.SakaLuXSignedGrant;
+ const now=Math.floor(Date.now()/1000),key='AAAAAAAAAAAAAAAA';
+ const claim={issuer:'sakalux.ro',v:1,subject:12345,iat:now,exp:now+240,entitlements:['bounty-hunter']};
+ const encoded=Buffer.from(JSON.stringify(claim));
+ const cert={format:'slx-ed25519-v1',payload:encoded.toString('base64'),signature:sign(null,encoded,privateKey).toString('base64')};
+ const data={status:'ok',premium_active:true,user:{id:12345},entitlements:['bounty-hunter'],signed_certificate:cert};
+ const bountySource=fs.readFileSync('SakaLuX-Bounty-Hunter.user.js','utf8');
+ assert.match(bountySource,/SakaLuX Signed License Verifier — BEGIN/,'Bounty embeds independent verifier');
+ assert.match(bountySource,/api\.torn\.com\/v2\/user\/basic\?key=/,'Bounty obtains identity through authenticated Torn API');
+ assert.match(bountySource,/signed\.load\(localStorage,k,ENT,identity\)/,'Bounty checks account and module entitlement');
+ assert.match(bountySource,/if\(k===key\(\)\)/,'Bounty rejects identity switched during request');
+ const hubSource=fs.readFileSync('SakaLuX-Script-Hub.user.js','utf8');
+ assert.match(hubSource,/SIGNED_GRANT_STORAGE_KEY='SakaLuX_SIGNED_PRO_GRANT_V1'/);
+ assert.match(hubSource,/slxLicenseBroker\.diagnostics\(\)\?\.verified!==true/,'Hub must publish only cryptographically verified certificates');
+ assert.match(hubSource,/getSharedApiKey\(\)!==apiKey/,'Identity changes must block asynchronous cache writes');
+ assert.match(hubSource,/clearSignedHubGrant\(\)/,'Cache must be clearable');
+ const storage=new Map();
+ const adapter={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
+ assert.equal(await api.verify(data,{apiKey:key,entitlement:'bounty-hunter',userId:12345}),true);
+ assert.equal(await api.store(adapter,key,data,12345),true);
+ assert(await api.load(adapter,key,'bounty-hunter',12345));
+ assert.equal(await api.load(adapter,key,'stock-manager-advisor',12345),null);
+ assert.equal(await api.load(adapter,'BBBBBBBBBBBBBBBB','bounty-hunter',12345),null);
+ assert.equal(await api.verify({...data,user:{id:12346}},{apiKey:key,entitlement:'bounty-hunter',userId:12345}),false);
+ assert.equal(await api.verify({...data,entitlements:['bounty-hunter','stock-manager-advisor']},{apiKey:key,entitlement:'bounty-hunter',userId:12345}),false);
+ assert.equal(await api.verify(data,{apiKey:key,entitlement:'bounty-hunter',userId:12345,now:(now+241)*1000}),false);
+ assert.equal(await api.load(adapter,key,'bounty-hunter',54321),null,'Cross-account replay must fail');
+
+ // A separate userscript realm shares only the storage transport, not JS globals.
+ const isolated={crypto:webcrypto,TextEncoder,TextDecoder,atob,Uint8Array};
+ vm.createContext(isolated);vm.runInContext(source,isolated);
+ assert.notEqual(isolated.SakaLuXSignedGrant,api,'Isolated worlds must have separate verifier instances');
+ assert(await isolated.SakaLuXSignedGrant.load(adapter,key,'bounty-hunter',12345),
+   'Signed cache must work in another realm after independent verification');
+ assert.equal(await isolated.SakaLuXSignedGrant.load(adapter,key,'bounty-hunter',54321),null,
+   'Separate realm must reject a different account');
+ const original=storage.get(api.STORAGE_KEY);
+ const tampered=JSON.parse(original);
+ tampered.data.entitlements=['bounty-hunter','stock-manager-advisor'];
+ storage.set(api.STORAGE_KEY,JSON.stringify(tampered));
+ assert.equal(await isolated.SakaLuXSignedGrant.load(adapter,key,'bounty-hunter',12345),null,
+   'Separate realm must reject edited entitlements');
+ storage.set(api.STORAGE_KEY,original);
+
+ assert.equal(await api.verify(data,{apiKey:key,entitlement:'bounty-hunter'}),false,'Missing trusted current user identity must fail');
+ const altered={...cert,signature:(cert.signature[0]==='A'?'B':'A')+cert.signature.slice(1)};
+ assert.equal(await api.verify({...data,signed_certificate:altered},{apiKey:key,entitlement:'bounty-hunter',userId:12345}),false);
+ console.log('Signed grant tests: valid, isolated cache, identity, rights, expiry and tampering passed.');
+})().catch(e=>{console.error(e);process.exitCode=1});

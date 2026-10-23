@@ -21,6 +21,57 @@
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
+/* SakaLuX Signed License Verifier — BEGIN */
+/* SakaLuX signed license grant verifier — independent userscript realms.
+ * Shared storage is a transport only, never an authorization decision.
+ */
+(function(root) {
+  'use strict';
+  const PUBLIC_KEY_B64='Hw+1h/0NZwOLEmJ+sbwgcKBIpJrgE/5kmjGnA7hnrhM=';
+  const STORAGE_KEY='SakaLuX_SIGNED_PRO_GRANT_V1';
+  const decode=s=>Uint8Array.from(atob(String(s).replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-String(s).length%4)%4)),c=>c.charCodeAt(0));
+  const validKey=k=>/^[A-Za-z0-9]{16}$/.test(String(k));
+  const hash=async k=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  async function verify(data,{apiKey,entitlement,userId,now=Date.now()}={}){
+    if(!validKey(apiKey)||typeof entitlement!=='string'||!entitlement||!Number.isSafeInteger(userId)||userId<=0)return false;
+    const cert=data?.signed_certificate;
+    if(data?.status!=='ok'||data.premium_active!==true||cert?.format!=='slx-ed25519-v1')return false;
+    if(!Array.isArray(data.entitlements)||!data.entitlements.includes(entitlement))return false;
+    if(!Number.isSafeInteger(Number(data.user?.id))||Number(data.user.id)<=0)return false;
+    const keyBytes=decode(PUBLIC_KEY_B64),signature=decode(cert.signature),payload=decode(cert.payload);
+    if(keyBytes.length!==32||signature.length!==64)return false;
+    const publicKey=await crypto.subtle.importKey('raw',keyBytes,{name:'Ed25519'},false,['verify']);
+    if(!await crypto.subtle.verify('Ed25519',publicKey,signature,payload))return false;
+    const claim=JSON.parse(new TextDecoder().decode(payload));
+    const t=Math.floor(now/1000);
+    if(claim.issuer!=='sakalux.ro'||claim.v!==1||claim.subject!==Number(data.user.id)||claim.subject!==userId)return false;
+    if(!Number.isInteger(claim.iat)||!Number.isInteger(claim.exp)||claim.exp<=t||claim.iat>t+30||claim.exp>claim.iat+300)return false;
+    if(JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))return false;
+    // The signed claim expires within five minutes; other clients must independently verify it.
+    return true;
+  }
+  async function store(storage,apiKey,data,userId){
+    if(!validKey(apiKey)||!data?.signed_certificate)return false;
+    const entitlements=Array.isArray(data.entitlements)?data.entitlements:[];
+    if(!entitlements.length||!await verify(data,{apiKey,entitlement:entitlements[0],userId}))return false;
+    storage.setItem(STORAGE_KEY,JSON.stringify({keyHash:await hash(apiKey),data}));
+    return true;
+  }
+  async function load(storage,apiKey,entitlement,userId){
+    if(!validKey(apiKey))return null;
+    try{
+      const saved=JSON.parse(storage.getItem(STORAGE_KEY)||'null');
+      if(saved?.keyHash!==await hash(apiKey))return null;
+      if(!await verify(saved.data,{apiKey,entitlement,userId}))return null;
+      const claim=JSON.parse(new TextDecoder().decode(decode(saved.data.signed_certificate.payload)));
+      return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
+    }catch{return null}
+  }
+  root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+/* SakaLuX Signed License Verifier — END */
+
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
  * Source-only module. Not installed directly by users.
@@ -2376,31 +2427,69 @@ function ciDirectorProActive(){return ciProVerified&&Date.now()<ciProExpires&&ci
 async function ciCheckDirectorPro(force=false){
  const key=ciHubApiKey();
  if(!/^[a-zA-Z0-9]{16}$/.test(key)){ciProVerified=false;ciProExpires=0;ciProKey='';ciProFailure='missing_key';return false}
+
+ // Independent signed-grant verification: only an authenticated current Torn ID may unlock PRO.
+ if(globalThis.SakaLuXSignedGrant?.load&&typeof GM_xmlhttpRequest==='function'){
+  try{
+   const signed=globalThis.SakaLuXSignedGrant;
+   if(localStorage.getItem(signed.STORAGE_KEY)){
+    const id=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
+     method:'GET',url:'https://api.torn.com/v2/user/basic?key='+encodeURIComponent(key),timeout:10000,
+     onload:r=>{try{
+      const d=JSON.parse(r.responseText||'{}'),id=Number(d.id);
+      if(r.status!==200||d.error||!Number.isSafeInteger(id)||id<=0)throw Error('identity_invalid');
+      resolve(id);
+     }catch(e){reject(e)}},
+     onerror:()=>reject(Error('identity_network')),ontimeout:()=>reject(Error('identity_timeout'))
+    }));
+    const grant=await signed.load(localStorage,key,'company_director',id);
+    if(grant&&key===ciHubApiKey()){
+     const expiry=Date.parse(String(grant.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z');
+     ciProVerified=true;ciProKey=key;ciProExpires=Math.min(expiry,grant.verifiedGrantExpiresAt,Date.now()+300000);ciProFailure='active';return true;
+    }
+   }
+  }catch{} // Offline/invalid grant: use existing online license lookup.
+ }
  if(!force&&ciDirectorProActive())return true;
  if(ciProChecking)return ciProChecking;
- if(typeof GM_xmlhttpRequest!=='function'){ciProFailure='transport_unavailable';return false}
  ciProFailure='checking';
- ciProChecking=new Promise(resolve=>{
-  const finish=(active,reason)=>{ciProVerified=active;ciProFailure=reason;resolve(active)};
-  GM_xmlhttpRequest({
-   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-   headers:{'Content-Type':'application/json','Accept':'application/json'},
-   data:JSON.stringify({api_key:key}),timeout:12000,
-   onload:r=>{
-    try{
-     const d=JSON.parse(r.responseText||'{}');
-     const raw=String(d.expires_at||'');
-     const date=Date.parse(raw.includes('T')?raw:(raw.replace(' ','T')+'Z'));
-     const active=r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('company_director')&&Number.isFinite(date)&&date>Date.now()&&key===ciHubApiKey();
-     ciProKey=active?key:'';
-     ciProExpires=active?Math.min(date,Date.now()+5*60*1000):0;
-     finish(active,active?'active':r.status===429?'rate_limited':r.status>=500?'server_unavailable':r.status!==200?'http_'+r.status:d.status==='ok'?'inactive':'verification_failed');
-    }catch{ciProExpires=0;ciProKey='';finish(false,'invalid_response')}
-   },
-   onerror:()=>{ciProExpires=0;ciProKey='';finish(false,'network_error')},
-   ontimeout:()=>{ciProExpires=0;ciProKey='';finish(false,'timeout')}
-  });
- });
+ ciProChecking=(async()=>{
+  try{
+   const broker=globalThis.SakaLuXLicenseBroker;
+   let d;
+   if(broker?.check)d=await broker.check(key,{force});
+   else{
+    const flight=globalThis.__SakaLuXLicenseStandaloneFlight;
+    if(flight?.key===key&&flight.promise)d=await flight.promise;
+    else{
+     if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
+     const promise=new Promise((resolve,reject)=>{
+      try{GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+       headers:{'Content-Type':'application/json','Accept':'application/json'},
+       data:JSON.stringify({api_key:key}),timeout:12000,
+       onload:r=>{try{const result=JSON.parse(r.responseText||'{}');if(r.status!==200||result.status!=='ok')throw Error(r.status===429?'rate_limited':'http_'+r.status);resolve(result)}catch(e){reject(e)}},
+       onerror:()=>reject(Error('network_error')),ontimeout:()=>reject(Error('timeout'))
+      })}catch(e){reject(e)}
+     });
+     const shared={key,promise};globalThis.__SakaLuXLicenseStandaloneFlight=shared;
+     try{d=await promise}finally{
+      if(globalThis.__SakaLuXLicenseStandaloneFlight===shared)delete globalThis.__SakaLuXLicenseStandaloneFlight;
+     }
+    }
+   }
+   if(key!==ciHubApiKey())throw Error('identity_changed');
+   const raw=String(d?.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z';
+   const date=Date.parse(raw);
+   const active=d?.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('company_director')&&Number.isFinite(date)&&date>Date.now();
+   ciProVerified=active;ciProKey=active?key:'';ciProExpires=active?Math.min(date,Date.now()+5*60*1000):0;
+   ciProFailure=active?'active':d?.status==='ok'?'inactive':'verification_failed';
+   return active;
+  }catch(e){
+   ciProVerified=false;ciProExpires=0;ciProKey='';
+   ciProFailure=String(e?.message||'network_error').slice(0,70);
+   return false;
+  }
+ })();
  try{return await ciProChecking}finally{ciProChecking=null}
 }
 function ciProExplanation(){

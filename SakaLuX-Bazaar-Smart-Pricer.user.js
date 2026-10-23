@@ -881,6 +881,57 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Premium Badges v2 — END */
 
 
+/* SakaLuX Signed License Verifier — BEGIN */
+/* SakaLuX signed license grant verifier — independent userscript realms.
+ * Shared storage is a transport only, never an authorization decision.
+ */
+(function(root) {
+  'use strict';
+  const PUBLIC_KEY_B64='Hw+1h/0NZwOLEmJ+sbwgcKBIpJrgE/5kmjGnA7hnrhM=';
+  const STORAGE_KEY='SakaLuX_SIGNED_PRO_GRANT_V1';
+  const decode=s=>Uint8Array.from(atob(String(s).replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-String(s).length%4)%4)),c=>c.charCodeAt(0));
+  const validKey=k=>/^[A-Za-z0-9]{16}$/.test(String(k));
+  const hash=async k=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  async function verify(data,{apiKey,entitlement,userId,now=Date.now()}={}){
+    if(!validKey(apiKey)||typeof entitlement!=='string'||!entitlement||!Number.isSafeInteger(userId)||userId<=0)return false;
+    const cert=data?.signed_certificate;
+    if(data?.status!=='ok'||data.premium_active!==true||cert?.format!=='slx-ed25519-v1')return false;
+    if(!Array.isArray(data.entitlements)||!data.entitlements.includes(entitlement))return false;
+    if(!Number.isSafeInteger(Number(data.user?.id))||Number(data.user.id)<=0)return false;
+    const keyBytes=decode(PUBLIC_KEY_B64),signature=decode(cert.signature),payload=decode(cert.payload);
+    if(keyBytes.length!==32||signature.length!==64)return false;
+    const publicKey=await crypto.subtle.importKey('raw',keyBytes,{name:'Ed25519'},false,['verify']);
+    if(!await crypto.subtle.verify('Ed25519',publicKey,signature,payload))return false;
+    const claim=JSON.parse(new TextDecoder().decode(payload));
+    const t=Math.floor(now/1000);
+    if(claim.issuer!=='sakalux.ro'||claim.v!==1||claim.subject!==Number(data.user.id)||claim.subject!==userId)return false;
+    if(!Number.isInteger(claim.iat)||!Number.isInteger(claim.exp)||claim.exp<=t||claim.iat>t+30||claim.exp>claim.iat+300)return false;
+    if(JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))return false;
+    // The signed claim expires within five minutes; other clients must independently verify it.
+    return true;
+  }
+  async function store(storage,apiKey,data,userId){
+    if(!validKey(apiKey)||!data?.signed_certificate)return false;
+    const entitlements=Array.isArray(data.entitlements)?data.entitlements:[];
+    if(!entitlements.length||!await verify(data,{apiKey,entitlement:entitlements[0],userId}))return false;
+    storage.setItem(STORAGE_KEY,JSON.stringify({keyHash:await hash(apiKey),data}));
+    return true;
+  }
+  async function load(storage,apiKey,entitlement,userId){
+    if(!validKey(apiKey))return null;
+    try{
+      const saved=JSON.parse(storage.getItem(STORAGE_KEY)||'null');
+      if(saved?.keyHash!==await hash(apiKey))return null;
+      if(!await verify(saved.data,{apiKey,entitlement,userId}))return null;
+      const claim=JSON.parse(new TextDecoder().decode(decode(saved.data.signed_certificate.payload)));
+      return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
+    }catch{return null}
+  }
+  root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+/* SakaLuX Signed License Verifier — END */
+
 /* SakaLuX Freemium Control — BEGIN */
 (()=>{
  'use strict';
@@ -893,7 +944,36 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    return !!(data?.premium_active===true&&data?.entitlements?.includes(ENT)&&Number.isFinite(expiry)&&expiry>Date.now()&&k===key());
  };
  async function isPro(){
-   const k=key();if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
+   const k=key();
+   // Cross-world authorization requires signed certificate AND authenticated Torn identity.
+   // Online SakaLuX verification remains the fallback if either validation fails.
+   if(typeof GM_xmlhttpRequest==='function'&&globalThis.SakaLuXSignedGrant?.load){
+     try{
+       const grantKey=globalThis.SakaLuXSignedGrant.STORAGE_KEY;
+       if(localStorage.getItem(grantKey)&&/^[A-Za-z0-9]{16}$/.test(k)){
+         const ownId=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
+           method:'GET',url:'https://api.torn.com/v2/user/basic?key='+encodeURIComponent(k),
+           timeout:10000,
+           onload:r=>{try{
+             const d=JSON.parse(r.responseText||'{}'),id=Number(d.id);
+             if(r.status!==200||d.error||!Number.isSafeInteger(id)||id<=0)throw Error('identity_invalid');
+             resolve(id);
+           }catch(e){reject(e)}},
+           onerror:()=>reject(Error('identity_network')),ontimeout:()=>reject(Error('identity_timeout'))
+         }));
+         if(k===key()){
+           const grant=await globalThis.SakaLuXSignedGrant.load(localStorage,k,ENT,ownId);
+           if(grant&&k===key()){
+             verifiedKey=k;
+             verifiedUntil=Math.min(grant.verifiedGrantExpiresAt,Date.now()+300000,Date.parse(String(grant.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z'));
+             verificationState='pro';
+             return true;
+           }
+         }
+       }
+     }catch{} // Never grant PRO if cache or Torn identity verification is unavailable.
+   }
+if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
    if(k===verifiedKey&&verifiedUntil>Date.now()){verificationState='pro';return true;}
    const hub=globalThis.__SakaLuXPremiumVerified;
    if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));verificationState='pro';return true}

@@ -21,6 +21,99 @@
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
+/* SakaLuX Signed License Verifier — BEGIN */
+/* SakaLuX signed license grant verifier — independent userscript realms.
+ * Shared storage is a transport only, never an authorization decision.
+ */
+(function(root) {
+  'use strict';
+  const PUBLIC_KEY_B64='Hw+1h/0NZwOLEmJ+sbwgcKBIpJrgE/5kmjGnA7hnrhM=';
+  const STORAGE_KEY='SakaLuX_SIGNED_PRO_GRANT_V1';
+  const decode=s=>Uint8Array.from(atob(String(s).replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-String(s).length%4)%4)),c=>c.charCodeAt(0));
+  const validKey=k=>/^[A-Za-z0-9]{16}$/.test(String(k));
+  const hash=async k=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  async function verify(data,{apiKey,entitlement,userId,now=Date.now()}={}){
+    if(!validKey(apiKey)||typeof entitlement!=='string'||!entitlement||!Number.isSafeInteger(userId)||userId<=0)return false;
+    const cert=data?.signed_certificate;
+    if(data?.status!=='ok'||data.premium_active!==true||cert?.format!=='slx-ed25519-v1')return false;
+    if(!Array.isArray(data.entitlements)||!data.entitlements.includes(entitlement))return false;
+    if(!Number.isSafeInteger(Number(data.user?.id))||Number(data.user.id)<=0)return false;
+    const keyBytes=decode(PUBLIC_KEY_B64),signature=decode(cert.signature),payload=decode(cert.payload);
+    if(keyBytes.length!==32||signature.length!==64)return false;
+    const publicKey=await crypto.subtle.importKey('raw',keyBytes,{name:'Ed25519'},false,['verify']);
+    if(!await crypto.subtle.verify('Ed25519',publicKey,signature,payload))return false;
+    const claim=JSON.parse(new TextDecoder().decode(payload));
+    const t=Math.floor(now/1000);
+    if(claim.issuer!=='sakalux.ro'||claim.v!==1||claim.subject!==Number(data.user.id)||claim.subject!==userId)return false;
+    if(!Number.isInteger(claim.iat)||!Number.isInteger(claim.exp)||claim.exp<=t||claim.iat>t+30||claim.exp>claim.iat+300)return false;
+    if(JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))return false;
+    // The signed claim expires within five minutes; other clients must independently verify it.
+    return true;
+  }
+  async function store(storage,apiKey,data,userId){
+    if(!validKey(apiKey)||!data?.signed_certificate)return false;
+    const entitlements=Array.isArray(data.entitlements)?data.entitlements:[];
+    if(!entitlements.length||!await verify(data,{apiKey,entitlement:entitlements[0],userId}))return false;
+    storage.setItem(STORAGE_KEY,JSON.stringify({keyHash:await hash(apiKey),data}));
+    return true;
+  }
+  async function load(storage,apiKey,entitlement,userId){
+    if(!validKey(apiKey))return null;
+    try{
+      const saved=JSON.parse(storage.getItem(STORAGE_KEY)||'null');
+      if(saved?.keyHash!==await hash(apiKey))return null;
+      if(!await verify(saved.data,{apiKey,entitlement,userId}))return null;
+      const claim=JSON.parse(new TextDecoder().decode(decode(saved.data.signed_certificate.payload)));
+      return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
+    }catch{return null}
+  }
+  root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+/* SakaLuX Signed License Verifier — END */
+
+/* SakaLuX Suite Signed PRO Access — BEGIN */
+(() => {
+  'use strict';
+  // Entitlements remain module-scoped. No Suite-wide premium bypass.
+  let identityFlight=null;
+  const getApiKey=()=>{try{return String(globalThis.SakaLuXScriptHub?.getApiKey?.()||
+    localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}};
+  function identity(apiKey){
+    if(identityFlight?.key===apiKey)return identityFlight.promise;
+    if(typeof GM_xmlhttpRequest!=='function')return Promise.reject(Error('transport_unavailable'));
+    const promise=new Promise((resolve,reject)=>{
+      try{GM_xmlhttpRequest({method:'GET',
+        url:'https://api.torn.com/v2/user/basic?key='+encodeURIComponent(apiKey),timeout:10000,
+        onload:r=>{try{
+          if(r.status!==200)throw Error('identity_http_'+r.status);
+          const data=JSON.parse(r.responseText||'{}'),id=Number(data?.id);
+          if(data?.error||!Number.isSafeInteger(id)||id<=0)throw Error('identity_unverified');
+          resolve(id);
+        }catch(e){reject(e)}},
+        onerror:()=>reject(Error('identity_network')),ontimeout:()=>reject(Error('identity_timeout'))
+      })}catch(e){reject(e)}
+    });
+    const flight={key:apiKey,promise};identityFlight=flight;
+    void promise.then(()=>{},()=>{}).finally(()=>{if(identityFlight===flight)identityFlight=null});
+    return promise;
+  }
+  async function check(entitlement){
+    const apiKey=getApiKey(),signed=globalThis.SakaLuXSignedGrant;
+    if(!/^[A-Za-z0-9]{16}$/.test(apiKey)||typeof entitlement!=='string'||!entitlement||
+       !signed?.load||!localStorage.getItem(signed.STORAGE_KEY))return false;
+    try{
+      const userId=await identity(apiKey);
+      if(apiKey!==getApiKey())return false;
+      const grant=await signed.load(localStorage,apiKey,entitlement,userId);
+      return !!grant&&apiKey===getApiKey();
+    }catch{return false}
+  }
+  globalThis.SakaLuXSuiteSignedPro=Object.freeze({check});
+})();
+/* SakaLuX Suite Signed PRO Access — END */
+
+
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
  * Source-only module. Not installed directly by users.
@@ -11190,7 +11283,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       if (active) return;
       active = true;
       ensureStyle();
-      observer = new MutationObserver(() => schedule(80));
+      observer = new MutationObserver(records => { if (records.every(r => r.target?.closest?.('#chat-box, .chat-messages'))) return; schedule(80); });
       observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
       schedule(0);
     }
@@ -47557,7 +47650,7 @@ function refresh(){const root=suiteRoot();if(!root)return;for(const [id,name,g] 
 window.addEventListener('SakaLuX:ModuleReady',()=>setTimeout(refresh,30),{passive:true});
 window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(refresh,30),{passive:true});
 window.addEventListener('storage',()=>setTimeout(refresh,30),{passive:true});
-new MutationObserver(()=>{clearTimeout(window.__slx0948t);window.__slx0948t=setTimeout(refresh,80);}).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['data-enabled','aria-checked']});
+new MutationObserver(records=>{if(records.every(r=>r.target?.closest?.('#chat-box, .chat-messages')))return;clearTimeout(window.__slx0948t);window.__slx0948t=setTimeout(refresh,80);}).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['data-enabled','aria-checked']});
 setInterval(refresh,750);setTimeout(refresh,50);
 })();
 
@@ -47607,7 +47700,7 @@ function ensureAll(){
 }
 window.addEventListener('SakaLuX:ModuleReady',()=>setTimeout(ensureAll,20),{passive:true});
 window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(ensureAll,20),{passive:true});
-new MutationObserver(()=>{clearTimeout(window.__slx0949t);window.__slx0949t=setTimeout(ensureAll,60);}).observe(document.documentElement,{childList:true,subtree:true});
+new MutationObserver(records=>{if(records.every(r=>r.target?.closest?.('#chat-box, .chat-messages')))return;clearTimeout(window.__slx0949t);window.__slx0949t=setTimeout(ensureAll,60);}).observe(document.documentElement,{childList:true,subtree:true});
 setInterval(ensureAll,1000);setTimeout(ensureAll,40);
 })();
 

@@ -16,6 +16,57 @@
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
 // ==/UserScript==
 
+/* SakaLuX Signed License Verifier — BEGIN */
+/* SakaLuX signed license grant verifier — independent userscript realms.
+ * Shared storage is a transport only, never an authorization decision.
+ */
+(function(root) {
+  'use strict';
+  const PUBLIC_KEY_B64='Hw+1h/0NZwOLEmJ+sbwgcKBIpJrgE/5kmjGnA7hnrhM=';
+  const STORAGE_KEY='SakaLuX_SIGNED_PRO_GRANT_V1';
+  const decode=s=>Uint8Array.from(atob(String(s).replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-String(s).length%4)%4)),c=>c.charCodeAt(0));
+  const validKey=k=>/^[A-Za-z0-9]{16}$/.test(String(k));
+  const hash=async k=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(k)))).map(n=>n.toString(16).padStart(2,'0')).join('');
+  async function verify(data,{apiKey,entitlement,userId,now=Date.now()}={}){
+    if(!validKey(apiKey)||typeof entitlement!=='string'||!entitlement||!Number.isSafeInteger(userId)||userId<=0)return false;
+    const cert=data?.signed_certificate;
+    if(data?.status!=='ok'||data.premium_active!==true||cert?.format!=='slx-ed25519-v1')return false;
+    if(!Array.isArray(data.entitlements)||!data.entitlements.includes(entitlement))return false;
+    if(!Number.isSafeInteger(Number(data.user?.id))||Number(data.user.id)<=0)return false;
+    const keyBytes=decode(PUBLIC_KEY_B64),signature=decode(cert.signature),payload=decode(cert.payload);
+    if(keyBytes.length!==32||signature.length!==64)return false;
+    const publicKey=await crypto.subtle.importKey('raw',keyBytes,{name:'Ed25519'},false,['verify']);
+    if(!await crypto.subtle.verify('Ed25519',publicKey,signature,payload))return false;
+    const claim=JSON.parse(new TextDecoder().decode(payload));
+    const t=Math.floor(now/1000);
+    if(claim.issuer!=='sakalux.ro'||claim.v!==1||claim.subject!==Number(data.user.id)||claim.subject!==userId)return false;
+    if(!Number.isInteger(claim.iat)||!Number.isInteger(claim.exp)||claim.exp<=t||claim.iat>t+30||claim.exp>claim.iat+300)return false;
+    if(JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))return false;
+    // The signed claim expires within five minutes; other clients must independently verify it.
+    return true;
+  }
+  async function store(storage,apiKey,data,userId){
+    if(!validKey(apiKey)||!data?.signed_certificate)return false;
+    const entitlements=Array.isArray(data.entitlements)?data.entitlements:[];
+    if(!entitlements.length||!await verify(data,{apiKey,entitlement:entitlements[0],userId}))return false;
+    storage.setItem(STORAGE_KEY,JSON.stringify({keyHash:await hash(apiKey),data}));
+    return true;
+  }
+  async function load(storage,apiKey,entitlement,userId){
+    if(!validKey(apiKey))return null;
+    try{
+      const saved=JSON.parse(storage.getItem(STORAGE_KEY)||'null');
+      if(saved?.keyHash!==await hash(apiKey))return null;
+      if(!await verify(saved.data,{apiKey,entitlement,userId}))return null;
+      const claim=JSON.parse(new TextDecoder().decode(decode(saved.data.signed_certificate.payload)));
+      return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
+    }catch{return null}
+  }
+  root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+/* SakaLuX Signed License Verifier — END */
+
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
  * Source-only module. Not installed directly by users.
@@ -2664,11 +2715,34 @@ let slxProVerification='checking';
 async function slxCheckProAccess(){
  let key='';try{key=String(window.SakaLuXScriptHub?.getApiKey?.()||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{}
  if(!/^[a-zA-Z0-9]{16}$/.test(key)){slxProVerification='unavailable';return slxRestorePro();}
+
+ // Independent signed-grant verification: only an authenticated current Torn ID may unlock PRO.
+ if(globalThis.SakaLuXSignedGrant?.load&&typeof GM_xmlhttpRequest==='function'){
+  try{
+   const signed=globalThis.SakaLuXSignedGrant;
+   if(localStorage.getItem(signed.STORAGE_KEY)){
+    const id=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
+     method:'GET',url:'https://api.torn.com/v2/user/basic?key='+encodeURIComponent(key),timeout:10000,
+     onload:r=>{try{
+      const d=JSON.parse(r.responseText||'{}'),id=Number(d.id);
+      if(r.status!==200||d.error||!Number.isSafeInteger(id)||id<=0)throw Error('identity_invalid');
+      resolve(id);
+     }catch(e){reject(e)}},
+     onerror:()=>reject(Error('identity_network')),ontimeout:()=>reject(Error('identity_timeout'))
+    }));
+    const grant=await signed.load(localStorage,key,'enhancer_guard',id);
+    if(grant&&key===slxLicenseKey()){
+     const expiry=Date.parse(String(grant.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z');
+     return slxConfirmedPro(Math.min(expiry,grant.verifiedGrantExpiresAt));
+    }
+   }
+  }catch{} // Offline/invalid grant: use existing online license lookup.
+ }
  const hub=globalThis.__SakaLuXPremiumVerified;
  if(hub?.key===key&&Date.now()-hub.at<5*60*1000&&hub.data?.premium_active===true){
   const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
   if(Number.isFinite(expiry)&&expiry>Date.now()&&hub.data.entitlements?.includes('enhancer_guard')){
-   return slxConfirmedPro(expiry);
+   return slxConfirmedPro(Math.min(expiry,Date.now()+300000));
   }
  }
  const broker=globalThis.SakaLuXLicenseBroker;
@@ -2679,19 +2753,40 @@ async function slxCheckProAccess(){
    const allowed=d?.status==='ok'&&d?.premium_active===true&&Array.isArray(d.entitlements)&&
      d.entitlements.includes('enhancer_guard')&&
      Number.isFinite(expiry)&&expiry>Date.now();
-   if(allowed)return slxConfirmedPro(expiry);
+   if(allowed)return slxConfirmedPro(Math.min(expiry,Date.now()+300000));
    slxProVerification=d?.status==='ok'?'free':'unavailable';
    if(d?.status==='ok'){slxProAllowed=false;slxProExpiry=0;try{localStorage.removeItem(slxLicenseCacheKey)}catch{};return false}
    return slxRestorePro();
   }catch{slxProVerification='unavailable';return slxRestorePro();}
  }
- if(typeof GM_xmlhttpRequest!=='function'){slxProVerification='unavailable';return slxRestorePro();}
- return new Promise(resolve=>GM_xmlhttpRequest({
-  method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-  headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
-  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now());if(allowed){resolve(slxConfirmedPro(ends));return;}if(r.status===200&&d.status==='ok'){slxProAllowed=false;slxProExpiry=0;slxProVerification='free';try{localStorage.removeItem(slxLicenseCacheKey)}catch{};resolve(false);return;}slxProVerification='unavailable';resolve(slxRestorePro())}catch{slxProVerification='unavailable';resolve(slxRestorePro())}},
-  onerror:()=>{slxProVerification='unavailable';resolve(slxRestorePro())},ontimeout:()=>{slxProVerification='unavailable';resolve(slxRestorePro())}
- }));
+ try{
+  let d;
+  const same=globalThis.__SakaLuXLicenseStandaloneFlight;
+  if(same?.key===key&&same.promise)d=await same.promise;
+  else{
+   if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
+   const promise=new Promise((resolve,reject)=>{
+    try{GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+     headers:{'Content-Type':'application/json','Accept':'application/json'},
+     data:JSON.stringify({api_key:key}),timeout:12000,
+     onload:r=>{try{const result=JSON.parse(r.responseText||'{}');if(r.status!==200||result.status!=='ok')throw Error('http_'+r.status);resolve(result)}catch(e){reject(e)}},
+     onerror:()=>reject(Error('network_unavailable')),ontimeout:()=>reject(Error('timeout'))
+    })}catch(e){reject(e)}
+   });
+   const shared={key,promise};globalThis.__SakaLuXLicenseStandaloneFlight=shared;
+   try{d=await promise}finally{
+    if(globalThis.__SakaLuXLicenseStandaloneFlight===shared)delete globalThis.__SakaLuXLicenseStandaloneFlight;
+   }
+  }
+  if(key!==slxLicenseKey())throw Error('identity_changed');
+  const ends=Date.parse(String(d?.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z');
+  const allowed=d?.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&
+   d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now();
+  if(allowed)return slxConfirmedPro(ends);
+  slxProAllowed=false;slxProExpiry=0;slxProVerification='free';
+  try{localStorage.removeItem(slxLicenseCacheKey)}catch{}
+  return false;
+ }catch{slxProVerification='unavailable';return slxRestorePro()}
 }
 function slxProCurrent(){
  const hub=globalThis.__SakaLuXPremiumVerified;

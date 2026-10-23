@@ -3,11 +3,19 @@ const { spawnSync } = require('node:child_process');
 const files = fs.readdirSync('.').filter(x=>x.endsWith('.user.js')).sort();
 const results=[];
 for (const file of files) for (const mode of ['standalone', 'relevant']) {
-  const child=spawnSync(process.execPath,['tests/performance/worker.cjs',file,mode],{encoding:'utf8',timeout:12000,env:process.env,maxBuffer:1024*1024});
+  const child=spawnSync(process.execPath,['tests/performance/worker.cjs',file,mode],{encoding:'utf8',timeout:20000,env:process.env,maxBuffer:1024*1024});
   try { const row=JSON.parse(child.stdout.trim().split('\n').at(-1)); results.push(row); console.log(`${file} ${mode}: ${row.queries} queries; ${row.timeoutsScheduled} timeouts; ${row.observerMs}ms observer work; errors=${row.errors.length}`); }
   catch { results.push({file,mode,error:child.error?.message || child.stderr || 'No result'}); console.log(`${file} ${mode}: FAILED`); }
 }
 fs.writeFileSync(process.argv[2]||'/tmp/performance-results.json',JSON.stringify({fixture:'400 rows, 40 unrelated chat mutations at 20ms intervals, 1000ms initial settle, 450ms drain; jsdom, offline APIs; no rendering/GPU',node:process.version,results},null,2));
+// Diagnostic summary: highlight the highest timer scheduling call sites, not just the total.
+for (const row of results.filter(x => /SakaLuX-(?:Suite|Script-Hub)\.user\.js/.test(x.file || ''))) {
+ const hotspots = Object.entries(row.timeoutSources || {}).sort((a,b) => b[1]-a[1]).slice(0,5);
+ console.log('[PERF HOTSPOTS] '+row.file+' '+row.mode+' '+JSON.stringify({
+   scheduled:row.timeoutsScheduled, observers:row.observers,
+   topTimerSites:hotspots.map(([site,count])=>({site,count}))
+ }));
+}
 if(results.some(x=>x.error))process.exitCode=1;
 if(process.argv.includes('--assert')) {
  const assert=require('node:assert/strict');
