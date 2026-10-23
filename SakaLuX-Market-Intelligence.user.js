@@ -936,13 +936,24 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
        if(broker?.check)d=await broker.check(k);
        else{
          if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
-         d=await new Promise((resolve,reject)=>GM_xmlhttpRequest({
-           method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-           headers:{'Content-Type':'application/json','Accept':'application/json'},
-           data:JSON.stringify({api_key:k}),timeout:12000,
-           onload:r=>{try{const data=JSON.parse(r.responseText||'{}');if(r.status===429||data.status==='rate_limited')throw Error('rate_limited');if(r.status!==200)throw Error('HTTP '+r.status);resolve(data)}catch(e){reject(e)}},
-           onerror:()=>reject(Error('network_unavailable')),ontimeout:()=>reject(Error('timeout'))
-         }));
+         // Join a same-key standalone request from Bounty/Stock; avoid duplicate checks.
+         const existing=globalThis.__SakaLuXLicenseStandaloneFlight;
+         if(existing?.key===k&&existing.promise)d=await existing.promise;
+         else{
+           const flight=new Promise((resolve,reject)=>GM_xmlhttpRequest({
+             method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+             headers:{'Content-Type':'application/json','Accept':'application/json'},
+             data:JSON.stringify({api_key:k}),timeout:12000,
+             onload:r=>{try{const data=JSON.parse(r.responseText||'{}');if(r.status===429||data.status==='rate_limited')throw Error('rate_limited');if(r.status!==200||data.status!=='ok')throw Error('HTTP '+r.status);resolve(data)}catch(e){reject(e)}},
+             onerror:()=>reject(Error('network_unavailable')),ontimeout:()=>reject(Error('timeout'))
+           }));
+           const shared={key:k,promise:flight};
+           globalThis.__SakaLuXLicenseStandaloneFlight=shared;
+           try{d=await flight}finally{
+             if(globalThis.__SakaLuXLicenseStandaloneFlight===shared)
+               delete globalThis.__SakaLuXLicenseStandaloneFlight;
+           }
+         }
        }
        if(d?.status!=='ok')throw Error(d?.status||'license_unavailable');
        if(acceptGrant(d,k)){rememberGrant(d,k);return true;}
