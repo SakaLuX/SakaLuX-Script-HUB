@@ -1,8 +1,5 @@
 name: Batch release Standalone Runtime v1.1.3
 on:
-  push:
-    paths:
-      - '.github/workflows/batch-release-standalone-v113.yml'
   workflow_dispatch:
 permissions:
   contents: write
