@@ -4,6 +4,7 @@ on:
     paths:
       - 'SakaLuX-*.user.js'
       - 'tests/market-pro-bootstrap-regression.cjs'
+      - 'tests/standalone-pro-startup-regression.cjs'
       - '.github/workflows/pro-license-syntax-check.yml'
   workflow_dispatch:
 jobs:
@@ -49,3 +50,5 @@ jobs:
 
       - name: Check Market independent PRO revalidation
         run: node tests/market-pro-bootstrap-regression.cjs
+      - name: Check independent Bounty and Stock PRO startup
+        run: node tests/standalone-pro-startup-regression.cjs
