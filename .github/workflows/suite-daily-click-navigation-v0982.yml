@@ -1,9 +1,5 @@
 name: Suite Daily Click Navigation v0.9.982
 on:
-  push:
-    paths:
-      - '.github/scripts/add_suite_daily_click_navigation_v0982.py'
-      - '.github/workflows/suite-daily-click-navigation-v0982.yml'
   workflow_dispatch:
 permissions:
   contents: write
