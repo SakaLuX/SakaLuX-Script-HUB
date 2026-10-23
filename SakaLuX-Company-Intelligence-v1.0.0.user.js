@@ -62,7 +62,9 @@
     try{
       const saved=JSON.parse(storage.getItem(STORAGE_KEY)||'null');
       if(saved?.keyHash!==await hash(apiKey))return null;
-      return await verify(saved.data,{apiKey,entitlement,userId})?saved.data:null;
+      if(!await verify(saved.data,{apiKey,entitlement,userId}))return null;
+      const claim=JSON.parse(new TextDecoder().decode(decode(saved.data.signed_certificate.payload)));
+      return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
     }catch{return null}
   }
   root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
@@ -2443,7 +2445,7 @@ async function ciCheckDirectorPro(force=false){
     const grant=await signed.load(localStorage,key,'company_director',id);
     if(grant&&key===ciHubApiKey()){
      const expiry=Date.parse(String(grant.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z');
-     ciProVerified=true;ciProKey=key;ciProExpires=Math.min(expiry,Date.now()+300000);ciProFailure='active';return true;
+     ciProVerified=true;ciProKey=key;ciProExpires=Math.min(expiry,grant.verifiedGrantExpiresAt,Date.now()+300000);ciProFailure='active';return true;
     }
    }
   }catch{} // Offline/invalid grant: use existing online license lookup.
