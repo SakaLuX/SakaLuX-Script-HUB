@@ -1,8 +1,5 @@
 name: Publish Bounty v0.5.1 + Hub v1.9.91
 on:
-  push:
-    paths:
-      - '.github/workflows/publish-bounty-v051-hub-v1991.yml'
   workflow_dispatch:
 permissions:
   contents: write
