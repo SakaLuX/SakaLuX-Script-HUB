@@ -1,8 +1,5 @@
 name: Publish Bounty Hunter v0.4.7 retry
 on:
-  push:
-    paths:
-      - '.github/workflows/publish-bounty-hunter-v047-retry.yml'
   workflow_dispatch:
 permissions:
   contents: write
