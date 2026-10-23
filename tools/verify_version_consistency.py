@@ -37,7 +37,7 @@ for module in registry["scripts"]:
     path = ROOT / module["sourceUrl"].rsplit("/", 1)[-1]
     source = path.read_text(encoding="utf-8")
     header = version_match(source, r"(?m)^// @version\s+(\S+)", ident + " header")
-    internal = version_match(source, r"const SELF\s*=[^\n]*?version:\s*['\"]([^'\"]+)", ident + " SELF.version")
+    internal = None if ident == "gym-optimizer" else version_match(source, r"const SELF\s*=[^\n]*?version:\s*['\"]([^'\"]+)", ident + " SELF.version")
     offset = hub.find('"id": "' + ident + '"')
     end = hub.find("\n            }", offset)
     if offset < 0 or end < 0:
