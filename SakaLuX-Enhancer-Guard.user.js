@@ -2685,13 +2685,34 @@ async function slxCheckProAccess(){
    return slxRestorePro();
   }catch{slxProVerification='unavailable';return slxRestorePro();}
  }
- if(typeof GM_xmlhttpRequest!=='function'){slxProVerification='unavailable';return slxRestorePro();}
- return new Promise(resolve=>GM_xmlhttpRequest({
-  method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-  headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:key}),timeout:12000,
-  onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ends=Date.parse(String(d.expires_at||'').replace(' ','T')+'Z');const allowed=(r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now());if(allowed){resolve(slxConfirmedPro(ends));return;}if(r.status===200&&d.status==='ok'){slxProAllowed=false;slxProExpiry=0;slxProVerification='free';try{localStorage.removeItem(slxLicenseCacheKey)}catch{};resolve(false);return;}slxProVerification='unavailable';resolve(slxRestorePro())}catch{slxProVerification='unavailable';resolve(slxRestorePro())}},
-  onerror:()=>{slxProVerification='unavailable';resolve(slxRestorePro())},ontimeout:()=>{slxProVerification='unavailable';resolve(slxRestorePro())}
- }));
+ try{
+  let d;
+  const same=globalThis.__SakaLuXLicenseStandaloneFlight;
+  if(same?.key===key&&same.promise)d=await same.promise;
+  else{
+   if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
+   const promise=new Promise((resolve,reject)=>{
+    try{GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+     headers:{'Content-Type':'application/json','Accept':'application/json'},
+     data:JSON.stringify({api_key:key}),timeout:12000,
+     onload:r=>{try{const result=JSON.parse(r.responseText||'{}');if(r.status!==200||result.status!=='ok')throw Error('http_'+r.status);resolve(result)}catch(e){reject(e)}},
+     onerror:()=>reject(Error('network_unavailable')),ontimeout:()=>reject(Error('timeout'))
+    })}catch(e){reject(e)}
+   });
+   const shared={key,promise};globalThis.__SakaLuXLicenseStandaloneFlight=shared;
+   try{d=await promise}finally{
+    if(globalThis.__SakaLuXLicenseStandaloneFlight===shared)delete globalThis.__SakaLuXLicenseStandaloneFlight;
+   }
+  }
+  if(key!==slxLicenseKey())throw Error('identity_changed');
+  const ends=Date.parse(String(d?.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z');
+  const allowed=d?.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&
+   d.entitlements.includes('enhancer_guard')&&Number.isFinite(ends)&&ends>Date.now();
+  if(allowed)return slxConfirmedPro(ends);
+  slxProAllowed=false;slxProExpiry=0;slxProVerification='free';
+  try{localStorage.removeItem(slxLicenseCacheKey)}catch{}
+  return false;
+ }catch{slxProVerification='unavailable';return slxRestorePro()}
 }
 function slxProCurrent(){
  const hub=globalThis.__SakaLuXPremiumVerified;
