@@ -1,8 +1,5 @@
 name: Publish normalized script releases
 on:
-  push:
-    branches: [main]
-    paths: ['releases/version-normalization-2026-10-07.json']
   workflow_dispatch:
 permissions:
   contents: write
