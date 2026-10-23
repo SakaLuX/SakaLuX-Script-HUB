@@ -1453,7 +1453,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.3.73",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.",
                         "Preserve preferred ON/OFF independent of transient license check.",
@@ -1508,7 +1508,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "5.3.71",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.",
                         "Preserve preferred ON/OFF independent of transient license check.",
@@ -1567,7 +1567,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "version": "1.1.28",
                 "release": {
                     "version": "1.1.28",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
                         "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
@@ -1632,7 +1632,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.0.61",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
                         "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
@@ -1710,7 +1710,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.17.87",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Travel panels are restricted to true Travel Agency/in-flight/abroad page contexts, never Bazaar or profiles.",
                         "Route detection prioritizes explicit Bazaar, profile, inventory and market pages before SPA travel headings.",
@@ -1790,7 +1790,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "0.5.20",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Align embedded runtime version with @version to prevent false Hub update alerts.",
                         "Preserve existing script functionality and API key settings."
@@ -1892,7 +1892,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.3.65",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Align embedded runtime version with @version to prevent false Hub update alerts.",
                         "Preserve existing script functionality and API key settings."
@@ -1956,7 +1956,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.8.95",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.",
                         "The offer link remains visible in a PRO dialog regardless of whether a license is already active.",
@@ -2022,7 +2022,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "0.8.34",
-                    "date": "2026-10-22",
+                    "date": "2026-10-23",
                     "notes": [
                         "Fixes stale TornPDA canonical installed-version fallback 0.8.30; reports 0.8.34 when GM_info is absent.",
                         "Aligns source, runtime, registry and Hub version reporting."
@@ -2098,7 +2098,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "installable": true
             }
         ],
-        "lastVerified": "2026-10-22",
+        "lastVerified": "2026-10-23",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 
