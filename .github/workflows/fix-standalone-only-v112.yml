@@ -1,8 +1,5 @@
 name: Fix Standalone Dock only v1.1.2
 on:
-  push:
-    paths:
-      - '.github/workflows/fix-standalone-only-v112.yml'
   workflow_dispatch:
 permissions:
   contents: write
