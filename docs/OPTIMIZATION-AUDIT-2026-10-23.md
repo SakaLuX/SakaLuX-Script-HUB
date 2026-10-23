@@ -74,3 +74,9 @@ The Hub's certificate panel already validates `slx-ed25519-v1` grants; its exist
 Hub now writes a separate `SakaLuX_SIGNED_PRO_GRANT_V1` cache entry with certificate, entitlements and account claims **only after its Ed25519 broker diagnostics report verified=true**. The entry uses the SHA-256 fingerprint of the current API key, is cleared on key change or an authoritative FREE response, and is not used as an unsigned PRO flag. An independent realm must still validate the signature, expiry, entitlement and authenticated Torn user ID with `src/core/sakalux-signed-license-grant.js` before making an authorization decision.
 
 Pending before claiming cross-world licensing is operational: embedding the verifier into the userscripts, obtaining a trusted current-user ID in each realm, handling certificate refresh and safe revocation, and real TornPDA/Tampermonkey tests.
+
+## Cross-realm validation fixture
+
+The signed-grant regression now constructs **two independent VM globals** sharing only a storage adapter. The second realm validates the certificate with its own Ed25519 verifier and checks that altered entitlements and a different authenticated Torn user ID are rejected. This is an automated isolated-realm simulation, **not** a TornPDA field test.
+
+Production gating remains unchanged: no standalone script can safely use a signed cache entry until its own current Torn identity is established from an authenticated source. The certificate screenshot alone does not establish that per-script identity contract.
