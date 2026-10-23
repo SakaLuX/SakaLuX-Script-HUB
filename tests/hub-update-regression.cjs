@@ -31,7 +31,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   assert.equal(result.latest, script.version);
   assert.equal(result.distributionBehind, true);
   assert.equal(api.getUpdateState(script).state, 'available');
-  assert.equal(api.getInstallUrl(script), script.sourceUrl);
+  assert.equal(api.getInstallUrl(script), script.downloadUrl);
   assert(calls.some(url => url.startsWith(script.metaUrl) && url.includes('?t=')));
   assert(calls.some(url => url.startsWith(script.sourceUrl)));
   assert.equal(api.isUpdateCacheFresh(script), true);
@@ -46,7 +46,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   };
   result = await api.checkScriptUpdate(script, true);
   assert.equal(result.error, null);
-  assert.equal(api.getInstallUrl(script), script.sourceUrl);
+  assert.equal(api.getInstallUrl(script), script.downloadUrl);
   w.fetch = () => Promise.reject(Error('All sources offline'));
   result = await api.checkScriptUpdate(script, true);
   assert(result.error);
@@ -61,7 +61,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   result = await api.checkScriptUpdate(script, true);
   assert.equal(result.latest, '0.5.8');
   assert.equal(result.available, true);
-  assert.equal(api.getInstallUrl(script), script.sourceUrl);
+  assert.equal(api.getInstallUrl(script), script.downloadUrl);
 
   w.fetch = async url => {
     if (url.startsWith(script.sourceUrl)) throw Error('GitHub unavailable');
