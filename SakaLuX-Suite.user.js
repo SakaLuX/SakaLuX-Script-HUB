@@ -72,6 +72,48 @@
 
 /* SakaLuX Signed License Verifier — END */
 
+/* SakaLuX Suite Signed PRO Access — BEGIN */
+(() => {
+  'use strict';
+  // Entitlements remain module-scoped. No Suite-wide premium bypass.
+  let identityFlight=null;
+  const getApiKey=()=>{try{return String(globalThis.SakaLuXScriptHub?.getApiKey?.()||
+    localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||'').trim()}catch{return ''}};
+  function identity(apiKey){
+    if(identityFlight?.key===apiKey)return identityFlight.promise;
+    if(typeof GM_xmlhttpRequest!=='function')return Promise.reject(Error('transport_unavailable'));
+    const promise=new Promise((resolve,reject)=>{
+      try{GM_xmlhttpRequest({method:'GET',
+        url:'https://api.torn.com/v2/user/basic?key='+encodeURIComponent(apiKey),timeout:10000,
+        onload:r=>{try{
+          if(r.status!==200)throw Error('identity_http_'+r.status);
+          const data=JSON.parse(r.responseText||'{}'),id=Number(data?.id);
+          if(data?.error||!Number.isSafeInteger(id)||id<=0)throw Error('identity_unverified');
+          resolve(id);
+        }catch(e){reject(e)}},
+        onerror:()=>reject(Error('identity_network')),ontimeout:()=>reject(Error('identity_timeout'))
+      })}catch(e){reject(e)}
+    });
+    const flight={key:apiKey,promise};identityFlight=flight;
+    void promise.then(()=>{},()=>{}).finally(()=>{if(identityFlight===flight)identityFlight=null});
+    return promise;
+  }
+  async function check(entitlement){
+    const apiKey=getApiKey(),signed=globalThis.SakaLuXSignedGrant;
+    if(!/^[A-Za-z0-9]{16}$/.test(apiKey)||typeof entitlement!=='string'||!entitlement||
+       !signed?.load||!localStorage.getItem(signed.STORAGE_KEY))return false;
+    try{
+      const userId=await identity(apiKey);
+      if(apiKey!==getApiKey())return false;
+      const grant=await signed.load(localStorage,apiKey,entitlement,userId);
+      return !!grant&&apiKey===getApiKey();
+    }catch{return false}
+  }
+  globalThis.SakaLuXSuiteSignedPro=Object.freeze({check});
+})();
+/* SakaLuX Suite Signed PRO Access — END */
+
+
 /* SakaLuX Shared Core — BEGIN */
 /* SakaLuX Shared Core v1 - test foundation
  * Source-only module. Not installed directly by users.
