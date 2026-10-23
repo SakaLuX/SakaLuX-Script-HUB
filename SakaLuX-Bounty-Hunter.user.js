@@ -893,6 +893,20 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T')+'Z'));verificationState='pro';return true}
    // Prefer the Hub's shared broker: one in-flight request for all modules.
    // A server outage is unknown, never proof that the account is FREE.
+   // Share a short-lived successful server response with other standalone modules.
+   // This is a same-realm optimization, never an independent proof of entitlement.
+   const sharedCache=globalThis.__SakaLuXLicenseStandaloneCache;
+   if(sharedCache?.key===k&&sharedCache.data?.status==='ok'&&
+      Number.isFinite(sharedCache.at)&&Date.now()>=sharedCache.at&&
+      Date.now()-sharedCache.at<(sharedCache.data.premium_active?300000:30000)&&
+      (!sharedCache.data.premium_active||(Number.isFinite(Date.parse(String(sharedCache.data.expires_at).replace(' ','T')+'Z'))&&
+       Date.parse(String(sharedCache.data.expires_at).replace(' ','T')+'Z')>Date.now()))){
+     const ok=accepts(sharedCache.data,k);
+     verificationState=ok?'pro':'free';
+     if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(sharedCache.data.expires_at).replace(' ','T')+'Z'));}
+     else {verifiedKey='';verifiedUntil=0;}
+     return ok;
+   }
    const broker=globalThis.SakaLuXLicenseBroker;
    if(broker?.check){
      try{
@@ -924,6 +938,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
        onload:r=>{try{
          const d=JSON.parse(r.responseText||'{}');
          if(r.status!==200||d?.status!=='ok')throw Error('license_unavailable');
+         globalThis.__SakaLuXLicenseStandaloneCache={key:k,at:Date.now(),data:d};
          resolve(d);
        }catch(e){reject(e)}},
        onerror:()=>reject(Error('network_unavailable')),
