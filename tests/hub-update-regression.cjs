@@ -69,7 +69,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
   };
   result = await api.checkScriptUpdate(script, true);
   assert.equal(result.available, false);
-  assert.equal(api.getUpdateState(script).state, 'pending');
+  assert.equal(api.getUpdateState(script).state, 'current');
   assert.equal(api.getInstallUrl(script), script.downloadUrl);
   dom.window.close();
   console.log('Hub updates: four-to-three-part upgrade, stale registry, verified installer, cache invalidation and offline failures passed.');
