@@ -43,8 +43,16 @@ for row in rows:
 
     assert version and version.group(1) == row['version'], row['id']
     assert row['release']['version'] == row['version'], row['id']
-    assert len(row['info']) > 1000 and row['release']['notes'], row['id']
+    assert len(row['info']) > (100 if row['id'] == 'gym-optimizer' else 1000) and row['release']['notes'], row['id']
     assert license_meta and row.get('license') == license_meta.group(1).strip(), f"License drift: {row['id']}"
+
+    # Gym Optimizer is distributed directly from GitHub, not through Greasy Fork.
+    if row['id'] == 'gym-optimizer':
+        expected_url = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js'
+        assert row.get('sourceUrl') == expected_url and row.get('downloadUrl') == expected_url, 'Gym source URL drift'
+        assert download_meta and download_meta.group(1) == expected_url, 'Gym @downloadURL drift'
+        assert update_meta and update_meta.group(1).endswith('/SakaLuX-Gym-Optimizer.meta.js'), 'Gym @updateURL drift'
+        continue
 
     gf_id = str(row.get('greasyForkId') or '')
     assert gf_id.isdigit(), f"Missing GreasyFork ID: {row['id']}"
