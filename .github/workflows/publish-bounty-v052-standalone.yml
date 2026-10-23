@@ -1,8 +1,5 @@
 name: Publish Bounty v0.5.2 + Standalone Dock v1.1.0
 on:
-  push:
-    paths:
-      - '.github/workflows/publish-bounty-v052-standalone.yml'
   workflow_dispatch:
 permissions:
   contents: write
