@@ -2,10 +2,6 @@ name: Suite Wheel Direct API v0.9.976
 
 # retrigger after patcher regression fix
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/suite-wheel-direct-api-v0976.yml'
   workflow_dispatch:
 
 permissions:
