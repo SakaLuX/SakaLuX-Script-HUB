@@ -5,6 +5,9 @@ on:
       - release/bump-signed-license-scripts-20261023
     paths:
       - '.github/workflows/prepare-pr50-version-bumps.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/prepare-pr50-version-bumps.yml'
   workflow_dispatch:
 permissions:
   contents: write
@@ -15,6 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: true
+          ref: release/bump-signed-license-scripts-20261023
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
