@@ -5,6 +5,7 @@ on:
       - 'SakaLuX-*.user.js'
       - 'tests/market-pro-bootstrap-regression.cjs'
       - 'tests/standalone-pro-startup-regression.cjs'
+      - 'tests/company-enhancer-license-sharing-regression.cjs'
       - '.github/workflows/pro-license-syntax-check.yml'
   workflow_dispatch:
 jobs:
@@ -52,3 +53,5 @@ jobs:
         run: node tests/market-pro-bootstrap-regression.cjs
       - name: Check independent Bounty and Stock PRO startup
         run: node tests/standalone-pro-startup-regression.cjs
+      - name: Check Company and Enhancer license coalescing
+        run: node tests/company-enhancer-license-sharing-regression.cjs
