@@ -1,10 +1,7 @@
 name: Suite Smart Daily Checklist v0.9.975
 
+# Historical one-time patch: disable automatic push trigger.
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/suite-smart-daily-v0975.yml'
   workflow_dispatch:
 
 permissions:
