@@ -899,13 +899,45 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
      try{const d=await broker.check(k);const ok=d?.status==='ok'&&accepts(d,k);verificationState=d?.status==='ok'?(ok?'pro':'free'):'unavailable';if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}else{verifiedKey='';verifiedUntil=0}return ok}catch{verificationState='unavailable';return false}
    }
    if(pending)return pending;
+   const globalFlight=globalThis.__SakaLuXLicenseStandaloneFlight;
+   if(globalFlight?.key===k&&globalFlight.promise){
+     pending=globalFlight.promise.then(d=>{
+       const ok=d?.status==='ok'&&accepts(d,k);
+       verificationState=d?.status==='ok'?(ok?'pro':'free'):'unavailable';
+       if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));}
+       else {verifiedKey='';verifiedUntil=0;}
+       return ok;
+     },()=>{verificationState='unavailable';return false;});
+     try{return await pending}finally{pending=null}
+   }
    if(typeof GM_xmlhttpRequest!=='function'){verificationState='unavailable';return false;}
-   pending=new Promise(resolve=>{
-    GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',headers:{'Content-Type':'application/json','Accept':'application/json'},data:JSON.stringify({api_key:k}),timeout:12000,
-     onload:r=>{try{const d=JSON.parse(r.responseText||'{}');const ok=r.status===200&&d.status==='ok'&&accepts(d,k);verificationState=r.status===200&&d.status==='ok'?(ok?'pro':'free'):'unavailable';if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'))}resolve(ok)}catch{verificationState='unavailable';resolve(false)}},
-     onerror:()=>{verificationState='unavailable';resolve(false)},ontimeout:()=>{verificationState='unavailable';resolve(false)}
-    })
-   });try{return await pending}finally{pending=null}
+   const flight=new Promise((resolve,reject)=>{
+     try{GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+       headers:{'Content-Type':'application/json','Accept':'application/json'},
+       data:JSON.stringify({api_key:k}),timeout:12000,
+       onload:r=>{try{
+         const d=JSON.parse(r.responseText||'{}');
+         if(r.status!==200||d?.status!=='ok')throw Error('license_unavailable');
+         resolve(d);
+       }catch(e){reject(e)}},
+       onerror:()=>reject(Error('network_unavailable')),
+       ontimeout:()=>reject(Error('timeout'))
+     });}catch(e){reject(e)}
+   });
+   const shared={key:k,promise:flight};
+   globalThis.__SakaLuXLicenseStandaloneFlight=shared;
+   void flight.then(()=>{},()=>{}).finally(()=>{
+     if(globalThis.__SakaLuXLicenseStandaloneFlight===shared)
+       delete globalThis.__SakaLuXLicenseStandaloneFlight;
+   });
+   pending=flight.then(d=>{
+     const ok=accepts(d,k);
+     verificationState=ok?'pro':'free';
+     if(ok){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(d.expires_at).replace(' ','T')+'Z'));}
+     else {verifiedKey='';verifiedUntil=0;}
+     return ok;
+   },()=>{verificationState='unavailable';return false;});
+   try{return await pending}finally{pending=null}
  }
  function locked(){
    if(verificationState!=='free'){globalThis.SakaLuXDialog?.notice?.('PRO verification pending or unavailable. Please retry.','warning');return;}
