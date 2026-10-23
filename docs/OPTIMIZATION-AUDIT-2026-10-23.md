@@ -96,3 +96,14 @@ any premium Suite module must still gate features according to its corresponding
 Important caveats: calls to Torn `user/basic` may fail with restricted API key permissions and then
 fall back to license server verification. This has passed static/simulated test coverage only;
 live TornPDA and Tampermonkey testing remains outstanding. No Greasy Fork releases have been published.
+
+## Suite module-scoped signed grant consumer
+
+Suite now exposes `SakaLuXSuiteSignedPro.check(entitlement)`, which returns true only if:
+the Hub signed-grant cache exists, Torn's authenticated `/v2/user/basic` confirms the account,
+the embedded Ed25519 verifier validates the signed subject/expiry/entitlement, and the API key
+has not changed during the asynchronous check. Concurrent identity requests within Suite
+share an in-flight promise. Missing/invalid cache simply returns false; existing online
+authorization logic is left intact. **This is an available API for Suite premium modules,
+not a blanket PRO unlock and not yet connected to every Suite module's own feature gate.**
+The nine standalone PRO scripts already have signed-grant consumers on this PR branch.
