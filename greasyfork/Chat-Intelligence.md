@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.39**
+**v1.2.40**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-23**
-- Canonical version: **v1.2.39**
+- Canonical version: **v1.2.40**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,16 @@
 
 ## Current release note
 
-**v1.2.39 — Version and release synchronization**
+**v1.2.40 — Version and release synchronization**
 - Version 1.2.39: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 
 
 
+
+### v1.2.40 — 2026-10-23
+- Version synchronization for the SakaLuX script release set; no feature behavior change.
 
 ### v1.2.39 — 2026-10-07
 - Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.

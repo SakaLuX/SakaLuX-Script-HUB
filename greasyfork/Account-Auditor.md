@@ -3,13 +3,13 @@
 > Standalone SakaLuX account-auditing tool. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v1.3.28**
+**v1.3.29**
 
 
 ## Repository synchronization
 
 - Verified: **2026-10-23**
-- Canonical version: **v1.3.28**
+- Canonical version: **v1.3.29**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Account-Auditor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Account-Auditor.md
@@ -30,12 +30,15 @@
 
 ## Current release note
 
-**v1.3.28 — Version and release synchronization**
+**v1.3.29 — Version and release synchronization**
 - Version 1.3.28: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 
 
+
+### v1.3.29 — 2026-10-23
+- Version synchronization for the SakaLuX script release set; no feature behavior change.
 
 ### v1.3.28 — 2026-10-07
 - Returns to a three-part version with a higher patch number, so updates from the previous four-part version are detected.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Elimination Assistant
 // @namespace    sakalux.elimination.assistant
-// @version      1.3.65
+// @version      1.3.66
 // @description  Torn Eliminations advisor with rotating 500-player batches, persistent SAFE targets, TornPDA export, FF/BS calibration and PC-safe attack links.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1067,7 +1067,7 @@ if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  const v = '1.3.65'; // This script's own @version; global GM_info can belong to another TornPDA userscript.
+  const v = '1.3.66'; // This script's own @version; global GM_info can belong to another TornPDA userscript.
   const g = globalThis;
   g.__SakaLuXInstalledVersions = g.__SakaLuXInstalledVersions || Object.create(null);
   g.__SakaLuXInstalledVersions['elimination-assistant'] = v;
@@ -1398,7 +1398,7 @@ if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.65" }));
+  const SELF = Object.freeze(Object.assign({"id":"elimination-assistant","name":"Elimination","icon":"⚔️","selector":"","fallback":"https://www.torn.com/page.php?sid=elimination"}, { version: "1.3.66" }));
   const API_GLOBAL = "SakaLuXEliminationAssistant";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1460,7 +1460,7 @@ if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
  */
 (() => {
 'use strict';
-const VERSION = '1.3.65';
+const VERSION = '1.3.66';
 const HUB_INSTALL_URL='https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
 const HUB_PROMPT_STORAGE='SakaLuX_HUB_INSTALL_PROMPT_LAST';
 const HUB_PROMPT_ID='sakalux-hub-install-prompt';

@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.28**
+**v1.1.29**
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -19,7 +19,7 @@
 ## Repository synchronization
 
 - Verified: **2026-10-23**
-- Canonical version: **v1.1.28**
+- Canonical version: **v1.1.29**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md
@@ -50,12 +50,15 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.28 — Version and release synchronization**
+**v1.1.29 — Version and release synchronization**
 - Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.
 - The offer link remains visible in a PRO dialog regardless of whether a license is already active.
 - No change to free/premium entitlements or server-side license rules.
 
 ## Release history / Changelog
+
+### v1.1.29 — 2026-10-23
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ### v1.1.28 — 2026-10-10
 - Premium dialogs now display **Send 1 Xanax for 7 days PRO** with a direct recipient profile link.
