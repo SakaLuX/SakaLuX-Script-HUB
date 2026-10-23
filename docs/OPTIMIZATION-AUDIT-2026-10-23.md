@@ -39,3 +39,13 @@ A focused Suite optimization skips DOM mutation batches originating solely in `#
 | Suite all-native-enabled scheduled timeouts | 318 | 156 | -162 (~50.9%) |
 
 This is not a full TornPDA benchmark: tests use 40 unrelated chat mutations with offline API mocks. CI validation, PRO syntax, release gate, version consistency and TornPDA navigation all passed for the modified PR head. The reduction comes from avoiding irrelevant work, not increasing a timer threshold. Live module behavior remains to be smoke-tested before publication.
+
+## Shared licensing request audit — 2026-10-23
+
+- Existing Hub broker coalesces simultaneous checks for the same key in the **same userscript JavaScript realm**, caches server-accepted PRO responses up to five minutes and FREE responses up to 30 seconds, and enforces expiry.
+- Bounty Hunter and Stock Manager now share an **in-flight** fallback request through `globalThis.__SakaLuXLicenseStandaloneFlight`, only for the same API key; each module still checks its own entitlement against the server response. The shared entry is cleared once the request completes.
+- A global JavaScript property is not guaranteed to cross isolated userscript worlds in TornPDA/Tampermonkey. **No cross-world deduplication guarantee** should be claimed. Persisting a raw PRO flag in localStorage without separate signed-grant verification would be unsafe.
+- Market Intelligence has its own short-lived, locally persisted prior-verification cache and explicit revalidation; it is not yet a consumer of the Bounty/Stock in-flight fallback.
+- Next architectural pass: unify an opt-in broker into a canonical shared-core component and test isolated-world behavior with TornPDA and Tampermonkey before advertising one request across all scripts. Preserve server validation, account identity, signature and revocation handling.
+
+CI note: one run exceeded the former 12-second per-worker **wall-clock** limit for Hub in a loaded CI runner. The process allowance was adjusted to 20 seconds, without increasing the measured timeout-count budget or removing assertions.
