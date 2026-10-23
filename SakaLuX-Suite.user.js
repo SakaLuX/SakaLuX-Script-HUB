@@ -11190,7 +11190,7 @@ const SCRIPT_ID = 'sakalux-edge-scanner';
       if (active) return;
       active = true;
       ensureStyle();
-      observer = new MutationObserver(() => schedule(80));
+      observer = new MutationObserver(records => { if (records.every(r => r.target?.closest?.('#chat-box, .chat-messages'))) return; schedule(80); });
       observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
       schedule(0);
     }
@@ -47557,7 +47557,7 @@ function refresh(){const root=suiteRoot();if(!root)return;for(const [id,name,g] 
 window.addEventListener('SakaLuX:ModuleReady',()=>setTimeout(refresh,30),{passive:true});
 window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(refresh,30),{passive:true});
 window.addEventListener('storage',()=>setTimeout(refresh,30),{passive:true});
-new MutationObserver(()=>{clearTimeout(window.__slx0948t);window.__slx0948t=setTimeout(refresh,80);}).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['data-enabled','aria-checked']});
+new MutationObserver(records=>{if(records.every(r=>r.target?.closest?.('#chat-box, .chat-messages')))return;clearTimeout(window.__slx0948t);window.__slx0948t=setTimeout(refresh,80);}).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['data-enabled','aria-checked']});
 setInterval(refresh,750);setTimeout(refresh,50);
 })();
 
@@ -47607,7 +47607,7 @@ function ensureAll(){
 }
 window.addEventListener('SakaLuX:ModuleReady',()=>setTimeout(ensureAll,20),{passive:true});
 window.addEventListener('SakaLuX:ScriptHubReady',()=>setTimeout(ensureAll,20),{passive:true});
-new MutationObserver(()=>{clearTimeout(window.__slx0949t);window.__slx0949t=setTimeout(ensureAll,60);}).observe(document.documentElement,{childList:true,subtree:true});
+new MutationObserver(records=>{if(records.every(r=>r.target?.closest?.('#chat-box, .chat-messages')))return;clearTimeout(window.__slx0949t);window.__slx0949t=setTimeout(ensureAll,60);}).observe(document.documentElement,{childList:true,subtree:true});
 setInterval(ensureAll,1000);setTimeout(ensureAll,40);
 })();
 
