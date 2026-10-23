@@ -1,8 +1,6 @@
 name: Update Bounty Hunter v0.4.5
+# Historical one-time patch: disable automatic push trigger.
 on:
-  push:
-    paths:
-      - '.github/workflows/update-bounty-hunter-v045.yml'
   workflow_dispatch:
 permissions:
   contents: write
