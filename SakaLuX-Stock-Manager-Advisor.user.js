@@ -973,7 +973,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 if(!/^[A-Za-z0-9]{16}$/.test(k)){verificationState='unavailable';return false;}
    if(k===verifiedKey&&verifiedUntil>Date.now()){verificationState='pro';return true;}
    const hub=globalThis.__SakaLuXPremiumVerified;
-   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(grant.verifiedGrantExpiresAt,Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z'));verificationState='pro';return true}
+   if(hub?.key===k&&Date.now()-hub.at<300000&&accepts(hub.data,k)){verifiedKey=k;verifiedUntil=Math.min(Date.now()+300000,Date.parse(String(hub.data.expires_at).replace(' ','T').replace(/Z$/i,'')+'Z'));verificationState='pro';return true}
    // Share a short-lived successful server response with other standalone modules.
    // This is a same-realm optimization, never an independent proof of entitlement.
    const sharedCache=globalThis.__SakaLuXLicenseStandaloneCache;
