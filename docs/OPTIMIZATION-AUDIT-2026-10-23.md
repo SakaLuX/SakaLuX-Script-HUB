@@ -68,3 +68,9 @@ The Hub's certificate panel already validates `slx-ed25519-v1` grants; its exist
 - Synthetic signed fixture and tampering/expiry/replay tests run as part of PRO License CI.
 
 **Not yet shipped/connected:** publication of authenticated signed grants by Hub, identity retrieval in every userscript realm, secure cache-consumer integration and end-to-end TornPDA/Tampermonkey tests. The screenshot confirms the Hub verification UI, not that these cross-realm steps already work.
+
+## Hub signed-grant publication integration
+
+Hub now writes a separate `SakaLuX_SIGNED_PRO_GRANT_V1` cache entry with certificate, entitlements and account claims **only after its Ed25519 broker diagnostics report verified=true**. The entry uses the SHA-256 fingerprint of the current API key, is cleared on key change or an authoritative FREE response, and is not used as an unsigned PRO flag. An independent realm must still validate the signature, expiry, entitlement and authenticated Torn user ID with `src/core/sakalux-signed-license-grant.js` before making an authorization decision.
+
+Pending before claiming cross-world licensing is operational: embedding the verifier into the userscripts, obtaining a trusted current-user ID in each realm, handling certificate refresh and safe revocation, and real TornPDA/Tampermonkey tests.
