@@ -2378,29 +2378,44 @@ async function ciCheckDirectorPro(force=false){
  if(!/^[a-zA-Z0-9]{16}$/.test(key)){ciProVerified=false;ciProExpires=0;ciProKey='';ciProFailure='missing_key';return false}
  if(!force&&ciDirectorProActive())return true;
  if(ciProChecking)return ciProChecking;
- if(typeof GM_xmlhttpRequest!=='function'){ciProFailure='transport_unavailable';return false}
  ciProFailure='checking';
- ciProChecking=new Promise(resolve=>{
-  const finish=(active,reason)=>{ciProVerified=active;ciProFailure=reason;resolve(active)};
-  GM_xmlhttpRequest({
-   method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
-   headers:{'Content-Type':'application/json','Accept':'application/json'},
-   data:JSON.stringify({api_key:key}),timeout:12000,
-   onload:r=>{
-    try{
-     const d=JSON.parse(r.responseText||'{}');
-     const raw=String(d.expires_at||'');
-     const date=Date.parse(raw.includes('T')?raw:(raw.replace(' ','T')+'Z'));
-     const active=r.status===200&&d.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('company_director')&&Number.isFinite(date)&&date>Date.now()&&key===ciHubApiKey();
-     ciProKey=active?key:'';
-     ciProExpires=active?Math.min(date,Date.now()+5*60*1000):0;
-     finish(active,active?'active':r.status===429?'rate_limited':r.status>=500?'server_unavailable':r.status!==200?'http_'+r.status:d.status==='ok'?'inactive':'verification_failed');
-    }catch{ciProExpires=0;ciProKey='';finish(false,'invalid_response')}
-   },
-   onerror:()=>{ciProExpires=0;ciProKey='';finish(false,'network_error')},
-   ontimeout:()=>{ciProExpires=0;ciProKey='';finish(false,'timeout')}
-  });
- });
+ ciProChecking=(async()=>{
+  try{
+   const broker=globalThis.SakaLuXLicenseBroker;
+   let d;
+   if(broker?.check)d=await broker.check(key,{force});
+   else{
+    const flight=globalThis.__SakaLuXLicenseStandaloneFlight;
+    if(flight?.key===key&&flight.promise)d=await flight.promise;
+    else{
+     if(typeof GM_xmlhttpRequest!=='function')throw Error('transport_unavailable');
+     const promise=new Promise((resolve,reject)=>{
+      try{GM_xmlhttpRequest({method:'POST',url:'https://sakalux.ro/api/hub-premium-check.php',
+       headers:{'Content-Type':'application/json','Accept':'application/json'},
+       data:JSON.stringify({api_key:key}),timeout:12000,
+       onload:r=>{try{const result=JSON.parse(r.responseText||'{}');if(r.status!==200||result.status!=='ok')throw Error(r.status===429?'rate_limited':'http_'+r.status);resolve(result)}catch(e){reject(e)}},
+       onerror:()=>reject(Error('network_error')),ontimeout:()=>reject(Error('timeout'))
+      })}catch(e){reject(e)}
+     });
+     const shared={key,promise};globalThis.__SakaLuXLicenseStandaloneFlight=shared;
+     try{d=await promise}finally{
+      if(globalThis.__SakaLuXLicenseStandaloneFlight===shared)delete globalThis.__SakaLuXLicenseStandaloneFlight;
+     }
+    }
+   }
+   if(key!==ciHubApiKey())throw Error('identity_changed');
+   const raw=String(d?.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z';
+   const date=Date.parse(raw);
+   const active=d?.status==='ok'&&d.premium_active===true&&Array.isArray(d.entitlements)&&d.entitlements.includes('company_director')&&Number.isFinite(date)&&date>Date.now();
+   ciProVerified=active;ciProKey=active?key:'';ciProExpires=active?Math.min(date,Date.now()+5*60*1000):0;
+   ciProFailure=active?'active':d?.status==='ok'?'inactive':'verification_failed';
+   return active;
+  }catch(e){
+   ciProVerified=false;ciProExpires=0;ciProKey='';
+   ciProFailure=String(e?.message||'network_error').slice(0,70);
+   return false;
+  }
+ })();
  try{return await ciProChecking}finally{ciProChecking=null}
 }
 function ciProExplanation(){
