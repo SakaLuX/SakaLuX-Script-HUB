@@ -33,9 +33,7 @@
 ## Current release note
 
 **v1.8.96 — Version and release synchronization**
-- Premium dialogs show the message 'Send 1 Xanax for 7 days PRO' and a direct link to SakaLuX [2380374] on Torn.
-- The offer link remains visible in a PRO dialog regardless of whether a license is already active.
-- No change to free/premium entitlements or server-side license rules.
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ## Release history / Changelog
 

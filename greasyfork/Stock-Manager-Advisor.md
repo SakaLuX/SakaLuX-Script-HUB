@@ -43,8 +43,7 @@
 ## Current release note
 
 **v0.8.35 — Version and release synchronization**
-- Fixes stale TornPDA canonical installed-version fallback 0.8.30; reports 0.8.34 when GM_info is absent.
-- Aligns source, runtime, registry and Hub version reporting.
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ## Release history / Changelog
 

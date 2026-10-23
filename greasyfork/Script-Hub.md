@@ -62,7 +62,7 @@
 ## Current release note
 
 **v1.9.158 — Version and release synchronization**
-- Version 1.9.157: internal runtime and registry synchronization.
+- Version 1.9.158: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 

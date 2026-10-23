@@ -38,9 +38,7 @@
 ## Current release note
 
 **v5.3.72 — Version and release synchronization**
-- Cache verified PRO for up to 10 minutes and never beyond entitlement expiry.
-- Preserve preferred ON/OFF independent of transient license check.
-- Restore premium runtime after confirmed authorization.
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ## Release history / Changelog
 

@@ -25,7 +25,7 @@
 ## Current release note
 
 **v1.2.40 — Version and release synchronization**
-- Version 1.2.39: internal runtime and registry synchronization.
+- Version 1.2.40: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 

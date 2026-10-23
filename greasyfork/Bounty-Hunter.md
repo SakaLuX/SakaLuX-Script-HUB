@@ -52,8 +52,7 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 ## Current release note
 
 **v0.5.21 — Version and release synchronization**
-- Align embedded runtime version with @version to prevent false Hub update alerts.
-- Preserve existing script functionality and API key settings.
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ## Release history / Changelog
 

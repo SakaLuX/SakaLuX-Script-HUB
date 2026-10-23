@@ -49,7 +49,7 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 ## Current release note
 
 **v0.9.1002 — Version and release synchronization**
-- Version 0.9.1001: internal runtime and registry synchronization.
+- Version 0.9.1002: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 

@@ -50,8 +50,7 @@
 ## Current release note
 
 **v1.3.66 — Version and release synchronization**
-- Align embedded runtime version with @version to prevent false Hub update alerts.
-- Preserve existing script functionality and API key settings.
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ## Release history / Changelog
 

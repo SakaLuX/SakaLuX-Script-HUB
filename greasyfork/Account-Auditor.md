@@ -31,7 +31,7 @@
 ## Current release note
 
 **v1.3.29 — Version and release synchronization**
-- Version 1.3.28: internal runtime and registry synchronization.
+- Version 1.3.29: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 

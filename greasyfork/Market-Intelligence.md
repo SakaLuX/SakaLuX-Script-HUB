@@ -76,9 +76,7 @@
 ## Current release note
 
 **v1.17.88 — Version and release synchronization**
-- Travel panels are restricted to true Travel Agency/in-flight/abroad page contexts, never Bazaar or profiles.
-- Route detection prioritizes explicit Bazaar, profile, inventory and market pages before SPA travel headings.
-- Late YATA and market-price responses cannot paint Best Route Basket after navigation away.
+- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
 
 ## Release history / Changelog
 

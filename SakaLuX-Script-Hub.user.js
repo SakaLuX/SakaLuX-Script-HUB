@@ -1417,671 +1417,671 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     };
 
     const FALLBACK_REGISTRY = {
-  "scripts": [
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXEnhancerGuard",
-      "buttonSelector": "#sl-eg-button",
-      "category": "Inventory",
-      "description": "Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.",
-      "downloadUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js",
-      "greasyForkId": "592698",
-      "icon": "🛡️",
-      "id": "enhancer",
-      "info": "Purpose\nEnhancer Guard helps you track Enhancers and Enhancer Relics in your Torn inventory and protect items you want to keep. It combines an inventory dashboard with Item Protector integration directly on Torn Items.\n\nInventory dashboard\nShows which tracked items you own, which are missing and the quantities available. Search locates individual items; filters and sorting narrow the list; favorites keep important items easy to find. Compact mode reduces space used on TornPDA. Refresh and hard refresh update the information, and optional auto-refresh can periodically refresh inventory data.\n\nItem protection\nDisplays lock badges for fully protected, partially protected and unlocked items. Partial protection lets you retain a chosen quantity instead of locking the entire item stack. Local protection settings and Item Protector state are used to keep the display consistent. Fully protected items are hidden or blocked in supported Bazaar sale-selection flows so they do not enter the selection accidentally.\n\nAPI and saved settings\nUses Torn API v2 inventory/item data and includes a dedicated API Access panel for creating, testing, saving or clearing the required key. Favorites, display preferences, protection quantities and cached inventory state are saved locally. Compatible Hub key integration is available; the module also works standalone.\n\nHow to use\nRefresh after inventory changes, search or filter for the item, then review its protection state and retained quantity. Torn API inventory is cached server-side for up to about one hour, so newly purchased items may remain pending even after a manual refresh. The panel shows the snapshot age when the API data is stale. Protection is a local browser safeguard, so review Torn's final sale list before confirming any sale.",
-      "metaUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
-      "name": "Enhancer Guard",
-      "quickActions": [
-        {
-          "icon": "🛡️",
-          "id": "open",
-          "label": "OPEN",
-          "method": "open"
-        },
-        {
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh"
-        },
-        {
-          "icon": "⚡",
-          "id": "hardRefresh",
-          "label": "HARD",
-          "method": "hardRefresh"
-        }
-      ],
-      "release": {
-        "version": "1.3.74",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
-      "type": "addon",
-      "version": "1.3.74",
-      "detailsRevision": 29,
-      "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
-      "greasyForkUrl": "https://greasyfork.org/scripts/592698",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
-      "license": "All Rights Reserved",
-      "accessTier": "pro",
-      "accessEnforcement": "client_entitlement_check",
-      "premiumNote": "Client validates the server-issued enhancer_guard entitlement before starting. JavaScript can be modified; server-side protected operations are still needed for tamper resistance."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXBazaarThanker",
-      "buttonSelector": "#sakalux-bt-settings-button",
-      "category": "Trading",
-      "description": "Bazaar buyer grouping, thank-you messages, statistics and history management.",
-      "downloadUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js",
-      "greasyForkId": "592388",
-      "icon": "💬",
-      "id": "bazaar",
-      "info": "Purpose\nBazaar Thanker organizes purchases from your Bazaar and helps prepare personal thank-you messages for customers. It reads Events and assists on Messages; Hub can detect and open its settings from other Torn pages.\n\nBuyer grouping and purchase details\nDetects supported Bazaar purchase events and groups purchases by buyer. Buyer details let you review the purchase information before preparing a message. Copy tools help reuse purchase or message information. Configurable big-buyer thresholds highlight customers by item count or amount spent.\n\nMessage customization\nUses a custom Bazaar name when supplied and automatic name detection when no custom name is configured. Message text is configurable so you can include your preferred greeting and Bazaar information. The thank-you workflow prepares text for Torn's messaging flow; review the recipient and final message before sending.\n\nHistory and repeat-message control\nKeeps local buyer/message history, statistics and processed-event state. A configurable cooldown avoids repeatedly thanking the same buyer too soon; the default is four hours. History-management controls help inspect or clear the records stored on the device.\n\nAccess and persistence\nDoes not need a Torn API key. Settings and working records are stored locally in TornPDA or the userscript environment. Script Hub provides detection, settings access and ON/OFF integration; the shared standalone dock can open the module when Hub is absent. Core purchase and message processing remains limited to the relevant Events and Messages pages.",
-      "metaUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
-      "name": "Bazaar Thanker",
-      "quickActions": [
-        {
-          "icon": "⚙️",
-          "id": "open",
-          "label": "SETTINGS",
-          "method": "open"
-        },
-        {
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh"
-        },
-        {
-          "fallbackUrl": "https://www.torn.com/page.php?sid=events",
-          "icon": "📋",
-          "id": "events",
-          "label": "EVENTS",
-          "method": "goToEvents"
-        }
-      ],
-      "release": {
-        "version": "5.3.72",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
-      "type": "addon",
-      "version": "5.3.72",
-      "detailsRevision": 33,
-      "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
-      "greasyForkUrl": "https://greasyfork.org/scripts/592388",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
-      "license": "All Rights Reserved",
-      "accessTier": "pro",
-      "accessEnforcement": "client_entitlement_check",
-      "premiumNote": "Client validates the server-issued bazaar_thanker entitlement before starting. JavaScript can be modified; server-side protected operations are still needed for tamper resistance."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXBazaarSmartPricer",
-      "buttonSelector": ".qp-chip",
-      "category": "Trading",
-      "description": "Quick Pricer-parity Bazaar helper with per-item Quick Add/Undo, quantity + price fill, bulk pricing, RW/bonus protection and Hub-styled settings.",
-      "downloadUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.user.js",
-      "icon": "💰",
-      "id": "bazaar-smart-pricer",
-      "info": "Purpose\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\n\nBulk workflow\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\n\nSafety\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\n\nHub integration\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. API Access automatically prefers the Hub shared key when Hub is installed and keeps a local fallback. Manage Bazaar Update All can open collapsed rows sequentially, fill prices, and leaves Torn SAVE CHANGES as the final confirmation step. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.\n\nPricing source\nAutomatic pricing uses Torn market_value with the configured discount/markup. If Torn City shop-floor enforcement is enabled, sell_price is the hard minimum because it is the amount the NPC shop pays you; buy_price is not used as the Bazaar price floor.",
-      "name": "Bazaar Smart Pricer",
-      "quickActions": [
-        {
-          "icon": "⚙️",
-          "id": "open",
-          "label": "SETTINGS",
-          "method": "open",
-          "fallbackUrl": "https://www.torn.com/bazaar.php"
-        },
-        {
-          "icon": "💰",
-          "id": "quick-fill",
-          "label": "QUICK FILL",
-          "method": "quickFill",
-          "fallbackUrl": "https://www.torn.com/bazaar.php"
-        },
-        {
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh",
-          "fallbackUrl": "https://www.torn.com/bazaar.php"
-        }
-      ],
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
-      "type": "addon",
-      "detailsRevision": 48,
-      "version": "1.1.29",
-      "release": {
-        "version": "1.1.29",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
-      "metaUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
-      "greasyForkId": "596672",
-      "greasyForkUrl": "https://greasyfork.org/scripts/596672",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md",
-      "license": "MIT",
-      "accessTier": "mixed",
-      "freeFeatures": [
-        "Per-item Quick Add and Undo",
-        "Individual pricing",
-        "RW/bonus item safety controls"
-      ],
-      "proFeatures": [
-        "Bulk Pricing",
-        "Update All",
-        "Quick Fill"
-      ],
-      "accessEnforcement": "client_side_check",
-      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXMissionRewards",
-      "buttonSelector": "#sl-mri-button",
-      "category": "Missions",
-      "description": "Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.",
-      "downloadUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js",
-      "greasyForkId": "592711",
-      "icon": "🎯",
-      "id": "mission-rewards",
-      "info": "Purpose\nMission Rewards adds practical purchase information to Torn's Mission Shop, helping compare rewards before spending mission credits. It decorates supported reward cards and provides a more detailed reward panel.\n\nReward value\nShows estimated market value and value per mission credit, so offers with different prices can be compared on the same basis. Values are estimates based on available item data; they are guidance rather than guaranteed resale prices.\n\nSpecial ammunition\nReads currently owned special ammunition through the configured API key and shows ownership context alongside relevant rewards. This helps distinguish ammunition you already have from offers you may want to buy.\n\nWeapon-mod price learning\nTracks normal and special weapon-mod credit ranges from offers seen locally. Learned ranges build up as you use the script on the device. They describe observed offers and do not guarantee the price of future Mission Shop rewards.\n\nAPI and refresh\nDedicated API Access uses User: Ammo and Torn: Items permissions. Includes key setup and validation, refresh controls and local item/ammo caches. Compatible shared Hub key access can be used where available. No API write permission is required for reward information.\n\nWhere it runs\nRegisters with Hub on every Torn page, but Mission Shop scanning only runs on Missions. Settings and learned ranges are stored locally. the rolled-back experimental Mission Hints branch is not part of the active feature set. Reward purchases remain normal player actions.",
-      "metaUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
-      "name": "Mission Rewards",
-      "quickActions": [
-        {
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions",
-          "icon": "⚙️",
-          "id": "open",
-          "label": "SETTINGS",
-          "method": "open"
-        },
-        {
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions",
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh"
-        },
-        {
-          "fallbackUrl": "https://www.torn.com/page.php?sid=missions",
-          "icon": "🎯",
-          "id": "missions",
-          "label": "MISSIONS",
-          "method": "goToMissions"
-        }
-      ],
-      "release": {
-        "version": "1.0.62",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
-      "type": "addon",
-      "version": "1.0.62",
-      "detailsRevision": 24,
-      "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
-      "greasyForkUrl": "https://greasyfork.org/scripts/592711",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
-      "license": "All Rights Reserved",
-      "accessTier": "mixed",
-      "freeFeatures": [
-        "Reward values",
-        "Value per credit",
-        "Owned ammunition"
-      ],
-      "proFeatures": [
-        "Advanced reward offer analysis",
-        "Weapon mod price history"
-      ],
-      "accessEnforcement": "client_side_check",
-      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXMarketIntelligence",
-      "buttonSelector": "#sl-mi-button",
-      "category": "Trading",
-      "description": "Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.",
-      "downloadUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js",
-      "greasyForkId": "592781",
-      "icon": "📈",
-      "id": "market-intelligence",
-      "info": "Purpose\nMarket Intelligence combines item-price analysis, Bazaar-flip estimates, travel purchasing plans, Museum set analysis and equipment comparisons. It provides decision support on the relevant Torn market and travel pages.\n\nItem Market and watchlists\nShows live or cached item-price information, locally collected price history and trends. BUY NOW, FAIR, WAIT and LEARNING signals summarize the available price context. Watchlists help keep selected items under review. Limited history is identified as learning rather than treated as a reliable long-term trend.\n\nBazaar Flip Intelligence\nCompares available price information to estimate net profit and return on investment for possible flips. Estimates depend on the prices and stock visible to the module; an apparent opportunity is not a guaranteed sale or profit.\n\nTravel purchasing\nBest Travel Run compares possible runs; Best Route Basket and the Travel Buy Planner help allocate carrying capacity across purchases. In-country Best Buys evaluates available buying opportunities. Arrival Stock and Arrival Basket support planning while flying. Local travel-session estimates, recent plans and stock/restock observations improve the context collected on the device.\n\nMuseum and equipment\nMuseum Set Intelligence adds set-oriented item context. The Loadout Comparator helps compare weapon and armor options using supported equipment data, alongside the trading/travel workspace.\n\nData and settings\nUses Torn API data and YATA public travel data where needed. Keeps local caches, price/travel history, watchlists and preferences. Dedicated API diagnostics help identify missing data access. The optional SakaLuX Price Network client is disabled by default and can be configured separately.\n\nHub and manual actions\nSupports persistent Hub ON/OFF and native settings access, with the shared standalone dock available separately. Market features run on relevant market pages and travel tools on relevant travel pages. It does not automatically buy or sell items; prices, stocks and travel estimates should be checked before acting.",
-      "metaUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
-      "name": "Market Intelligence",
-      "quickActions": [
-        {
-          "icon": "⚙️",
-          "id": "open",
-          "label": "SETTINGS",
-          "method": "open"
-        },
-        {
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh"
-        },
-        {
-          "fallbackUrl": "https://www.torn.com/page.php?sid=travel",
-          "icon": "✈️",
-          "id": "best-run",
-          "label": "BEST RUN",
-          "method": "goToBestRun"
-        },
-        {
-          "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket",
-          "icon": "📈",
-          "id": "market",
-          "label": "MARKET",
-          "method": "goToMarket"
-        },
-        {
-          "fallbackUrl": "https://www.torn.com/museum.php",
-          "icon": "🏛️",
-          "id": "museum",
-          "label": "MUSEUM",
-          "method": "goToMuseum"
-        }
-      ],
-      "release": {
-        "version": "1.17.88",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
-      "type": "addon",
-      "version": "1.17.88",
-      "detailsRevision": 38,
-      "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
-      "greasyForkUrl": "https://greasyfork.org/scripts/592781",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
-      "license": "All Rights Reserved",
-      "accessTier": "mixed",
-      "freeFeatures": [
-        "Market price context",
-        "BUY/WAIT indicators",
-        "Basic watchlist"
-      ],
-      "proFeatures": [
-        "Bazaar Flip",
-        "Best Travel Run",
-        "Route Basket",
-        "Travel Planner",
-        "Museum"
-      ],
-      "accessEnforcement": "client_side_check",
-      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXBountyHunter",
-      "buttonSelector": "#slx-bh-btn",
-      "category": "Combat",
-      "description": "Full-board Torn bounty hunter with Shared Core, Hub-aligned UI, FFScouter beatable filtering, strict live status and hospital timing.",
-      "icon": "🎯",
-      "id": "bounty-hunter",
-      "info": "Purpose\nBounty Hunter scans the full Torn bounty board and builds a target-first hunt list for TornPDA and desktop. v0.5.0 adds an adaptive, resumable scanner with smart caching and live progress.\n\nAdaptive scanner\nFull-board API paging is paced automatically, reacts to latency/rate limits, preserves partial progress and can resume from the last saved offset instead of always starting over.\n\nSmart cache\nBoard results are cached separately from FF/BS and live status. FFScouter estimates are cached per target for up to 12 hours, while live status stays short-lived.\n\nBeatable filtering\nFF 1–3, reward, level, BS, Hospital window, Okay/Hospital, watchlist/blacklist and verified live status can all participate in the final list.\n\nUI and integration\nThe Hub-style panel shows scan/FF/status progress, launches from Chat V3, uses Shared Core API/storage/workspace helpers and exposes health diagnostics to Script Hub.\n\nAPI Access\nThe shared Script Hub key now requires Torn: Bounties in addition to the existing User Basic/Profile access. API diagnostics distinguish missing Bounties permission from temporary rate limiting. Distribution and update checks now use GreasyFork #598988.",
-      "name": "Bounty Hunter",
-      "quickActions": [
-        {
-          "icon": "🎯",
-          "id": "open",
-          "label": "OPEN",
-          "method": "open",
-          "fallbackUrl": "https://www.torn.com/bounties.php"
-        },
-        {
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh",
-          "fallbackUrl": "https://www.torn.com/bounties.php"
-        },
-        {
-          "icon": "📰",
-          "id": "bounties",
-          "label": "BOUNTIES",
-          "method": "goToBounties",
-          "fallbackUrl": "https://www.torn.com/bounties.php"
-        },
-        {
-          "icon": "🧪",
-          "id": "test-key",
-          "label": "TEST API",
-          "method": "testTornAccess",
-          "fallbackUrl": "https://www.torn.com/bounties.php"
-        },
-        {
-          "icon": "🔑",
-          "id": "create-key",
-          "label": "API KEY",
-          "method": "createRequiredTornKey",
-          "fallbackUrl": "https://www.torn.com/preferences.php#tab=api"
-        }
-      ],
-      "release": {
-        "version": "0.5.21",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
-      "downloadUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.user.js",
-      "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
-      "type": "addon",
-      "version": "0.5.21",
-      "detailsRevision": 28,
-      "license": "All Rights Reserved",
-      "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
-      "greasyForkId": "598988",
-      "greasyForkUrl": "https://greasyfork.org/scripts/598988",
-      "accessTier": "mixed",
-      "freeFeatures": [
-        "Basic target list",
-        "Basic search and filtering"
-      ],
-      "proFeatures": [
-        "Full-board Scanner",
-        "FF/BS filtering",
-        "Smart Sort"
-      ],
-      "accessEnforcement": "client_side_check",
-      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXEliminationAssistant",
-      "buttonSelector": "#slx-elim-btn",
-      "category": "Combat",
-      "description": "Eliminations advisor with unified Torn + FFScouter API setup, rotating 500-player batches, availability status, TornPDA export and PC-safe attack routing.",
-      "downloadUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js",
-      "greasyForkId": "594921",
-      "icon": "⚔️",
-      "id": "elimination-assistant",
-      "info": "Purpose\nElimination Assistant helps find and review combat targets during Torn Eliminations. It loads team members and target availability, ranks candidates and organizes targets you want to revisit.\n\nTeams and batch loading\nUses Torn API v2 to load Elimination teams and target data. Large teams are processed in rotating groups of up to 500 players, with LOAD NEXT to continue through the membership. Player search, filters and sorting help narrow the current results.\n\nTarget recommendations\nSAFE, RISKY and SKIP recommendations and Smart Target Score summarize the data available for each target. Optional FFScouter Fair Fight/battle-stat estimates can be compared with your calibrated or manually entered battle stats. These are estimates, not a guarantee that an attack will be won.\n\nCalibration and target learning\nSupports calibration and optional FF scans. Manually recorded WIN/LOSS outcomes add local per-target learning, so results you record can contribute context on later visits.\n\nAvailability and navigation\nAttackable-state checks help distinguish targets currently suitable to open. PROFILE and ATTACK actions take you to the selected player or attack page, including routing suitable for PC and TornPDA. The script never attacks automatically.\n\nSaved SAFE targets and export\nRemembers SAFE targets across batches and sessions. Saved targets can be reviewed, copied, exported, removed individually or cleared. SAFE/RISKY attackable targets can be exported in TornPDA Chain Targets format.\n\nAPI and settings\nIncludes dedicated Torn API Access and optional FFScouter key controls. Target/filter preferences and local saved-target state persist across normal use. Hub provides persistent ON/OFF and module access; the shared standalone dock remains available when Hub is absent.",
-      "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
-      "name": "Elimination Assistant",
-      "quickActions": [
-        {
-          "icon": "⏻",
-          "id": "toggle",
-          "label": "POWER",
-          "method": "toggleEnabled"
-        },
-        {
-          "icon": "⚔️",
-          "id": "open",
-          "label": "OPEN",
-          "method": "open"
-        },
-        {
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh"
-        },
-        {
-          "icon": "📊",
-          "id": "ffscan",
-          "label": "FF SCAN",
-          "method": "scanFF"
-        },
-        {
-          "icon": "📤",
-          "id": "export-targets",
-          "label": "EXPORT TARGETS",
-          "method": "exportTargets"
-        },
-        {
-          "icon": "🎯",
-          "id": "calibrate",
-          "label": "CALIBRATE",
-          "method": "calibrate"
-        },
-        {
-          "icon": "🧪",
-          "id": "test-key",
-          "label": "TEST KEY",
-          "method": "testTornKey"
-        },
-        {
-          "icon": "🔑",
-          "id": "create-key",
-          "label": "API KEY",
-          "method": "createRequiredTornKey"
-        },
-        {
-          "fallbackUrl": "https://www.torn.com/page.php?sid=elimination",
-          "icon": "🏆",
-          "id": "event",
-          "label": "ELIMS",
-          "method": "goToEliminations"
-        }
-      ],
-      "release": {
-        "version": "1.3.66",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
-      "type": "addon",
-      "version": "1.3.66",
-      "detailsRevision": 29,
-      "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
-      "greasyForkUrl": "https://greasyfork.org/scripts/594921",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
-      "license": "All Rights Reserved",
-      "accessTier": "mixed",
-      "freeFeatures": [
-        "Elimination teams",
-        "Player search",
-        "Availability status"
-      ],
-      "proFeatures": [
-        "SAFE/RISKY/SKIP recommendations",
-        "FFScouter",
-        "Calibration",
-        "Target learning"
-      ],
-      "accessEnforcement": "client_side_check",
-      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXCompanyIntelligence",
-      "buttonSelector": "#sakalux-module-bridge-company-intelligence",
-      "category": "Company",
-      "description": "Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.",
-      "downloadUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js",
-      "greasyForkId": "595873",
-      "icon": "🏢",
-      "id": "company-intelligence",
-      "info": "Purpose\nCompany Intelligence provides Employee and Director workspaces for understanding your job, staff, training commitments and company development. It combines permitted Torn company/user data with local history and manually recorded planning data.\n\nEmployee workspace\nShows work stats and position suitability, personal progress, train tracking, employment offers and actionable advice. Employee Progress compares changes in work stats and train compliance and provides 30/90-day projections based on the available history. Offer comparison helps review the information recorded for possible jobs.\n\nCompany Growth Center\nBuilds daily company snapshots, shows the Sunday rating countdown and presents a star outlook. Growth direction and star predictions are advisory: Torn ratings are comparative, and missing competitor or historical data limits confidence.\n\nDirector staff planning\nProvides staff overview, effectiveness and position analysis, position-optimization advice and actionable employee flags. Smart training rotation, training debt and per-employee train history help track commitments and plan future training. Director-only API data requires the key owner to be the company director.\n\nTrain-sale contracts\nTracks contracts, delivered and remaining trains, balances and employee training history. CSV/report export supports reviewing records outside the panel. Local contract records are planning data and should be kept current with actual deliveries.\n\nFinance, stock and benchmarks\nWeekly finance and balance views use known API values and locally logged amounts. Unknown costs are not silently converted into real zeroes. Stock intelligence, competitor benchmarks, company timeline, diagnostics and advice add broader context. Same-type competitor samples and regular snapshots improve comparisons.\n\nAPI and employment state\nSupports Torn API v2 with classic API and local company-cache fallbacks. Fresh job data is prioritized when refreshing employment status; historical planning records can remain available after job changes. Dedicated API controls manage the data needed by the selected workspace.\n\nPersistence and access\nCompany notes, contracts, benchmarks, snapshots and history are stored locally. Uses the shared Bazaar-style Standalone Dock registration and Hub module bridge rather than a second Company menu. The module provides analysis and planning; it does not perform automated company actions. Refresh after the daily company report to build useful history.",
-      "metaUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
-      "name": "Company Intelligence",
-      "quickActions": [
-        {
-          "icon": "⏻",
-          "id": "toggle",
-          "label": "POWER",
-          "method": "toggleEnabled"
-        },
-        {
-          "icon": "🏢",
-          "id": "open",
-          "label": "OPEN",
-          "method": "open"
-        },
-        {
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh"
-        }
-      ],
-      "release": {
-        "version": "1.8.96",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
-      "type": "addon",
-      "version": "1.8.96",
-      "detailsRevision": 49,
-      "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
-      "greasyForkUrl": "https://greasyfork.org/scripts/595873",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
-      "license": "All Rights Reserved",
-      "accessTier": "mixed",
-      "freeFeatures": [
-        "employee"
-      ],
-      "proFeatures": [
-        "director"
-      ],
-      "accessEnforcement": "client_side_check",
-      "premiumNote": "Employee FREE; Director PRO. Server-calculated entitlement is checked by client; complete code-level protection requires server-hosted features."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXStockManagerAdvisor",
-      "buttonSelector": "#sakalux-module-bridge-stock-manager-advisor",
-      "category": "Trading",
-      "description": "Torn stock vault and advisor with Financial Advisor, Technical Trade Assistant, Portfolio Simulator and Smart Rebalance strategy profiles.",
-      "downloadUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.user.js",
-      "icon": "📊",
-      "id": "stock-manager-advisor",
-      "info": "Purpose\nStock Manager & Advisor adds a stock workspace directly to Torn Stocks and provides a full dashboard through Hub. It combines portfolio tracking, benefit-block analysis, financial and technical advice, simulations and explicit player-triggered trade controls.\n\nPortfolio and inline workspace\nShows invested capital when cost basis is known, market value, unrealized profit/loss, cash and holdings. Per-stock companion cards expose portfolio/benefit context and compact actions. Search, sorting, filters, favorites, favorite targets and Compact mode help organize the list. Transaction history and action logs keep local activity records.\n\nVault and withdrawal controls\nVault Max and Vault Keep calculate purchases for the selected target using the configured cash amount or retained-cash preference. Withdrawal controls calculate shares to sell for a chosen amount; Withdraw All, Sell Excess and Sell to Cash Target support explicit stock-management workflows where available. Target Lock helps prevent accidental target changes. PANIC is an explicit cash-to-stock action using its configured primary/fallback target and preview flow.\n\nBenefit and ROI advice\nAnalyzes benefit tiers, protected benefit floors, distance to the next benefit, estimated yield, marginal APR and payback. Best ROI and Best Affordable candidates help compare potential purchases. Benefit values and adviser scores are estimates rather than guaranteed returns.\n\nFinancial Advisor\nModels gross benefit income per day, month and year, configurable costs and net income. Exclusions keep chosen stocks out of adviser comparisons. Bank comparison supports different deposit periods, with best-effort automatic rate capture on supported Bank pages and a manual APR fallback.\n\nTechnical Trade Assistant\nCollects price history locally and compares 24H, 1W and 1M windows. Provides a chart with price, EMA20, EMA90 and Bollinger overlays, RSI14, momentum and technical-score context. BUY BIAS, SELL BIAS, WATCH and NEUTRAL states summarize the local signals. History grows with use on the device; the module does not depend on an external historical-price service.\n\nPortfolio Simulator\nShows before/after what-if reallocations, safely reallocatable coverage, benefit-yield and technical-score changes, target-tier movement and unused cash/share-rounding effects. Simulator results are previews and do not submit trades.\n\nSmart Rebalance and profiles\nBuilds portfolio-wide SELL-to-BUY proposals using free shares above protected benefit floors. SAFE, BALANCED and AGGRESSIVE profiles tune turnover caps, score thresholds, weighting and suggested-move limits. Recalculation updates the local technical context. Plans remain preview-only until the separate guided execution controls are deliberately used.\n\nTrading safeguards and API\nDry Run, Benefit Lock, confirmations and cooldown checks protect the trade workflow. A dedicated API Access panel manages money, portfolio and stock-catalogue data. Hub OPEN and REFRESH display or synchronize data; they do not place orders. Review a proposed trade before confirming it.\n\nPersistence and TornPDA behavior\nSettings, targets, profiles, caches, local price history, favorites and transaction records persist during normal updates. Export/import excludes the API key. The inline workspace mounts without waiting for page/chat mutations to stop, skips hidden stock containers and recovers after Stocks content is replaced. Disabling the module stops its runtime controls and blocks new orders; an already submitted request is not cancelled.\n\nAPI Access\nUses the shared SakaLuX Hub Torn API key automatically when Hub is installed and active. A local Stock Manager key can still be saved as the standalone fallback. The dedicated API Access sheet checks User Money, User Stocks and Torn Stocks permissions.",
-      "metaUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
-      "name": "Stock Manager & Advisor",
-      "quickActions": [
-        {
-          "icon": "⏻",
-          "id": "toggle",
-          "label": "POWER",
-          "method": "toggleEnabled"
-        },
-        {
-          "icon": "📊",
-          "id": "open",
-          "label": "OPEN",
-          "method": "open"
-        },
-        {
-          "icon": "🔄",
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh"
-        },
-        {
-          "fallbackUrl": "https://www.torn.com/page.php?sid=stocks",
-          "icon": "📈",
-          "id": "stocks",
-          "label": "STOCKS",
-          "method": "goToStocks"
-        }
-      ],
-      "release": {
-        "version": "0.8.35",
-        "date": "2026-10-23",
-        "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
-        ]
-      },
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
-      "type": "addon",
-      "version": "0.8.35",
-      "detailsRevision": 28,
-      "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
-      "greasyForkId": "596192",
-      "greasyForkUrl": "https://greasyfork.org/scripts/596192",
-      "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md",
-      "license": "All Rights Reserved",
-      "accessTier": "mixed",
-      "freeFeatures": [
-        "Portfolio",
-        "Prices",
-        "Profit/loss",
-        "Stock benefits",
-        "Safety confirmations"
-      ],
-      "proFeatures": [
-        "Financial Advisor",
-        "Technical Assistant",
-        "Portfolio Simulator",
-        "Smart Rebalance",
-        "PANIC floating button and execution"
-      ],
-      "accessEnforcement": "client_side_check",
-      "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
-    },
-    {
-      "active": true,
-      "apiGlobal": "SakaLuXGymOptimizer",
-      "buttonSelector": "#slx-gym-panel",
-      "category": "Gym",
-      "description": "SakaLuX Gym Optimizer — inline gym ratios, history, Train Next and verified-gym recommendations.",
-      "id": "gym-optimizer",
-      "icon": "🏋️",
-      "name": "Gym Optimizer",
-      "type": "addon",
-      "version": "1.7.10",
-      "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
-      "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
-      "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
-      "quickActions": [
-        {
-          "id": "open",
-          "label": "OPEN",
-          "method": "open"
-        },
-        {
-          "id": "refresh",
-          "label": "REFRESH",
-          "method": "refresh"
-        }
-      ],
-      "release": {
-        "version": "1.7.10",
-        "date": "2026-10-21",
-        "notes": [
-          "Userscript and metadata declare v1.7.10. Detailed per-version notes for v1.7.2 through v1.7.10 have not yet been reconstructed from verified changes."
-        ]
-      },
-      "accessTier": "free",
-      "license": "All Rights Reserved",
-      "comingSoon": false,
-      "installable": true
+        "scripts": [
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXEnhancerGuard",
+                "buttonSelector": "#sl-eg-button",
+                "category": "Inventory",
+                "description": "Advanced Enhancer inventory tracker with dedicated API access setup for Torn PDA / Tampermonkey.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.user.js",
+                "greasyForkId": "592698",
+                "icon": "🛡️",
+                "id": "enhancer",
+                "info": "Purpose\nEnhancer Guard helps you track Enhancers and Enhancer Relics in your Torn inventory and protect items you want to keep. It combines an inventory dashboard with Item Protector integration directly on Torn Items.\n\nInventory dashboard\nShows which tracked items you own, which are missing and the quantities available. Search locates individual items; filters and sorting narrow the list; favorites keep important items easy to find. Compact mode reduces space used on TornPDA. Refresh and hard refresh update the information, and optional auto-refresh can periodically refresh inventory data.\n\nItem protection\nDisplays lock badges for fully protected, partially protected and unlocked items. Partial protection lets you retain a chosen quantity instead of locking the entire item stack. Local protection settings and Item Protector state are used to keep the display consistent. Fully protected items are hidden or blocked in supported Bazaar sale-selection flows so they do not enter the selection accidentally.\n\nAPI and saved settings\nUses Torn API v2 inventory/item data and includes a dedicated API Access panel for creating, testing, saving or clearing the required key. Favorites, display preferences, protection quantities and cached inventory state are saved locally. Compatible Hub key integration is available; the module also works standalone.\n\nHow to use\nRefresh after inventory changes, search or filter for the item, then review its protection state and retained quantity. Torn API inventory is cached server-side for up to about one hour, so newly purchased items may remain pending even after a manual refresh. The panel shows the snapshot age when the API data is stale. Protection is a local browser safeguard, so review Torn's final sale list before confirming any sale.",
+                "metaUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
+                "name": "Enhancer Guard",
+                "quickActions": [
+                    {
+                        "icon": "🛡️",
+                        "id": "open",
+                        "label": "OPEN",
+                        "method": "open"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    },
+                    {
+                        "icon": "⚡",
+                        "id": "hardRefresh",
+                        "label": "HARD",
+                        "method": "hardRefresh"
+                    }
+                ],
+                "release": {
+                    "version": "1.3.74",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
+                "type": "addon",
+                "version": "1.3.74",
+                "detailsRevision": 29,
+                "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/592698",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
+                "license": "All Rights Reserved",
+                "accessTier": "pro",
+                "accessEnforcement": "client_entitlement_check",
+                "premiumNote": "Client validates the server-issued enhancer_guard entitlement before starting. JavaScript can be modified; server-side protected operations are still needed for tamper resistance."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXBazaarThanker",
+                "buttonSelector": "#sakalux-bt-settings-button",
+                "category": "Trading",
+                "description": "Bazaar buyer grouping, thank-you messages, statistics and history management.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.user.js",
+                "greasyForkId": "592388",
+                "icon": "💬",
+                "id": "bazaar",
+                "info": "Purpose\nBazaar Thanker organizes purchases from your Bazaar and helps prepare personal thank-you messages for customers. It reads Events and assists on Messages; Hub can detect and open its settings from other Torn pages.\n\nBuyer grouping and purchase details\nDetects supported Bazaar purchase events and groups purchases by buyer. Buyer details let you review the purchase information before preparing a message. Copy tools help reuse purchase or message information. Configurable big-buyer thresholds highlight customers by item count or amount spent.\n\nMessage customization\nUses a custom Bazaar name when supplied and automatic name detection when no custom name is configured. Message text is configurable so you can include your preferred greeting and Bazaar information. The thank-you workflow prepares text for Torn's messaging flow; review the recipient and final message before sending.\n\nHistory and repeat-message control\nKeeps local buyer/message history, statistics and processed-event state. A configurable cooldown avoids repeatedly thanking the same buyer too soon; the default is four hours. History-management controls help inspect or clear the records stored on the device.\n\nAccess and persistence\nDoes not need a Torn API key. Settings and working records are stored locally in TornPDA or the userscript environment. Script Hub provides detection, settings access and ON/OFF integration; the shared standalone dock can open the module when Hub is absent. Core purchase and message processing remains limited to the relevant Events and Messages pages.",
+                "metaUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
+                "name": "Bazaar Thanker",
+                "quickActions": [
+                    {
+                        "icon": "⚙️",
+                        "id": "open",
+                        "label": "SETTINGS",
+                        "method": "open"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=events",
+                        "icon": "📋",
+                        "id": "events",
+                        "label": "EVENTS",
+                        "method": "goToEvents"
+                    }
+                ],
+                "release": {
+                    "version": "5.3.72",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
+                "type": "addon",
+                "version": "5.3.72",
+                "detailsRevision": 33,
+                "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/592388",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
+                "license": "All Rights Reserved",
+                "accessTier": "pro",
+                "accessEnforcement": "client_entitlement_check",
+                "premiumNote": "Client validates the server-issued bazaar_thanker entitlement before starting. JavaScript can be modified; server-side protected operations are still needed for tamper resistance."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXBazaarSmartPricer",
+                "buttonSelector": ".qp-chip",
+                "category": "Trading",
+                "description": "Quick Pricer-parity Bazaar helper with per-item Quick Add/Undo, quantity + price fill, bulk pricing, RW/bonus protection and Hub-styled settings.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.user.js",
+                "icon": "💰",
+                "id": "bazaar-smart-pricer",
+                "info": "Purpose\nBazaar Smart Pricer is now rebased on the proven Torn Bazaar Quick Pricer v2.9.3 behavior. Add Items gets the same compact per-item Quick Add/Undo control in the native item description area; one tap fills full quantity and calculated price. Manage Bazaar gets native price-update controls.\n\nBulk workflow\nThe draggable Quick Fill / Update All chip and its gear button use the upstream behavior, including visible-row processing and progress.\n\nSafety\nSkip RW weapons, Skip bonus items, Skip $1 items, NPC floor enforcement, discount/markup direction, price-change alert threshold and cache controls are available in Settings. RW and generic bonus skipping default to ON.\n\nHub integration\nThe settings modal keeps the polished Quick Pricer layout but uses SakaLuX Hub dark tokens. API Access automatically prefers the Hub shared key when Hub is installed and keeps a local fallback. Manage Bazaar Update All can open collapsed rows sequentially, fill prices, and leaves Torn SAVE CHANGES as the final confirmation step. Script Hub can open Settings and run Quick Fill through the SakaLuXBazaarSmartPricer API global.\n\nPricing source\nAutomatic pricing uses Torn market_value with the configured discount/markup. If Torn City shop-floor enforcement is enabled, sell_price is the hard minimum because it is the amount the NPC shop pays you; buy_price is not used as the Bazaar price floor.",
+                "name": "Bazaar Smart Pricer",
+                "quickActions": [
+                    {
+                        "icon": "⚙️",
+                        "id": "open",
+                        "label": "SETTINGS",
+                        "method": "open",
+                        "fallbackUrl": "https://www.torn.com/bazaar.php"
+                    },
+                    {
+                        "icon": "💰",
+                        "id": "quick-fill",
+                        "label": "QUICK FILL",
+                        "method": "quickFill",
+                        "fallbackUrl": "https://www.torn.com/bazaar.php"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh",
+                        "fallbackUrl": "https://www.torn.com/bazaar.php"
+                    }
+                ],
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
+                "type": "addon",
+                "detailsRevision": 48,
+                "version": "1.1.29",
+                "release": {
+                    "version": "1.1.29",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
+                "metaUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
+                "greasyForkId": "596672",
+                "greasyForkUrl": "https://greasyfork.org/scripts/596672",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md",
+                "license": "MIT",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Per-item Quick Add and Undo",
+                    "Individual pricing",
+                    "RW/bonus item safety controls"
+                ],
+                "proFeatures": [
+                    "Bulk Pricing",
+                    "Update All",
+                    "Quick Fill"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXMissionRewards",
+                "buttonSelector": "#sl-mri-button",
+                "category": "Missions",
+                "description": "Mission Shop reward values, value per credit, ammo ownership and weapon mod tracking.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.user.js",
+                "greasyForkId": "592711",
+                "icon": "🎯",
+                "id": "mission-rewards",
+                "info": "Purpose\nMission Rewards adds practical purchase information to Torn's Mission Shop, helping compare rewards before spending mission credits. It decorates supported reward cards and provides a more detailed reward panel.\n\nReward value\nShows estimated market value and value per mission credit, so offers with different prices can be compared on the same basis. Values are estimates based on available item data; they are guidance rather than guaranteed resale prices.\n\nSpecial ammunition\nReads currently owned special ammunition through the configured API key and shows ownership context alongside relevant rewards. This helps distinguish ammunition you already have from offers you may want to buy.\n\nWeapon-mod price learning\nTracks normal and special weapon-mod credit ranges from offers seen locally. Learned ranges build up as you use the script on the device. They describe observed offers and do not guarantee the price of future Mission Shop rewards.\n\nAPI and refresh\nDedicated API Access uses User: Ammo and Torn: Items permissions. Includes key setup and validation, refresh controls and local item/ammo caches. Compatible shared Hub key access can be used where available. No API write permission is required for reward information.\n\nWhere it runs\nRegisters with Hub on every Torn page, but Mission Shop scanning only runs on Missions. Settings and learned ranges are stored locally. the rolled-back experimental Mission Hints branch is not part of the active feature set. Reward purchases remain normal player actions.",
+                "metaUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
+                "name": "Mission Rewards",
+                "quickActions": [
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=missions",
+                        "icon": "⚙️",
+                        "id": "open",
+                        "label": "SETTINGS",
+                        "method": "open"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=missions",
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=missions",
+                        "icon": "🎯",
+                        "id": "missions",
+                        "label": "MISSIONS",
+                        "method": "goToMissions"
+                    }
+                ],
+                "release": {
+                    "version": "1.0.62",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
+                "type": "addon",
+                "version": "1.0.62",
+                "detailsRevision": 24,
+                "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/592711",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Reward values",
+                    "Value per credit",
+                    "Owned ammunition"
+                ],
+                "proFeatures": [
+                    "Advanced reward offer analysis",
+                    "Weapon mod price history"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXMarketIntelligence",
+                "buttonSelector": "#sl-mi-button",
+                "category": "Trading",
+                "description": "Torn PDA-first market/travel intelligence with strict Item Market page scoping, Loadout Comparator, API access diagnostics/key setup, Price Network and travel tools.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.user.js",
+                "greasyForkId": "592781",
+                "icon": "📈",
+                "id": "market-intelligence",
+                "info": "Purpose\nMarket Intelligence combines item-price analysis, Bazaar-flip estimates, travel purchasing plans, Museum set analysis and equipment comparisons. It provides decision support on the relevant Torn market and travel pages.\n\nItem Market and watchlists\nShows live or cached item-price information, locally collected price history and trends. BUY NOW, FAIR, WAIT and LEARNING signals summarize the available price context. Watchlists help keep selected items under review. Limited history is identified as learning rather than treated as a reliable long-term trend.\n\nBazaar Flip Intelligence\nCompares available price information to estimate net profit and return on investment for possible flips. Estimates depend on the prices and stock visible to the module; an apparent opportunity is not a guaranteed sale or profit.\n\nTravel purchasing\nBest Travel Run compares possible runs; Best Route Basket and the Travel Buy Planner help allocate carrying capacity across purchases. In-country Best Buys evaluates available buying opportunities. Arrival Stock and Arrival Basket support planning while flying. Local travel-session estimates, recent plans and stock/restock observations improve the context collected on the device.\n\nMuseum and equipment\nMuseum Set Intelligence adds set-oriented item context. The Loadout Comparator helps compare weapon and armor options using supported equipment data, alongside the trading/travel workspace.\n\nData and settings\nUses Torn API data and YATA public travel data where needed. Keeps local caches, price/travel history, watchlists and preferences. Dedicated API diagnostics help identify missing data access. The optional SakaLuX Price Network client is disabled by default and can be configured separately.\n\nHub and manual actions\nSupports persistent Hub ON/OFF and native settings access, with the shared standalone dock available separately. Market features run on relevant market pages and travel tools on relevant travel pages. It does not automatically buy or sell items; prices, stocks and travel estimates should be checked before acting.",
+                "metaUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
+                "name": "Market Intelligence",
+                "quickActions": [
+                    {
+                        "icon": "⚙️",
+                        "id": "open",
+                        "label": "SETTINGS",
+                        "method": "open"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=travel",
+                        "icon": "✈️",
+                        "id": "best-run",
+                        "label": "BEST RUN",
+                        "method": "goToBestRun"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=ItemMarket",
+                        "icon": "📈",
+                        "id": "market",
+                        "label": "MARKET",
+                        "method": "goToMarket"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/museum.php",
+                        "icon": "🏛️",
+                        "id": "museum",
+                        "label": "MUSEUM",
+                        "method": "goToMuseum"
+                    }
+                ],
+                "release": {
+                    "version": "1.17.88",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
+                "type": "addon",
+                "version": "1.17.88",
+                "detailsRevision": 38,
+                "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/592781",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Market price context",
+                    "BUY/WAIT indicators",
+                    "Basic watchlist"
+                ],
+                "proFeatures": [
+                    "Bazaar Flip",
+                    "Best Travel Run",
+                    "Route Basket",
+                    "Travel Planner",
+                    "Museum"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXBountyHunter",
+                "buttonSelector": "#slx-bh-btn",
+                "category": "Combat",
+                "description": "Full-board Torn bounty hunter with Shared Core, Hub-aligned UI, FFScouter beatable filtering, strict live status and hospital timing.",
+                "icon": "🎯",
+                "id": "bounty-hunter",
+                "info": "Purpose\nBounty Hunter scans the full Torn bounty board and builds a target-first hunt list for TornPDA and desktop. v0.5.0 adds an adaptive, resumable scanner with smart caching and live progress.\n\nAdaptive scanner\nFull-board API paging is paced automatically, reacts to latency/rate limits, preserves partial progress and can resume from the last saved offset instead of always starting over.\n\nSmart cache\nBoard results are cached separately from FF/BS and live status. FFScouter estimates are cached per target for up to 12 hours, while live status stays short-lived.\n\nBeatable filtering\nFF 1–3, reward, level, BS, Hospital window, Okay/Hospital, watchlist/blacklist and verified live status can all participate in the final list.\n\nUI and integration\nThe Hub-style panel shows scan/FF/status progress, launches from Chat V3, uses Shared Core API/storage/workspace helpers and exposes health diagnostics to Script Hub.\n\nAPI Access\nThe shared Script Hub key now requires Torn: Bounties in addition to the existing User Basic/Profile access. API diagnostics distinguish missing Bounties permission from temporary rate limiting. Distribution and update checks now use GreasyFork #598988.",
+                "name": "Bounty Hunter",
+                "quickActions": [
+                    {
+                        "icon": "🎯",
+                        "id": "open",
+                        "label": "OPEN",
+                        "method": "open",
+                        "fallbackUrl": "https://www.torn.com/bounties.php"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh",
+                        "fallbackUrl": "https://www.torn.com/bounties.php"
+                    },
+                    {
+                        "icon": "📰",
+                        "id": "bounties",
+                        "label": "BOUNTIES",
+                        "method": "goToBounties",
+                        "fallbackUrl": "https://www.torn.com/bounties.php"
+                    },
+                    {
+                        "icon": "🧪",
+                        "id": "test-key",
+                        "label": "TEST API",
+                        "method": "testTornAccess",
+                        "fallbackUrl": "https://www.torn.com/bounties.php"
+                    },
+                    {
+                        "icon": "🔑",
+                        "id": "create-key",
+                        "label": "API KEY",
+                        "method": "createRequiredTornKey",
+                        "fallbackUrl": "https://www.torn.com/preferences.php#tab=api"
+                    }
+                ],
+                "release": {
+                    "version": "0.5.21",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
+                "downloadUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.user.js",
+                "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
+                "type": "addon",
+                "version": "0.5.21",
+                "detailsRevision": 28,
+                "license": "All Rights Reserved",
+                "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
+                "greasyForkId": "598988",
+                "greasyForkUrl": "https://greasyfork.org/scripts/598988",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Basic target list",
+                    "Basic search and filtering"
+                ],
+                "proFeatures": [
+                    "Full-board Scanner",
+                    "FF/BS filtering",
+                    "Smart Sort"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXEliminationAssistant",
+                "buttonSelector": "#slx-elim-btn",
+                "category": "Combat",
+                "description": "Eliminations advisor with unified Torn + FFScouter API setup, rotating 500-player batches, availability status, TornPDA export and PC-safe attack routing.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.user.js",
+                "greasyForkId": "594921",
+                "icon": "⚔️",
+                "id": "elimination-assistant",
+                "info": "Purpose\nElimination Assistant helps find and review combat targets during Torn Eliminations. It loads team members and target availability, ranks candidates and organizes targets you want to revisit.\n\nTeams and batch loading\nUses Torn API v2 to load Elimination teams and target data. Large teams are processed in rotating groups of up to 500 players, with LOAD NEXT to continue through the membership. Player search, filters and sorting help narrow the current results.\n\nTarget recommendations\nSAFE, RISKY and SKIP recommendations and Smart Target Score summarize the data available for each target. Optional FFScouter Fair Fight/battle-stat estimates can be compared with your calibrated or manually entered battle stats. These are estimates, not a guarantee that an attack will be won.\n\nCalibration and target learning\nSupports calibration and optional FF scans. Manually recorded WIN/LOSS outcomes add local per-target learning, so results you record can contribute context on later visits.\n\nAvailability and navigation\nAttackable-state checks help distinguish targets currently suitable to open. PROFILE and ATTACK actions take you to the selected player or attack page, including routing suitable for PC and TornPDA. The script never attacks automatically.\n\nSaved SAFE targets and export\nRemembers SAFE targets across batches and sessions. Saved targets can be reviewed, copied, exported, removed individually or cleared. SAFE/RISKY attackable targets can be exported in TornPDA Chain Targets format.\n\nAPI and settings\nIncludes dedicated Torn API Access and optional FFScouter key controls. Target/filter preferences and local saved-target state persist across normal use. Hub provides persistent ON/OFF and module access; the shared standalone dock remains available when Hub is absent.",
+                "metaUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
+                "name": "Elimination Assistant",
+                "quickActions": [
+                    {
+                        "icon": "⏻",
+                        "id": "toggle",
+                        "label": "POWER",
+                        "method": "toggleEnabled"
+                    },
+                    {
+                        "icon": "⚔️",
+                        "id": "open",
+                        "label": "OPEN",
+                        "method": "open"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    },
+                    {
+                        "icon": "📊",
+                        "id": "ffscan",
+                        "label": "FF SCAN",
+                        "method": "scanFF"
+                    },
+                    {
+                        "icon": "📤",
+                        "id": "export-targets",
+                        "label": "EXPORT TARGETS",
+                        "method": "exportTargets"
+                    },
+                    {
+                        "icon": "🎯",
+                        "id": "calibrate",
+                        "label": "CALIBRATE",
+                        "method": "calibrate"
+                    },
+                    {
+                        "icon": "🧪",
+                        "id": "test-key",
+                        "label": "TEST KEY",
+                        "method": "testTornKey"
+                    },
+                    {
+                        "icon": "🔑",
+                        "id": "create-key",
+                        "label": "API KEY",
+                        "method": "createRequiredTornKey"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=elimination",
+                        "icon": "🏆",
+                        "id": "event",
+                        "label": "ELIMS",
+                        "method": "goToEliminations"
+                    }
+                ],
+                "release": {
+                    "version": "1.3.66",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
+                "type": "addon",
+                "version": "1.3.66",
+                "detailsRevision": 29,
+                "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/594921",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Elimination teams",
+                    "Player search",
+                    "Availability status"
+                ],
+                "proFeatures": [
+                    "SAFE/RISKY/SKIP recommendations",
+                    "FFScouter",
+                    "Calibration",
+                    "Target learning"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXCompanyIntelligence",
+                "buttonSelector": "#sakalux-module-bridge-company-intelligence",
+                "category": "Company",
+                "description": "Employee and Director company intelligence with work-stat position advisor, effectiveness, growth/star direction, staff optimization, training, contracts and mobile-first TornPDA UI.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.user.js",
+                "greasyForkId": "595873",
+                "icon": "🏢",
+                "id": "company-intelligence",
+                "info": "Purpose\nCompany Intelligence provides Employee and Director workspaces for understanding your job, staff, training commitments and company development. It combines permitted Torn company/user data with local history and manually recorded planning data.\n\nEmployee workspace\nShows work stats and position suitability, personal progress, train tracking, employment offers and actionable advice. Employee Progress compares changes in work stats and train compliance and provides 30/90-day projections based on the available history. Offer comparison helps review the information recorded for possible jobs.\n\nCompany Growth Center\nBuilds daily company snapshots, shows the Sunday rating countdown and presents a star outlook. Growth direction and star predictions are advisory: Torn ratings are comparative, and missing competitor or historical data limits confidence.\n\nDirector staff planning\nProvides staff overview, effectiveness and position analysis, position-optimization advice and actionable employee flags. Smart training rotation, training debt and per-employee train history help track commitments and plan future training. Director-only API data requires the key owner to be the company director.\n\nTrain-sale contracts\nTracks contracts, delivered and remaining trains, balances and employee training history. CSV/report export supports reviewing records outside the panel. Local contract records are planning data and should be kept current with actual deliveries.\n\nFinance, stock and benchmarks\nWeekly finance and balance views use known API values and locally logged amounts. Unknown costs are not silently converted into real zeroes. Stock intelligence, competitor benchmarks, company timeline, diagnostics and advice add broader context. Same-type competitor samples and regular snapshots improve comparisons.\n\nAPI and employment state\nSupports Torn API v2 with classic API and local company-cache fallbacks. Fresh job data is prioritized when refreshing employment status; historical planning records can remain available after job changes. Dedicated API controls manage the data needed by the selected workspace.\n\nPersistence and access\nCompany notes, contracts, benchmarks, snapshots and history are stored locally. Uses the shared Bazaar-style Standalone Dock registration and Hub module bridge rather than a second Company menu. The module provides analysis and planning; it does not perform automated company actions. Refresh after the daily company report to build useful history.",
+                "metaUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
+                "name": "Company Intelligence",
+                "quickActions": [
+                    {
+                        "icon": "⏻",
+                        "id": "toggle",
+                        "label": "POWER",
+                        "method": "toggleEnabled"
+                    },
+                    {
+                        "icon": "🏢",
+                        "id": "open",
+                        "label": "OPEN",
+                        "method": "open"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    }
+                ],
+                "release": {
+                    "version": "1.8.96",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
+                "type": "addon",
+                "version": "1.8.96",
+                "detailsRevision": 49,
+                "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
+                "greasyForkUrl": "https://greasyfork.org/scripts/595873",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "employee"
+                ],
+                "proFeatures": [
+                    "director"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Employee FREE; Director PRO. Server-calculated entitlement is checked by client; complete code-level protection requires server-hosted features."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXStockManagerAdvisor",
+                "buttonSelector": "#sakalux-module-bridge-stock-manager-advisor",
+                "category": "Trading",
+                "description": "Torn stock vault and advisor with Financial Advisor, Technical Trade Assistant, Portfolio Simulator and Smart Rebalance strategy profiles.",
+                "downloadUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.user.js",
+                "icon": "📊",
+                "id": "stock-manager-advisor",
+                "info": "Purpose\nStock Manager & Advisor adds a stock workspace directly to Torn Stocks and provides a full dashboard through Hub. It combines portfolio tracking, benefit-block analysis, financial and technical advice, simulations and explicit player-triggered trade controls.\n\nPortfolio and inline workspace\nShows invested capital when cost basis is known, market value, unrealized profit/loss, cash and holdings. Per-stock companion cards expose portfolio/benefit context and compact actions. Search, sorting, filters, favorites, favorite targets and Compact mode help organize the list. Transaction history and action logs keep local activity records.\n\nVault and withdrawal controls\nVault Max and Vault Keep calculate purchases for the selected target using the configured cash amount or retained-cash preference. Withdrawal controls calculate shares to sell for a chosen amount; Withdraw All, Sell Excess and Sell to Cash Target support explicit stock-management workflows where available. Target Lock helps prevent accidental target changes. PANIC is an explicit cash-to-stock action using its configured primary/fallback target and preview flow.\n\nBenefit and ROI advice\nAnalyzes benefit tiers, protected benefit floors, distance to the next benefit, estimated yield, marginal APR and payback. Best ROI and Best Affordable candidates help compare potential purchases. Benefit values and adviser scores are estimates rather than guaranteed returns.\n\nFinancial Advisor\nModels gross benefit income per day, month and year, configurable costs and net income. Exclusions keep chosen stocks out of adviser comparisons. Bank comparison supports different deposit periods, with best-effort automatic rate capture on supported Bank pages and a manual APR fallback.\n\nTechnical Trade Assistant\nCollects price history locally and compares 24H, 1W and 1M windows. Provides a chart with price, EMA20, EMA90 and Bollinger overlays, RSI14, momentum and technical-score context. BUY BIAS, SELL BIAS, WATCH and NEUTRAL states summarize the local signals. History grows with use on the device; the module does not depend on an external historical-price service.\n\nPortfolio Simulator\nShows before/after what-if reallocations, safely reallocatable coverage, benefit-yield and technical-score changes, target-tier movement and unused cash/share-rounding effects. Simulator results are previews and do not submit trades.\n\nSmart Rebalance and profiles\nBuilds portfolio-wide SELL-to-BUY proposals using free shares above protected benefit floors. SAFE, BALANCED and AGGRESSIVE profiles tune turnover caps, score thresholds, weighting and suggested-move limits. Recalculation updates the local technical context. Plans remain preview-only until the separate guided execution controls are deliberately used.\n\nTrading safeguards and API\nDry Run, Benefit Lock, confirmations and cooldown checks protect the trade workflow. A dedicated API Access panel manages money, portfolio and stock-catalogue data. Hub OPEN and REFRESH display or synchronize data; they do not place orders. Review a proposed trade before confirming it.\n\nPersistence and TornPDA behavior\nSettings, targets, profiles, caches, local price history, favorites and transaction records persist during normal updates. Export/import excludes the API key. The inline workspace mounts without waiting for page/chat mutations to stop, skips hidden stock containers and recovers after Stocks content is replaced. Disabling the module stops its runtime controls and blocks new orders; an already submitted request is not cancelled.\n\nAPI Access\nUses the shared SakaLuX Hub Torn API key automatically when Hub is installed and active. A local Stock Manager key can still be saved as the standalone fallback. The dedicated API Access sheet checks User Money, User Stocks and Torn Stocks permissions.",
+                "metaUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
+                "name": "Stock Manager & Advisor",
+                "quickActions": [
+                    {
+                        "icon": "⏻",
+                        "id": "toggle",
+                        "label": "POWER",
+                        "method": "toggleEnabled"
+                    },
+                    {
+                        "icon": "📊",
+                        "id": "open",
+                        "label": "OPEN",
+                        "method": "open"
+                    },
+                    {
+                        "icon": "🔄",
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    },
+                    {
+                        "fallbackUrl": "https://www.torn.com/page.php?sid=stocks",
+                        "icon": "📈",
+                        "id": "stocks",
+                        "label": "STOCKS",
+                        "method": "goToStocks"
+                    }
+                ],
+                "release": {
+                    "version": "0.8.35",
+                    "date": "2026-10-23",
+                    "notes": [
+                        "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+                    ]
+                },
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
+                "type": "addon",
+                "version": "0.8.35",
+                "detailsRevision": 28,
+                "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
+                "greasyForkId": "596192",
+                "greasyForkUrl": "https://greasyfork.org/scripts/596192",
+                "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md",
+                "license": "All Rights Reserved",
+                "accessTier": "mixed",
+                "freeFeatures": [
+                    "Portfolio",
+                    "Prices",
+                    "Profit/loss",
+                    "Stock benefits",
+                    "Safety confirmations"
+                ],
+                "proFeatures": [
+                    "Financial Advisor",
+                    "Technical Assistant",
+                    "Portfolio Simulator",
+                    "Smart Rebalance",
+                    "PANIC floating button and execution"
+                ],
+                "accessEnforcement": "client_side_check",
+                "premiumNote": "Basic features FREE. Advanced functions require verified SakaLuX PRO; no server-hosted execution authorization. Additional action paths require TornPDA regression testing."
+            },
+            {
+                "active": true,
+                "apiGlobal": "SakaLuXGymOptimizer",
+                "buttonSelector": "#slx-gym-panel",
+                "category": "Gym",
+                "description": "SakaLuX Gym Optimizer — inline gym ratios, history, Train Next and verified-gym recommendations.",
+                "id": "gym-optimizer",
+                "icon": "🏋️",
+                "name": "Gym Optimizer",
+                "type": "addon",
+                "version": "1.7.10",
+                "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
+                "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
+                "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
+                "quickActions": [
+                    {
+                        "id": "open",
+                        "label": "OPEN",
+                        "method": "open"
+                    },
+                    {
+                        "id": "refresh",
+                        "label": "REFRESH",
+                        "method": "refresh"
+                    }
+                ],
+                "release": {
+                    "version": "1.7.10",
+                    "date": "2026-10-21",
+                    "notes": [
+                        "Userscript and metadata declare v1.7.10. Detailed per-version notes for v1.7.2 through v1.7.10 have not yet been reconstructed from verified changes."
+                    ]
+                },
+                "accessTier": "free",
+                "license": "All Rights Reserved",
+                "comingSoon": false,
+                "installable": true
+            }
+        ],
+        "lastVerified": "2026-10-23",
+        "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
-  ],
-  "lastVerified": "2026-10-23",
-  "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
-}
 
     const FALLBACK_MODULE_DETAILS = Object.fromEntries(
         (FALLBACK_REGISTRY.scripts || []).map(s => [s.id, { info: s.info, release: s.release }])
