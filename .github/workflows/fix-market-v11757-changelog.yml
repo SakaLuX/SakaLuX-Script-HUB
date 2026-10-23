@@ -1,10 +1,5 @@
 name: Sync Market Intelligence v1.17.57 Changelog
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/scripts/fix_market_v11757_changelog.py'
-      - '.github/workflows/fix-market-v11757-changelog.yml'
   workflow_dispatch:
 permissions:
   contents: write
