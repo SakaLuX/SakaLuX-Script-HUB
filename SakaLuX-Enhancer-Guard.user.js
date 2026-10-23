@@ -57,7 +57,9 @@
     try{
       const saved=JSON.parse(storage.getItem(STORAGE_KEY)||'null');
       if(saved?.keyHash!==await hash(apiKey))return null;
-      return await verify(saved.data,{apiKey,entitlement,userId})?saved.data:null;
+      if(!await verify(saved.data,{apiKey,entitlement,userId}))return null;
+      const claim=JSON.parse(new TextDecoder().decode(decode(saved.data.signed_certificate.payload)));
+      return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
     }catch{return null}
   }
   root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
@@ -2731,7 +2733,7 @@ async function slxCheckProAccess(){
     const grant=await signed.load(localStorage,key,'enhancer_guard',id);
     if(grant&&key===slxLicenseKey()){
      const expiry=Date.parse(String(grant.expires_at||'').replace(' ','T').replace(/Z$/i,'')+'Z');
-     return slxConfirmedPro(expiry);
+     return slxConfirmedPro(Math.min(expiry,grant.verifiedGrantExpiresAt));
     }
    }
   }catch{} // Offline/invalid grant: use existing online license lookup.
@@ -2740,7 +2742,7 @@ async function slxCheckProAccess(){
  if(hub?.key===key&&Date.now()-hub.at<5*60*1000&&hub.data?.premium_active===true){
   const expiry=Date.parse(String(hub.data.expires_at||'').replace(' ','T')+'Z');
   if(Number.isFinite(expiry)&&expiry>Date.now()&&hub.data.entitlements?.includes('enhancer_guard')){
-   return slxConfirmedPro(expiry);
+   return slxConfirmedPro(Math.min(expiry,grant.verifiedGrantExpiresAt));
   }
  }
  const broker=globalThis.SakaLuXLicenseBroker;
@@ -2751,7 +2753,7 @@ async function slxCheckProAccess(){
    const allowed=d?.status==='ok'&&d?.premium_active===true&&Array.isArray(d.entitlements)&&
      d.entitlements.includes('enhancer_guard')&&
      Number.isFinite(expiry)&&expiry>Date.now();
-   if(allowed)return slxConfirmedPro(expiry);
+   if(allowed)return slxConfirmedPro(Math.min(expiry,grant.verifiedGrantExpiresAt));
    slxProVerification=d?.status==='ok'?'free':'unavailable';
    if(d?.status==='ok'){slxProAllowed=false;slxProExpiry=0;try{localStorage.removeItem(slxLicenseCacheKey)}catch{};return false}
    return slxRestorePro();
