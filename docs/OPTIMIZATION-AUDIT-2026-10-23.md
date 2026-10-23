@@ -80,3 +80,19 @@ Pending before claiming cross-world licensing is operational: embedding the veri
 The signed-grant regression now constructs **two independent VM globals** sharing only a storage adapter. The second realm validates the certificate with its own Ed25519 verifier and checks that altered entitlements and a different authenticated Torn user ID are rejected. This is an automated isolated-realm simulation, **not** a TornPDA field test.
 
 Production gating remains unchanged: no standalone script can safely use a signed cache entry until its own current Torn identity is established from an authenticated source. The certificate screenshot alone does not establish that per-script identity contract.
+
+## Signed grant consumers — expanded integration
+
+The shared Ed25519 verifier is now embedded in the nine PRO-bearing standalone scripts:
+Bounty Hunter, Market Intelligence, Stock Manager, Elimination Assistant, Mission Rewards,
+Bazaar Smart Pricer, Company Intelligence, Enhancer Guard and Bazaar Thanker.
+Each requires the signed cache and an authenticated user identity from Torn v2 `user/basic`,
+matches that identity against the signed subject, and checks its own entitlement.
+Without these checks, each script retains its existing online verification fallback.
+Market uses Shared Core's Torn API request broker rather than a private GM request.
+The Suite now embeds the verifier for reuse, but **embedding it alone does not grant Suite-wide PRO**;
+any premium Suite module must still gate features according to its corresponding entitlement.
+
+Important caveats: calls to Torn `user/basic` may fail with restricted API key permissions and then
+fall back to license server verification. This has passed static/simulated test coverage only;
+live TornPDA and Tampermonkey testing remains outstanding. No Greasy Fork releases have been published.
