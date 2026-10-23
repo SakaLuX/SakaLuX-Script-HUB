@@ -1,8 +1,5 @@
 name: Fix Standalone first-slot S v1.1.8
 on:
-  push:
-    paths:
-      - '.github/workflows/fix-standalone-first-slot-v118.yml'
   workflow_dispatch:
 permissions:
   contents: write
