@@ -943,7 +943,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
    // A cached signed grant is accepted only after an independent Torn API identity check.
    // Failure falls back to the existing server-side license verification.
    const signed=globalThis.SakaLuXSignedGrant;
-   if(signed?.load&&typeof GM_xmlhttpRequest==='function'){
+   if(signed?.load&&typeof GM_xmlhttpRequest==='function'&&
+      localStorage.getItem(signed.STORAGE_KEY)){
      try{
        const identity=await new Promise((resolve,reject)=>{
          GM_xmlhttpRequest({method:'GET',
