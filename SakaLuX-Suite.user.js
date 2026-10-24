@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.1002
+// @version      0.9.1003
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -44153,7 +44153,31 @@ function scan(){
     const energyTip=id=>simpleTip([`Energy Gain - ${ENERGY_GAIN_INFO.get(Number(id))} Energy`]);
     const nerveTip=id=>simpleTip([`Nerve Gain - ${NERVE_GAIN_INFO.get(Number(id))} Nerve`]);
     const happyTip=id=>simpleTip(["Happy Gains",HAPPY_GAIN_INFO.get(Number(id))||`ID ${id}`]);
-    const healthTip=id=>simpleTip([`Health Gain - ${HEALTH_GAIN_INFO.get(Number(id))} Life`]);
+    // Item Signal medical details share the base values used by Recovery Planner.
+    // Keep the labels explicit about base stats versus user-specific perks.
+    const MEDICAL_ITEM_EFFECTS=new Map([
+      [68,{name:"Small First Aid Kit",hospital:20,cooldown:10}],
+      [67,{name:"First Aid Kit",hospital:40,cooldown:15}],
+      [66,{name:"Morphine",hospital:70,cooldown:20}],
+      ...[732,733,734,735,736,737,738,739].map(id=>[id,{name:"Blood Bag",hospital:120,cooldown:30,requiresIV:true}]),
+      [200,{name:"Opium",hospital:null,cooldown:0,drug:true}]
+    ]);
+    const healthTip=id=>{
+      const item=MEDICAL_ITEM_EFFECTS.get(Number(id));
+      const pct=HEALTH_GAIN_INFO.get(Number(id));
+      if(!item)return simpleTip([`Health Gain - ${pct} Life`]);
+      const lines=[`${item.name} · base effects`,`Life restored: +${pct}`];
+      if(item.drug){
+        lines.push("Hospital time: removes all remaining time.");
+        lines.push("Cooldown: drug cooldown applies (not medical).");
+      }else{
+        lines.push(`Hospital time reduced: -${item.hospital} minutes.`);
+        lines.push(`Medical cooldown added: +${item.cooldown} minutes.`);
+        if(item.requiresIV)lines.push("Requires IV Therapy.");
+        lines.push("Education and faction perks may modify effects.");
+      }
+      return simpleTip(lines);
+    };
     function bindTrigger(el,build,preferRight){
       const show=()=>{if(!active||activeTrigger===el)return;hideActiveTip();const tip=build();ensurePortal().appendChild(tip);void tip.offsetWidth;positionTip(el,tip,preferRight);requestAnimationFrame(()=>tip.classList.add("is-visible"));activeTipEl=tip;activeTrigger=el;};
       const hide=()=>{if(activeTrigger===el)hideActiveTip();};
