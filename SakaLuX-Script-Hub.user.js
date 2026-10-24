@@ -1452,16 +1452,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.74",
-                    "date": "2026-10-23",
+                    "version": "1.3.75",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.74",
-                "detailsRevision": 29,
+                "version": "1.3.75",
+                "detailsRevision": 30,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -1506,7 +1506,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "5.3.72",
-                    "date": "2026-10-23",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
@@ -1563,7 +1563,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "version": "1.1.29",
                 "release": {
                     "version": "1.1.29",
-                    "date": "2026-10-23",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
@@ -1626,7 +1626,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.0.62",
-                    "date": "2026-10-23",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
@@ -1702,7 +1702,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.17.88",
-                    "date": "2026-10-23",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
@@ -1780,7 +1780,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "0.5.21",
-                    "date": "2026-10-23",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
@@ -1881,7 +1881,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.3.66",
-                    "date": "2026-10-23",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
@@ -1944,7 +1944,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.8.96",
-                    "date": "2026-10-23",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
@@ -2008,7 +2008,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "0.8.35",
-                    "date": "2026-10-23",
+                    "date": "2026-10-24",
                     "notes": [
                         "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
                     ]
@@ -2079,7 +2079,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "installable": true
             }
         ],
-        "lastVerified": "2026-10-23",
+        "lastVerified": "2026-10-24",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 
