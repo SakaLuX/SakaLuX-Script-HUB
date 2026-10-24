@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Enhancer Guard
 // @namespace    https://torn.com/
-// @version      1.3.74
+// @version      1.3.75
 // @description  Advanced Enhancer inventory tracker for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -884,7 +884,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Premium Badges v2 — BEGIN */
 (()=>{
  'use strict';
- const MATCH=new RegExp("enhancer guard|item protector|protect item|lock item",'i');
+ const MATCH=new RegExp('^(?:enhancer guard|item protector)(?:\\s|$)','i');
  const ROOT=new RegExp("sl-eg|enhancer",'i');
  const STYLE_ID='slx-premium-badge-style';
  function decorate(){
@@ -914,7 +914,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
      continue;
    }
    if(el.querySelector(':scope > .slx-premium-badge'))continue;
-   const label=String(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
+   const label=String(el.textContent||'').trim(); // Never badge per-item action tooltips/icons.
    if(!MATCH.test(label)||/^(?:OPEN PREMIUM|PRO|✦ PRO)$/i.test(label)||/(?:\bPRO\b|✦\s*PRO)/i.test(label))continue;
    const tag=document.createElement('span');tag.className='slx-premium-badge';tag.textContent='✦ PRO';tag.setAttribute('aria-hidden','true');
    if(el.tagName==='LABEL'&&el.querySelector('button'))continue;
