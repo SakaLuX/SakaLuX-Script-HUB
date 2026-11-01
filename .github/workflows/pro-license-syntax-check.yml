@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'SakaLuX-*.user.js'
+      - 'tests/license-rate-limit-regression.cjs'
       - 'tests/market-pro-bootstrap-regression.cjs'
       - 'tests/standalone-pro-startup-regression.cjs'
       - 'tests/company-enhancer-license-sharing-regression.cjs'
@@ -47,7 +48,7 @@ jobs:
           assert.match(hub,/30\*1000/,'FREE cache must not delay newly paid accounts for 5 minutes');
           for(const name of ['Bazaar-Smart-Pricer','Mission-Rewards','Market-Intelligence','Elimination-Assistant','Bounty-Hunter','Stock-Manager-Advisor','Enhancer-Guard','Bazaar-Thanker-PDA']){
             const source=fs.readFileSync('SakaLuX-'+name+'.user.js','utf8');
-            assert.match(source,/SakaLuXLicenseBroker/,'Missing shared broker in '+name);
+            assert.match(source,/SakaLuXLicenseClient.check/,'Missing coordinated license client in '+name);
           }
           console.log('License wiring invariants passed.');
           NODE
@@ -62,3 +63,6 @@ jobs:
         run: node tests/signed-license-grant-regression.cjs
       - name: Verify all signed license consumers and Suite
         run: node tests/all-signed-license-consumers-regression.cjs
+
+      - name: Verify cross-realm cache and persisted rate limit
+        run: node tests/license-rate-limit-regression.cjs

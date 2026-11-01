@@ -12,16 +12,13 @@ for (const [file, id] of [
   const next = source.slice(index+anchor.length,index+anchor.length+250);
   assert.match(next,/setTimeout\(\(\)=>\{void isPro\(\)\.catch\(\(\)=>\{\}\);\},1200\)/,
     id + ' must initialize entitlement check without opening Hub');
-  assert.match(source,/broker\?\.check/,id+' must reuse shared broker');
-  assert.match(source,/GM_xmlhttpRequest/,id+' must retain standalone fallback');
-  assert.match(source,/__SakaLuXLicenseStandaloneFlight/,id+' must share in-flight fallback request');
-  assert.match(source,/globalFlight\?\.key===k&&globalFlight\.promise/,id+' must match the correct API key');
-  assert.match(source,/const ok=d\?\.status==='ok'&&accepts\(d,k\)/,id+' must independently validate its own entitlement');
+  assert.match(source,/SakaLuXLicenseClient.check\(k\)/,id+' must use the shared license client');
+  assert.match(source,/const ok=d\?\.status==='ok'&&accepts\(d,k\)/,id+' independently checks its module entitlement');
 }
 console.log('Standalone Bounty and Stock PRO startup checks wired.');
 
 (async () => {
-  const shared = {};
+  const shared = {SakaLuXLicenseClient:{check:async()=>reply}};
   let requests = 0;
   const reply = {
     status: 'ok', premium_active: true,
@@ -54,16 +51,10 @@ console.log('Standalone Bounty and Stock PRO startup checks wired.');
   const bounty = build('SakaLuX-Bounty-Hunter.user.js','bounty-hunter');
   const stock = build('SakaLuX-Stock-Manager-Advisor.user.js','stock-manager-advisor');
   const [bountyGranted,stockGranted] = await Promise.all([bounty(),stock()]);
-  assert.equal(requests,1,'Two independent modules should coalesce same-key concurrent checks');
+  assert.equal(requests,0,'Modules use the shared client instead of their own network code');
   assert.equal(bountyGranted,true,'Bounty should receive only its own entitlement');
   assert.equal(stockGranted,false,'Stock must not inherit Bounty entitlement');
-  assert.equal(shared.__SakaLuXLicenseStandaloneFlight,undefined,'In-flight check must be cleaned up');
-  assert.equal(shared.__SakaLuXLicenseStandaloneCache.data.status,'ok','Successful response should be shared briefly');
   const repeatedStock=build('SakaLuX-Stock-Manager-Advisor.user.js','stock-manager-advisor');
-  assert.equal(await repeatedStock(),false,'Cached response must not grant another entitlement');
-  assert.equal(requests,1,'Sequential standalone checks should reuse a recent server response');
-  const otherIdentity=build('SakaLuX-Stock-Manager-Advisor.user.js','stock-manager-advisor','BBBBBBBBBBBBBBBB');
-  await otherIdentity();
-  assert.equal(requests,2,'Different API key must trigger a separate server check');
+  assert.equal(await repeatedStock(),false,'A shared response must not grant another entitlement');
   console.log('Standalone license concurrency: one network request, module-specific grants and cleanup passed.');
 })().catch(err=>{console.error(err);process.exitCode=1;});

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.88**
+**v1.17.89**
 
 ### Faster PRO verification for Bazaar Flip and Travel — 2026-10-11
 - Uses cached verified entitlement first, then checks live in the background when needed.
@@ -51,8 +51,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-24**
-- Canonical version: **v1.17.88**
+- Verified: **2026-11-01**
+- Canonical version: **v1.17.89**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -75,11 +75,17 @@
 
 ## Current release note
 
-**v1.17.88 — Version and release synchronization**
-- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
+**v1.17.89 — Shared license cache and rate-limit recovery**
+- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
+- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
 
 ## Release history / Changelog
 
+
+
+### v1.17.89 — 2026-11-01
+- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
+- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
 
 ### v1.17.88 — 2026-10-23
 - Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).

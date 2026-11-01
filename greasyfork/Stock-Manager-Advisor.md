@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.35**
+**v0.8.36**
 
 ### v0.8.34 — Installed-version fallback fix
 - Corrected the canonical TornPDA installed-version fallback from v0.8.30 to v0.8.34, preventing false update indications after installation.
@@ -16,8 +16,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-10-24**
-- Canonical version: **v0.8.35**
+- Verified: **2026-11-01**
+- Canonical version: **v0.8.36**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -42,10 +42,16 @@
 
 ## Current release note
 
-**v0.8.35 — Version and release synchronization**
-- Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).
+**v0.8.36 — Shared license cache and rate-limit recovery**
+- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
+- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
 
 ## Release history / Changelog
+
+
+### v0.8.36 — 2026-11-01
+- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
+- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
 
 ### v0.8.35 — 2026-10-23
 - Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50).

@@ -34,16 +34,17 @@
         }
       ],
       "release": {
-        "version": "1.3.75",
-        "date": "2026-10-24",
+        "version": "1.3.76",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.75",
-      "detailsRevision": 30,
+      "version": "1.3.76",
+      "detailsRevision": 31,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -87,16 +88,17 @@
         }
       ],
       "release": {
-        "version": "5.3.72",
-        "date": "2026-10-24",
+        "version": "5.3.73",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.72",
-      "detailsRevision": 33,
+      "version": "5.3.73",
+      "detailsRevision": 34,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -141,13 +143,14 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 48,
-      "version": "1.1.29",
+      "detailsRevision": 49,
+      "version": "1.1.30",
       "release": {
-        "version": "1.1.29",
-        "date": "2026-10-24",
+        "version": "1.1.30",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -207,16 +210,17 @@
         }
       ],
       "release": {
-        "version": "1.0.62",
-        "date": "2026-10-24",
+        "version": "1.0.63",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.62",
-      "detailsRevision": 24,
+      "version": "1.0.63",
+      "detailsRevision": 25,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -283,16 +287,17 @@
         }
       ],
       "release": {
-        "version": "1.17.88",
-        "date": "2026-10-24",
+        "version": "1.17.89",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.88",
-      "detailsRevision": 38,
+      "version": "1.17.89",
+      "detailsRevision": 39,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -361,10 +366,11 @@
         }
       ],
       "release": {
-        "version": "0.5.21",
-        "date": "2026-10-24",
+        "version": "0.5.22",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -372,8 +378,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.21",
-      "detailsRevision": 28,
+      "version": "0.5.22",
+      "detailsRevision": 29,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -462,16 +468,17 @@
         }
       ],
       "release": {
-        "version": "1.3.66",
-        "date": "2026-10-24",
+        "version": "1.3.67",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.66",
-      "detailsRevision": 29,
+      "version": "1.3.67",
+      "detailsRevision": 30,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -525,16 +532,17 @@
         }
       ],
       "release": {
-        "version": "1.8.96",
-        "date": "2026-10-24",
+        "version": "1.8.97",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.96",
-      "detailsRevision": 49,
+      "version": "1.8.97",
+      "detailsRevision": 50,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -589,16 +597,17 @@
         }
       ],
       "release": {
-        "version": "0.8.35",
-        "date": "2026-10-24",
+        "version": "0.8.36",
+        "date": "2026-11-01",
         "notes": [
-          "Integrate independently verified, digitally signed PRO grants and Hub-independent license startup (PR #50)."
+          "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
+          "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.35",
-      "detailsRevision": 28,
+      "version": "0.8.36",
+      "detailsRevision": 29,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
@@ -661,6 +670,6 @@
       "installable": true
     }
   ],
-  "lastVerified": "2026-10-24",
+  "lastVerified": "2026-11-01",
   "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
 }
