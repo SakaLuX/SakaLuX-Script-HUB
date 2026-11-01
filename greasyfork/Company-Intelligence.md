@@ -32,7 +32,7 @@
 
 ## Current release note
 
-**v1.8.97 — Shared license cache and rate-limit recovery**
+**v1.8.97 — Version and release synchronization**
 - Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
 - Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
 

@@ -48,9 +48,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1004 — Shared license cache and rate-limit recovery**
-- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
-- Suite module entitlement checks now use the same coordinated license client and persisted cooldown as standalone scripts.
+**v0.9.1004 — Version and release synchronization**
+- Version 0.9.1004: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 
