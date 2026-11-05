@@ -24,8 +24,8 @@
 
 ## Current release note
 
-**v1.2.41 — Chat settings footer cleanup**
-- Removes the duplicate author row above the donation buttons.
+**v1.2.41 — Version and release synchronization**
+- Version 1.2.41: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 
