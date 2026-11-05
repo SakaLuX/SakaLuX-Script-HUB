@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.40**
+**v1.2.41**
 
 
 ## Repository synchronization
 
-- Verified: **2026-11-04**
-- Canonical version: **v1.2.40**
+- Verified: **2026-11-05**
+- Canonical version: **v1.2.41**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,13 +24,16 @@
 
 ## Current release note
 
-**v1.2.40 — Version and release synchronization**
-- Version 1.2.40: internal runtime and registry synchronization.
+**v1.2.41 — Chat settings footer cleanup**
+- Removes the duplicate author row above the donation buttons.
 
 ## Release history / Changelog
 
 
 
+
+### v1.2.41 — 2026-11-05
+- Removes the duplicate author row above the donation buttons.
 
 ### v1.2.40 — 2026-10-23
 - Version synchronization for the SakaLuX script release set; no feature behavior change.
