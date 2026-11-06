@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Account Auditor
 // @namespace    sakalux.account.auditor
-// @version      1.3.29
+// @version      1.3.30
 // @description  Private read-only Torn account auditor with rate-limit-safe API collection, split GitHub snapshots, and user-triggered capture of the currently visible Torn message.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -1154,7 +1154,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.29" }));
+  const SELF = Object.freeze(Object.assign({"id":"account-auditor","name":"Auditor","icon":"🔎","selector":"#sl-aa-button","fallback":"https://www.torn.com/index.php"}, { version: "1.3.30" }));
   const API_GLOBAL = "";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1185,7 +1185,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 (function () {
     'use strict';
 
-    const VERSION = '1.3.29';
+    const VERSION = '1.3.30';
     const NAME = 'SakaLuX Account Auditor';
     const PDA_KEY = '###PDA-APIKEY###';
     const AUDITOR_API_CREATE_URL = 'https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Account%20Auditor&user=profile,bars,cooldowns,travel,education,jobpoints,merits,refills,notifications,money,stocks,properties,discord,weaponexp,workstats,skills,battlestats,networth,display,icons,criminalrecord,bazaar,crimes,hof,ammo,attacksfull,bounties,calendar,casino,competition,enlistedcars,equipment,faction,forumfeed,forumfriends,forumposts,forumsubscribedthreads,forumthreads,gym,honors,itemmarket,itemmods,job,jobranks,medals,missions,organizedcrime,organizedcrimes,perks,property,races,racingrecords,reports,revivesfull,trades,virus,snapshot,personalstats,list,inventory,messages,events,log&torn=merits,education';
@@ -1496,12 +1496,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const AUDIT_CHANGE_IGNORE=/(?:^|\.)(?:timestamp|time|date|last_action|lastAction|updated|cooldown|current|maximum|interval|until|expires|expiry)(?:$|\.)/i;
     function auditScalar(value){return value===null||['string','number','boolean'].includes(typeof value);}
     function flattenAuditValues(value,prefix,out,depth=0){
-        if(depth>6||Object.keys(out).length>=600)return;
+        if(depth>6)return;
         if(auditScalar(value)){if(prefix&&!AUDIT_CHANGE_IGNORE.test(prefix))out[prefix]=value;return;}
         if(Array.isArray(value)){if(prefix)out[prefix+'.length']=value.length;return;}
         if(!value||typeof value!=='object')return;
         for(const key of Object.keys(value).sort()){
-            if(Object.keys(out).length>=600)break;
             flattenAuditValues(value[key],prefix?prefix+'.'+key:key,out,depth+1);
         }
     }
@@ -1536,7 +1535,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             changes.push(row);
         }
         changes.sort((a,b)=>auditChangePriority(a.path)-auditChangePriority(b.path)||a.path.localeCompare(b.path));
-        return{schema:'sakalux-audit-changes-v1',baseline:false,previousAt:previous?.at||null,currentAt:current?.at||null,totalChanges:changes.length,shownChanges:Math.min(80,changes.length),changes:changes.slice(0,80)};
+        return{schema:'sakalux-audit-changes-v1',baseline:false,previousAt:previous?.at||null,currentAt:current?.at||null,totalChanges:changes.length,shownChanges:changes.length,changes};
     }
     function prepareAuditChanges(snapshot){
         const current=buildAuditFingerprint(snapshot),previous=loadJson(STORAGE.auditBaseline,null),report=compareAuditFingerprints(previous,current);
