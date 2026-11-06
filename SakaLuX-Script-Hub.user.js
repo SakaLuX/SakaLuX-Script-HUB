@@ -1661,7 +1661,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.3.76",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -1715,7 +1715,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "5.3.73",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -1773,7 +1773,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "version": "1.1.30",
                 "release": {
                     "version": "1.1.30",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -1837,7 +1837,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.0.63",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -1914,7 +1914,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.17.89",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -1993,7 +1993,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "0.5.22",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -2095,7 +2095,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.3.67",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -2159,7 +2159,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "1.8.97",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -2224,7 +2224,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "release": {
                     "version": "0.8.36",
-                    "date": "2026-11-05",
+                    "date": "2026-11-06",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
                         "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
@@ -2296,7 +2296,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "installable": true
             }
         ],
-        "lastVerified": "2026-11-05",
+        "lastVerified": "2026-11-06",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 
