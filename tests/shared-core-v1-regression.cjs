@@ -60,7 +60,7 @@ function loadCore({ hub = false } = {}) {
 (async () => {
   const { core, context, elements, html, store, eventHandlers } = loadCore();
   assert.ok(core, 'core exported');
-  assert.equal(core.version, '1.2.8', 'Shared Core version matches current canonical source');
+  assert.equal(core.version, '1.2.9', 'Shared Core version matches current canonical source');
   assert.equal(context.SakaLuXPerf, core.perf, 'legacy SakaLuXPerf alias preserved');
   assert.equal(typeof core.ui?.ensureSharedSkin, 'function', 'shared UI skin moved into Core');
   assert.equal(typeof core.api?.requestJson, 'function', 'API Request Broker exported');
@@ -117,6 +117,19 @@ function loadCore({ hub = false } = {}) {
   const secondCode = fs.readFileSync('src/core/sakalux-core.js','utf8');
   vm.runInContext(secondCode, context);
   assert.equal(context.SakaLuXCore, core, 'same Core version does not reinitialize');
+
+  // A newer runtime must survive loading a stale embedded script.
+  const newer = Object.freeze({ ...core, version: '1.3.0' });
+  context.SakaLuXCore = newer;
+  vm.runInContext(secondCode, context);
+  assert.equal(context.SakaLuXCore, newer, 'an older embedded Core cannot downgrade a newer runtime');
+
+  // When a genuinely older version exists, the canonical code may upgrade it.
+  const older = Object.freeze({ ...core, version: '1.2.7' });
+  context.SakaLuXCore = older;
+  vm.runInContext(secondCode, context);
+  assert.equal(context.SakaLuXCore.version, '1.2.9', 'an older Core is upgraded to the canonical version');
+  assert.notEqual(context.SakaLuXCore, older, 'older Core instance is replaced');
 
   console.log('All Shared Core v1 regression tests passed.');
 })().catch(err => { console.error(err.stack || err); process.exit(1); });
