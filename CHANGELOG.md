@@ -1,5 +1,10 @@
 # Changelog
 
+## account-auditor v1.3.32 — automatic release (2026-11-11)
+
+- Source change: refactor(auditor): cancel stale scheduled audit when auto-sync disabled and avoid duplicate sync.
+- Updated canonical userscript version to v1.3.32; package verified by GitHub Actions.
+
 ## bazaar v5.3.75 — automatic release (2026-11-11)
 
 - Source change: perf(bazaar): coalesce buyer message observer updates.
