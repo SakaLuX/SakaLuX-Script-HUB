@@ -2158,7 +2158,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.98",
+                    "version": "1.8.99",
                     "date": "2026-11-11",
                     "notes": [
                         "Fixes two-value Torn `working_stats_received` records (e.g. `50,25`) in company training imports.",
@@ -2168,8 +2168,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.98",
-                "detailsRevision": 51,
+                "version": "1.8.99",
+                "detailsRevision": 52,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
