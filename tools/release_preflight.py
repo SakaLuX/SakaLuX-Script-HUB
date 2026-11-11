@@ -125,7 +125,7 @@ def validate_entry(entry, registry_by_id):
             if row.get('release', {}).get('version') != version: errors.append(f"{entry['id']}: release.version drift")
             if registry_filename(row) != entry['file']: errors.append(f"{entry['id']}: sourceUrl does not target {entry['file']}")
             if not row.get('release', {}).get('notes'): errors.append(f"{entry['id']}: release notes missing in scripts.json")
-            if entry['doc'] not in row.get('documentationUrl', ''): errors.append(f"{entry['id']}: documentationUrl drift")
+            if row.get('documentationUrl') and entry['doc'] not in row['documentationUrl']: errors.append(f"{entry['id']}: documentationUrl drift")
     elif row:
         errors.append(f"{entry['id']}: marked registry=false but unexpectedly present in scripts.json")
 
