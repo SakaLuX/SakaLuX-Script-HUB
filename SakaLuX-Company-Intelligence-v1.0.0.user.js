@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Company Intelligence
 // @namespace    sakalux.torn.company
-// @version      1.8.98
+// @version      1.8.99
 // @description  Employee + Director company intelligence for Torn. PDA-first, API-based, no automated gameplay actions.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1129,7 +1129,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.8.98';
+  let v = '1.8.99';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1464,7 +1464,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"}, { version: "1.8.98" }));
+  const SELF = Object.freeze(Object.assign({"id":"company-intelligence","name":"Company","icon":"🏢","selector":"#sakalux-module-bridge-company-intelligence","fallback":"https://www.torn.com/joblist.php"}, { version: "1.8.99" }));
   const API_GLOBAL = "SakaLuXCompanyIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
@@ -1540,7 +1540,7 @@ This is an information/decision-support tool. It never automates company actions
     (document.head||document.documentElement).appendChild(st);
   })();
 
-const APP={name:'SakaLuX Company Intelligence',version:'1.8.98',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
+const APP={name:'SakaLuX Company Intelligence',version:'1.8.99',base:'https://api.torn.com/v2',legacy:'https://api.torn.com',key:'sak_ci'};
 const PROFILE_URL='https://www.torn.com/profiles.php?XID=2380374';
 const API_CREATE_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX_Company_Intelligence&user=basic,profile,workstats,job,log&company=profile,employees,stock&torn=logcategories';
 const HUB_API_STORAGE='SakaLuX_HUB_TORN_API_KEY';
@@ -2343,21 +2343,10 @@ async function importMyTrainingLog(){
         const value=Number(csv[index].trim()||0);
         if(Number.isFinite(value)&&value>0)add(stat,value);
        });
-      }else if(csv.length===2&&csv.every(v=>/^\s*\d+(?:\.\d+)?\s*$/.test(v))){
-       // Company Intelligence v1.8.98: Torn also returns two amounts without stat names (e.g. "50,25").
-       // They are primary/secondary amounts, NOT necessarily MAN/INT.
-       // Only resolve stat names from a recent previously identified train for
-       // this same employee with the same ordered gain amounts.
-       const amounts=csv.map(v=>Number(v.trim()));
-       const currentTs=stamp<1e12?stamp*1000:stamp;
-       const prior=saved.filter(row=>{
-        const gs=Array.isArray(row.gains)?row.gains:[];
-        return String(row.employee||'').trim().toLowerCase()===employee.toLowerCase()
-         && Number(row.ts)<currentTs && currentTs-Number(row.ts)<=14*86400000
-         && gs.length===2 && gs.every((g,i)=>Number(g.amount)===amounts[i]&&normalStat(g.stat));
-       }).sort((a,b)=>Number(b.ts)-Number(a.ts))[0];
-       if(prior)prior.gains.forEach((g,i)=>add(g.stat,amounts[i]));
       }
+      // Two unlabelled numbers denote PRIMARY/SECONDARY, not MAN/INT.
+      // A current or earlier job can have a different position; do not transfer
+      // stat names from a previous train without position-at-event evidence.
       collect(receivedText);
       // Support "+50 intelligence", "50 intelligence", and "intelligence: 50" formats.
       for(const hit of receivedText.matchAll(/(?:\+?([\d,.]+)\s*(?:points?\s*(?:of|in)\s*)?(manual\s*labor|intelligence|endurance)|(manual\s*labor|intelligence|endurance)\s*(?:\+|:|=|gained?\s*)\s*([\d,.]+))/gi))
@@ -2397,6 +2386,16 @@ async function importMyTrainingLog(){
     const rawGains=receivedText.slice(0,180);
     if(known.has(id)){
       const old=saved.find(row=>String(row.apiLogId||'')===id);
+      // Repair previously mislabelled two-value records on reimport.
+      if(old&&/^\\s*\\d+(?:\\.\\d+)?\\s*,\\s*\\d+(?:\\.\\d+)?\\s*$/.test(rawGains)&&!unique.length){
+       if(Array.isArray(old.gains)&&old.gains.length){
+        old.gains=[];old.primary='Unknown';old.secondary='Unknown';
+        old.note='Train Company / '+title+' · primary/secondary '+rawGains+' (historical position unverified)';
+        enriched++;
+       }
+       old.rawGains=rawGains;
+       continue;
+      }
       if(old&&(unique.length||rawGains)&&(!Array.isArray(old.gains)||!old.gains.length||(!old.rawGains&&rawGains))){
        old.primary=unique.length?first:old.primary;old.secondary=unique.length?second:old.secondary;old.gains=unique.length?unique:old.gains;old.rawGains=rawGains||old.rawGains;
        old.note='Train Company / '+title+' · '+gained;enriched++;
