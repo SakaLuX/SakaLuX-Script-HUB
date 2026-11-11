@@ -102,6 +102,22 @@ def main():
                                 "\n".join("- " + n for n in notes_by_id[item["id"]]) +
                                 "\n\nValidation: GitHub Actions preflight, regression and syntax gates are required before publishing.\n",
                                 encoding="utf-8")
+    # Update the repository-wide changelog as well as each module's GreasyFork documentation.
+    global_log = ROOT / "CHANGELOG.md"
+    existing = global_log.read_text(encoding="utf-8") if global_log.exists() else "# Changelog\n"
+    additions = []
+    for item in plan:
+        heading = f"## {item['id']} v{item['version']} — automatic release ({DATE})"
+        if heading not in existing:
+            additions.append(heading + "\\n\\n" +
+                             "\\n".join("- " + note for note in notes_by_id[item["id"]]) + "\\n")
+    if additions:
+        if existing.startswith("# Changelog"):
+            first_line, _, remainder = existing.partition("\n")
+            global_log.write_text(first_line + "\n\n" + "\n".join(additions) + "\n" +
+                                  remainder.lstrip("\n"), encoding="utf-8")
+        else:
+            global_log.write_text("\n\n".join(additions) + "\n" + existing, encoding="utf-8")
     (ROOT / ".release-plan.json").write_text(json.dumps({"releases": plan}, indent=2) + "\n", encoding="utf-8")
     print("Prepared releases:", ", ".join(p["tag"] for p in plan))
 
