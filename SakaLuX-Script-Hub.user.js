@@ -2158,7 +2158,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.97",
+                    "version": "1.8.98",
                     "date": "2026-11-11",
                     "notes": [
                         "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
@@ -2167,8 +2167,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.97",
-                "detailsRevision": 50,
+                "version": "1.8.98",
+                "detailsRevision": 51,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",

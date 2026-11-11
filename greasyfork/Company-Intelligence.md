@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.97**
+**v1.8.98**
 
 
 ## Repository synchronization
 
 - Verified: **2026-11-11**
-- Canonical version: **v1.8.97**
+- Canonical version: **v1.8.98**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,7 +32,7 @@
 
 ## Current release note
 
-**v1.8.97 — Version and release synchronization**
+**v1.8.98 — Version and release synchronization**
 - Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
 - Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
 
@@ -59,6 +59,11 @@
 
 
 
+
+
+### v1.8.98 — 2026-11-11
+- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
+- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
 
 ### v1.8.97 — 2026-11-01
 - Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
