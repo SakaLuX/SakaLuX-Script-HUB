@@ -39379,7 +39379,7 @@ async function tlResolveCurrentRole(apiKey){
     }catch{return null;}
 }
 function tlResolveTrainingEntry(entry,roleInfo){
-    const amounts=tlTrainingAmounts(entry.receivedDebug);
+    const amounts=tlTrainingAmounts(entry.receivedDebug).length===2?tlTrainingAmounts(entry.receivedDebug):Array.isArray(entry.trainingAmounts)&&entry.trainingAmounts.length===2&&entry.trainingAmounts.every(Number.isFinite)?entry.trainingAmounts:[];
     if(amounts.length!==2)return entry;
     entry.trainingAmounts=amounts;
     entry.gainSource="primary-secondary";
@@ -40656,7 +40656,7 @@ function tlRenderLog(entries){
         const gainHtml=displayed.length
             ?`<div class="tl-log-gains">${displayed.map(g=>`<span class="tl-log-gain">${escHtml(g)}</span>`).join("")}</div>`
             :`<div style="font-size:11px;color:var(--sakalux-textMuted);margin-top:8px">No exact stat breakdown found. <div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">working_stats_received: ${escHtml(e.receivedDebug||"not stored")}</div>${e.apiSchema?.length?`<div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">Available fields: ${escHtml(e.apiSchema.join(", "))}</div>`:""}</div>`;
-        const roleNote=tlTrainingAmounts(e.receivedDebug).length===2
+        const roleNote=(tlTrainingAmounts(e.receivedDebug).length===2||Array.isArray(e.trainingAmounts)&&e.trainingAmounts.length===2)
             ?(e.roleStatPair?.length===2
               ?'<div class="tl-log-note">'+(e.gainSource==="user-confirmed-role"?'Position confirmed by you: ':'Position from event: ')+escHtml(e.role||e.currentRoleName||"")+'</div>'
               :'<div class="tl-log-note">Historical position not included in API log.'+
@@ -40666,13 +40666,37 @@ function tlRenderLog(entries){
             :'';
         return`<details class="tl-log-entry" style="display:block;cursor:pointer"><summary style="display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none"><span class="tl-log-name">${escHtml(e.name)}${e.manual?' <small>(manual)</small>':""}${e.paid?' <small>✓ Paid</small>':""}</span><span class="tl-log-ts">${tlFmtDate(e.ts)} ▾</span></summary><div style="padding-top:10px;border-top:1px solid var(--sakalux-border);margin-top:10px"><div style="font-size:11px;color:var(--sakalux-textMuted)">Working stats received</div>${gainHtml}${roleNote}</div></details>`;
     }).join("");
-    return`<div class="tl-log-list">${html}</div>`;
+    const tools='<div style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 0 12px"><button type="button" class="tl-add-btn" id="tl-assign-position-date" style="font-size:12px">Set historical role stats by date</button></div>';
+    return tools+`<div class="tl-log-list">${html}</div>`;
 }
 function renderTab(tabName){const m=document.getElementById("fc-tlog-modal");if(!m)return;const body=document.getElementById("tl-body");if(!body)return;_activeDayKey=null;const entries=tlLoad().entries;
     if(body.dataset.tlRoleConfirmWired!=="1"){
         body.dataset.tlRoleConfirmWired="1";
         body.addEventListener("click",ev=>{
             const button=ev.target.closest("[data-tl-confirm-role]");
+            const bulk=ev.target.closest("#tl-assign-position-date");
+            if(bulk){
+                const from=prompt("Starting date for this role (YYYY-MM-DD), based on your actual job history:");
+                if(!from||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(from))return;
+                const fromDate=new Date(from+"T00:00:00");
+                if(!Number.isFinite(fromDate.getTime())||fromDate.toLocaleDateString("en-CA")!==from)return;
+                const pair=String(prompt("Primary and secondary working stats for that historical role (MAN/INT, INT/END, END/INT, INT/MAN, MAN/END, END/MAN):","INT/END")||"").trim().toUpperCase().split("/").map(v=>v.trim());
+                if(pair.length!==2||pair[0]===pair[1]||pair.some(v=>!["MAN","INT","END"].includes(v))){alert("Choose two different MAN, INT or END stats.");return;}
+                const saved=tlLoad();
+                const matching=saved.entries.filter(row=>Number(row.ts)>=fromDate.getTime()&&(tlTrainingAmounts(row.receivedDebug).length===2||Array.isArray(row.trainingAmounts)&&row.trainingAmounts.length===2));
+                if(!matching.length){alert("No two-value trainings found from that date.");return;}
+                if(!confirm("Assign "+pair.join(" / ")+" to "+matching.length+" two-value training events from "+from+" onward? Only do this if that job position applied to all those train dates."))return;
+                for(const row of matching){
+                    row.trainingAmounts=tlTrainingAmounts(row.receivedDebug).length===2?tlTrainingAmounts(row.receivedDebug):row.trainingAmounts;
+                    row.roleStatPair=[...pair];
+                    row.gainSource="user-confirmed-role";
+                    row.gains=[];
+                    row.role="Confirmed "+pair.join(" / ");
+                }
+                tlSave(saved);
+                renderTab("log");
+                return;
+            }
             if(!button)return;
             const id=button.getAttribute("data-tl-confirm-role");
             const saved=tlLoad();
