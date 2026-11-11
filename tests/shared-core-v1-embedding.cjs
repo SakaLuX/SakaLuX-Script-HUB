@@ -41,4 +41,28 @@ for (const file of targets) {
   assert.equal(builtVersion, version, `${file}: version is unchanged by test embedding`);
 }
 
+// Gym Optimizer previously used ASCII-hyphen block markers. Re-embedding must
+// remove the legacy block instead of silently duplicating the Shared Core.
+const legacy = [
+  '// ==UserScript==',
+  '// @name SakaLuX Legacy Test',
+  '// @version 1.0.0',
+  '// ==/UserScript==',
+  '',
+  '',
+  '/* SakaLuX Shared Core  -  BEGIN */',
+  'const legacyCoreShouldBeRemoved = true;',
+  '/* SakaLuX Shared Core  -  END */',
+  '',
+  'const applicationCodeShouldRemain = true;',
+  ''
+].join('\\n');
+const converted = embedSharedCore(legacy, core);
+assert.equal(count(converted, BEGIN), 1, 'legacy markers converted to one canonical Core block');
+assert.equal(count(converted, END), 1, 'legacy Core END replaced');
+assert.equal(count(converted, 'const legacyCoreShouldBeRemoved'), 0, 'legacy embedded body removed');
+assert.equal(count(converted, "const NS = 'SakaLuXCore'"), 1, 'legacy embedding cannot duplicate Core namespace');
+assert.ok(converted.includes('const applicationCodeShouldRemain = true;'), 'application code preserved');
+assert.equal(embedSharedCore(converted, core), converted, 'converted script embedding is idempotent');
+
 console.log('Shared Core embedding/build test passed for Market Intelligence and Stock Manager.');
