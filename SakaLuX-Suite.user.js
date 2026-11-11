@@ -39546,12 +39546,15 @@ async function tlSyncApi(manual=false){
                         // Re-evaluate two-value records; old versions may contain false MAN/INT gains.
                         const previous=JSON.stringify([stored.gains,stored.trainingAmounts,stored.roleStatPair]);
                         if(entry.trainingAmounts?.length===2){
+                            const userConfirmed=stored.gainSource==="user-confirmed-role"&&Array.isArray(stored.roleStatPair)&&stored.roleStatPair.length===2;
                             stored.gains=[];
                             stored.trainingAmounts=entry.trainingAmounts;
-                            stored.roleStatPair=entry.roleStatPair||[];
+                            if(!userConfirmed){
+                                stored.roleStatPair=entry.roleStatPair||[];
+                                stored.gainSource=entry.gainSource;
+                            }
                             stored.currentRoleSuggestion=entry.currentRoleSuggestion||[];
                             stored.currentRoleName=entry.currentRoleName||"";
-                            stored.gainSource=entry.gainSource;
                         }else if(entry.gains.length){stored.gains=entry.gains;}
                         if(previous!==JSON.stringify([stored.gains,stored.trainingAmounts,stored.roleStatPair]))updated++;
                         stored.apiImported=true;
@@ -40643,14 +40646,35 @@ function tlRenderLog(entries){
             :`<div style="font-size:11px;color:var(--sakalux-textMuted);margin-top:8px">No exact stat breakdown found. <div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">working_stats_received: ${escHtml(e.receivedDebug||"not stored")}</div>${e.apiSchema?.length?`<div style="margin-top:6px;font-size:10px;overflow-wrap:anywhere">Available fields: ${escHtml(e.apiSchema.join(", "))}</div>`:""}</div>`;
         const roleNote=tlTrainingAmounts(e.receivedDebug).length===2
             ?(e.roleStatPair?.length===2
-              ?'<div class="tl-log-note">Position verified from training event: '+escHtml(e.role||"")+'</div>'
-              :'<div class="tl-log-note">Primary / secondary amounts confirmed; historical position not in this log.'+(e.currentRoleName?' Current role: '+escHtml(e.currentRoleName)+' ('+escHtml((e.currentRoleSuggestion||[]).join(' / '))+') — not applied to past trains.':'')+'</div>')
+              ?'<div class="tl-log-note">'+(e.gainSource==="user-confirmed-role"?'Position confirmed by you: ':'Position from event: ')+escHtml(e.role||e.currentRoleName||"")+'</div>'
+              :'<div class="tl-log-note">Historical position not included in API log.'+
+                 (e.currentRoleSuggestion?.length===2
+                    ?' Current position: '+escHtml(e.currentRoleName||"")+' ('+escHtml(e.currentRoleSuggestion.join(' / '))+'). <button type="button" class="tl-role-confirm" data-tl-confirm-role="'+escHtml(e.apiLogId||"")+'">Confirm this position for this train</button>'
+                    :'')+'</div>')
             :'';
         return`<details class="tl-log-entry" style="display:block;cursor:pointer"><summary style="display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none"><span class="tl-log-name">${escHtml(e.name)}${e.manual?' <small>(manual)</small>':""}${e.paid?' <small>✓ Paid</small>':""}</span><span class="tl-log-ts">${tlFmtDate(e.ts)} ▾</span></summary><div style="padding-top:10px;border-top:1px solid var(--sakalux-border);margin-top:10px"><div style="font-size:11px;color:var(--sakalux-textMuted)">Working stats received</div>${gainHtml}${roleNote}</div></details>`;
     }).join("");
     return`<div class="tl-log-list">${html}</div>`;
 }
-function renderTab(tabName){const m=document.getElementById("fc-tlog-modal");if(!m)return;const body=document.getElementById("tl-body");if(!body)return;_activeDayKey=null;const entries=tlLoad().entries;const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1008`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
+function renderTab(tabName){const m=document.getElementById("fc-tlog-modal");if(!m)return;const body=document.getElementById("tl-body");if(!body)return;_activeDayKey=null;const entries=tlLoad().entries;
+    if(body.dataset.tlRoleConfirmWired!=="1"){
+        body.dataset.tlRoleConfirmWired="1";
+        body.addEventListener("click",ev=>{
+            const button=ev.target.closest("[data-tl-confirm-role]");
+            if(!button)return;
+            const id=button.getAttribute("data-tl-confirm-role");
+            const saved=tlLoad();
+            const entry=saved.entries.find(row=>String(row.apiLogId||"")===id);
+            if(!entry||!Array.isArray(entry.currentRoleSuggestion)||entry.currentRoleSuggestion.length!==2)return;
+            entry.roleStatPair=[...entry.currentRoleSuggestion];
+            entry.role=entry.currentRoleName||entry.role;
+            entry.gainSource="user-confirmed-role";
+            entry.gains=[];
+            tlSave(saved);
+            renderTab("log");
+        });
+    }
+    const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1008`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
 function wireScheduleDeletes(body){
     if(body.dataset.fcScheduleWired==="1")return;
     body.dataset.fcScheduleWired="1";
