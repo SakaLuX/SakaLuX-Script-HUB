@@ -9,6 +9,13 @@
       "tagPrefix": "account-auditor-v"
     },
     {
+      "id": "bazaar",
+      "file": "SakaLuX-Bazaar-Thanker-PDA.user.js",
+      "doc": "greasyfork/Bazaar-Thanker.md",
+      "registry": true,
+      "tagPrefix": "bazaar-v"
+    },
+    {
       "id": "bazaar-smart-pricer",
       "file": "SakaLuX-Bazaar-Smart-Pricer.user.js",
       "doc": "greasyfork/Bazaar-Smart-Pricer.md",
@@ -16,11 +23,11 @@
       "tagPrefix": "bazaar-smart-pricer-v"
     },
     {
-      "id": "bazaar",
-      "file": "SakaLuX-Bazaar-Thanker-PDA.user.js",
-      "doc": "greasyfork/Bazaar-Thanker.md",
+      "id": "bounty-hunter",
+      "file": "SakaLuX-Bounty-Hunter.user.js",
+      "doc": "greasyfork/Bounty-Hunter.md",
       "registry": true,
-      "tagPrefix": "bazaar-v"
+      "tagPrefix": "bounty-hunter-v"
     },
     {
       "id": "chat-intelligence",
@@ -49,6 +56,20 @@
       "doc": "greasyfork/Enhancer-Guard.md",
       "registry": true,
       "tagPrefix": "enhancer-v"
+    },
+    {
+      "id": "gym-optimizer",
+      "file": "SakaLuX-Gym-Optimizer.user.js",
+      "doc": "greasyfork/Gym-Optimizer.md",
+      "registry": true,
+      "tagPrefix": "gym-optimizer-v"
+    },
+    {
+      "id": "halloween-assistant",
+      "file": "SakaLuX-Halloween-Assistant.user.js",
+      "doc": "greasyfork/Halloween-Assistant.md",
+      "registry": false,
+      "tagPrefix": "halloween-assistant-v"
     },
     {
       "id": "market-intelligence",
@@ -84,13 +105,6 @@
       "doc": "greasyfork/SakaLuX-Suite.md",
       "registry": false,
       "tagPrefix": "suite-v"
-    },
-    {
-      "id": "bounty-hunter",
-      "file": "SakaLuX-Bounty-Hunter.user.js",
-      "doc": "greasyfork/Bounty-Hunter.md",
-      "registry": true,
-      "tagPrefix": "bounty-hunter-v"
     }
   ]
 }
