@@ -2343,6 +2343,20 @@ async function importMyTrainingLog(){
         const value=Number(csv[index].trim()||0);
         if(Number.isFinite(value)&&value>0)add(stat,value);
        });
+      }else if(csv.length===2&&csv.every(v=>/^\s*\d+(?:\.\d+)?\s*$/.test(v))){
+       // Torn also returns two amounts without stat names (e.g. "50,25").
+       // They are primary/secondary amounts, NOT necessarily MAN/INT.
+       // Only resolve stat names from a recent previously identified train for
+       // this same employee with the same ordered gain amounts.
+       const amounts=csv.map(v=>Number(v.trim()));
+       const currentTs=stamp<1e12?stamp*1000:stamp;
+       const prior=saved.filter(row=>{
+        const gs=Array.isArray(row.gains)?row.gains:[];
+        return String(row.employee||'').trim().toLowerCase()===employee.toLowerCase()
+         && Number(row.ts)<currentTs && currentTs-Number(row.ts)<=14*86400000
+         && gs.length===2 && gs.every((g,i)=>Number(g.amount)===amounts[i]&&normalStat(g.stat));
+       }).sort((a,b)=>Number(b.ts)-Number(a.ts))[0];
+       if(prior)prior.gains.forEach((g,i)=>add(g.stat,amounts[i]));
       }
       collect(receivedText);
       // Support "+50 intelligence", "50 intelligence", and "intelligence: 50" formats.
