@@ -468,17 +468,17 @@
         }
       ],
       "release": {
-        "version": "1.3.68",
+        "version": "1.3.69",
         "date": "2026-11-11",
         "notes": [
-          "Source change: Synchronize shared runtime with canonical Core.",
-          "Updated canonical userscript version to v1.3.68; package verified by GitHub Actions."
+          "Source change: perf(elimination): reduce Hub power synchronization polling.",
+          "Updated canonical userscript version to v1.3.69; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.68",
-      "detailsRevision": 31,
+      "version": "1.3.69",
+      "detailsRevision": 32,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",

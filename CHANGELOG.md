@@ -1,5 +1,10 @@
 # Changelog
 
+## elimination-assistant v1.3.69 — automatic release (2026-11-11)
+
+- Source change: perf(elimination): reduce Hub power synchronization polling.
+- Updated canonical userscript version to v1.3.69; package verified by GitHub Actions.
+
 ## halloween-assistant v0.5.12 — automatic release (2026-11-11)
 
 - Source change: perf(halloween): skip countdown redraw when target board is hidden.
