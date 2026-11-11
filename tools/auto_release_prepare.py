@@ -39,6 +39,8 @@ def main():
     args = parser.parse_args()
     git("rev-parse", "--verify", args.base)
     changed = set(git("diff", "--name-only", "--diff-filter=ACMRT", args.base, "HEAD").splitlines())
+    # The Core embed step updates userscripts in the working tree before this script runs.
+    changed.update(git("diff", "--name-only", "--diff-filter=ACMRT").splitlines())
     if args.script_id:
         selected = [e for e in CONFIG if e["id"] == args.script_id]
         if not selected:
@@ -80,7 +82,7 @@ def main():
         subjects = git("log", "--format=%s", f"{args.base}..HEAD", "--", entry["file"]).splitlines()
         subjects = list(dict.fromkeys(x.strip() for x in subjects if x.strip() and "[skip-sync]" not in x))
         if not subjects:
-            subjects = ["Repository script update"]
+            subjects = ["Synchronize shared runtime with canonical Core"] if entry["file"] in git("diff", "--name-only").splitlines() else ["Repository script update"]
         notes = [f"Source change: {subject}." for subject in subjects[:8]]
         notes.append(f"Updated canonical userscript version to v{current}; package verified by GitHub Actions.")
         notes_by_id[entry["id"]] = notes
