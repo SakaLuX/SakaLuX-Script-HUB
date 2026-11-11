@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '*.user.js'
+      - 'src/core/sakalux-core.js'
   workflow_dispatch:
     inputs:
       script_id:
@@ -34,6 +35,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Embed latest Shared Core safely into all managed userscripts
+        run: |
+          node --check tools/sync_embedded_core.cjs
+          node tools/sync_embedded_core.cjs --write
       - name: Prepare changed script versions, notes and Hub registry
         env:
           BEFORE_SHA: ${{ github.event.before }}
