@@ -1239,7 +1239,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     ];
 
     let settings = Object.assign({}, DEFAULT_SETTINGS, loadJson(STORAGE.settings, {}));
-    let busy = false, autoTimer = null, lastStatus = '';
+    let busy = false, autoTimer = null, autoStartupTimer = null, lastStatus = '';
 
     function rawGet(key){
         try { if (typeof GM_getValue === 'function') { const v=GM_getValue(key,''); if (typeof v==='string' && v) return v; } } catch(_){}
@@ -1642,7 +1642,20 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         window.addEventListener('resize',()=>{const r=b.getBoundingClientRect();applyAuditButtonPosition(b,{left:r.left,top:r.top});const n=b.getBoundingClientRect();saveAuditButtonPosition(n.left,n.top);},{passive:true});
     }
     function createButton(){if(!settings.showButton||document.getElementById('sl-aa-button'))return;const b=document.createElement('button');b.id='sl-aa-button';b.type='button';b.textContent='☠︎ AUDIT';b.title='Tap to open · drag to move';document.body.appendChild(b);makeAuditButtonDraggable(b);}
-    function scheduleAutoSync(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;}if(!settings.autoSync)return;const mins=Math.max(15,Number(settings.autoSyncMinutes)||30);autoTimer=setInterval(()=>syncNow(),mins*60*1000);const last=loadJson(STORAGE.lastSync,null);if(!last?.at||Date.now()-Number(last.at)>=mins*60*1000)setTimeout(()=>syncNow(),5000);}
+    function scheduleAutoSync(){
+        if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+        if(autoStartupTimer){clearTimeout(autoStartupTimer);autoStartupTimer=null;}
+        if(!settings.autoSync)return;
+        const mins=Math.max(15,Number(settings.autoSyncMinutes)||30);
+        autoTimer=setInterval(()=>{if(settings.autoSync&&!busy)void syncNow();},mins*60*1000);
+        const last=loadJson(STORAGE.lastSync,null);
+        if(!last?.at||Date.now()-Number(last.at)>=mins*60*1000){
+            autoStartupTimer=setTimeout(()=>{
+                autoStartupTimer=null;
+                if(settings.autoSync&&!busy)void syncNow();
+            },5000);
+        }
+    }
 
     window.SakaLuXAccountAuditor={id:'account-auditor',name:'Account Auditor',version:VERSION,open(){openSettings();return true;},async sync(){return syncNow();},async snapshot(){return collectSnapshot();},captureCurrentMessage(){return captureCurrentMessage();},capturedMessages(){return loadJson(STORAGE.captures,[]);},changesSinceLastAudit(){return getLastAuditChanges();},status(){return{version:VERSION,busy,lastStatus,lastSync:loadJson(STORAGE.lastSync,null),changesSinceLastAudit:getLastAuditChanges(),capturedMessages:loadJson(STORAGE.captures,[]).length,settings:{repo:settings.repo,branch:settings.branch,path:settings.path,autoSync:settings.autoSync,autoSyncMinutes:settings.autoSyncMinutes,includePrivateData:settings.includePrivateData,maxPrivatePages:settings.maxPrivatePages,splitSnapshots:settings.splitSnapshots,includeCapturedMessages:settings.includeCapturedMessages},hasTornKey:Boolean(getTornApiKey()),hasGitHubToken:Boolean(rawGet(STORAGE.githubToken))};}};
     window.dispatchEvent(new CustomEvent('SakaLuX:AccountAuditorReady',{detail:{version:VERSION}}));
