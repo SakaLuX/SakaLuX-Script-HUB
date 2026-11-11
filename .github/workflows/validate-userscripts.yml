@@ -2,8 +2,13 @@ name: Validate repository
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '*.user.js'
   pull_request:
   workflow_dispatch:
+  workflow_run:
+    workflows: ['SakaLuX Automatic Script Releases']
+    types: [completed]
 permissions:
   contents: read
 concurrency:
@@ -11,6 +16,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   validate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
