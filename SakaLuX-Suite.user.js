@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.1009
+// @version      0.9.1010
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1072,7 +1072,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.1009';
+  const VERSION = '0.9.1010';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -39309,6 +39309,23 @@ function tlApiSetStatus(message){const e=document.getElementById("tl-api-status"
 
 // Torn company train amounts can be a 2-value PRIMARY,SECONDARY pair.
 // Never silently treat those values as MAN,INT.
+function tlExplicitStatCsv(raw){
+    if(raw==null)return null;
+    let text=String(raw).trim();
+    // Saved receivedDebug is often JSON.stringify(API value).
+    for(let i=0;i<3;i++){
+        if(!((text.startsWith('"')&&text.endsWith('"'))||(text.startsWith("'")&&text.endsWith("'"))))break;
+        try{const parsed=JSON.parse(text);text=typeof parsed==="string"?parsed.trim():text.slice(1,-1).trim();}
+        catch{text=text.slice(1,-1).trim();}
+    }
+    const fields=text.split(",").map(x=>x.trim());
+    // Torn's fixed slots are MAN,INT,END. Empty means zero, not omitted slot.
+    if(fields.length!==3||!fields.some(Boolean)||!fields.every(v=>v===""||/^\+?\d+(?:\.\d+)?$/.test(v)))return null;
+    return ["MAN","INT","END"].flatMap((stat,i)=>{
+        const amount=Number(fields[i]||0);
+        return amount>0?[stat+" +"+amount.toLocaleString("en-US")]:[];
+    });
+}
 function tlTrainingAmounts(raw){
     if(raw==null)return [];
     // Historical API records can have quoted, nested-JSON or backslash-escaped amounts.
@@ -39443,14 +39460,14 @@ function tlApiGains(item){
     };
     if(receivedText){
         parseGainText(receivedText);
-        // Only an explicit 3-stat CSV is MAN,INT,END. A two-value CSV
-        // carries PRIMARY,SECONDARY gains; the job position determines names.
-        const csv=receivedText.trim().split(",").map(v=>v.trim());
-        if(csv.length===3&&csv.every(v=>/^\+?\d+(?:\.\d+)?$/.test(v))){
-            ["MAN","INT","END"].forEach((name,index)=>{
-                const amount=Number(csv[index]||0);
-                if(Number.isFinite(amount)&&amount>0)collected[name]=amount;
-            });
+        // Torn has three fixed MAN,INT,END slots; blank slots mean zero.
+        // Example: ",50,25" => INT +50, END +25.
+        const explicit=tlExplicitStatCsv(receivedText);
+        if(explicit!==null){
+            for(const gain of explicit){
+                const match=gain.match(/^(MAN|INT|END) \+([\d,]+)$/);
+                if(match)collected[match[1]]=Number(match[2].replace(/,/g,""));
+            }
         }
     }
     // Handle API scalar, arrays and JSON-encoded values without guessing stat names.
@@ -40613,7 +40630,7 @@ function tlWireDayPanel(dayKey,isFuture){
 }
 function refreshDayPanel(dayKey,isFuture){const old=document.getElementById("tl-day-panel");if(!old)return;const d=new Date(dayKey+"T12:00:00");const label=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});old.outerHTML=tlBuildDayPanel(dayKey,isFuture,label);tlWireDayPanel(dayKey,isFuture);}
 function refreshCalendarCells(){const todayKey=tlDayKey(Date.now());const logMap={},schMap={};tlLoad().entries.forEach(e=>{const k=tlDayKey(e.ts);logMap[k]=(logMap[k]||0)+1;});schLoad().entries.forEach(e=>{const k=tlDayKey(e.ts);schMap[k]=(schMap[k]||0)+1;});document.querySelectorAll(".tl-cal-cell[data-day]").forEach(cell=>{const key=cell.dataset.day;const logs=logMap[key]||0,scheds=schMap[key]||0;const isFut=key>todayKey;["c1","c2","c3","c4","s1","s2","s3","has-trains","has-sched","faded"].forEach(c=>cell.classList.remove(c));if(isFut){if(scheds>0){cell.classList.add("has-sched",scheds>=3?"s3":scheds>=2?"s2":"s1");}else{cell.classList.add("future");}}else{if(logs>0){const max=Math.max(1,...Object.values(logMap));const r=logs/max;cell.classList.add("has-trains",logs>=max&&max>3?"c4":r>=.66?"c3":r>=.33?"c2":"c1");}else{cell.classList.add("faded");}}const countEl=cell.querySelector(".tl-cal-count,.tl-cal-sched");if(countEl)countEl.remove();if(logs>0){const span=document.createElement("div");span.className="tl-cal-count";span.textContent=logs;cell.appendChild(span);}else if(scheds>0){const span=document.createElement("div");span.className="tl-cal-sched";span.textContent=scheds;cell.appendChild(span);}});}
-function renderTabStats(){const sub=document.getElementById("tl-subtitle");const entries=tlLoad().entries;if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1009`;}
+function renderTabStats(){const sub=document.getElementById("tl-subtitle");const entries=tlLoad().entries;if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1010`;}
 function buildTrainingLogModal(){
     if(document.getElementById("fc-tlog-modal"))return;
     const ov=document.createElement("div");ov.id="fc-tlog-overlay";
@@ -40636,18 +40653,16 @@ function tlRenderStats(entries){const today=new Date();const now=today.getTime()
 function tlRenderSchedule(){const upcoming=schUpcoming();if(!upcoming.length)return`<div class="tl-empty">No upcoming trains scheduled.<br><span style="font-size:11px">Click any future day on the Calendar tab to schedule a train.</span></div>`;const now=Date.now();const html=upcoming.map(s=>{const d=new Date(s.ts);const daysAway=Math.ceil((s.ts-now)/86400000);const dayStr=daysAway===0?"Today":daysAway===1?"Tomorrow":`In ${daysAway} days`;return`<div class="tl-sched-entry"><div class="tl-sched-date"><div class="tl-sched-day">${d.getDate()}</div><div class="tl-sched-mon">${d.toLocaleDateString(undefined,{month:"short"})}</div><div style="font-size:9px;color:var(--sakalux-textMuted);margin-top:2px">${dayStr}</div></div><div><div class="tl-sched-name">${escHtml(s.name)}</div>${s.note?`<div class="tl-sched-note">${escHtml(s.note)}</div>`:""} ${s.paid?`<span style="font-size:10px;color:var(--sakalux-green2);font-weight:400">✓ Paid</span>`:`<span style="font-size:10px;color:var(--sakalux-textMuted)">Unpaid</span>`}</div><button type="button" class="tl-sched-del" data-del-sched="${s.id}">Remove</button></div>`;}).join("");return`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button type="button" class="tl-btn-clear" id="tl-clear-schedule">Clear All Scheduled Trains</button></div><div class="tl-sched-list">${html}</div>`;}
 function tlRenderByEmployee(entries){if(!entries.length)return`<div class="tl-empty">No training recorded yet.</div>`;const today=new Date();const now=today.getTime();const weekStart=new Date(today.getFullYear(),today.getMonth(),today.getDate()-((today.getDay()+6)%7)).getTime();const monthStart=new Date(today.getFullYear(),today.getMonth(),1).getTime();const nextDay=new Date(today.getFullYear(),today.getMonth(),today.getDate()+1).getTime();const map={};entries.forEach(e=>{if(!map[e.name])map[e.name]={name:e.name,last:0,total:0,week:0,month:0,paid:0};map[e.name].total++;if(e.paid)map[e.name].paid++;if(e.ts>map[e.name].last)map[e.name].last=e.ts;if(e.ts>=weekStart&&e.ts<nextDay)map[e.name].week++;if(e.ts>=monthStart&&e.ts<nextDay)map[e.name].month++;});const rows=Object.values(map).sort((a,b)=>b.last-a.last);const rowsHtml=rows.map(r=>{const daysSince=Math.floor((now-r.last)/86400000);const stale=daysSince>=7;const unpaid=r.total-r.paid;return`<tr><td><strong>${escHtml(r.name)}</strong></td><td class="${stale?"tl-stale":""}">${tlFmtDateShort(r.last)}<br><span style="font-size:10px;color:var(--sakalux-textMuted)">${daysSince===0?"Today":daysSince===1?"Yesterday":`${daysSince}d ago`}</span></td><td><span class="tl-emp-badge ${r.week>0?"active":""}">${r.week}</span></td><td><span class="tl-emp-badge ${r.month>0?"active":""}">${r.month}</span></td><td>${r.total}</td><td><span style="color:var(--sakalux-green2);font-weight:400">${r.paid}</span>${unpaid>0?` <span style="color:var(--sakalux-textMuted);font-size:11px">/ ${unpaid} unpaid</span>`:""}</td></tr>`;}).join("");return`<table class="tl-emp-table"><thead><tr><th>Employee</th><th>Last Trained</th><th>This Week</th><th>This Month</th><th>Total</th><th>Paid</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;}
 function tlDisplayGains(entry){
+    // Parse the raw Torn slots first, even when an older script saved wrong labels.
+    const explicit=tlExplicitStatCsv(entry.receivedDebug);
+    if(explicit!==null)return explicit;
     const amounts=tlTrainingAmounts(entry.receivedDebug);
     if(amounts.length===2){
         const pair=Array.isArray(entry.roleStatPair)?entry.roleStatPair:[];
         const labels=pair.length===2?pair:["PRIMARY","SECONDARY"];
         return amounts.flatMap((value,index)=>value>0?[labels[index]+" +"+value.toLocaleString("en-US")]:[]);
     }
-    if(Array.isArray(entry.gains)&&entry.gains.length)return entry.gains;
-    let raw=String(entry.receivedDebug??"").trim();
-    if(raw.startsWith('"')&&raw.endsWith('"'))raw=raw.slice(1,-1);
-    const parts=raw.split(",").map(value=>value.trim());
-    if(parts.length!==3||!parts.every(v=>/^\+?\d+(?:\.\d+)?$/.test(v)))return [];
-    return ["MAN","INT","END"].flatMap((name,index)=>Number(parts[index])>0?[name+" +"+Number(parts[index]).toLocaleString("en-US")]:[]);
+    return Array.isArray(entry.gains)?entry.gains:[];
 }
 function tlRenderLog(entries){
     if(!entries.length)return`<div class="tl-empty">No training recorded yet.</div>`;
@@ -40710,7 +40725,7 @@ function renderTab(tabName){const m=document.getElementById("fc-tlog-modal");if(
             renderTab("log");
         });
     }
-    const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1009`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
+    const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1010`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
 function wireScheduleDeletes(body){
     if(body.dataset.fcScheduleWired==="1")return;
     body.dataset.fcScheduleWired="1";
@@ -47768,7 +47783,7 @@ function scan(){
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
 (() => {
 'use strict';
-const VERSION='0.9.1009';
+const VERSION='0.9.1010';
 const MODULES=[
  ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],
  ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],
