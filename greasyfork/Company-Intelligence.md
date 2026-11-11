@@ -32,12 +32,18 @@
 
 ## Current release note
 
-**v1.8.99 — Version and release synchronization**
-- Fixes two-value Torn `working_stats_received` records (e.g. `50,25`) in company training imports.
-- Backfills stat labels only when a matching earlier verified employee training event exists; unresolved records are not guessed.
-- Keeps existing training history and supports reimporting stored events.
+**v1.8.99 — Safe training-history labels**
+- Removes the unsafe inference that a previous employee train proves the position for a later train.
+- Two-number train logs remain labelled PRIMARY / SECONDARY until position-at-event evidence is available.
+- Re-import clears inaccurate old labels for ambiguous entries without deleting the training events.
 
 ## Release history / Changelog
+
+### v1.8.99 — 2026-11-11
+- Removes the unsafe inference that a previous employee train proves the position for a later train.
+- Two-number train logs remain labelled PRIMARY / SECONDARY until position-at-event evidence is available.
+- Re-import clears inaccurate old labels for ambiguous entries without deleting the training events.
+
 
 
 ### v1.8.99 — 2026-11-11
