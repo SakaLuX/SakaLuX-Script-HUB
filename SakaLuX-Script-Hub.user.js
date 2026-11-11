@@ -4775,5 +4775,6 @@ let q=0;const schedule=()=>{if(q)return;q=setTimeout(()=>{q=0;run();},40)};
 document.addEventListener('change',schedule,true);document.addEventListener('click',schedule,true);
 new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['checked','disabled','aria-checked','aria-disabled','class']});
 window.addEventListener('SakaLuX:ModuleReady',schedule,{passive:true});window.addEventListener('SakaLuX:ScriptHubReady',schedule,{passive:true});
-setInterval(run,1000);setTimeout(run,60);
+// Mutation observers and UI events handle immediate updates; polling is a low-frequency fallback.
+setInterval(()=>{if(!document.hidden)run();},3000);setTimeout(run,60);
 })();
