@@ -109,8 +109,8 @@ def main():
     for item in plan:
         heading = f"## {item['id']} v{item['version']} — automatic release ({DATE})"
         if heading not in existing:
-            additions.append(heading + "\\n\\n" +
-                             "\\n".join("- " + note for note in notes_by_id[item["id"]]) + "\\n")
+            additions.append(heading + "\n\n" +
+                             "\n".join("- " + note for note in notes_by_id[item["id"]]) + "\n")
     if additions:
         if existing.startswith("# Changelog"):
             first_line, _, remainder = existing.partition("\n")
