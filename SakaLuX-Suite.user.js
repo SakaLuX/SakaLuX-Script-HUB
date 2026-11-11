@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.1008
+// @version      0.9.1009
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1072,7 +1072,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.1008';
+  const VERSION = '0.9.1009';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -39310,11 +39310,23 @@ function tlApiSetStatus(message){const e=document.getElementById("tl-api-status"
 // Torn company train amounts can be a 2-value PRIMARY,SECONDARY pair.
 // Never silently treat those values as MAN,INT.
 function tlTrainingAmounts(raw){
-    if(typeof raw!=="string")return [];
-    let text=raw.trim();
-    if(text.startsWith('"')&&text.endsWith('"'))text=text.slice(1,-1);
-    const parts=text.split(",").map(x=>x.trim());
-    return parts.length===2&&parts.every(v=>/^\+?\d+(?:\.\d+)?$/.test(v))?parts.map(Number):[];
+    if(raw==null)return [];
+    // Historical API records can have quoted, nested-JSON or backslash-escaped amounts.
+    let text=String(raw).trim();
+    for(let i=0;i<5;i++){
+        const previous=text;
+        if((text.startsWith('"')&&text.endsWith('"'))||(text.startsWith("'")&&text.endsWith("'"))){
+            try{
+                const decoded=JSON.parse(text);
+                text=typeof decoded==="string"?decoded.trim():text.slice(1,-1).trim();
+            }catch{text=text.slice(1,-1).trim();}
+        }
+        text=text.replace(/^\+(?=[\d])/,"+");
+        text=text.replace(/^\\(["'])|\\(["'])$/g,"$1$2").trim();
+        if(text===previous)break;
+    }
+    const match=text.match(/^\s*([+]?\d+(?:\.\d+)?)\s*,\s*([+]?\d+(?:\.\d+)?)\s*$/);
+    return match?[Number(match[1]),Number(match[2])]:[];
 }
 function tlPositionGainPair(position){
     if(!position||typeof position!=="object")return [];
@@ -40601,7 +40613,7 @@ function tlWireDayPanel(dayKey,isFuture){
 }
 function refreshDayPanel(dayKey,isFuture){const old=document.getElementById("tl-day-panel");if(!old)return;const d=new Date(dayKey+"T12:00:00");const label=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});old.outerHTML=tlBuildDayPanel(dayKey,isFuture,label);tlWireDayPanel(dayKey,isFuture);}
 function refreshCalendarCells(){const todayKey=tlDayKey(Date.now());const logMap={},schMap={};tlLoad().entries.forEach(e=>{const k=tlDayKey(e.ts);logMap[k]=(logMap[k]||0)+1;});schLoad().entries.forEach(e=>{const k=tlDayKey(e.ts);schMap[k]=(schMap[k]||0)+1;});document.querySelectorAll(".tl-cal-cell[data-day]").forEach(cell=>{const key=cell.dataset.day;const logs=logMap[key]||0,scheds=schMap[key]||0;const isFut=key>todayKey;["c1","c2","c3","c4","s1","s2","s3","has-trains","has-sched","faded"].forEach(c=>cell.classList.remove(c));if(isFut){if(scheds>0){cell.classList.add("has-sched",scheds>=3?"s3":scheds>=2?"s2":"s1");}else{cell.classList.add("future");}}else{if(logs>0){const max=Math.max(1,...Object.values(logMap));const r=logs/max;cell.classList.add("has-trains",logs>=max&&max>3?"c4":r>=.66?"c3":r>=.33?"c2":"c1");}else{cell.classList.add("faded");}}const countEl=cell.querySelector(".tl-cal-count,.tl-cal-sched");if(countEl)countEl.remove();if(logs>0){const span=document.createElement("div");span.className="tl-cal-count";span.textContent=logs;cell.appendChild(span);}else if(scheds>0){const span=document.createElement("div");span.className="tl-cal-sched";span.textContent=scheds;cell.appendChild(span);}});}
-function renderTabStats(){const sub=document.getElementById("tl-subtitle");const entries=tlLoad().entries;if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1008`;}
+function renderTabStats(){const sub=document.getElementById("tl-subtitle");const entries=tlLoad().entries;if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1009`;}
 function buildTrainingLogModal(){
     if(document.getElementById("fc-tlog-modal"))return;
     const ov=document.createElement("div");ov.id="fc-tlog-overlay";
@@ -40674,7 +40686,7 @@ function renderTab(tabName){const m=document.getElementById("fc-tlog-modal");if(
             renderTab("log");
         });
     }
-    const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1008`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
+    const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1009`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
 function wireScheduleDeletes(body){
     if(body.dataset.fcScheduleWired==="1")return;
     body.dataset.fcScheduleWired="1";
@@ -47732,7 +47744,7 @@ function scan(){
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
 (() => {
 'use strict';
-const VERSION='0.9.1008';
+const VERSION='0.9.1009';
 const MODULES=[
  ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],
  ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],
