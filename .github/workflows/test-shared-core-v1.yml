@@ -39,6 +39,8 @@ jobs:
           node --check tests/shared-core-v1-level2-audit.cjs
           node --check tests/shared-core-api-broker-regression.cjs
           node --check tests/shared-core-api-integration-regression.cjs
+      - name: Check managed userscript embedding compatibility
+        run: node tools/sync_embedded_core.cjs
       - name: Run Shared Core regression suite
         run: node tests/shared-core-v1-regression.cjs
       - name: Run API Request Broker regression suite
