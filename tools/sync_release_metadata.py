@@ -57,13 +57,20 @@ def main():
     parser.add_argument('--bump', action='store_true', help='Increment patch, removing fourth version component')
     parser.add_argument('--date', default=__import__('datetime').date.today().isoformat())
     parser.add_argument('--notes', type=Path, help='JSON mapping script IDs to accurate release notes; omitted for version-only synchronization')
+    parser.add_argument('--only', nargs='*', help='Synchronize only specified script ids; all when omitted')
     args = parser.parse_args()
     notes_by_id = json.loads(args.notes.read_text()) if args.notes else {}
     config = json.loads((ROOT/'release-config.json').read_text())
     registry = json.loads((ROOT/'scripts.json').read_text())
     by_id = {row['id']: row for row in registry['scripts']}
     changes = []
+    allowed = set(args.only) if args.only is not None else None
+    unknown = (allowed or set()) - {e['id'] for e in config['scripts']}
+    if unknown:
+        raise ValueError(f'Unknown release ids: {sorted(unknown)}')
     for entry in config['scripts']:
+        if allowed is not None and entry['id'] not in allowed:
+            continue
         path = ROOT/entry['file']
         source = path.read_text()
         old = re.search(r'(?m)^//\s*@version\s+(\S+)', source)[1]
@@ -89,6 +96,8 @@ def main():
             row['info'] = row['info'].replace('\\n', '\n')
             row['info'] = re.sub(r'The current stable branch is v[\d.]+; ', '', row['info'])
         changes.append((entry['id'], old, version))
+    if not changes:
+        return
     registry['lastVerified'] = args.date
     (ROOT/'scripts.json').write_text(json.dumps(registry, indent=2, ensure_ascii=False)+'\n')
     hub_path = ROOT/'SakaLuX-Script-Hub.user.js'
@@ -98,8 +107,8 @@ def main():
     a = hub.index(start)
     b = hub.index(end, a)
     hub = hub[:a]+start+json.dumps(registry, indent=4, ensure_ascii=False).replace('\n', '\n    ')+hub[b:]
-    version = next(v for key, _, v in changes if key == 'script-hub')
-    if not re.search(rf"[\"']version[\"']?\s*:\s*[\"']{re.escape(version)}[\"']", hub[:a]):
+    version = next((v for key, _, v in changes if key == 'script-hub'), None)
+    if version and not re.search(rf"[\"']version[\"']?\s*:\s*[\"']{re.escape(version)}[\"']", hub[:a]):
         changelog = {'version': version, 'date': args.date, 'changes': notes_by_id.get('script-hub', ['Version synchronization'])}
         hub = hub.replace('    const HUB_CHANGELOG = [\n', '    const HUB_CHANGELOG = [\n        '+json.dumps(changelog, ensure_ascii=False)+',\n', 1)
     hub_path.write_text(hub)
