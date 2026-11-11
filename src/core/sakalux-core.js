@@ -1,7 +1,7 @@
 /* SakaLuX Shared Core v1 - shared runtime
  * Source-only module. Not installed directly by users.
  * Embedded into each managed userscript by the validated release pipeline.
- * Keep runtime behavior consistent across older and newer TornPDA scripts.
+ * Keep runtime behavior consistent when TornPDA loads scripts in any order.
  */
 (() => {
   'use strict';
