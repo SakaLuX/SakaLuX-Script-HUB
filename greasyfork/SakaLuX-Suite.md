@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.1009**
+**v0.9.1010**
 
 
 ## Repository synchronization
 
 - Verified: **2026-11-11**
-- Canonical version: **v0.9.1009**
+- Canonical version: **v0.9.1010**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -48,14 +48,14 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1009 — Training Log saved gain recovery and dated role confirmation**
-- Decodes plain, quoted, escaped, and nested-escaped two-number train gains, including saved values such as `"50,25"`.
-- Retains exact numeric gains even when historical stat names cannot be validated.
-- Adds the voluntary **Set historical role stats by date** control for people who know when their primary/secondary work stats changed (for example INT/END from a chosen date).
-- Keeps historical training entries intact and never silently applies today's job to earlier training.
-- Added regression coverage for quoted/escaped stored records; Torn PDA live verification pending.
+**v0.9.1010 — Version and release synchronization**
+- Version 0.9.1010: internal runtime and registry synchronization.
 
 ## Release history / Changelog
+
+
+### v0.9.1010 — 2026-11-11
+- Version 0.9.1010: internal runtime and registry synchronization.
 
 ### v0.9.1009 — 2026-11-11
 - Decodes plain, quoted, escaped, and nested-escaped two-number train gains, including saved values such as `"50,25"`.
