@@ -1536,7 +1536,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function open() { const overlay = ensureUI(); overlay.hidden = false; targets = []; renderTargets(); if (!scanning) void scan(true); return true; }
   function close() { const overlay = $('#' + IDS.overlay); if (overlay) overlay.hidden = true; }
-  setInterval(() => { if (targets.length) renderTargets(); }, 5000);
+  // The countdown redraw is only useful while the target board is visible.
+  setInterval(() => {
+    const overlay = $('#' + IDS.overlay);
+    if (!document.hidden && overlay && !overlay.hidden && targets.length) renderTargets();
+  }, 5000);
   function schedule() { clearInterval(timer); if (settings.autoRefresh) timer = setInterval(() => { if (!document.hidden && !scanning) { targets = []; renderTargets(); void scan(true); } }, Math.max(30, num(settings.refreshSeconds) || 90) * 1000); }
   function health() { return { version: VERSION, core: SHARED_CORE?.version || null, ready: true, scanning, targets: targets.length, bountyTargets: targets.filter(row => row.hasBounty).length, supplementalTargets: targets.filter(row => !row.hasBounty).length, lastScanMs, boardCacheAge: Date.now() - num(boardCache.at), targetPoolAge: Date.now() - num(targetPool.at), ffCache: Object.keys(ffCache).length, statusCache: Object.keys(statusCache).length, hasTornKey: validKey(getTornKey()), hasFFKey: validKey(getFFKey()), lastError, lastWarning }; }
 
