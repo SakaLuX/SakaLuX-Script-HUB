@@ -3823,13 +3823,12 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
       const hrefChanged=location.href!==lastHref;
       if(hrefChanged) lastHref=location.href;
       const own='#slx-stock-panel,#slx-stock-inline,#slx-stock-open,#slx-stock-panic,.slx-stock-row-tools,[id^="sakalux-module-bridge-"]';
-      managerLauncher();
       const relevant=hrefChanged || (isStocks() && records.some(r=>{
         const target=r.target.nodeType===1?r.target:r.target.parentElement;
         if(target?.closest?.(own))return false;
         return [...r.addedNodes,...r.removedNodes].some(n=>n.nodeType===1&&!n.matches?.(own));
       }));
-      if(relevant) scheduleInlineMount(hrefChanged);
+      if(relevant){managerLauncher();scheduleInlineMount(hrefChanged);}
     });
     runtimeObserver=mo;
     mo.observe(document.body||document.documentElement,{subtree:true,childList:true});
