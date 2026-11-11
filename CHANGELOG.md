@@ -1,5 +1,18 @@
 # Changelog
 
+## Suite v0.9.1006 — two-value Torn Company training gains (2026-11-11)
+
+- Training Log API importer now recognizes `working_stats_received: "50,25"` as MAN +50 / INT +25 (omitted trailing END zero), as well as full `50,25,0` triplets.
+- Full Log backfills the gains from previously saved API records without clearing history. Invalid formats remain unlabelled.
+- Phone/Torn PDA live verification pending.
+
+## Company Intelligence v1.8.98 — train history parsing (2026-11-11)
+
+- Employee train import accepts the two-number Torn Company log format in addition to three-number triplets.
+- Where two values are ambiguous, stat labels require a verified matching previous train for the same employee within 14 days.
+- Reimport can enrich existing log entries; no guessed labels when the prior evidence is unavailable. Phone/Torn PDA live verification pending.
+
+
 > **Release metadata note (2026-10-22):** The canonical `SakaLuX-Gym-Optimizer.user.js` and `.meta.js` both declare **v1.7.10**. The Gym release history below currently reaches **v1.7.1**; notes for v1.7.2–v1.7.10 have not been independently reconstructed. Do not treat v1.7.1 as the currently distributed version.\n\n## Gym Optimizer v1.7.1 - live Gym energy detection (2026-10-21)
 
 - Fix false 'Not enough verified energy for even one repetition' with energy available. Prefer Torn's native Gym banner 'You have 15/150 energy' over stale API bars or generic HUD values.
