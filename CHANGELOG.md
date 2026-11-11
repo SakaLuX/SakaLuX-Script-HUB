@@ -1,5 +1,12 @@
 # Changelog
 
+## Suite v0.9.1007 — fix Company Training Log import regex (2026-11-11)
+
+- Fixes an incorrectly escaped numeric regular expression in Suite v0.9.1006, which caused valid two-value Torn Company training records (including `50,25`) to be rejected.
+- Existing imported events can now be updated on Import API. Saved-record backfill remains available.
+- Parsing validated on example inputs; on-device confirmation pending.
+
+
 ## Suite v0.9.1006 — two-value Torn Company training gains (2026-11-11)
 
 - Training Log API importer now recognizes `working_stats_received: "50,25"` as MAN +50 / INT +25 (omitted trailing END zero), as well as full `50,25,0` triplets.
