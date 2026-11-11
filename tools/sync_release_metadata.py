@@ -17,7 +17,7 @@ def sync_runtime(source, version):
         # 'let v'. Update only inside the owned block to avoid touching unrelated
         # local 'const v' variables in application code.
         text = re.sub(
-            r"(/\* SakaLuX Canonical Installed Version — BEGIN \*/[\s\S]*?\b(?:const|let)\s+v\s*=\s*['\\"])[^'\\"]+(['\\"])",
+            r"""(/\* SakaLuX Canonical Installed Version — BEGIN \*/[\s\S]*?\b(?:const|let)\s+v\s*=\s*['"])[^'"]+(['"])""",
             lambda m: m[1] + version + m[2], text, count=1,
         )
         text = re.sub(r"(\bconst\s+VERSION\s*=\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
