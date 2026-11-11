@@ -39322,7 +39322,7 @@ function tlTrainingAmounts(raw){
             }catch{text=text.slice(1,-1).trim();}
         }
         text=text.replace(/^\+(?=[\d])/,"+");
-        text=text.replace(/^\\(["'])|\\(["'])$/g,"$1$2").trim();
+        text=text.replace(/^[\\'"]+|[\\'"]+$/g,"").trim();
         if(text===previous)break;
     }
     const match=text.match(/^\s*([+]?\d+(?:\.\d+)?)\s*,\s*([+]?\d+(?:\.\d+)?)\s*$/);
