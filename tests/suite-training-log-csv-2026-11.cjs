@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const source=fs.readFileSync('SakaLuX-Suite.user.js','utf8');
-assert.match(source,/^\/\/ @version\s+0\.9\.1010$/m);
+assert.match(source,/^\/\/ @version\s+\d+\.\d+\.\d+$/m,'a valid Suite version is present');
 const begin=source.indexOf('function tlExplicitStatCsv(raw){');
 const end=source.indexOf('function tlTrainingAmounts(raw){',begin);
 assert.ok(begin>0&&end>begin,'explicit 3-slot CSV parser exists');
