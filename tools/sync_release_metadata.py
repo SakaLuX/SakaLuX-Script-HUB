@@ -13,6 +13,13 @@ def sync_runtime(source, version):
     parts = re.split(r'(/\* SakaLuX Shared (?:Core|Dock Runtime) — BEGIN \*/.*?/\* SakaLuX Shared (?:Core|Dock Runtime) — END \*/)', source, flags=re.S)
     for i in range(0, len(parts), 2):
         text = parts[i]
+        # Canonical installed-version markers may declare 'const v', not just
+        # 'let v'. Update only inside the owned block to avoid touching unrelated
+        # local 'const v' variables in application code.
+        text = re.sub(
+            r"(/\\* SakaLuX Canonical Installed Version — BEGIN \\*/[\\s\\S]*?\\b(?:const|let)\\s+v\\s*=\\s*['\\\"])[^'\\\"]+(['\\\"])",
+            lambda m: m[1] + version + m[2], text, count=1,
+        )
         text = re.sub(r"(\bconst\s+VERSION\s*=\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
         text = re.sub(r"(\blet\s+v\s*=\s*['\"])[^'\"]+(['\"])", lambda m: m[1]+version+m[2], text)
         text = re.sub(r"(\{\s*version\s*:\s*['\"])[^'\"]+(['\"]\s*\}\s*\)\))", lambda m: m[1]+version+m[2], text)
