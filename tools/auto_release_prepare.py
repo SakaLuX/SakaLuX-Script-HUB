@@ -56,7 +56,7 @@ def main():
             current = version(source)
             tag = f"{entry['tagPrefix']}{current}"
             released_source = git("show", f"{tag}:{filename}", check=False)
-            if filename in changed or released_source != source:
+            if filename in changed or released_source != source.strip():
                 selected.append(entry)
     if not selected:
         Path(".release-plan.json").write_text('{"releases":[]}\n', encoding="utf-8")
