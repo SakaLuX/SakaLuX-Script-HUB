@@ -2750,7 +2750,9 @@ let ciPlacementTimer=null;
 function init(){
  setTimeout(normalizeStandaloneCompanyPlacement,250);
  setTimeout(normalizeStandaloneCompanyPlacement,900);
- if(!ciPlacementTimer)ciPlacementTimer=setInterval(normalizeStandaloneCompanyPlacement,2000);
+ if(!ciPlacementTimer)ciPlacementTimer=setInterval(()=>{
+  if(!document.hidden)normalizeStandaloneCompanyPlacement();
+ },3000);
  css();S.enabled=get(KEY.enabled,true)!==false;S.compact=get(KEY.compact,true)!==false;S.mode='employee';S.tab=get(KEY.tab,'overview')||'overview'; // Desired Director mode is retained separately and only becomes effective after PRO verification.
  S.employment=get(APP.key+':employment',null);
  if(!S.data.profile&&!(S.employment?.known&&!S.employment.id)){const cached=get(KEY.company,null),last=arr(KEY.snapshots).filter(x=>x.company?.name&&x.company.name!=='Unknown company').sort((a,b)=>b.ts-a.ts)[0]?.company;if(cached||last)S.data.profile=cached||last}
