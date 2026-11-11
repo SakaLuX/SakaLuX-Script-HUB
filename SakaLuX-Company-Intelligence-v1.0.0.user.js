@@ -2344,7 +2344,7 @@ async function importMyTrainingLog(){
         if(Number.isFinite(value)&&value>0)add(stat,value);
        });
       }
-      // Two unlabelled numbers denote PRIMARY/SECONDARY, not MAN/INT.
+      // Company v1.8.99: two unlabelled numbers denote PRIMARY/SECONDARY, not MAN/INT.
       // A current or earlier job can have a different position; do not transfer
       // stat names from a previous train without position-at-event evidence.
       collect(receivedText);
