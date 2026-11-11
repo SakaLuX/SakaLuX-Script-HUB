@@ -60,72 +60,29 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Interpret leading-empty Torn CSV `,50,25` as INT +50 / END +25.
 - Repair visible saved records by rendering the raw API slots first.
 - Add 3-slot regression tests.
-
-
-
-### v0.9.1010 — 2026-11-11
 - Version 0.9.1010: internal runtime and registry synchronization.
-
 ### v0.9.1009 — 2026-11-11
 - Decodes plain, quoted, escaped, and nested-escaped two-number train gains, including saved values such as `"50,25"`.
 - Retains exact numeric gains even when historical stat names cannot be validated.
 - Adds the voluntary **Set historical role stats by date** control for people who know when their primary/secondary work stats changed (for example INT/END from a chosen date).
 - Keeps historical training entries intact and never silently applies today's job to earlier training.
 - Added regression coverage for quoted/escaped stored records; Torn PDA live verification pending.
-
-
-
-### v0.9.1009 — 2026-11-11
 - Version 0.9.1009: internal runtime and registry synchronization.
-
 ### v0.9.1008 — 2026-11-11
 - Two-number Torn training logs now mean PRIMARY +50 and SECONDARY +25; they are not hardcoded MAN and INT.
 - Reads current job/position through Torn API v2 and matches position requirements against the official company catalogue (with a PSF fallback).
 - Only applies stat labels automatically to historical events with a verifiable event-specific position; otherwise displays PRIMARY / SECONDARY plus advisory current-role information.
 - Re-import repairs false stat labels previously saved by older Suite versions without deleting logs.
-
-
-
-### v0.9.1008 — 2026-11-11
 - Version 0.9.1008: internal runtime and registry synchronization.
-
 ### v0.9.1007 — 2026-11-11
 - Fix invalid double-escaped CSV numeric regex in the v0.9.1006 training-log import.
 - `50,25` and `50,25,0` now parse to MAN +50 / INT +25; malformed inputs are rejected.
-
-
-
-### v0.9.1007 — 2026-11-11
 - Version 0.9.1007: internal runtime and registry synchronization.
-
 ### v0.9.1006 — 2026-11-11
 - Training Log now recognizes two-value `working_stats_received` CSV records (for example `50,25`) as MAN/INT with an omitted zero END value.
 - Full Log also restores the gain labels for existing saved API records without clearing history.
 - Preserves support for three-value records and avoids assigning stats to malformed CSV values.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### v0.9.1006 — 2026-11-11
 - Version 0.9.1006: internal runtime and registry synchronization.
-
 ### v0.9.1005 — 2026-11-04
 - Version 0.9.1005: internal runtime and registry synchronization.
 
@@ -248,26 +205,10 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 - Regression coverage added for reported refill/casino failures and current official v2 response shapes.
 
 
-
-
 ### v0.9.969 — Smart Daily Checklist button hotfix
 - Fixes the non-responsive **Daily Progress** button introduced in v0.9.968 by restoring the delegated toolbar click listener.
 - Adds an end-to-end DOM click assertion to the Suite Daily Progress regression test.
 - Smart Daily Checklist public API is now v2.0.1.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ### v0.9.968 — Smart Daily Checklist v2 with API auto-completion
