@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.73**
+**v5.3.74**
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -20,7 +20,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-11**
-- Canonical version: **v5.3.73**
+- Canonical version: **v5.3.74**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -37,13 +37,18 @@
 
 ## Current release note
 
-**v5.3.73 — Version and release synchronization**
-- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
-- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
+**v5.3.74 — Version and release synchronization**
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v5.3.74; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
+
+
+### v5.3.74 — 2026-11-11
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v5.3.74; package verified by GitHub Actions.
 
 ### v5.3.73 — 2026-11-01
 - Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.7.11
+// @version      1.7.12
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.7.11',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.12',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -34,16 +34,17 @@
   } catch(e) {}
 })();
 
-/* SakaLuX Shared Core  -  BEGIN */
-/* SakaLuX Shared Core v1 - test foundation
+/* SakaLuX Shared Core — BEGIN */
+/* SakaLuX Shared Core v1 - shared runtime
  * Source-only module. Not installed directly by users.
- * Intended to be embedded into standalone userscripts at build/release time.
+ * Embedded into each managed userscript by the validated release pipeline.
+ * Keep runtime behavior consistent when TornPDA loads scripts in any order.
  */
 (() => {
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.8';
+  const CORE_VERSION = '1.2.9';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -78,7 +79,20 @@
     };
   }
 
-  if (g[NS]?.version === CORE_VERSION) {
+  // Older embedded userscripts may execute after a newer module in TornPDA.
+  // Never downgrade an already loaded Shared Core just because versions differ.
+  function compareCoreVersion(a, b) {
+    const parse = value => String(value || '').split('.').map(x => Number(x));
+    const left = parse(a), right = parse(b);
+    if (!left.length || left.some(x => !Number.isFinite(x))) return -1;
+    for (let i = 0; i < Math.max(left.length, right.length); i++) {
+      const diff = (left[i] || 0) - (right[i] || 0);
+      if (diff) return diff > 0 ? 1 : -1;
+    }
+    return 0;
+  }
+
+  if (g[NS]?.version && compareCoreVersion(g[NS].version, CORE_VERSION) >= 0) {
     g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
     g[NS].settings?.autoGuardCurrentScript?.();
     if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
@@ -704,8 +718,8 @@
       const author = String(options.author || 'SakaLuX [2380374]');
       const showMoney = options.showMoney !== false;
       const showItems = options.showItems !== false;
-      const moneyLabel = String(options.moneyLabel || '[MONEY] SEND MONEY');
-      const itemsLabel = String(options.itemsLabel || '[GIFT] SEND ITEMS');
+      const moneyLabel = String(options.moneyLabel || '💸 SEND MONEY');
+      const itemsLabel = String(options.itemsLabel || '🎁 SEND ITEMS');
       const inlineLayout = options.layout === 'inline';
       if (!document.getElementById('sakalux-shared-donation-footer-style')) {
         const style = document.createElement('style');
@@ -731,7 +745,7 @@
       }
       const made = document.createElement('div');
       made.className = 'slx-shared-donation-made';
-      made.appendChild(document.createTextNode('Made with [HEART] by '));
+      made.appendChild(document.createTextNode('Made with ❤️ by '));
       const authorLink = document.createElement('a');
       authorLink.href = profile;
       authorLink.textContent = author;
@@ -847,7 +861,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   routeKey = router.key();
   ui.ensureSharedSkin();
 })();
-/* SakaLuX Shared Core  -  END */
+/* SakaLuX Shared Core — END */
 (() => {
   'use strict';
   // Register in a DOM bridge visible across userscript execution contexts.

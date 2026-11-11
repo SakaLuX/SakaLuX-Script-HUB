@@ -1,7 +1,7 @@
 # SakaLuX Bounty Hunter
 
 ## Current version
-**v0.5.22**
+**v0.5.23**
 
 ### 2026-10-20 · Version consistency
 - Fixed embedded runtime version reporting to match userscript `@version`.
@@ -51,12 +51,17 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.22 — Version and release synchronization**
-- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
-- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
+**v0.5.23 — Version and release synchronization**
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.5.23; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
+
+
+### v0.5.23 — 2026-11-11
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.5.23; package verified by GitHub Actions.
 
 ### v0.5.22 — 2026-11-01
 - Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).

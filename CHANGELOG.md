@@ -1,5 +1,80 @@
 # Changelog
 
+## account-auditor v1.3.31 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.31; package verified by GitHub Actions.
+
+## bazaar v5.3.74 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v5.3.74; package verified by GitHub Actions.
+
+## bazaar-smart-pricer v1.1.31 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.1.31; package verified by GitHub Actions.
+
+## bounty-hunter v0.5.23 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.5.23; package verified by GitHub Actions.
+
+## chat-intelligence v1.2.42 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.2.42; package verified by GitHub Actions.
+
+## company-intelligence v1.8.100 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.8.100; package verified by GitHub Actions.
+
+## elimination-assistant v1.3.68 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.68; package verified by GitHub Actions.
+
+## enhancer v1.3.77 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.77; package verified by GitHub Actions.
+
+## gym-optimizer v1.7.12 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.7.12; package verified by GitHub Actions.
+
+## halloween-assistant v0.5.11 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.5.11; package verified by GitHub Actions.
+
+## market-intelligence v1.17.90 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.17.90; package verified by GitHub Actions.
+
+## mission-rewards v1.0.64 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.0.64; package verified by GitHub Actions.
+
+## script-hub v1.9.160 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.9.160; package verified by GitHub Actions.
+
+## stock-manager-advisor v0.8.37 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.8.37; package verified by GitHub Actions.
+
+## suite v0.9.1011 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.9.1011; package verified by GitHub Actions.
+
 ## gym-optimizer v1.7.11 — automatic release (2026-11-11)
 
 - Source change: docs(gym): add direct support link and exercise automatic managed release.

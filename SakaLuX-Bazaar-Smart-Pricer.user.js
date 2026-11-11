@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bazaar Smart Pricer
 // @namespace    sakalux.bazaar.smart.pricer
-// @version      1.1.30
+// @version      1.1.31
 // @description  SakaLuX Hub-integrated Bazaar quick pricing with exact per-item Quick Add, bulk fill, RW safety and mobile-first settings.
 // @author       SakaLuX [2380374]
 // @license      MIT
@@ -19,15 +19,16 @@
 // ==/UserScript==
 
 /* SakaLuX Shared Core — BEGIN */
-/* SakaLuX Shared Core v1 - test foundation
+/* SakaLuX Shared Core v1 - shared runtime
  * Source-only module. Not installed directly by users.
- * Intended to be embedded into standalone userscripts at build/release time.
+ * Embedded into each managed userscript by the validated release pipeline.
+ * Keep runtime behavior consistent when TornPDA loads scripts in any order.
  */
 (() => {
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.8';
+  const CORE_VERSION = '1.2.9';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -62,7 +63,20 @@
     };
   }
 
-  if (g[NS]?.version === CORE_VERSION) {
+  // Older embedded userscripts may execute after a newer module in TornPDA.
+  // Never downgrade an already loaded Shared Core just because versions differ.
+  function compareCoreVersion(a, b) {
+    const parse = value => String(value || '').split('.').map(x => Number(x));
+    const left = parse(a), right = parse(b);
+    if (!left.length || left.some(x => !Number.isFinite(x))) return -1;
+    for (let i = 0; i < Math.max(left.length, right.length); i++) {
+      const diff = (left[i] || 0) - (right[i] || 0);
+      if (diff) return diff > 0 ? 1 : -1;
+    }
+    return 0;
+  }
+
+  if (g[NS]?.version && compareCoreVersion(g[NS].version, CORE_VERSION) >= 0) {
     g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
     g[NS].settings?.autoGuardCurrentScript?.();
     if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
@@ -1182,7 +1196,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.1.30';
+  let v = '1.1.31';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1199,7 +1213,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Bazaar Smart Pricer Global Power Bridge — BEGIN */
 (() => {
   'use strict';
-  const VERSION = '1.1.30';
+  const VERSION = '1.1.31';
   const LOCAL_KEY = 'SakaLuX_BAZAAR_SMART_PRICER_ENABLED';
   const GM_KEY = 'moduleEnabled';
   function readEnabled() {
@@ -1553,7 +1567,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"}, { version: "1.1.30" }));
+  const SELF = Object.freeze(Object.assign({"id":"bazaar-smart-pricer","name":"Bazaar Smart Pricer","icon":"💰","selector":".qp-chip","fallback":"https://www.torn.com/bazaar.php"}, { version: "1.1.31" }));
   const API_GLOBAL = "SakaLuXBazaarSmartPricer";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {

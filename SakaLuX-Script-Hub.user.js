@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.159
+// @version      1.9.160
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -229,15 +229,16 @@
 /* SakaLuX Signed License Verifier — END */
 
 /* SakaLuX Shared Core — BEGIN */
-/* SakaLuX Shared Core v1 - test foundation
+/* SakaLuX Shared Core v1 - shared runtime
  * Source-only module. Not installed directly by users.
- * Intended to be embedded into standalone userscripts at build/release time.
+ * Embedded into each managed userscript by the validated release pipeline.
+ * Keep runtime behavior consistent when TornPDA loads scripts in any order.
  */
 (() => {
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.8';
+  const CORE_VERSION = '1.2.9';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -272,7 +273,20 @@
     };
   }
 
-  if (g[NS]?.version === CORE_VERSION) {
+  // Older embedded userscripts may execute after a newer module in TornPDA.
+  // Never downgrade an already loaded Shared Core just because versions differ.
+  function compareCoreVersion(a, b) {
+    const parse = value => String(value || '').split('.').map(x => Number(x));
+    const left = parse(a), right = parse(b);
+    if (!left.length || left.some(x => !Number.isFinite(x))) return -1;
+    for (let i = 0; i < Math.max(left.length, right.length); i++) {
+      const diff = (left[i] || 0) - (right[i] || 0);
+      if (diff) return diff > 0 ? 1 : -1;
+    }
+    return 0;
+  }
+
+  if (g[NS]?.version && compareCoreVersion(g[NS].version, CORE_VERSION) >= 0) {
     g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
     g[NS].settings?.autoGuardCurrentScript?.();
     if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
@@ -1099,7 +1113,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.159';
+    const VERSION = '1.9.160';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -1133,6 +1147,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.160", "date": "2026-11-11", "changes": ["Source change: Synchronize shared runtime with canonical Core.", "Updated canonical userscript version to v1.9.160; package verified by GitHub Actions."]},
         {"version": "1.9.159", "date": "2026-11-01", "changes": ["Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).", "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."]},
         {"version": "1.9.158", "date": "2026-10-22", "changes": ["Version synchronization"]},
         {"version": "1.9.156", "date": "2026-10-22", "changes": ["Version synchronization"]},
@@ -1660,17 +1675,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.76",
+                    "version": "1.3.77",
                     "date": "2026-11-11",
                     "notes": [
-                        "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
-                        "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v1.3.77; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
                 "type": "addon",
-                "version": "1.3.76",
-                "detailsRevision": 31,
+                "version": "1.3.77",
+                "detailsRevision": 32,
                 "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592698",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -1714,17 +1729,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.73",
+                    "version": "5.3.74",
                     "date": "2026-11-11",
                     "notes": [
-                        "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
-                        "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v5.3.74; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.73",
-                "detailsRevision": 34,
+                "version": "5.3.74",
+                "detailsRevision": 35,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -1769,14 +1784,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 ],
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
                 "type": "addon",
-                "detailsRevision": 49,
-                "version": "1.1.30",
+                "detailsRevision": 50,
+                "version": "1.1.31",
                 "release": {
-                    "version": "1.1.30",
+                    "version": "1.1.31",
                     "date": "2026-11-11",
                     "notes": [
-                        "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
-                        "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v1.1.31; package verified by GitHub Actions."
                     ]
                 },
                 "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -1836,17 +1851,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.0.63",
+                    "version": "1.0.64",
                     "date": "2026-11-11",
                     "notes": [
-                        "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
-                        "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v1.0.64; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
                 "type": "addon",
-                "version": "1.0.63",
-                "detailsRevision": 25,
+                "version": "1.0.64",
+                "detailsRevision": 26,
                 "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592711",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -1913,17 +1928,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.89",
+                    "version": "1.17.90",
                     "date": "2026-11-11",
                     "notes": [
-                        "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
-                        "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v1.17.90; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.89",
-                "detailsRevision": 39,
+                "version": "1.17.90",
+                "detailsRevision": 40,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -1992,11 +2007,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.5.22",
+                    "version": "0.5.23",
                     "date": "2026-11-11",
                     "notes": [
-                        "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
-                        "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v0.5.23; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -2004,8 +2019,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
                 "type": "addon",
-                "version": "0.5.22",
-                "detailsRevision": 29,
+                "version": "0.5.23",
+                "detailsRevision": 30,
                 "license": "All Rights Reserved",
                 "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
                 "greasyForkId": "598988",
@@ -2094,17 +2109,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.3.67",
+                    "version": "1.3.68",
                     "date": "2026-11-11",
                     "notes": [
-                        "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
-                        "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v1.3.68; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
                 "type": "addon",
-                "version": "1.3.67",
-                "detailsRevision": 30,
+                "version": "1.3.68",
+                "detailsRevision": 31,
                 "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/594921",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -2158,18 +2173,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.8.99",
+                    "version": "1.8.100",
                     "date": "2026-11-11",
                     "notes": [
-                        "Fixes two-value Torn `working_stats_received` records (e.g. `50,25`) in company training imports.",
-                        "Backfills stat labels only when a matching earlier verified employee training event exists; unresolved records are not guessed.",
-                        "Keeps existing training history and supports reimporting stored events."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v1.8.100; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
                 "type": "addon",
-                "version": "1.8.99",
-                "detailsRevision": 52,
+                "version": "1.8.100",
+                "detailsRevision": 53,
                 "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/595873",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -2224,17 +2238,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.36",
+                    "version": "0.8.37",
                     "date": "2026-11-11",
                     "notes": [
-                        "Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).",
-                        "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v0.8.37; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.36",
-                "detailsRevision": 29,
+                "version": "0.8.37",
+                "detailsRevision": 30,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",
@@ -2268,7 +2282,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.7.11",
+                "version": "1.7.12",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2285,18 +2299,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.7.11",
+                    "version": "1.7.12",
                     "date": "2026-11-11",
                     "notes": [
-                        "Source change: docs(gym): add direct support link and exercise automatic managed release.",
-                        "Updated canonical userscript version to v1.7.11; package verified by GitHub Actions."
+                        "Source change: Synchronize shared runtime with canonical Core.",
+                        "Updated canonical userscript version to v1.7.12; package verified by GitHub Actions."
                     ]
                 },
                 "accessTier": "free",
                 "license": "All Rights Reserved",
                 "comingSoon": false,
                 "installable": true,
-                "detailsRevision": 1
+                "detailsRevision": 2
             }
         ],
         "lastVerified": "2026-11-11",

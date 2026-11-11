@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Chat Intelligence
 // @namespace    sakalux.chat.intelligence
-// @version      1.2.41
+// @version      1.2.42
 // @description  Torn chat intelligence with controls visually integrated into the native Chat V3 title bar.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -14,15 +14,16 @@
 // ==/UserScript==
 
 /* SakaLuX Shared Core — BEGIN */
-/* SakaLuX Shared Core v1 - test foundation
+/* SakaLuX Shared Core v1 - shared runtime
  * Source-only module. Not installed directly by users.
- * Intended to be embedded into standalone userscripts at build/release time.
+ * Embedded into each managed userscript by the validated release pipeline.
+ * Keep runtime behavior consistent when TornPDA loads scripts in any order.
  */
 (() => {
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.8';
+  const CORE_VERSION = '1.2.9';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -57,7 +58,20 @@
     };
   }
 
-  if (g[NS]?.version === CORE_VERSION) {
+  // Older embedded userscripts may execute after a newer module in TornPDA.
+  // Never downgrade an already loaded Shared Core just because versions differ.
+  function compareCoreVersion(a, b) {
+    const parse = value => String(value || '').split('.').map(x => Number(x));
+    const left = parse(a), right = parse(b);
+    if (!left.length || left.some(x => !Number.isFinite(x))) return -1;
+    for (let i = 0; i < Math.max(left.length, right.length); i++) {
+      const diff = (left[i] || 0) - (right[i] || 0);
+      if (diff) return diff > 0 ? 1 : -1;
+    }
+    return 0;
+  }
+
+  if (g[NS]?.version && compareCoreVersion(g[NS].version, CORE_VERSION) >= 0) {
     g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
     g[NS].settings?.autoGuardCurrentScript?.();
     if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
@@ -1171,7 +1185,7 @@ document.readyState==='loading'?addEventListener('DOMContentLoaded',init,{once:t
   if(!document.body)return;
   let e=document.querySelector('[data-slx-standalone-registration="chat-intelligence"]');
   if(!e){e=document.createElement('span');e.hidden=true;e.setAttribute('data-slx-standalone-registration','chat-intelligence');document.body.appendChild(e);}
-  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.41'});
+  Object.assign(e.dataset,{id:'chat-intelligence',name:'Chat',icon:'💬',selector:'',fallback:'https://www.torn.com/index.php',version:'1.2.42'});
  };
  if(document.body)mount();else document.addEventListener('DOMContentLoaded',mount,{once:true});
 })();

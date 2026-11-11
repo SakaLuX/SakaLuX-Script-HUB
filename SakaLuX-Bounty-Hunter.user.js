@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Bounty Hunter
 // @namespace    sakalux.bounty.hunter
-// @version      0.5.22
+// @version      0.5.23
 // @description  Mobile-first Torn bounty intelligence with full-board API paging, live target enrichment, FF/BS hints, hospital countdowns, alerts, Safe/Profit modes, watchlist and blacklist.
 // @author       SakaLuX [2380374]
 // @match        https://www.torn.com/*
@@ -13,15 +13,16 @@
 // ==/UserScript==
 
 /* SakaLuX Shared Core — BEGIN */
-/* SakaLuX Shared Core v1 - test foundation
+/* SakaLuX Shared Core v1 - shared runtime
  * Source-only module. Not installed directly by users.
- * Intended to be embedded into standalone userscripts at build/release time.
+ * Embedded into each managed userscript by the validated release pipeline.
+ * Keep runtime behavior consistent when TornPDA loads scripts in any order.
  */
 (() => {
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.8';
+  const CORE_VERSION = '1.2.9';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -56,7 +57,20 @@
     };
   }
 
-  if (g[NS]?.version === CORE_VERSION) {
+  // Older embedded userscripts may execute after a newer module in TornPDA.
+  // Never downgrade an already loaded Shared Core just because versions differ.
+  function compareCoreVersion(a, b) {
+    const parse = value => String(value || '').split('.').map(x => Number(x));
+    const left = parse(a), right = parse(b);
+    if (!left.length || left.some(x => !Number.isFinite(x))) return -1;
+    for (let i = 0; i < Math.max(left.length, right.length); i++) {
+      const diff = (left[i] || 0) - (right[i] || 0);
+      if (diff) return diff > 0 ? 1 : -1;
+    }
+    return 0;
+  }
+
+  if (g[NS]?.version && compareCoreVersion(g[NS].version, CORE_VERSION) >= 0) {
     g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
     g[NS].settings?.autoGuardCurrentScript?.();
     if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
@@ -1178,7 +1192,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  const v = '0.5.22'; // This script's own @version; global GM_info can belong to another TornPDA userscript.
+  const v = '0.5.23'; // This script's own @version; global GM_info can belong to another TornPDA userscript.
   const g = globalThis;
   g.__SakaLuXInstalledVersions = g.__SakaLuXInstalledVersions || Object.create(null);
   g.__SakaLuXInstalledVersions['bounty-hunter'] = v;
@@ -1509,7 +1523,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF=Object.freeze({id:'bounty-hunter',name:'Bounty Hunter',icon:'🎯',version:'0.5.22',fallback:'https://www.torn.com/bounties.php'});
+  const SELF=Object.freeze({id:'bounty-hunter',name:'Bounty Hunter',icon:'🎯',version:'0.5.23',fallback:'https://www.torn.com/bounties.php'});
   function openSelf(){try{const api=window.SakaLuXBountyHunter;if(api&&typeof api.open==='function'){api.open();return}}catch{}const bridge=document.getElementById('sakalux-module-bridge-'+SELF.id);if(bridge){bridge.dataset.action = 'open';bridge.click();return}if(SELF.fallback)location.href=SELF.fallback}
   function register(){const dock=globalThis.SakaLuXDockRuntime;if(!dock||typeof dock.register!=='function')throw new Error('SakaLuX Shared Dock Runtime is unavailable');dock.register({...SELF,open:openSelf})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',register,{once:true});else register();
@@ -1517,7 +1531,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — END */
 
 (()=>{'use strict';
-const VERSION='0.5.22',ID='bounty-hunter',API='SakaLuXBountyHunter';
+const VERSION='0.5.23',ID='bounty-hunter',API='SakaLuXBountyHunter';
 const GREASYFORK_ID='598988',GREASYFORK_URL='https://greasyfork.org/scripts/598988',HUB_SHARED_KEY_URL='https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=SakaLuX%20Script%20Hub&user=basic,profile,workstats,job,money,travel,equipment,inventory,battlestats,ammo,stocks&company=profile,employees,stock&torn=items,elimination,eliminationteam,stocks,bounties&market=itemmarket';
 const CORE=globalThis.SakaLuXCore||null;
 try{CORE?.ui?.ensureSharedSkin?.();CORE?.settings?.register?.({id:ID,version:1,keys:['SLX_BOUNTY_SETTINGS_V3','SLX_BOUNTY_WATCH_V1','SLX_BOUNTY_BLACK_V1','SLX_BOUNTY_CACHE_V2','SLX_BOUNTY_USER_CACHE_V1','SLX_BOUNTY_FF_CACHE_V1','SLX_BOUNTY_SCAN_STATE_V1']});CORE?.api?.configure?.({maxConcurrent:4});}catch{}

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.67**
+**v1.3.68**
 
 ### 2026-10-20 · Version consistency
 - Fixed embedded runtime version reporting to match userscript `@version`.
@@ -25,7 +25,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-11**
-- Canonical version: **v1.3.67**
+- Canonical version: **v1.3.68**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -49,12 +49,17 @@
 
 ## Current release note
 
-**v1.3.67 — Version and release synchronization**
-- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
-- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
+**v1.3.68 — Version and release synchronization**
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.68; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
+
+
+### v1.3.68 — 2026-11-11
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.68; package verified by GitHub Actions.
 
 ### v1.3.67 — 2026-11-01
 - Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).

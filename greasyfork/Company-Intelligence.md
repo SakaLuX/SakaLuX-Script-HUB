@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.99**
+**v1.8.100**
 
 
 ## Repository synchronization
 
 - Verified: **2026-11-11**
-- Canonical version: **v1.8.99**
+- Canonical version: **v1.8.100**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,12 +32,16 @@
 
 ## Current release note
 
-**v1.8.99 — Version and release synchronization**
-- Fixes two-value Torn `working_stats_received` records (e.g. `50,25`) in company training imports.
-- Backfills stat labels only when a matching earlier verified employee training event exists; unresolved records are not guessed.
-- Keeps existing training history and supports reimporting stored events.
+**v1.8.100 — Version and release synchronization**
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.8.100; package verified by GitHub Actions.
 
 ## Release history / Changelog
+
+
+### v1.8.100 — 2026-11-11
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.8.100; package verified by GitHub Actions.
 
 ### v1.8.99 — 2026-11-11
 - Removes the unsafe inference that a previous employee train proves the position for a later train.
