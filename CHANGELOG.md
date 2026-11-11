@@ -1,5 +1,13 @@
 # Changelog
 
+## Suite v0.9.1009 — recover saved Company training gains (2026-11-11)
+
+- Fixes two-value Company training logs displaying "No exact stat breakdown found" despite containing `50,25` by normalizing plain, quoted and nested-escaped stored values.
+- Full Log displays PRIMARY +50 / SECONDARY +25 when the historical role cannot be verified, instead of inventing MAN/INT.
+- Adds explicit dated historical-role mapping in Full Log: select the effective date and primary/secondary stat pair (such as INT/END); confirmation updates relevant saved train rows without deleting them.
+- Extends the Suite training-log regression test for escaped inputs. Source syntax checked; live Torn PDA confirmation pending.
+
+
 ## Suite v0.9.1008 — role-aware Company train parsing (2026-11-11)
 
 - Two-number Torn Company training gains represent primary/secondary work stats, not hardcoded MAN/INT.
