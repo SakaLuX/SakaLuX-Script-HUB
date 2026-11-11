@@ -32,10 +32,10 @@
 
 ## Current release note
 
-**v1.8.98 — Company train import compatibility**
-- Supports two-value `working_stats_received` records alongside the existing three-value format.
-- Uses an earlier verified matching employee train (within 14 days) to resolve the stat names safely when Torn omits them.
-- Existing API records can be enriched on reimport; unmatched ambiguous records remain unlabelled rather than guessed.
+**v1.8.98 — Version and release synchronization**
+- Fixes two-value Torn `working_stats_received` records (e.g. `50,25`) in company training imports.
+- Backfills stat labels only when a matching earlier verified employee training event exists; unresolved records are not guessed.
+- Keeps existing training history and supports reimporting stored events.
 
 ## Release history / Changelog
 

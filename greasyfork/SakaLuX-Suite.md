@@ -48,10 +48,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1006 — Two-value Torn training logs**
-- Training Log now recognizes two-value `working_stats_received` CSV records (for example `50,25`) as MAN/INT with an omitted zero END value.
-- Full Log also restores the gain labels for existing saved API records without clearing history.
-- Preserves support for three-value records and avoids assigning stats to malformed CSV values.
+**v0.9.1006 — Version and release synchronization**
+- Version 0.9.1006: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 
