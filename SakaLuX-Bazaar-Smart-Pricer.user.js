@@ -3473,6 +3473,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function setupObserver(bazaarRoot) {
         if (bazaarObserver) bazaarObserver.disconnect();
         bazaarObserver = new MutationObserver(() => {
+            if (document.hidden || !isModuleEnabled()) return;
             clearTimeout(mutationDebounceTimer);
             mutationDebounceTimer = setTimeout(() => {
                 processAllItems();
