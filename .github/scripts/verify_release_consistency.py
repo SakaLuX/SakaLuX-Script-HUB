@@ -18,6 +18,7 @@ DOC_BY_ID = {
     'elimination-assistant': 'greasyfork/Elimination-Assistant.md',
     'company-intelligence': 'greasyfork/Company-Intelligence.md',
     'stock-manager-advisor': 'greasyfork/Stock-Manager-Advisor.md',
+    'gym-optimizer': 'greasyfork/Gym-Optimizer.md',
 }
 
 STANDALONE_DOCS = [
@@ -25,6 +26,7 @@ STANDALONE_DOCS = [
     ('SakaLuX-Chat-Intelligence.user.js', 'greasyfork/Chat-Intelligence.md', 'Chat Intelligence'),
     ('SakaLuX-Account-Auditor.user.js', 'greasyfork/Account-Auditor.md', 'Account Auditor'),
     ('SakaLuX-Suite.user.js', 'greasyfork/SakaLuX-Suite.md', 'SakaLuX Suite'),
+    ('SakaLuX-Halloween-Assistant.user.js', 'greasyfork/Halloween-Assistant.md', 'Halloween Assistant'),
 ]
 
 errors = []
