@@ -39363,7 +39363,7 @@ async function tlResolveCurrentRole(apiKey){
         try{catalog=await tlApiRead("https://api.torn.com/v2/torn/companies",apiKey);}catch{}
         const position=tlCatalogPosition(catalog,companyType,role);
         const pair=tlPositionGainPair(position);
-        return {role,companyType,companyId,pair,checkedAt:Date.now()};
+        return {role,companyType,companyId,pair,catalog,checkedAt:Date.now()};
     }catch{return null;}
 }
 function tlResolveTrainingEntry(entry,roleInfo){
