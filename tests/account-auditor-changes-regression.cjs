@@ -21,7 +21,8 @@ assert.ok(syncPos>=0&&commitPos>syncPos,'baseline commits only after successful 
 assert.ok(source.includes('changesSinceLastAudit(){return getLastAuditChanges();}'),'public changes API exposed');
 assert.ok(source.includes("id=\"sl-aa-changes\""),'panel change counter present');
 assert.ok(source.includes("AUDIT_CHANGE_GROUPS=['money','networth','battlestats','workstats','skills','criminalrecord','racingrecords','personalstats','merits','education','jobpoints','stocks','bars']"),'tracked change groups stable');
-assert.ok(source.includes('changes:changes.slice(0,80)'),'report bounded to 80 detailed changes');
+assert.ok(source.includes('shownChanges:changes.length,changes}'),'report retains all detailed changes without the former 80-entry cap');
+assert.ok(!source.includes('changes:changes.slice(0,80)'),'old 80-entry cap stays removed');
 
 const doc=fs.readFileSync('greasyfork/Account-Auditor.md','utf8');
 assert.ok(doc.includes(`**v${currentVersion}**`),'doc current version synchronized');
