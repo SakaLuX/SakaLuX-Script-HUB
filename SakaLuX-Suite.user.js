@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Suite [EXPERIMENTAL]
 // @namespace    sakalux.suite
-// @version      0.9.1006
+// @version      0.9.1007
 // @description  Complete modular SakaLuX toolkit for Torn PDA / Tampermonkey.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1072,7 +1072,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
  * settings migration and TornPDA compatibility. */
 (() => {
   "use strict";
-  const VERSION = '0.9.1006';
+  const VERSION = '0.9.1007';
   const SUITE = Object.freeze({
     name: "SakaLuX Suite",
     version: VERSION,
@@ -39349,10 +39349,10 @@ function tlApiGains(item){
     };
     if(receivedText){
         parseGainText(receivedText);
-        // Suite v0.9.1006: Torn may omit trailing zero values from the ordered MAN,INT,END CSV.
+        // Suite v0.9.1007: Torn may omit trailing zero values from the ordered MAN,INT,END CSV.
         // E.g. "50,25" means MAN +50, INT +25, END +0.
         const csv=receivedText.trim().split(",").map(v=>v.trim());
-        if(csv.length>=2&&csv.length<=3&&csv.every(v=>/^\\+?\\d+(?:\\.\\d+)?$/.test(v))){
+        if(csv.length>=2&&csv.length<=3&&csv.every(v=>/^\+?\d+(?:\.\d+)?$/.test(v))){
             ["MAN","INT","END"].forEach((name,index)=>{
                 const amount=Number(csv[index]||0);
                 if(Number.isFinite(amount)&&amount>0)collected[name]=amount;
@@ -47610,7 +47610,7 @@ function scan(){
 /* SAKALUX_SUITE_0947_STABLE_UI_PATCH */
 (() => {
 'use strict';
-const VERSION='0.9.1006';
+const VERSION='0.9.1007';
 const MODULES=[
  ['enhancer','Enhancer Guard','SakaLuXEnhancerGuard'],
  ['bazaar','Bazaar Thanker','SakaLuXBazaarThanker'],
