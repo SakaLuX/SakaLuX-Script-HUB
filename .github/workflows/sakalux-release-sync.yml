@@ -1,25 +1,29 @@
-name: Sync SakaLuX script versions and releases
+name: SakaLuX Automatic Script Releases
 
 on:
   push:
     branches: [main]
     paths:
       - '*.user.js'
-      - 'release-config.json'
-      - 'tools/sync_release_metadata.py'
   workflow_dispatch:
+    inputs:
+      script_id:
+        description: Optional script ID to publish on demand
+        type: string
+        required: false
 
 permissions:
   contents: write
 
 concurrency:
-  group: sakalux-release-sync
+  group: sakalux-automatic-release-main
   cancel-in-progress: false
 
 jobs:
-  synchronize:
+  synchronize-and-release:
     if: "!contains(github.event.head_commit.message, '[skip-sync]')"
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,52 +31,67 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Synchronize dock, runtime, registry and markdown
-        run: python tools/sync_release_metadata.py
-      - name: Validate syntax of synchronized userscripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare changed script versions, notes and Hub registry
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          SELECTED_SCRIPT: ${{ inputs.script_id }}
+        shell: bash
         run: |
+          base="$BEFORE_SHA"
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then base="HEAD^"; fi
+          if [[ -n "$SELECTED_SCRIPT" ]]; then
+            python tools/auto_release_prepare.py --base "$base" --script-id "$SELECTED_SCRIPT"
+          else
+            python tools/auto_release_prepare.py --base "$base"
+          fi
+      - name: Validate all scripts, metadata and release notes
+        run: |
+          python3 -m pip install PyYAML==6.0.3
+          python3 .github/scripts/validate_repository.py
+          python3 .github/scripts/verify_release_consistency.py
+          python3 tools/verify_version_consistency.py
+          python3 .github/scripts/verify_runtime_version_signals.py
+          python3 tools/release_preflight.py --all
           for script in *.user.js; do node --check "$script"; done
-      - name: Commit synchronized metadata
+          node tests/shared-core-v1-regression.cjs
+          node tests/account-auditor-changes-regression.cjs
+          node tests/suite-training-log-csv-2026-11.cjs
+      - name: Commit validated release files
+        shell: bash
         run: |
-          if git diff --quiet; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- '*.user.js' scripts.json 'greasyfork/*.md'
-          git commit -m "chore(release): synchronize versions, dock, docs and registry [skip-sync]"
-          # Other commits can land while synchronization is running. Rebase and retry
-          # instead of failing the release job with a non-fast-forward push.
+          git add -- '*.user.js' '*.meta.js' scripts.json 'greasyfork/*.md' 'releases/*.md'
+          if git diff --cached --quiet; then
+            echo "No repository changes required"
+            exit 0
+          fi
+          git commit -m "chore(release): synchronize validated script releases [skip-sync]"
           for attempt in 1 2 3; do
-            if git pull --rebase origin main && git push origin HEAD:main; then
-              exit 0
-            fi
+            if git pull --rebase origin main && git push origin HEAD:main; then exit 0; fi
             git rebase --abort 2>/dev/null || true
-            echo "Sync push attempt $attempt failed; retrying against the latest main"
             sleep 3
           done
-          echo "Unable to synchronize release metadata without conflicts" >&2
+          echo "Release commit could not be pushed; refusing to publish releases" >&2
           exit 1
-      - name: Publish GitHub releases for changed script versions
+      - name: Publish GitHub Releases for changed scripts
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          git diff --name-only HEAD^ HEAD -- '*.user.js' | while read -r script; do
-            [ -f "$script" ] || continue
-            version=$(grep -m1 '^// @version' "$script" | awk '{print $3}')
-            [ -n "$version" ] || continue
-            id=$(python - "$script" <<'PY'
-          import json,sys
-          rows=json.load(open('release-config.json'))['scripts']
-          print(next((r['id'] for r in rows if r['file']==sys.argv[1]), ''))
-          PY
-            )
-            [ -n "$id" ] || continue
-            tag="$id-v$version"
-            if gh release view "$tag" >/dev/null 2>&1; then continue; fi
-            doc=$(python - "$id" <<'PY'
-          import json,sys
-          print(next(r['doc'] for r in json.load(open('release-config.json'))['scripts'] if r['id']==sys.argv[1]))
-          PY
-            )
-            gh release create "$tag" "$script" --title "$id v$version" --notes-file "$doc" --target main
+          jq -r '.releases[] | [.id,.version,.file,.tag] | @tsv' .release-plan.json |
+          while IFS=$'\t' read -r id version script tag; do
+            [[ -n "$id" ]] || continue
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "$tag already exists; leaving it unchanged"
+              continue
+            fi
+            note=$(find releases -maxdepth 1 -type f -name "$id-v$version-version-audit-*.md" | sort | tail -n1)
+            test -n "$note"
+            gh release create "$tag" "$script" --target main \
+              --title "$id v$version" --notes-file "$note" --latest=false
+            echo "Published $tag"
           done
