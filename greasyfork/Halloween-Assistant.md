@@ -1,7 +1,7 @@
 # SakaLuX Halloween Assistant
 
 ## Current version
-**v0.5.9**
+**v0.5.10**
 
 ## Purpose
 SakaLuX Halloween Assistant is a mobile-first Torn helper that finds live, attack-ready Halloween targets and ranks the easiest estimated defeats first.
@@ -28,12 +28,16 @@ Attack decisions remain manual. The script does not automatically attack players
 
 ## Current release note
 
-**v0.5.9 — Current canonical Halloween Assistant baseline**
-- Registers the existing v0.5.9 source for complete GitHub release automation.
-- Preserves live target screening, FFScouter integration, filters, and the movable panel already present in the script.
-- No new gameplay capability is claimed by this documentation-only baseline.
+**v0.5.10 — Version and release synchronization**
+- Source change: fix(halloween): declare canonical installer and update URLs for automated releases.
+- Updated canonical userscript version to v0.5.10; package verified by GitHub Actions.
 
 ## Release history / Changelog
+
+
+### v0.5.10 — 2026-11-11
+- Source change: fix(halloween): declare canonical installer and update URLs for automated releases.
+- Updated canonical userscript version to v0.5.10; package verified by GitHub Actions.
 
 ### v0.5.9 — 2026-11-11
 - Document the existing source baseline and enable automated versioned releases.
@@ -52,7 +56,7 @@ Attack decisions remain manual. The script does not automatically attack players
 - Prioritizes bounty targets and then fills with non-bounty targets.
 
 ## Distribution
-- Canonical version: **v0.5.9**
+- Canonical version: **v0.5.10**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Halloween-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Halloween-Assistant.md
