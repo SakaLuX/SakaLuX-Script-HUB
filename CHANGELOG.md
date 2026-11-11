@@ -1,5 +1,19 @@
 # Changelog
 
+## Suite v0.9.1008 — role-aware Company train parsing (2026-11-11)
+
+- Two-number Torn Company training gains represent primary/secondary work stats, not hardcoded MAN/INT.
+- Read current position from Torn user/job and official company positions; only event-specific role evidence is treated as historical proof.
+- Previously mislabelled imported trains are repaired on API reimport, showing PRIMARY +50 / SECONDARY +25 until the historical position is confirmed.
+- Adds a per-train user confirmation control for applying the current role to a historical record; user-confirmed mappings survive subsequent reimports.
+- Adds regression cases for two-value logs. Live Torn PDA verification pending.
+
+## Company Intelligence v1.8.99 — avoid historical position guesses (2026-11-11)
+
+- Stops copying primary/secondary work stat labels from a previous train to a later train without historical role evidence.
+- On reimport, clears old misleading labels for ambiguous two-value gains without deleting the training event.
+
+
 ## Suite v0.9.1007 — fix Company Training Log import regex (2026-11-11)
 
 - Fixes an incorrectly escaped numeric regular expression in Suite v0.9.1006, which caused valid two-value Torn Company training records (including `50,25`) to be rejected.
