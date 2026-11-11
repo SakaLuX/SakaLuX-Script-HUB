@@ -48,10 +48,19 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1010 — Version and release synchronization**
-- Version 0.9.1010: internal runtime and registry synchronization.
+**v0.9.1010 — Fix actual Torn work stats CSV slots**
+- Correctly reads `working_stats_received: ",50,25"` as MAN empty, INT +50, END +25.
+- Also supports other empty fixed slots (e.g. `50,,25`) and numeric zeros; retains `50,25` as an ambiguous two-value case.
+- Full Log reads authoritative raw gains before previously saved incorrect labels; no log deletion needed.
+- Includes regression tests for both API and saved-entry display. Live Torn PDA verification pending.
 
 ## Release history / Changelog
+
+### v0.9.1010 — 2026-11-11
+- Interpret leading-empty Torn CSV `,50,25` as INT +50 / END +25.
+- Repair visible saved records by rendering the raw API slots first.
+- Add 3-slot regression tests.
+
 
 
 ### v0.9.1010 — 2026-11-11
