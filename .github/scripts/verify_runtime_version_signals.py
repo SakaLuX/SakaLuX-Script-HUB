@@ -24,6 +24,13 @@ for path in sorted(ROOT.glob('SakaLuX*.user.js')):
         if not m: errors.append(f'{path.name}: canonical installed-version marker has no fallback version')
         elif m.group(1)!=version: errors.append(f'{path.name}: canonical marker {m.group(1)} != @version {version}')
 
+    # Bazaar Thanker's public bridge and installed-version signal use this
+    # independent module constant, which must follow @version exactly.
+    if path.name == 'SakaLuX-Bazaar-Thanker-PDA.user.js':
+        runtime = re.search(r"""\bconst\s+BAZAAR_VERSION\s*=\s*['"]([^'"]+)['"]""", text)
+        if not runtime or runtime.group(1) != version:
+            errors.append(f'{path.name}: BAZAAR_VERSION {runtime.group(1) if runtime else "<missing>"} != @version {version}')
+
     # APP.version is an application release surface when present.
     m=re.search(r"const APP=\{[^\n]*?version:'([^']+)'",text)
     if m and m.group(1)!=version:
