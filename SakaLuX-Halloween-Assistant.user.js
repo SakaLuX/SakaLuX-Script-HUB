@@ -14,6 +14,8 @@
 // @connect      raw.githubusercontent.com
 // @homepage     https://github.com/SakaLuX/SakaLuX-Script-HUB
 // @supportURL   https://github.com/SakaLuX/SakaLuX-Script-HUB/issues
+// @downloadURL https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Halloween-Assistant.user.js
+// @updateURL   https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Halloween-Assistant.user.js
 // ==/UserScript==
 
 /* SakaLuX Shared Core — BEGIN */
