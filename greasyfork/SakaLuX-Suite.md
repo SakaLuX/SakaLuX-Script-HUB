@@ -48,10 +48,22 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1009 — Version and release synchronization**
-- Version 0.9.1009: internal runtime and registry synchronization.
+**v0.9.1009 — Training Log saved gain recovery and dated role confirmation**
+- Decodes plain, quoted, escaped, and nested-escaped two-number train gains, including saved values such as `"50,25"`.
+- Retains exact numeric gains even when historical stat names cannot be validated.
+- Adds the voluntary **Set historical role stats by date** control for people who know when their primary/secondary work stats changed (for example INT/END from a chosen date).
+- Keeps historical training entries intact and never silently applies today's job to earlier training.
+- Added regression coverage for quoted/escaped stored records; Torn PDA live verification pending.
 
 ## Release history / Changelog
+
+### v0.9.1009 — 2026-11-11
+- Decodes plain, quoted, escaped, and nested-escaped two-number train gains, including saved values such as `"50,25"`.
+- Retains exact numeric gains even when historical stat names cannot be validated.
+- Adds the voluntary **Set historical role stats by date** control for people who know when their primary/secondary work stats changed (for example INT/END from a chosen date).
+- Keeps historical training entries intact and never silently applies today's job to earlier training.
+- Added regression coverage for quoted/escaped stored records; Torn PDA live verification pending.
+
 
 
 ### v0.9.1009 — 2026-11-11
