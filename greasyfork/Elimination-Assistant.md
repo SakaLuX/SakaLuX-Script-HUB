@@ -24,7 +24,7 @@
 
 ## Repository synchronization
 
-- Verified: **2026-11-06**
+- Verified: **2026-11-11**
 - Canonical version: **v1.3.67**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
