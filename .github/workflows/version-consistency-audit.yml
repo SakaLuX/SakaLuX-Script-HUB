@@ -3,7 +3,6 @@ name: Version Consistency Audit
 on:
   push:
     paths:
-      - 'SakaLuX-*.user.js'
       - 'scripts.json'
       - 'greasyfork/**'
       - 'releases/**'
@@ -17,10 +16,14 @@ on:
       - 'releases/**'
       - 'tools/verify_version_consistency.py'
       - '.github/workflows/version-consistency-audit.yml'
+  workflow_run:
+    workflows: ['SakaLuX Automatic Script Releases']
+    types: [completed]
   workflow_dispatch:
 
 jobs:
   verify-versions:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
