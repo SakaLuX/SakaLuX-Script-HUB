@@ -43,47 +43,15 @@
 - Removes the unsafe inference that a previous employee train proves the position for a later train.
 - Two-number train logs remain labelled PRIMARY / SECONDARY until position-at-event evidence is available.
 - Re-import clears inaccurate old labels for ambiguous entries without deleting the training events.
-
-
-
-### v1.8.99 — 2026-11-11
 - Fixes two-value Torn `working_stats_received` records (e.g. `50,25`) in company training imports.
 - Backfills stat labels only when a matching earlier verified employee training event exists; unresolved records are not guessed.
 - Keeps existing training history and supports reimporting stored events.
-
 ### v1.8.98 — 2026-11-11
 - Supports two-value `working_stats_received` records alongside the existing three-value format.
 - Uses an earlier verified matching employee train (within 14 days) to resolve the stat names safely when Torn omits them.
 - Existing API records can be enriched on reimport; unmatched ambiguous records remain unlabelled rather than guessed.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### v1.8.98 — 2026-11-11
 - Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
 - Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
-
 ### v1.8.97 — 2026-11-01
 - Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
 - Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
@@ -352,8 +320,6 @@
 - Centralizes shared infrastructure in the embedded SakaLuX Core.
 - Adds permanent Shared Core/API broker regression coverage.
 - Embeds Shared Core v1 while keeping this userscript independently installable and runnable.
-
-
 
 
 ### v1.8.40 — Release metadata synchronization
