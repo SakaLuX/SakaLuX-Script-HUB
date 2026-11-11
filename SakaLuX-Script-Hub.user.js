@@ -1729,17 +1729,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "5.3.74",
+                    "version": "5.3.75",
                     "date": "2026-11-11",
                     "notes": [
-                        "Source change: Synchronize shared runtime with canonical Core.",
-                        "Updated canonical userscript version to v5.3.74; package verified by GitHub Actions."
+                        "Source change: perf(bazaar): coalesce buyer message observer updates.",
+                        "Updated canonical userscript version to v5.3.75; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
                 "type": "addon",
-                "version": "5.3.74",
-                "detailsRevision": 35,
+                "version": "5.3.75",
+                "detailsRevision": 36,
                 "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592388",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",

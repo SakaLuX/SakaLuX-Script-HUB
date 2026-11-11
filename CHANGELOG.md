@@ -1,5 +1,10 @@
 # Changelog
 
+## bazaar v5.3.75 — automatic release (2026-11-11)
+
+- Source change: perf(bazaar): coalesce buyer message observer updates.
+- Updated canonical userscript version to v5.3.75; package verified by GitHub Actions.
+
 ## elimination-assistant v1.3.69 — automatic release (2026-11-11)
 
 - Source change: perf(elimination): reduce Hub power synchronization polling.
