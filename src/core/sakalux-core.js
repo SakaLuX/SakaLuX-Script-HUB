@@ -6,7 +6,7 @@
   'use strict';
 
   const g = globalThis;
-  const CORE_VERSION = '1.2.8';
+  const CORE_VERSION = '1.2.9';
   const NS = 'SakaLuXCore';
 
   const SETTINGS_CATALOG = Object.freeze([
@@ -41,7 +41,20 @@
     };
   }
 
-  if (g[NS]?.version === CORE_VERSION) {
+  // Older embedded userscripts may execute after a newer module in TornPDA.
+  // Never downgrade an already loaded Shared Core just because versions differ.
+  function compareCoreVersion(a, b) {
+    const parse = value => String(value || '').split('.').map(x => Number(x));
+    const left = parse(a), right = parse(b);
+    if (!left.length || left.some(x => !Number.isFinite(x))) return -1;
+    for (let i = 0; i < Math.max(left.length, right.length); i++) {
+      const diff = (left[i] || 0) - (right[i] || 0);
+      if (diff) return diff > 0 ? 1 : -1;
+    }
+    return 0;
+  }
+
+  if (g[NS]?.version && compareCoreVersion(g[NS].version, CORE_VERSION) >= 0) {
     g[NS].api?.registerEnvironment?.(currentTransportEnvironment());
     g[NS].settings?.autoGuardCurrentScript?.();
     if (!g.SakaLuXPerf && g[NS].perf) g.SakaLuXPerf = g[NS].perf;
