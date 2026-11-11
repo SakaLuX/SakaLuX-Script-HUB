@@ -1958,7 +1958,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     window.addEventListener('popstate',()=>setTimeout(enforceTravelPanelScope,0),{passive:true});
     window.addEventListener('hashchange',()=>setTimeout(enforceTravelPanelScope,0),{passive:true});
     document.addEventListener('click',()=>setTimeout(enforceTravelPanelScope,120),true);
-    setInterval(enforceTravelPanelScope,1500);
+    // Route events handle immediate cleanup; only use the watchdog while visible.
+    setInterval(()=>{if(!document.hidden)enforceTravelPanelScope();},3000);
 
     function paintTravelSessionSummary(){
         if(!ensureTravelSurfaceRuntime())return;
