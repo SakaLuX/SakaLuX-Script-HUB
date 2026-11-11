@@ -40679,7 +40679,7 @@ function renderTab(tabName){const m=document.getElementById("fc-tlog-modal");if(
                 const from=prompt("Starting date for this role (YYYY-MM-DD), based on your actual job history:");
                 if(!from||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(from))return;
                 const fromDate=new Date(from+"T00:00:00");
-                if(!Number.isFinite(fromDate.getTime())||fromDate.toLocaleDateString("en-CA")!==from)return;
+                if(!Number.isFinite(fromDate.getTime())||[fromDate.getFullYear(),String(fromDate.getMonth()+1).padStart(2,"0"),String(fromDate.getDate()).padStart(2,"0")].join("-")!==from)return;
                 const pair=String(prompt("Primary and secondary working stats for that historical role (MAN/INT, INT/END, END/INT, INT/MAN, MAN/END, END/MAN):","INT/END")||"").trim().toUpperCase().split("/").map(v=>v.trim());
                 if(pair.length!==2||pair[0]===pair[1]||pair.some(v=>!["MAN","INT","END"].includes(v))){alert("Choose two different MAN, INT or END stats.");return;}
                 const saved=tlLoad();
