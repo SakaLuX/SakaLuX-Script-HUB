@@ -92,6 +92,13 @@ def main():
         notes = notes_by_id.get(entry['id'], old_notes or [f'Version {version}: internal runtime and registry synchronization.'])
         source = re.sub(r'(?m)^(//\s*@version\s+)\S+', lambda m: m[1]+version, source, count=1)
         source = sync_runtime(source, version)
+        # Bazaar Thanker's public module version is exposed by BAZAAR_VERSION,
+        # not by the independent embedded Dock Runtime VERSION.
+        if entry['id'] == 'bazaar':
+            source = re.sub(
+                r"""(\bconst\s+BAZAAR_VERSION\s*=\s*['"])[^'"]+(['"])""",
+                lambda m: m[1] + version + m[2], source, count=1,
+            )
         path.write_text(source)
         sync_doc(ROOT/entry['doc'], version, notes, args.date)
         if entry['id'] in by_id:
