@@ -2221,6 +2221,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function startObserver() {
         if (!state.enabled || !isMissionsPage() || state.observer) return;
         state.observer = new MutationObserver(mutations => {
+            if (document.hidden || !state.enabled || !isMissionsPage()) return;
             if (window.SakaLuXPerf?.unrelated?.(mutations)) return;
             if (mutations.some(m => {
                 const root=m.target.nodeType===1?m.target:m.target.parentElement;
