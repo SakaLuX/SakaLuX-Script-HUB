@@ -56,7 +56,7 @@ const legacy = [
   '',
   'const applicationCodeShouldRemain = true;',
   ''
-].join('\\n');
+].join('\n');
 const converted = embedSharedCore(legacy, core);
 assert.equal(count(converted, BEGIN), 1, 'legacy markers converted to one canonical Core block');
 assert.equal(count(converted, END), 1, 'legacy Core END replaced');
