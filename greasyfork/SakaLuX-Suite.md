@@ -48,10 +48,20 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1008 — Version and release synchronization**
-- Version 0.9.1008: internal runtime and registry synchronization.
+**v0.9.1008 — Role-aware Company training gains**
+- Two-number Torn training logs now mean PRIMARY +50 and SECONDARY +25; they are not hardcoded MAN and INT.
+- Reads current job/position through Torn API v2 and matches position requirements against the official company catalogue (with a PSF fallback).
+- Only applies stat labels automatically to historical events with a verifiable event-specific position; otherwise displays PRIMARY / SECONDARY plus advisory current-role information.
+- Re-import repairs false stat labels previously saved by older Suite versions without deleting logs.
 
 ## Release history / Changelog
+
+### v0.9.1008 — 2026-11-11
+- Two-number Torn training logs now mean PRIMARY +50 and SECONDARY +25; they are not hardcoded MAN and INT.
+- Reads current job/position through Torn API v2 and matches position requirements against the official company catalogue (with a PSF fallback).
+- Only applies stat labels automatically to historical events with a verifiable event-specific position; otherwise displays PRIMARY / SECONDARY plus advisory current-role information.
+- Re-import repairs false stat labels previously saved by older Suite versions without deleting logs.
+
 
 
 ### v0.9.1008 — 2026-11-11
