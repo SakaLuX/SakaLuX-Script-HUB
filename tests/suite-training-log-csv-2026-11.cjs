@@ -2,8 +2,12 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const source = fs.readFileSync('SakaLuX-Suite.user.js','utf8');
-assert.match(source, /^\/\/ @version\s+0\.9\.1008$/m);
+assert.match(source, /^\/\/ @version\s+0\.9\.1009$/m);
 assert.ok(source.includes('function tlTrainingAmounts(raw)'));
+const start=source.indexOf('function tlTrainingAmounts(raw){');
+const end=source.indexOf('function tlPositionGainPair(',start);
+const parseReal=new Function(source.slice(start,end)+'return tlTrainingAmounts')();
+for(const raw of ['50,25','"50,25"','\\\\"50,25\\\\"'])assert.deepEqual(parseReal(raw),[50,25]);
 assert.ok(source.includes('function tlResolveCurrentRole(apiKey)'));
 assert.ok(source.includes('function tlCatalogPosition('));
 assert.ok(source.includes('user-confirmed-role'));
