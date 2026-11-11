@@ -70,6 +70,8 @@ def main():
                 source = re.sub(r"(?m)^(//\s*@version\s+)\d+\.\d+\.\d+", lambda m: m[1] + current, source, count=1)
                 path.write_text(source, encoding="utf-8")
         if entry["id"] == "gym-optimizer":
+            source = re.sub(r"(const id=\x27gym-optimizer\x27,v=\x27)\d+\.\d+\.\d+(\x27)", lambda m: m[1] + current + m[2], source, count=1)
+            path.write_text(source, encoding="utf-8")
             meta_path = ROOT / "SakaLuX-Gym-Optimizer.meta.js"
             meta = meta_path.read_text(encoding="utf-8")
             meta = re.sub(r"(?m)^(//\s*@version\s+)\d+\.\d+\.\d+", lambda m: m[1] + current, meta, count=1)
