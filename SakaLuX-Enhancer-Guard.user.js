@@ -2375,7 +2375,9 @@ hideProtectedSaleRows();
             state.autoRefreshTimer = null;
         }
         if (!state.enabled || !slxProCurrent() || state.autoRefreshMinutes <= 0) return;
-        state.autoRefreshTimer = setInterval(() => refreshData(), state.autoRefreshMinutes * 60 * 1000);
+        state.autoRefreshTimer = setInterval(() => {
+            if (!document.hidden && state.enabled) void refreshData();
+        }, state.autoRefreshMinutes * 60 * 1000);
     }
 
     function injectCss() {
