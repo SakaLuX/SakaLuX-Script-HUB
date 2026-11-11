@@ -46,7 +46,18 @@ def main():
         if not selected:
             raise ValueError("Unknown script id: " + args.script_id)
     else:
-        selected = [e for e in CONFIG if e["file"] in changed]
+        # Multiple commits can arrive while another Actions run is publishing.
+        # Compare every canonical source against its last release tag so an
+        # earlier cancelled/conflicted run never leaves a script unpublished.
+        selected = []
+        for entry in CONFIG:
+            filename = entry["file"]
+            source = (ROOT / filename).read_text(encoding="utf-8")
+            current = version(source)
+            tag = f"{entry['tagPrefix']}{current}"
+            released_source = git("show", f"{tag}:{filename}", check=False)
+            if filename in changed or released_source != source:
+                selected.append(entry)
     if not selected:
         Path(".release-plan.json").write_text('{"releases":[]}\n', encoding="utf-8")
         print("No changed managed userscripts; no release required.")
