@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -39,7 +39,18 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- '*.user.js' scripts.json 'greasyfork/*.md'
           git commit -m "chore(release): synchronize versions, dock, docs and registry [skip-sync]"
-          git push
+          # Other commits can land while synchronization is running. Rebase and retry
+          # instead of failing the release job with a non-fast-forward push.
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "Sync push attempt $attempt failed; retrying against the latest main"
+            sleep 3
+          done
+          echo "Unable to synchronize release metadata without conflicts" >&2
+          exit 1
       - name: Publish GitHub releases for changed script versions
         env:
           GH_TOKEN: ${{ github.token }}
