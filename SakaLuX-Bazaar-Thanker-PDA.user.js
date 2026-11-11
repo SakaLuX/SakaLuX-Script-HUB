@@ -2457,12 +2457,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     let messageObserver = null;
+    let messageRefreshPending = false;
 
     function startMessageObserver() {
         if (!moduleEnabled || messageObserver) return;
         messageObserver = new MutationObserver(function () {
-            fillSubject();
-            fillMessageEditor();
+            // Filling the inputs can itself mutate the DOM: coalesce updates.
+            if (document.hidden || messageRefreshPending) return;
+            messageRefreshPending = true;
+            setTimeout(() => {
+                messageRefreshPending = false;
+                fillSubject();
+                fillMessageEditor();
+            }, 120);
         });
         messageObserver.observe(document.body, { childList: true, subtree: true });
         fillSubject();
