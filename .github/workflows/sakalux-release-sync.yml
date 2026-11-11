@@ -6,6 +6,7 @@ on:
     paths:
       - '*.user.js'
       - 'src/core/sakalux-core.js'
+      - 'tools/auto_release_prepare.py'
   workflow_dispatch:
     inputs:
       script_id:
