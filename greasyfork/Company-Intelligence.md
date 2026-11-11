@@ -32,11 +32,18 @@
 
 ## Current release note
 
-**v1.8.98 — Version and release synchronization**
-- Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).
-- Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported.
+**v1.8.98 — Company train import compatibility**
+- Supports two-value `working_stats_received` records alongside the existing three-value format.
+- Uses an earlier verified matching employee train (within 14 days) to resolve the stat names safely when Torn omits them.
+- Existing API records can be enriched on reimport; unmatched ambiguous records remain unlabelled rather than guessed.
 
 ## Release history / Changelog
+
+### v1.8.98 — 2026-11-11
+- Supports two-value `working_stats_received` records alongside the existing three-value format.
+- Uses an earlier verified matching employee train (within 14 days) to resolve the stat names safely when Torn omits them.
+- Existing API records can be enriched on reimport; unmatched ambiguous records remain unlabelled rather than guessed.
+
 
 
 
