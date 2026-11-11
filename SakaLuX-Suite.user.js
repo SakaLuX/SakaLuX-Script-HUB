@@ -39349,11 +39349,12 @@ function tlApiGains(item){
     };
     if(receivedText){
         parseGainText(receivedText);
-        // Torn encodes working stats as MAN,INT,END comma-separated triplets.
-        const csv=receivedText.trim().match(/^([+-]?\\d+(?:\\.\\d+)?)\\s*,\\s*([+-]?\\d+(?:\\.\\d+)?)\\s*,\\s*([+-]?\\d+(?:\\.\\d+)?)$/);
-        if(csv){
+        // Torn may omit trailing zero values from the ordered MAN,INT,END CSV.
+        // E.g. "50,25" means MAN +50, INT +25, END +0.
+        const csv=receivedText.trim().split(",").map(v=>v.trim());
+        if(csv.length>=2&&csv.length<=3&&csv.every(v=>/^\\+?\\d+(?:\\.\\d+)?$/.test(v))){
             ["MAN","INT","END"].forEach((name,index)=>{
-                const amount=Number(csv[index+1]);
+                const amount=Number(csv[index]||0);
                 if(Number.isFinite(amount)&&amount>0)collected[name]=amount;
             });
         }
@@ -40534,7 +40535,8 @@ function tlDisplayGains(entry){
     if(raw.startsWith('"')&&raw.endsWith('"'))raw=raw.slice(1,-1);
     if(raw.startsWith("'")&&raw.endsWith("'"))raw=raw.slice(1,-1);
     const parts=raw.split(",").map(value=>value.trim());
-    if(parts.length!==3)return [];
+    // Old saved API records may contain a two-value CSV with an omitted END zero.
+    if(parts.length<2||parts.length>3)return [];
     const numbers=parts.map(value=>value!==""?Number(value):NaN);
     if(!numbers.every(value=>Number.isFinite(value)&&value>=0))return [];
     return ["MAN","INT","END"].flatMap((name,index)=>numbers[index]>0?[name+" +"+numbers[index].toLocaleString("en-US")]:[]);
