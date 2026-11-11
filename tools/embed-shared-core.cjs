@@ -11,7 +11,9 @@ function stripSharedCore(source) {
   // The embedder owns the two newlines immediately before BEGIN. Removing the
   // block together with only those owned newlines restores the original file
   // byte-for-byte, including whatever whitespace originally followed metadata.
-  const ownedBlock = new RegExp(`\\n\\n${escapeRegExp(BEGIN)}[\\s\\S]*?${escapeRegExp(END)}`, 'g');
+  // Both canonical em-dash markers and older ASCII-hyphen markers occur in
+  // published scripts. Strip either form before embedding to avoid two runtimes.
+  const ownedBlock = /\n{1,2}\/\* SakaLuX Shared Core\s*[—-]\s*BEGIN \*\/[\s\S]*?\/\* SakaLuX Shared Core\s*[—-]\s*END \*\//g;
   return source.replace(ownedBlock, '');
 }
 
