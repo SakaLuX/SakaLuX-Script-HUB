@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.1008**
+**v0.9.1009**
 
 
 ## Repository synchronization
 
 - Verified: **2026-11-11**
-- Canonical version: **v0.9.1008**
+- Canonical version: **v0.9.1009**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -48,10 +48,14 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1008 — Version and release synchronization**
-- Version 0.9.1008: internal runtime and registry synchronization.
+**v0.9.1009 — Version and release synchronization**
+- Version 0.9.1009: internal runtime and registry synchronization.
 
 ## Release history / Changelog
+
+
+### v0.9.1009 — 2026-11-11
+- Version 0.9.1009: internal runtime and registry synchronization.
 
 ### v0.9.1008 — 2026-11-11
 - Two-number Torn training logs now mean PRIMARY +50 and SECONDARY +25; they are not hardcoded MAN and INT.
