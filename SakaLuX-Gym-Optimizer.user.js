@@ -1918,6 +1918,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   let lastUrl=location.href;
   let previousGymUiName=null;
   setInterval(()=>{
+    // Preserve the existing route state, but avoid repeated DOM work while TornPDA is backgrounded.
+    if(document.hidden)return;
     if(location.href!==lastUrl){lastUrl=location.href;scheduleGymAutoRefresh();render()}
     else scheduleGymAutoRefresh();
     registerGym();mount();watchGymHistory();syncNextActionButton();
