@@ -1,7 +1,7 @@
 # SakaLuX Bounty Hunter
 
 ## Current version
-**v0.5.23**
+**v0.5.24**
 
 ### 2026-10-20 · Version consistency
 - Fixed embedded runtime version reporting to match userscript `@version`.
@@ -51,13 +51,18 @@ Target alerts can notify when a matching target is Okay or is close to hospital 
 
 ## Current release note
 
-**v0.5.23 — Version and release synchronization**
+**v0.5.24 — Version and release synchronization**
 - Source change: Synchronize shared runtime with canonical Core.
-- Updated canonical userscript version to v0.5.23; package verified by GitHub Actions.
+- Updated canonical userscript version to v0.5.24; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
+
+
+### v0.5.24 — 2026-11-11
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.5.24; package verified by GitHub Actions.
 
 ### v0.5.23 — 2026-11-11
 - Source change: Synchronize shared runtime with canonical Core.

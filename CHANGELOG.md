@@ -1,5 +1,55 @@
 # Changelog
 
+## bazaar-smart-pricer v1.1.32 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.1.32; package verified by GitHub Actions.
+
+## bounty-hunter v0.5.24 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.5.24; package verified by GitHub Actions.
+
+## chat-intelligence v1.2.43 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.2.43; package verified by GitHub Actions.
+
+## company-intelligence v1.8.101 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.8.101; package verified by GitHub Actions.
+
+## enhancer v1.3.78 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.78; package verified by GitHub Actions.
+
+## gym-optimizer v1.7.13 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.7.13; package verified by GitHub Actions.
+
+## market-intelligence v1.17.91 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.17.91; package verified by GitHub Actions.
+
+## mission-rewards v1.0.65 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.0.65; package verified by GitHub Actions.
+
+## script-hub v1.9.161 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.9.161; package verified by GitHub Actions.
+
+## stock-manager-advisor v0.8.38 — automatic release (2026-11-11)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.8.38; package verified by GitHub Actions.
+
 ## account-auditor v1.3.32 — automatic release (2026-11-11)
 
 - Source change: refactor(auditor): cancel stale scheduled audit when auto-sync disabled and avoid duplicate sync.

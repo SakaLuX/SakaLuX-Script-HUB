@@ -3,13 +3,13 @@
 > Complementary add-on for SakaLuX Script Hub.
 
 ## Current version
-**v1.2.42**
+**v1.2.43**
 
 
 ## Repository synchronization
 
 - Verified: **2026-11-11**
-- Canonical version: **v1.2.42**
+- Canonical version: **v1.2.43**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Chat-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Chat-Intelligence.md
@@ -24,15 +24,20 @@
 
 ## Current release note
 
-**v1.2.42 — Version and release synchronization**
+**v1.2.43 — Version and release synchronization**
 - Source change: Synchronize shared runtime with canonical Core.
-- Updated canonical userscript version to v1.2.42; package verified by GitHub Actions.
+- Updated canonical userscript version to v1.2.43; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
 
 
+
+
+### v1.2.43 — 2026-11-11
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.2.43; package verified by GitHub Actions.
 
 ### v1.2.42 — 2026-11-11
 - Source change: Synchronize shared runtime with canonical Core.
