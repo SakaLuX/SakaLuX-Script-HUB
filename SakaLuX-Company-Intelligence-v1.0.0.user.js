@@ -2344,7 +2344,7 @@ async function importMyTrainingLog(){
         if(Number.isFinite(value)&&value>0)add(stat,value);
        });
       }else if(csv.length===2&&csv.every(v=>/^\s*\d+(?:\.\d+)?\s*$/.test(v))){
-       // Torn also returns two amounts without stat names (e.g. "50,25").
+       // Company Intelligence v1.8.98: Torn also returns two amounts without stat names (e.g. "50,25").
        // They are primary/secondary amounts, NOT necessarily MAN/INT.
        // Only resolve stat names from a recent previously identified train for
        // this same employee with the same ordered gain amounts.

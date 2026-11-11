@@ -39349,7 +39349,7 @@ function tlApiGains(item){
     };
     if(receivedText){
         parseGainText(receivedText);
-        // Torn may omit trailing zero values from the ordered MAN,INT,END CSV.
+        // Suite v0.9.1006: Torn may omit trailing zero values from the ordered MAN,INT,END CSV.
         // E.g. "50,25" means MAN +50, INT +25, END +0.
         const csv=receivedText.trim().split(",").map(v=>v.trim());
         if(csv.length>=2&&csv.length<=3&&csv.every(v=>/^\\+?\\d+(?:\\.\\d+)?$/.test(v))){
