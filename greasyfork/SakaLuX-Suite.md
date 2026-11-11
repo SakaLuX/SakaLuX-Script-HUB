@@ -48,10 +48,8 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1007 — Training Log CSV parser correction**
-- Corrects over-escaped numeric regular expression from v0.9.1006 that rejected valid `50,25` Torn Company training records.
-- Ensures Import API can populate MAN +50 / INT +25 and update existing saved log entries.
-- Retains the Full Log saved-record backfill. On-device confirmation pending.
+**v0.9.1007 — Version and release synchronization**
+- Version 0.9.1007: internal runtime and registry synchronization.
 
 ## Release history / Changelog
 
