@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.18.01
+// @version      1.18.02
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1601,7 +1601,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 (function () {
     'use strict';
-    const VERSION = '1.18.01';
+    const VERSION = '1.18.02';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -2313,7 +2313,25 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function verdictClass(v){return v==='UPGRADE'?'upgrade':v==='DOWNGRADE'?'downgrade':v==='SIDEGRADE'?'sidegrade':'unknown';}
 
     // Never purchase automatically: locate the exact UID in Torn's own market UI.
-    function openRecommendedMarketOffer(itemId,gear,card){
+    async function openRecommendedMarketOffer(itemId,gear,card){
+        if(card.dataset.offerChecking==='1')return;
+        card.dataset.offerChecking='1';
+        const pendingLabel=card.querySelector('.sl-mi-loadout-action');
+        if(pendingLabel)pendingLabel.textContent='Checking live offer…';
+        try{
+            const fresh=await fetchMarket(itemId,true);
+            const offers=marketGearListings(fresh);
+            const sameUid=gear?.uid!=null&&offers.find(x=>String(x.uid||'')===String(gear.uid)&&Number(x.price)===Number(gear.price));
+            const sameStats=offers.find(x=>Number(x.price)===Number(gear.price)&&Math.abs(Number(x.stats?.damage)-Number(gear.stats?.damage))<0.005&&Math.abs(Number(x.stats?.accuracy)-Number(gear.stats?.accuracy))<0.005&&Math.abs(Number(x.stats?.quality)-Number(gear.stats?.quality))<0.005);
+            if(!sameUid&&!sameStats){
+                if(pendingLabel)pendingLabel.textContent='Offer not in latest API results — refresh recommendations';
+                return;
+            }
+            gear=sameUid||sameStats;
+        }catch(error){
+            if(pendingLabel)pendingLabel.textContent='Could not verify live listing — try refresh';
+            return;
+        }finally{delete card.dataset.offerChecking;}
         const uid=String(gear?.uid??'').trim();
         const root=document.querySelector('#mainContainer')||document.body;
         const panel=card?.querySelector('.sl-mi-loadout-action');
