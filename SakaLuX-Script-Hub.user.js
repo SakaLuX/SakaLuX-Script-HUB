@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.161
+// @version      1.9.162
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1113,7 +1113,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.161';
+    const VERSION = '1.9.162';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -1147,6 +1147,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.162", "date": "2026-11-12", "changes": ["Source change: Synchronize shared runtime with canonical Core.", "Updated canonical userscript version to v1.9.162; package verified by GitHub Actions."]},
         {"version": "1.9.161", "date": "2026-11-11", "changes": ["Source change: Synchronize shared runtime with canonical Core.", "Updated canonical userscript version to v1.9.161; package verified by GitHub Actions."]},
         {"version": "1.9.160", "date": "2026-11-11", "changes": ["Source change: Synchronize shared runtime with canonical Core.", "Updated canonical userscript version to v1.9.160; package verified by GitHub Actions."]},
         {"version": "1.9.159", "date": "2026-11-01", "changes": ["Reuses a signed, API-key-bound PRO certificate across pages and isolated userscripts for its original validity (up to five minutes).", "Shares license requests and persists server rate-limit deadlines across reloads; Torn PDA callback and Promise transports are supported."]},
@@ -1929,17 +1930,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.92",
+                    "version": "1.17.93",
                     "date": "2026-11-12",
                     "notes": [
-                        "Source change: fix(market-intelligence): distinguish missing melee from API errors and scope equipment cache to active key.",
-                        "Updated canonical userscript version to v1.17.92; package verified by GitHub Actions."
+                        "Source change: fix(market-intelligence): map Torn v2 weapon subtypes to melee slots and preserve null combat stats.",
+                        "Updated canonical userscript version to v1.17.93; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.92",
-                "detailsRevision": 42,
+                "version": "1.17.93",
+                "detailsRevision": 43,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

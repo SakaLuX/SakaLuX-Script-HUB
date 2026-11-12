@@ -1,5 +1,15 @@
 # Changelog
 
+## market-intelligence v1.17.93 — automatic release (2026-11-12)
+
+- Source change: fix(market-intelligence): map Torn v2 weapon subtypes to melee slots and preserve null combat stats.
+- Updated canonical userscript version to v1.17.93; package verified by GitHub Actions.
+
+## script-hub v1.9.162 — automatic release (2026-11-12)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.9.162; package verified by GitHub Actions.
+
 ## market-intelligence v1.17.92 — automatic release (2026-11-12)
 
 - Source change: fix(market-intelligence): distinguish missing melee from API errors and scope equipment cache to active key.

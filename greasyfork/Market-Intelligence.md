@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.92**
+**v1.17.93**
 
 ### Faster PRO verification for Bazaar Flip and Travel — 2026-10-11
 - Uses cached verified entitlement first, then checks live in the background when needed.
@@ -52,7 +52,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-12**
-- Canonical version: **v1.17.92**
+- Canonical version: **v1.17.93**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -75,9 +75,9 @@
 
 ## Current release note
 
-**v1.17.92 — Version and release synchronization**
-- Source change: fix(market-intelligence): distinguish missing melee from API errors and scope equipment cache to active key.
-- Updated canonical userscript version to v1.17.92; package verified by GitHub Actions.
+**v1.17.93 — Version and release synchronization**
+- Source change: fix(market-intelligence): map Torn v2 weapon subtypes to melee slots and preserve null combat stats.
+- Updated canonical userscript version to v1.17.93; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -85,6 +85,11 @@
 
 
 
+
+
+### v1.17.93 — 2026-11-12
+- Source change: fix(market-intelligence): map Torn v2 weapon subtypes to melee slots and preserve null combat stats.
+- Updated canonical userscript version to v1.17.93; package verified by GitHub Actions.
 
 ### v1.17.92 — 2026-11-12
 - Source change: fix(market-intelligence): distinguish missing melee from API errors and scope equipment cache to active key.
