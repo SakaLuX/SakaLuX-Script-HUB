@@ -1,5 +1,10 @@
 # Changelog
 
+## script-hub v1.9.164 — automatic release (2026-11-12)
+
+- Source change: fix(script-hub): refresh INFO and NEW from canonical registry for every module.
+- Updated canonical userscript version to v1.9.164; package verified by GitHub Actions.
+
 ## market-intelligence v1.17.98 — automatic release (2026-11-12)
 
 - Source change: fix(market-intelligence): honor numeric equipment slots, suppress temporary and detect armor category.
