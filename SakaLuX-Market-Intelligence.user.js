@@ -2248,7 +2248,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const actual=inferGearSlot(meta,meta.type||'');
         const selected=marketSelectedCategory();
         // Never compare a stale API market item against the newly selected equipment tab.
-        if(selected&&actual&&actual!==selected&&actual!=='weapon')return selected;
+        // A specific item must be compared by its item metadata, not the surrounding tab.
         return actual||selected;
     }
     function armorFamily(slot){return String(slot||'').startsWith('armor-')?slot:(slot==='armor'?'armor':'');}
@@ -3531,29 +3531,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return vals.map(v=>blocks[Math.min(blocks.length-1,Math.max(0,Math.round((v-lo)/span*(blocks.length-1))))]).join('');
     }
 
+    // Only an explicit item selection can drive item-specific pricing/comparisons.
+    // Category pages contain many hidden/listing links: the first DOM item is NOT selected.
     function selectedMarketItemId(){
-        const sources=[location.hash||'',location.search||'',location.href||''];
+        const sources=[location.hash||'',location.search||''];
         for(const src of sources){
             const m=String(src).match(/(?:itemID|itemId|item_id)=(\d+)/i);
             if(m&&Number(m[1])>0)return Number(m[1]);
         }
-        const links=[...document.querySelectorAll('a[href*="itemID="],a[href*="itemId="],[data-itemid],[data-item-id],[data-item]')];
-        for(const el of links){
-            const raw=el.getAttribute('href')||el.getAttribute('data-itemid')||el.getAttribute('data-item-id')||el.getAttribute('data-item')||'';
-            const m=String(raw).match(/(?:itemID|itemId|item_id)?=?\b(\d{1,6})\b/i);
-            if(m&&Number(m[1])>0)return Number(m[1]);
-        }
-        const searchText=normText(document.querySelector('input[type="search"],input[placeholder*="Search" i],input[placeholder*="item" i]')?.value||'').toLowerCase();
-        const imgs=[...document.querySelectorAll('img[src*="/images/items/"]')].filter(isVisible);
-        if(searchText){
-            const exact=imgs.find(img=>normText(img.alt||img.getAttribute('title')||'').toLowerCase()===searchText);
-            const id=itemIdFromImg(exact);if(id)return id;
-        }
-        const ids=imgs.map(itemIdFromImg).filter(Boolean);
-        const unique=[...new Set(ids)];
-        if(unique.length===1)return unique[0];
-        if(ids.length)return ids[0];
-        return null;
+        const selected=document.querySelector('[data-selected-item-id],[data-active-item-id], [aria-current="true"][data-itemid], [aria-selected="true"][data-itemid]');
+        const selectedId=Number(selected?.getAttribute('data-selected-item-id')||selected?.getAttribute('data-active-item-id')||selected?.getAttribute('data-itemid')||0);
+        return selectedId>0?selectedId:null;
     }
     async function scanItemMarket(){
         if(!settings.itemMarket||!/[?&]sid=ItemMarket(?:[&#]|$)/i.test(location.href)){
@@ -3561,7 +3549,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             return;
         }
         const previous=document.getElementById('sl-mi-market-bar');
-        const id=selectedMarketItemId();if(!id){if(detectPage()==='itemmarket'){setTimeout(()=>scheduleScan(false),700);return;}previous?.remove();return;}
+        const id=selectedMarketItemId();
+        if(!id){previous?.remove();state.itemMarketItemId=null;return;}
+        // No need to rebuild a healthy panel on every SPA DOM mutation.
+        if(previous?.isConnected&&previous.dataset.itemId===String(id)&&previous.dataset.marketRevision===String(state.marketRevision||0))return;
         const requestEpoch=++state.itemMarketEpoch;
         const market=await fetchMarket(id,false);if(!market||requestEpoch!==state.itemMarketEpoch||selectedMarketItemId()!==id)return;
         recordPriceHistory(id,market);
@@ -3570,7 +3561,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const watched=watchlist[String(id)]||null,bar=document.createElement('div');bar.id='sl-mi-market-bar';
         const trendIcon=analysis.trend>1?'↑':analysis.trend<-1?'↓':'→';
         const signalClass=analysis.signal==='BUY NOW'?'buy':analysis.signal==='WAIT'?'wait':analysis.signal==='FAIR'?'fair':'learning';
-        const cachedNetwork=settings.priceNetwork&&priceNetworkConfigured()?cachedNetworkConsensus(id):null;bar.dataset.itemId=String(id);
+        const cachedNetwork=settings.priceNetwork&&priceNetworkConfigured()?cachedNetworkConsensus(id):null;bar.dataset.itemId=String(id);bar.dataset.marketRevision=String(state.marketRevision||0);
         bar.innerHTML='<div class="sl-mi-market-head"><div><b>📈 ITEM MARKET INTELLIGENCE</b><span>floor <strong>'+money(market.minPrice)+'</strong> · effective <strong>'+money(market.price)+'</strong> · '+market.count+' listings</span></div><span class="sl-mi-signal '+signalClass+'">'+esc(analysis.signal)+'</span></div>'+
             '<div class="sl-mi-market-grid"><div><small>TREND</small><strong>'+trendIcon+' '+pct(analysis.trend)+'</strong></div><div><small>MEDIAN</small><strong>'+money(analysis.median)+'</strong></div><div><small>VOLATILITY</small><strong>'+analysis.volatility.toFixed(1)+'%</strong></div><div><small>SPREAD</small><strong>'+analysis.spread.toFixed(1)+'%</strong></div></div>'+
             '<div class="sl-mi-spark"><span>'+esc(sparkText(analysis.rows))+'</span><small>'+analysis.samples+' local samples · '+esc(analysis.reason)+'</small></div>'+
@@ -3749,9 +3740,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function scheduleMarketTabRefresh(){
         if(!settings.enabled||detectPage()!=='itemmarket')return;
         state.itemMarketEpoch=(state.itemMarketEpoch||0)+1;
-        document.getElementById('sl-mi-market-bar')?.remove();
+        state.marketRevision=(state.marketRevision||0)+1;
+        // Wait for Torn SPA to settle before reading the new selection.
         if(marketTabTimer)clearTimeout(marketTabTimer);
-        marketTabTimer=setTimeout(()=>{marketTabTimer=null;scheduleScan(false);},300);
+        marketTabTimer=setTimeout(()=>{marketTabTimer=null;scheduleScan(false);},380);
     }
     function scheduleScan(force=false){
         if(detectPage()==='travel'&&!force){
@@ -3955,11 +3947,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             const label=normText(target.textContent||target.getAttribute('aria-label')||'').toLowerCase();
             if(/^(primary|secondary|melee|temporary|equipment|supplies)$/.test(label)||/itemid=|item_id=/i.test(target.getAttribute('href')||'')){
                 scheduleMarketTabRefresh();
-                setTimeout(scheduleMarketTabRefresh,900);
             }
         };
         document.addEventListener('click',state.marketTabHandler,true);
-        state.observer=new MutationObserver(muts=>{if(window.SakaLuXPerf?.unrelated?.(muts))return;const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-session,#sl-mi-arrival,#sl-mi-overlay,#sl-mi-country-best,#sl-mi-travel-plan,#sl-mi-bazaar-board,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&detectDestination()&&!detectInFlight()){scheduleLandedSmartRefresh('mutation');return;}if(detectPage()==='travel'&&now-state.lastObserverScan<5000){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});state.routeHandler=()=>scheduleScan(true);window.addEventListener('hashchange',state.routeHandler);}
+        state.observer=new MutationObserver(muts=>{if(window.SakaLuXPerf?.unrelated?.(muts))return;const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-market-bar'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-session,#sl-mi-arrival,#sl-mi-overlay,#sl-mi-country-best,#sl-mi-travel-plan,#sl-mi-bazaar-board,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&detectDestination()&&!detectInFlight()){scheduleLandedSmartRefresh('mutation');return;}if(detectPage()==='travel'&&now-state.lastObserverScan<5000){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});state.routeHandler=()=>scheduleScan(true);window.addEventListener('hashchange',state.routeHandler);}
 
     function stopRuntime(){
         if(state.bestRouteBootstrapTimer){clearInterval(state.bestRouteBootstrapTimer);state.bestRouteBootstrapTimer=null;}
