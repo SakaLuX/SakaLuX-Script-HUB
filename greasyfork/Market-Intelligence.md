@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.98**
+**v1.17.99**
 
 ### Faster PRO verification for Bazaar Flip and Travel — 2026-10-11
 - Uses cached verified entitlement first, then checks live in the background when needed.
@@ -52,7 +52,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-12**
-- Canonical version: **v1.17.98**
+- Canonical version: **v1.17.99**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -75,9 +75,9 @@
 
 ## Current release note
 
-**v1.17.98 — Version and release synchronization**
-- Source change: fix(market-intelligence): honor numeric equipment slots, suppress temporary and detect armor category.
-- Updated canonical userscript version to v1.17.98; package verified by GitHub Actions.
+**v1.17.99 — Version and release synchronization**
+- Source change: feat(market): make Top 5 comparator cards navigate to exact Torn listing when present.
+- Updated canonical userscript version to v1.17.99; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -91,6 +91,11 @@
 
 
 
+
+
+### v1.17.99 — 2026-11-12
+- Source change: feat(market): make Top 5 comparator cards navigate to exact Torn listing when present.
+- Updated canonical userscript version to v1.17.99; package verified by GitHub Actions.
 
 ### v1.17.98 — 2026-11-12
 - Source change: fix(market-intelligence): honor numeric equipment slots, suppress temporary and detect armor category.

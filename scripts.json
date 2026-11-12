@@ -287,17 +287,17 @@
         }
       ],
       "release": {
-        "version": "1.17.98",
+        "version": "1.17.99",
         "date": "2026-11-12",
         "notes": [
-          "Source change: fix(market-intelligence): honor numeric equipment slots, suppress temporary and detect armor category.",
-          "Updated canonical userscript version to v1.17.98; package verified by GitHub Actions."
+          "Source change: feat(market): make Top 5 comparator cards navigate to exact Torn listing when present.",
+          "Updated canonical userscript version to v1.17.99; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.98",
-      "detailsRevision": 48,
+      "version": "1.17.99",
+      "detailsRevision": 49,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
