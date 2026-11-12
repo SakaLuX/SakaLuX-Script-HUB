@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1012 — automatic release (2026-11-12)
+
+- Source change: fix(suite): preserve Training Log on quota errors with compact storage and IndexedDB fallback.
+- Updated canonical userscript version to v0.9.1012; package verified by GitHub Actions.
+
 ## market-intelligence v1.18.02 — automatic release (2026-11-12)
 
 - Source change: fix(market): recheck recommended offer against fresh Torn API before locating listing.
