@@ -1932,17 +1932,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.99",
+                    "version": "1.18.00",
                     "date": "2026-11-12",
                     "notes": [
-                        "Source change: feat(market): make Top 5 comparator cards navigate to exact Torn listing when present.",
-                        "Updated canonical userscript version to v1.17.99; package verified by GitHub Actions."
+                        "Source change: feat(market): display bonuses on equipped weapons and comparison offers; invalidate old loadout cache.",
+                        "Updated canonical userscript version to v1.18.00; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.99",
-                "detailsRevision": 49,
+                "version": "1.18.00",
+                "detailsRevision": 50,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

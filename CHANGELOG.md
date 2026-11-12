@@ -1,5 +1,10 @@
 # Changelog
 
+## market-intelligence v1.18.00 — automatic release (2026-11-12)
+
+- Source change: feat(market): display bonuses on equipped weapons and comparison offers; invalidate old loadout cache.
+- Updated canonical userscript version to v1.18.00; package verified by GitHub Actions.
+
 ## market-intelligence v1.17.99 — automatic release (2026-11-12)
 
 - Source change: feat(market): make Top 5 comparator cards navigate to exact Torn listing when present.
