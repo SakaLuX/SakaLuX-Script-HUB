@@ -1,5 +1,15 @@
 # Changelog
 
+## market-intelligence v1.17.95 — automatic release (2026-11-12)
+
+- Source change: fix(market-intelligence): stop phantom first-item selection and preserve comparator across SPA redraws.
+- Updated canonical userscript version to v1.17.95; package verified by GitHub Actions.
+
+## script-hub v1.9.163 — automatic release (2026-11-12)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.9.163; package verified by GitHub Actions.
+
 ## market-intelligence v1.17.94 — automatic release (2026-11-12)
 
 - Source change: fix(market-intelligence): auto-refresh all equipment tabs and prevent stale Item Market comparisons.
