@@ -39621,8 +39621,8 @@ async function tlSyncApi(manual=false){
     finally{tlApiSyncBusy=false;if(btn)btn.disabled=false;}
 }
 
-// Training logs are kept compact in localStorage; IndexedDB is a lossless fallback
-// when the TornPDA origin quota is exhausted by other add-ons.
+// Training logs use compact, backward-compatible localStorage records.
+// If the TornPDA origin quota is exhausted, IndexedDB preserves existing history.
 const TL_FIELDS=["ts","name","role","company","companyType","gains","receivedDebug","apiLogId","apiImported","trainingAmounts","roleStatPair","gainSource","currentRoleSuggestion","currentRoleName","paid","manual","cost","amount","note","apiSchema"];
 let tlMemory=null,tlMode="local",tlHydration=null,tlPendingWrite=Promise.resolve(),tlRevision=0;
 function tlPack(d){
