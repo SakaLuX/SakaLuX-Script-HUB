@@ -2071,6 +2071,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function saveApiKey(key) { try { localStorage.setItem(STORAGE.apiKey,key); state.apiMode='Manual'; } catch (_) {} }
 
     function clearLoadoutCache(){ try{localStorage.removeItem(STORAGE.loadoutCache);}catch(_){} state.loadoutReady=false;state.loadoutItems=0; }
+    // Identity marker only: never persist the API key itself in the equipment cache.
+    function loadoutKeyId(key){let h=2166136261;for(const c of String(key||'')){h=Math.imul(h^c.charCodeAt(0),16777619);}return (h>>>0).toString(16)+':'+String(key||'').length;}
+    function validLoadoutCache(cache,key){return !!(key&&cache?.keyId===loadoutKeyId(key)&&cache?.at&&Date.now()-Number(cache.at)<LOADOUT_CACHE_MS&&Array.isArray(cache.items));}
     function apiErrorText(data){ return normText(data?.error?.error||data?.error?.message||data?.error||''); }
     async function checkRequiredApiAccess(force=true){
         const key=getApiKey();
@@ -2086,7 +2089,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             }
             const items=collectEquipmentItems(data);
             state.apiAccessStatus='ok';state.apiAccessMessage='API access OK · user/equipment available';state.apiAccessCheckedAt=Date.now();
-            if(force){saveJson(STORAGE.loadoutCache,{at:Date.now(),items});state.loadoutReady=items.length>0;state.loadoutItems=items.length;}
+            if(force){saveJson(STORAGE.loadoutCache,{at:Date.now(),keyId:loadoutKeyId(key),items});state.loadoutReady=items.length>0;state.loadoutItems=items.length;}
             return {ok:true,status:'ok',message:state.apiAccessMessage,items};
         }catch(e){
             const msg=String(e?.message||e||'API request failed');
@@ -2146,6 +2149,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
     function inferGearSlot(raw, hint='') {
         const text=normText([hint,raw?.slot,raw?.position,raw?.type,raw?.sub_type,raw?.subType,raw?.name,raw?.item?.type,raw?.item?.sub_type,raw?.item?.name].filter(Boolean).join(' ')).toLowerCase();
+        // Torn API v2 equipment slots are numeric; prefer the weapon's semantic type/sub-type for comparison.
         if(/primary/.test(text))return 'primary';
         if(/secondary/.test(text))return 'secondary';
         if(/melee/.test(text))return 'melee';
@@ -2192,14 +2196,14 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     const fetchEquippedLoadoutPending=new Map();
-    function fetchEquippedLoadout(force=false){if(!force){const cached=loadJson(STORAGE.loadoutCache,null);if(cached?.at&&Date.now()-Number(cached.at)<LOADOUT_CACHE_MS&&Array.isArray(cached.items))return fetchEquippedLoadoutData(false);}const pendingKey=getApiKey();if(fetchEquippedLoadoutPending.has(pendingKey))return fetchEquippedLoadoutPending.get(pendingKey);const pending=fetchEquippedLoadoutData(force).finally(()=>fetchEquippedLoadoutPending.delete(pendingKey));fetchEquippedLoadoutPending.set(pendingKey,pending);return pending;}
+    function fetchEquippedLoadout(force=false){if(!force){const cached=loadJson(STORAGE.loadoutCache,null);if(validLoadoutCache(cached,getApiKey()))return fetchEquippedLoadoutData(false);}const pendingKey=getApiKey();if(fetchEquippedLoadoutPending.has(pendingKey))return fetchEquippedLoadoutPending.get(pendingKey);const pending=fetchEquippedLoadoutData(force).finally(()=>fetchEquippedLoadoutPending.delete(pendingKey));fetchEquippedLoadoutPending.set(pendingKey,pending);return pending;}
     async function fetchEquippedLoadoutData(force=false) {
         const cached=loadJson(STORAGE.loadoutCache,null);
-        if(!force&&cached?.at&&Date.now()-Number(cached.at)<LOADOUT_CACHE_MS&&Array.isArray(cached.items)){
-            state.loadoutReady=true;state.loadoutItems=cached.items.length;state.loadoutLastError='';return cached.items;
-        }
         const key=getApiKey();
-        if(!key){state.loadoutReady=false;state.loadoutLastError='API key not configured';return [];}
+        if(!force&&validLoadoutCache(cached,key)){
+            state.loadoutReady=cached.items.length>0;state.loadoutItems=cached.items.length;state.loadoutLastError='';return cached.items;
+        }
+        if(!key){state.apiAccessStatus='missing';state.loadoutReady=false;state.loadoutLastError='API key not configured';return [];}
         try{
             const data=await requestJson('https://api.torn.com/v2/user/equipment?key='+encodeURIComponent(key));
             if(data?.error){
@@ -2209,11 +2213,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 throw new Error(state.apiAccessMessage);
             }
             const items=collectEquipmentItems(data);
-            saveJson(STORAGE.loadoutCache,{at:Date.now(),items});
+            saveJson(STORAGE.loadoutCache,{at:Date.now(),keyId:loadoutKeyId(key),items});
             state.apiAccessStatus='ok';state.apiAccessMessage='API access OK · user/equipment available';state.apiAccessCheckedAt=Date.now();
             state.loadoutReady=items.length>0;state.loadoutItems=items.length;state.loadoutLastError=items.length?'':'API access OK, but no equipped combat items were returned';
             return items;
-        }catch(e){state.loadoutReady=false;state.loadoutLastError=String(e?.message||e);return cached?.items||[];}
+        }catch(e){state.loadoutReady=false;state.loadoutLastError=String(e?.message||e);return validLoadoutCache(cached,key)?cached.items:[];}
     }
 
     function marketGearListings(market) { return Array.isArray(market?.gearListings)?market.gearListings:[]; }
@@ -2250,11 +2254,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const equipped=await fetchEquippedLoadout(false);if(!bar.isConnected||bar.dataset.itemId!==String(id))return;
         const matches=compatibleEquipped(slot,equipped).sort((a,b)=>equippedScore(b,slot)-equippedScore(a,slot)),current=matches[0]||null;
         if(!current){
-            const missing=state.apiAccessStatus==='missing-equipment'||/MISSING EQUIPMENT ACCESS/i.test(state.loadoutLastError||'');
-            const headline=missing?'API KEY MISSING EQUIPMENT ACCESS':'Could not match equipped '+esc(slot);
-            const detail=missing?'Create a new SakaLuX Market Intelligence API key, then paste/save it in Settings.':(state.loadoutLastError||'No compatible equipped item was returned.');
-            block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>'+headline+'</span></div><small class="sl-mi-loadout-error">'+esc(detail)+'</small><button type="button" class="sl-mi-loadout-keyfix">FIX API KEY</button>';
-            block.querySelector('.sl-mi-loadout-keyfix').onclick=()=>openSettings();state.loadoutComparisons=0;state.loadoutBestVerdict='';return;
+            const missing=state.apiAccessStatus==='missing'||state.apiAccessStatus==='missing-equipment';
+            const apiFailed=missing||state.apiAccessStatus==='error';
+            const headline=missing?'API KEY MISSING EQUIPMENT ACCESS':apiFailed?'Equipment API unavailable':'Could not match equipped '+esc(slot);
+            const detail=missing?'Verify the equipment permission for your API key in Settings.':apiFailed?(state.loadoutLastError||'Equipment API request failed.'):('No equipped '+slot+' item matched the market listing. Check your loadout or refresh.');
+            block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>'+headline+'</span></div><small class="sl-mi-loadout-error">'+esc(detail)+'</small><button type="button" class="sl-mi-loadout-keyfix">'+(missing?'FIX API KEY':'REFRESH EQUIPMENT')+'</button>';
+            block.querySelector('.sl-mi-loadout-keyfix').onclick=async()=>{if(missing){openSettings();return;}clearLoadoutCache();await renderLoadoutComparator(bar,market,id);};state.loadoutComparisons=0;state.loadoutBestVerdict='';return;
         }
         const rows=gear.slice(0,8).map(g=>({...g,comparison:compareGear(g,current,slot)})),rank={UPGRADE:3,SIDEGRADE:2,UNKNOWN:1,DOWNGRADE:0};
         rows.sort((a,b)=>(rank[b.comparison.verdict]-rank[a.comparison.verdict])||(Number(a.price)-Number(b.price)));
