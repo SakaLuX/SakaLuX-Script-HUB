@@ -32,6 +32,24 @@ def bump(value):
     return ".".join(map(str, parts))
 
 
+def release_relevant_source(entry, source):
+    """Ignore generated Hub registry data when deciding whether Hub needs a release.
+
+    The embedded fallback registry changes whenever another module releases.
+    This is metadata synchronization, not a functional Hub change. Keep all
+    other source bytes (including Shared Core) in the comparison.
+    """
+    if entry["id"] != "script-hub":
+        return source.strip()
+    start = "    const FALLBACK_REGISTRY = "
+    end = "\n\n    const FALLBACK_MODULE_DETAILS = "
+    if start not in source or end not in source:
+        raise ValueError("Hub fallback registry markers changed; cannot safely compare releases")
+    before, tail = source.split(start, 1)
+    _, after = tail.split(end, 1)
+    return (before + start + "<generated registry>" + end + after).strip()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", required=True, help="Previous commit SHA or ref")
@@ -56,7 +74,12 @@ def main():
             current = version(source)
             tag = f"{entry['tagPrefix']}{current}"
             released_source = git("show", f"{tag}:{filename}", check=False)
-            if filename in changed or released_source != source.strip():
+            if entry["id"] == "script-hub":
+                # Do not publish Hub just because another module changed its
+                # generated FALLBACK_REGISTRY; still publish real Hub/Core edits.
+                if not released_source or release_relevant_source(entry, released_source) != release_relevant_source(entry, source):
+                    selected.append(entry)
+            elif filename in changed or released_source != source.strip():
                 selected.append(entry)
     print("Release reconciliation candidates:", ", ".join(e["id"] for e in selected) or "none")
     if not selected:
