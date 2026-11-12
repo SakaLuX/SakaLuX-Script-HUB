@@ -2561,7 +2561,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             ...s,
             expectedVersion: String(s.version || '0'),
             info: s.info || FALLBACK_MODULE_DETAILS[s.id]?.info,
-            release: s.release || FALLBACK_MODULE_DETAILS[s.id]?.release,
+            // An older cached registry can carry notes for a different version.
+            release: String(s.release?.version||'')===String(s.version||'')
+                ?s.release
+                :(String(baseline?.release?.version||'')===String(s.version||'')
+                    ?baseline.release:{version:String(s.version||'0'),date:'',notes:[]}),
             quickActions: Array.isArray(s.quickActions) ? s.quickActions : [],
             api() {
                 try { return s.apiGlobal ? window[s.apiGlobal] || null : null; } catch { return null; }
@@ -2612,6 +2616,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             const raw = await httpGet(REGISTRY_URL + '?v=' + VERSION + (force ? '&t=' + Date.now() : ''));
             const data = JSON.parse(raw);
             if (!Array.isArray(data?.scripts)) throw new Error('Invalid registry');
+            // A delayed CDN/cached response must never downgrade module details.
             registry = data;
             SCRIPTS = normalizeRegistry(data);
             registryStatus = 'online';
@@ -3811,6 +3816,17 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
         if (translated !== originalText) renderTranslated(root, translated);
         else if (fallbackText) renderTranslated(root, fallbackText);
     }
+    function latestHubModule(id){
+        return SCRIPTS.find(s=>s.id===id)||null;
+    }
+    async function showFreshModuleView(id,view){
+        // Refresh only when the user opens INFO/NEW, not on every Hub render.
+        // Re-read the normalized module after loading to avoid closing over stale cards.
+        await loadRegistry(true);
+        const current=latestHubModule(id);
+        if(view==='info')openModuleInfo(current);
+        else openModuleRelease(current);
+    }
     function openModuleInfo(script) {
         if (!script) return;
         createOverlay(`${headerMarkup(script.name, 'What this module does', 'slhmi-close', script.icon || '🧩', 'MODULE INFORMATION')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(script.version || script.expectedVersion || '?')} <span class="slh-version-date">${escapeHtml(script.category || 'Other')}</span></div><div id="slh-info-auto" style="margin-top:8px">${String(language() === 'ro' ? (MODULE_INFO_RO[script.id] || script.info || script.description || 'No module information available.') : (script.info || script.description || 'No module information available.')).split(/\n\s*\n/).map(section => { const lines = section.split('\n'); return lines.length > 1 ? `<section style="margin-bottom:16px"><h3 style="margin:0 0 6px;color:#f3f7fb;font-size:12px">${escapeHtml(lines.shift())}</h3><p style="margin:0;line-height:1.6">${escapeHtml(lines.join('\n'))}</p></section>` : `<p style="margin:0 0 12px;line-height:1.6">${escapeHtml(section)}</p>`; }).join('')}</div></div><button class="slh-big-btn gray" id="slhmi-back">← BACK</button></div>`);
@@ -3823,13 +3839,15 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
     function openModuleRelease(script) {
         if (!script) return;
-        const release = script.release || {};
-        const localizedNotes = language() === 'ro' && MODULE_RELEASE_RO[script.id] && MODULE_RELEASE_RO[script.id].length === (release.notes || []).length ? MODULE_RELEASE_RO[script.id] : release.notes;
+        const release=String(script.release?.version||'')===String(script.version||'')?script.release:{version:script.version,date:'',notes:[]};
+        // Old hardcoded RO translations are not versioned and can silently
+        // replace the current release notes. Translate the live notes instead.
+        const localizedNotes=release.notes;
         const notes = Array.isArray(localizedNotes) && localizedNotes.length
             ? localizedNotes.map(note => `<div>• ${escapeHtml(note)}</div>`).join('')
             : '<div>No release notes available yet.</div>';
         createOverlay(`${headerMarkup(script.name, 'Current module release notes', 'slhmn-close', '✦', 'RELEASE CENTER')}<div class="slh-view"><div class="slh-note"><div class="slh-version-title">v${escapeHtml(release.version || script.version || script.expectedVersion || '?')} ${release.date ? `<span class="slh-version-date">${escapeHtml(release.date)}</span>` : ''}</div><div id="slh-release-auto" style="margin-top:8px">${notes}</div></div><button class="slh-big-btn gray" id="slhmn-back">← BACK</button></div>`);
-        translateModuleView(script, 'slh-release-auto', (release.notes || []).join('\n'), (MODULE_RELEASE_RO[script.id] || []).join('\n'), (root, translated) => {
+        translateModuleView(script, 'slh-release-auto', (release.notes || []).join('\n'), '', (root, translated) => {
             root.innerHTML = translated.split('\n').map(line => '<div>• ' + escapeHtml(line) + '</div>').join('');
         });
         document.getElementById('slhmn-close').onclick = closeHub;
@@ -4259,8 +4277,8 @@ body [id^="sakalux-"][id*="overlay"],body [id^="sl-"][id*="overlay"],body [id^="
 
     function bindCards() {
         document.querySelectorAll('[data-module-docs]').forEach(button => { button.onclick = () => { const script = SCRIPTS.find(item => item.id === button.dataset.moduleDocs); if (script) window.open('https://sakalux.ro/#script/' + encodeURIComponent(script.id) + '/info', '_blank', 'noopener,noreferrer'); }; });
-        document.querySelectorAll('[data-module-info]').forEach(button => { button.onclick = () => openModuleInfo(SCRIPTS.find(item => item.id === button.dataset.moduleInfo)); });
-        document.querySelectorAll('[data-module-new]').forEach(button => { button.onclick = () => openModuleRelease(SCRIPTS.find(item => item.id === button.dataset.moduleNew)); });
+        document.querySelectorAll('[data-module-info]').forEach(button => { button.onclick = async () => {button.disabled=true;try{await showFreshModuleView(button.dataset.moduleInfo,'info');}finally{if(button.isConnected)button.disabled=false;}}; });
+        document.querySelectorAll('[data-module-new]').forEach(button => { button.onclick = async () => {button.disabled=true;try{await showFreshModuleView(button.dataset.moduleNew,'release');}finally{if(button.isConnected)button.disabled=false;}}; });
         document.querySelectorAll('[data-remediate]').forEach(button => {
             button.onclick = async () => {
                 button.disabled = true;
