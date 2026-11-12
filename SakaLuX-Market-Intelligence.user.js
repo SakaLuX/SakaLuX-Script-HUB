@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.99
+// @version      1.18.00
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2073,7 +2073,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function clearLoadoutCache(){ try{localStorage.removeItem(STORAGE.loadoutCache);}catch(_){} state.loadoutReady=false;state.loadoutItems=0; }
     // Identity marker only: never persist the API key itself in the equipment cache.
     function loadoutKeyId(key){let h=2166136261;for(const c of String(key||'')){h=Math.imul(h^c.charCodeAt(0),16777619);}return (h>>>0).toString(16)+':'+String(key||'').length;}
-    function validLoadoutCache(cache,key){return !!(key&&cache?.schema===2&&cache?.keyId===loadoutKeyId(key)&&cache?.at&&Date.now()-Number(cache.at)<LOADOUT_CACHE_MS&&Array.isArray(cache.items));}
+    function validLoadoutCache(cache,key){return !!(key&&cache?.schema===3&&cache?.keyId===loadoutKeyId(key)&&cache?.at&&Date.now()-Number(cache.at)<LOADOUT_CACHE_MS&&Array.isArray(cache.items));}
     function apiErrorText(data){ return normText(data?.error?.error||data?.error?.message||data?.error||''); }
     async function checkRequiredApiAccess(force=true){
         const key=getApiKey();
@@ -2089,7 +2089,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             }
             const items=collectEquipmentItems(data);
             state.apiAccessStatus='ok';state.apiAccessMessage='API access OK · user/equipment available';state.apiAccessCheckedAt=Date.now();
-            if(force){saveJson(STORAGE.loadoutCache,{schema:2,at:Date.now(),keyId:loadoutKeyId(key),items});state.loadoutReady=items.length>0;state.loadoutItems=items.length;}
+            if(force){saveJson(STORAGE.loadoutCache,{schema:3,at:Date.now(),keyId:loadoutKeyId(key),items});state.loadoutReady=items.length>0;state.loadoutItems=items.length;}
             return {ok:true,status:'ok',message:state.apiAccessMessage,items};
         }catch(e){
             const msg=String(e?.message||e||'API request failed');
@@ -2192,7 +2192,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const slot=explicitEquippedSlot(raw)||(explicitSlot&&/primary|secondary|melee|temporary|helmet|glove|boot|leg|body|chest/.test(explicitSlot)
             ?inferGearSlot({slot:explicitSlot},explicitSlot)
             :inferGearSlot({...raw,...details,name,type,sub_type:subType},hint));
-        const bonuses=Array.isArray(details?.bonuses)?details.bonuses:(Array.isArray(raw.bonuses)?raw.bonuses:[]);
+        const bonuses=Array.isArray(raw.bonuses)&&raw.bonuses.length?raw.bonuses:(Array.isArray(details?.bonuses)?details.bonuses:[]);
         return {name:String(name),uid,slot,type,subType,stats,bonuses};
     }
 
@@ -2231,13 +2231,23 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 throw new Error(state.apiAccessMessage);
             }
             const items=collectEquipmentItems(data);
-            saveJson(STORAGE.loadoutCache,{schema:2,at:Date.now(),keyId:loadoutKeyId(key),items});
+            saveJson(STORAGE.loadoutCache,{schema:3,at:Date.now(),keyId:loadoutKeyId(key),items});
             state.apiAccessStatus='ok';state.apiAccessMessage='API access OK · user/equipment available';state.apiAccessCheckedAt=Date.now();
             state.loadoutReady=items.length>0;state.loadoutItems=items.length;state.loadoutLastError=items.length?'':'API access OK, but no equipped combat items were returned';
             return items;
         }catch(e){state.loadoutReady=false;state.loadoutLastError=String(e?.message||e);return validLoadoutCache(cached,key)?cached.items:[];}
     }
 
+    function gearBonusesHtml(bonuses) {
+        const list=Array.isArray(bonuses)?bonuses.filter(x=>x&&typeof x==='object'):[];
+        if(!list.length)return '<span class="sl-mi-bonus-empty">No special bonuses reported</span>';
+        return list.map(b=>{
+            const name=String(b.title||b.name||b.bonus||'Bonus');
+            const value=b.value!=null&&b.value!==''?' '+String(b.value)+(typeof b.value==='number'?'%':''):'';
+            const description=String(b.description||'').trim();
+            return '<span class="sl-mi-bonus-chip"><b>'+esc(name+value)+'</b>'+(description?'<small>'+esc(description)+'</small>':'')+'</span>';
+        }).join('');
+    }
     function marketGearListings(market) { return Array.isArray(market?.gearListings)?market.gearListings:[]; }
     function marketSelectedCategory(){
         const selectors=['[role="tab"][aria-selected="true"]','[role="tab"][aria-current="page"]','[class*="active"][class*="category"]','[class*="selected"][class*="category"]'];
@@ -2352,9 +2362,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const rows=topLoadoutUpgrades(gear,current,slot);
         state.loadoutComparisons=rows.length;state.loadoutBestVerdict=rows[0]?.comparison?.verdict||'';
         const cs=current.stats||{},currentStats=String(slot).startsWith('armor')?'Armor '+statValue(cs.armor):'Dmg '+statValue(cs.damage)+' · Acc '+statValue(cs.accuracy);
-        block.innerHTML='<div class="sl-mi-loadout-head"><div><b>⚔ LOADOUT COMPARATOR</b><span>Equipped: <strong>'+esc(current.name)+'</strong> · '+esc(currentStats)+'</span></div><button type="button" class="sl-mi-loadout-refresh">↻</button></div><div class="sl-mi-loadout-note">Top 5 strict upgrades: up to 3 strongest first, then 2 lowest-priced upgrades. Only this searched item; base stats exclude bonuses/mods.</div>'+(rows.length?'<div class="sl-mi-loadout-rows"></div>':'<div class="sl-mi-loadout-error">No verified upgrade among the current item listings. Try another weapon or armor item.</div>');
+        block.innerHTML='<div class="sl-mi-loadout-head"><div><b>⚔ LOADOUT COMPARATOR</b><span>Equipped: <strong>'+esc(current.name)+'</strong> · '+esc(currentStats)+'</span></div><button type="button" class="sl-mi-loadout-refresh">↻</button></div><div class="sl-mi-equipped-bonuses"><b>Equipped bonuses</b><div class="sl-mi-bonus-list">'+gearBonusesHtml(current.bonuses)+'</div></div><div class="sl-mi-loadout-note">Top 5 strict upgrades: up to 3 strongest first, then 2 lowest-priced upgrades. Only this searched item; base stats exclude bonuses/mods.</div>'+(rows.length?'<div class="sl-mi-loadout-rows"></div>':'<div class="sl-mi-loadout-error">No verified upgrade among the current item listings. Try another weapon or armor item.</div>');
         const host=block.querySelector('.sl-mi-loadout-rows');
-        rows.forEach((g,i)=>{const c=g.comparison,row=document.createElement('div');row.className='sl-mi-loadout-row upgrade';const stats=String(slot).startsWith('armor')?'Armor '+statValue(g.stats.armor)+' ('+signedStat(c.deltaArmor)+')':'Dmg '+statValue(g.stats.damage)+' ('+signedStat(c.deltaDamage)+') · Acc '+statValue(g.stats.accuracy)+' ('+signedStat(c.deltaAccuracy)+')';const bonus=(g.bonuses||[]).map(x=>x?.title).filter(Boolean).slice(0,2).join(', ');row.innerHTML='<strong class="sl-mi-loadout-verdict">#'+(i+1)+' '+esc(g.tier)+'</strong><span>'+money(g.price)+'</span><span>'+esc(stats)+'</span><span>Q '+statValue(g.stats.quality)+(bonus?' · '+esc(bonus):'')+'</span><small class="sl-mi-loadout-action">VIEW OFFER ↗</small>';row.setAttribute('role','button');row.tabIndex=0;row.title='Find this exact listing in Torn Item Market';row.onclick=()=>openRecommendedMarketOffer(id,g,row);row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openRecommendedMarketOffer(id,g,row);}};host.appendChild(row);});
+        rows.forEach((g,i)=>{const c=g.comparison,row=document.createElement('div');row.className='sl-mi-loadout-row upgrade';const stats=String(slot).startsWith('armor')?'Armor '+statValue(g.stats.armor)+' ('+signedStat(c.deltaArmor)+')':'Dmg '+statValue(g.stats.damage)+' ('+signedStat(c.deltaDamage)+') · Acc '+statValue(g.stats.accuracy)+' ('+signedStat(c.deltaAccuracy)+')';row.innerHTML='<strong class="sl-mi-loadout-verdict">#'+(i+1)+' '+esc(g.tier)+'</strong><span>'+money(g.price)+'</span><span>'+esc(stats)+'</span><span>Q '+statValue(g.stats.quality)+'</span><div class="sl-mi-offer-bonuses"><b>Bonuses</b><div class="sl-mi-bonus-list">'+gearBonusesHtml(g.bonuses)+'</div></div><small class="sl-mi-loadout-action">VIEW OFFER ↗</small>';row.setAttribute('role','button');row.tabIndex=0;row.title='Find this exact listing in Torn Item Market';row.onclick=()=>openRecommendedMarketOffer(id,g,row);row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openRecommendedMarketOffer(id,g,row);}};host.appendChild(row);});
         block.querySelector('.sl-mi-loadout-refresh').onclick=async()=>{localStorage.removeItem(STORAGE.loadoutCache);await renderLoadoutComparator(bar,market,id);};
     }
 
@@ -4004,7 +4014,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     // Interactive comparator cards; style is appended once without changing the market layout.
     if(!document.getElementById('sl-mi-offer-navigation-css')){
         const offerStyle=document.createElement('style');offerStyle.id='sl-mi-offer-navigation-css';
-        offerStyle.textContent='.sl-mi-loadout-row[role="button"]{cursor:pointer;touch-action:manipulation}.sl-mi-loadout-row[role="button"]:focus-visible{outline:2px solid #65b5ff;outline-offset:2px}.sl-mi-loadout-action{display:block;color:#78bffa;font-weight:700;letter-spacing:.02em}.sl-mi-offer-target{outline:3px solid #78d98b!important;outline-offset:2px!important}';
+        offerStyle.textContent='.sl-mi-equipped-bonuses,.sl-mi-offer-bonuses{margin-top:5px;padding:5px 0;grid-column:1/-1;font-size:10px}.sl-mi-equipped-bonuses>b,.sl-mi-offer-bonuses>b{display:block;color:#e0c46e;margin-bottom:4px}.sl-mi-bonus-list{display:flex;flex-wrap:wrap;gap:5px}.sl-mi-bonus-chip{display:inline-flex;flex-direction:column;gap:2px;background:#202c3b;border:1px solid #3a526a;border-radius:5px;padding:4px 6px;max-width:100%}.sl-mi-bonus-chip b{color:#9bd7ff}.sl-mi-bonus-chip small{color:#cbd5df;white-space:normal;font-size:9px}.sl-mi-bonus-empty{color:#8f98a5}.sl-mi-loadout-row[role="button"]{cursor:pointer;touch-action:manipulation}.sl-mi-loadout-row[role="button"]:focus-visible{outline:2px solid #65b5ff;outline-offset:2px}.sl-mi-loadout-action{display:block;color:#78bffa;font-weight:700;letter-spacing:.02em}.sl-mi-offer-target{outline:3px solid #78d98b!important;outline-offset:2px!important}';
         document.head.appendChild(offerStyle);
     }
 
