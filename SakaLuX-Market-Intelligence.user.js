@@ -2270,6 +2270,29 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         else verdict='UNKNOWN';
         return {verdict,deltaDamage:dd,deltaAccuracy:da,deltaArmor:dar,deltaQuality:dq};
     }
+    function topLoadoutUpgrades(gear,current,slot){
+        const armor=String(slot).startsWith('armor');
+        const valid=gear.map(g=>({...g,comparison:compareGear(g,current,slot)})).filter(g=>{
+            const p=Number(g.price);
+            if(!(p>0))return false;
+            const own=current.stats||{},st=g.stats||{};
+            if(armor)return st.armor!=null&&own.armor!=null&&Number(st.armor)>Number(own.armor)+0.05;
+            // A real upgrade must not lose either damage or accuracy.
+            if(st.damage==null||st.accuracy==null||own.damage==null||own.accuracy==null)return false;
+            const dd=Number(st.damage)-Number(own.damage),da=Number(st.accuracy)-Number(own.accuracy);
+            return dd>=-0.05&&da>=-0.05&&(dd>0.05||da>0.05);
+        }).map(g=>{
+            const c=g.comparison;
+            const gain=armor?Number(c.deltaArmor):Number(c.deltaDamage)+Number(c.deltaAccuracy);
+            const strength=armor?Number(g.stats.armor):Number(g.stats.damage)+Number(g.stats.accuracy);
+            return {...g,gain,strength};
+        });
+        const premium=[...valid].sort((a,b)=>b.strength-a.strength||b.gain-a.gain||b.price-a.price).slice(0,3);
+        const used=new Set(premium.map(g=>String(g.uid||'')+'|'+g.price+'|'+g.strength));
+        const budget=valid.filter(g=>!used.has(String(g.uid||'')+'|'+g.price+'|'+g.strength))
+            .sort((a,b)=>a.price-b.price||b.gain-a.gain).slice(0,2);
+        return premium.map(g=>({...g,tier:'TOP PERFORMANCE'})).concat(budget.map(g=>({...g,tier:'BEST VALUE'})));
+    }
     function signedStat(v){if(v==null||!Number.isFinite(Number(v)))return '—';const n=Number(v);return (n>=0?'+':'')+n.toFixed(2);}
     function statValue(v){return v==null||!Number.isFinite(Number(v))?'—':Number(v).toFixed(2);}
     function verdictClass(v){return v==='UPGRADE'?'upgrade':v==='DOWNGRADE'?'downgrade':v==='SIDEGRADE'?'sidegrade':'unknown';}
@@ -2290,13 +2313,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>'+headline+'</span></div><small class="sl-mi-loadout-error">'+esc(detail)+'</small><button type="button" class="sl-mi-loadout-keyfix">'+(missing?'FIX API KEY':'REFRESH EQUIPMENT')+'</button>';
             block.querySelector('.sl-mi-loadout-keyfix').onclick=async()=>{if(missing){openSettings();return;}clearLoadoutCache();await renderLoadoutComparator(bar,market,id);};state.loadoutComparisons=0;state.loadoutBestVerdict='';return;
         }
-        const rows=gear.slice(0,8).map(g=>({...g,comparison:compareGear(g,current,slot)})),rank={UPGRADE:3,SIDEGRADE:2,UNKNOWN:1,DOWNGRADE:0};
-        rows.sort((a,b)=>(rank[b.comparison.verdict]-rank[a.comparison.verdict])||(Number(a.price)-Number(b.price)));
+        const rows=topLoadoutUpgrades(gear,current,slot);
         state.loadoutComparisons=rows.length;state.loadoutBestVerdict=rows[0]?.comparison?.verdict||'';
         const cs=current.stats||{},currentStats=String(slot).startsWith('armor')?'Armor '+statValue(cs.armor):'Dmg '+statValue(cs.damage)+' · Acc '+statValue(cs.accuracy);
-        block.innerHTML='<div class="sl-mi-loadout-head"><div><b>⚔ LOADOUT COMPARATOR</b><span>Equipped: <strong>'+esc(current.name)+'</strong> · '+esc(currentStats)+'</span></div><button type="button" class="sl-mi-loadout-refresh">↻</button></div><div class="sl-mi-loadout-note">Verdict compares base combat stats only. Weapon bonuses/mods can change the practical choice.</div><div class="sl-mi-loadout-rows"></div>';
+        block.innerHTML='<div class="sl-mi-loadout-head"><div><b>⚔ LOADOUT COMPARATOR</b><span>Equipped: <strong>'+esc(current.name)+'</strong> · '+esc(currentStats)+'</span></div><button type="button" class="sl-mi-loadout-refresh">↻</button></div><div class="sl-mi-loadout-note">Top 5 strict upgrades: up to 3 strongest first, then 2 lowest-priced upgrades. Only this searched item; base stats exclude bonuses/mods.</div>'+(rows.length?'<div class="sl-mi-loadout-rows"></div>':'<div class="sl-mi-loadout-error">No verified upgrade among the current item listings. Try another weapon or armor item.</div>');
         const host=block.querySelector('.sl-mi-loadout-rows');
-        rows.forEach(g=>{const c=g.comparison,row=document.createElement('div');row.className='sl-mi-loadout-row '+verdictClass(c.verdict);const stats=String(slot).startsWith('armor')?'Armor '+statValue(g.stats.armor)+' ('+signedStat(c.deltaArmor)+')':'Dmg '+statValue(g.stats.damage)+' ('+signedStat(c.deltaDamage)+') · Acc '+statValue(g.stats.accuracy)+' ('+signedStat(c.deltaAccuracy)+')';const bonus=(g.bonuses||[]).map(x=>x?.title).filter(Boolean).slice(0,2).join(', ');row.innerHTML='<strong class="sl-mi-loadout-verdict">'+esc(c.verdict)+'</strong><span>'+money(g.price)+'</span><span>'+esc(stats)+'</span><span>Q '+statValue(g.stats.quality)+(bonus?' · '+esc(bonus):'')+'</span>';host.appendChild(row);});
+        rows.forEach((g,i)=>{const c=g.comparison,row=document.createElement('div');row.className='sl-mi-loadout-row upgrade';const stats=String(slot).startsWith('armor')?'Armor '+statValue(g.stats.armor)+' ('+signedStat(c.deltaArmor)+')':'Dmg '+statValue(g.stats.damage)+' ('+signedStat(c.deltaDamage)+') · Acc '+statValue(g.stats.accuracy)+' ('+signedStat(c.deltaAccuracy)+')';const bonus=(g.bonuses||[]).map(x=>x?.title).filter(Boolean).slice(0,2).join(', ');row.innerHTML='<strong class="sl-mi-loadout-verdict">#'+(i+1)+' '+esc(g.tier)+'</strong><span>'+money(g.price)+'</span><span>'+esc(stats)+'</span><span>Q '+statValue(g.stats.quality)+(bonus?' · '+esc(bonus):'')+'</span>';host.appendChild(row);});
         block.querySelector('.sl-mi-loadout-refresh').onclick=async()=>{localStorage.removeItem(STORAGE.loadoutCache);await renderLoadoutComparator(bar,market,id);};
     }
 
