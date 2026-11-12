@@ -1,5 +1,10 @@
 # Changelog
 
+## market-intelligence v1.17.97 — automatic release (2026-11-12)
+
+- Source change: feat(market-intelligence): show top five verified upgrades ranked by strength and affordable price.
+- Updated canonical userscript version to v1.17.97; package verified by GitHub Actions.
+
 ## market-intelligence v1.17.96 — automatic release (2026-11-12)
 
 - Source change: fix(market-intelligence): restore stable category overview without phantom market item quotes.
