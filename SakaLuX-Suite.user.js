@@ -39611,7 +39611,7 @@ async function tlSyncApi(manual=false){
             if(rows.length<100||oldest<=from||!Number.isFinite(oldest)||!newIds)break;
             to=oldest-1;
         }
-        data.entries.sort((a,b)=>b.ts-a.ts);await tlSave(data);
+        data.entries.sort((a,b)=>b.ts-a.ts);if(!await tlSave(data))throw new Error('Unable to persist training history; no existing logs were deleted.');
         const check=tlLoad();const persisted=check.entries.filter(x=>x.apiImported).length;
         try{localStorage.setItem(TL_API_SYNC_KEY,JSON.stringify({lastCheck:Date.now(),lastImported:added}));}catch(e){console.warn("[SakaLuX Suite] Training sync timestamp could not be cached",e);}
         tlApiSetStatus(added+" new trains imported · "+updated+" gains updated · "+matched+" matching events · "+scanned+" Company logs / "+pages+" page(s). Saved API trains: "+persisted+".");
@@ -39707,9 +39707,9 @@ function tlSave(d){
         }
     }
     tlPendingWrite=tlPendingWrite.catch(()=>{}).then(()=>tlDbWrite({payload,at:Date.now()}));
-    return tlPendingWrite.catch(e=>{
+    return tlPendingWrite.then(()=>true).catch(e=>{
         tlApiSetStatus("Training Log not saved: local storage is full and IndexedDB failed. Do not clear logs. "+String(e?.message||e));
-        throw e;
+        return false;
     });
 }
 function tlAdd(entry) {
@@ -40733,7 +40733,7 @@ function tlWireDayPanel(dayKey,isFuture){
 }
 function refreshDayPanel(dayKey,isFuture){const old=document.getElementById("tl-day-panel");if(!old)return;const d=new Date(dayKey+"T12:00:00");const label=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});old.outerHTML=tlBuildDayPanel(dayKey,isFuture,label);tlWireDayPanel(dayKey,isFuture);}
 function refreshCalendarCells(){const todayKey=tlDayKey(Date.now());const logMap={},schMap={};tlLoad().entries.forEach(e=>{const k=tlDayKey(e.ts);logMap[k]=(logMap[k]||0)+1;});schLoad().entries.forEach(e=>{const k=tlDayKey(e.ts);schMap[k]=(schMap[k]||0)+1;});document.querySelectorAll(".tl-cal-cell[data-day]").forEach(cell=>{const key=cell.dataset.day;const logs=logMap[key]||0,scheds=schMap[key]||0;const isFut=key>todayKey;["c1","c2","c3","c4","s1","s2","s3","has-trains","has-sched","faded"].forEach(c=>cell.classList.remove(c));if(isFut){if(scheds>0){cell.classList.add("has-sched",scheds>=3?"s3":scheds>=2?"s2":"s1");}else{cell.classList.add("future");}}else{if(logs>0){const max=Math.max(1,...Object.values(logMap));const r=logs/max;cell.classList.add("has-trains",logs>=max&&max>3?"c4":r>=.66?"c3":r>=.33?"c2":"c1");}else{cell.classList.add("faded");}}const countEl=cell.querySelector(".tl-cal-count,.tl-cal-sched");if(countEl)countEl.remove();if(logs>0){const span=document.createElement("div");span.className="tl-cal-count";span.textContent=logs;cell.appendChild(span);}else if(scheds>0){const span=document.createElement("div");span.className="tl-cal-sched";span.textContent=scheds;cell.appendChild(span);}});}
-function renderTabStats(){const sub=document.getElementById("tl-subtitle");const entries=tlLoad().entries;if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v${SUITE_VERSION}`;}
+function renderTabStats(){const sub=document.getElementById("tl-subtitle");const entries=tlLoad().entries;if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v${globalThis.__SakaLuXInstalledVersions?.suite||globalThis.SakaLuXSuite?.version||(typeof VERSION!=="undefined"?VERSION:"0.9.1011")}`;}
 function buildTrainingLogModal(){
     if(document.getElementById("fc-tlog-modal"))return;
     const ov=document.createElement("div");ov.id="fc-tlog-overlay";
@@ -40828,7 +40828,7 @@ function renderTab(tabName){const m=document.getElementById("fc-tlog-modal");if(
             renderTab("log");
         });
     }
-    const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1010`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
+    const sub=document.getElementById("tl-subtitle"),note=document.getElementById("tl-foot-note");if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v${globalThis.__SakaLuXInstalledVersions?.suite||globalThis.SakaLuXSuite?.version||(typeof VERSION!=="undefined"?VERSION:"0.9.1011")}`;if(note)note.textContent="Logged entries record attempted trains, not confirmed server responses.";if(tabName==="calendar")body.innerHTML=tlRenderStats(entries)+tlRenderCalendar(entries);else if(tabName==="schedule"){body.innerHTML=tlRenderStats(entries)+tlRenderSchedule();wireScheduleDeletes(body);}else if(tabName==="employees")body.innerHTML=tlRenderStats(entries)+tlRenderByEmployee(entries);else body.innerHTML=tlRenderLog(entries);}
 function wireScheduleDeletes(body){
     if(body.dataset.fcScheduleWired==="1")return;
     body.dataset.fcScheduleWired="1";
