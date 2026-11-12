@@ -1930,17 +1930,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.93",
+                    "version": "1.17.94",
                     "date": "2026-11-12",
                     "notes": [
-                        "Source change: fix(market-intelligence): map Torn v2 weapon subtypes to melee slots and preserve null combat stats.",
-                        "Updated canonical userscript version to v1.17.93; package verified by GitHub Actions."
+                        "Source change: fix(market-intelligence): auto-refresh all equipment tabs and prevent stale Item Market comparisons.",
+                        "Updated canonical userscript version to v1.17.94; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.93",
-                "detailsRevision": 43,
+                "version": "1.17.94",
+                "detailsRevision": 44,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
