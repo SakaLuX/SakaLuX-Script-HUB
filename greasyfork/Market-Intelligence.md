@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.17.95**
+**v1.17.96**
 
 ### Faster PRO verification for Bazaar Flip and Travel — 2026-10-11
 - Uses cached verified entitlement first, then checks live in the background when needed.
@@ -52,7 +52,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-12**
-- Canonical version: **v1.17.95**
+- Canonical version: **v1.17.96**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -75,9 +75,9 @@
 
 ## Current release note
 
-**v1.17.95 — Version and release synchronization**
-- Source change: fix(market-intelligence): stop phantom first-item selection and preserve comparator across SPA redraws.
-- Updated canonical userscript version to v1.17.95; package verified by GitHub Actions.
+**v1.17.96 — Version and release synchronization**
+- Source change: fix(market-intelligence): restore stable category overview without phantom market item quotes.
+- Updated canonical userscript version to v1.17.96; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -88,6 +88,11 @@
 
 
 
+
+
+### v1.17.96 — 2026-11-12
+- Source change: fix(market-intelligence): restore stable category overview without phantom market item quotes.
+- Updated canonical userscript version to v1.17.96; package verified by GitHub Actions.
 
 ### v1.17.95 — 2026-11-12
 - Source change: fix(market-intelligence): stop phantom first-item selection and preserve comparator across SPA redraws.

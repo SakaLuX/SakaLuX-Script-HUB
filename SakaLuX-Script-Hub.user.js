@@ -1931,17 +1931,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.17.95",
+                    "version": "1.17.96",
                     "date": "2026-11-12",
                     "notes": [
-                        "Source change: fix(market-intelligence): stop phantom first-item selection and preserve comparator across SPA redraws.",
-                        "Updated canonical userscript version to v1.17.95; package verified by GitHub Actions."
+                        "Source change: fix(market-intelligence): restore stable category overview without phantom market item quotes.",
+                        "Updated canonical userscript version to v1.17.96; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
                 "type": "addon",
-                "version": "1.17.95",
-                "detailsRevision": 45,
+                "version": "1.17.96",
+                "detailsRevision": 46,
                 "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
                 "greasyForkUrl": "https://greasyfork.org/scripts/592781",
                 "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

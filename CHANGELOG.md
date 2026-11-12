@@ -1,5 +1,10 @@
 # Changelog
 
+## market-intelligence v1.17.96 — automatic release (2026-11-12)
+
+- Source change: fix(market-intelligence): restore stable category overview without phantom market item quotes.
+- Updated canonical userscript version to v1.17.96; package verified by GitHub Actions.
+
 ## market-intelligence v1.17.95 — automatic release (2026-11-12)
 
 - Source change: fix(market-intelligence): stop phantom first-item selection and preserve comparator across SPA redraws.
