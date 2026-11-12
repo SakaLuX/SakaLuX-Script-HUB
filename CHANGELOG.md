@@ -1,5 +1,10 @@
 # Changelog
 
+## market-intelligence v1.17.92 — automatic release (2026-11-12)
+
+- Source change: fix(market-intelligence): distinguish missing melee from API errors and scope equipment cache to active key.
+- Updated canonical userscript version to v1.17.92; package verified by GitHub Actions.
+
 ## bazaar-smart-pricer v1.1.32 — automatic release (2026-11-11)
 
 - Source change: Synchronize shared runtime with canonical Core.

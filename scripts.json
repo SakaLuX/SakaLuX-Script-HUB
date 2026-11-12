@@ -287,17 +287,17 @@
         }
       ],
       "release": {
-        "version": "1.17.91",
-        "date": "2026-11-11",
+        "version": "1.17.92",
+        "date": "2026-11-12",
         "notes": [
-          "Source change: Synchronize shared runtime with canonical Core.",
-          "Updated canonical userscript version to v1.17.91; package verified by GitHub Actions."
+          "Source change: fix(market-intelligence): distinguish missing melee from API errors and scope equipment cache to active key.",
+          "Updated canonical userscript version to v1.17.92; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.17.91",
-      "detailsRevision": 41,
+      "version": "1.17.92",
+      "detailsRevision": 42,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -672,6 +672,6 @@
       "detailsRevision": 3
     }
   ],
-  "lastVerified": "2026-11-11",
+  "lastVerified": "2026-11-12",
   "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
 }
