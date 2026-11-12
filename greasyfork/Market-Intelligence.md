@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.18.00**
+**v1.18.01**
 
 ### Faster PRO verification for Bazaar Flip and Travel — 2026-10-11
 - Uses cached verified entitlement first, then checks live in the background when needed.
@@ -52,7 +52,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-12**
-- Canonical version: **v1.18.00**
+- Canonical version: **v1.18.01**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md
@@ -75,9 +75,9 @@
 
 ## Current release note
 
-**v1.18.00 — Version and release synchronization**
-- Source change: feat(market): display bonuses on equipped weapons and comparison offers; invalidate old loadout cache.
-- Updated canonical userscript version to v1.18.00; package verified by GitHub Actions.
+**v1.18.01 — Version and release synchronization**
+- Source change: fix(market): navigate native listings with safe stat matching and no misleading unavailable status.
+- Updated canonical userscript version to v1.18.01; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -93,6 +93,11 @@
 
 
 
+
+
+### v1.18.01 — 2026-11-12
+- Source change: fix(market): navigate native listings with safe stat matching and no misleading unavailable status.
+- Updated canonical userscript version to v1.18.01; package verified by GitHub Actions.
 
 ### v1.18.00 — 2026-11-12
 - Source change: feat(market): display bonuses on equipped weapons and comparison offers; invalidate old loadout cache.

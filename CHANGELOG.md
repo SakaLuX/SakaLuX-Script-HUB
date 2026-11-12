@@ -1,5 +1,10 @@
 # Changelog
 
+## market-intelligence v1.18.01 — automatic release (2026-11-12)
+
+- Source change: fix(market): navigate native listings with safe stat matching and no misleading unavailable status.
+- Updated canonical userscript version to v1.18.01; package verified by GitHub Actions.
+
 ## market-intelligence v1.18.00 — automatic release (2026-11-12)
 
 - Source change: feat(market): display bonuses on equipped weapons and comparison offers; invalidate old loadout cache.
