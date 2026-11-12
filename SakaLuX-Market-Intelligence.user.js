@@ -2073,7 +2073,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function clearLoadoutCache(){ try{localStorage.removeItem(STORAGE.loadoutCache);}catch(_){} state.loadoutReady=false;state.loadoutItems=0; }
     // Identity marker only: never persist the API key itself in the equipment cache.
     function loadoutKeyId(key){let h=2166136261;for(const c of String(key||'')){h=Math.imul(h^c.charCodeAt(0),16777619);}return (h>>>0).toString(16)+':'+String(key||'').length;}
-    function validLoadoutCache(cache,key){return !!(key&&cache?.keyId===loadoutKeyId(key)&&cache?.at&&Date.now()-Number(cache.at)<LOADOUT_CACHE_MS&&Array.isArray(cache.items));}
+    function validLoadoutCache(cache,key){return !!(key&&cache?.schema===2&&cache?.keyId===loadoutKeyId(key)&&cache?.at&&Date.now()-Number(cache.at)<LOADOUT_CACHE_MS&&Array.isArray(cache.items));}
     function apiErrorText(data){ return normText(data?.error?.error||data?.error?.message||data?.error||''); }
     async function checkRequiredApiAccess(force=true){
         const key=getApiKey();
@@ -2089,7 +2089,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             }
             const items=collectEquipmentItems(data);
             state.apiAccessStatus='ok';state.apiAccessMessage='API access OK · user/equipment available';state.apiAccessCheckedAt=Date.now();
-            if(force){saveJson(STORAGE.loadoutCache,{at:Date.now(),keyId:loadoutKeyId(key),items});state.loadoutReady=items.length>0;state.loadoutItems=items.length;}
+            if(force){saveJson(STORAGE.loadoutCache,{schema:2,at:Date.now(),keyId:loadoutKeyId(key),items});state.loadoutReady=items.length>0;state.loadoutItems=items.length;}
             return {ok:true,status:'ok',message:state.apiAccessMessage,items};
         }catch(e){
             const msg=String(e?.message||e||'API request failed');
@@ -2147,6 +2147,11 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         return {damage:num(stats.damage),accuracy:num(stats.accuracy),armor:num(stats.armor??stats.armour),quality:num(stats.quality)};
     }
 
+    function explicitEquippedSlot(raw){
+        const n=Number(raw?.slot??raw?.position);
+        const slots={1:'primary',2:'secondary',3:'melee',4:'armor-body',5:'temporary',6:'armor-head',7:'armor-legs',8:'armor-feet',9:'armor-hands'};
+        return Number.isInteger(n)?(slots[n]||''):'';
+    }
     function inferGearSlot(raw, hint='') {
         const text=normText([hint,raw?.slot,raw?.position,raw?.type,raw?.sub_type,raw?.subType,raw?.name,raw?.item?.type,raw?.item?.sub_type,raw?.item?.name].filter(Boolean).join(' ')).toLowerCase();
         // Torn API v2 equipment slots are numeric. Weapon type is "Weapon";
@@ -2184,9 +2189,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const type=details?.type||raw.type||'';
         const subType=details?.sub_type||details?.subType||raw.sub_type||raw.subType||'';
         const explicitSlot=normText(raw.slot_name??raw.slotName??raw.position_name??'').toLowerCase();
-        const slot=explicitSlot&&/primary|secondary|melee|temporary|helmet|glove|boot|leg|body|chest/.test(explicitSlot)
+        const slot=explicitEquippedSlot(raw)||(explicitSlot&&/primary|secondary|melee|temporary|helmet|glove|boot|leg|body|chest/.test(explicitSlot)
             ?inferGearSlot({slot:explicitSlot},explicitSlot)
-            :inferGearSlot({...raw,...details,name,type,sub_type:subType},hint);
+            :inferGearSlot({...raw,...details,name,type,sub_type:subType},hint));
         const bonuses=Array.isArray(details?.bonuses)?details.bonuses:(Array.isArray(raw.bonuses)?raw.bonuses:[]);
         return {name:String(name),uid,slot,type,subType,stats,bonuses};
     }
@@ -2226,7 +2231,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 throw new Error(state.apiAccessMessage);
             }
             const items=collectEquipmentItems(data);
-            saveJson(STORAGE.loadoutCache,{at:Date.now(),keyId:loadoutKeyId(key),items});
+            saveJson(STORAGE.loadoutCache,{schema:2,at:Date.now(),keyId:loadoutKeyId(key),items});
             state.apiAccessStatus='ok';state.apiAccessMessage='API access OK · user/equipment available';state.apiAccessCheckedAt=Date.now();
             state.loadoutReady=items.length>0;state.loadoutItems=items.length;state.loadoutLastError=items.length?'':'API access OK, but no equipped combat items were returned';
             return items;
@@ -3572,17 +3577,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const texts=[...root.querySelectorAll('button,[role="button"],[role="combobox"],select,[class*="dropdown"],[class*="filter"]')]
             .filter(isVisible).map(el=>normText(el.textContent||el.getAttribute('aria-label')||'').toLowerCase()).filter(t=>t.length<65);
         for(const t of texts){
-            if(/\\ball melee\\b/.test(t))return 'melee';
-            if(/\\ball primary\\b/.test(t))return 'primary';
-            if(/\\ball secondary\\b/.test(t))return 'secondary';
-            if(/\\ball temporary\\b/.test(t))return 'temporary';
-            if(/\\ball armou?r\\b/.test(t))return 'armor';
+            if(/\ball melee\b/.test(t))return 'melee';
+            if(/\ball primary\b/.test(t))return 'primary';
+            if(/\ball secondary\b/.test(t))return 'secondary';
+            if(/\ball temporary\b/.test(t))return 'temporary';
+            if(/\ball armou?r\b/.test(t))return 'armor';
         }
         return marketSelectedCategory();
     }
     async function renderMarketCategoryOverview(){
         const slot=visibleMarketCategory();
         const old=document.getElementById('sl-mi-market-bar');
+        if(slot==='temporary'){state.itemMarketEpoch=(state.itemMarketEpoch||0)+1;old?.remove();return;}
         const signature='category:'+slot;
         if(old?.dataset.selection===signature)return;
         if(!slot){
@@ -3621,6 +3627,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             return;
         }
         const previous=document.getElementById('sl-mi-market-bar');
+        if(visibleMarketCategory()==='temporary'){previous?.remove();state.itemMarketEpoch=(state.itemMarketEpoch||0)+1;return;}
         const id=selectedMarketItemId();
         if(!id){state.itemMarketItemId=null;await renderMarketCategoryOverview();return;}
         // No need to rebuild a healthy panel on every SPA DOM mutation.
