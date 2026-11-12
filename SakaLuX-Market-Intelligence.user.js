@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.17.98
+// @version      1.17.99
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2302,6 +2302,37 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function statValue(v){return v==null||!Number.isFinite(Number(v))?'—':Number(v).toFixed(2);}
     function verdictClass(v){return v==='UPGRADE'?'upgrade':v==='DOWNGRADE'?'downgrade':v==='SIDEGRADE'?'sidegrade':'unknown';}
 
+    // Never purchase automatically: locate the exact UID in Torn's own market UI.
+    function openRecommendedMarketOffer(itemId,gear,card){
+        const uid=String(gear?.uid??'').trim();
+        const marketplace=document.querySelector('#mainContainer')||document.body;
+        // Scan only Torn's native market nodes; never match our own comparator cards.
+        const candidates=[...marketplace.querySelectorAll('[data-uid],[data-item-uid],[data-itemuid],[data-unique-id],[href*="uid="],[data-testid*="listing"]')];
+        const exact=candidates.find(el=>{
+            if(el.closest('#sl-mi-market-bar,#sl-mi-overlay'))return false;
+            const attributes=['data-uid','data-item-uid','data-itemuid','data-unique-id'];
+            if(attributes.some(key=>String(el.getAttribute(key)||'')===uid))return true;
+            const href=el.getAttribute('href')||'';
+            return !!uid&&new RegExp('(?:[?&#]uid=)'+uid+'(?:[&#]|$)','i').test(href);
+        });
+        if(exact&&uid){
+            const listing=exact.closest('[class*="listing"],[class*="itemRow"],[class*="item-row"],li,tr')||exact;
+            listing.scrollIntoView({behavior:'smooth',block:'center'});
+            listing.classList.add('sl-mi-offer-target');
+            setTimeout(()=>listing.classList.remove('sl-mi-offer-target'),4500);
+            return;
+        }
+        // The API can expose a listing that Torn hasn't rendered (pagination/market changes).
+        // Open the matching item market, but never select an unrelated offer or click Buy.
+        const target='https://www.torn.com/page.php?sid=ItemMarket#/market/view=search&itemID='+encodeURIComponent(itemId);
+        if(String(location.href).includes('itemID='+itemId)){
+            const info=card.querySelector('.sl-mi-loadout-action');
+            if(info)info.textContent='Offer not visible in current listings';
+            return;
+        }
+        location.href=target;
+    }
+
     async function renderLoadoutComparator(bar,market,id) {
         bar.querySelector('.sl-mi-loadout')?.remove();
         if(!settings.loadoutComparator)return;
@@ -2323,7 +2354,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const cs=current.stats||{},currentStats=String(slot).startsWith('armor')?'Armor '+statValue(cs.armor):'Dmg '+statValue(cs.damage)+' · Acc '+statValue(cs.accuracy);
         block.innerHTML='<div class="sl-mi-loadout-head"><div><b>⚔ LOADOUT COMPARATOR</b><span>Equipped: <strong>'+esc(current.name)+'</strong> · '+esc(currentStats)+'</span></div><button type="button" class="sl-mi-loadout-refresh">↻</button></div><div class="sl-mi-loadout-note">Top 5 strict upgrades: up to 3 strongest first, then 2 lowest-priced upgrades. Only this searched item; base stats exclude bonuses/mods.</div>'+(rows.length?'<div class="sl-mi-loadout-rows"></div>':'<div class="sl-mi-loadout-error">No verified upgrade among the current item listings. Try another weapon or armor item.</div>');
         const host=block.querySelector('.sl-mi-loadout-rows');
-        rows.forEach((g,i)=>{const c=g.comparison,row=document.createElement('div');row.className='sl-mi-loadout-row upgrade';const stats=String(slot).startsWith('armor')?'Armor '+statValue(g.stats.armor)+' ('+signedStat(c.deltaArmor)+')':'Dmg '+statValue(g.stats.damage)+' ('+signedStat(c.deltaDamage)+') · Acc '+statValue(g.stats.accuracy)+' ('+signedStat(c.deltaAccuracy)+')';const bonus=(g.bonuses||[]).map(x=>x?.title).filter(Boolean).slice(0,2).join(', ');row.innerHTML='<strong class="sl-mi-loadout-verdict">#'+(i+1)+' '+esc(g.tier)+'</strong><span>'+money(g.price)+'</span><span>'+esc(stats)+'</span><span>Q '+statValue(g.stats.quality)+(bonus?' · '+esc(bonus):'')+'</span>';host.appendChild(row);});
+        rows.forEach((g,i)=>{const c=g.comparison,row=document.createElement('div');row.className='sl-mi-loadout-row upgrade';const stats=String(slot).startsWith('armor')?'Armor '+statValue(g.stats.armor)+' ('+signedStat(c.deltaArmor)+')':'Dmg '+statValue(g.stats.damage)+' ('+signedStat(c.deltaDamage)+') · Acc '+statValue(g.stats.accuracy)+' ('+signedStat(c.deltaAccuracy)+')';const bonus=(g.bonuses||[]).map(x=>x?.title).filter(Boolean).slice(0,2).join(', ');row.innerHTML='<strong class="sl-mi-loadout-verdict">#'+(i+1)+' '+esc(g.tier)+'</strong><span>'+money(g.price)+'</span><span>'+esc(stats)+'</span><span>Q '+statValue(g.stats.quality)+(bonus?' · '+esc(bonus):'')+'</span><small class="sl-mi-loadout-action">VIEW OFFER ↗</small>';row.setAttribute('role','button');row.tabIndex=0;row.title='Find this exact listing in Torn Item Market';row.onclick=()=>openRecommendedMarketOffer(id,g,row);row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openRecommendedMarketOffer(id,g,row);}};host.appendChild(row);});
         block.querySelector('.sl-mi-loadout-refresh').onclick=async()=>{localStorage.removeItem(STORAGE.loadoutCache);await renderLoadoutComparator(bar,market,id);};
     }
 
@@ -3968,6 +3999,13 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             openApiAccess();
         };
         return true;
+    }
+
+    // Interactive comparator cards; style is appended once without changing the market layout.
+    if(!document.getElementById('sl-mi-offer-navigation-css')){
+        const offerStyle=document.createElement('style');offerStyle.id='sl-mi-offer-navigation-css';
+        offerStyle.textContent='.sl-mi-loadout-row[role="button"]{cursor:pointer;touch-action:manipulation}.sl-mi-loadout-row[role="button"]:focus-visible{outline:2px solid #65b5ff;outline-offset:2px}.sl-mi-loadout-action{display:block;color:#78bffa;font-weight:700;letter-spacing:.02em}.sl-mi-offer-target{outline:3px solid #78d98b!important;outline-offset:2px!important}';
+        document.head.appendChild(offerStyle);
     }
 
     function openSettings(){
