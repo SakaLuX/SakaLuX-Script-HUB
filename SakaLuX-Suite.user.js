@@ -39535,7 +39535,7 @@ function tlApiExtract(raw,types){
         const received=d.working_stats_received;
         const receivedDebug=received===undefined?"missing":JSON.stringify(received)?.slice(0,260)||String(received);
         const schemaPaths=(obj,prefix="",depth=0)=>depth>2||!obj||typeof obj!=="object"?[]:Object.entries(obj).flatMap(([k,v])=>{const path=prefix?prefix+"."+k:k;return v&&typeof v==="object"?schemaPaths(v,path,depth+1):[path];}).slice(0,36);
-        return {ts,name,company:String(d.company_name||d.company?.name||""),companyType:String(d.company_type||d.company?.type||""),role:String(d.position||d.position_name||d.job_position||""),gains,receivedDebug,apiLogId:id,apiImported:true,apiSchema:schemaPaths({data:d,details:detail})};
+        return {ts,name,company:String(d.company_name||d.company?.name||""),companyType:String(d.company_type||d.company?.type||""),role:String(d.position||d.position_name||d.job_position||""),gains,receivedDebug,apiLogId:id,apiImported:true,apiSchema:gains.length?[]:schemaPaths({data:d,details:detail})};
     }).filter(Boolean);
 }
 async function tlSyncApi(manual=false){
@@ -39602,8 +39602,8 @@ async function tlSyncApi(manual=false){
                         if(previous!==JSON.stringify([stored.gains,stored.trainingAmounts,stored.roleStatPair]))updated++;
                         stored.apiImported=true;
                     }
-                    if(entry.apiSchema?.length)stored.apiSchema=entry.apiSchema;
-                    if(entry.receivedDebug!==undefined)stored.receivedDebug=entry.receivedDebug;
+                    if(stored&&entry.apiSchema?.length&&!stored.gains?.length&&!stored.trainingAmounts?.length)stored.apiSchema=entry.apiSchema;
+                    if(stored&&entry.receivedDebug!==undefined)stored.receivedDebug=entry.receivedDebug;
                     continue;
                 }
                 known.add(entry.apiLogId);data.entries.push(entry);added++;
@@ -39611,9 +39611,9 @@ async function tlSyncApi(manual=false){
             if(rows.length<100||oldest<=from||!Number.isFinite(oldest)||!newIds)break;
             to=oldest-1;
         }
-        data.entries.sort((a,b)=>b.ts-a.ts);tlSave(data);
+        data.entries.sort((a,b)=>b.ts-a.ts);await tlSave(data);
         const check=tlLoad();const persisted=check.entries.filter(x=>x.apiImported).length;
-        localStorage.setItem(TL_API_SYNC_KEY,JSON.stringify({lastCheck:Date.now(),lastImported:added}));
+        try{localStorage.setItem(TL_API_SYNC_KEY,JSON.stringify({lastCheck:Date.now(),lastImported:added}));}catch(e){console.warn("[SakaLuX Suite] Training sync timestamp could not be cached",e);}
         tlApiSetStatus(added+" new trains imported · "+updated+" gains updated · "+matched+" matching events · "+scanned+" Company logs / "+pages+" page(s). Saved API trains: "+persisted+".");
         const modal=document.getElementById("fc-tlog-modal");
         if(modal?.classList.contains("fc-vis"))renderTab(modal.querySelector(".tl-tab.active")?.dataset.tltab||"calendar");
@@ -39621,8 +39621,97 @@ async function tlSyncApi(manual=false){
     finally{tlApiSyncBusy=false;if(btn)btn.disabled=false;}
 }
 
-function tlLoad() { try{return JSON.parse(localStorage.getItem(CFG.trainLogKey)||'{"entries":[]}');}catch{return{entries:[]};} }
-function tlSave(d) { localStorage.setItem(CFG.trainLogKey,JSON.stringify(d)); }
+// Training logs are kept compact in localStorage; IndexedDB is a lossless fallback
+// when the TornPDA origin quota is exhausted by other add-ons.
+const TL_FIELDS=["ts","name","role","company","companyType","gains","receivedDebug","apiLogId","apiImported","trainingAmounts","roleStatPair","gainSource","currentRoleSuggestion","currentRoleName","paid","manual","cost","amount","note","apiSchema"];
+let tlMemory=null,tlMode="local",tlHydration=null,tlPendingWrite=Promise.resolve(),tlRevision=0;
+function tlPack(d){
+    const entries=(Array.isArray(d?.entries)?d.entries:[]).map(e=>{
+        const values=TL_FIELDS.map(k=>e[k]===undefined?null:e[k]);
+        // Full API schema is diagnostic only once gains are known.
+        if(Array.isArray(e.gains)&&e.gains.length||Array.isArray(e.trainingAmounts)&&e.trainingAmounts.length)values[TL_FIELDS.indexOf("apiSchema")]=null;
+        while(values.length&&values[values.length-1]===null)values.pop();
+        const extra=Object.fromEntries(Object.entries(e).filter(([k])=>!TL_FIELDS.includes(k)));
+        return Object.keys(extra).length?[values,extra]:values;
+    });
+    return JSON.stringify({format:"tl-packed-1",entries});
+}
+function tlUnpack(raw){
+    const parsed=typeof raw==="string"?JSON.parse(raw):raw;
+    if(parsed?.format!=="tl-packed-1")return Array.isArray(parsed?.entries)?parsed:{entries:[]};
+    return {entries:(parsed.entries||[]).map(entry=>{
+        const pair=Array.isArray(entry?.[0])?entry[0]:entry;
+        const extra=Array.isArray(entry?.[0])?entry[1]||{}:{};
+        const result={...extra};
+        TL_FIELDS.forEach((key,i)=>{if(pair[i]!==null&&pair[i]!==undefined)result[key]=pair[i];});
+        return result;
+    })};
+}
+function tlLoad(){
+    if(tlMemory)return tlMemory;
+    try{return tlMemory=tlUnpack(localStorage.getItem(CFG.trainLogKey)||'{"entries":[]}');}
+    catch(e){console.warn("[SakaLuX Suite] Training Log read failed",e);return tlMemory={entries:[]};}
+}
+function tlDb(){
+    return new Promise((resolve,reject)=>{
+        if(!globalThis.indexedDB){reject(new Error("IndexedDB unavailable"));return;}
+        const request=indexedDB.open("sakalux_suite_training_log",1);
+        request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains("logs"))request.result.createObjectStore("logs");};
+        request.onsuccess=()=>resolve(request.result);
+        request.onerror=()=>reject(request.error||new Error("IndexedDB open failed"));
+    });
+}
+async function tlDbRead(){
+    const db=await tlDb();
+    try{return await new Promise((resolve,reject)=>{
+        const tx=db.transaction("logs","readonly"),get=tx.objectStore("logs").get(CFG.trainLogKey);
+        get.onsuccess=()=>resolve(get.result||null);
+        get.onerror=()=>reject(get.error);
+    });}finally{db.close();}
+}
+async function tlDbWrite(value){
+    const db=await tlDb();
+    try{await new Promise((resolve,reject)=>{
+        const tx=db.transaction("logs","readwrite");
+        tx.objectStore("logs").put(value,CFG.trainLogKey);
+        tx.oncomplete=resolve;
+        tx.onerror=()=>reject(tx.error||new Error("IndexedDB write failed"));
+        tx.onabort=()=>reject(tx.error||new Error("IndexedDB transaction aborted"));
+    });}finally{db.close();}
+}
+function tlHydrate(){
+    if(tlHydration)return tlHydration;
+    tlHydration=(async()=>{
+        const initialRevision=tlRevision;
+        try{
+            const saved=await tlDbRead();
+            if(saved?.payload&&initialRevision===tlRevision){
+                tlMemory=tlUnpack(saved.payload);
+                tlMode="indexeddb";
+            }else tlLoad();
+        }catch(e){console.warn("[SakaLuX Suite] IndexedDB training history unavailable",e);tlLoad();}
+        return tlLoad();
+    })();
+    return tlHydration;
+}
+function tlSave(d){
+    const payload=tlPack(d);
+    // Read back from the compact payload to keep the in-memory and disk schemas identical.
+    tlMemory=tlUnpack(payload);tlRevision++;
+    if(tlMode==="local"){
+        try{localStorage.setItem(CFG.trainLogKey,payload);return Promise.resolve(true);}
+        catch(e){
+            if(e?.name!=="QuotaExceededError"&&!/quota/i.test(String(e)))throw e;
+            tlMode="indexeddb";
+            console.warn("[SakaLuX Suite] TornPDA local storage full; using IndexedDB for training history.");
+        }
+    }
+    tlPendingWrite=tlPendingWrite.catch(()=>{}).then(()=>tlDbWrite({payload,at:Date.now()}));
+    return tlPendingWrite.catch(e=>{
+        tlApiSetStatus("Training Log not saved: local storage is full and IndexedDB failed. Do not clear logs. "+String(e?.message||e));
+        throw e;
+    });
+}
 function tlAdd(entry) {
     const d=tlLoad();
     const cutoff=Date.now()-(CFG.logRetainDays*86400000);
@@ -40644,7 +40733,7 @@ function tlWireDayPanel(dayKey,isFuture){
 }
 function refreshDayPanel(dayKey,isFuture){const old=document.getElementById("tl-day-panel");if(!old)return;const d=new Date(dayKey+"T12:00:00");const label=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});old.outerHTML=tlBuildDayPanel(dayKey,isFuture,label);tlWireDayPanel(dayKey,isFuture);}
 function refreshCalendarCells(){const todayKey=tlDayKey(Date.now());const logMap={},schMap={};tlLoad().entries.forEach(e=>{const k=tlDayKey(e.ts);logMap[k]=(logMap[k]||0)+1;});schLoad().entries.forEach(e=>{const k=tlDayKey(e.ts);schMap[k]=(schMap[k]||0)+1;});document.querySelectorAll(".tl-cal-cell[data-day]").forEach(cell=>{const key=cell.dataset.day;const logs=logMap[key]||0,scheds=schMap[key]||0;const isFut=key>todayKey;["c1","c2","c3","c4","s1","s2","s3","has-trains","has-sched","faded"].forEach(c=>cell.classList.remove(c));if(isFut){if(scheds>0){cell.classList.add("has-sched",scheds>=3?"s3":scheds>=2?"s2":"s1");}else{cell.classList.add("future");}}else{if(logs>0){const max=Math.max(1,...Object.values(logMap));const r=logs/max;cell.classList.add("has-trains",logs>=max&&max>3?"c4":r>=.66?"c3":r>=.33?"c2":"c1");}else{cell.classList.add("faded");}}const countEl=cell.querySelector(".tl-cal-count,.tl-cal-sched");if(countEl)countEl.remove();if(logs>0){const span=document.createElement("div");span.className="tl-cal-count";span.textContent=logs;cell.appendChild(span);}else if(scheds>0){const span=document.createElement("div");span.className="tl-cal-sched";span.textContent=scheds;cell.appendChild(span);}});}
-function renderTabStats(){const sub=document.getElementById("tl-subtitle");const entries=tlLoad().entries;if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v0.9.1010`;}
+function renderTabStats(){const sub=document.getElementById("tl-subtitle");const entries=tlLoad().entries;if(sub)sub.textContent=`${entries.length} trains logged · last ${CFG.logRetainDays} days · Suite v${SUITE_VERSION}`;}
 function buildTrainingLogModal(){
     if(document.getElementById("fc-tlog-modal"))return;
     const ov=document.createElement("div");ov.id="fc-tlog-overlay";
@@ -40766,7 +40855,7 @@ function wireScheduleDeletes(body){
         mountTrainCounters();
     });
 }
-function openTrainingLog(){buildTrainingLogModal();const ov=document.getElementById("fc-tlog-overlay"),m=document.getElementById("fc-tlog-modal");m.querySelectorAll(".tl-tab").forEach(t=>t.classList.remove("active"));m.querySelector('[data-tltab="calendar"]')?.classList.add("active");renderTab("calendar");ov.style.display="block";m.classList.add("fc-vis");tlSyncApi(false);}
+async function openTrainingLog(){buildTrainingLogModal();const ov=document.getElementById("fc-tlog-overlay"),m=document.getElementById("fc-tlog-modal");m.querySelectorAll(".tl-tab").forEach(t=>t.classList.remove("active"));m.querySelector('[data-tltab="calendar"]')?.classList.add("active");await tlHydrate();renderTab("calendar");ov.style.display="block";m.classList.add("fc-vis");tlSyncApi(false);}
 function mountTrainingLogBtn(){if(document.getElementById("fc-tlog-btn"))return;const hdr=document.querySelector("#employees .title-black")||document.querySelector("#employees .title")||document.querySelector(".company-employees .title-black")||document.querySelector(".company-employees .title")||document.querySelector(".employees-list .title-black")||document.querySelector(".employees-list .title")||document.querySelector('[aria-controls="employees"]')?.closest("li")?.parentElement?.nextElementSibling?.querySelector(".title-black")||document.querySelector(".manage-employees .title-black")||document.querySelector(".manage-employees .title");if(!hdr)return;hdr.classList.add("fc-header");const btn=document.createElement("button");btn.id="fc-tlog-btn";btn.type="button";btn.textContent="Training Log";btn.className="fc-btn fc-btn--navy";btn.addEventListener("click",openTrainingLog);hdr.appendChild(btn);}
 function getScheduledTrainCount(name){
     if(!name)return 0;
