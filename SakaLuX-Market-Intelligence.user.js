@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Market Intelligence
 // @namespace    sakalux.market.intelligence
-// @version      1.18.00
+// @version      1.18.01
 // @description  Torn PDA-first market/travel intelligence with stable Travel/Bazaar panels, Loadout Comparator, Price Network, Bazaar Flip and travel basket tools.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1601,7 +1601,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 (function () {
     'use strict';
-    const VERSION = '1.18.00';
+    const VERSION = '1.18.01';
     const NAME = 'SakaLuX Market Intelligence';
     const PDA_KEY = '###PDA-APIKEY###';
     const HUB_INSTALL_URL = 'https://update.greasyfork.org/scripts/592699/SakaLuX%20Script%20Hub.user.js';
@@ -2315,32 +2315,49 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     // Never purchase automatically: locate the exact UID in Torn's own market UI.
     function openRecommendedMarketOffer(itemId,gear,card){
         const uid=String(gear?.uid??'').trim();
-        const marketplace=document.querySelector('#mainContainer')||document.body;
-        // Scan only Torn's native market nodes; never match our own comparator cards.
-        const candidates=[...marketplace.querySelectorAll('[data-uid],[data-item-uid],[data-itemuid],[data-unique-id],[href*="uid="],[data-testid*="listing"]')];
+        const root=document.querySelector('#mainContainer')||document.body;
+        const panel=card?.querySelector('.sl-mi-loadout-action');
+        // Torn may virtualize its market rows and does not consistently expose UID attributes.
+        // Only resolve an exact item when the UID exists on a native market element.
+        const candidates=[...root.querySelectorAll('[data-uid],[data-item-uid],[data-itemuid],[data-unique-id],[href*="uid="],[href*="UID="]')];
         const exact=candidates.find(el=>{
             if(el.closest('#sl-mi-market-bar,#sl-mi-overlay'))return false;
-            const attributes=['data-uid','data-item-uid','data-itemuid','data-unique-id'];
-            if(attributes.some(key=>String(el.getAttribute(key)||'')===uid))return true;
+            if(['data-uid','data-item-uid','data-itemuid','data-unique-id'].some(key=>String(el.getAttribute(key)||'')===uid))return true;
             const href=el.getAttribute('href')||'';
-            return !!uid&&new RegExp('(?:[?&#]uid=)'+uid+'(?:[&#]|$)','i').test(href);
+            return !!uid&&new RegExp('(?:[?&#](?:uid|UID)=)'+uid+'(?:[&#]|$)','i').test(href);
         });
-        if(exact&&uid){
-            const listing=exact.closest('[class*="listing"],[class*="itemRow"],[class*="item-row"],li,tr')||exact;
-            listing.scrollIntoView({behavior:'smooth',block:'center'});
-            listing.classList.add('sl-mi-offer-target');
-            setTimeout(()=>listing.classList.remove('sl-mi-offer-target'),4500);
+        const mark=el=>{if(!el)return false;el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('sl-mi-offer-target');setTimeout(()=>el.classList.remove('sl-mi-offer-target'),4500);return true;};
+        if(uid&&exact){
+            const nativeRow=exact.closest('[class*="listing"],[class*="itemRow"],[class*="item-row"],li,tr')||exact;
+            mark(nativeRow);
+            if(panel)panel.textContent='Offer highlighted below — buy in Torn';
             return;
         }
-        // The API can expose a listing that Torn hasn't rendered (pagination/market changes).
-        // Open the matching item market, but never select an unrelated offer or click Buy.
+        // A rendered row can be found by matching all three displayed details.
+        // Do not click a buy button or claim an exact UID match on a price-only match.
+        const price=Number(gear?.price),damage=Number(gear?.stats?.damage),accuracy=Number(gear?.stats?.accuracy);
+        const nativeRows=[...root.querySelectorAll('li,[class*="listing"],[class*="marketRow"],[class*="itemRow"],[class*="item-row"]')]
+            .filter(el=>!el.closest('#sl-mi-market-bar,#sl-mi-overlay')&&el.getBoundingClientRect().width>0);
+        const matches=nativeRows.filter(el=>{
+            const t=String(el.innerText||el.textContent||'').replace(/,/g,'');
+            if(!Number.isFinite(price)||!Number.isFinite(damage)||!Number.isFinite(accuracy))return false;
+            return t.includes(String(price))&&t.includes(damage.toFixed(2))&&t.includes(accuracy.toFixed(2));
+        });
+        if(matches.length===1){
+            mark(matches[0]);
+            if(panel)panel.textContent='Matching stats + price highlighted — verify before buying';
+            return;
+        }
         const target='https://www.torn.com/page.php?sid=ItemMarket#/market/view=search&itemID='+encodeURIComponent(itemId);
-        if(String(location.href).includes('itemID='+itemId)){
-            const info=card.querySelector('.sl-mi-loadout-action');
-            if(info)info.textContent='Offer not visible in current listings';
+        if(!String(location.href).includes('itemID='+itemId)){
+            location.href=target;
             return;
         }
-        location.href=target;
+        // The API's 100 listings need not be rendered in Torn's virtualized/paginated DOM.
+        // Move to the native listing/filter area, rather than incorrectly saying the offer is gone.
+        const marketArea=root.querySelector('[class*="itemsList"],[class*="item-list"],[class*="market-list"],[class*="marketList"],[class*="searchResults"]');
+        if(marketArea)mark(marketArea);else window.scrollBy({top:Math.max(450,window.innerHeight*.65),behavior:'smooth'});
+        if(panel)panel.textContent='API offer found · scroll/filter market for '+money(price)+' · Dmg '+statValue(damage)+' · Acc '+statValue(accuracy);
     }
 
     async function renderLoadoutComparator(bar,market,id) {
