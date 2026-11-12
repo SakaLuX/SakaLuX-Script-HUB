@@ -3543,6 +3543,56 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const selectedId=Number(selected?.getAttribute('data-selected-item-id')||selected?.getAttribute('data-active-item-id')||selected?.getAttribute('data-itemid')||0);
         return selectedId>0?selectedId:null;
     }
+    function visibleMarketCategory(){
+        // The market can display a whole category without an itemID.
+        // Prefer Torn's category dropdown labels over unrelated hidden links.
+        const root=document.querySelector('#mainContainer')||document.body;
+        const texts=[...root.querySelectorAll('button,[role="button"],[role="combobox"],select,[class*="dropdown"],[class*="filter"]')]
+            .filter(isVisible).map(el=>normText(el.textContent||el.getAttribute('aria-label')||'').toLowerCase()).filter(t=>t.length<65);
+        for(const t of texts){
+            if(/\\ball melee\\b/.test(t))return 'melee';
+            if(/\\ball primary\\b/.test(t))return 'primary';
+            if(/\\ball secondary\\b/.test(t))return 'secondary';
+            if(/\\ball temporary\\b/.test(t))return 'temporary';
+            if(/\\ball armou?r\\b/.test(t))return 'armor';
+        }
+        return marketSelectedCategory();
+    }
+    async function renderMarketCategoryOverview(){
+        const slot=visibleMarketCategory();
+        const old=document.getElementById('sl-mi-market-bar');
+        const signature='category:'+slot;
+        if(old?.dataset.selection===signature)return;
+        if(!slot){
+            // No selected item and no identified category: avoid phantom quotes.
+            old?.remove();
+            return;
+        }
+        const epoch=++state.itemMarketEpoch;
+        const bar=document.createElement('div');
+        bar.id='sl-mi-market-bar';
+        bar.dataset.selection=signature;
+        bar.innerHTML='<div class="sl-mi-market-head"><div><b>📈 ITEM MARKET INTELLIGENCE</b><span>'+esc(slot.toUpperCase())+' · Category overview</span></div><span class="sl-mi-signal learning">BROWSING</span></div>'+
+            '<div class="sl-mi-spark"><span>—</span><small>Select an individual item for market floor, trend, watchlist and listing comparisons.</small></div>';
+        old?.remove();mountTop(bar);
+        if(!settings.loadoutComparator)return;
+        const block=document.createElement('div');block.className='sl-mi-loadout';
+        block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>Checking equipped '+esc(slot)+'…</span></div>';
+        bar.appendChild(block);
+        const equipped=await fetchEquippedLoadout(false);
+        if(!bar.isConnected||epoch!==state.itemMarketEpoch||visibleMarketCategory()!==slot)return;
+        const matches=compatibleEquipped(slot,equipped);
+        if(matches.length){
+            block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>Equipped: '+esc(matches.map(x=>x.name).join(', '))+'</span></div>'+
+                '<small class="sl-mi-loadout-note">Choose an individual market item to compare its stats with your equipment.</small>';
+        }else{
+            const msg=state.apiAccessStatus==='missing-equipment'||state.apiAccessStatus==='missing'?'Equipment API permission missing':state.apiAccessStatus==='error'?'Equipment API unavailable':'No equipped '+slot+' item detected';
+            block.innerHTML='<div class="sl-mi-loadout-head"><b>⚔ LOADOUT COMPARATOR</b><span>'+esc(msg)+'</span></div>'+
+                '<small class="sl-mi-loadout-note">Select an item for detailed comparison, or refresh equipment.</small>'+
+                '<button type="button" class="sl-mi-loadout-keyfix">REFRESH EQUIPMENT</button>';
+            block.querySelector('button').onclick=async()=>{clearLoadoutCache();bar.remove();await renderMarketCategoryOverview();};
+        }
+    }
     async function scanItemMarket(){
         if(!settings.itemMarket||!/[?&]sid=ItemMarket(?:[&#]|$)/i.test(location.href)){
             document.getElementById('sl-mi-market-bar')?.remove();
@@ -3550,7 +3600,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         }
         const previous=document.getElementById('sl-mi-market-bar');
         const id=selectedMarketItemId();
-        if(!id){previous?.remove();state.itemMarketItemId=null;return;}
+        if(!id){state.itemMarketItemId=null;await renderMarketCategoryOverview();return;}
         // No need to rebuild a healthy panel on every SPA DOM mutation.
         if(previous?.isConnected&&previous.dataset.itemId===String(id)&&previous.dataset.marketRevision===String(state.marketRevision||0))return;
         const requestEpoch=++state.itemMarketEpoch;
@@ -3561,7 +3611,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         const watched=watchlist[String(id)]||null,bar=document.createElement('div');bar.id='sl-mi-market-bar';
         const trendIcon=analysis.trend>1?'↑':analysis.trend<-1?'↓':'→';
         const signalClass=analysis.signal==='BUY NOW'?'buy':analysis.signal==='WAIT'?'wait':analysis.signal==='FAIR'?'fair':'learning';
-        const cachedNetwork=settings.priceNetwork&&priceNetworkConfigured()?cachedNetworkConsensus(id):null;bar.dataset.itemId=String(id);bar.dataset.marketRevision=String(state.marketRevision||0);
+        const cachedNetwork=settings.priceNetwork&&priceNetworkConfigured()?cachedNetworkConsensus(id):null;bar.dataset.itemId=String(id);bar.dataset.selection='item:'+id;bar.dataset.marketRevision=String(state.marketRevision||0);
         bar.innerHTML='<div class="sl-mi-market-head"><div><b>📈 ITEM MARKET INTELLIGENCE</b><span>floor <strong>'+money(market.minPrice)+'</strong> · effective <strong>'+money(market.price)+'</strong> · '+market.count+' listings</span></div><span class="sl-mi-signal '+signalClass+'">'+esc(analysis.signal)+'</span></div>'+
             '<div class="sl-mi-market-grid"><div><small>TREND</small><strong>'+trendIcon+' '+pct(analysis.trend)+'</strong></div><div><small>MEDIAN</small><strong>'+money(analysis.median)+'</strong></div><div><small>VOLATILITY</small><strong>'+analysis.volatility.toFixed(1)+'%</strong></div><div><small>SPREAD</small><strong>'+analysis.spread.toFixed(1)+'%</strong></div></div>'+
             '<div class="sl-mi-spark"><span>'+esc(sparkText(analysis.rows))+'</span><small>'+analysis.samples+' local samples · '+esc(analysis.reason)+'</small></div>'+
