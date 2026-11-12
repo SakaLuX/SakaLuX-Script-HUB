@@ -287,17 +287,17 @@
         }
       ],
       "release": {
-        "version": "1.18.01",
+        "version": "1.18.02",
         "date": "2026-11-12",
         "notes": [
-          "Source change: fix(market): navigate native listings with safe stat matching and no misleading unavailable status.",
-          "Updated canonical userscript version to v1.18.01; package verified by GitHub Actions."
+          "Source change: fix(market): recheck recommended offer against fresh Torn API before locating listing.",
+          "Updated canonical userscript version to v1.18.02; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.18.01",
-      "detailsRevision": 51,
+      "version": "1.18.02",
+      "detailsRevision": 52,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",

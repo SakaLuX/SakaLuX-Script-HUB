@@ -1203,7 +1203,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Canonical Installed Version — BEGIN */
 (() => {
   'use strict';
-  let v = '1.18.01';
+  let v = '1.18.02';
   try {
     const meta = globalThis.GM_info && globalThis.GM_info.script && globalThis.GM_info.script.version;
     if (meta) v = String(meta);
@@ -1538,7 +1538,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 /* SakaLuX Shared Dock Registration — BEGIN */
 (() => {
   'use strict';
-  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.18.01" }));
+  const SELF = Object.freeze(Object.assign({"id":"market-intelligence","name":"Market","icon":"📈","selector":"","fallback":"https://www.torn.com/page.php?sid=ItemMarket"}, { version: "1.18.02" }));
   const API_GLOBAL = "SakaLuXMarketIntelligence";
   function openSelf() {
     if (SELF.id === 'bazaar-smart-pricer' && location.pathname !== '/bazaar.php') {
