@@ -2143,16 +2143,25 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
     function normalizeGearStats(raw) {
         const stats=raw?.stats||raw?.item_details?.stats||raw?.itemDetails?.stats||raw?.item?.stats||{};
-        const num=v=>{const n=Number(v);return Number.isFinite(n)?n:null;};
+        const num=v=>{if(v==null||v==='')return null;const n=Number(v);return Number.isFinite(n)?n:null;};
         return {damage:num(stats.damage),accuracy:num(stats.accuracy),armor:num(stats.armor??stats.armour),quality:num(stats.quality)};
     }
 
     function inferGearSlot(raw, hint='') {
         const text=normText([hint,raw?.slot,raw?.position,raw?.type,raw?.sub_type,raw?.subType,raw?.name,raw?.item?.type,raw?.item?.sub_type,raw?.item?.name].filter(Boolean).join(' ')).toLowerCase();
-        // Torn API v2 equipment slots are numeric; prefer the weapon's semantic type/sub-type for comparison.
+        // Torn API v2 equipment slots are numeric. Weapon type is "Weapon";
+        // the sub_type (Clubbing, Piercing, Slashing, Mechanical) identifies melee.
+        const subtype=normText(raw?.sub_type??raw?.subType??raw?.item?.sub_type??'').toLowerCase();
+        const type=normText(raw?.type??raw?.item?.type??'').toLowerCase();
+        if(type==='weapon'){
+            if(/^(clubbing|piercing|slashing|mechanical)$/.test(subtype))return 'melee';
+            if(subtype==='temporary')return 'temporary';
+            if(/^(pistol)$/.test(subtype))return 'secondary';
+            if(/^(heavy artillery|machine gun|rifle|shotgun|smg)$/.test(subtype))return 'primary';
+        }
         if(/primary/.test(text))return 'primary';
         if(/secondary/.test(text))return 'secondary';
-        if(/melee/.test(text))return 'melee';
+        if(/melee|clubbing|slashing|mechanical/.test(text))return 'melee';
         if(/temporary/.test(text))return 'temporary';
         if(/helmet|mask|head/.test(text))return 'armor-head';
         if(/glove|gauntlet|hand/.test(text))return 'armor-hands';
@@ -2228,7 +2237,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if(candidateSlotValue==='weapon')return equipped.filter(x=>['primary','secondary','melee','weapon'].includes(x.slot));
         if(candidateSlotValue==='armor')return equipped.filter(x=>armorFamily(x.slot));
         if(candidateSlotValue.startsWith('armor-')){const exact=equipped.filter(x=>x.slot===candidateSlotValue);return exact.length?exact:equipped.filter(x=>armorFamily(x.slot));}
-        return equipped.filter(x=>x.slot===candidateSlotValue);
+        return equipped.filter(x=>x.slot===candidateSlotValue||(candidateSlotValue==='melee'&&x.slot==='weapon'&&/^(clubbing|piercing|slashing|mechanical)$/i.test(x.subType||'')));
     }
     function equippedScore(item,slot){const st=item?.stats||{};return String(slot).startsWith('armor')?(Number(st.armor)||0):((Number(st.damage)||0)+(Number(st.accuracy)||0));}
     function compareGear(candidate,equippedItem,slot) {
