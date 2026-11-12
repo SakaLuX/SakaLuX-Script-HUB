@@ -2159,6 +2159,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             if(/^(pistol)$/.test(subtype))return 'secondary';
             if(/^(heavy artillery|machine gun|rifle|shotgun|smg)$/.test(subtype))return 'primary';
         }
+        // Slot hints must win over subtype: Mechanical and SMGs can occupy multiple slots.
         if(/primary/.test(text))return 'primary';
         if(/secondary/.test(text))return 'secondary';
         if(/melee|clubbing|slashing|mechanical/.test(text))return 'melee';
@@ -2177,12 +2178,15 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if(!raw||typeof raw!=='object')return null;
         const details=raw.item_details||raw.itemDetails||raw.item||raw;
         const stats=normalizeGearStats(raw);
-        if(stats.damage==null&&stats.accuracy==null&&stats.armor==null)return null;
+        if(stats.damage==null&&stats.accuracy==null&&stats.armor==null&&!((raw?.name||raw?.item?.name)&&((raw?.type||raw?.item?.type)||raw?.slot!=null)))return null;
         const name=details?.name||raw.name||raw.item_name||raw.label||hint||'Equipped item';
         const uid=details?.uid??raw.uid??raw.item_uid??null;
         const type=details?.type||raw.type||'';
         const subType=details?.sub_type||details?.subType||raw.sub_type||raw.subType||'';
-        const slot=inferGearSlot({...raw,...details,name,type,sub_type:subType},hint);
+        const explicitSlot=normText(raw.slot_name??raw.slotName??raw.position_name??'').toLowerCase();
+        const slot=explicitSlot&&/primary|secondary|melee|temporary|helmet|glove|boot|leg|body|chest/.test(explicitSlot)
+            ?inferGearSlot({slot:explicitSlot},explicitSlot)
+            :inferGearSlot({...raw,...details,name,type,sub_type:subType},hint);
         const bonuses=Array.isArray(details?.bonuses)?details.bonuses:(Array.isArray(raw.bonuses)?raw.bonuses:[]);
         return {name:String(name),uid,slot,type,subType,stats,bonuses};
     }
@@ -2230,7 +2234,23 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
 
     function marketGearListings(market) { return Array.isArray(market?.gearListings)?market.gearListings:[]; }
-    function candidateSlot(market) { const meta=market?.itemMeta||{};return inferGearSlot(meta,meta.type||''); }
+    function marketSelectedCategory(){
+        const selectors=['[role="tab"][aria-selected="true"]','[role="tab"][aria-current="page"]','[class*="active"][class*="category"]','[class*="selected"][class*="category"]'];
+        const nodes=selectors.flatMap(selector=>[...document.querySelectorAll(selector)]).filter(isVisible);
+        for(const node of nodes){
+            const t=normText(node.textContent||'').toLowerCase();
+            if(/^(primary|secondary|melee|temporary)$/.test(t))return t;
+        }
+        return '';
+    }
+    function candidateSlot(market) {
+        const meta=market?.itemMeta||{};
+        const actual=inferGearSlot(meta,meta.type||'');
+        const selected=marketSelectedCategory();
+        // Never compare a stale API market item against the newly selected equipment tab.
+        if(selected&&actual&&actual!==selected&&actual!=='weapon')return selected;
+        return actual||selected;
+    }
     function armorFamily(slot){return String(slot||'').startsWith('armor-')?slot:(slot==='armor'?'armor':'');}
     function compatibleEquipped(candidateSlotValue,equipped){
         if(!candidateSlotValue)return [];
@@ -3542,7 +3562,8 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         }
         const previous=document.getElementById('sl-mi-market-bar');
         const id=selectedMarketItemId();if(!id){if(detectPage()==='itemmarket'){setTimeout(()=>scheduleScan(false),700);return;}previous?.remove();return;}
-        const market=await fetchMarket(id,true);if(!market)return;
+        const requestEpoch=++state.itemMarketEpoch;
+        const market=await fetchMarket(id,false);if(!market||requestEpoch!==state.itemMarketEpoch||selectedMarketItemId()!==id)return;
         recordPriceHistory(id,market);
         const analysis=analyzePriceHistory(id,Number(market.minPrice),market);
         state.itemMarketSignal=analysis.signal;state.itemMarketTrend=analysis.trend;state.itemMarketVolatility=analysis.volatility;state.itemMarketHistorySamples=analysis.samples;
@@ -3557,7 +3578,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
             '<div class="sl-mi-watch-row"><input id="sl-mi-watch-price" inputmode="numeric" placeholder="Watch below..." value="'+esc(watched?.maxPrice||'')+'"><button id="sl-mi-watch-save">'+(watched?'UPDATE WATCH':'ADD WATCH')+'</button>'+(watched?'<button id="sl-mi-watch-remove">REMOVE</button>':'')+'</div>';
         previous?.remove();
         mountTop(bar);
-        if(settings.priceNetwork&&priceNetworkConfigured())fetchNetworkConsensus(id).then(data=>{if(bar.dataset.itemId===String(id))updateNetworkBlock(bar,data);});
+        if(settings.priceNetwork&&priceNetworkConfigured())fetchNetworkConsensus(id).then(data=>{if(bar.isConnected&&bar.dataset.itemId===String(id))updateNetworkBlock(bar,data);});
         await renderLoadoutComparator(bar,market,id);
         bar.querySelector('#sl-mi-watch-save').onclick=()=>{const n=parseMoney(bar.querySelector('#sl-mi-watch-price').value);if(!(n>0))return;watchlist[String(id)]={itemId:id,maxPrice:n,updatedAt:Date.now()};saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
         const rm=bar.querySelector('#sl-mi-watch-remove');if(rm)rm.onclick=()=>{delete watchlist[String(id)];saveJson(STORAGE.watchlist,watchlist);scanItemMarket();};
@@ -3718,9 +3739,19 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     function mountTop(el){if(/^sl-mi-(best-run|arrival|country-best|travel-plan|session)$/.test(el.id||'')&&detectPage()!=='travel')return;const host=document.querySelector('#mainContainer .content-wrapper')||document.querySelector('.content-wrapper')||document.querySelector('#mainContainer')||document.body;host.insertBefore(el,host.firstChild);}
 
     async function scan(force=false){
-        if(!settings.enabled||state.busy)return;state.busy=true;state.page=detectPage();if(state.page!=='travel')document.querySelectorAll('#sl-mi-session,#sl-mi-arrival,#sl-mi-best-run,#sl-mi-country-best,#sl-mi-travel-plan').forEach(n=>n.remove());state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
+        if(!settings.enabled)return;
+        if(state.busy){state.pendingScan=true;return;}
+        state.busy=true;state.page=detectPage();if(state.page!=='travel')document.querySelectorAll('#sl-mi-session,#sl-mi-arrival,#sl-mi-best-run,#sl-mi-country-best,#sl-mi-travel-plan').forEach(n=>n.remove());state.decorated=0;state.marketRequests=0;state.stockEtaLearned=0;state.lastError='';
         try{if(force)document.querySelectorAll('.sl-mi-travel,.sl-mi-bazaar,.sl-mi-items,#sl-mi-market-bar,#sl-mi-museum-bar,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());if(state.page!=='travel')document.querySelectorAll('.sl-mi-travel,#sl-mi-best-run,#sl-mi-arrival,#sl-mi-session,#sl-mi-travel-plan,#sl-mi-country-best').forEach(n=>n.remove());switch(state.page){case'travel':await scanTravel();break;case'bazaar':await scanBazaar();break;case'itemmarket':await scanItemMarket();break;case'items':await scanItems();break;case'points':scanPoints();break;case'museum':await scanMuseum();break;}if(state.page==='items'||state.page==='profile')document.getElementById('sl-mi-market-bar')?.remove();state.lastScan=Date.now();state.scanCount++;}
-        catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;if(!settings.enabled)cleanupLiveFeature('enabled');}
+        catch(e){state.lastError=String(e?.message||e);console.error('['+NAME+']',e);}finally{state.busy=false;if(!settings.enabled)cleanupLiveFeature('enabled');if(state.pendingScan){state.pendingScan=false;scheduleScan(false);}}
+    }
+    let marketTabTimer=null;
+    function scheduleMarketTabRefresh(){
+        if(!settings.enabled||detectPage()!=='itemmarket')return;
+        state.itemMarketEpoch=(state.itemMarketEpoch||0)+1;
+        document.getElementById('sl-mi-market-bar')?.remove();
+        if(marketTabTimer)clearTimeout(marketTabTimer);
+        marketTabTimer=setTimeout(()=>{marketTabTimer=null;scheduleScan(false);},300);
     }
     function scheduleScan(force=false){
         if(detectPage()==='travel'&&!force){
@@ -3915,12 +3946,27 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 `;document.head.appendChild(s);}
 
     function maybePromptHub(){if(!settings.enabled||window.SakaLuXScriptHub)return;let last=0;try{last=Number(localStorage.getItem(HUB_PROMPT_STORAGE)||0);}catch(_){}if(Date.now()-last<HUB_PROMPT_INTERVAL)return;setTimeout(()=>{if(!settings.enabled||window.SakaLuXScriptHub||document.getElementById('sl-mi-hub-prompt'))return;const box=document.createElement('div');box.id='sl-mi-hub-prompt';box.style.cssText='position:fixed;left:10px;right:10px;bottom:20px;z-index:2147483647;max-width:520px;margin:auto;background:#11161d;color:#fff;border:1px solid #39414c;border-radius:12px;padding:12px;font:12px Arial;box-shadow:0 8px 30px rgba(0,0,0,.55)';box.innerHTML='<b>☠︎ SakaLuX Script Hub</b><div style="margin:6px 0;color:#b8bec7">Install the Hub to manage Market Intelligence and the other SakaLuX add-ons from one place.</div><div style="display:flex;gap:7px"><button id="sl-mi-hub-install" style="flex:1;padding:9px;border:0;border-radius:7px;background:#2563eb;color:white;font-weight:900">INSTALL HUB</button><button id="sl-mi-hub-later" style="flex:1;padding:9px;border:0;border-radius:7px;background:#353c46;color:white;font-weight:900">NOT NOW</button></div>';document.body.appendChild(box);box.querySelector('#sl-mi-hub-install').onclick=()=>{location.href=HUB_INSTALL_URL;};box.querySelector('#sl-mi-hub-later').onclick=()=>{try{localStorage.setItem(HUB_PROMPT_STORAGE,String(Date.now()));}catch(_){}box.remove();};},1800);}
-    function startObserver(){if(!settings.enabled||state.observer)return;state.observer=new MutationObserver(muts=>{if(window.SakaLuXPerf?.unrelated?.(muts))return;const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-session,#sl-mi-arrival,#sl-mi-overlay,#sl-mi-country-best,#sl-mi-travel-plan,#sl-mi-bazaar-board,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&detectDestination()&&!detectInFlight()){scheduleLandedSmartRefresh('mutation');return;}if(detectPage()==='travel'&&now-state.lastObserverScan<5000){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});state.routeHandler=()=>scheduleScan(true);window.addEventListener('hashchange',state.routeHandler);}
+    function startObserver(){if(!settings.enabled||state.observer)return;
+        // Torn's market tabs are SPA controls; track clicks even when the route/hash is unchanged.
+        state.marketTabHandler=e=>{
+            if(detectPage()!=='itemmarket')return;
+            const target=e.target instanceof Element?e.target.closest('button,[role="tab"],a,[class*="category"],[class*="tab"]'):null;
+            if(!target||target.closest('#sl-mi-market-bar,#sl-mi-overlay'))return;
+            const label=normText(target.textContent||target.getAttribute('aria-label')||'').toLowerCase();
+            if(/^(primary|secondary|melee|temporary|equipment|supplies)$/.test(label)||/itemid=|item_id=/i.test(target.getAttribute('href')||'')){
+                scheduleMarketTabRefresh();
+                setTimeout(scheduleMarketTabRefresh,900);
+            }
+        };
+        document.addEventListener('click',state.marketTabHandler,true);
+        state.observer=new MutationObserver(muts=>{if(window.SakaLuXPerf?.unrelated?.(muts))return;const now=Date.now();const meaningful=muts.some(m=>[...m.addedNodes||[]].some(n=>{if(!(n instanceof Element))return false;if(n.id&&n.id.startsWith('sl-mi-'))return false;if(n.closest?.('#sl-mi-best-run,#sl-mi-session,#sl-mi-arrival,#sl-mi-overlay,#sl-mi-country-best,#sl-mi-travel-plan,#sl-mi-bazaar-board,.sl-mi-travel,.sl-mi-bazaar,.sl-mi-bazaar-badge-wrap,.sl-mi-items'))return false;return true;}));if(!meaningful)return;if(detectPage()==='travel'&&detectDestination()&&!detectInFlight()){scheduleLandedSmartRefresh('mutation');return;}if(detectPage()==='travel'&&now-state.lastObserverScan<5000){state.observerSkips++;return;}state.lastObserverScan=now;scheduleScan(false);});state.observer.observe(document.body,{childList:true,subtree:true});state.routeHandler=()=>scheduleScan(true);window.addEventListener('hashchange',state.routeHandler);}
 
     function stopRuntime(){
         if(state.bestRouteBootstrapTimer){clearInterval(state.bestRouteBootstrapTimer);state.bestRouteBootstrapTimer=null;}
         if(state.bestRouteEntitlementListener){window.removeEventListener('SakaLuX:PremiumStatus',state.bestRouteEntitlementListener);state.bestRouteEntitlementListener=null;}
         state.observer?.disconnect();state.observer=null;
+        if(state.marketTabHandler){document.removeEventListener('click',state.marketTabHandler,true);state.marketTabHandler=null;}
+        if(marketTabTimer){clearTimeout(marketTabTimer);marketTabTimer=null;}
         if(state.routeHandler)window.removeEventListener('hashchange',state.routeHandler);state.routeHandler=null;
         if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=null;
         if(state.premiumPanelRecoveryTimer){clearInterval(state.premiumPanelRecoveryTimer);state.premiumPanelRecoveryTimer=null;}
