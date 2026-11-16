@@ -1,11 +1,11 @@
 # SakaLuX Gym Optimizer
 
 ## Current version
-**v1.7.13**
+**v1.7.14**
 
 ## Repository synchronization
-- Verified: **2026-11-11**
-- Canonical version: **v1.7.13**
+- Verified: **2026-11-16**
+- Canonical version: **v1.7.14**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js
 - Update metadata URL: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.meta.js
@@ -17,18 +17,19 @@
 
 ## Current release note
 
-**v1.7.13 — Version and release synchronization**
-- Source change: Synchronize shared runtime with canonical Core.
-- Updated canonical userscript version to v1.7.13; package verified by GitHub Actions.
+**v1.7.14 — Gym History capture diagnostics**
+- Broaden native Gym tile stat extraction without reading injected UI.
+- Show a live reason when History is waiting or blocked; preserve all existing snapshots.
+- Synchronize UI, bridge and header versions to v1.7.14.
 
 ## Release history / Changelog
 
 
 
 
-### v1.7.13 — 2026-11-11
+### v1.7.14 — 2026-11-11
 - Source change: Synchronize shared runtime with canonical Core.
-- Updated canonical userscript version to v1.7.13; package verified by GitHub Actions.
+- Updated canonical userscript version to v1.7.14; package verified by GitHub Actions.
 
 ### v1.7.12 — 2026-11-11
 - Source change: Synchronize shared runtime with canonical Core.
