@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Gym Optimizer
 // @namespace    https://sakalux.ro/
-// @version      1.7.13
+// @version      1.7.14
 // @description  Safe Gym stat planner with confirmed-only gym suggestions. TornPDA/Tampermonkey.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -16,7 +16,7 @@
 // Gym bootstrap: publish proof of script execution before Shared Core or UI initializes.
 ;(() => {
   try {
-    const id='gym-optimizer',v='1.7.13',root=document.documentElement;
+    const id='gym-optimizer',v='1.7.14',root=document.documentElement;
     if(!root)return;
     root.setAttribute('data-sakalux-installed-'+id,v);
     root.setAttribute('data-sakalux-gym-boot','loaded');
@@ -867,7 +867,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // Register in a DOM bridge visible across userscript execution contexts.
   // Do this before the duplicate-instance guard: legacy live instances can still be detected.
   try {
-    const ver='1.7.10',id='gym-optimizer';
+    const ver='1.7.14',id='gym-optimizer';
     const html=document.documentElement;
     html?.setAttribute('data-sakalux-installed-'+id,ver);
     let node=document.getElementById('sakalux-module-bridge-'+id);
@@ -1049,17 +1049,25 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const statNumber=s=>Number(String(s).replace(/,/g,''))||0;
   function nativeStats(){
     const found={};
-    // Read individual Torn training tile headings, never global HUD or injected text.
-    const buttons=[...document.querySelectorAll('button,input[type="button"]')].filter(b=>!panel.contains(b)&&/^train$/i.test((b.textContent||b.value||'').trim()));
+    // Read only native Torn Gym tiles. Do not use injected panels, HUD totals,
+    // manually configured targets or the previous History values as new evidence.
+    const buttons=[...document.querySelectorAll('button,input[type="button"],[role="button"]')]
+      .filter(b=>!panel.contains(b)&&/^train$/i.test((b.innerText||b.textContent||b.value||'').trim()));
     for(const button of buttons){
       let node=button.parentElement;
-      for(let d=0;node&&d<5;d++,node=node.parentElement){
+      for(let depth=0;node&&depth<8;depth++,node=node.parentElement){
         if(node.contains(panel))break;
-        const text=(node.innerText||'').replace(/\s+/g,' ');
-        const matched=stats.find(n=>new RegExp('^'+n+'\\s+[\\d,.]+','i').test(text));
-        if(!matched)continue;
-        const value=text.match(new RegExp('^'+matched+'\\s+([\\d,]+(?:\\.\\d+)?)','i'));
-        if(value&&statNumber(value[1])>0){found[matched]=statNumber(value[1]);break}
+        const text=(node.innerText||node.textContent||'').replace(/\s+/g,' ').trim();
+        for(const name of stats){
+          if(found[name])continue;
+          // Match a native stat label and its complete value, including decimals.
+          // Require a word boundary so 72K abbreviations cannot masquerade as exact stats.
+          const match=text.match(new RegExp('(?:^|\\s)'+name+'\\s*[:\\-]?\\s*([\\d,]+(?:\\.\\d+)?)(?=\\s|$)','i'));
+          if(match&&statNumber(match[1])>0)found[name]=statNumber(match[1]);
+        }
+        // Avoid wandering into the whole page and accidentally reading other UI.
+        if(Object.keys(found).length===4)break;
+        if(node.querySelectorAll('button,input[type="button"],[role="button"]').length>16)break;
       }
     }
     return found;
@@ -1291,7 +1299,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function registerGym(){
     try{
-      const version='1.7.10',id='gym-optimizer';
+      const version='1.7.14',id='gym-optimizer';
       window.__SakaLuXInstalledVersions=window.__SakaLuXInstalledVersions||{};
       window.__SakaLuXInstalledVersions[id]=version;
       document.documentElement?.setAttribute('data-sakalux-installed-'+id,version);
@@ -1631,20 +1639,41 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   // stats are visible, stable across polls and monotonic relative to the last snapshot.
   // Never infer a training gain from manually configured target values.
   let pendingGymSnapshot=null;
+  let gymHistoryStatus='Waiting for native Gym stats';
   const gymSnapshotValid=(values)=>stats.every(n=>Number.isFinite(values[n])&&values[n]>0);
   const gymSnapshotEqual=(a,b)=>stats.every(n=>Math.abs(Number(a?.[n])-Number(b?.[n]))<0.005);
+  function setGymHistoryStatus(message){
+    if(gymHistoryStatus===message)return;
+    gymHistoryStatus=message;
+    const label=panel.querySelector('#slx-gym-history-status');
+    if(label)label.textContent=message;
+  }
   function watchGymHistory(){
-    if(!onGym()||!state.enabled){pendingGymSnapshot=null;return}
+    if(!onGym()||!state.enabled){
+      pendingGymSnapshot=null;
+      setGymHistoryStatus(state.enabled?'Waiting for Gym page':'History monitoring disabled');
+      return;
+    }
     const live=nativeStats();
-    if(!gymSnapshotValid(live)){pendingGymSnapshot=null;return}
+    if(!gymSnapshotValid(live)){
+      pendingGymSnapshot=null;
+      setGymHistoryStatus('Waiting for native stats: '+stats.filter(n=>!Number.isFinite(live[n])||live[n]<=0).join(', '));
+      return;
+    }
     const last=state.history?.[state.history.length-1]?.values;
-    if(last&&gymSnapshotEqual(live,last)){pendingGymSnapshot=null;return}
+    if(last&&gymSnapshotEqual(live,last)){
+      pendingGymSnapshot=null;
+      setGymHistoryStatus('Up to date; no new stat changes');
+      return;
+    }
     if(last&&stats.some(n=>live[n]+0.005<Number(last[n])||!Number.isFinite(Number(last[n])))){
       pendingGymSnapshot=null;
+      setGymHistoryStatus('Live stats below last saved snapshot; no overwrite. Check source/account.');
       return;
     }
     if(!pendingGymSnapshot||!gymSnapshotEqual(pendingGymSnapshot,live)){
       pendingGymSnapshot={...live};
+      setGymHistoryStatus('Verifying stable native stats');
       return;
     }
     pendingGymSnapshot=null;
@@ -1652,6 +1681,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     state.history.push({at:new Date().toISOString(),values:{...live},source:'auto'});
     state.history=state.history.slice(-180);
     save();
+    setGymHistoryStatus('Saved snapshot at '+new Date().toLocaleTimeString());
     if(['HISTORY','OVERVIEW'].includes(panel.dataset.tab||'OVERVIEW'))render();
   }
 
@@ -1732,7 +1762,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     const tab=panel.dataset.tab||'OVERVIEW';
     const esc=escape;
     const tabs=['OVERVIEW','HISTORY','EXPORT','SETTINGS','INFO'];
-    const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>v1.7.10 · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
+    const header='<div class="sf-top"><strong>SAKALUX GYM</strong><span>v1.7.14 · DEXTERITY HIGH</span></div><div class="sf-tabs">'+tabs.map(t=>'<button data-tab="'+t+'" class="'+(tab===t?'active':'')+'">'+t+'</button>').join('')+'</div>';
     const info='<div class="sf-overview"><div><div class="sf-eyebrow">RATIO HEALTH</div><div class="sf-ratio"><b>'+(!complete?' - ':pct>=98?'A':pct>=90?'B':pct>=80?'C':'D')+'</b><span>'+(!complete?'Awaiting stats':pct+'% toward targets')+'<small>SakaLuX Ratio</small></span></div></div><div style="text-align:right"><div class="sf-eyebrow">TOTAL BATTLE STATS</div><div class="sf-total">'+(total?fmt(total):' - ')+'</div><div class="sf-gain">'+(gain==null?'AWAITING NEXT TRAIN':'+'+fmt(gain)+' SINCE LAST TRAIN')+'</div></div></div>';
     const nextAction=gymNextAction(next?.stat,gym);
     const train='<div class="sf-section">TRAIN NEXT</div><div class="sf-card">'
@@ -1779,7 +1809,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
           +'<div class="slx-hstat slx-htotal">'+compact(sum)+small(sum-old,rows[i+1]!=null)+'</div></div>';
       }).join('')
       +(rows.length?'':'<p class="slx-history-empty">Snapshots are saved automatically after verified stat changes. No manual saving needed.</p>')
-      +'</div><div class="slx-history-footer">AUTO-SAVE ACTIVE - '+snapshots.length+' snapshots stored</div><div class="sf-history-actions"><button id="slx-gym-clear">CLEAR HISTORY</button></div>';
+      +'</div><div class="slx-history-footer">AUTO-SAVE ACTIVE - '+snapshots.length+' snapshots stored</div><div id="slx-gym-history-status" class="slx-history-footer" role="status">'+escape(gymHistoryStatus)+'</div><div class="sf-history-actions"><button id="slx-gym-clear">CLEAR HISTORY</button></div>';
     const summary='=== SakaLuX Gym Export ===\nDate: '+new Date().toLocaleString()+'\nRatio: '+state.mode+' | High: '+(state.highStat||'Dexterity')+'\nHealth: '+(complete?pct+'%':'unverified')+' | TBS: '+fmt(total)+'\n\nSTAT       CURRENT     TARGET      STATUS\n'+stats.map(n=>n.padEnd(11)+fmt(actual[n]).padEnd(12)+(targets[n]?fmt(targets[n]):'dump').padEnd(12)+(Number(state.weights[n])===0?'Minimize':(actual[n]>=targets[n]?'At target':'Below target'))).join('\n');
     const exporter='<div class="sf-section">EXPORT SNAPSHOT</div><div class="sf-export"><p>Copy a plain-text summary of your current ratio health and target stats.</p><button id="slx-gym-copy">COPY TO CLIPBOARD</button><pre>'+escape(summary)+'</pre><button id="slx-gym-export">EXPORT HISTORY CSV</button></div>';
     const about='<div class="sf-info"><div class="sf-section">WHY NOT JUST TRAIN ALL STATS EQUALLY?</div><p>Torn has specialist gyms that give significantly better gains than regular gyms, but they have stat ratio requirements to unlock and keep access. Baldr and Hank are two popular ways to structure stats for those gyms.</p><div class="sf-section">GYM DOTS - WHY THEY MATTER</div><p>Gym dots indicate relative training gains per energy. Higher dots generally mean more gains, but exact gains and eligibility vary by gym.</p><div class="sf-three"><div>GEORGES GYM<strong style="color:#e9b84c">~7.3</strong><small>10e / train<br>No specialist ratio</small></div><div>SPECIAL GYMS<strong style="color:#ef9a45">~7.5</strong><small>Often 25e / train<br>Ratio required</small></div><div>ELITE GYMS<strong style="color:#50d18d">~8.0</strong><small>Often 50e / train<br>Strict ratio rules</small></div></div><div class="sf-section">BALDRS RATIO - 1.25 : 1 : 0.75 : 0.75</div><p>A balanced specialist build. The leading stat is 1.25, secondary 1, and the two lower stats 0.75 each. This keeps the lower stats meaningful rather than dumping one completely.</p><p>Baldr-style builds can aim for specialist gym access while maintaining a more balanced combat profile. Actual unlocks must be checked in Torn.</p><p style="color:#55d991;border-left:4px solid #32c778;padding:10px;background:#123224">BEST FOR: Balanced offensive or defensive builds; fewer extreme weaknesses.</p><div class="sf-section">HANKS RATIO - 1.25 : 1 : 1 : ~0</div><p>An aggressive three-stat build with one dump stat kept very low. It emphasizes gains for three stats, but the dump can create a major combat weakness.</p><p style="color:#f0b46b;border-left:4px solid #d68b39;padding:10px;background:#332619">TRADE-OFF: Higher specialization at the cost of one neglected stat. Verify gym unlock rules before choosing.</p><div class="sf-section">SAKALUX - DEXTERITY HIGH</div><p><b style="color:#49d994">DEXTERITY:</b> primary dodge stat. <b style="color:#47d7eb">SPEED:</b> secondary accuracy stat. <b style="color:#f18a5a">STRENGTH:</b> supporting damage stat. <b style="color:#b18af1">DEFENSE:</b> dump stat. Your custom weights can be changed in Settings.</p><p>Ratios are training targets, not proof that a particular specialist gym is unlocked.</p><div class="sf-section">STATS EXPLAINED</div><p><b style="color:#f18a5a">STRENGTH - DAMAGE</b><br>Determines how much damage your successful hits can deal. It works together with weapon damage and other combat modifiers.</p><p><b style="color:#47d7eb">SPEED - ACCURACY</b><br>Helps your attacks connect against opponents with Dexterity. Speed alone does not determine damage.</p><p><b style="color:#b18af1">DEFENSE - DAMAGE REDUCTION</b><br>Helps reduce damage when an attack lands. Low Defense can leave you vulnerable if you fail to dodge.</p><p><b style="color:#49d994">DEXTERITY - DODGING</b><br>Helps you avoid incoming attacks against opponents Speed. A dodge-focused build can still be hit.</p><div class="sf-section">IMPORTANT NOTES</div><p>Gym dot values are approximate. Specialist eligibility depends on the games current requirements. The optimizer should not automatically assume a gym is unlocked or spend energy without your confirmation.</p></div>';
@@ -1819,7 +1849,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   const open=()=>{render();mount();};
   const close=()=>{panel.hidden=true};
   toggle.onclick=open;panel.querySelector('[data-settings]').onclick=()=>{panel.classList.toggle('expanded');panel.querySelector('[data-settings]').textContent=panel.classList.contains('expanded')?'Close settings ^':'Settings v'};
-  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.10',getState:()=>({...state})};
+  window.SakaLuXGymOptimizer={open,close,refresh:render,version:'1.7.14',getState:()=>({...state})};
   // Insert ONLY as a normal-flow sibling of Torn's actual training tile group.
   // Previous gym-root insertion overlapped the stat/HUD section on TornPDA.
   function trainingAnchor(){
