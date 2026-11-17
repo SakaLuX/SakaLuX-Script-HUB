@@ -641,7 +641,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.7.14",
+      "version": "1.7.15",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -658,12 +658,12 @@
         }
       ],
       "release": {
-        "version": "1.7.14",
-        "date": "2026-11-16",
+        "version": "1.7.15",
+        "date": "2026-11-17",
         "notes": [
-          "Fix History stat reading across TornPDA Gym tile layouts.",
-          "Show History capture status without deleting existing snapshots.",
-          "Synchronize displayed/runtime version with userscript metadata."
+          "Read Gym stats only from their own native training tiles to prevent cross-card mismatches.",
+          "Display exactly which live stat is below its last stored snapshot, without clearing History.",
+          "Keep existing snapshots and sync version display."
         ]
       },
       "accessTier": "free",
