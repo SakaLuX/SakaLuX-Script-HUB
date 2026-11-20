@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1017 — automatic release (2026-11-20)
+
+- Source change: feat(suite): restore cross-page PANIC, all settings and Dry Run control.
+- Updated canonical userscript version to v0.9.1017; package verified by GitHub Actions.
+
 ## stock-manager-advisor v0.8.43 — automatic release (2026-11-20)
 
 - Source change: feat(stock): restore cross-page PANIC one-order execution via Suite bridge.
