@@ -48332,11 +48332,11 @@ document.addEventListener('click',e=>{
 })();
 
 
-/* SAKALUX_SUITE_PANIC_BRIDGE_V1: one click = at most one stock BUY, on Stocks only. */
+/* SAKALUX_SUITE_PANIC_BRIDGE_V2: cross-page PANIC purchase with explicit confirmation. */
 (()=>{
   'use strict';
   const ID='slx-suite-panic-tools';
-  const K={target:'SLX_STOCK_TARGET',fallback:'SLX_STOCK_PANIC_FALLBACK',keep:'SLX_STOCK_PANIC_KEEP_CASH',max:'SLX_STOCK_PANIC_MAX_SPEND',all:'SLX_STOCK_PANIC_USE_ALL',confirm:'SLX_STOCK_PANIC_CONFIRM'};
+  const K={target:'SLX_STOCK_TARGET',fallback:'SLX_STOCK_PANIC_FALLBACK',keep:'SLX_STOCK_PANIC_KEEP_CASH',max:'SLX_STOCK_PANIC_MAX_SPEND',all:'SLX_STOCK_PANIC_USE_ALL',confirm:'SLX_STOCK_PANIC_CONFIRM',dry:'SLX_STOCK_DRY_RUN'};
   const stockPage=()=>/^(?:stocks|StockMarket)$/i.test(new URL(location.href).searchParams.get('sid')||'');
   const safe=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const engine=()=>globalThis.SakaLuXStockManagerAdvisor;
@@ -48346,14 +48346,15 @@ document.addEventListener('click',e=>{
     if(!windowEl||document.getElementById(ID))return;
     const section=document.createElement('section');
     section.id=ID;section.style.cssText='padding:14px;margin:12px;border:1px solid #b48a42;border-radius:12px;background:#16191f;color:#f2e5cd';
-    section.innerHTML='<h3 style="margin:0 0 10px">PANIC · Stock Safe Mode</h3>'
-      +'<div style="font-size:12px;margin-bottom:8px">Available only while viewing Torn Stocks. One click can place at most one BUY; it cannot rebalance multiple stocks.</div>'
+    section.innerHTML='<h3 style="margin:0 0 10px">PANIC · Fast Vault</h3>'
+      +'<div style="font-size:12px;margin-bottom:8px">Available from any Torn page. Uses Stock Manager price/portfolio data and sends one BUY for your chosen target.</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">'
       +'<label>Primary stock<input data-k="target" placeholder="e.g. SYM" maxlength="5" style="width:100%"></label>'
       +'<label>Fallback stock<input data-k="fallback" placeholder="optional" maxlength="5" style="width:100%"></label>'
       +'<label>Keep cash<input data-k="keep" inputmode="numeric" placeholder="0" style="width:100%"></label>'
       +'<label>Max spend<input data-k="max" inputmode="numeric" placeholder="0 = unlimited" style="width:100%"></label></div>'
       +'<label style="display:block;margin:8px 0"><input data-k="all" type="checkbox"> Use all available cash (ignores Keep / Max)</label>'
+      +'<label style="display:block;margin:8px 0"><input data-k="dry" type="checkbox"> Dry Run · preview only, never buy</label>'
       +'<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" data-action="preview">PREVIEW</button><button type="button" data-action="buy">PANIC BUY · ONE TRADE</button><button type="button" data-action="stocks">OPEN STOCKS</button></div>'
       +'<div data-role="status" role="status" aria-live="polite" style="padding-top:8px;font-size:12px"></div>';
     // Within the Suite window; stays under Suite's main navigation.
@@ -48370,7 +48371,6 @@ document.addEventListener('click',e=>{
       const btn=e.target.closest('button[data-action]');if(!btn)return;
       const action=btn.dataset.action;
       if(action==='stocks'){location.href='https://www.torn.com/page.php?sid=stocks';return}
-      if(!stockPage()){notify('Open Torn Stocks to preview or execute PANIC.');return}
       const api=engine();
       if(!api?.panicPreview||!api?.panicBuy){notify('Enable or install Stock Manager & Advisor, then reopen Suite.');return}
       if(btn.disabled)return;
@@ -48380,7 +48380,7 @@ document.addEventListener('click',e=>{
           const data=await api.panicPreview();
           notify('Preview: '+data.shares.toLocaleString()+' '+data.sym+' ≈ $'+Math.round(data.estimate).toLocaleString()+(data.fallbackUsed?' (fallback)':'')+'. No order sent.');
         }else if(action==='buy'){
-          // Extra confirmation is always enabled; one physical click, max one BUY.
+          // Extra confirmation is enabled; one physical click, max one BUY.
           localStorage.setItem(K.confirm,'1');
           const result=await api.panicBuy();
           if(result?.success)notify(result.dryRun?'DRY RUN: no order sent.':'One PANIC BUY sent. Verify the result in Stock Manager history.');
