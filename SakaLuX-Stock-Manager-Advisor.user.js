@@ -3071,12 +3071,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     }
   }
 
-  async function panic() {
+  async function panic({skipConfirm=false}={}) {
     if(!(await globalThis.SakaLuXFreemium['stock-manager-advisor'].isPro())){globalThis.SakaLuXFreemium['stock-manager-advisor'].locked();return;}
     try {
       set(K.panicPending,'0');
       const x=await previewPanic();
-      if(bool(K.panicConfirm,false)) {
+      if(!skipConfirm && bool(K.panicConfirm,false)) {
         const ok=confirm(`PANIC v2\n\nTarget: ${x.sym}${x.fallbackUsed?' (fallback)':''}\nShares: ${x.shares.toLocaleString()}\nEstimated spend: ${money(x.estimate)}\nCash before: ${money(x.cash)}\nEstimated cash after: ${money(x.leftover)}\n\nExecute now?`);
         if(!ok){status('PANIC cancelled.','warn');return;}
       }
@@ -3782,7 +3782,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     window.SakaLuXStockManagerAdvisor={
       name:APP.name,version:APP.version,open:moduleOpen,refresh:moduleRefresh,setEnabled,
       panicPreview:async()=>previewPanic(),
-      panicBuy:async()=>panic(),
+      panicBuy:async()=>panic({skipConfirm:true}),
       panicConfig:()=>({target:get(K.target,''),fallback:get(K.panicFallback,''),keep:get(K.panicKeep,'0'),max:get(K.panicMax,'0'),all:bool(K.panicUseAll,false),confirm:bool(K.panicConfirm,true),dryRun:isDryRun()}),
       toggleEnabled:()=>setEnabled(!bool(K.enabled,true)),isEnabled:()=>bool(K.enabled,true),
       goToStocks:()=>{location.href=APP.stocksUrl;},
