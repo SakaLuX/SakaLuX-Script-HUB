@@ -597,17 +597,17 @@
         }
       ],
       "release": {
-        "version": "0.8.41",
+        "version": "0.8.42",
         "date": "2026-11-20",
         "notes": [
-          "Source change: feat(stock): expose stocks-page-only PANIC bridge for Suite and remove floating PANIC control.",
-          "Updated canonical userscript version to v0.8.41; package verified by GitHub Actions."
+          "Source change: fix(stock): provide explicit PANIC success and failure result to Suite.",
+          "Updated canonical userscript version to v0.8.42; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.41",
-      "detailsRevision": 34,
+      "version": "0.8.42",
+      "detailsRevision": 35,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
