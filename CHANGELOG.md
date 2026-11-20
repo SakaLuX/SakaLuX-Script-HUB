@@ -1,5 +1,10 @@
 # Changelog
 
+## stock-manager-advisor v0.8.41 — automatic release (2026-11-20)
+
+- Source change: feat(stock): expose stocks-page-only PANIC bridge for Suite and remove floating PANIC control.
+- Updated canonical userscript version to v0.8.41; package verified by GitHub Actions.
+
 ## stock-manager-advisor v0.8.40 — automatic release (2026-11-20)
 
 - Source change: fix(stock): disable chained rebalance and auto panic, constrain trades to stocks, disclose API key flows.

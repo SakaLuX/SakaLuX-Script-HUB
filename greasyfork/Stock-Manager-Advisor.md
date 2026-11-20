@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.40**
+**v0.8.41**
 
 ### v0.8.34 — Installed-version fallback fix
 - Corrected the canonical TornPDA installed-version fallback from v0.8.30 to v0.8.34, preventing false update indications after installation.
@@ -17,7 +17,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-20**
-- Canonical version: **v0.8.40**
+- Canonical version: **v0.8.41**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -42,9 +42,9 @@
 
 ## Current release note
 
-**v0.8.40 — Version and release synchronization**
-- Source change: fix(stock): disable chained rebalance and auto panic, constrain trades to stocks, disclose API key flows.
-- Updated canonical userscript version to v0.8.40; package verified by GitHub Actions.
+**v0.8.41 — Version and release synchronization**
+- Source change: feat(stock): expose stocks-page-only PANIC bridge for Suite and remove floating PANIC control.
+- Updated canonical userscript version to v0.8.41; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -52,6 +52,11 @@
 
 
 
+
+
+### v0.8.41 — 2026-11-20
+- Source change: feat(stock): expose stocks-page-only PANIC bridge for Suite and remove floating PANIC control.
+- Updated canonical userscript version to v0.8.41; package verified by GitHub Actions.
 
 ### v0.8.40 — 2026-11-20
 - Source change: fix(stock): disable chained rebalance and auto panic, constrain trades to stocks, disclose API key flows.
