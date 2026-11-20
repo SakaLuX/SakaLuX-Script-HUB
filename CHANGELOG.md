@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1022 — automatic release (2026-11-20)
+
+- Source change: fix(suite): integrate PANIC as native Reminders module row after Recovery Planner.
+- Updated canonical userscript version to v0.9.1022; package verified by GitHub Actions.
+
 ## suite v0.9.1021 — automatic release (2026-11-20)
 
 - Source change: fix(suite): persistent bottom-right PANIC action on all Torn pages with Suite ON/OFF toggle.
