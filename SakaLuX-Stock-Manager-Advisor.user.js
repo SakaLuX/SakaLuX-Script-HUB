@@ -3016,13 +3016,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
 
-  function panicButton() {
-    if($('#slx-stock-panic')) return;
-    const b=document.createElement('button');
-    b.id='slx-stock-panic'; b.type='button'; b.textContent='PANIC'; b.title='Panic v2 · preview and vault on-hand cash into the configured stock target';
-    b.addEventListener('click', panic);
-    (document.body||document.documentElement).appendChild(b);
-  }
 
   async function resolvePanicPreview() {
     const primary=get(K.target).toUpperCase();
@@ -3168,7 +3161,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   function applyInlineButtonPrefs(card=$('#slx-stock-inline')) {
     if(!card) return;
     const pref=inlineButtonPrefs();
-    const map={advisor:'[data-slx-inline-tab="advisor"]',trade:'[data-slx-inline-tab="trade"]',rebalance:'[data-slx-inline-tab="rebalance"]',panic:'#slx-inline-panic',full:'#slx-inline-full'};
+    const map={advisor:'[data-slx-inline-tab="advisor"]',trade:'[data-slx-inline-tab="trade"]',rebalance:'[data-slx-inline-tab="rebalance"]',full:'#slx-inline-full'};
     const premium=new Set(['advisor','rebalance','panic']);
     const active=globalThis.SakaLuXFreemium?.['stock-manager-advisor']?.isActive?.()===true;
     Object.entries(map).forEach(([k,sel])=>{const el=$(sel,card);if(!el)return;el.hidden=!pref[k];if(premium.has(k)){el.dataset.slxProLocked=String(!active);if(!active)el.title='SakaLuX PRO required — preference saved';else el.removeAttribute('title');}});
@@ -3208,7 +3201,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         <div class="slx-inline-actions"><button id="slx-inline-vault-max" class="primary" type="button">Vault Max</button><button id="slx-inline-withdraw-all" class="danger" type="button">Withdraw All</button><button id="slx-inline-vault-keep" type="button">Vault Keep</button><label><input id="slx-inline-keep" value="${esc(get(K.keep,'0'))}" placeholder="Keep cash"></label><button id="slx-inline-withdraw" type="button">Withdraw</button><label><input id="slx-inline-withdraw-value" value="${esc(get(K.withdraw,'1m'))}" placeholder="Withdraw amount"></label></div>
         <div class="slx-inline-options"><label><input id="slx-inline-api-mode" type="checkbox"> API Mode</label><label><input id="slx-inline-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-inline-dry" type="checkbox"> Dry Run</label><button id="slx-inline-compact" type="button">Compact</button></div>
         <div id="slx-inline-presets" class="slx-inline-presets"></div>
-        <div id="slx-inline-config" class="slx-inline-config" hidden><label>Withdrawal presets <input id="slx-inline-preset-input" value="${esc(get(K.inlinePresets,'50k,250k,1m,5m,10m,25m'))}" placeholder="50k,250k,1m,5m,10m,25m"></label><div class="slx-inline-config-actions"><button id="slx-inline-save-presets" type="button">Save presets</button><label><input data-inline-button="advisor" type="checkbox"> Advisor <span class="slx-premium-badge">✦ PRO</span></label><label><input data-inline-button="trade" type="checkbox"> Trade</label><label><input data-inline-button="rebalance" type="checkbox"> Rebalance <span class="slx-premium-badge">✦ PRO</span></label><label><input data-inline-button="panic" type="checkbox"> PANIC <span class="slx-premium-badge">✦ PRO</span></label><label><input data-inline-button="full" type="checkbox"> Full</label></div></div>
+        <div id="slx-inline-config" class="slx-inline-config" hidden><label>Withdrawal presets <input id="slx-inline-preset-input" value="${esc(get(K.inlinePresets,'50k,250k,1m,5m,10m,25m'))}" placeholder="50k,250k,1m,5m,10m,25m"></label><div class="slx-inline-config-actions"><button id="slx-inline-save-presets" type="button">Save presets</button><label><input data-inline-button="advisor" type="checkbox"> Advisor <span class="slx-premium-badge">✦ PRO</span></label><label><input data-inline-button="trade" type="checkbox"> Trade</label><label><input data-inline-button="rebalance" type="checkbox"> Rebalance <span class="slx-premium-badge">✦ PRO</span></label><label><input data-inline-button="full" type="checkbox"> Full</label></div></div>
         <div id="slx-inline-status" class="slx-inline-note">Ready.</div>
       </div>`;
     if(before) host.insertBefore(card,before); else host.prepend(card);
@@ -3382,7 +3375,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     if($('#slx-stock-style')) return;
     const s=document.createElement('style'); s.id='slx-stock-style';
     s.textContent=`
-#slx-stock-panic{position:fixed;right:10px;top:174px;z-index:2147482500;border:1px solid #ff5c6b;border-radius:10px;padding:8px 10px;background:linear-gradient(180deg,#7f1520,#4d0d14);color:#fff;font:900 11px Arial;box-shadow:0 6px 18px #0008}
 #slx-stock-panel{position:fixed;inset:0;z-index:2147483000;background:#05080dcc;color:#e8eef7;display:none;align-items:flex-start;justify-content:center;padding:70px 10px 90px;overflow:auto;font-family:Arial,sans-serif}
 #slx-stock-panel[data-open="1"]{display:flex} #slx-stock-panel .card{width:min(720px,100%);background:#0e1620;border:1px solid #344458;border-radius:16px;box-shadow:0 20px 55px #000b;overflow:hidden}
 #slx-stock-panel .head{display:flex;align-items:center;gap:10px;padding:14px 16px;background:linear-gradient(180deg,#162536,#101a26);border-bottom:1px solid #33465b} #slx-stock-panel h2{font-size:16px;margin:0;flex:1}
@@ -3424,11 +3416,10 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       <div class="section"><div class="api-head"><div class="title">Torn API Key</div><span id="slx-stock-api-badge" class="api-badge">${get(K.api)?'Saved':'Not configured'}</span></div>
         <div class="api-key-row"><input id="slx-stock-api" type="password" autocomplete="off" placeholder="Paste Torn API key"><button id="slx-api-show" type="button" title="Show / hide API key">👁</button></div>
         <div class="actions slx-api-actions"><button id="slx-api-save" class="primary" type="button">Save Key</button><button id="slx-api-test" type="button">Test & Sync</button><button id="slx-api-create" type="button">Create Required Key</button><button id="slx-api-clear" class="danger" type="button">Clear</button></div>
-        <div class="api-help">Required selections: <b>user → money, stocks</b> and <b>torn → stocks</b>.</div><div class="api-help" style="overflow-x:auto"><b>API Terms of Service — SakaLuX Stock Manager</b><table style="width:100%;border-collapse:collapse;font-size:11px;text-align:left"><thead><tr><th>Data Storage</th><th>Data Sharing</th><th>Purpose of Use</th><th>Key Storage &amp; Sharing</th><th>Key Access Level</th></tr></thead><tbody><tr><td>Local persistent storage for the key and portfolio settings; API data may be cached locally. Server retention must be confirmed by the service operator.</td><td>Service owner (only for the premium verification request); otherwise user.</td><td>Stocks portfolio analysis, guidance and premium license verification.</td><td>Locally saved key is sent via HTTPS to api.torn.com and to sakalux.ro for premium verification. The server's retention policy has not been verified.</td><td>User: money, stocks; Torn: stocks. Shared Hub keys can have broader permissions.</td></tr></tbody></table><b>Notice:</b> Do not submit an API key until server-side key handling and retention have been confirmed.</div>
+        <div class="api-help">Required selections: <b>user → money, stocks</b> and <b>torn → stocks</b>.</div><div class="api-help slx-stock-api-tos" style="overflow-x:auto;max-width:100%;border:1px solid #52637b;padding:10px;border-radius:9px;background:#132131;color:#e9f2ff"><b>API Terms of Service (ToS) — Stock Manager</b><div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:11px;text-align:left;min-width:640px;width:100%"><thead><tr><th>Data Storage</th><th>Data Sharing</th><th>Purpose of Use</th><th>Key Storage &amp; Sharing</th><th>Key Access Level</th></tr></thead><tbody><tr><td>Only locally (key, settings and cached portfolio data). Server retention for license verification is not yet verified.</td><td>Service owners may receive the key for PRO license verification.</td><td>Other: portfolio analytics, stock guidance, subscription entitlement verification.</td><td>Stored in browser localStorage; transmitted via HTTPS to Torn API and to sakalux.ro for license verification. Server-side storage status unverified.</td><td>Custom: user money, stocks; torn stocks. A shared Hub key may grant broader selections.</td></tr></tbody></table></div><div style="margin-top:8px"><b>Transparency notice:</b> The server storage/retention policy has not yet been verified. Do not enter a key until the policy has been confirmed and updated.</div></div>
       </div>
-      <div class="section"><div class="title">Vault & Panic v2</div><div class="grid slx-vault-grid">
+      <div class="section"><div class="title">Vault & Withdraw</div><div class="grid slx-vault-grid">
         <label>Primary target <select id="slx-stock-target"><option value="">Sync API or open Stocks to detect symbols</option></select></label>
-        <label>Fallback target <select id="slx-panic-fallback"><option value="">None</option></select></label>
         <button id="slx-vault-keep" type="button">Vault (Keep)</button>
         <label>Vault keep cash <input id="slx-stock-keep" value="${esc(get(K.keep,'0'))}" placeholder="e.g. 250k"></label>
         <button id="slx-withdraw" type="button">Withdraw</button>
@@ -3436,10 +3427,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         <button id="slx-vault-max" class="primary" type="button">Vault Max</button>
         <button id="slx-withdraw-all" class="danger" type="button">Withdraw All</button>
       </div>
-      <input id="slx-panic-keep" type="hidden" value="${esc(get(K.panicKeep,get(K.keep,'0')))}">
-      <input id="slx-panic-max" type="hidden" value="${esc(get(K.panicMax,'0'))}">
-      <div class="actions slx-safety-options"><label><input id="slx-benefit-lock" type="checkbox"> Lock Benefits</label><label><input id="slx-panic-confirm" type="checkbox"> Confirm Panic</label><label><input id="slx-panic-use-all" type="checkbox"> PANIC uses 100% cash</label><button id="slx-panic-preview-btn" type="button">Preview PANIC</button></div>
-      <div id="slx-panic-preview" class="panic-preview">Preview shows target, exact shares, estimated spend and cash remaining before any order is sent.</div></div>
+      <div class="actions slx-safety-options"><label><input id="slx-benefit-lock" type="checkbox"> Lock Benefits</label></div></div>
       <div class="section"><div class="title">Safety</div><div class="safety-grid"><label><input id="slx-dry-run" type="checkbox"> Dry Run · calculate/log only, never send BUY/SELL</label><div class="muted">Trades are serialized and protected by a 1.5s anti-double-click cooldown.</div></div></div>
       <div class="section"><div class="api-head"><div class="title">Transaction History</div><div><select id="slx-tx-filter"><option value="all">All</option><option value="buy">BUY</option><option value="sell">SELL</option></select> <input id="slx-tx-search" placeholder="Search symbol/status…" style="max-width:170px"></div></div><div id="slx-stock-tx-history" class="action-list muted">No transactions yet.</div></div>
       <div class="section"><div class="api-head"><div class="title">Action Log</div><button id="slx-log-clear" type="button">Clear Log</button></div><div id="slx-stock-action-log" class="action-list muted">No stock actions logged yet.</div></div>
@@ -3465,8 +3453,6 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     $('#slx-stock-api',p).value=get(K.api);
     $('#slx-stock-api-badge',p).dataset.kind=get(K.api)?'idle':'idle';
     $('#slx-benefit-lock',p).checked=bool(K.benefitLock,true);
-    $('#slx-panic-confirm',p).checked=bool(K.panicConfirm,false);
-    $('#slx-panic-use-all',p).checked=bool(K.panicUseAll,false);
     $('#slx-dry-run',p).checked=bool(K.dryRun,true);
     $('#slx-api-show',p).onclick=()=>{const i=$('#slx-stock-api',p);i.type=i.type==='password'?'text':'password';};
     $('#slx-api-save',p).onclick=()=>{try{saveApiKeyFromPanel();}catch(e){status(e.message,'bad');}};
@@ -3477,20 +3463,14 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     $('#slx-benefit-reset',p).onclick=()=>{if(confirm('Reset all manual benefit values/frequencies?')){del(K.benefitValues);renderBenefitValues();renderAdvisor();renderTradeAssistant();status('Manual benefit values reset.','ok');}};
     $('#slx-stock-keep',p).onchange=e=>set(K.keep,e.target.value);
     $('#slx-stock-withdraw',p).onchange=e=>set(K.withdraw,e.target.value);
-    $('#slx-panic-keep',p).onchange=e=>set(K.panicKeep,e.target.value);
-    $('#slx-panic-max',p).onchange=e=>set(K.panicMax,e.target.value);
     $('#slx-benefit-lock',p).onchange=e=>set(K.benefitLock,e.target.checked?'1':'0');
-    $('#slx-panic-confirm',p).onchange=e=>set(K.panicConfirm,e.target.checked?'1':'0');
-    $('#slx-panic-use-all',p).onchange=e=>{set(K.panicUseAll,e.target.checked?'1':'0');status(`PANIC 100% cash mode ${e.target.checked?'enabled':'disabled'}.`,e.target.checked?'warn':'ok');};
-    $('#slx-panic-fallback',p).onchange=e=>set(K.panicFallback,e.target.value);
-    $('#slx-panic-preview-btn',p).onclick=()=>previewPanic().catch(()=>{});
     $('#slx-dry-run',p).onchange=e=>{set(K.dryRun,e.target.checked?'1':'0');status(`Dry Run ${e.target.checked?'enabled':'disabled'}.`,e.target.checked?'warn':'ok');};
     $('#slx-log-clear',p).onclick=clearActionLog;
     $('#slx-bank-apr',p).onchange=e=>{set(K.bankApr,String(Math.max(0,Number(e.target.value)||0)));renderAdvisor();renderOptimizer();renderTradeAssistant();};
     $('#slx-opt-min-apr',p).onchange=e=>{set(K.optimizerMinApr,String(Math.max(0,Number(e.target.value)||0)));renderOptimizer();};
     $('#slx-rebalance-reserve',p).onchange=e=>{set(K.rebalanceReserve,e.target.value);renderRebalancePreview();};
     $('#slx-rebalance-preview-btn',p).onclick=()=>safeRender('Rebalance Preview',renderRebalancePreview);
-    $('#slx-stock-target',p).onchange=e=>{set(K.target,e.target.value);const v=$('#slx-panic-preview',p);if(v){v.dataset.kind='';v.textContent='Target changed · run Preview PANIC again.';}renderPortfolio();renderAdvisor();renderOptimizer();};
+    $('#slx-stock-target',p).onchange=e=>{set(K.target,e.target.value);renderPortfolio();renderAdvisor();renderOptimizer();};
     $('#slx-vault-max',p).onclick=()=>vault().then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     $('#slx-vault-keep',p).onclick=()=>vault({keep:parseAmount($('#slx-stock-keep',p).value)}).then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
     $('#slx-withdraw',p).onclick=()=>withdrawCash(parseAmount($('#slx-stock-withdraw',p).value)).then(()=>syncAllApi().catch(()=>{})).catch(e=>status(e.message,'bad'));
@@ -3504,11 +3484,10 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
   function refreshTargetSelect() {
     if(!S.panel?.isConnected) return;
     scanStocks();
-    const primary=$('#slx-stock-target',S.panel), fallback=$('#slx-panic-fallback',S.panel);
-    const current=get(K.target).toUpperCase(), currentFallback=get(K.panicFallback).toUpperCase();
+    const primary=$('#slx-stock-target',S.panel);
+    const current=get(K.target).toUpperCase();
     const list=[...S.stocks.keys()].sort();
     if(primary) primary.innerHTML='<option value="">Select stock…</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===current?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
-    if(fallback) fallback.innerHTML='<option value="">None</option>'+list.map(sym=>`<option value="${esc(sym)}" ${sym===currentFallback?'selected':''}>${esc(sym)} · ${money(S.stocks.get(sym).price)}</option>`).join('');
   }
 
   function premiumStyle() {
@@ -3664,7 +3643,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
           <div class="slx-stock-api-status" id="slx-stock-api-status"><b>TORN API ACCESS</b><span>${initial.key?'READY':'NOT CHECKED'}</span></div>
           <div id="slx-stock-api-source" class="slx-api-source">Active source: <b>${esc(initial.source)}</b></div>
           <div class="slx-api-note">The SakaLuX Hub general key is used automatically first when Hub is installed and active. The local key below remains the standalone fallback.</div>
-          <div class="api-help" style="overflow-x:auto"><b>API Terms of Service — SakaLuX Stock Manager</b><table style="width:100%;border-collapse:collapse;font-size:11px;text-align:left"><thead><tr><th>Data Storage</th><th>Data Sharing</th><th>Purpose of Use</th><th>Key Storage &amp; Sharing</th><th>Key Access Level</th></tr></thead><tbody><tr><td>Local persistent storage for the key and portfolio settings; API data may be cached locally. Server retention must be confirmed by the service operator.</td><td>Service owner (only for the premium verification request); otherwise user.</td><td>Stocks portfolio analysis, guidance and premium license verification.</td><td>Locally saved key is sent via HTTPS to api.torn.com and to sakalux.ro for premium verification. The server's retention policy has not been verified.</td><td>User: money, stocks; Torn: stocks. Shared Hub keys can have broader permissions.</td></tr></tbody></table><b>Notice:</b> Do not submit an API key until server-side key handling and retention have been confirmed.</div>
+          <div class="api-help slx-stock-api-tos" style="overflow-x:auto;max-width:100%;border:1px solid #52637b;padding:10px;border-radius:9px;background:#132131;color:#e9f2ff"><b>API Terms of Service (ToS) — Stock Manager</b><div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:11px;text-align:left;min-width:640px;width:100%"><thead><tr><th>Data Storage</th><th>Data Sharing</th><th>Purpose of Use</th><th>Key Storage &amp; Sharing</th><th>Key Access Level</th></tr></thead><tbody><tr><td>Only locally (key, settings and cached portfolio data). Server retention for license verification is not yet verified.</td><td>Service owners may receive the key for PRO license verification.</td><td>Other: portfolio analytics, stock guidance, subscription entitlement verification.</td><td>Stored in browser localStorage; transmitted via HTTPS to Torn API and to sakalux.ro for license verification. Server-side storage status unverified.</td><td>Custom: user money, stocks; torn stocks. A shared Hub key may grant broader selections.</td></tr></tbody></table></div><div style="margin-top:8px"><b>Transparency notice:</b> The server storage/retention policy has not yet been verified. Do not enter a key until the policy has been confirmed and updated.</div></div>
           <label>Replace / paste standalone Torn API key</label>
           <input id="slx-stock-api-sheet-input" type="password" autocomplete="off" placeholder="Paste Torn API key here" value="${esc(local)}">
           <div class="slx-api-sheet-actions"><button type="button" class="slx-api-primary" id="slx-stock-api-save">SAVE & TEST</button><button type="button" id="slx-stock-api-check">CHECK ACCESS</button></div>
@@ -3776,7 +3755,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
         $$('.slx-stock-row-tools').forEach(x=>x.remove());
       }
       managerLauncher();
-      if(!$('#slx-stock-panic')) panicButton();
+      $('#slx-stock-panic')?.remove();
     },delay);
   }
 
@@ -3841,7 +3820,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
   }
 
   async function init() {
-    style(); $('#slx-stock-panic')?.remove(); // PANIC control now belongs to Suite.
+    style(); $('#slx-stock-panic')?.remove(); // PANIC UI owned exclusively by Suite.
     if(!bool(K.enabled,true)||runtimeObserver)return;
     premiumStyle(); restoreCache(); managerLauncher();
     if(isStocks()) setTimeout(()=>scheduleInlineMount(true),220);
