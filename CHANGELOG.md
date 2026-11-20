@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1018 — automatic release (2026-11-20)
+
+- Source change: fix(suite): display default PANIC Dry Run enabled correctly.
+- Updated canonical userscript version to v0.9.1018; package verified by GitHub Actions.
+
 ## suite v0.9.1017 — automatic release (2026-11-20)
 
 - Source change: feat(suite): restore cross-page PANIC, all settings and Dry Run control.
