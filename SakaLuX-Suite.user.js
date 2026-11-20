@@ -2870,7 +2870,23 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
           <section class="sakalux-api-block">
             <div class="sakalux-api-title">Shared Torn API Key</div>
             <div class="sakalux-api-desc">
-              Stored only in this browser. It is never included in exported suite settings.
+              Stored locally in your browser and excluded from exported Suite settings. The shared license verification component may transmit your key to sakalux.ro.
+            </div>
+            <div class="slx-api-tos" style="padding:10px;margin:10px 0;border:1px solid #627793;border-radius:10px;background:#192333;color:#e9f1fd;font-size:11px;line-height:1.5">
+              <strong>API Terms of Service (ToS) — SakaLuX Suite</strong>
+              <div style="max-width:100%;overflow-x:auto;margin-top:7px">
+                <table style="min-width:610px;width:100%;border-collapse:collapse;text-align:left">
+                  <thead><tr><th>Data Storage</th><th>Data Sharing</th><th>Purpose of Use</th><th>Key Storage &amp; Sharing</th><th>Key Access Level</th></tr></thead>
+                  <tbody><tr>
+                    <td>Only locally for Suite settings and cached data. Server-side retention for license checks is not yet verified.</td>
+                    <td>Service owners may receive API keys used for premium checks; integration endpoints vary by active module.</td>
+                    <td>Other: SakaLuX module analytics and subscription entitlement checks.</td>
+                    <td>Stored locally; modules can use the key for Torn API calls; signed license checking may transmit it via HTTPS to sakalux.ro. Server retention unverified.</td>
+                    <td>Custom: depends on enabled Suite modules and any shared key permissions.</td>
+                  </tr></tbody>
+                </table>
+              </div>
+              <div style="margin-top:8px">Notice: server key retention and sharing still require administrator verification before full ToS compliance can be confirmed.</div>
             </div>
             <div class="sakalux-api-row">
               <input
