@@ -1,5 +1,10 @@
 # Changelog
 
+## gym-optimizer v1.7.17 — automatic release (2026-11-20)
+
+- Source change: fix(tos): disclose Torn API key handling at local key entry in SakaLuX-Gym-Optimizer.user.js.
+- Updated canonical userscript version to v1.7.17; package verified by GitHub Actions.
+
 ## suite v0.9.1022 — automatic release (2026-11-20)
 
 - Source change: fix(suite): integrate PANIC as native Reminders module row after Recovery Planner.

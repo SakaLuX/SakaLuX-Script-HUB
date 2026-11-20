@@ -1,11 +1,11 @@
 # SakaLuX Gym Optimizer
 
 ## Current version
-**v1.7.16**
+**v1.7.17**
 
 ## Repository synchronization
 - Verified: **2026-11-20**
-- Canonical version: **v1.7.16**
+- Canonical version: **v1.7.17**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js
 - Update metadata URL: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.meta.js
@@ -17,15 +17,20 @@
 
 ## Current release note
 
-**v1.7.16 — Version and release synchronization**
-- Source change: Synchronize shared runtime with canonical Core.
-- Updated canonical userscript version to v1.7.16; package verified by GitHub Actions.
+**v1.7.17 — Version and release synchronization**
+- Source change: fix(tos): disclose Torn API key handling at local key entry in SakaLuX-Gym-Optimizer.user.js.
+- Updated canonical userscript version to v1.7.17; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
 
 
+
+
+### v1.7.17 — 2026-11-20
+- Source change: fix(tos): disclose Torn API key handling at local key entry in SakaLuX-Gym-Optimizer.user.js.
+- Updated canonical userscript version to v1.7.17; package verified by GitHub Actions.
 
 ### v1.7.16 — 2026-11-20
 - Source change: Synchronize shared runtime with canonical Core.

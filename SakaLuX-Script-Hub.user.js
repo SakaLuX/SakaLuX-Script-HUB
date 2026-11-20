@@ -2322,7 +2322,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "icon": "🏋️",
                 "name": "Gym Optimizer",
                 "type": "addon",
-                "version": "1.7.16",
+                "version": "1.7.17",
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
                 "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -2339,18 +2339,18 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "1.7.16",
+                    "version": "1.7.17",
                     "date": "2026-11-20",
                     "notes": [
-                        "Source change: Synchronize shared runtime with canonical Core.",
-                        "Updated canonical userscript version to v1.7.16; package verified by GitHub Actions."
+                        "Source change: fix(tos): disclose Torn API key handling at local key entry in SakaLuX-Gym-Optimizer.user.js.",
+                        "Updated canonical userscript version to v1.7.17; package verified by GitHub Actions."
                     ]
                 },
                 "accessTier": "free",
                 "license": "All Rights Reserved",
                 "comingSoon": false,
                 "installable": true,
-                "detailsRevision": 4
+                "detailsRevision": 5
             }
         ],
         "lastVerified": "2026-11-20",
