@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1024 — automatic release (2026-11-20)
+
+- Source change: fix(suite): guard PANIC visibility style updates against observer loops.
+- Updated canonical userscript version to v0.9.1024; package verified by GitHub Actions.
+
 ## suite v0.9.1023 — automatic release (2026-11-20)
 
 - Source change: fix(suite): align PANIC row with module cards and hide floating control over Suite panel.
