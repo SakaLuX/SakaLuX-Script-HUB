@@ -1,5 +1,10 @@
 # Changelog
 
+## stock-manager-advisor v0.8.43 — automatic release (2026-11-20)
+
+- Source change: feat(stock): restore cross-page PANIC one-order execution via Suite bridge.
+- Updated canonical userscript version to v0.8.43; package verified by GitHub Actions.
+
 ## suite v0.9.1016 — automatic release (2026-11-20)
 
 - Source change: fix(suite): distinguish confirmed, cancelled and failed PANIC actions.
