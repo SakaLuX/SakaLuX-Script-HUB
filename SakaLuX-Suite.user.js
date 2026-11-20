@@ -48332,64 +48332,99 @@ document.addEventListener('click',e=>{
 })();
 
 
-/* SAKALUX_SUITE_PANIC_BRIDGE_V2: cross-page PANIC purchase with explicit confirmation. */
+/* SAKALUX_SUITE_PANIC_BRIDGE_V3: Suite toggle and Stocks-page PANIC panel. */
 (()=>{
-  'use strict';
-  const ID='slx-suite-panic-tools';
-  const K={target:'SLX_STOCK_TARGET',fallback:'SLX_STOCK_PANIC_FALLBACK',keep:'SLX_STOCK_PANIC_KEEP_CASH',max:'SLX_STOCK_PANIC_MAX_SPEND',all:'SLX_STOCK_PANIC_USE_ALL',confirm:'SLX_STOCK_PANIC_CONFIRM',dry:'SLX_STOCK_DRY_RUN'};
-  const stockPage=()=>/^(?:stocks|StockMarket)$/i.test(new URL(location.href).searchParams.get('sid')||'');
-  const safe=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const engine=()=>globalThis.SakaLuXStockManagerAdvisor;
-  function mount(){
-    const panel=document.getElementById('sakalux-master-suite-panel');
-    const windowEl=panel?.querySelector('.sakalux-suite-window');
-    if(!windowEl||document.getElementById(ID))return;
-    const section=document.createElement('section');
-    section.id=ID;section.style.cssText='padding:14px;margin:12px;border:1px solid #b48a42;border-radius:12px;background:#16191f;color:#f2e5cd';
-    section.innerHTML='<h3 style="margin:0 0 10px">PANIC · Fast Vault</h3>'
-      +'<div style="font-size:12px;margin-bottom:8px">Available from any Torn page. Uses Stock Manager price/portfolio data and sends one BUY for your chosen target.</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">'
-      +'<label>Primary stock<input data-k="target" placeholder="e.g. SYM" maxlength="5" style="width:100%"></label>'
-      +'<label>Fallback stock<input data-k="fallback" placeholder="optional" maxlength="5" style="width:100%"></label>'
-      +'<label>Keep cash<input data-k="keep" inputmode="numeric" placeholder="0" style="width:100%"></label>'
-      +'<label>Max spend<input data-k="max" inputmode="numeric" placeholder="0 = unlimited" style="width:100%"></label></div>'
-      +'<label style="display:block;margin:8px 0"><input data-k="all" type="checkbox"> Use all available cash (ignores Keep / Max)</label>'
-      +'<label style="display:block;margin:8px 0"><input data-k="dry" type="checkbox"> Dry Run · preview only, never buy</label>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" data-action="preview">PREVIEW</button><button type="button" data-action="buy">PANIC BUY · ONE TRADE</button><button type="button" data-action="stocks">OPEN STOCKS</button></div>'
-      +'<div data-role="status" role="status" aria-live="polite" style="padding-top:8px;font-size:12px"></div>';
-    // Within the Suite window; stays under Suite's main navigation.
-    windowEl.appendChild(section);
-    for(const [name,key] of Object.entries(K)){
-      const el=section.querySelector('[data-k="'+name+'"]');if(!el)continue;
-      if(el.type==='checkbox')el.checked=localStorage.getItem(key)==='1'||(name==='dry'&&localStorage.getItem(key)===null);
-      else el.value=localStorage.getItem(key)||'';
-      el.addEventListener('change',()=>{const value=el.type==='checkbox'?(el.checked?'1':'0'):el.value.trim();localStorage.setItem(key,name==='target'||name==='fallback'?value.toUpperCase():value)});
-    }
-    const status=section.querySelector('[data-role="status"]');
-    const notify=msg=>{status.textContent=String(msg||'')};
-    section.addEventListener('click',async e=>{
-      const btn=e.target.closest('button[data-action]');if(!btn)return;
-      const action=btn.dataset.action;
-      if(action==='stocks'){location.href='https://www.torn.com/page.php?sid=stocks';return}
-      const api=engine();
-      if(!api?.panicPreview||!api?.panicBuy){notify('Enable or install Stock Manager & Advisor, then reopen Suite.');return}
-      if(btn.disabled)return;
-      btn.disabled=true;
-      try{
-        if(action==='preview'){
-          const data=await api.panicPreview();
-          notify('Preview: '+data.shares.toLocaleString()+' '+data.sym+' ≈ $'+Math.round(data.estimate).toLocaleString()+(data.fallbackUsed?' (fallback)':'')+'. No order sent.');
-        }else if(action==='buy'){
-          // Extra confirmation is enabled; one physical click, max one BUY.
-          localStorage.setItem(K.confirm,'1');
-          const result=await api.panicBuy();
-          if(result?.success)notify(result.dryRun?'DRY RUN: no order sent.':'One PANIC BUY sent. Verify the result in Stock Manager history.');
-          else notify(result?.error?'PANIC failed: '+result.error:'PANIC cancelled; no BUY was submitted.');
-        }
-      }catch(err){notify('PANIC: '+(err?.message||String(err)))}finally{btn.disabled=false}
-    });
+'use strict';
+const TOGGLE='slx-suite-panic-toggle', PANEL='slx-suite-panic-stocks', STYLE='slx-suite-panic-styles', ON='SLX_SUITE_PANIC_ENABLED';
+const KEYS={target:'SLX_STOCK_TARGET',fallback:'SLX_STOCK_PANIC_FALLBACK',keep:'SLX_STOCK_PANIC_KEEP_CASH',max:'SLX_STOCK_PANIC_MAX_SPEND',all:'SLX_STOCK_PANIC_USE_ALL',dry:'SLX_STOCK_DRY_RUN'};
+const enabled=()=>localStorage.getItem(ON)!=='0';
+const onStocks=()=>/^(stocks|StockMarket)$/i.test(new URL(location.href).searchParams.get('sid')||'');
+function style(){
+ if(document.getElementById(STYLE))return;
+ const e=document.createElement('style');e.id=STYLE;
+ e.textContent='#'+TOGGLE+'{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #b8954c;background:#181d27;color:#eee3d1;border-radius:12px;padding:12px 14px;margin:12px}'+
+ '#'+TOGGLE+' .panic-switch{width:56px;height:30px;border:1px solid #737e8a;background:#4c5564;border-radius:20px;position:relative;cursor:pointer;flex-shrink:0}'+
+ '#'+TOGGLE+' .panic-switch:before{content:"";display:block;position:absolute;width:22px;height:22px;top:3px;left:3px;background:#fff;border-radius:50%;transition:transform .15s}'+
+ '#'+TOGGLE+' .panic-switch[aria-checked=true]{background:#237acb;border-color:#69b7ff}'+
+ '#'+TOGGLE+' .panic-switch[aria-checked=true]:before{transform:translateX(26px)}'+
+ '#'+PANEL+'{margin:14px 8px;padding:15px;border:1px solid #bd9145;border-radius:13px;background:#181d27;color:#f4e9d4;font-size:13px;box-sizing:border-box;clear:both}'+
+ '#'+PANEL+' *{box-sizing:border-box}'+
+ '#'+PANEL+' .panic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}'+
+ '#'+PANEL+' label{color:#eee4d7;font-size:12px}'+
+ '#'+PANEL+' input:not([type=checkbox]){display:block;min-width:0;width:100%;padding:10px;background:#111827;color:#fff;border:1px solid #51647d;border-radius:8px;margin-top:5px}'+
+ '#'+PANEL+' .panic-check{display:flex;gap:10px;align-items:center;margin:10px 0}'+
+ '#'+PANEL+' input[type=checkbox]{width:19px;height:19px;accent-color:#348be5}'+
+ '#'+PANEL+' .panic-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:13px 0}'+
+ '#'+PANEL+' button{min-height:42px;background:#287bc6;color:white!important;border:1px solid #69aef0;border-radius:9px;padding:10px;cursor:pointer;font-weight:bold;opacity:1}'+
+ '#'+PANEL+' button:disabled{opacity:.5}';
+ document.head.appendChild(e);
+}
+function suite(){
+ const win=document.querySelector('#sakalux-master-suite-panel .sakalux-suite-window');
+ if(!win)return;
+ const existing=document.getElementById(TOGGLE);
+ if(existing&&existing.parentElement===win)return;
+ existing?.remove();
+ const row=document.createElement('section');row.id=TOGGLE;
+ row.innerHTML='<div><strong>PANIC</strong><div style="font-size:12px;opacity:.8">Show / hide PANIC menu in Stocks</div></div><button type="button" class="panic-switch" role="switch" aria-label="Enable PANIC" aria-checked="'+String(enabled())+'"></button>';
+ const footer=win.querySelector('#sakalux-inline-footer-suite');
+ if(footer)footer.before(row);else win.appendChild(row);
+ row.querySelector('button').onclick=e=>{const value=!enabled();localStorage.setItem(ON,value?'1':'0');e.currentTarget.setAttribute('aria-checked',String(value));stocks()};
+}
+function stocks(){
+ const old=document.getElementById(PANEL);
+ if(!enabled()||!onStocks()){old?.remove();return}
+ const host=document.querySelector('#slx-stock-inline')||document.querySelector('#mainContainer .content-wrapper')||document.querySelector('.content-wrapper')||document.querySelector('#mainContainer');
+ if(!host)return;
+ if(old?.parentElement===host)return;
+ old?.remove();
+ const p=document.createElement('section');p.id=PANEL;
+ p.innerHTML='<h3 style="color:#e9c981;margin:0 0 7px">PANIC · Stocks</h3><div style="opacity:.8;font-size:12px">Configure PANIC and preview your order here.</div>'+
+ '<div class="panic-grid"><label>Primary stock<input data-k="target" maxlength="5" placeholder="GRN"></label><label>Fallback stock<input data-k="fallback" maxlength="5" placeholder="Optional"></label><label>Keep cash<input data-k="keep" placeholder="0" inputmode="numeric"></label><label>Max spend<input data-k="max" placeholder="0 = unlimited" inputmode="numeric"></label></div>'+
+ '<label class="panic-check"><input type="checkbox" data-k="all">Use all available cash</label><label class="panic-check"><input type="checkbox" data-k="dry">Dry Run (no live transactions)</label>'+
+ '<div class="panic-actions"><button type="button" data-action="preview">PREVIEW</button><button type="button" data-action="buy">PANIC BUY</button></div><div data-role="status" role="status" aria-live="polite"></div>';
+ host.prepend(p);
+ const persist=()=>{
+  for(const [name,key] of Object.entries(KEYS)){
+   const input=p.querySelector('[data-k="'+name+'"]');if(!input)continue;
+   const val=input.type==='checkbox'?(input.checked?'1':'0'):input.value.trim();
+   localStorage.setItem(key,name==='target'||name==='fallback'?val.toUpperCase():val);
   }
-  const observer=new MutationObserver(()=>mount());
-  const start=()=>{mount();observer.observe(document.documentElement,{subtree:true,childList:true})};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+ };
+ for(const [name,key] of Object.entries(KEYS)){
+  const input=p.querySelector('[data-k="'+name+'"]');if(!input)continue;
+  const val=localStorage.getItem(key);
+  if(input.type==='checkbox')input.checked=val==='1'||(name==='dry'&&val===null);
+  else input.value=val||'';
+  input.addEventListener('change',persist);
+ }
+ const status=p.querySelector('[data-role="status"]');
+ let busy=false;
+ p.addEventListener('click',async e=>{
+  const btn=e.target.closest('button[data-action]');if(!btn||busy)return;
+  const api=globalThis.SakaLuXStockManagerAdvisor;
+  if(!api?.panicPreview||!api?.panicBuy){status.textContent='Enable Stock Manager & Advisor first.';return}
+  persist();busy=true;p.querySelectorAll('button').forEach(b=>b.disabled=true);
+  try{
+   if(btn.dataset.action==='preview'){
+    const x=await api.panicPreview();
+    status.textContent='Preview: '+Number(x.shares).toLocaleString()+' '+x.sym+' ≈ $'+Math.round(x.estimate).toLocaleString()+'. No trade sent.';
+   }else{
+    localStorage.setItem('SLX_STOCK_PANIC_CONFIRM','1');
+    const result=await api.panicBuy();
+    status.textContent=result?.success?(result.dryRun?'DRY RUN: no order sent.':'PANIC BUY submitted. Check stock history.'):(result?.error||'Cancelled.');
+   }
+  }catch(error){status.textContent='PANIC: '+String(error?.message||error)}
+  finally{busy=false;p.querySelectorAll('button').forEach(b=>b.disabled=false)}
+ });
+}
+let lastHref=location.href;
+const update=()=>{
+ if(location.href!==lastHref)lastHref=location.href;
+ style();suite();stocks();
+};
+let scheduled=false;
+const mo=new MutationObserver(()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update()})});
+const init=()=>{update();mo.observe(document.body||document.documentElement,{subtree:true,childList:true})};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
