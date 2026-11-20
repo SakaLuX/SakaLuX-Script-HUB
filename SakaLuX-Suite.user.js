@@ -48477,7 +48477,7 @@ function floating(){
  }
  const suitePanel=document.getElementById('sakalux-master-suite-panel');
  const suiteVisible=Boolean(suitePanel && suitePanel.getClientRects().length && getComputedStyle(suitePanel).visibility!=='hidden');
- if(previous?.isConnected){previous.style.setProperty('display',suiteVisible?'none':'block','important');return;}
+ if(previous?.isConnected){const next=suiteVisible?'none':'block';if(previous.style.display!==next)previous.style.setProperty('display',next,'important');return;}
  previous?.remove();
  const button=document.createElement('button');button.id=FLOAT;button.type='button';button.textContent='PANIC';button.title='SakaLuX Suite PANIC — buy to configured stock target';
  document.body.appendChild(button);
