@@ -3,7 +3,7 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.165**
+**v1.9.166**
 
 ### v1.9.165 — Signed PRO certificate failure diagnostics — 2026-11-20
 - Distinguishes rejected Ed25519 signatures, user identity, key binding, entitlement and expiry failures without exposing private keys or certificate contents.
@@ -41,7 +41,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-20**
-- Canonical version: **v1.9.165**
+- Canonical version: **v1.9.166**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Script-Hub.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Script-Hub.md
@@ -66,9 +66,9 @@
 
 ## Current release note
 
-**v1.9.165 — Version and release synchronization**
-- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
-- Updated canonical userscript version to v1.9.165; package verified by GitHub Actions.
+**v1.9.166 — Version and release synchronization**
+- Source change: fix(hub): display official Torn API ToS table at shared API-key entry.
+- Updated canonical userscript version to v1.9.166; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -95,6 +95,11 @@
 
 
 
+
+
+### v1.9.166 — 2026-11-20
+- Source change: fix(hub): display official Torn API ToS table at shared API-key entry.
+- Updated canonical userscript version to v1.9.166; package verified by GitHub Actions.
 
 ### v1.9.164 — 2026-11-12
 - Source change: fix(script-hub): refresh INFO and NEW from canonical registry for every module.

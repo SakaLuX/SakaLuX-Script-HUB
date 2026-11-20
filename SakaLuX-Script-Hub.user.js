@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Script Hub
 // @namespace    sakalux.script.hub
-// @version      1.9.165
+// @version      1.9.166
 // @description  Premium TornPDA control center for SakaLuX add-ons with clean module cards, persistent slide switches and one-tap panel access.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -1148,7 +1148,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         document.documentElement?.setAttribute('data-sakalux-hub-active', '1');
     } catch {}
 
-    const VERSION = '1.9.165';
+    const VERSION = '1.9.166';
     const PROFILE_XID = '2380374';
     const PROFILE_URL = 'https://www.torn.com/profiles.php?XID=' + PROFILE_XID;
     const REGISTRY_URL = 'https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/scripts.json';
@@ -1182,6 +1182,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
 
     const HUB_CHANGELOG = [
+        {"version": "1.9.166", "date": "2026-11-20", "changes": ["Source change: fix(hub): display official Torn API ToS table at shared API-key entry.", "Updated canonical userscript version to v1.9.166; package verified by GitHub Actions."]},
         {"version": "1.9.165", "date": "2026-11-12", "changes": ["Source change: fix(script-hub): refresh INFO and NEW from canonical registry for every module.", "Updated canonical userscript version to v1.9.165; package verified by GitHub Actions."]},
         {"version": "1.9.163", "date": "2026-11-12", "changes": ["Source change: Synchronize shared runtime with canonical Core.", "Updated canonical userscript version to v1.9.163; package verified by GitHub Actions."]},
         {"version": "1.9.162", "date": "2026-11-12", "changes": ["Source change: Synchronize shared runtime with canonical Core.", "Updated canonical userscript version to v1.9.162; package verified by GitHub Actions."]},

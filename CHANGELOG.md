@@ -1,5 +1,10 @@
 # Changelog
 
+## script-hub v1.9.166 — automatic release (2026-11-20)
+
+- Source change: fix(hub): display official Torn API ToS table at shared API-key entry.
+- Updated canonical userscript version to v1.9.166; package verified by GitHub Actions.
+
 ## suite v0.9.1020 — automatic release (2026-11-20)
 
 - Source change: fix(suite): show official five-column API ToS at shared-key entry and clarify server disclosure.
