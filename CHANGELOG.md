@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1016 — automatic release (2026-11-20)
+
+- Source change: fix(suite): distinguish confirmed, cancelled and failed PANIC actions.
+- Updated canonical userscript version to v0.9.1016; package verified by GitHub Actions.
+
 ## stock-manager-advisor v0.8.42 — automatic release (2026-11-20)
 
 - Source change: fix(stock): provide explicit PANIC success and failure result to Suite.
