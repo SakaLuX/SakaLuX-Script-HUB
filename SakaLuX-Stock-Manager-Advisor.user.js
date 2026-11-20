@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX Stock Manager & Advisor
 // @namespace    sakalux.stock.manager.advisor
-// @version      0.8.39
+// @version      0.8.40
 // @description  Torn stock workspace with Hub-style premium UI, throttled SPA rendering, compact controls and guided rebalance execution.
 // @author       SakaLuX [2380374]
 // @copyright    2026 SakaLuX [2380374]
@@ -2302,6 +2302,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
   function stockRebalanceAlreadySold(ctx,src){return ctx.sold.some(x=>x.sym===src.sym&&Number(x.shares)>=src.shares)}
   async function stockRebalanceExecute(plan,io,opts={}){
+    throw new Error('Automated multi-trade rebalance disabled to comply with Torn scripting rules.');
     if(!(await globalThis.SakaLuXFreemium['stock-manager-advisor'].isPro())){globalThis.SakaLuXFreemium['stock-manager-advisor'].locked();return;}
     const resume=stockRebalanceNormalizeResume(opts.resumeState),ctx={phase:STOCK_REBALANCE_STATES.PLANNING,plan:stockRebalanceSanitizePlan(plan),sold:resume.sold.map(x=>({...x,recovered:true})),bought:resume.bought,cashBeforeBuy:0,targetPriceBeforeBuy:0,verified:false,error:null,resumed:resume.sold.length>0||!!resume.bought,history:[STOCK_REBALANCE_STATES.PLANNING]};
     const transition=n=>{ctx.phase=n;ctx.history.push(n)};
@@ -2331,28 +2332,16 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   async function executeGuidedRebalance() {
-    if(!(await globalThis.SakaLuXFreemium['stock-manager-advisor'].isPro())){globalThis.SakaLuXFreemium['stock-manager-advisor'].locked();return;}
-    const rawPlan=buildExecutableRebalancePlan(); if(!rawPlan) throw new Error('No ROI rebalance candidate available.');
-    if(rawPlan.shortfall>0) throw new Error(`Rebalance still needs ${money(rawPlan.shortfall)} after all valid free/excess shares.`);
-    if(!confirm(rebalanceConfirmText(rawPlan))) return;
-    const plan={cash:rawPlan.cash,reserve:rawPlan.reserve,target:{sym:rawPlan.target.sym,sharesNeeded:rawPlan.target.sharesNeeded,price:rawPlan.target.price||0,cost:rawPlan.target.cost||0,tier:rawPlan.target.tier},sources:rawPlan.sources};
-    const oldCheckpoint=stockRebalanceCheckpointRead();
-    const resumeState=oldCheckpoint&&String(oldCheckpoint.target||'').toUpperCase()===String(plan.target.sym).toUpperCase()&&oldCheckpoint.phase!==STOCK_REBALANCE_STATES.COMPLETE?oldCheckpoint:null;
-    const preSellOwned=new Map();
-    const io={
-      sell:async(sym,shares)=>{await ensureStock(sym);preSellOwned.set(sym,ownedShares(sym));return postTrade(sym,shares,'sellShares')},
-      verifySell:async(sym,shares)=>{if(isDryRun())return true;await new Promise(r=>setTimeout(r,1800));if(getStockApiKey())await apiSync();else scanStocks();const before=Number(preSellOwned.get(sym));const now=Number(ownedShares(sym)||0);return Number.isFinite(before)?now<=Math.max(0,before-shares):true},
-      buy:async(sym,shares)=>postTrade(sym,shares,'buyShares'),
-      wait:ms=>new Promise(r=>setTimeout(r,ms)),
-      sync:async()=>{if(getStockApiKey())await apiSync();else{scanStocks();await new Promise(r=>setTimeout(r,350));scanStocks()}},
-      snapshot:async()=>{await ensureStock(plan.target.sym);const m=stockRowMetrics(plan.target.sym);return {cash:Math.max(Number(S.money)||0,currentMoneyFromDom()),targetPrice:Number(m?.price)||0,targetShares:Number(ownedShares(plan.target.sym)||0)}},
-      checkpoint:async state=>inlineStatus(`Rebalance · ${state.phase}`,'warn')
-    };
-    const ctx=await stockRebalanceExecute(plan,io,{syncDelayMs:isDryRun()?0:2600,maxSellRetries:isDryRun()?0:1,resumeState});
-    refreshInlinePanel();renderTransactionHistory();
-    if(ctx.phase===STOCK_REBALANCE_STATES.COMPLETE){inlineStatus(`Guided rebalance verified and complete for ${plan.target.sym}.`,'ok');return}
-    if(ctx.phase===STOCK_REBALANCE_STATES.STOPPED){inlineStatus(ctx.error||'Rebalance stopped safely before BUY.','warn');return}
-    throw new Error(ctx.error||`Rebalance failed in ${ctx.phase}.`);
+    // Torn's one-user-action/one-game-action rule forbids sequential SELL/BUY orders.
+    // Keep the ROI calculation as a manual checklist; never call postTrade here.
+    if(!isStocks()) throw new Error('Open the Stocks page to review the rebalance plan.');
+    const plan=buildExecutableRebalancePlan();
+    if(!plan) throw new Error('No ROI rebalance candidate available.');
+    const note=rebalanceConfirmText(plan)
+      .replace('Continue with SELL phase?', 'No trades will be executed. Perform each SELL or BUY yourself on the current Stocks page, with a separate user click for every trade.');
+    inlineStatus('Rebalance is manual-only: one separate user action per Torn trade.','warn');
+    window.alert(note);
+    return plan;
   }
 
   function stockViewScore(sym, mode) {
@@ -2526,6 +2515,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
 
   async function postTrade(sym, shares, step) {
     if(!bool(K.enabled,true)) throw new Error('Stock Manager is disabled.');
+    if(!isStocks()) throw new Error('Stock trades are allowed only on the current Stocks page.');
     const stock=S.stocks.get(sym);
     if(!stock?.id) throw new Error(`Stock ID missing for ${sym}. Sync API or open Stocks.`);
     shares=Math.floor(Number(shares)||0);
@@ -3432,7 +3422,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       <div class="section"><div class="api-head"><div class="title">Torn API Key</div><span id="slx-stock-api-badge" class="api-badge">${get(K.api)?'Saved':'Not configured'}</span></div>
         <div class="api-key-row"><input id="slx-stock-api" type="password" autocomplete="off" placeholder="Paste Torn API key"><button id="slx-api-show" type="button" title="Show / hide API key">👁</button></div>
         <div class="actions slx-api-actions"><button id="slx-api-save" class="primary" type="button">Save Key</button><button id="slx-api-test" type="button">Test & Sync</button><button id="slx-api-create" type="button">Create Required Key</button><button id="slx-api-clear" class="danger" type="button">Clear</button></div>
-        <div class="api-help">Required selections: <b>user → money, stocks</b> and <b>torn → stocks</b>. The key is stored locally in this script.</div>
+        <div class="api-help">Required selections: <b>user → money, stocks</b> and <b>torn → stocks</b>.</div><div class="api-help" style="overflow-x:auto"><b>API Terms of Service — SakaLuX Stock Manager</b><table style="width:100%;border-collapse:collapse;font-size:11px;text-align:left"><thead><tr><th>Data Storage</th><th>Data Sharing</th><th>Purpose of Use</th><th>Key Storage &amp; Sharing</th><th>Key Access Level</th></tr></thead><tbody><tr><td>Local persistent storage for the key and portfolio settings; API data may be cached locally. Server retention must be confirmed by the service operator.</td><td>Service owner (only for the premium verification request); otherwise user.</td><td>Stocks portfolio analysis, guidance and premium license verification.</td><td>Locally saved key is sent via HTTPS to api.torn.com and to sakalux.ro for premium verification. The server's retention policy has not been verified.</td><td>User: money, stocks; Torn: stocks. Shared Hub keys can have broader permissions.</td></tr></tbody></table><b>Notice:</b> Do not submit an API key until server-side key handling and retention have been confirmed.</div>
       </div>
       <div class="section"><div class="title">Vault & Panic v2</div><div class="grid slx-vault-grid">
         <label>Primary target <select id="slx-stock-target"><option value="">Sync API or open Stocks to detect symbols</option></select></label>
@@ -3672,6 +3662,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
           <div class="slx-stock-api-status" id="slx-stock-api-status"><b>TORN API ACCESS</b><span>${initial.key?'READY':'NOT CHECKED'}</span></div>
           <div id="slx-stock-api-source" class="slx-api-source">Active source: <b>${esc(initial.source)}</b></div>
           <div class="slx-api-note">The SakaLuX Hub general key is used automatically first when Hub is installed and active. The local key below remains the standalone fallback.</div>
+          <div class="api-help" style="overflow-x:auto"><b>API Terms of Service — SakaLuX Stock Manager</b><table style="width:100%;border-collapse:collapse;font-size:11px;text-align:left"><thead><tr><th>Data Storage</th><th>Data Sharing</th><th>Purpose of Use</th><th>Key Storage &amp; Sharing</th><th>Key Access Level</th></tr></thead><tbody><tr><td>Local persistent storage for the key and portfolio settings; API data may be cached locally. Server retention must be confirmed by the service operator.</td><td>Service owner (only for the premium verification request); otherwise user.</td><td>Stocks portfolio analysis, guidance and premium license verification.</td><td>Locally saved key is sent via HTTPS to api.torn.com and to sakalux.ro for premium verification. The server's retention policy has not been verified.</td><td>User: money, stocks; Torn: stocks. Shared Hub keys can have broader permissions.</td></tr></tbody></table><b>Notice:</b> Do not submit an API key until server-side key handling and retention have been confirmed.</div>
           <label>Replace / paste standalone Torn API key</label>
           <input id="slx-stock-api-sheet-input" type="password" autocomplete="off" placeholder="Paste Torn API key here" value="${esc(local)}">
           <div class="slx-api-sheet-actions"><button type="button" class="slx-api-primary" id="slx-stock-api-save">SAVE & TEST</button><button type="button" id="slx-stock-api-check">CHECK ACCESS</button></div>
@@ -3845,13 +3836,13 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
   }
 
   async function init() {
-    style(); panicButton();
+    style(); if(isStocks()) panicButton(); else $('#slx-stock-panic')?.remove();
     if(!bool(K.enabled,true)||runtimeObserver)return;
     premiumStyle(); restoreCache(); managerLauncher();
     if(isStocks()) setTimeout(()=>scheduleInlineMount(true),220);
     try { if(sessionStorage.getItem('SakaLuX_STOCK_KEY_SETUP_PENDING')==='1'){sessionStorage.removeItem('SakaLuX_STOCK_KEY_SETUP_PENDING');setTimeout(()=>{if(bool(K.enabled,true))openPanel();},700);} } catch {}
     if(isStocks()) {
-      stockPollTimer=setInterval(()=>{ if(!bool(K.enabled,true))return; if(scanStocks().size){clearInterval(stockPollTimer); scheduleInlineMount(true); if(S.panel?.dataset.open==='1'){refreshTargetSelect();renderAdvisor();} if(get(K.panicPending)==='1') panic();}},650);
+      stockPollTimer=setInterval(()=>{ if(!bool(K.enabled,true))return; if(scanStocks().size){clearInterval(stockPollTimer); scheduleInlineMount(true); if(S.panel?.dataset.open==='1'){refreshTargetSelect();renderAdvisor();} if(get(K.panicPending)==='1') set(K.panicPending,'0');}},650);
       stockPollStop=setTimeout(()=>clearInterval(stockPollTimer),10000);
     }
     const mo=new MutationObserver(records=>{
