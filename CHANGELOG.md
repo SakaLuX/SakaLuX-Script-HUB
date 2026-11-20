@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1023 — automatic release (2026-11-20)
+
+- Source change: fix(suite): align PANIC row with module cards and hide floating control over Suite panel.
+- Updated canonical userscript version to v0.9.1023; package verified by GitHub Actions.
+
 ## stock-manager-advisor v0.8.45 — automatic release (2026-11-20)
 
 - Source change: fix(stock): let Suite PANIC buy directly without confirmation dialog.
