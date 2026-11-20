@@ -48385,7 +48385,7 @@ function suite(){
  row.innerHTML='<div><strong>PANIC</strong><div style="font-size:12px;opacity:.8">Show / hide PANIC menu in Stocks</div></div><button type="button" class="panic-switch" role="switch" aria-label="Enable PANIC" aria-checked="'+String(enabled())+'"></button>';
  const footer=win.querySelector('#sakalux-inline-footer-suite');
  if(footer)footer.before(row);else win.appendChild(row);
- row.querySelector('button').onclick=e=>{const value=!enabled();localStorage.setItem(ON,value?'1':'0');e.currentTarget.setAttribute('aria-checked',String(value));stocks()};
+ row.querySelector('button').onclick=e=>{const value=!enabled();localStorage.setItem(ON,value?'1':'0');e.currentTarget.setAttribute('aria-checked',String(value));stocks();floating()};
 }
 function stocks(){
  const old=document.getElementById(PANEL);
@@ -48434,10 +48434,49 @@ function stocks(){
   finally{busy=false;p.querySelectorAll('button').forEach(b=>b.disabled=false)}
  });
 }
+
+const FLOAT='slx-suite-panic-floating',FLOAT_STYLE='slx-suite-panic-floating-style',FLOAT_STATUS='slx-suite-panic-floating-toast';
+let floatingBusy=false;
+function floating(){
+ const previous=document.getElementById(FLOAT);
+ if(!enabled()){previous?.remove();document.getElementById(FLOAT_STATUS)?.remove();return}
+ if(!document.body)return;
+ if(!document.getElementById(FLOAT_STYLE)){
+  const css=document.createElement('style');css.id=FLOAT_STYLE;
+  css.textContent='#'+FLOAT+'{position:fixed!important;right:14px!important;bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;z-index:2147483646!important;padding:12px 15px!important;min-width:86px!important;min-height:45px!important;border:1px solid #fa6976!important;border-radius:13px!important;background:linear-gradient(180deg,#a62437,#651522)!important;color:white!important;box-shadow:0 5px 24px rgba(0,0,0,.62)!important;font:900 13px Arial,sans-serif!important;letter-spacing:.7px!important;opacity:1!important;visibility:visible!important;cursor:pointer!important;pointer-events:auto!important}'+
+   '#'+FLOAT+':disabled{opacity:.64!important;cursor:progress!important}'+
+   '#'+FLOAT_STATUS+'{position:fixed!important;right:13px!important;bottom:calc(145px + env(safe-area-inset-bottom,0px))!important;z-index:2147483646!important;max-width:min(310px,calc(100vw - 26px))!important;padding:12px!important;background:#111c2c!important;color:#fff!important;border:1px solid #5989bd!important;border-radius:10px!important;box-shadow:0 4px 22px #000a!important;font:12px/1.5 Arial,sans-serif!important}'+
+   '@media(min-width:900px){#'+FLOAT+'{bottom:20px!important}#'+FLOAT_STATUS+'{bottom:80px!important}}';
+  (document.head||document.documentElement).appendChild(css);
+ }
+ if(previous?.isConnected)return;
+ previous?.remove();
+ const button=document.createElement('button');button.id=FLOAT;button.type='button';button.textContent='PANIC';button.title='SakaLuX Suite PANIC — buy to configured stock target';
+ document.body.appendChild(button);
+ button.addEventListener('click',async()=>{
+  if(floatingBusy)return;
+  const notice=msg=>{
+   let toast=document.getElementById(FLOAT_STATUS);
+   if(!toast){toast=document.createElement('div');toast.id=FLOAT_STATUS;toast.setAttribute('role','status');toast.setAttribute('aria-live','polite');document.body.appendChild(toast)}
+   toast.textContent=String(msg||'');
+  };
+  const api=globalThis.SakaLuXStockManagerAdvisor;
+  if(!api?.panicBuy){notice('Activate Stock Manager & Advisor to use PANIC.');return}
+  floatingBusy=true;button.disabled=true;
+  try{
+   // Require confirmation for every real purchase; one button action, at most one order.
+   localStorage.setItem('SLX_STOCK_PANIC_CONFIRM','1');
+   const result=await api.panicBuy();
+   if(result?.success)notice(result.dryRun?'PANIC DRY RUN: preview only, no order sent.':'PANIC BUY completed. Verify in Stock Manager transaction history.');
+   else notice(result?.error?'PANIC failed: '+result.error:'PANIC cancelled, no order submitted.');
+  }catch(error){notice('PANIC: '+String(error?.message||error))}
+  finally{floatingBusy=false;button.disabled=false}
+ });
+}
 let lastHref=location.href;
 const update=()=>{
  if(location.href!==lastHref)lastHref=location.href;
- style();suite();stocks();
+ style();suite();stocks();floating();
 };
 let scheduled=false;
 const mo=new MutationObserver(()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update()})});
