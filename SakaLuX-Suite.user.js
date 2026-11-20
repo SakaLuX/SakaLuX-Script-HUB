@@ -48382,8 +48382,9 @@ document.addEventListener('click',e=>{
         }else if(action==='buy'){
           // Extra confirmation is always enabled; one physical click, max one BUY.
           localStorage.setItem(K.confirm,'1');
-          await api.panicBuy();
-          notify('PANIC request completed. Check the transaction log in Stock Manager before trying again.');
+          const result=await api.panicBuy();
+          if(result?.success)notify(result.dryRun?'DRY RUN: no order sent.':'One PANIC BUY sent. Verify the result in Stock Manager history.');
+          else notify(result?.error?'PANIC failed: '+result.error:'PANIC cancelled; no BUY was submitted.');
         }
       }catch(err){notify('PANIC: '+(err?.message||String(err)))}finally{btn.disabled=false}
     });
