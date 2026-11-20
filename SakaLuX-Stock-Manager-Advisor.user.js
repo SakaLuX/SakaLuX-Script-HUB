@@ -3079,6 +3079,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   async function panic() {
+    if(!isStocks()) throw new Error('PANIC is available only on the Stocks page.');
     if(!(await globalThis.SakaLuXFreemium['stock-manager-advisor'].isPro())){globalThis.SakaLuXFreemium['stock-manager-advisor'].locked();return;}
     try {
       set(K.panicPending,'0');
@@ -3800,6 +3801,9 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     };
     window.SakaLuXStockManagerAdvisor={
       name:APP.name,version:APP.version,open:moduleOpen,refresh:moduleRefresh,setEnabled,
+      panicPreview:async()=>{if(!isStocks())throw new Error('Open Stocks before using PANIC.');return previewPanic();},
+      panicBuy:async()=>{if(!isStocks())throw new Error('Open Stocks before using PANIC.');return panic();},
+      panicConfig:()=>({target:get(K.target,''),fallback:get(K.panicFallback,''),keep:get(K.panicKeep,'0'),max:get(K.panicMax,'0'),all:bool(K.panicUseAll,false),confirm:bool(K.panicConfirm,true),dryRun:isDryRun()}),
       toggleEnabled:()=>setEnabled(!bool(K.enabled,true)),isEnabled:()=>bool(K.enabled,true),
       goToStocks:()=>{location.href=APP.stocksUrl;},
       health:()=>({ready:true,version:APP.version,enabled:bool(K.enabled,true),apiConfigured:Boolean(getStockApiKey()),apiSource:stockApiAccess().source,dryRun:isDryRun(),tradeBusy:S.tradeBusy})
@@ -3836,7 +3840,7 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
   }
 
   async function init() {
-    style(); if(isStocks()) panicButton(); else $('#slx-stock-panic')?.remove();
+    style(); $('#slx-stock-panic')?.remove(); // PANIC control now belongs to Suite.
     if(!bool(K.enabled,true)||runtimeObserver)return;
     premiumStyle(); restoreCache(); managerLauncher();
     if(isStocks()) setTimeout(()=>scheduleInlineMount(true),220);
