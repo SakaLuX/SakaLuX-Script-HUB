@@ -3092,10 +3092,12 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       await postTrade(x.sym,x.shares,'buyShares');
       status(`PANIC complete · ${panicPreviewText(x)}`,'ok');
       if(getStockApiKey() && !isDryRun()) syncAllApi().catch(()=>{});
+      return {success:true,preview:x,dryRun:isDryRun()};
     } catch(e) {
       set(K.panicPending,'0');
       status(`PANIC failed: ${e.message}`,'bad');
       openPanel();
+      return {success:false,error:String(e?.message||e)};
     }
   }
 
