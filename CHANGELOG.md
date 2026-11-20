@@ -1,5 +1,10 @@
 # Changelog
 
+## stock-manager-advisor v0.8.44 — automatic release (2026-11-20)
+
+- Source change: fix(stock): remove duplicate PANIC UI and improve official API ToS disclosure.
+- Updated canonical userscript version to v0.8.44; package verified by GitHub Actions.
+
 ## suite v0.9.1019 — automatic release (2026-11-20)
 
 - Source change: fix(suite): use PANIC ON/OFF switch in Suite and settings/controls inside Stocks.

@@ -3,7 +3,7 @@
 > Main SakaLuX module, registered in Script Hub and the standalone dock. GitHub is the canonical source; public installs and updates are delivered through Greasy Fork.
 
 ## Current version
-**v0.8.43**
+**v0.8.44**
 
 ### v0.8.34 — Installed-version fallback fix
 - Corrected the canonical TornPDA installed-version fallback from v0.8.30 to v0.8.34, preventing false update indications after installation.
@@ -17,7 +17,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-20**
-- Canonical version: **v0.8.43**
+- Canonical version: **v0.8.44**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Stock-Manager-Advisor.md
@@ -42,9 +42,9 @@
 
 ## Current release note
 
-**v0.8.43 — Version and release synchronization**
-- Source change: feat(stock): restore cross-page PANIC one-order execution via Suite bridge.
-- Updated canonical userscript version to v0.8.43; package verified by GitHub Actions.
+**v0.8.44 — Version and release synchronization**
+- Source change: fix(stock): remove duplicate PANIC UI and improve official API ToS disclosure.
+- Updated canonical userscript version to v0.8.44; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -55,6 +55,11 @@
 
 
 
+
+
+### v0.8.44 — 2026-11-20
+- Source change: fix(stock): remove duplicate PANIC UI and improve official API ToS disclosure.
+- Updated canonical userscript version to v0.8.44; package verified by GitHub Actions.
 
 ### v0.8.43 — 2026-11-20
 - Source change: feat(stock): restore cross-page PANIC one-order execution via Suite bridge.
