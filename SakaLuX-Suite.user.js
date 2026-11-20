@@ -48358,7 +48358,7 @@ const onStocks=()=>/^(stocks|StockMarket)$/i.test(new URL(location.href).searchP
 function style(){
  if(document.getElementById(STYLE))return;
  const e=document.createElement('style');e.id=STYLE;
- e.textContent='#'+TOGGLE+'{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #b8954c;background:#181d27;color:#eee3d1;border-radius:12px;padding:12px 14px;margin:12px}'+
+ e.textContent='#'+TOGGLE+'{box-sizing:border-box!important;margin:0 0 10px!important;width:100%!important;max-width:100%!important}'+
  '#'+TOGGLE+' .panic-switch{width:56px;height:30px;border:1px solid #737e8a;background:#4c5564;border-radius:20px;position:relative;cursor:pointer;flex-shrink:0}'+
  '#'+TOGGLE+' .panic-switch:before{content:"";display:block;position:absolute;width:22px;height:22px;top:3px;left:3px;background:#fff;border-radius:50%;transition:transform .15s}'+
  '#'+TOGGLE+' .panic-switch[aria-checked=true]{background:#237acb;border-color:#69b7ff}'+
@@ -48475,10 +48475,13 @@ function floating(){
    '@media(min-width:900px){#'+FLOAT+'{bottom:20px!important}#'+FLOAT_STATUS+'{bottom:80px!important}}';
   (document.head||document.documentElement).appendChild(css);
  }
- if(previous?.isConnected)return;
+ const suitePanel=document.getElementById('sakalux-master-suite-panel');
+ const suiteVisible=Boolean(suitePanel && suitePanel.getClientRects().length && getComputedStyle(suitePanel).visibility!=='hidden');
+ if(previous?.isConnected){previous.style.setProperty('display',suiteVisible?'none':'block','important');return;}
  previous?.remove();
  const button=document.createElement('button');button.id=FLOAT;button.type='button';button.textContent='PANIC';button.title='SakaLuX Suite PANIC — buy to configured stock target';
  document.body.appendChild(button);
+ if(suiteVisible)button.style.setProperty('display','none','important');
  button.addEventListener('click',async()=>{
   if(floatingBusy)return;
   const notice=msg=>{
@@ -48506,6 +48509,6 @@ const update=()=>{
 };
 let scheduled=false;
 const mo=new MutationObserver(()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;update()})});
-const init=()=>{update();mo.observe(document.body||document.documentElement,{subtree:true,childList:true})};
+const init=()=>{update();mo.observe(document.body||document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class','hidden']})};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
