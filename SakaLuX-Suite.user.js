@@ -48361,7 +48361,7 @@ document.addEventListener('click',e=>{
     windowEl.appendChild(section);
     for(const [name,key] of Object.entries(K)){
       const el=section.querySelector('[data-k="'+name+'"]');if(!el)continue;
-      if(el.type==='checkbox')el.checked=localStorage.getItem(key)==='1';
+      if(el.type==='checkbox')el.checked=localStorage.getItem(key)==='1'||(name==='dry'&&localStorage.getItem(key)===null);
       else el.value=localStorage.getItem(key)||'';
       el.addEventListener('change',()=>{const value=el.type==='checkbox'?(el.checked?'1':'0'):el.value.trim();localStorage.setItem(key,name==='target'||name==='fallback'?value.toUpperCase():value)});
     }
