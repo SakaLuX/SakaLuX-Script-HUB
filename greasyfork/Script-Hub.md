@@ -3,7 +3,12 @@
 > Core manager for the SakaLuX Torn script ecosystem.
 
 ## Current version
-**v1.9.164**
+**v1.9.165**
+
+### Signed PRO certificate failure diagnostics — 2026-11-20
+- Distinguishes rejected Ed25519 signatures, user identity, key binding, entitlement and expiry failures without exposing private keys or certificate contents.
+- Preserves existing fail-closed PRO checks; no licensing bypass.
+
 
 ### Early PRO verification — 2026-10-11
 - Starts shared entitlement verification as soon as Hub loads, without opening the UI.
