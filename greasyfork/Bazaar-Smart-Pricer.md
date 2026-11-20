@@ -3,7 +3,7 @@
 > Smart Bazaar pricing helper for Torn, designed for TornPDA and desktop userscript managers.
 
 ## Current version
-**v1.1.32**
+**v1.1.33**
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -18,8 +18,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-11-11**
-- Canonical version: **v1.1.32**
+- Verified: **2026-11-20**
+- Canonical version: **v1.1.33**
 - License: **MIT**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Smart-Pricer.md
@@ -50,14 +50,19 @@ MIT-licensed implementation based on the proven Torn Bazaar Quick Pricer behavio
 
 ## Current release note
 
-**v1.1.32 — Version and release synchronization**
-- Source change: Synchronize shared runtime with canonical Core.
-- Updated canonical userscript version to v1.1.32; package verified by GitHub Actions.
+**v1.1.33 — Version and release synchronization**
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.1.33; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
 
+
+
+### v1.1.33 — 2026-11-20
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.1.33; package verified by GitHub Actions.
 
 ### v1.1.32 — 2026-11-11
 - Source change: Synchronize shared runtime with canonical Core.

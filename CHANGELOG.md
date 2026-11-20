@@ -1,5 +1,65 @@
 # Changelog
 
+## bazaar v5.3.76 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v5.3.76; package verified by GitHub Actions.
+
+## bazaar-smart-pricer v1.1.33 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.1.33; package verified by GitHub Actions.
+
+## bounty-hunter v0.5.25 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v0.5.25; package verified by GitHub Actions.
+
+## company-intelligence v1.8.102 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.8.102; package verified by GitHub Actions.
+
+## elimination-assistant v1.3.70 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.3.70; package verified by GitHub Actions.
+
+## enhancer v1.3.79 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.3.79; package verified by GitHub Actions.
+
+## gym-optimizer v1.7.16 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.7.16; package verified by GitHub Actions.
+
+## market-intelligence v1.18.3 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.18.3; package verified by GitHub Actions.
+
+## mission-rewards v1.0.66 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.0.66; package verified by GitHub Actions.
+
+## script-hub v1.9.165 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.9.165; package verified by GitHub Actions.
+
+## stock-manager-advisor v0.8.39 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v0.8.39; package verified by GitHub Actions.
+
+## suite v0.9.1014 — automatic release (2026-11-20)
+
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v0.9.1014; package verified by GitHub Actions.
+
 ## script-hub v1.9.165 — signed PRO failure diagnostics (2026-11-20)
 
 - Exposes specific reasons for rejected PRO certificates without exposing API keys or bypassing license verification.

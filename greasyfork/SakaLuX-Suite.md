@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.1013**
+**v0.9.1014**
 
 
 ## Repository synchronization
 
-- Verified: **2026-11-12**
-- Canonical version: **v0.9.1013**
+- Verified: **2026-11-20**
+- Canonical version: **v0.9.1014**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -48,14 +48,19 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1013 — Version and release synchronization**
-- Source change: fix(suite): release quota-safe Training Log persistence and dynamic version labels.
-- Updated canonical userscript version to v0.9.1013; package verified by GitHub Actions.
+**v0.9.1014 — Version and release synchronization**
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v0.9.1014; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
 
+
+
+### v0.9.1014 — 2026-11-20
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v0.9.1014; package verified by GitHub Actions.
 
 ### v0.9.1013 — 2026-11-12
 - Source change: fix(suite): release quota-safe Training Log persistence and dynamic version labels.

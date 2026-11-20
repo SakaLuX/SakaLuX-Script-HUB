@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.0.65**
+**v1.0.66**
 
 ### License Manager v2 (2026-10-10)
 - Shared entitlement broker; improved cache and outage handling.
@@ -19,8 +19,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-11-11**
-- Canonical version: **v1.0.65**
+- Verified: **2026-11-20**
+- Canonical version: **v1.0.66**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md
@@ -40,14 +40,19 @@
 
 ## Current release note
 
-**v1.0.65 — Version and release synchronization**
-- Source change: Synchronize shared runtime with canonical Core.
-- Updated canonical userscript version to v1.0.65; package verified by GitHub Actions.
+**v1.0.66 — Version and release synchronization**
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.0.66; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
 
+
+
+### v1.0.66 — 2026-11-20
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v1.0.66; package verified by GitHub Actions.
 
 ### v1.0.65 — 2026-11-11
 - Source change: Synchronize shared runtime with canonical Core.

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v5.3.75**
+**v5.3.76**
 
 ### License Manager v2 (2026-10-10)
 - Faster shared license verification and safer unavailable states.
@@ -19,8 +19,8 @@
 
 ## Repository synchronization
 
-- Verified: **2026-11-11**
-- Canonical version: **v5.3.75**
+- Verified: **2026-11-20**
+- Canonical version: **v5.3.76**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md
@@ -37,15 +37,20 @@
 
 ## Current release note
 
-**v5.3.75 — Version and release synchronization**
-- Source change: perf(bazaar): coalesce buyer message observer updates.
-- Updated canonical userscript version to v5.3.75; package verified by GitHub Actions.
+**v5.3.76 — Version and release synchronization**
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v5.3.76; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
 
 
+
+
+### v5.3.76 — 2026-11-20
+- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
+- Updated canonical userscript version to v5.3.76; package verified by GitHub Actions.
 
 ### v5.3.75 — 2026-11-11
 - Source change: perf(bazaar): coalesce buyer message observer updates.

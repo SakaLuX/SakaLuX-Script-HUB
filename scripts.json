@@ -34,17 +34,17 @@
         }
       ],
       "release": {
-        "version": "1.3.78",
-        "date": "2026-11-11",
+        "version": "1.3.79",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: Synchronize shared runtime with canonical Core.",
-          "Updated canonical userscript version to v1.3.78; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v1.3.79; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js",
       "type": "addon",
-      "version": "1.3.78",
-      "detailsRevision": 33,
+      "version": "1.3.79",
+      "detailsRevision": 34,
       "updateUrl": "https://update.greasyfork.org/scripts/592698/SakaLuX%20Enhancer%20Guard.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592698",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md",
@@ -88,17 +88,17 @@
         }
       ],
       "release": {
-        "version": "5.3.75",
-        "date": "2026-11-11",
+        "version": "5.3.76",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: perf(bazaar): coalesce buyer message observer updates.",
-          "Updated canonical userscript version to v5.3.75; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v5.3.76; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Thanker-PDA.user.js",
       "type": "addon",
-      "version": "5.3.75",
-      "detailsRevision": 36,
+      "version": "5.3.76",
+      "detailsRevision": 37,
       "updateUrl": "https://update.greasyfork.org/scripts/592388/SakaLuX%20Bazaar%20Thanker%20-%20PDA.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592388",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bazaar-Thanker.md",
@@ -143,14 +143,14 @@
       ],
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bazaar-Smart-Pricer.user.js",
       "type": "addon",
-      "detailsRevision": 51,
-      "version": "1.1.32",
+      "detailsRevision": 52,
+      "version": "1.1.33",
       "release": {
-        "version": "1.1.32",
-        "date": "2026-11-11",
+        "version": "1.1.33",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: Synchronize shared runtime with canonical Core.",
-          "Updated canonical userscript version to v1.1.32; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v1.1.33; package verified by GitHub Actions."
         ]
       },
       "updateUrl": "https://update.greasyfork.org/scripts/596672/SakaLuX%20Bazaar%20Smart%20Pricer.meta.js",
@@ -210,17 +210,17 @@
         }
       ],
       "release": {
-        "version": "1.0.65",
-        "date": "2026-11-11",
+        "version": "1.0.66",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: Synchronize shared runtime with canonical Core.",
-          "Updated canonical userscript version to v1.0.65; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v1.0.66; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Mission-Rewards.user.js",
       "type": "addon",
-      "version": "1.0.65",
-      "detailsRevision": 27,
+      "version": "1.0.66",
+      "detailsRevision": 28,
       "updateUrl": "https://update.greasyfork.org/scripts/592711/SakaLuX%20Mission%20Rewards.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592711",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Mission-Rewards.md",
@@ -287,17 +287,17 @@
         }
       ],
       "release": {
-        "version": "1.18.02",
-        "date": "2026-11-12",
+        "version": "1.18.3",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: fix(market): recheck recommended offer against fresh Torn API before locating listing.",
-          "Updated canonical userscript version to v1.18.02; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v1.18.3; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Market-Intelligence.user.js",
       "type": "addon",
-      "version": "1.18.02",
-      "detailsRevision": 52,
+      "version": "1.18.3",
+      "detailsRevision": 53,
       "updateUrl": "https://update.greasyfork.org/scripts/592781/SakaLuX%20Market%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/592781",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Market-Intelligence.md",
@@ -366,11 +366,11 @@
         }
       ],
       "release": {
-        "version": "0.5.24",
-        "date": "2026-11-11",
+        "version": "0.5.25",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: Synchronize shared runtime with canonical Core.",
-          "Updated canonical userscript version to v0.5.24; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v0.5.25; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Bounty-Hunter.user.js",
@@ -378,8 +378,8 @@
       "updateUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Bounty-Hunter.md",
       "type": "addon",
-      "version": "0.5.24",
-      "detailsRevision": 31,
+      "version": "0.5.25",
+      "detailsRevision": 32,
       "license": "All Rights Reserved",
       "metaUrl": "https://update.greasyfork.org/scripts/598988/SakaLuX%20Bounty%20Hunter.meta.js",
       "greasyForkId": "598988",
@@ -468,17 +468,17 @@
         }
       ],
       "release": {
-        "version": "1.3.69",
-        "date": "2026-11-11",
+        "version": "1.3.70",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: perf(elimination): reduce Hub power synchronization polling.",
-          "Updated canonical userscript version to v1.3.69; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v1.3.70; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js",
       "type": "addon",
-      "version": "1.3.69",
-      "detailsRevision": 32,
+      "version": "1.3.70",
+      "detailsRevision": 33,
       "updateUrl": "https://update.greasyfork.org/scripts/594921/SakaLuX%20Elimination%20Assistant.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/594921",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md",
@@ -532,17 +532,17 @@
         }
       ],
       "release": {
-        "version": "1.8.101",
-        "date": "2026-11-11",
+        "version": "1.8.102",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: Synchronize shared runtime with canonical Core.",
-          "Updated canonical userscript version to v1.8.101; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v1.8.102; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js",
       "type": "addon",
-      "version": "1.8.101",
-      "detailsRevision": 54,
+      "version": "1.8.102",
+      "detailsRevision": 55,
       "updateUrl": "https://update.greasyfork.org/scripts/595873/SakaLuX%20Company%20Intelligence.meta.js",
       "greasyForkUrl": "https://greasyfork.org/scripts/595873",
       "documentationUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md",
@@ -597,17 +597,17 @@
         }
       ],
       "release": {
-        "version": "0.8.38",
-        "date": "2026-11-11",
+        "version": "0.8.39",
+        "date": "2026-11-20",
         "notes": [
-          "Source change: Synchronize shared runtime with canonical Core.",
-          "Updated canonical userscript version to v0.8.38; package verified by GitHub Actions."
+          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
+          "Updated canonical userscript version to v0.8.39; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.38",
-      "detailsRevision": 31,
+      "version": "0.8.39",
+      "detailsRevision": 32,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
@@ -641,7 +641,7 @@
       "icon": "🏋️",
       "name": "Gym Optimizer",
       "type": "addon",
-      "version": "1.7.15",
+      "version": "1.7.16",
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "downloadUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Gym-Optimizer.user.js",
       "info": "Inline SakaLuX Gym Optimizer for TornPDA/Tampermonkey with DEX-primary training strategy, colored stats, snapshots, gym recommendations and guarded actions. Gym unlock checks remain conservative.",
@@ -658,21 +658,20 @@
         }
       ],
       "release": {
-        "version": "1.7.15",
-        "date": "2026-11-17",
+        "version": "1.7.16",
+        "date": "2026-11-20",
         "notes": [
-          "Read Gym stats only from their own native training tiles to prevent cross-card mismatches.",
-          "Display exactly which live stat is below its last stored snapshot, without clearing History.",
-          "Keep existing snapshots and sync version display."
+          "Source change: Synchronize shared runtime with canonical Core.",
+          "Updated canonical userscript version to v1.7.16; package verified by GitHub Actions."
         ]
       },
       "accessTier": "free",
       "license": "All Rights Reserved",
       "comingSoon": false,
       "installable": true,
-      "detailsRevision": 3
+      "detailsRevision": 4
     }
   ],
-  "lastVerified": "2026-11-12",
+  "lastVerified": "2026-11-20",
   "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
 }
