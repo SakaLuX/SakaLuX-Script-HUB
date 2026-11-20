@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1021 — automatic release (2026-11-20)
+
+- Source change: fix(suite): persistent bottom-right PANIC action on all Torn pages with Suite ON/OFF toggle.
+- Updated canonical userscript version to v0.9.1021; package verified by GitHub Actions.
+
 ## script-hub v1.9.166 — automatic release (2026-11-20)
 
 - Source change: fix(hub): display official Torn API ToS table at shared API-key entry.
