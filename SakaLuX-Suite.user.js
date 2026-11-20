@@ -48378,14 +48378,40 @@ function style(){
 function suite(){
  const win=document.querySelector('#sakalux-master-suite-panel .sakalux-suite-window');
  if(!win)return;
+ // Place PANIC inside the existing Reminders module list, immediately after Recovery Planner.
+ const recovery=[...win.querySelectorAll('.sakalux-module-row')].find(row=>
+  row.querySelector('.sakalux-module-name')?.textContent?.trim()==='Recovery Planner');
+ if(!recovery)return;
  const existing=document.getElementById(TOGGLE);
- if(existing&&existing.parentElement===win)return;
+ if(existing?.previousElementSibling===recovery && existing.classList.contains('sakalux-module-row')){
+  const button=existing.querySelector('.sakalux-switch');
+  if(button)button.setAttribute('aria-checked',String(enabled()));
+  return;
+ }
  existing?.remove();
- const row=document.createElement('section');row.id=TOGGLE;
- row.innerHTML='<div><strong>PANIC</strong><div style="font-size:12px;opacity:.8">Show / hide PANIC menu in Stocks</div></div><button type="button" class="panic-switch" role="switch" aria-label="Enable PANIC" aria-checked="'+String(enabled())+'"></button>';
- const footer=win.querySelector('#sakalux-inline-footer-suite');
- if(footer)footer.before(row);else win.appendChild(row);
- row.querySelector('button').onclick=e=>{const value=!enabled();localStorage.setItem(ON,value?'1':'0');e.currentTarget.setAttribute('aria-checked',String(value));stocks();floating()};
+ const row=recovery.cloneNode(true);
+ row.id=TOGGLE;
+ const title=row.querySelector('.sakalux-module-name');
+ if(title)title.textContent='PANIC';
+ const desc=row.querySelector('.sakalux-module-desc');
+ if(desc)desc.textContent='Shows the floating PANIC button in the bottom-right corner on every Torn page.';
+ for(const btn of row.querySelectorAll('[data-module-settings]'))btn.remove();
+ const control=row.querySelector('.sakalux-switch');
+ if(!control)return;
+ control.removeAttribute('data-module-toggle');
+ control.removeAttribute('disabled');
+ control.setAttribute('aria-label','Toggle PANIC');
+ control.setAttribute('aria-checked',String(enabled()));
+ control.title='Enable or disable the floating PANIC button';
+ control.addEventListener('click',event=>{
+  event.stopPropagation();
+  const value=!enabled();
+  localStorage.setItem(ON,value?'1':'0');
+  control.setAttribute('aria-checked',String(value));
+  stocks();
+  floating();
+ });
+ recovery.after(row);
 }
 function stocks(){
  const old=document.getElementById(PANEL);
