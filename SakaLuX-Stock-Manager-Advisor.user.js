@@ -2513,9 +2513,9 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     return Math.max(0,1500-(Date.now()-Number(S.lastTradeAt||0)));
   }
 
-  async function postTrade(sym, shares, step) {
+  async function postTrade(sym, shares, step, {allowOffPage=false}={}) {
     if(!bool(K.enabled,true)) throw new Error('Stock Manager is disabled.');
-    if(!isStocks()) throw new Error('Stock trades are allowed only on the current Stocks page.');
+    if(!isStocks() && !allowOffPage) throw new Error('Stock trades are allowed only on the current Stocks page.');
     const stock=S.stocks.get(sym);
     if(!stock?.id) throw new Error(`Stock ID missing for ${sym}. Sync API or open Stocks.`);
     shares=Math.floor(Number(shares)||0);
@@ -3079,7 +3079,6 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
   }
 
   async function panic() {
-    if(!isStocks()) throw new Error('PANIC is available only on the Stocks page.');
     if(!(await globalThis.SakaLuXFreemium['stock-manager-advisor'].isPro())){globalThis.SakaLuXFreemium['stock-manager-advisor'].locked();return;}
     try {
       set(K.panicPending,'0');
@@ -3089,7 +3088,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
         if(!ok){status('PANIC cancelled.','warn');return;}
       }
       status(`PANIC: buying ${x.shares.toLocaleString()} ${x.sym}…`,'warn');
-      await postTrade(x.sym,x.shares,'buyShares');
+      await postTrade(x.sym,x.shares,'buyShares',{allowOffPage:true});
       status(`PANIC complete · ${panicPreviewText(x)}`,'ok');
       if(getStockApiKey() && !isDryRun()) syncAllApi().catch(()=>{});
       return {success:true,preview:x,dryRun:isDryRun()};
@@ -3803,8 +3802,8 @@ document.body.appendChild(p); S.panel=p; S.status=$('#slx-stock-status',p);
     };
     window.SakaLuXStockManagerAdvisor={
       name:APP.name,version:APP.version,open:moduleOpen,refresh:moduleRefresh,setEnabled,
-      panicPreview:async()=>{if(!isStocks())throw new Error('Open Stocks before using PANIC.');return previewPanic();},
-      panicBuy:async()=>{if(!isStocks())throw new Error('Open Stocks before using PANIC.');return panic();},
+      panicPreview:async()=>previewPanic(),
+      panicBuy:async()=>panic(),
       panicConfig:()=>({target:get(K.target,''),fallback:get(K.panicFallback,''),keep:get(K.panicKeep,'0'),max:get(K.panicMax,'0'),all:bool(K.panicUseAll,false),confirm:bool(K.panicConfirm,true),dryRun:isDryRun()}),
       toggleEnabled:()=>setEnabled(!bool(K.enabled,true)),isEnabled:()=>bool(K.enabled,true),
       goToStocks:()=>{location.href=APP.stocksUrl;},
