@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.79**
+**v1.3.80**
 
 ### v1.3.73 — Faction Deposit visibility fix (2026-10-18)
 - Excludes Faction Armory and Deposit from protected-sale row hiding.
@@ -25,7 +25,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-20**
-- Canonical version: **v1.3.79**
+- Canonical version: **v1.3.80**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Enhancer-Guard.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Enhancer-Guard.md
@@ -45,9 +45,9 @@
 
 ## Current release note
 
-**v1.3.79 — Version and release synchronization**
-- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
-- Updated canonical userscript version to v1.3.79; package verified by GitHub Actions.
+**v1.3.80 — Version and release synchronization**
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.80; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -55,6 +55,11 @@
 
 
 
+
+
+### v1.3.80 — 2026-11-20
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.80; package verified by GitHub Actions.
 
 ### v1.3.79 — 2026-11-20
 - Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.

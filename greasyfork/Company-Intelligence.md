@@ -3,13 +3,13 @@
 > Complementary add-on for **SakaLuX Script Hub**. It is managed through the Hub on TornPDA / Tampermonkey.
 
 ## Current version
-**v1.8.102**
+**v1.8.103**
 
 
 ## Repository synchronization
 
 - Verified: **2026-11-20**
-- Canonical version: **v1.8.102**
+- Canonical version: **v1.8.103**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Company-Intelligence-v1.0.0.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Company-Intelligence.md
@@ -32,14 +32,19 @@
 
 ## Current release note
 
-**v1.8.102 — Version and release synchronization**
-- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
-- Updated canonical userscript version to v1.8.102; package verified by GitHub Actions.
+**v1.8.103 — Version and release synchronization**
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.8.103; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
 
+
+
+### v1.8.103 — 2026-11-20
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.8.103; package verified by GitHub Actions.
 
 ### v1.8.102 — 2026-11-20
 - Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.

@@ -3,7 +3,7 @@
 > Complementary add-on for **SakaLuX Script Hub**. It also works standalone.
 
 ## Current version
-**v1.3.70**
+**v1.3.71**
 
 ### 2026-10-20 · Version consistency
 - Fixed embedded runtime version reporting to match userscript `@version`.
@@ -25,7 +25,7 @@
 ## Repository synchronization
 
 - Verified: **2026-11-20**
-- Canonical version: **v1.3.70**
+- Canonical version: **v1.3.71**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Elimination-Assistant.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/Elimination-Assistant.md
@@ -49,15 +49,20 @@
 
 ## Current release note
 
-**v1.3.70 — Version and release synchronization**
-- Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.
-- Updated canonical userscript version to v1.3.70; package verified by GitHub Actions.
+**v1.3.71 — Version and release synchronization**
+- Source change: fix(tos): cover all Torn API key entry forms in SakaLuX-Elimination-Assistant.user.js.
+- Updated canonical userscript version to v1.3.71; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
 
 
 
+
+
+### v1.3.71 — 2026-11-20
+- Source change: fix(tos): cover all Torn API key entry forms in SakaLuX-Elimination-Assistant.user.js.
+- Updated canonical userscript version to v1.3.71; package verified by GitHub Actions.
 
 ### v1.3.70 — 2026-11-20
 - Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.

@@ -1,5 +1,50 @@
 # Changelog
 
+## account-auditor v1.3.33 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.33; package verified by GitHub Actions.
+
+## bazaar-smart-pricer v1.1.34 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.1.34; package verified by GitHub Actions.
+
+## bounty-hunter v0.5.26 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.5.26; package verified by GitHub Actions.
+
+## company-intelligence v1.8.103 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.8.103; package verified by GitHub Actions.
+
+## elimination-assistant v1.3.71 — automatic release (2026-11-20)
+
+- Source change: fix(tos): cover all Torn API key entry forms in SakaLuX-Elimination-Assistant.user.js.
+- Updated canonical userscript version to v1.3.71; package verified by GitHub Actions.
+
+## enhancer v1.3.80 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.3.80; package verified by GitHub Actions.
+
+## halloween-assistant v0.5.13 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v0.5.13; package verified by GitHub Actions.
+
+## market-intelligence v1.18.4 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.18.4; package verified by GitHub Actions.
+
+## mission-rewards v1.0.67 — automatic release (2026-11-20)
+
+- Source change: Synchronize shared runtime with canonical Core.
+- Updated canonical userscript version to v1.0.67; package verified by GitHub Actions.
+
 ## gym-optimizer v1.7.17 — automatic release (2026-11-20)
 
 - Source change: fix(tos): disclose Torn API key handling at local key entry in SakaLuX-Gym-Optimizer.user.js.
