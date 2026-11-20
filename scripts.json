@@ -597,17 +597,17 @@
         }
       ],
       "release": {
-        "version": "0.8.39",
+        "version": "0.8.40",
         "date": "2026-11-20",
         "notes": [
-          "Source change: fix(script-hub): expose signed PRO certificate failure diagnostics v1.9.165.",
-          "Updated canonical userscript version to v0.8.39; package verified by GitHub Actions."
+          "Source change: fix(stock): disable chained rebalance and auto panic, constrain trades to stocks, disclose API key flows.",
+          "Updated canonical userscript version to v0.8.40; package verified by GitHub Actions."
         ]
       },
       "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
       "type": "addon",
-      "version": "0.8.39",
-      "detailsRevision": 32,
+      "version": "0.8.40",
+      "detailsRevision": 33,
       "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
       "greasyForkId": "596192",
       "greasyForkUrl": "https://greasyfork.org/scripts/596192",
