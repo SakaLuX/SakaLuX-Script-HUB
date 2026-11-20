@@ -2278,17 +2278,17 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                     }
                 ],
                 "release": {
-                    "version": "0.8.44",
+                    "version": "0.8.45",
                     "date": "2026-11-20",
                     "notes": [
-                        "Source change: fix(stock): remove duplicate PANIC UI and improve official API ToS disclosure.",
-                        "Updated canonical userscript version to v0.8.44; package verified by GitHub Actions."
+                        "Source change: fix(stock): let Suite PANIC buy directly without confirmation dialog.",
+                        "Updated canonical userscript version to v0.8.45; package verified by GitHub Actions."
                     ]
                 },
                 "sourceUrl": "https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Stock-Manager-Advisor.user.js",
                 "type": "addon",
-                "version": "0.8.44",
-                "detailsRevision": 37,
+                "version": "0.8.45",
+                "detailsRevision": 38,
                 "updateUrl": "https://update.greasyfork.org/scripts/596192/SakaLuX%20Stock%20Manager%20%26%20Advisor.meta.js",
                 "greasyForkId": "596192",
                 "greasyForkUrl": "https://greasyfork.org/scripts/596192",
