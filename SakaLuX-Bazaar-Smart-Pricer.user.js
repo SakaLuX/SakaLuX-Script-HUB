@@ -930,6 +930,41 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
     // The signed claim expires within five minutes; other clients must independently verify it.
     return true;
   }
+
+  // Only called after authorization fails. Return a reason code, never the token,
+  // certificate payload, signature, or user details.
+  async function failureReason(data,{apiKey,entitlement,userId,now=Date.now()}={}){
+    try{
+      if(!validKey(apiKey))return 'invalid_key_format';
+      if(typeof entitlement!=='string'||!entitlement)return 'missing_entitlement';
+      const cert=data?.signed_certificate;
+      if(data?.status!=='ok'||data.premium_active!==true)return 'not_active_pro_response';
+      if(cert?.format!=='slx-ed25519-v1')return 'invalid_certificate_format';
+      if(!Array.isArray(data.entitlements)||!data.entitlements.includes(entitlement))return 'missing_response_entitlement';
+      if(!Number.isSafeInteger(Number(data.user?.id))||Number(data.user.id)<=0)return 'invalid_response_user';
+      const publicKey=decode(PUBLIC_KEY_B64),signature=decode(cert.signature),payload=decode(cert.payload);
+      if(publicKey.length!==32||signature.length!==64)return 'invalid_certificate_bytes';
+      const key=await crypto.subtle.importKey('raw',publicKey,{name:'Ed25519'},false,['verify']);
+      if(!await crypto.subtle.verify('Ed25519',key,signature,payload))return 'invalid_signature';
+      const claim=JSON.parse(new TextDecoder().decode(payload));
+      const t=Math.floor(now/1000);
+      if(claim.issuer!=='sakalux.ro'||claim.v!==1)return 'invalid_issuer_or_version';
+      if(claim.subject!==Number(data.user.id))return 'subject_response_mismatch';
+      if(Number.isSafeInteger(userId)&&userId>0&&claim.subject!==userId)return 'subject_identity_mismatch';
+      if(claim.api_key_hash!==undefined){
+        if(claim.api_key_hash!==await hash(apiKey))return 'api_key_hash_mismatch';
+      }else if(!(Number.isSafeInteger(userId)&&userId>0))return 'unbound_api_key';
+      if(!Number.isInteger(claim.iat)||!Number.isInteger(claim.exp))return 'invalid_certificate_timestamps';
+      if(claim.exp<=t)return 'certificate_expired';
+      if(claim.iat>t+30)return 'certificate_issued_in_future';
+      if(claim.exp>claim.iat+300)return 'certificate_lifetime_invalid';
+      if(JSON.stringify(claim.entitlements)!==JSON.stringify(data.entitlements))return 'entitlements_mismatch';
+      return 'verification_failed_unknown';
+    }catch(e){
+      if(e?.name==='NotSupportedError')return 'ed25519_not_supported';
+      return 'malformed_certificate_or_crypto_error';
+    }
+  }
   async function store(storage,apiKey,data,userId){
     if(!validKey(apiKey)||!data?.signed_certificate)return false;
     const entitlements=Array.isArray(data.entitlements)?data.entitlements:[];
@@ -947,7 +982,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       return {...saved.data,verifiedGrantExpiresAt:claim.exp*1000};
     }catch{return null}
   }
-  root.SakaLuXSignedGrant=Object.freeze({verify,store,load,STORAGE_KEY});
+  root.SakaLuXSignedGrant=Object.freeze({verify,store,load,failureReason,STORAGE_KEY});
 })(typeof globalThis!=='undefined'?globalThis:this);
 
 /* Shared online lookup and cross-realm coordination. Storage never grants PRO:
@@ -1049,7 +1084,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
       if(data.signed_certificate){
         // Legacy certificates still require the online, authenticated identity.
         if(!data.entitlements.length||!await root.SakaLuXSignedGrant.verify(data,{apiKey,entitlement:data.entitlements[0],userId:Number(data.user.id)}))
-          throw Error('invalid_certificate_signature_or_identity');
+          throw Error('invalid_certificate_'+await root.SakaLuXSignedGrant.failureReason(data,{apiKey,entitlement:data.entitlements[0],userId:Number(data.user.id)}));
         const claim=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(data.signed_certificate.payload.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-data.signed_certificate.payload.length%4)%4)),c=>c.charCodeAt(0))));
         until=Math.min(until,claim.exp*1000);
         try{await root.SakaLuXSignedGrant.store(localStorage,apiKey,data,Number(data.user.id))}catch{}
