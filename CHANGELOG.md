@@ -1,5 +1,11 @@
 # Changelog
 
+## script-hub v1.9.165 — signed PRO failure diagnostics (2026-11-20)
+
+- Exposes specific reasons for rejected PRO certificates without exposing API keys or bypassing license verification.
+- Synchronizes the shared verifier across Hub, Suite and signed-license consumers.
+- Corrects Hub offline fallback Gym Optimizer v1.7.15 release metadata.
+
 ## suite v0.9.1013 — automatic release (2026-11-12)
 
 - Source change: fix(suite): release quota-safe Training Log persistence and dynamic version labels.
