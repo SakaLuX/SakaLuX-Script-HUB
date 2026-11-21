@@ -48367,7 +48367,7 @@ function style(){
  '#'+PANEL+' *{box-sizing:border-box}'+
  '#'+PANEL+' .panic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}'+
  '#'+PANEL+' label{color:#eee4d7;font-size:12px}'+
- '#'+PANEL+' input:not([type=checkbox]){display:block;min-width:0;width:100%;padding:10px;background:#111827;color:#fff;border:1px solid #51647d;border-radius:8px;margin-top:5px}'+
+ '#'+PANEL+' input:not([type=checkbox]),#'+PANEL+' select{display:block;min-width:0;width:100%;padding:10px;background:#111827;color:#fff;border:1px solid #51647d;border-radius:8px;margin-top:5px}'+
  '#'+PANEL+' .panic-check{display:flex;gap:10px;align-items:center;margin:10px 0}'+
  '#'+PANEL+' input[type=checkbox]{width:19px;height:19px;accent-color:#348be5}'+
  '#'+PANEL+' .panic-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:13px 0}'+
@@ -48413,6 +48413,64 @@ function suite(){
  });
  recovery.after(row);
 }
+
+let cachedStocks=null,cachedKey='',loadingStocks=null;
+function apiKey(){
+ try{return String(localStorage.getItem('SLX_STOCK_API_KEY')||localStorage.getItem('SakaLuX_HUB_TORN_API_KEY')||localStorage.getItem('SLX_PANIC_STANDALONE_API_KEY')||'').trim()}catch{return ''}
+}
+async function availableStocks(){
+ const k=apiKey();if(!k)throw Error('An API key is required to load the stock list. Configure it in Stock Manager or SakaLuX Hub.');
+ if(cachedStocks&&cachedKey===k)return cachedStocks;
+ if(loadingStocks&&cachedKey===k)return loadingStocks;
+ cachedKey=k;
+ loadingStocks=new Promise((resolve,reject)=>{
+  if(typeof GM_xmlhttpRequest!=='function'){reject(Error('Torn API request access is unavailable.'));return}
+  GM_xmlhttpRequest({method:'GET',url:'https://api.torn.com/v2/torn/stocks?key='+encodeURIComponent(k),timeout:16000,
+   onload:r=>{try{
+    if(r.status!==200)throw Error('Torn API returned HTTP '+r.status);
+    const data=JSON.parse(r.responseText||'{}');if(data.error)throw Error(data.error.error||'Torn API error');
+    const raw=data.stocks;if(!raw||typeof raw!=='object')throw Error('Stock catalogue unavailable.');
+    const entries=Array.isArray(raw)?raw:Object.values(raw),stocks=new Map();
+    for(const x of entries){
+     const sym=String(x?.acronym||x?.symbol||'').trim().toUpperCase();
+     if(!/^[A-Z]{2,5}$/.test(sym))continue;
+     stocks.set(sym,{sym,name:String(x?.name||x?.company_name||sym)});
+    }
+    if(!stocks.size)throw Error('Stock catalogue is empty.');
+    resolve([...stocks.values()].sort((a,b)=>a.sym.localeCompare(b.sym)));
+   }catch(error){reject(error)}},
+   onerror:()=>reject(Error('Could not connect to Torn API.')),
+   ontimeout:()=>reject(Error('Torn API request timed out.'))
+  });
+ }).then(rows=>{cachedStocks=rows;return rows}).finally(()=>{loadingStocks=null});
+ return loadingStocks;
+}
+async function populateStockOptions(panel,status){
+ const fields=['target','fallback'].map(k=>[k,panel.querySelector('[data-k="'+k+'"]')]).filter(([,x])=>x);
+ const initial=new Map(fields.map(([k,x])=>[k,x.value||localStorage.getItem(KEYS[k])||(k==='target'?'GRN':'')]));
+ for(const [k,select] of fields){
+  const option=document.createElement('option');option.value=initial.get(k);option.textContent=option.value?option.value+' · Loading...':'Loading stock list...';
+  select.replaceChildren(option);
+ }
+ try{
+  const stocks=await availableStocks();
+  if(!panel.isConnected)return;
+  for(const [k,select] of fields){
+   const selected=initial.get(k);
+   select.replaceChildren();
+   if(k==='fallback'){const empty=document.createElement('option');empty.value='';empty.textContent='No fallback stock';select.appendChild(empty)}
+   if(selected&&!stocks.some(x=>x.sym===selected)){
+    const missing=document.createElement('option');missing.value=selected;missing.textContent=selected+' (previously saved)';select.appendChild(missing);
+   }
+   for(const x of stocks){const option=document.createElement('option');option.value=x.sym;option.textContent=x.sym+' — '+x.name;select.appendChild(option)}
+   select.value=selected;
+  }
+  if(status)status.textContent='Stock list loaded from Torn API ('+stocks.length+').';
+ }catch(error){
+  if(status)status.textContent='Could not load stock list: '+String(error?.message||error);
+ }
+}
+
 function stocks(){
  const old=document.getElementById(PANEL);
  if(!enabled()||!onStocks()){old?.remove();return}
@@ -48422,7 +48480,7 @@ function stocks(){
  old?.remove();
  const p=document.createElement('section');p.id=PANEL;
  p.innerHTML='<h3 style="color:#e9c981;margin:0 0 7px">PANIC · Stocks</h3><div style="opacity:.8;font-size:12px">Configure PANIC and preview your order here.</div>'+
- '<div class="panic-grid"><label>Primary stock<input data-k="target" maxlength="5" placeholder="GRN"></label><label>Fallback stock<input data-k="fallback" maxlength="5" placeholder="Optional"></label><label>Keep cash<input data-k="keep" placeholder="0" inputmode="numeric"></label><label>Max spend<input data-k="max" placeholder="0 = unlimited" inputmode="numeric"></label></div>'+
+ '<div class="panic-grid"><label>Primary stock<select data-k="target"></select></label><label>Fallback stock<select data-k="fallback"></select></label><label>Keep cash<input data-k="keep" placeholder="0" inputmode="numeric"></label><label>Max spend<input data-k="max" placeholder="0 = unlimited" inputmode="numeric"></label></div>'+
  '<label class="panic-check"><input type="checkbox" data-k="all">Use all available cash</label><label class="panic-check"><input type="checkbox" data-k="dry">Dry Run (no live transactions)</label>'+
  '<div class="panic-actions"><button type="button" data-action="preview">PREVIEW</button><button type="button" data-action="buy">PANIC BUY</button></div><div data-role="status" role="status" aria-live="polite"></div>';
  host.prepend(p);
@@ -48437,10 +48495,13 @@ function stocks(){
   const input=p.querySelector('[data-k="'+name+'"]');if(!input)continue;
   const val=localStorage.getItem(key);
   if(input.type==='checkbox')input.checked=val==='1'||(name==='dry'&&val===null);
-  else input.value=val||'';
+  else if(input.tagName==='SELECT'){
+   const chosen=val||(name==='target'?'GRN':'');const placeholder=document.createElement('option');placeholder.value=chosen;placeholder.textContent=chosen||'No fallback stock';input.appendChild(placeholder);input.value=chosen;
+  }else input.value=val||'';
   input.addEventListener('change',persist);
  }
  const status=p.querySelector('[data-role="status"]');
+ void populateStockOptions(p,status);
  let busy=false;
  p.addEventListener('click',async e=>{
   const btn=e.target.closest('button[data-action]');if(!btn||busy)return;
