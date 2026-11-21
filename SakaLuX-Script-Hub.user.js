@@ -2353,7 +2353,7 @@ body [id^="sakalux-"]:where(:not(#sakalux-hub-overlay, #sakalux-hub-panel, #saka
                 "detailsRevision": 5
             }
         ],
-        "lastVerified": "2026-11-20",
+        "lastVerified": "2026-11-21",
         "repository": "https://github.com/SakaLuX/SakaLuX-Script-HUB"
     }
 

@@ -3,13 +3,13 @@
 > Standalone experimental SakaLuX toolkit. **Not registered in SakaLuX Script Hub.**
 
 ## Current version
-**v0.9.1024**
+**v0.9.1025**
 
 
 ## Repository synchronization
 
-- Verified: **2026-11-20**
-- Canonical version: **v0.9.1024**
+- Verified: **2026-11-21**
+- Canonical version: **v0.9.1025**
 - License: **All Rights Reserved**
 - Canonical GitHub source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/SakaLuX-Suite.user.js
 - GreasyFork description source: https://raw.githubusercontent.com/SakaLuX/SakaLuX-Script-HUB/main/greasyfork/SakaLuX-Suite.md
@@ -48,9 +48,9 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 ## Current release note
 
-**v0.9.1024 — Version and release synchronization**
-- Source change: fix(suite): guard PANIC visibility style updates against observer loops.
-- Updated canonical userscript version to v0.9.1024; package verified by GitHub Actions.
+**v0.9.1025 — Version and release synchronization**
+- Source change: feat(suite): select PANIC primary and fallback stocks from Torn API dropdown.
+- Updated canonical userscript version to v0.9.1025; package verified by GitHub Actions.
 
 ## Release history / Changelog
 
@@ -67,6 +67,11 @@ SakaLuX Suite combines multiple Torn helper modules into one userscript installa
 
 
 
+
+
+### v0.9.1025 — 2026-11-21
+- Source change: feat(suite): select PANIC primary and fallback stocks from Torn API dropdown.
+- Updated canonical userscript version to v0.9.1025; package verified by GitHub Actions.
 
 ### v0.9.1024 — 2026-11-20
 - Source change: fix(suite): guard PANIC visibility style updates against observer loops.

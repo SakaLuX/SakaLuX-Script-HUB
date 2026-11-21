@@ -1,5 +1,10 @@
 # Changelog
 
+## suite v0.9.1025 — automatic release (2026-11-21)
+
+- Source change: feat(suite): select PANIC primary and fallback stocks from Torn API dropdown.
+- Updated canonical userscript version to v0.9.1025; package verified by GitHub Actions.
+
 ## suite v0.9.1024 — automatic release (2026-11-20)
 
 - Source change: fix(suite): guard PANIC visibility style updates against observer loops.
