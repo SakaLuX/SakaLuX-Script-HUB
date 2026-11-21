@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX PANIC Standalone
 // @namespace    https://sakalux.ro/
-// @version      0.1.0
+// @version      0.1.1
 // @description  Independent one-tap PANIC Torn stock buy. This feature carries Torn scripting compliance risk.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
   'use strict';
   if (window.__SakaLuXPanicStandalone) return;
   window.__SakaLuXPanicStandalone = true;
-  const VERSION = '0.1.0';
+  const VERSION = '0.1.1';
   const STORE = {
     key: 'SLX_PANIC_STANDALONE_API_KEY',
     target: 'SLX_STOCK_TARGET',
@@ -81,7 +81,7 @@
       apiJson('https://api.torn.com/v2/user/money?key='+encodeURIComponent(apiKey)),
       apiJson('https://api.torn.com/v2/torn/stocks?key='+encodeURIComponent(apiKey))
     ]);
-    const cash=Number(user?.money?.onhand ?? user?.money?.cash ?? user?.money_onhand ?? user?.cash);
+    const cash=Number(user?.money?.wallet ?? user?.money?.onhand ?? user?.money?.cash ?? user?.money_onhand ?? user?.cash);
     if(!Number.isFinite(cash)||cash<=0) throw Error('No positive cash balance returned by Torn API.');
     const all=get(STORE.all,'0')==='1';
     const reserve=all?0:parseAmount(get(STORE.reserve,'0'));
