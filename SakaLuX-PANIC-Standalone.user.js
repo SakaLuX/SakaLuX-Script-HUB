@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX PANIC Standalone
 // @namespace    https://sakalux.ro/
-// @version      0.1.3
+// @version      0.1.4
 // @description  Independent one-tap PANIC Torn stock buy. This feature carries Torn scripting compliance risk.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
   'use strict';
   if (window.__SakaLuXPanicStandalone) return;
   window.__SakaLuXPanicStandalone = true;
-  const VERSION = '0.1.3';
+  const VERSION = '0.1.4';
   const STORE = {
     key: 'SLX_PANIC_STANDALONE_API_KEY',
     target: 'SLX_STOCK_TARGET',
@@ -93,14 +93,14 @@
   let catalogueCache=null, catalogueKey='', cataloguePromise=null;
   async function fetchStockOptions() {
     const apiKey=key();
-    if(!apiKey) throw Error('Configurează mai întâi cheia API Torn.');
+    if(!apiKey) throw Error('Configure a Torn API key first.');
     if(catalogueCache&&catalogueKey===apiKey)return catalogueCache;
     if(cataloguePromise&&catalogueKey===apiKey)return cataloguePromise;
     catalogueKey=apiKey;
     cataloguePromise=apiJson('https://api.torn.com/v2/torn/stocks?key='+encodeURIComponent(apiKey))
       .then(data=>{
         const raw=data?.stocks;
-        if(!raw || typeof raw!=='object')throw Error('Lista acțiunilor nu este disponibilă prin Torn API.');
+        if(!raw || typeof raw!=='object')throw Error('The stock list is unavailable from Torn API.');
         const items=Array.isArray(raw)?raw:Object.values(raw);
         const found=new Map();
         for(const item of items){
@@ -109,7 +109,7 @@
           const name=String(item?.name||item?.company_name||symbol).trim();
           found.set(symbol,{symbol,name});
         }
-        if(!found.size)throw Error('Torn API nu a returnat acțiuni valide.');
+        if(!found.size)throw Error('Torn API returned no valid stocks.');
         catalogueCache=[...found.values()].sort((a,b)=>a.symbol.localeCompare(b.symbol));
         return catalogueCache;
       }).finally(()=>{cataloguePromise=null;});
@@ -122,7 +122,7 @@
       const selected=select.value||get(STORE[type],type==='target'?'GRN':'');
       select.replaceChildren();
       const opt=document.createElement('option');
-      opt.value=selected;opt.textContent=selected ? selected+' · se încarcă lista...' : 'Se încarcă acțiunile...';
+      opt.value=selected;opt.textContent=selected ? selected+' · loading stock list...' : 'Loading stocks...';
       select.appendChild(opt);select.value=selected;
     }
     try {
@@ -132,11 +132,11 @@
         const selected=select.value || get(STORE[type],type==='target'?'GRN':'');
         select.replaceChildren();
         if(type==='fallback'){
-          const empty=document.createElement('option');empty.value='';empty.textContent='Fără acțiune de rezervă';select.appendChild(empty);
+          const empty=document.createElement('option');empty.value='';empty.textContent='No fallback stock';select.appendChild(empty);
         }
         if(selected&&!items.some(item=>item.symbol===selected)){
           const option=document.createElement('option');
-          option.value=selected;option.textContent=selected+' (salvat anterior)';
+          option.value=selected;option.textContent=selected+' (previously saved)';
           select.appendChild(option);
         }
         for(const item of items){
@@ -147,32 +147,32 @@
         }
         select.value=selected;
       }
-      if(feedback)feedback.textContent='Lista acțiunilor a fost încărcată din Torn API ('+items.length+').';
+      if(feedback)feedback.textContent='Stock list loaded from Torn API ('+items.length+').';
     }catch(e){
-      if(feedback)feedback.textContent='Lista acțiunilor nu a putut fi încărcată: '+String(e?.message||e);
+      if(feedback)feedback.textContent='Could not load stock list: '+String(e?.message||e);
     }
   }
 
   async function prepare() {
     const apiKey=key();
-    if(!apiKey) throw Error('Configurează cheia API Torn din setările PANIC.');
+    if(!apiKey) throw Error('Configure the Torn API key in PANIC settings.');
     const target=get(STORE.target,'GRN').trim().toUpperCase();
     const fallback=get(STORE.fallback).trim().toUpperCase();
-    if(!/^[A-Z]{2,5}$/.test(target)) throw Error('Selectează o acțiune principală validă.');
+    if(!/^[A-Z]{2,5}$/.test(target)) throw Error('Select a valid primary stock.');
     const [user, catalog]=await Promise.all([
       apiJson('https://api.torn.com/v2/user/money?key='+encodeURIComponent(apiKey)),
       apiJson('https://api.torn.com/v2/torn/stocks?key='+encodeURIComponent(apiKey))
     ]);
     const cash=Number(user?.money?.wallet ?? user?.money?.onhand ?? user?.money?.cash ?? user?.money_onhand ?? user?.cash);
-    if(!Number.isFinite(cash)||cash<=0) throw Error('Torn API nu a returnat un sold disponibil pozitiv.');
+    if(!Number.isFinite(cash)||cash<=0) throw Error('Torn API did not return a positive wallet balance.');
     const all=get(STORE.all,'0')==='1';
     const reserve=all?0:parseAmount(get(STORE.reserve,'0'));
     const maxSpend=all?0:parseAmount(get(STORE.max,'0'));
-    if(!Number.isFinite(reserve)||reserve<0||!Number.isFinite(maxSpend)||maxSpend<0) throw Error('Rezerva sau limita de cheltuire este invalidă.');
+    if(!Number.isFinite(reserve)||reserve<0||!Number.isFinite(maxSpend)||maxSpend<0) throw Error('Invalid cash reserve or spending limit.');
     const allowed=Math.max(0,Math.min(cash-reserve,maxSpend>0?maxSpend:cash));
-    if(allowed<=0) throw Error('Nu sunt bani disponibili după aplicarea limitei și rezervei.');
+    if(allowed<=0) throw Error('No cash available after applying the reserve and spending limit.');
     const raw=catalog?.stocks;
-    if(!raw||typeof raw!=='object') throw Error('Lista acțiunilor nu este disponibilă.');
+    if(!raw||typeof raw!=='object') throw Error('The stock list is unavailable.');
     const list=Array.isArray(raw)?raw:Object.entries(raw).map(([id,v])=>({...v,id:v?.id??id}));
     const picks=[target,fallback].filter((x,i,a)=>x&&a.indexOf(x)===i);
     for(const sym of picks) {
@@ -183,35 +183,35 @@
       const shares=Math.floor(allowed/price);
       if(shares>0)return {sym,stockId,price,shares,cash,estimate:shares*price,remaining:cash-shares*price};
     }
-    throw Error('Nu s-a găsit nicio acțiune accesibilă dintre cele selectate.');
+    throw Error('No affordable stock found among the selected targets.');
   }
   async function buy() {
     if(busy)return;
-    if(Date.now()-lastTradeAt<2000){status('Așteaptă înainte de o nouă apăsare PANIC.',true);return;}
+    if(Date.now()-lastTradeAt<2000){status('Please wait before pressing PANIC again.',true);return;}
     busy=true;
     const button=document.getElementById('slx-panic-standalone-button');
     if(button)button.disabled=true;
     try {
-      status('PANIC: verific soldul și prețul acțiunilor…');
+      status('PANIC: checking wallet balance and stock price…');
       const x=await prepare();
       if(get(STORE.dry,'0')==='1') {
-        status('TEST · '+x.shares.toLocaleString()+' '+x.sym+' · '+money(x.estimate)+' · nu s-a trimis nicio tranzacție.');
+        status('DRY RUN · '+x.shares.toLocaleString()+' '+x.sym+' · '+money(x.estimate)+' · no transaction sent.');
         return;
       }
       const rfc=(document.cookie.match(/(?:^|;\s*)rfc_v=([^;]+)/)||[])[1];
-      if(!rfc)throw Error('Sesiunea Torn nu este disponibilă. Reîncarcă pagina și încearcă din nou.');
+      if(!rfc)throw Error('Torn session token unavailable. Reload Torn and try again.');
       lastTradeAt=Date.now();
-      status('PANIC: cumpăr '+x.shares.toLocaleString()+' '+x.sym+' pentru aproximativ '+money(x.estimate)+'…');
+      status('PANIC: buying '+x.shares.toLocaleString()+' '+x.sym+' for approximately '+money(x.estimate)+'…');
       const response=await fetch('https://www.torn.com/page.php?sid=StockMarket&step=buyShares&rfcv='+encodeURIComponent(rfc),{
         method:'POST',credentials:'include',cache:'no-store',
         headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','X-Requested-With':'XMLHttpRequest'},
         body:new URLSearchParams({stockId:x.stockId,amount:String(x.shares)})
       });
       const raw=await response.text();
-      let data;try{data=JSON.parse(raw)}catch{throw Error('Torn a returnat un răspuns invalid la tranzacție.');}
-      if(!response.ok||data?.success!==true)throw Error(String(data?.text||data?.message||data?.error?.error||'Torn nu a confirmat cumpărarea.'));
-      status('PANIC finalizat · '+x.shares.toLocaleString()+' '+x.sym+' · aproximativ '+money(x.estimate)+'.');
-    } catch(e) { status('PANIC a eșuat: '+String(e?.message||e),true); }
+      let data;try{data=JSON.parse(raw)}catch{throw Error('Torn returned an invalid transaction response.');}
+      if(!response.ok||data?.success!==true)throw Error(String(data?.text||data?.message||data?.error?.error||'Torn did not confirm this purchase.'));
+      status('PANIC completed · '+x.shares.toLocaleString()+' '+x.sym+' · approximately '+money(x.estimate)+'.');
+    } catch(e) { status('PANIC failed: '+String(e?.message||e),true); }
     finally {busy=false;if(button)button.disabled=false;}
   }
   function settings() {
@@ -224,37 +224,37 @@
     const close=document.createElement('button');close.textContent='×';close.onclick=()=>box.remove();
     top.append(title,close);box.append(top);
     const fields=[
-      ['Cheie API Torn (lasă gol pentru cheia deja salvată)',STORE.key,'password'],
-      ['Acțiunea principală',STORE.target,'select','GRN'],
-      ['Acțiunea de rezervă',STORE.fallback,'select',''],
-      ['Bani de păstrat',STORE.reserve,'text','0'],
-      ['Sumă maximă de cheltuit (0 = fără limită)',STORE.max,'text','0']
+      ['Torn API key (leave blank to reuse saved key)',STORE.key,'password'],
+      ['Primary stock',STORE.target,'select','GRN'],
+      ['Fallback stock',STORE.fallback,'select',''],
+      ['Keep cash',STORE.reserve,'text','0'],
+      ['Maximum spend (0 = unlimited)',STORE.max,'text','0']
     ];
     const controls={};
     for(const [label,k,type,def] of fields){
       const row=document.createElement('label');row.textContent=label;
-      const input=document.createElement(type==='select'?'select':'input');if(type!=='select')input.type=type;input.value=get(k,def||'');
-      if(k===STORE.key){input.placeholder=key()?'Cheie disponibilă (salvată local)':'Introdu cheia API Torn';}
+      const input=document.createElement(type==='select'?'select':'input');if(type!=='select')input.type=type;if(type==='select'){const pending=document.createElement('option');pending.value=get(k,def||'');pending.textContent=pending.value||'No fallback stock';input.appendChild(pending);}else input.value=get(k,def||'');
+      if(k===STORE.key){input.placeholder=key()?'Key available (stored locally)':'Enter Torn API key';}
       row.appendChild(input);box.appendChild(row);controls[k]=input;
     }
-    for(const [label,k] of [['Folosește toți banii disponibili',STORE.all],['Mod de testare (fără cumpărare)',STORE.dry]]){
+    for(const [label,k] of [['Use all available cash',STORE.all],['Dry Run (no real purchase)',STORE.dry]]){
       const row=document.createElement('label');row.className='slx-row';
       const check=document.createElement('input');check.type='checkbox';check.checked=get(k,'0')==='1';row.append(check,document.createTextNode(label));box.appendChild(row);controls[k]=check;
     }
-    const note=document.createElement('small');note.textContent='Atenție: cumpărarea automată din alte pagini poate încălca regulile Torn. Cheia este stocată local; se poate reutiliza o cheie SakaLuX existentă. Scriptul citește datele Stocks/Money din API.';
+    const note=document.createElement('small');note.textContent='Warning: automated stock purchases from other pages may violate Torn scripting rules. Your API key is stored locally; an existing SakaLuX key may be reused. Stock and wallet data are read through Torn API.';
     box.appendChild(note);
     const actions=document.createElement('div');actions.className='slx-row';
-    const save=document.createElement('button');save.textContent='SALVEAZĂ SETĂRILE';
+    const save=document.createElement('button');save.textContent='SAVE SETTINGS';
     save.onclick=()=>{
       for(const [k,el] of Object.entries(controls)){
         const v=el.type==='checkbox'?(el.checked?'1':'0'):el.value.trim();
         if(k===STORE.key && !v)continue;
         localStorage.setItem(k,[STORE.target,STORE.fallback].includes(k)?v.toUpperCase():v);
       }
-      box.remove();status('Setările PANIC au fost salvate local.');
+      box.remove();status('PANIC settings saved locally.');
     };
-    const test=document.createElement('button');test.textContent='VERIFICĂ API';
-    test.onclick=async()=>{try{test.disabled=true;const p=await prepare();status('API OK · '+p.sym+' · '+p.shares.toLocaleString()+' acțiuni · '+money(p.estimate));}catch(e){status(String(e.message||e),true)}finally{test.disabled=false;}};
+    const test=document.createElement('button');test.textContent='TEST API';
+    test.onclick=async()=>{try{test.disabled=true;const p=await prepare();status('API OK · '+p.sym+' · '+p.shares.toLocaleString()+' shares · '+money(p.estimate));}catch(e){status(String(e.message||e),true)}finally{test.disabled=false;}};
     actions.append(save,test);box.appendChild(actions);
     document.body.appendChild(box);
     void fillStockSelectors(box,{target:controls[STORE.target],fallback:controls[STORE.fallback]});
@@ -277,21 +277,21 @@
     panel.innerHTML=`
       <div class="slx-header"><strong>🚨 SakaLuX PANIC · Stocks</strong><span>v${VERSION}</span></div>
       <div class="slx-grid">
-        <label>Acțiunea principală<select data-panic="target"></select></label>
-        <label>Acțiunea de rezervă<select data-panic="fallback"></select></label>
-        <label>Sumă de cheltuit, $<input data-panic="max" inputmode="decimal" placeholder="0 = tot soldul"></label>
-        <label>Bani de păstrat, $<input data-panic="reserve" inputmode="decimal" placeholder="0"></label>
+        <label>Primary stock<select data-panic="target"></select></label>
+        <label>Fallback stock<select data-panic="fallback"></select></label>
+        <label>Amount to spend, $<input data-panic="max" inputmode="decimal" placeholder="0 = available balance"></label>
+        <label>Cash to keep, $<input data-panic="reserve" inputmode="decimal" placeholder="0"></label>
       </div>
       <div class="slx-checks">
-        <label><input type="checkbox" data-panic="all">Folosește tot soldul</label>
-        <label><input type="checkbox" data-panic="dry">Test fără cumpărare (Dry Run)</label>
+        <label><input type="checkbox" data-panic="all">Use all available cash</label>
+        <label><input type="checkbox" data-panic="dry">Dry Run (no purchase)</label>
       </div>
       <div class="slx-actions">
-        <button type="button" data-panic-action="save">SALVEAZĂ</button>
-        <button type="button" data-panic-action="preview">VERIFICĂ SUMA</button>
-        <button type="button" data-panic-action="settings">CHEIE API</button>
+        <button type="button" data-panic-action="save">SAVE</button>
+        <button type="button" data-panic-action="preview">PREVIEW AMOUNT</button>
+        <button type="button" data-panic-action="settings">API KEY</button>
       </div>
-      <div class="slx-status" role="status" aria-live="polite">Setările se aplică butonului PANIC din toate paginile. 0 la suma de cheltuit = soldul disponibil minus banii păstrați.</div>`;
+      <div class="slx-status" role="status" aria-live="polite">These settings apply to the PANIC button on every Torn page. Spend 0 = available wallet balance minus the cash reserve.</div>`;
     const inputs={
       target:panel.querySelector('[data-panic="target"]'),
       fallback:panel.querySelector('[data-panic="fallback"]'),
@@ -313,11 +313,11 @@
       const target=inputs.target.value.trim().toUpperCase();
       const fallback=inputs.fallback.value.trim().toUpperCase();
       if(!/^[A-Z]{2,5}$/.test(target)|| (fallback&&!/^[A-Z]{2,5}$/.test(fallback))){
-        throw Error('Introdu un simbol valid pentru acțiune (de exemplu GRN).');
+        throw Error('Select a valid stock symbol (for example GRN).');
       }
       if(!Number.isFinite(parseAmount(inputs.max.value))||parseAmount(inputs.max.value)<0||
          !Number.isFinite(parseAmount(inputs.reserve.value))||parseAmount(inputs.reserve.value)<0){
-        throw Error('Suma și rezerva trebuie să fie numere pozitive. Poți folosi 100k sau 2m.');
+        throw Error('Spend amount and cash reserve must be non-negative numbers. You can use 100k or 2m.');
       }
       localStorage.setItem(STORE.target,target);
       localStorage.setItem(STORE.fallback,fallback);
@@ -325,7 +325,7 @@
       localStorage.setItem(STORE.reserve,inputs.reserve.value.trim()||'0');
       localStorage.setItem(STORE.all,inputs.all.checked?'1':'0');
       localStorage.setItem(STORE.dry,inputs.dry.checked?'1':'0');
-      message.textContent='Setările PANIC au fost salvate și sunt active în toate paginile Torn.';
+      message.textContent='PANIC settings saved and active on all Torn pages.';
     };
     panel.addEventListener('click',async event=>{
       const btn=event.target.closest('[data-panic-action]');
@@ -334,9 +334,9 @@
       try {
         save();
         if(btn.dataset.panicAction==='preview'){
-          btn.disabled=true;message.textContent='Se verifică soldul și prețul din Torn API...';
+          btn.disabled=true;message.textContent='Checking wallet balance and stock price via Torn API...';
           const p=await prepare();
-          message.textContent='Verificat: '+p.shares.toLocaleString()+' acțiuni '+p.sym+' · cost estimat '+money(p.estimate)+' · rămas '+money(p.remaining)+'. Nu s-a cumpărat nimic.';
+          message.textContent='Preview: '+p.shares.toLocaleString()+' shares '+p.sym+' · estimated cost '+money(p.estimate)+' · remaining '+money(p.remaining)+'. No purchase was made.';
         }
       }catch(error){message.textContent='PANIC: '+String(error?.message||error);}
       finally{btn.disabled=false;}
@@ -352,7 +352,7 @@
     if(document.getElementById('slx-panic-standalone-button'))return;
     const button=document.createElement('button');
     button.type='button';button.id='slx-panic-standalone-button';button.textContent='PANIC';
-    button.title='Atinge pentru cumpărare PANIC · ține apăsat pentru setări';
+    button.title='Tap to buy with PANIC · long-press for settings';
     let hold=0,suppress=false;
     button.addEventListener('pointerdown',()=>{suppress=false;hold=setTimeout(()=>{suppress=true;settings();},650)});
     for(const event of ['pointerup','pointercancel','pointerleave'])button.addEventListener(event,()=>clearTimeout(hold));
