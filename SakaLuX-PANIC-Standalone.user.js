@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SakaLuX PANIC Standalone
 // @namespace    https://sakalux.ro/
-// @version      0.1.1
+// @version      0.1.2
 // @description  Independent one-tap PANIC Torn stock buy. This feature carries Torn scripting compliance risk.
 // @author       SakaLuX
 // @match        https://www.torn.com/*
@@ -15,7 +15,7 @@
   'use strict';
   if (window.__SakaLuXPanicStandalone) return;
   window.__SakaLuXPanicStandalone = true;
-  const VERSION = '0.1.1';
+  const VERSION = '0.1.2';
   const STORE = {
     key: 'SLX_PANIC_STANDALONE_API_KEY',
     target: 'SLX_STOCK_TARGET',
@@ -47,6 +47,22 @@
   #slx-panic-standalone-settings .slx-row {display:flex!important;gap:8px!important;align-items:center!important;margin:8px 0!important}
   #slx-panic-standalone-settings .slx-row label {margin:0!important}
   #slx-panic-standalone-settings small {color:#bdcddd!important}
+
+  #slx-panic-stock-config {box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:12px 0!important;padding:14px!important;border:1px solid #445c79!important;border-radius:13px!important;background:linear-gradient(180deg,#172536,#0f1927)!important;color:#edf5ff!important;font:13px/1.4 Arial,sans-serif!important;clear:both!important}
+  #slx-panic-stock-config * {box-sizing:border-box!important}
+  #slx-panic-stock-config .slx-header {display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin-bottom:10px!important}
+  #slx-panic-stock-config .slx-header strong {font-size:15px!important}
+  #slx-panic-stock-config .slx-grid {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  #slx-panic-stock-config label {display:grid!important;gap:4px!important;min-width:0!important;color:#cad9e8!important;font:12px Arial,sans-serif!important}
+  #slx-panic-stock-config input:not([type=checkbox]),#slx-panic-stock-config select {display:block!important;width:100%!important;min-width:0!important;padding:10px!important;border:1px solid #47617b!important;border-radius:8px!important;background:#0b1420!important;color:#fff!important;font:13px Arial,sans-serif!important}
+  #slx-panic-stock-config .slx-checks {display:flex!important;flex-wrap:wrap!important;gap:12px!important;margin-top:12px!important}
+  #slx-panic-stock-config .slx-checks label {display:flex!important;flex-direction:row!important;align-items:center!important;gap:7px!important}
+  #slx-panic-stock-config .slx-checks input {width:18px!important;height:18px!important;accent-color:#d04a59!important}
+  #slx-panic-stock-config .slx-actions {display:flex!important;flex-wrap:wrap!important;gap:8px!important;margin-top:12px!important}
+  #slx-panic-stock-config button {border:1px solid #6a8db2!important;border-radius:8px!important;background:#21547f!important;color:#fff!important;padding:10px 13px!important;font:800 12px Arial,sans-serif!important;cursor:pointer!important}
+  #slx-panic-stock-config button.slx-danger {background:#8d2637!important;border-color:#dd6373!important}
+  #slx-panic-stock-config .slx-status {font-size:11px!important;color:#b2c9e3!important;margin-top:10px!important;white-space:normal!important}
+  @media(max-width:430px){#slx-panic-stock-config .slx-grid{grid-template-columns:1fr 1fr!important}#slx-panic-stock-config .slx-actions button{flex:1!important}}
   @media(min-width:900px){#slx-panic-standalone-button{bottom:20px!important}#slx-panic-standalone-status,#slx-panic-standalone-settings{bottom:78px!important}}
   `;
   (document.head||document.documentElement).appendChild(style);
@@ -176,6 +192,93 @@
     actions.append(save,test);box.appendChild(actions);
     document.body.appendChild(box);
   }
+
+  const stockPage=()=>{
+    const sid=new URL(location.href).searchParams.get('sid')||'';
+    return location.pathname.toLowerCase().endsWith('/page.php') && /^(stocks|stockmarket)$/i.test(sid);
+  };
+  function mountStockPanel(){
+    const existing=document.getElementById('slx-panic-stock-config');
+    if(!stockPage()){existing?.remove();return;}
+    if(existing?.isConnected)return;
+    const stockManager=document.getElementById('slx-stock-inline');
+    const main=document.querySelector('#mainContainer .content-wrapper')||document.querySelector('#mainContainer')||document.querySelector('.content-wrapper');
+    const host=stockManager?.parentElement||main;
+    if(!host)return;
+    const panel=document.createElement('section');
+    panel.id='slx-panic-stock-config';
+    panel.innerHTML=`
+      <div class="slx-header"><strong>🚨 SakaLuX PANIC · Stocks</strong><span>v${VERSION}</span></div>
+      <div class="slx-grid">
+        <label>Acțiunea principală<input data-panic="target" maxlength="5" placeholder="GRN" autocomplete="off"></label>
+        <label>Acțiunea de rezervă<input data-panic="fallback" maxlength="5" placeholder="Opțional" autocomplete="off"></label>
+        <label>Sumă de cheltuit, $<input data-panic="max" inputmode="decimal" placeholder="0 = tot soldul"></label>
+        <label>Bani de păstrat, $<input data-panic="reserve" inputmode="decimal" placeholder="0"></label>
+      </div>
+      <div class="slx-checks">
+        <label><input type="checkbox" data-panic="all">Folosește tot soldul</label>
+        <label><input type="checkbox" data-panic="dry">Test fără cumpărare (Dry Run)</label>
+      </div>
+      <div class="slx-actions">
+        <button type="button" data-panic-action="save">SALVEAZĂ</button>
+        <button type="button" data-panic-action="preview">VERIFICĂ SUMA</button>
+        <button type="button" data-panic-action="settings">CHEIE API</button>
+      </div>
+      <div class="slx-status" role="status" aria-live="polite">Setările se aplică butonului PANIC din toate paginile. 0 la suma de cheltuit = soldul disponibil minus banii păstrați.</div>`;
+    const inputs={
+      target:panel.querySelector('[data-panic="target"]'),
+      fallback:panel.querySelector('[data-panic="fallback"]'),
+      max:panel.querySelector('[data-panic="max"]'),
+      reserve:panel.querySelector('[data-panic="reserve"]'),
+      all:panel.querySelector('[data-panic="all"]'),
+      dry:panel.querySelector('[data-panic="dry"]')
+    };
+    const load=()=>{
+      inputs.target.value=get(STORE.target,'GRN');
+      inputs.fallback.value=get(STORE.fallback,'');
+      inputs.max.value=get(STORE.max,'0');
+      inputs.reserve.value=get(STORE.reserve,'0');
+      inputs.all.checked=get(STORE.all,'0')==='1';
+      inputs.dry.checked=get(STORE.dry,'0')==='1';
+    };
+    const message=panel.querySelector('.slx-status');
+    const save=()=>{
+      const target=inputs.target.value.trim().toUpperCase();
+      const fallback=inputs.fallback.value.trim().toUpperCase();
+      if(!/^[A-Z]{2,5}$/.test(target)|| (fallback&&!/^[A-Z]{2,5}$/.test(fallback))){
+        throw Error('Introdu un simbol valid pentru acțiune (de exemplu GRN).');
+      }
+      if(!Number.isFinite(parseAmount(inputs.max.value))||parseAmount(inputs.max.value)<0||
+         !Number.isFinite(parseAmount(inputs.reserve.value))||parseAmount(inputs.reserve.value)<0){
+        throw Error('Suma și rezerva trebuie să fie numere pozitive. Poți folosi 100k sau 2m.');
+      }
+      localStorage.setItem(STORE.target,target);
+      localStorage.setItem(STORE.fallback,fallback);
+      localStorage.setItem(STORE.max,inputs.max.value.trim()||'0');
+      localStorage.setItem(STORE.reserve,inputs.reserve.value.trim()||'0');
+      localStorage.setItem(STORE.all,inputs.all.checked?'1':'0');
+      localStorage.setItem(STORE.dry,inputs.dry.checked?'1':'0');
+      message.textContent='Setările PANIC au fost salvate și sunt active în toate paginile Torn.';
+    };
+    panel.addEventListener('click',async event=>{
+      const btn=event.target.closest('[data-panic-action]');
+      if(!btn)return;
+      if(btn.dataset.panicAction==='settings'){settings();return;}
+      try {
+        save();
+        if(btn.dataset.panicAction==='preview'){
+          btn.disabled=true;message.textContent='Se verifică soldul și prețul din Torn API...';
+          const p=await prepare();
+          message.textContent='Verificat: '+p.shares.toLocaleString()+' acțiuni '+p.sym+' · cost estimat '+money(p.estimate)+' · rămas '+money(p.remaining)+'. Nu s-a cumpărat nimic.';
+        }
+      }catch(error){message.textContent='PANIC: '+String(error?.message||error);}
+      finally{btn.disabled=false;}
+    });
+    load();
+    if(stockManager?.parentElement===host)host.insertBefore(panel,stockManager);
+    else host.prepend(panel);
+  }
+
   function init() {
     if(!document.body)return;
     if(document.getElementById('slx-panic-standalone-button'))return;
@@ -190,5 +293,6 @@
     document.body.appendChild(button);
     if(!key()||!get(STORE.target))setTimeout(()=>{if(!document.getElementById('slx-panic-standalone-settings'))settings();},300);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+  function boot(){init();mountStockPanel();new MutationObserver(()=>{if(stockPage() && !document.getElementById('slx-panic-stock-config'))mountStockPanel();}).observe(document.body,{childList:true,subtree:true});setInterval(mountStockPanel,1700);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
